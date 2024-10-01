@@ -17,51 +17,51 @@ import javax.net.ssl.HostnameVerifier;
 
 import java.util.Objects;
 
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.auth.CredentialsProvider;
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.cookie.CookieStore;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.config.RequestConfig.Builder;
-import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.TrustAllStrategy;
-import org.apache.hc.client5.http.psl.PublicSuffixMatcherLoader;
-import org.apache.hc.client5.http.cookie.Cookie;
-import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
-import org.apache.hc.core5.http.message.BasicHeader;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.apache.hc.core5.http.protocol.BasicHttpContext;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.ssl.SSLContexts;
-import org.apache.hc.core5.http.protocol.HttpContext;
-import org.apache.hc.core5.http.protocol.HttpCoreContext;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.conn.util.PublicSuffixMatcherLoader;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 /*
@@ -743,7 +743,7 @@ Public License instead of this License.  But first, please read
  */
 
 public class Download {
-
+	
 	public static final int DEFAULT_MAX_CONNECTIONS = 20;
 	public static final int DEFAULT_TIMEOUT = 4000;
 	private CookieStore cookieStore = new BasicCookieStore();
@@ -753,7 +753,7 @@ public class Download {
 	private HttpHost defaultProxy;
 	private int defaultTimeout;
 	private HttpClient client;
-
+	
 	public Download() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		this(DEFAULT_TIMEOUT, null, null, DEFAULT_MAX_CONNECTIONS, true);
 	}
@@ -797,7 +797,7 @@ public class Download {
 			null,
 			null,
 			null, //DNS to null I suppose?
-			-1,
+			-1l,
 			TimeUnit.MILLISECONDS);
 		connManager.setDefaultMaxPerRoute(maxConnections);		
 		connManager.setMaxTotal(maxConnections);
@@ -888,7 +888,7 @@ public class Download {
 			return isPost ? originalDwn.post(this) : originalDwn.get(this);
 		}
 		
-		private void setHeaders(HttpUriRequestBase request) {
+		private void setHeaders(HttpRequestBase request) {
 			for(Entry<String, String> e : headers.entrySet()) {
 				request.setHeader(e.getKey(), e.getValue());
 			}
@@ -959,7 +959,7 @@ public class Download {
 		}
 	}
 	
-	private Response doRequest(Request req, HttpUriRequestBase httpReq) throws ClientProtocolException, IOException {
+	private Response doRequest(Request req, HttpRequestBase httpReq) throws ClientProtocolException, IOException {
 		boolean updateTimeout = req.timeout != defaultTimeout;
 		boolean updateProxy = req.proxy != null && !Objects.equals(req.proxy, defaultProxy);
 		if(updateTimeout || updateProxy || req.redirectsDisabled) {
@@ -1005,7 +1005,7 @@ public class Download {
 	}
 
 	public Download setLogin(String username, String password) {
-		provider.setCredentials(
+        provider.setCredentials(
                 AuthScope.ANY,
                 new UsernamePasswordCredentials(username, password)
         );
