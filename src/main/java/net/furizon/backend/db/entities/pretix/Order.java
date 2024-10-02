@@ -19,22 +19,22 @@ public class Order {
 
 	@Getter
 	private Set<String> days = new HashSet<String>();
-	@Getter @Setter
+	@Getter
 	private Sponsorship sponsorship;
-	@Getter @Setter
+	@Getter
 	private int roomCapacity = 0; // 0 = has no room
+
+	public Order(Set<String> days, Sponsorship sponsorship, int roomCapacity) {
+		this.days = days;
+		this.sponsorship = sponsorship;
+		this.roomCapacity = roomCapacity;
+	}
 
 	//TODO User
 	//TODO Event
 
 	public boolean isDaily(){
 		return !days.isEmpty();
-	}
-	public void addDay(String day){
-		days.add(day);
-	}
-	public void clearDays(){
-		days.clear();
 	}
 
 	public boolean ownsRoom(){
