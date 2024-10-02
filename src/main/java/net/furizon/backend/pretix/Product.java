@@ -7,5 +7,4 @@ public class Product {
 	@Getter @Setter
 	private long id;
 
-	
 }

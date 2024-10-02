@@ -26,8 +26,8 @@ public final class PretixGeneralSettings {
 	@Getter @Column(nullable = false)
 	private String organizer;
 
-	@Getter @Column(nullable = true)
-	private String currentEvent;
+	@Getter
+	private String currentEvent; //Not needed to be saved in DB, obtained by the event table
 
 	@Getter @Column(nullable = true)
 	private String hostName;
