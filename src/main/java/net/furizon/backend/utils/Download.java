@@ -32,10 +32,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -62,6 +59,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 /*
@@ -757,13 +755,13 @@ public class Download {
 	public Download() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		this(DEFAULT_TIMEOUT, null, null, DEFAULT_MAX_CONNECTIONS, true);
 	}
-	public Download(int deafaultTimeout, Map<String, String> defaultHeaders, HttpHost defaultProxy, int maxConnections, boolean checkSSL) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+	public Download(int defaultTimeout, Map<String, String> defaultHeaders, HttpHost defaultProxy, int maxConnections, boolean checkSSL) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		 Builder requestConfigBuilder = RequestConfig.custom()
-					.setConnectionRequestTimeout(deafaultTimeout)
-					.setConnectTimeout(deafaultTimeout)
-					.setSocketTimeout(deafaultTimeout)
+					.setConnectionRequestTimeout(defaultTimeout)
+					.setConnectTimeout(defaultTimeout)
+					.setSocketTimeout(defaultTimeout)
 					.setRedirectsEnabled(true);
-		this.defaultTimeout = deafaultTimeout;
+		this.defaultTimeout = defaultTimeout;
 		if(defaultProxy != null) {
 			//App.LOGGER.config("Starting download client with a proxy " + proxy);
 			requestConfigBuilder.setProxy(defaultProxy);
@@ -783,7 +781,7 @@ public class Download {
 		}
 		SSLConnectionSocketFactory scsf = null;
 		if(!checkSSL) {
-			System.out.println("Starting download client without checking ssl certificates");
+			//System.out.println("Starting download client without checking ssl certificates");
 			scsf = new SSLConnectionSocketFactory(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build(), NoopHostnameVerifier.INSTANCE);
 			httpClientBuilder.setSSLSocketFactory(scsf);
 			httpClientBuilder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
@@ -805,13 +803,16 @@ public class Download {
 		
 		client = httpClientBuilder.build();
 	}
+
+	public enum RequestMethod {GET, POST, PATCH}
 	
 	public static class Request {
-		private boolean isPost, redirectsDisabled;
+		private RequestMethod method = RequestMethod.GET;
+		private boolean redirectsDisabled;
 		private Map<String, String> headers = new LinkedHashMap<String, String>();
-		private ArrayList<NameValuePair> postParams;
+		private List<NameValuePair> bodyParams = new ArrayList<NameValuePair>();
 		private Download originalDwn;
-		private HttpEntity postBody;
+		private HttpEntity body;
 		private HttpHost proxy;
 		private int timeout;
 		private String url;
@@ -827,31 +828,53 @@ public class Download {
 			headers.put(name, value);
 			return this;
 		}
-		public Request setPostParam(String name, String value) {
-			postParams.add(new BasicNameValuePair(name, value));
+		public Request setBodyParam(String name, String value) {
+			bodyParams.add(new BasicNameValuePair(name, value));
 			return this;
 		}
-		public Request setPostBody(String body) throws UnsupportedEncodingException {
-			postBody = new StringEntity(body);
+		public Request setBody(Object body) throws UnsupportedEncodingException {
+			switch (body) {
+				case String s -> setBodyString(s);
+				case byte[] bytes -> setBodyRaw(bytes);
+				case JSONObject jsonObject -> setJson(jsonObject);
+				case null, default -> throw new RuntimeException("Unsupported object type");
+			}
 			return this;
 		}
-		public Request setPostBody(String body, ContentType contentType) throws UnsupportedEncodingException {
-			postBody = new StringEntity(body, contentType);
+		public Request setPostBody(Object body, ContentType contentType){
+			switch (body) {
+				case String s -> setBodyString(s, contentType);
+				case byte[] bytes -> setBodyRaw(bytes, contentType);
+				case JSONObject jsonObject -> setJson(jsonObject, contentType);
+				case null, default -> throw new RuntimeException("Unsupported object type");
+			}
+			return this;
+		}
+		public Request setBodyString(String body) throws UnsupportedEncodingException {
+			this.body = new StringEntity(body);
+			return this;
+		}
+		public Request setBodyString(String body, ContentType contentType) {
+			this.body = new StringEntity(body, contentType);
 			headers.put(HttpHeaders.CONTENT_TYPE, contentType.toString());
 			return this;
 		}
-		public Request setPostBodyRaw(byte[] body) {
-			postBody = new ByteArrayEntity(body, ContentType.APPLICATION_OCTET_STREAM);
+		public Request setBodyRaw(byte[] body) {
+			this.body = new ByteArrayEntity(body, ContentType.APPLICATION_OCTET_STREAM);
 			//headers.put("Content-type", contentType.toString());
 			return this;
 		}
-		public Request setPostBodyRaw(byte[] body, ContentType contentType) {
-			postBody = new ByteArrayEntity(body, contentType);
+		public Request setBodyRaw(byte[] body, ContentType contentType) {
+			this.body = new ByteArrayEntity(body, contentType);
 			//headers.put("Content-type", contentType.toString());
 			return this;
 		}
-		public Request setPostJson(JSONObject json) {
-			postBody = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
+		public Request setJson(JSONObject json) {
+			body = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
+			return this;
+		}
+		public Request setJson(JSONObject json, ContentType contentType) {
+			body = new StringEntity(json.toString(), contentType);
 			return this;
 		}
 		public Request setTimeout(int timeout) {
@@ -863,11 +886,19 @@ public class Download {
 			return this;
 		}
 		public Request setGet() {
-			isPost = false;
+			method = RequestMethod.GET;
 			return this;
 		}
 		public Request setPost() {
-			isPost = true;
+			method = RequestMethod.POST;
+			return this;
+		}
+		public Request setPatch(){
+			method = RequestMethod.PATCH;
+			return this;
+		}
+		public Request setMethod(RequestMethod method){
+			this.method = method;
 			return this;
 		}
 		public Request disableRedirects() {
@@ -884,8 +915,12 @@ public class Download {
 			originalDwn = dwn;
 			return this;
 		}
-		public Response go() throws ClientProtocolException, IOException {
-			return isPost ? originalDwn.post(this) : originalDwn.get(this);
+		public Response go() throws IOException {
+			return switch(method){
+				case GET -> originalDwn.get(this);
+				case POST -> originalDwn.post(this);
+				case PATCH -> originalDwn.patch(this);
+			};
 		}
 		
 		private void setHeaders(HttpRequestBase request) {
@@ -893,10 +928,10 @@ public class Download {
 				request.setHeader(e.getKey(), e.getValue());
 			}
 		}
-		private HttpEntity getPostEntity() throws UnsupportedEncodingException {
-			if(postBody != null)
-				return postBody;
-			return new UrlEncodedFormEntity(postParams, "UTF-8");
+		private HttpEntity getEntity() throws UnsupportedEncodingException {
+			if(body != null)
+				return body;
+			return new UrlEncodedFormEntity(bodyParams, "UTF-8");
 		}
 	}
 	public static class Response {
@@ -959,7 +994,7 @@ public class Download {
 		}
 	}
 	
-	private Response doRequest(Request req, HttpRequestBase httpReq) throws ClientProtocolException, IOException {
+	private Response doRequest(Request req, HttpRequestBase httpReq) throws IOException {
 		boolean updateTimeout = req.timeout != defaultTimeout;
 		boolean updateProxy = req.proxy != null && !Objects.equals(req.proxy, defaultProxy);
 		if(updateTimeout || updateProxy || req.redirectsDisabled) {
@@ -993,15 +1028,23 @@ public class Download {
 	public Request post(String url) {
 		return new Request(url).setPost().setOriginalDwn(this);
 	}
+	public Request patch(String url) {
+		return new Request(url).setPatch().setOriginalDwn(this);
+	}
 	
-	public Response get(Request req) throws ClientProtocolException, IOException {
+	public Response get(Request req) throws IOException {
 		HttpGet httpGet = new HttpGet(req.url);
 		return doRequest(req, httpGet);
 	}
-	public Response post(Request req) throws ClientProtocolException, IOException {
+	public Response post(Request req) throws IOException {
 		HttpPost httpPost = new HttpPost(req.url);
-		httpPost.setEntity(req.getPostEntity());
+		httpPost.setEntity(req.getEntity());
 		return doRequest(req, httpPost);
+	}
+	public Response patch(Request req) throws IOException {
+		HttpPatch httpPatch = new HttpPatch(req.url);
+		httpPatch.setEntity(req.getEntity());
+		return doRequest(req, httpPatch);
 	}
 
 	public Download setLogin(String username, String password) {
