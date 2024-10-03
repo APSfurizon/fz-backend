@@ -4,6 +4,7 @@ import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.Tuple;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,6 +16,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -24,17 +26,25 @@ public class PretixInteraction {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(PretixInteraction.class);
 
-	private enum PretixObjectBaseTypes implements PretixObject {
-		ITEM_TICKET, ITEM_TICKET_DAILY, ITEM_MEMBERSHIP, ITEM_SPONSORSHIP, ITEM_EXTRA_DAYS, ITEM_ROOMS, QUESTION_SECRET
+	private static PretixIdsMap pretixIdsCache = null;
+	private static class PretixIdsMap {
+
+		public Set<Integer> ticketIds = new HashSet<>();
+		public Map<Integer, Integer> dailyIds = new HashMap<>(); //map id -> day idx
+
+		public Set<Integer> membershipCardIds = new HashSet<>();
+
+		public Set<Integer> sponsorshipItemIds = new HashSet<>();
+		public Map<Integer, Sponsorship> sponsorshipVariationIds = new HashMap<>();
+
+		public Map<Integer, ExtraDays> extraDaysIds = new HashMap<>();
+
+		public Set<Integer> roomItemIds = new HashSet<>();
+		public Map<Integer, Tuple<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
+
+		public int questionSecret = -1;
+
 	}
-	private class Room implements PretixObject{ public int capacity; }
-	private class Daily implements PretixObject{ public int day; }
-
-	//private static PretixIdsMap pretixIdsCache = null;
-	private static Map<Integer, PretixObject> itemMap = new HashMap<>();
-	private static Map<Integer, PretixObject> variationMap = new HashMap<>();
-	private static Map<Integer, PretixObject> questionsMap = new HashMap<>();
-
 
 	public static void reloadEverything(){
 		reloadEvents();
@@ -51,35 +61,63 @@ public class PretixInteraction {
 
 	}
 	private static void reloadQuestions(){
-		questionsMap.clear();
+
 	}
 	private static void reloadProducts() throws TimeoutException {
-		itemMap.clear();
-		variationMap.clear();
+		pretixIdsCache = new PretixIdsMap();
+
+		TriConsumer<JSONObject, String, BiConsumer<Integer, String>> searchVariations = (item, prefix, fnc) -> {
+			JSONArray variations = item.getJSONArray("variations");
+			for(int i = 0; i < variations.length(); i++){
+				JSONObject variation = variations.getJSONObject(i);
+				String identifierVariation = variation.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
+				int variationId = variation.getInt("id");
+
+				if(identifierVariation.startsWith(prefix))
+					fnc.accept(variationId, identifierVariation.substring(prefix.length()));
+			}
+		};
+
 		getAllPages("items/", PretixSettings.generalSettings.getEventUrl(), (item) -> {
-			JSONObject metadata = item.getJSONObject("meta_data");
-			String identifier = item.getString(Constants.METADATA_IDENTIFIER_ITEM);
+			String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
 			int itemId = item.getInt("id");
 
 			if(identifier.startsWith(Constants.METADATA_EXTRA_DAYS_TAG_PREFIX)){
-				
+				String s = identifier.substring(Constants.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
+				ExtraDays ed = ExtraDays.valueOf(s);
+				pretixIdsCache.extraDaysIds.put(itemId, ed);
+
+
 			} else if(identifier.startsWith(Constants.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
+				String s = identifier.substring(Constants.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
+				int day = Integer.parseInt(s);
+				pretixIdsCache.dailyIds.put(itemId, day);
 
 			} else switch(identifier){
 				case Constants.METADATA_EVENT_TICKET: {
-					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_TICKET);
+					pretixIdsCache.ticketIds.add(itemId);
 					break;
 				}
 				case Constants.METADATA_MEMBERSHIP_CARD: {
-					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_MEMBERSHIP);
+					pretixIdsCache.membershipCardIds.add(itemId);
 					break;
 				}
 				case Constants.METADATA_SPONSORSHIP: {
-					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_SPONSORSHIP);
+					pretixIdsCache.sponsorshipItemIds.add(itemId);
+					searchVariations.accept(item, Constants.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX, (variationId, s) -> {
+						Sponsorship ss = Sponsorship.valueOf(s);
+						pretixIdsCache.sponsorshipVariationIds.put(variationId, ss);
+					});
 					break;
 				}
 				case Constants.METADATA_ROOM: {
-
+					pretixIdsCache.roomItemIds.add(itemId);
+					searchVariations.accept(item, Constants.METADATA_ROOM_TYPE_TAG_PREFIX, (variationId, s) -> {
+						String[] sp = s.split("_");
+						String hotelName = sp[0];
+						int capacity = Integer.parseInt(sp[1]);
+						pretixIdsCache.roomVariationIds.put(variationId, new Tuple<>(capacity, hotelName));
+					});
 					break;
 				}
 			}

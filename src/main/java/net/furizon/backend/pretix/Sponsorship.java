@@ -2,7 +2,7 @@ package net.furizon.backend.pretix;
 
 import lombok.Getter;
 
-public enum Sponsorship implements PretixObject {
+public enum Sponsorship {
 	NONE(""), SPONSOR(""), SUPER_SPONSOR("");
 
 	@Getter
