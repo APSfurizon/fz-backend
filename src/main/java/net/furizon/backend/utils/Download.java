@@ -25,7 +25,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
@@ -59,7 +58,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 /*
@@ -953,7 +951,7 @@ public class Download {
 			setHeaders(response.getAllHeaders());
 		}
 		
-		public int getResponseCode() {
+		public int getStatusCode() {
 			return respCode;
 		}
 		public String getHeader(String name) {

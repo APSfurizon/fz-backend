@@ -2,10 +2,9 @@ package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.furizon.backend.db.entities.pretix.Order;
-import net.furizon.backend.db.entities.users.security.AuthenticationData;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,11 +29,19 @@ public final class User {
     @Getter @Column(name = "user_first_name")
     private String firstName;
 
+    @Getter @Column(name = "user_last_name")
+    private String lastName;
+
     @OneToMany(mappedBy = "orderOwner")
+    @Getter
     private Set<Order> orders;
 
-    @OneToOne(mappedBy = "authentication")
+    @OneToOne(mappedBy = "authenticationOwner")
     @Getter
-    private User authenticationOwner;
+    private AuthenticationData authentication;
+
+    @OneToMany(mappedBy = "user")
+    @Getter
+    private List<UserGroup> userGroupAssociations;
 
 }

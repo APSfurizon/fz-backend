@@ -7,10 +7,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "products")
+//@Entity
+//@Table(name = "products")
 public class Product {
-	@Getter @Setter
+	//TODO not needed?
+	/*@Getter @Setter
 	@Id @Column(name = "product_id")
 	private long id;
 
@@ -21,6 +22,6 @@ public class Product {
 	// TODO: Check how to categorize products which are convention tickets
 	public boolean isAdmittanceProduct(){
 		return false;
-	}
+	}*/
 
 }

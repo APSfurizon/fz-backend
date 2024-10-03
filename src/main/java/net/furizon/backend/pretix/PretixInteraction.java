@@ -23,6 +23,13 @@ import java.util.function.Consumer;
 public class PretixInteraction {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(PretixInteraction.class);
+
+	private enum PretixObjectBaseTypes implements PretixObject {
+		ITEM_TICKET, ITEM_TICKET_DAILY, ITEM_MEMBERSHIP, ITEM_SPONSORSHIP, ITEM_EXTRA_DAYS, ITEM_ROOMS, QUESTION_SECRET
+	}
+	private class Room implements PretixObject{ public int capacity; }
+	private class Daily implements PretixObject{ public int day; }
+
 	//private static PretixIdsMap pretixIdsCache = null;
 	private static Map<Integer, PretixObject> itemMap = new HashMap<>();
 	private static Map<Integer, PretixObject> variationMap = new HashMap<>();
@@ -55,26 +62,25 @@ public class PretixInteraction {
 			int itemId = item.getInt("id");
 
 			if(identifier.startsWith(Constants.METADATA_EXTRA_DAYS_TAG_PREFIX)){
-
+				
 			} else if(identifier.startsWith(Constants.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
 
 			} else switch(identifier){
-					case Constants.METADATA_EVENT_TICKET: {
-						itemMap.put(itemId, PretixObjectBaseTypes.ITEM_TICKET);
-						break;
-					}
-					case Constants.METADATA_MEMBERSHIP_CARD: {
-						itemMap.put(itemId, PretixObjectBaseTypes.ITEM_MEMBERSHIP);
-						break;
-					}
-					case Constants.METADATA_SPONSORSHIP: {
+				case Constants.METADATA_EVENT_TICKET: {
+					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_TICKET);
+					break;
+				}
+				case Constants.METADATA_MEMBERSHIP_CARD: {
+					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_MEMBERSHIP);
+					break;
+				}
+				case Constants.METADATA_SPONSORSHIP: {
+					itemMap.put(itemId, PretixObjectBaseTypes.ITEM_SPONSORSHIP);
+					break;
+				}
+				case Constants.METADATA_ROOM: {
 
-						break;
-					}
-					case Constants.METADATA_ROOM: {
-
-						break;
-					}
+					break;
 				}
 			}
 		});
@@ -113,26 +119,6 @@ public class PretixInteraction {
 			});
 		}
 		//return ret;
-	}
-
-
-	private enum PretixObjectBaseTypes implements PretixObject {
-		ITEM_TICKET, ITEM_TICKET_DAILY, ITEM_MEMBERSHIP, ITEM_SPONSORSHIP, ITEM_EXTRA_DAYS, ITEM_ROOMS, QUESTION_SECRET
-	}
-	private class PretixIdsMap {
-
-
-
-
-		/*public Set<Integer> ticketIds = new HashSet<>();
-		public Set<Integer> ticketDailyIds = new HashSet<>();
-
-		public Set<Integer> membershipCardIds = new HashSet<>();
-
-		public Set<Integer> sponsorshipItemIds = new HashSet<>();
-		public Map<Sponsorship, Set<Integer>> sponsorshipVarationIds = new HashMap<>();
-
-		public Map<ExtraDays, Set<Integer>> extraDaysIds = new HashMap<>();*/
 	}
 
 

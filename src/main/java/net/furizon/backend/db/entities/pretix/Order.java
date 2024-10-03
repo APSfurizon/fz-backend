@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.pretix.ExtraDays;
 import net.furizon.backend.pretix.Sponsorship;
 
 import javax.naming.Name;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,20 +24,45 @@ import java.util.Set;
 @Table(name = "orders")
 public class Order {
 
+	@Id
 	@Getter
-	@Transient
+	private String code;
+
+
+	private String dailyDays; //TODO convert
+	@Getter @Transient
 	private Set<String> days = new HashSet<String>();
 
-	@Getter @Transient
-	private Sponsorship sponsorship;
+	@Getter
+	private Sponsorship sponsorship = Sponsorship.NONE;
 
-	@Getter @Transient
+	@Getter
+	private ExtraDays extraDays = ExtraDays.NONE;
+
+	@Getter
 	private int roomCapacity = 0; // 0 = has no room
 
-	public Order(Set<String> days, Sponsorship sponsorship, int roomCapacity) {
+	@Getter
+	private String hotelLocation;
+
+	@Getter
+	private boolean hasMembership;
+
+	public Order(){}
+	public Order(String code, Set<String> days, Sponsorship sponsorship, ExtraDays extraDays, int roomCapacity, String hotelLocation, boolean hasMembership) {
+		this.code = code;
 		this.days = days;
+		this.extraDays = extraDays;
 		this.sponsorship = sponsorship;
 		this.roomCapacity = roomCapacity;
+		this.hotelLocation  = hotelLocation;
+		this.hasMembership = hasMembership;
+	}
+
+	//DON'T USE THAT!
+	public void setDailyDays(String dailyDays) {
+		this.dailyDays = dailyDays;
+		days.addAll(Arrays.asList(dailyDays.split(",")));
 	}
 
 	@ManyToOne

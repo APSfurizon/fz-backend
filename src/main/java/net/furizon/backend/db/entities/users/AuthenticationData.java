@@ -1,9 +1,8 @@
-package net.furizon.backend.db.entities.users.security;
+package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.furizon.backend.db.entities.users.User;
 
 @Entity
 @Table(name = "authentications")
@@ -12,13 +11,13 @@ public class AuthenticationData {
     @OneToOne
     @JoinColumn(name = "user_id")
     @Id @Getter @Setter
-    private User authentication;
+    private User authenticationOwner;
 
     @Column(name="authentication_password", nullable = false)
     @Getter @Setter
     private String passwordHash;
 
-    @Column(name = "authentication_email")
+    @Column(name = "authentication_email", unique = true, nullable = false)
     @Getter @Setter
     private String email;
 

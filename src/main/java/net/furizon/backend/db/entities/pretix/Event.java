@@ -1,13 +1,10 @@
 package net.furizon.backend.db.entities.pretix;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -20,23 +17,25 @@ public final class Event {
 	@Getter
 	private String publicUrl;
 
-	@Getter
-	private HashMap<String, String> eventName; //map lang -> name
+	@Getter @Transient //TODO transform to string
+	private Map<String, String> eventName; //map lang -> name
 
 	@Getter
-	private String dateFrom;
+	private String dateFrom, dateEnd;
 
 	@Getter @Setter
 	private boolean isCurrentEvent;
 
+	@Getter
 	@OneToMany(mappedBy = "orderEvent")
 	private Set<Order> orders;
 
-	public Event(String organizer, String event, String publicUrl, HashMap<String, String> eventName, String dateFrom){
+	public Event(String organizer, String event, String publicUrl, Map<String, String> eventName, String dateFrom, String dateEnd){
 		slug = getSlug(organizer, event);
 		this.publicUrl = publicUrl + "/" + slug;
 		this.eventName = eventName;
 		this.dateFrom = dateFrom;
+		this.dateEnd = dateEnd;
 	}
 
 	public static String getSlug(String organizer, String event){
