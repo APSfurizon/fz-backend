@@ -1,12 +1,18 @@
 package net.furizon.backend.db.entities.pretix;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.Set;
 
-public class Event {
+@Entity
+@Table(name = "events")
+public final class Event {
 	@Id
 	@Getter
 	private String slug;
@@ -22,6 +28,9 @@ public class Event {
 
 	@Getter @Setter
 	private boolean isCurrentEvent;
+
+	@OneToMany(mappedBy = "orderEvent")
+	private Set<Order> orders;
 
 	public Event(String organizer, String event, String publicUrl, HashMap<String, String> eventName, String dateFrom){
 		slug = getSlug(organizer, event);
