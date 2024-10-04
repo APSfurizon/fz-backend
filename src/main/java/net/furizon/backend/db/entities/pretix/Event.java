@@ -27,7 +27,7 @@ public final class Event {
 	private boolean isCurrentEvent;
 
 	@Getter
-	@OneToMany(mappedBy = "orderEvent")
+	@OneToMany(mappedBy = "orderEvent", fetch = FetchType.LAZY)
 	private Set<Order> orders;
 
 	public Event(String organizer, String event, String publicUrl, Map<String, String> eventName, String dateFrom, String dateEnd){

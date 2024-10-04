@@ -19,7 +19,7 @@ public class Group {
 	@Column(name = "group_name", nullable = false)
 	private String name;
 
-	@OneToMany(mappedBy = "group")
+	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
 	@Getter
 	private List<UserGroup> userGroupAssociations;
 

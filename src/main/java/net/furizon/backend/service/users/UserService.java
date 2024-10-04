@@ -7,11 +7,16 @@ import net.furizon.backend.db.repositories.users.IAuthenticationDataRepository;
 import net.furizon.backend.db.repositories.users.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 	private final IUserRepository userRepository;
 	private final IAuthenticationDataRepository authenticationDataRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -37,4 +42,19 @@ public class UserService {
 		return null;//TODO return actual stuff
 	}
 
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		final Optional<User> user = this.userRepository.findByEmail(username);
+		if (user.isEmpty()){
+			throw new UsernameNotFoundException("Unknown user " + username);
+		}
+		return org.springframework.security.core.userdetails.User.withUsername(user.get().getAuthentication().getEmail())
+				.password(user.get().getAuthentication().getPasswordHash())
+				.authorities("ROLE_USER")
+				.accountExpired(false)
+				.accountLocked(false)
+				.credentialsExpired(false)
+				.disabled(user.get().getAuthentication().isLoginDisabled())
+				.build();
+	}
 }

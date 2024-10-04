@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "authentications")
-public class AuthenticationData {
+public class  AuthenticationData {
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -25,6 +25,10 @@ public class AuthenticationData {
     @Getter @Setter
     private boolean emailVerified;
 
+    @Column(name = "authentication_2fa_enabled")
+    @Getter @Setter
+    private boolean is2faEnabled;
+
     @Column(name = "authentication_token")
     @Getter @Setter
     private String totpToken;
@@ -32,4 +36,8 @@ public class AuthenticationData {
     @Column(name = "authentication_from_oauth")
     @Getter @Setter
     private boolean isOauthLogin;
+
+    @Column(name = "authentication_disabled")
+    @Getter @Setter
+    private boolean isLoginDisabled;
 }
