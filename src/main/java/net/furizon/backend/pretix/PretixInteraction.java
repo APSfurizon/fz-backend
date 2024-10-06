@@ -1,6 +1,8 @@
 package net.furizon.backend.pretix;
 
 import net.furizon.backend.db.entities.pretix.Event;
+import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.Tuple;
@@ -42,30 +44,53 @@ public class PretixInteraction {
 		public Set<Integer> roomItemIds = new HashSet<>();
 		public Map<Integer, Tuple<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
 
+		public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
+		public Map<Integer, String> questionIdentifiers = new HashMap<>();
+		public Map<String, Integer> questionIdentifiersToId = new HashMap<>();
+
 		public int questionSecret = -1;
 
 	}
 
-	public static void reloadEverything(){
-		reloadEvents();
-		reloadOrders();
+	public static boolean reloadEverything(){
+		try {
+			reloadEvents();
+			reloadOrders();
+			return true;
+		} catch(TimeoutException te) {
+			return false;
+		}
 	}
 
-	public static void reloadOrderData(){
-		reloadProducts();
-		reloadQuestions();
-		reloadOrders();
+	public static boolean reloadOrderData(){
+		try {
+			PretixIdsMap cache = new PretixIdsMap();
+			reloadProducts(cache);
+			reloadQuestions(cache);
+			pretixIdsCache = cache;
+			reloadOrders();
+			return true;
+		} catch(TimeoutException te) {
+			return false;
+		}
 	}
 
-	private static void reloadOrders(){
-
+	private static void reloadOrders() throws TimeoutException {
+		getAllPages("orders/", PretixSettings.generalSettings.getEventUrl(), PretixInteraction::parseOrderAndUpdateDB);
 	}
-	private static void reloadQuestions(){
+	private static void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
+		getAllPages("questions/", PretixSettings.generalSettings.getEventUrl(), (item) -> {
+			int id = item.getInt("id");
+			String identifier = item.getString("identifier");
+			pretixIdsCache.questionTypeIds.put(id, QuestionType.fromCode(item.getString("type")));
+			pretixIdsCache.questionIdentifiers.put(id, identifier);
+			pretixIdsCache.questionIdentifiersToId.put(identifier, id);
 
+			if(item.getString("identifier").equals(Constants.QUESTIONS_ACCOUNT_SECRET))
+				pretixIdsCache.questionSecret = id;
+		});
 	}
-	private static void reloadProducts() throws TimeoutException {
-		pretixIdsCache = new PretixIdsMap();
-
+	private static void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
 		TriConsumer<JSONObject, String, BiConsumer<Integer, String>> searchVariations = (item, prefix, fnc) -> {
 			JSONArray variations = item.getJSONArray("variations");
 			for(int i = 0; i < variations.length(); i++){
@@ -124,6 +149,92 @@ public class PretixInteraction {
 		});
 	}
 
+	public static void fetchOrder(String code, String secret) throws TimeoutException {
+		Download.Response res = doGet("orders/" + code.replaceAll("[^A-Za-z0-9]+", ""), PretixSettings.generalSettings.getEventUrl(), Constants.STATUS_CODES_WITH_404);
+		if(res.getStatusCode() == 404) throw new RuntimeException("Order not found");
+		JSONObject orderData = res.getResponseJson();
+		if(!orderData.getString("secret").equals(secret)) throw new RuntimeException("Order not found"); //Same exception to not leak matched order code
+		parseOrderAndUpdateDB(orderData);
+	}
+	private static void parseOrderAndUpdateDB(JSONObject orderData){
+		PretixIdsMap pCache = pretixIdsCache;
+		boolean hasTicket = false; //If no ticket is found, we don't store the order at all
+
+		String code = orderData.getString("coded");
+		String secret = orderData.getString("secret");
+
+		Set<Integer> days = new HashSet<>();
+		Sponsorship sponsorship = Sponsorship.NONE;
+		ExtraDays extraDays = ExtraDays.NONE;
+		int answersMainPositionId = 0;
+		String hotelLocation = null;
+		boolean membership = false;
+		JSONArray answers = null;
+		String userSecret = null;
+		int roomCapacity = 0;
+
+		JSONArray positions = orderData.getJSONArray("positions");
+		for(int i = 0; i < positions.length(); i++){
+			JSONObject position = positions.getJSONObject(i);
+			int item = position.getInt("item");
+
+			if(pCache.ticketIds.contains(item)){
+				hasTicket = true;
+				answersMainPositionId = position.getInt("id");
+				answers = position.getJSONArray("answers");
+				for(int j = 0; j < answers.length(); j++){
+					JSONObject answer = answers.getJSONObject(j);
+					int qId = answer.getInt("question");
+					if(translateQuestionType(qId) == QuestionType.FILE)
+						answer.put("answer", Constants.QUESTIONS_FILE_KEEP); //TODO: check if changes are reflected in original array (they should)
+					if(qId == pCache.questionSecret)
+						userSecret = answer.getString("answer");
+				}
+			} else
+
+			if(pCache.dailyIds.containsKey(item))
+				days.add(pCache.dailyIds.get(item));
+			else
+
+			if(pCache.membershipCardIds.contains(item))
+				membership = true;
+			else
+
+			if(pCache.sponsorshipItemIds.contains(item)) {
+				Sponsorship s = pCache.sponsorshipVariationIds.get(position.getInt("variation"));
+				if(s.ordinal() > sponsorship.ordinal()) sponsorship = s; //keep the best sponsorship
+			} else
+
+			if(pCache.extraDaysIds.containsKey(item)) {
+				ExtraDays d = pCache.extraDaysIds.get(item);
+				if(extraDays != ExtraDays.BOTH) {
+					if (extraDays != d && extraDays != ExtraDays.NONE) {
+						extraDays = ExtraDays.BOTH;
+					} else extraDays = d;
+				}
+			} else
+
+			if(pCache.roomItemIds.contains(item)) {
+				Tuple<Integer, String> room = pCache.roomVariationIds.get(position.getInt("variation"));
+				roomCapacity = room.getA();
+				hotelLocation = room.getB();
+			}
+		}
+
+		if(hasTicket) {
+			//TODO: fetch user from db by userSecret
+			User u = null;
+
+			Order order = null; //TODO: try fetching from db
+			if (order == null) //order not found
+				order = new Order();
+			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, u, PretixSettings.generalSettings.getCurrentEventObj(), answers);
+		} else {
+			//TODO: delete order
+		}
+	}
+
+
 	//TODO: Organizers and events can change slug and we have no other way to uniquely identify an event. Eventually: Create "something" which can move the events and related orders to a new one
 	private static List<Tuple<String, String>> reloadOrganizers() throws TimeoutException {
 		List<Tuple<String, String>> organizers = new LinkedList<>();
@@ -160,19 +271,27 @@ public class PretixInteraction {
 	}
 
 
+	public static String translateQuestionId(int answerId){
+		return pretixIdsCache.questionIdentifiers.get(answerId);
+	}
+	public static QuestionType translateQuestionType(int answerId){
+		return pretixIdsCache.questionTypeIds.get(answerId);
+	}
+	public static QuestionType translateQuestionType(String questionIdentifier){
+		return pretixIdsCache.questionTypeIds.get(pretixIdsCache.questionIdentifiersToId.get(questionIdentifier));
+	}
+
 	//Push orders to pretix
 	public static void uploadToPretixDb(){
 		//TODO: I will need to store the full raw questions of every order to reupload them (diocane)
 	}
 
 	private static void getAllPages(String url, String baseUrl, Consumer<JSONObject> elementFnc) throws TimeoutException {
-		int[] expectedStatusCodes = {200, 404};
-
 		int pages = 0;
 		while(true){
 			pages += 1;
 
-			Download.Response res = doGet(url + "/?page=" + pages, baseUrl, expectedStatusCodes);
+			Download.Response res = doGet(url + "/?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
 			if(res.getStatusCode() == 404) break;
 
 			JSONObject response = res.getResponseJson();

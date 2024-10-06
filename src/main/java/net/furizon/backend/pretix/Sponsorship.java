@@ -3,7 +3,7 @@ package net.furizon.backend.pretix;
 import lombok.Getter;
 
 public enum Sponsorship {
-	NONE(""), SPONSOR(""), SUPER_SPONSOR("");
+	NONE(""), SPONSOR(""), SUPER_SPONSOR(""); //These MUST be in "importance" order
 
 	@Getter
 	private final String color; //TODO for frontend

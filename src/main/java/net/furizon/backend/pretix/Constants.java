@@ -22,6 +22,10 @@ public class Constants {
 	public static final String METADATA_ROOM = "room";
 	public static final String METADATA_ROOM_TYPE_TAG_PREFIX = "room_type_";
 
-
 	public static final String QUESTIONS_ACCOUNT_SECRET = "account_secret";
+
+	public static final String QUESTIONS_FILE_KEEP = "file:keep";
+
+	public static final int[] STATUS_CODES_WITH_404 = new int[] { 200, 404 };
+	public static final int[] STATUS_CODES_ONLY_200 = new int[] { 200 };
 }
