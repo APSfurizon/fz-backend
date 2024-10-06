@@ -22,7 +22,6 @@ public final class User {
     @Getter @Column(name="user_id", nullable = false)
     private long id;
 
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Getter @Column(name="user_secret", nullable = false)
     private long secret;
 

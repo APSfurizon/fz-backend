@@ -8,9 +8,14 @@ import lombok.Setter;
 @Table(name = "authentications")
 public class  AuthenticationData {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    @Column(name="authentication_id", nullable = false)
+    private long id;
+
     @OneToOne
     @JoinColumn(name = "user_id")
-    @Id @Getter @Setter
+    @Getter @Setter
     private User authenticationOwner;
 
     @Column(name="authentication_password", nullable = false)

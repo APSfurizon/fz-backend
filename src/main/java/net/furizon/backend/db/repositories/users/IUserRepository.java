@@ -12,7 +12,7 @@ public interface IUserRepository extends ListCrudRepository<User, Long> {
 	@Query(value = "SELECT U FROM User U WHERE U.firstName LIKE '%?1%' OR U.lastName LIKE '%?2%'")
 	List<User> findByName(String firstName, String lastName);
 
-	@Query(value = "SELECT U FROM User U WHERE U.authentication.email = ?1 LIMIT 1")
+	@Query(value = "SELECT U FROM User U WHERE U.authentication.email = ?1")
 	Optional<User> findByEmail(String email);
 
 }

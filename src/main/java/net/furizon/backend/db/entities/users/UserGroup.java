@@ -1,7 +1,9 @@
 package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
-import net.furizon.backend.db.CompositeKey;
+import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * Associates users to groups
@@ -9,14 +11,17 @@ import net.furizon.backend.db.CompositeKey;
  */
 @Entity
 @Table(name = "user_group")
-@IdClass(CompositeKey.class) // Allow partial primary keys
 public class UserGroup {
-	@Id
+
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Getter
+	@Column(name="user_group_id", nullable = false)
+	private long id;
+
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@Id
 	@ManyToOne
 	@JoinColumn(name = "group_id")
 	private Group group;

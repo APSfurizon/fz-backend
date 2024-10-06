@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@PropertySource(value = "file:/config.properties")
+@PropertySource(value = "file:config.properties")
 @ConfigurationProperties(prefix = "backend")
 public class Config {
 	private int port;
