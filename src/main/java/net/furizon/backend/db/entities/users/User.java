@@ -3,6 +3,8 @@ package net.furizon.backend.db.entities.users;
 import jakarta.persistence.*;
 import lombok.Getter;
 import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.users.content.Fursuit;
+import net.furizon.backend.db.entities.users.content.Media;
 
 import java.util.List;
 import java.util.Set;
@@ -42,5 +44,13 @@ public final class User {
     @OneToMany(mappedBy = "user")
     @Getter
     private List<UserGroup> userGroupAssociations;
+
+    @OneToMany(mappedBy = "mediaOwner")
+    @Getter
+    private List<Media> userMedias;
+
+    @OneToMany(mappedBy = "fursuitOwner")
+    @Getter
+    private List<Fursuit> userFursuits;
 
 }
