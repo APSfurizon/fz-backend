@@ -1,4 +1,4 @@
-package net.furizon.backend.pretix;
+package net.furizon.backend.utils.pretix;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package net.furizon.backend.pretix;
+package net.furizon.backend.utils.pretix;
 
 public class Constants {
 	public static final String METADATA_IDENTIFIER_ITEM = "item_name";

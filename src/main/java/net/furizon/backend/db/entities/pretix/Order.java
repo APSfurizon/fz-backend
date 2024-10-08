@@ -2,13 +2,15 @@ package net.furizon.backend.db.entities.pretix;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
-import net.furizon.backend.pretix.*;
+import net.furizon.backend.service.pretix.PretixService;
+import net.furizon.backend.utils.pretix.Constants;
+import net.furizon.backend.utils.pretix.ExtraDays;
+import net.furizon.backend.utils.pretix.QuestionType;
+import net.furizon.backend.utils.pretix.Sponsorship;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.naming.Name;
 import java.util.*;
 
 /*
@@ -70,9 +72,9 @@ public class Order {
 		for(int i = 0; i < jsonArray.length(); i++){
 			JSONObject obj = jsonArray.getJSONObject(i);
 			int questionId = obj.getInt("question");
-			String answerIdentifier = PretixInteraction.translateQuestionId(questionId);
+			String answerIdentifier = PretixService.translateQuestionId(questionId);
 			String value = obj.getString("answer");
-			Object o = switch(PretixInteraction.translateQuestionType(questionId)){
+			Object o = switch(PretixService.translateQuestionType(questionId)){
 				case NUMBER -> Float.parseFloat(value);
 				case STRING_ONE_LINE -> value;
 				case STRING_MULTI_LINE -> value;
@@ -95,7 +97,7 @@ public class Order {
 		JSONArray jsonArray  = new JSONArray();
 		for(String key : answersData.keySet()){
 			Object o = answersData.get(key);
-			String out = switch(PretixInteraction.translateQuestionType(key)){
+			String out = switch(PretixService.translateQuestionType(key)){
 				case QuestionType.NUMBER -> String.valueOf(o);
 				case STRING_ONE_LINE -> (String) o;
 				case STRING_MULTI_LINE -> (String) o;
