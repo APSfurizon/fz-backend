@@ -83,9 +83,6 @@ public class PretixConfig {
     @Setter
     private String baseUrl = null;
 
-    @Getter @Setter
-    private String eventUrl = null;
-
     public void setHostName(String hostName) {
         this.hostName = hostName;
         if(connectionHeaders == null) getConnectionHeaders(); //This will create them
@@ -109,18 +106,15 @@ public class PretixConfig {
         //TODO: Check if setters are automatically called when data is loaded from db
         if(!endpointUrl.endsWith("/")) endpointUrl += "/";
         baseUrl = endpointUrl + "api/v1/";
-        generateEventUrl();
     }
 
     public void setOrganizer(String organizer) {
         this.organizer = organizer;
-        generateEventUrl();
     }
 
     public void setCurrentEvent(String currentEvent) {
         this.currentEvent = currentEvent;
         this.currentEventObj = null;
-        generateEventUrl();
     }
     public Event getCurrentEventObj() {
         if(currentEventObj == null){
@@ -129,11 +123,11 @@ public class PretixConfig {
         return currentEventObj;
     }
 
-    private void generateEventUrl(){
-        eventUrl = getBaseUrl() + "organizers/" + organizer + "/events/" + currentEvent + "/";
+    public String getEventUrl(){
+        return getBaseUrl() + "organizers/" + organizer + "/events/" + currentEvent;
     }
 
-    public String getBaseUrl() {
+    public String getBaseUrl()  {
         baseUrl = getProtocol() + "://" + getHostName() + ":" + getPort() + "/api/v1/";
         return baseUrl;
     }

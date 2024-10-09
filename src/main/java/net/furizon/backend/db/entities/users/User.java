@@ -2,7 +2,10 @@ package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.pretix.Room;
+import net.furizon.backend.db.entities.pretix.RoomGuest;
 import net.furizon.backend.db.entities.users.content.Fursuit;
 import net.furizon.backend.db.entities.users.content.Media;
 
@@ -52,5 +55,13 @@ public final class User {
     @OneToMany(mappedBy = "fursuitOwner")
     @Getter
     private List<Fursuit> userFursuits;
+
+    @OneToOne(mappedBy = "roomOrder")
+    @Getter @Setter
+    private Room orderRoom;
+
+    @OneToMany(mappedBy = "guest")
+    @Getter
+    private List<RoomGuest> userAsGuestList;
 
 }

@@ -15,4 +15,7 @@ public interface IUserRepository extends ListCrudRepository<User, Long> {
 	@Query(value = "SELECT U FROM User U WHERE U.authentication.email = ?1")
 	Optional<User> findByEmail(String email);
 
+	@Query(value = "SELECT U FROM User U WHERE U.secret = ?1")
+	Optional<User> findBySecret(String secret);
+
 }

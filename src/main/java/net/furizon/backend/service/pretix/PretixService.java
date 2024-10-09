@@ -5,8 +5,8 @@ import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.db.repositories.pretix.IEventRepository;
 import net.furizon.backend.db.repositories.pretix.IOrderRepository;
-import net.furizon.backend.db.repositories.users.IAuthenticationDataRepository;
 import net.furizon.backend.db.repositories.users.IUserRepository;
+import net.furizon.backend.utils.TextUtil;
 import net.furizon.backend.utils.pretix.Constants;
 import net.furizon.backend.utils.pretix.ExtraDays;
 import net.furizon.backend.utils.pretix.QuestionType;
@@ -79,7 +79,7 @@ public class PretixService {
 	public boolean reloadEverything(){
 		try {
 			reloadEvents();
-			reloadOrders();
+			reloadOrderData();
 			return true;
 		} catch(TimeoutException te) {
 			return false;
@@ -100,10 +100,11 @@ public class PretixService {
 	}
 
 	private void reloadOrders() throws TimeoutException {
-		getAllPages("orders/", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDB);
+		getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDB);
 	}
+
 	private void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
-		getAllPages("questions/", pretixConfig.getEventUrl(), (item) -> {
+		getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
 			int id = item.getInt("id");
 			String identifier = item.getString("identifier");
 			pretixIdsCache.questionTypeIds.put(id, QuestionType.fromCode(item.getString("type")));
@@ -127,7 +128,7 @@ public class PretixService {
 			}
 		};
 
-		getAllPages("items/", pretixConfig.getEventUrl(), (item) -> {
+		getAllPages("items", pretixConfig.getEventUrl(), (item) -> {
 			String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
 			int itemId = item.getInt("id");
 
@@ -174,7 +175,7 @@ public class PretixService {
 	}
 
 	public void fetchOrder(String code, String secret) throws TimeoutException {
-		Download.Response res = doGet("orders/" + code.replaceAll("[^A-Za-z0-9]+", ""), pretixConfig.getEventUrl(), Constants.STATUS_CODES_WITH_404);
+		Download.Response res = doGet("orders" + code.replaceAll("[^A-Za-z0-9]+", ""), pretixConfig.getEventUrl(), Constants.STATUS_CODES_WITH_404);
 		if(res.getStatusCode() == 404) throw new RuntimeException("Order not found");
 		JSONObject orderData = res.getResponseJson();
 		if(!orderData.getString("secret").equals(secret)) throw new RuntimeException("Order not found"); //Same exception to not leak matched order code
@@ -184,7 +185,7 @@ public class PretixService {
 		PretixIdsMap pCache = pretixIdsCache;
 		boolean hasTicket = false; //If no ticket is found, we don't store the order at all
 
-		String code = orderData.getString("coded");
+		String code = orderData.getString("code");
 		String secret = orderData.getString("secret");
 
 		Set<Integer> days = new HashSet<>();
@@ -247,17 +248,17 @@ public class PretixService {
 
 		if(hasTicket) {
 			//TODO: fetch user from db by userSecret
-			User u = null;
+			User u = userRepository.findBySecret(secret).orElse(null);
 
-			Order order = null; //TODO: try fetching from db
+			Order order = orderRepository.findByCode(code).orElse(null);
 			if (order == null) //order not found
 				order = new Order();
 			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, u, pretixConfig.getCurrentEventObj(), answers);
+			orderRepository.save(order);
 		} else {
 			//TODO: delete order
 		}
 	}
-
 
 	//TODO: Organizers and events can change slug and we have no other way to uniquely identify an event. Eventually: Create "something" which can move the events and related orders to a new one
 	private List<Tuple<String, String>> reloadOrganizers() throws TimeoutException {
@@ -265,6 +266,7 @@ public class PretixService {
 		getAllPages("organizers/", pretixConfig.getBaseUrl(), (res) -> organizers.add(new Tuple<>(res.getString("slug"), res.getString("public_url"))));
 		return organizers;
 	}
+
 	public void reloadEvents() throws TimeoutException {
 		List<Tuple<String, String>> organizers = reloadOrganizers();
 
@@ -272,7 +274,7 @@ public class PretixService {
 		String currentEvent = pretixConfig.getCurrentEvent();
 		for(Tuple<String, String> o : organizers){
 			String organizer = o.getA();
-			getAllPages("organizers/" + organizer + "/events/", pretixConfig.getBaseUrl(), (res) -> {
+			getAllPages(TextUtil.url("organizers", organizer, "events"), pretixConfig.getBaseUrl(), (res) -> {
 
 				Map<String, String> names = new HashMap<>();
 				JSONObject obj = res.getJSONObject("name");
@@ -315,7 +317,7 @@ public class PretixService {
 		while(true){
 			pages += 1;
 
-			Download.Response res = doGet(url + "/?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
+			Download.Response res = doGet(TextUtil.leadingSlash(url) + "?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
 			if(res.getStatusCode() == 404) break;
 
 			JSONObject response = res.getResponseJson();
@@ -328,18 +330,21 @@ public class PretixService {
 	}
 
 	private static Download httpClient;
-	public void updatePretixSettings() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+
+	public void setupClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		httpClient = new Download(pretixConfig.getConnectionTimeout(), pretixConfig.getConnectionHeaders(), null, pretixConfig.getMaxConnections(), false);
 	}
 
 	private Download.Response doGet(String url, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.get(baseUrl + "/" + url).go(), null, expectedStatusCodes, "GETing");
+		return doRequest(url, () -> httpClient.get(TextUtil.leadingSlash(baseUrl) + url).go(), null, expectedStatusCodes, "GETing");
 	}
+
 	private Download.Response doPost(String url, Object content, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.post(baseUrl + "/" + url).setBody(content).go(), null, expectedStatusCodes, "POSTing");
+		return doRequest(url, () -> httpClient.post(TextUtil.leadingSlash(baseUrl) + url).setBody(content).go(), null, expectedStatusCodes, "POSTing");
 	}
+
 	private Download.Response doPatch(String url, JSONObject json, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.patch(baseUrl + "/" + url).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
+		return doRequest(url, () -> httpClient.patch(TextUtil.leadingSlash(baseUrl) + url).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
 	}
 
 	private Download.Response doRequest(String url, ThrowableSupplier<Download.Response, Exception> doReq, Runnable metricsFunc, int[] expectedStatusCodes, String opLogStr) throws TimeoutException {
@@ -364,6 +369,7 @@ public class PretixService {
 				//incPretixErrors(); TODO
 				LOGGER.warn("[PRETIX] An error ({}) occurred while {} '{}':\n{}", i, opLogStr, url, e.getMessage());
 			}
+			if (res != null) break;
 		}
 		if(res == null){
 			LOGGER.error("[PRETIX] Reached PRETIX_REQUESTS_MAX ({}) while {} '{}'. Aborting", maxRetries, opLogStr, url);

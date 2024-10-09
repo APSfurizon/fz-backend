@@ -13,7 +13,7 @@ public class CmdRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        pretixService.updatePretixSettings();
+        pretixService.setupClient();
         pretixService.reloadEverything();
     }
 }
