@@ -12,4 +12,8 @@ public class TextUtil {
         return String.join("/", Arrays.asList(strings));
     }
 
+    public static boolean isEmpty(String value) {
+        return value == null || value.trim().length() == 0;
+    }
+
 }

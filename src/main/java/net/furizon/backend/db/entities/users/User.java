@@ -28,7 +28,7 @@ public final class User {
     private long id;
 
     @Getter @Column(name="user_secret", nullable = false)
-    private long secret;
+    private String secret;
 
     @Getter @Column(name = "user_first_name")
     private String firstName;
@@ -55,10 +55,6 @@ public final class User {
     @OneToMany(mappedBy = "fursuitOwner")
     @Getter
     private List<Fursuit> userFursuits;
-
-    @OneToOne(mappedBy = "roomOrder")
-    @Getter @Setter
-    private Room orderRoom;
 
     @OneToMany(mappedBy = "guest")
     @Getter

@@ -247,13 +247,16 @@ public class PretixService {
 		}
 
 		if(hasTicket) {
-			//TODO: fetch user from db by userSecret
-			User u = userRepository.findBySecret(secret).orElse(null);
-
-			Order order = orderRepository.findByCode(code).orElse(null);
+			// fetch user from db by userSecret
+			User usr = null;
+			if (!TextUtil.isEmpty(userSecret)) {
+				usr = userRepository.findBySecret(userSecret).orElse(null);
+			}
+			// Fetch Order by code
+			Order order = orderRepository.findByCodeAndEvent(code, pretixConfig.getCurrentEventObj().getSlug()).orElse(null);
 			if (order == null) //order not found
 				order = new Order();
-			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, u, pretixConfig.getCurrentEventObj(), answers);
+			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, usr, pretixConfig.getCurrentEventObj(), answers);
 			orderRepository.save(order);
 		} else {
 			//TODO: delete order
@@ -272,25 +275,33 @@ public class PretixService {
 
 		//List<Event> ret = new LinkedList<>();
 		String currentEvent = pretixConfig.getCurrentEvent();
-		for(Tuple<String, String> o : organizers){
-			String organizer = o.getA();
+		String currentOrg = pretixConfig.getOrganizer();
+		for(Tuple<String, String> organizerTuple : organizers){
+			String organizer = organizerTuple.getA();
 			getAllPages(TextUtil.url("organizers", organizer, "events"), pretixConfig.getBaseUrl(), (res) -> {
 
 				Map<String, String> names = new HashMap<>();
 				JSONObject obj = res.getJSONObject("name");
 				for(String s : obj.keySet()) names.put(s, obj.getString(s));
 
-				//TODO check first if the order already exists, if not create a new object, if yes, obtain it and set the parameters. Then save it back to the db
-				Event e = new Event(
+				//TODO check first if the order already exists, if not create a new object, if yes, obtain it and set the parameters. Then save it back to the db\
+				String eventCode = res.getString("slug");
+				Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
+				if (evt == null) {
+					evt = new Event(
 							organizer,
 							res.getString("slug"),
-							o.getB(),
+							organizerTuple.getB(),
 							names,
 							res.getString("date_from"),
 							res.getString("date_to")
-						);
-				e.setCurrentEvent(e.getSlug().equals(currentEvent));
-				//ret.add(e);
+					);
+					evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
+					evt = eventRepository.save(evt);
+				}
+				if (evt != null && evt.isCurrentEvent()) {
+					pretixConfig.setCurrentEventObj(evt);
+				}
 			});
 		}
 		//return ret;

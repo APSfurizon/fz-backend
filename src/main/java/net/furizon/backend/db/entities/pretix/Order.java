@@ -2,6 +2,7 @@ package net.furizon.backend.db.entities.pretix;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.service.pretix.PretixService;
 import net.furizon.backend.utils.pretix.Constants;
@@ -63,6 +64,10 @@ public class Order {
 	@JoinColumn(name = "event_id")
 	@Getter
 	private Event orderEvent;
+
+	@OneToOne(mappedBy = "roomOrder")
+	@Getter @Setter
+	private Room orderRoom;
 
 	@Transient
 	private Map<String, Object> answersData = null;
