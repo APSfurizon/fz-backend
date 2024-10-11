@@ -8,6 +8,7 @@ import net.furizon.backend.db.entities.pretix.Room;
 import net.furizon.backend.db.entities.pretix.RoomGuest;
 import net.furizon.backend.db.entities.users.content.Fursuit;
 import net.furizon.backend.db.entities.users.content.Media;
+import net.furizon.backend.service.users.UserService;
 
 import java.util.List;
 import java.util.Set;
@@ -30,10 +31,10 @@ public final class User {
     @Getter @Column(name="user_secret", nullable = false)
     private String secret;
 
-    @Getter @Column(name = "user_first_name")
+    @Getter @Setter @Column(name = "user_first_name")
     private String firstName;
 
-    @Getter @Column(name = "user_last_name")
+    @Getter @Setter @Column(name = "user_last_name")
     private String lastName;
 
     @OneToMany(mappedBy = "orderOwner")
@@ -41,7 +42,7 @@ public final class User {
     private Set<Order> orders;
 
     @OneToOne(mappedBy = "authenticationOwner")
-    @Getter
+    @Getter @Setter
     private AuthenticationData authentication;
 
     @OneToMany(mappedBy = "user")
@@ -59,5 +60,11 @@ public final class User {
     @OneToMany(mappedBy = "guest")
     @Getter
     private List<RoomGuest> userAsGuestList;
+
+    public User() {}
+
+    public User(String secret) {
+        this.secret = secret;
+    }
 
 }

@@ -28,25 +28,25 @@ public class  AuthenticationData {
 
     @Column(name = "authentication_email_verified")
     @Getter @Setter
-    private boolean emailVerified;
+    private boolean emailVerified = false;
 
     @Column(name = "authentication_2fa_enabled")
     @Getter @Setter
-    private boolean is2faEnabled;
+    private boolean is2faEnabled = false;
 
     @Column(name = "authentication_token")
     @Getter @Setter
-    private String totpToken;
+    private String totpToken = null;
 
     @Column(name = "authentication_from_oauth")
     @Getter @Setter
-    private boolean isOauthLogin;
+    private boolean isOauthLogin = false;
 
     @Column(name = "authentication_disabled")
     @Getter @Setter
-    private boolean isLoginDisabled;
+    private boolean isLoginDisabled = false;
 
     @Column(name = "authentication_expired")
     @Getter @Setter
-    private boolean isLoginExpired;
+    private boolean isLoginExpired = false;
 }
