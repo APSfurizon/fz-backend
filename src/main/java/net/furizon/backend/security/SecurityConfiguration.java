@@ -28,39 +28,11 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
 
-		requestCache.setMatchingRequestParameterName(null);
-
-		// Allow static access
-		http.authorizeHttpRequests(configurer -> configurer
-				.requestMatchers(HttpMethod.GET, "/css/**", "/js/**", "/img/**", "/images/**", "/client/**")
-				.permitAll());
-
-		// Permetti l'accesso a specifici endpoint senza autenticazione
-		http.authorizeHttpRequests(configurer -> configurer
-				.requestMatchers(HttpMethod.POST, "/auth").permitAll());
-
-		// Configura la gestione delle eccezioni e il form di login
-		http.exceptionHandling(configurer -> configurer.accessDeniedPage("/auth/access-denied"))
-				.formLogin(form -> form.loginProcessingUrl("/auth").loginPage("/auth/login")
-						.defaultSuccessUrl("/furpanel/home", true).permitAll())
-				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login")
-						.deleteCookies("JSESSIONID").invalidateHttpSession(true).clearAuthentication(true).permitAll());
-
-		// Configurazioni aggiuntive
-		http.requestCache((cache) -> cache.requestCache(requestCache));
-
-//        http.formLogin(Customizer.withDefaults());
-//        http.logout(Customizer.withDefaults());
-
-		http.cors(cors -> cors.disable());
-
-		http.csrf(csrf -> csrf.disable());
-		http.httpBasic(Customizer.withDefaults());
-
-		// Le configurazione con .authenticated() vanno sempre alla fine
-		http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
+		http
+				.authorizeHttpRequests(it -> it.anyRequest().authenticated())
+				.httpBasic(Customizer.withDefaults())
+				.sessionManagement(it -> it.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();
 	}

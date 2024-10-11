@@ -45,4 +45,8 @@ public class  AuthenticationData {
     @Column(name = "authentication_disabled")
     @Getter @Setter
     private boolean isLoginDisabled;
+
+    @Column(name = "authentication_expired")
+    @Getter @Setter
+    private boolean isLoginExpired;
 }
