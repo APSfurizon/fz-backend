@@ -38,7 +38,7 @@ jobs:
         with:
           java-version: "23"
           distribution: "adopt"
-          cache: mvnw
+          cache: maven
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
       - name: Check
