@@ -90,7 +90,7 @@ public class PretixInteraction {
         getAllPages("questions/", PretixSettings.generalSettings.getEventUrl(), (item) -> {
             int id = item.getInt("id");
             String identifier = item.getString("identifier");
-            pretixIdsCache.questionTypeIds.put(id, QuestionType.fromCode(item.getString("type")));
+            pretixIdsCache.questionTypeIds.put(id, QuestionType.get(item.getString("type")));
             pretixIdsCache.questionIdentifiers.put(id, identifier);
             pretixIdsCache.questionIdentifiersToId.put(identifier, id);
 
