@@ -2,6 +2,7 @@ package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.pretix.Room;
@@ -23,6 +24,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 public final class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter @Column(name="user_id", nullable = false)
@@ -36,6 +38,9 @@ public final class User {
 
     @Getter @Setter @Column(name = "user_last_name")
     private String lastName;
+
+    @Getter @Setter @Column(name = "user_locale")
+    private String locale = "en";
 
     @OneToMany(mappedBy = "orderOwner")
     @Getter
@@ -60,8 +65,6 @@ public final class User {
     @OneToMany(mappedBy = "guest")
     @Getter
     private List<RoomGuest> userAsGuestList;
-
-    public User() {}
 
     public User(String secret) {
         this.secret = secret;

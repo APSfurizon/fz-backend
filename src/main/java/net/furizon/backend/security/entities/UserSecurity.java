@@ -10,25 +10,13 @@ import java.util.List;
 
 public class UserSecurity implements UserDetails {
 
-    private String username;
-
-    private String passwordHash;
-
-    private boolean credentialsExpired;
-
-    private boolean loginDisabled;
-
     @Getter
-    private boolean requiresMfa;
+    private User user;
 
     public UserSecurity() {}
 
     public UserSecurity (User from) {
-        this.username = from.getAuthentication().getEmail();
-        this.passwordHash = from.getAuthentication().getPasswordHash();
-        this.credentialsExpired = from.getAuthentication().isLoginExpired();
-        this.loginDisabled = from.getAuthentication().isLoginDisabled();
-        this.requiresMfa = from.getAuthentication().is2faEnabled();
+        this.user = from;
     }
 
     @Override
@@ -38,12 +26,12 @@ public class UserSecurity implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.passwordHash;
+        return this.user.getAuthentication().getPasswordHash();
     }
 
     @Override
     public String getUsername() {
-        return this.username;
+        return this.user.getAuthentication().getEmail();
     }
 
     @Override
@@ -58,11 +46,15 @@ public class UserSecurity implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return !this.credentialsExpired;
+        return !this.user.getAuthentication().isLoginExpired();
     }
 
     @Override
     public boolean isEnabled() {
-        return !this.loginDisabled;
+        return !this.user.getAuthentication().isLoginDisabled();
+    }
+
+    public boolean is2faEnabled () {
+        return this.user.getAuthentication().is2faEnabled();
     }
 }
