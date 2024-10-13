@@ -1,7 +1,12 @@
 package net.furizon.backend.db.entities.pretix.settings;
 
-import jakarta.persistence.*;
-import lombok.Getter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Setter;
 
 /**
@@ -9,22 +14,20 @@ import lombok.Setter;
  */
 @Entity
 @Table
+@lombok.Data
 public class PretixConnectionSettings {
-	@Getter
-	@Id
-	@Column
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+    @Id
+    @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.NONE)
+    private long id;
 
-	@Getter @Setter
-	@Column(nullable = false)
-	private int maxRetries;
+    @Column(nullable = false)
+    private int maxRetries;
 
-	@Getter @Setter
-	@Column(nullable = false)
-	private int maxHttpConnections;
+    @Column(nullable = false)
+    private int maxHttpConnections;
 
-	@Getter @Setter
-	@Column(nullable = false)
-	private int timeout;
+    @Column(nullable = false)
+    private int timeout;
 }

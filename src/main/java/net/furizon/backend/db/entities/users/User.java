@@ -1,6 +1,13 @@
 package net.furizon.backend.db.entities.users;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.content.Fursuit;
@@ -14,43 +21,48 @@ import java.util.Set;
  * it may be the author of published images, owner of a room or a roomie,
  * owns one or more membership cards, either expired or not.
  * May be linked to any orders placed in pretix.
- *<br><br>
+ * <br><br>
  * <b>TODO: handle nickname and fursona name problem</b>
  */
 @Entity
 @Table(name = "users")
+@Getter
 public final class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter @Column(name="user_id", nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id", nullable = false)
+    // Primitives can't be nullable, nullable = false is rudimentary here?
     private long id;
 
-    @Getter @Column(name="user_secret", nullable = false)
+    // Primitives can't be nullable, nullable = false is rudimentary here?
+    @Column(name = "user_secret", nullable = false)
     private long secret;
 
-    @Getter @Column(name = "user_first_name")
+    @Column(name = "user_first_name")
+    // TODO -> nullable?
     private String firstName;
 
-    @Getter @Column(name = "user_last_name")
+    @Column(name = "user_last_name")
+    // TODO -> nullable?
     private String lastName;
 
     @OneToMany(mappedBy = "orderOwner")
-    @Getter
+    // TODO -> nullable?
     private Set<Order> orders;
 
     @OneToOne(mappedBy = "authenticationOwner")
-    @Getter
+    // TODO -> nullable?
     private AuthenticationData authentication;
 
     @OneToMany(mappedBy = "user")
-    @Getter
+    // TODO -> nullable?
     private List<UserGroup> userGroupAssociations;
 
     @OneToMany(mappedBy = "mediaOwner")
-    @Getter
+    // TODO -> nullable?
     private List<Media> userMedias;
 
     @OneToMany(mappedBy = "fursuitOwner")
-    @Getter
+    // TODO -> nullable?
     private List<Fursuit> userFursuits;
-
 }
