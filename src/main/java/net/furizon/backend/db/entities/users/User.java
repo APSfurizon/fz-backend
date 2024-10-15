@@ -2,9 +2,14 @@ package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.pretix.Room;
+import net.furizon.backend.db.entities.pretix.RoomGuest;
 import net.furizon.backend.db.entities.users.content.Fursuit;
 import net.furizon.backend.db.entities.users.content.Media;
+import net.furizon.backend.service.users.UserService;
 
 import java.util.List;
 import java.util.Set;
@@ -19,26 +24,30 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 public final class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter @Column(name="user_id", nullable = false)
     private long id;
 
     @Getter @Column(name="user_secret", nullable = false)
-    private long secret;
+    private String secret;
 
-    @Getter @Column(name = "user_first_name")
+    @Getter @Setter @Column(name = "user_first_name")
     private String firstName;
 
-    @Getter @Column(name = "user_last_name")
+    @Getter @Setter @Column(name = "user_last_name")
     private String lastName;
+
+    @Getter @Setter @Column(name = "user_locale")
+    private String locale = "en";
 
     @OneToMany(mappedBy = "orderOwner")
     @Getter
     private Set<Order> orders;
 
     @OneToOne(mappedBy = "authenticationOwner")
-    @Getter
+    @Getter @Setter
     private AuthenticationData authentication;
 
     @OneToMany(mappedBy = "user")
@@ -52,5 +61,13 @@ public final class User {
     @OneToMany(mappedBy = "fursuitOwner")
     @Getter
     private List<Fursuit> userFursuits;
+
+    @OneToMany(mappedBy = "guest")
+    @Getter
+    private List<RoomGuest> userAsGuestList;
+
+    public User(String secret) {
+        this.secret = secret;
+    }
 
 }

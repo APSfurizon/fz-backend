@@ -1,17 +1,28 @@
-package net.furizon.backend.pretix;
+package net.furizon.backend.service.pretix;
 
 import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.db.repositories.pretix.IEventRepository;
+import net.furizon.backend.db.repositories.pretix.IOrderRepository;
+import net.furizon.backend.db.repositories.users.IUserRepository;
+import net.furizon.backend.utils.TextUtil;
+import net.furizon.backend.utils.pretix.Constants;
+import net.furizon.backend.utils.pretix.ExtraDays;
+import net.furizon.backend.utils.pretix.QuestionType;
+import net.furizon.backend.utils.pretix.Sponsorship;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.Tuple;
+import net.furizon.backend.utils.configs.PretixConfig;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -24,12 +35,25 @@ import java.util.function.Consumer;
 /**
  * Describes all the iteractions via Pretix
  */
-public class PretixInteraction {
+@Service
+public class PretixService {
+	private final IUserRepository userRepository;
+	private final IEventRepository eventRepository;
+	private final IOrderRepository orderRepository;
+	private PretixConfig pretixConfig;
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(PretixInteraction.class);
+	@Autowired
+	private PretixService (IUserRepository userRepository, IEventRepository eventRepository, IOrderRepository orderRepository, PretixConfig pretixConfig) {
+		this.userRepository = userRepository;
+		this.eventRepository = eventRepository;
+		this.orderRepository = orderRepository;
+		this.pretixConfig = pretixConfig;
+	}
 
-	private static PretixIdsMap pretixIdsCache = null;
-	private static class PretixIdsMap {
+	private final static Logger LOGGER = LoggerFactory.getLogger(PretixService.class);
+
+	private PretixIdsMap pretixIdsCache = null;
+	private class PretixIdsMap {
 
 		public Set<Integer> ticketIds = new HashSet<>();
 		public Map<Integer, Integer> dailyIds = new HashMap<>(); //map id -> day idx
@@ -52,17 +76,17 @@ public class PretixInteraction {
 
 	}
 
-	public static boolean reloadEverything(){
+	public boolean reloadEverything(){
 		try {
 			reloadEvents();
-			reloadOrders();
+			reloadOrderData();
 			return true;
 		} catch(TimeoutException te) {
 			return false;
 		}
 	}
 
-	public static boolean reloadOrderData(){
+	public boolean reloadOrderData(){
 		try {
 			PretixIdsMap cache = new PretixIdsMap();
 			reloadProducts(cache);
@@ -75,11 +99,12 @@ public class PretixInteraction {
 		}
 	}
 
-	private static void reloadOrders() throws TimeoutException {
-		getAllPages("orders/", PretixSettings.generalSettings.getEventUrl(), PretixInteraction::parseOrderAndUpdateDB);
+	private synchronized void reloadOrders() throws TimeoutException {
+		getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDB);
 	}
-	private static void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
-		getAllPages("questions/", PretixSettings.generalSettings.getEventUrl(), (item) -> {
+
+	private synchronized void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
+		getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
 			int id = item.getInt("id");
 			String identifier = item.getString("identifier");
 			pretixIdsCache.questionTypeIds.put(id, QuestionType.fromCode(item.getString("type")));
@@ -90,7 +115,7 @@ public class PretixInteraction {
 				pretixIdsCache.questionSecret = id;
 		});
 	}
-	private static void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
+	private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
 		TriConsumer<JSONObject, String, BiConsumer<Integer, String>> searchVariations = (item, prefix, fnc) -> {
 			JSONArray variations = item.getJSONArray("variations");
 			for(int i = 0; i < variations.length(); i++){
@@ -103,7 +128,7 @@ public class PretixInteraction {
 			}
 		};
 
-		getAllPages("items/", PretixSettings.generalSettings.getEventUrl(), (item) -> {
+		getAllPages("items", pretixConfig.getEventUrl(), (item) -> {
 			String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
 			int itemId = item.getInt("id");
 
@@ -149,18 +174,18 @@ public class PretixInteraction {
 		});
 	}
 
-	public static void fetchOrder(String code, String secret) throws TimeoutException {
-		Download.Response res = doGet("orders/" + code.replaceAll("[^A-Za-z0-9]+", ""), PretixSettings.generalSettings.getEventUrl(), Constants.STATUS_CODES_WITH_404);
+	public void fetchOrder(String code, String secret) throws TimeoutException {
+		Download.Response res = doGet("orders" + code.replaceAll("[^A-Za-z0-9]+", ""), pretixConfig.getEventUrl(), Constants.STATUS_CODES_WITH_404);
 		if(res.getStatusCode() == 404) throw new RuntimeException("Order not found");
 		JSONObject orderData = res.getResponseJson();
 		if(!orderData.getString("secret").equals(secret)) throw new RuntimeException("Order not found"); //Same exception to not leak matched order code
 		parseOrderAndUpdateDB(orderData);
 	}
-	private static void parseOrderAndUpdateDB(JSONObject orderData){
+	private void parseOrderAndUpdateDB(JSONObject orderData){
 		PretixIdsMap pCache = pretixIdsCache;
 		boolean hasTicket = false; //If no ticket is found, we don't store the order at all
 
-		String code = orderData.getString("coded");
+		String code = orderData.getString("code");
 		String secret = orderData.getString("secret");
 
 		Set<Integer> days = new HashSet<>();
@@ -221,77 +246,89 @@ public class PretixInteraction {
 			}
 		}
 
+		// Fetch Order by code
+		Order order = orderRepository.findByCodeAndEvent(code, pretixConfig.getCurrentEventObj().getSlug()).orElse(null);
 		if(hasTicket) {
-			//TODO: fetch user from db by userSecret
-			User u = null;
+			// fetch user from db by userSecret
+			User usr = null;
+			if (!TextUtil.isEmpty(userSecret))
+				usr = userRepository.findBySecret(userSecret).orElse(null);
 
-			Order order = null; //TODO: try fetching from db
 			if (order == null) //order not found
 				order = new Order();
-			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, u, PretixSettings.generalSettings.getCurrentEventObj(), answers);
+			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, usr, pretixConfig.getCurrentEventObj(), answers);
+			orderRepository.save(order);
 		} else {
-			//TODO: delete order
+			if(order != null)
+				orderRepository.delete(order);
 		}
 	}
 
-
 	//TODO: Organizers and events can change slug and we have no other way to uniquely identify an event. Eventually: Create "something" which can move the events and related orders to a new one
-	private static List<Tuple<String, String>> reloadOrganizers() throws TimeoutException {
+	private List<Tuple<String, String>> reloadOrganizers() throws TimeoutException {
 		List<Tuple<String, String>> organizers = new LinkedList<>();
-		getAllPages("organizers/", PretixSettings.generalSettings.getBaseUrl(), (res) -> organizers.add(new Tuple<>(res.getString("slug"), res.getString("public_url"))));
+		getAllPages("organizers/", pretixConfig.getBaseUrl(), (res) -> organizers.add(new Tuple<>(res.getString("slug"), res.getString("public_url"))));
 		return organizers;
 	}
-	public static void reloadEvents() throws TimeoutException {
+
+	public void reloadEvents() throws TimeoutException {
 		List<Tuple<String, String>> organizers = reloadOrganizers();
 
 		//List<Event> ret = new LinkedList<>();
-		String currentEvent = PretixSettings.generalSettings.getCurrentEvent();
-		for(Tuple<String, String> o : organizers){
-			String organizer = o.getA();
-			getAllPages("organizers/" + organizer + "/events/", PretixSettings.generalSettings.getBaseUrl(), (res) -> {
+		String currentEvent = pretixConfig.getCurrentEvent();
+		String currentOrg = pretixConfig.getOrganizer();
+		for(Tuple<String, String> organizerTuple : organizers){
+			String organizer = organizerTuple.getA();
+			getAllPages(TextUtil.url("organizers", organizer, "events"), pretixConfig.getBaseUrl(), (res) -> {
 
 				Map<String, String> names = new HashMap<>();
 				JSONObject obj = res.getJSONObject("name");
 				for(String s : obj.keySet()) names.put(s, obj.getString(s));
 
-				//TODO check first if the order already exists, if not create a new object, if yes, obtain it and set the parameters. Then save it back to the db
-				Event e = new Event(
+				String eventCode = res.getString("slug");
+				Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
+				if (evt == null) {
+					evt = new Event(
 							organizer,
 							res.getString("slug"),
-							o.getB(),
+							organizerTuple.getB(),
 							names,
 							res.getString("date_from"),
 							res.getString("date_to")
-						);
-				e.setCurrentEvent(e.getSlug().equals(currentEvent));
-				//ret.add(e);
+					);
+					evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
+					evt = eventRepository.save(evt);
+				}
+				if (evt != null && evt.isCurrentEvent()) {
+					pretixConfig.setCurrentEventObj(evt);
+				}
 			});
 		}
 		//return ret;
 	}
 
 
-	public static String translateQuestionId(int answerId){
+	public synchronized String translateQuestionId(int answerId){
 		return pretixIdsCache.questionIdentifiers.get(answerId);
 	}
-	public static QuestionType translateQuestionType(int answerId){
+	public synchronized QuestionType translateQuestionType(int answerId){
 		return pretixIdsCache.questionTypeIds.get(answerId);
 	}
-	public static QuestionType translateQuestionType(String questionIdentifier){
+	public synchronized QuestionType translateQuestionType(String questionIdentifier){
 		return pretixIdsCache.questionTypeIds.get(pretixIdsCache.questionIdentifiersToId.get(questionIdentifier));
 	}
 
 	//Push orders to pretix
-	public static void uploadToPretixDb(){
+	public synchronized void uploadToPretixDb(){
 		//TODO: I will need to store the full raw questions of every order to reupload them (diocane)
 	}
 
-	private static void getAllPages(String url, String baseUrl, Consumer<JSONObject> elementFnc) throws TimeoutException {
+	private void getAllPages(String url, String baseUrl, Consumer<JSONObject> elementFnc) throws TimeoutException {
 		int pages = 0;
 		while(true){
 			pages += 1;
 
-			Download.Response res = doGet(url + "/?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
+			Download.Response res = doGet(TextUtil.leadingSlash(url) + "?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
 			if(res.getStatusCode() == 404) break;
 
 			JSONObject response = res.getResponseJson();
@@ -299,29 +336,32 @@ public class PretixInteraction {
 			for(int i = 0; i < objs.length(); i++)
 				elementFnc.accept(objs.getJSONObject(i));
 
-			if(response.getString("next") == null) break;
+			if(response.get("next") == null) break;
 		}
 	}
 
 	private static Download httpClient;
-	public static void updatePretixSettings(PretixSettings ps) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-		httpClient = new Download(PretixSettings.connectionSettings.getTimeout(), PretixSettings.generalSettings.getConnectionHeaders(), null, PretixSettings.connectionSettings.getMaxHttpConnections(), false);
+
+	public void setupClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+		httpClient = new Download(pretixConfig.getConnectionTimeout(), pretixConfig.getConnectionHeaders(), null, pretixConfig.getMaxConnections(), false);
 	}
 
-	private static Download.Response doGet(String url, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.get(baseUrl + "/" + url).go(), null, expectedStatusCodes, "GETing");
-	}
-	private static Download.Response doPost(String url, Object content, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.post(baseUrl + "/" + url).setBody(content).go(), null, expectedStatusCodes, "POSTing");
-	}
-	private static Download.Response doPatch(String url, JSONObject json, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.patch(baseUrl + "/" + url).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
+	private Download.Response doGet(String url, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
+		return doRequest(url, () -> httpClient.get(TextUtil.leadingSlash(baseUrl) + url).go(), null, expectedStatusCodes, "GETing");
 	}
 
-	private static Download.Response doRequest(String url, ThrowableSupplier<Download.Response, Exception> doReq, Runnable metricsFunc, int[] expectedStatusCodes, String opLogStr) throws TimeoutException {
+	private Download.Response doPost(String url, Object content, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
+		return doRequest(url, () -> httpClient.post(TextUtil.leadingSlash(baseUrl) + url).setBody(content).go(), null, expectedStatusCodes, "POSTing");
+	}
+
+	private Download.Response doPatch(String url, JSONObject json, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
+		return doRequest(url, () -> httpClient.patch(TextUtil.leadingSlash(baseUrl) + url).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
+	}
+
+	private Download.Response doRequest(String url, ThrowableSupplier<Download.Response, Exception> doReq, Runnable metricsFunc, int[] expectedStatusCodes, String opLogStr) throws TimeoutException {
 		List<Integer> allowedStates = Arrays.stream(expectedStatusCodes).boxed().toList();
 		Download.Response res = null;
-		int maxRetries = PretixSettings.connectionSettings.getMaxRetries();
+		int maxRetries = pretixConfig.getMaxConnectionRetries();
 		for(int i = 0; i < maxRetries; i++){
 			try {
 				//metricsFunc.run(); TODO
@@ -340,6 +380,7 @@ public class PretixInteraction {
 				//incPretixErrors(); TODO
 				LOGGER.warn("[PRETIX] An error ({}) occurred while {} '{}':\n{}", i, opLogStr, url, e.getMessage());
 			}
+			if (res != null) break;
 		}
 		if(res == null){
 			LOGGER.error("[PRETIX] Reached PRETIX_REQUESTS_MAX ({}) while {} '{}'. Aborting", maxRetries, opLogStr, url);

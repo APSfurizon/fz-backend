@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
-import net.furizon.backend.pretix.*;
+import net.furizon.backend.service.pretix.PretixService;
+import net.furizon.backend.utils.pretix.Constants;
+import net.furizon.backend.utils.pretix.ExtraDays;
+import net.furizon.backend.utils.pretix.QuestionType;
+import net.furizon.backend.utils.pretix.Sponsorship;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.naming.Name;
 import java.util.*;
 
 /*
@@ -62,17 +65,21 @@ public class Order {
 	@Getter
 	private Event orderEvent;
 
+	@OneToOne(mappedBy = "roomOrder")
+	@Getter @Setter
+	private Room orderRoom;
+
 	@Transient
 	private Map<String, Object> answersData = null;
-	private void loadAnswers() {
+	private void loadAnswers(PretixService ps) {
 		JSONArray jsonArray = new JSONArray(answers);
 		Map<String, Object> answersData = new HashMap<String, Object>();
 		for(int i = 0; i < jsonArray.length(); i++){
 			JSONObject obj = jsonArray.getJSONObject(i);
 			int questionId = obj.getInt("question");
-			String answerIdentifier = PretixInteraction.translateQuestionId(questionId);
+			String answerIdentifier = ps.translateQuestionId(questionId);
 			String value = obj.getString("answer");
-			Object o = switch(PretixInteraction.translateQuestionType(questionId)){
+			Object o = switch(ps.translateQuestionType(questionId)){
 				case NUMBER -> Float.parseFloat(value);
 				case STRING_ONE_LINE -> value;
 				case STRING_MULTI_LINE -> value;
@@ -90,12 +97,12 @@ public class Order {
 		}
 		this.answersData = answersData;
 	}
-	private void saveAnswers() {
+	private void saveAnswers(PretixService ps) {
 		if(answersData == null) loadAnswers();
 		JSONArray jsonArray  = new JSONArray();
 		for(String key : answersData.keySet()){
 			Object o = answersData.get(key);
-			String out = switch(PretixInteraction.translateQuestionType(key)){
+			String out = switch(ps.translateQuestionType(key)){
 				case QuestionType.NUMBER -> String.valueOf(o);
 				case STRING_ONE_LINE -> (String) o;
 				case STRING_MULTI_LINE -> (String) o;
@@ -114,15 +121,15 @@ public class Order {
 		answers = jsonArray.toString();
 	}
 
-	public Object getAnswerValue(String answer){
-		if(answersData == null) loadAnswers();
+	public Object getAnswerValue(String answer, PretixService ps){
+		if(answersData == null) loadAnswers(ps);
 		return answersData.get(answer);
 
 	}
-	public void setAnswerValue(String answer, Object value){
-		if(answersData == null) loadAnswers();
+	public void setAnswerValue(String answer, Object value, PretixService ps){
+		if(answersData == null) loadAnswers(ps);
 		answersData.put(answer, value);
-		saveAnswers();
+		saveAnswers(ps);
 	}
 	public String getAnswersRaw(){
 		return answers;
