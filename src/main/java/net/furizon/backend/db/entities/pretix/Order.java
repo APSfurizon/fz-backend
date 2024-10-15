@@ -1,6 +1,7 @@
 package net.furizon.backend.db.entities.pretix;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
@@ -14,62 +15,48 @@ import org.json.JSONObject;
 
 import java.util.*;
 
-/*
-- Che prodotti ha
-	- SE ha un biglietto per l'evento
-	- Tipo di sponsor
-	- Se daily: che giorni ha
-	- SE ha una stanza; tipo della stanza
-- Secret per collegare l'ordine all'utente
- */
 @Entity
 @Table(name = "orders")
+@Getter
 public class Order {
 
 	@Id
-	@Getter
 	private String code;
 
+    @Getter(AccessLevel.NONE)
 	private long dailyDays = 0L; //bitmask of days
 
-	@Getter
 	private Sponsorship sponsorship = Sponsorship.NONE;
 
-	@Getter
 	private ExtraDays extraDays = ExtraDays.NONE;
 
-	@Getter
 	private int roomCapacity = 0; // 0 = has no room
 
-	@Getter
 	private String hotelLocation = "ITALY";
 
-	@Getter
 	private String pretixOrderSecret = "GABIBBO";
 
-	@Getter
 	private boolean hasMembership = false;
 
-	@Getter
 	private int answersMainPositionId = -1;
 
+    @Getter(AccessLevel.NONE)
 	private String answers;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	@Getter
 	private User orderOwner;
 
 	@ManyToOne
 	@JoinColumn(name = "event_id")
-	@Getter
 	private Event orderEvent;
 
 	@OneToOne(mappedBy = "roomOrder")
-	@Getter @Setter
+	@Setter
 	private Room orderRoom;
 
 	@Transient
+    @Getter(AccessLevel.NONE)
 	private Map<String, Object> answersData = null;
 	private void loadAnswers(PretixService ps) {
 		JSONArray jsonArray = new JSONArray(answers);
@@ -98,7 +85,7 @@ public class Order {
 		this.answersData = answersData;
 	}
 	private void saveAnswers(PretixService ps) {
-		if(answersData == null) loadAnswers();
+		if(answersData == null) loadAnswers(ps);
 		JSONArray jsonArray  = new JSONArray();
 		for(String key : answersData.keySet()){
 			Object o = answersData.get(key);
@@ -122,7 +109,8 @@ public class Order {
 	}
 
 	public Object getAnswerValue(String answer, PretixService ps){
-		if(answersData == null) loadAnswers(ps);
+        // TODO -> Think about lazy load?
+        if(answersData == null) loadAnswers(ps);
 		return answersData.get(answer);
 
 	}
@@ -144,6 +132,7 @@ public class Order {
 	}
 
 	@Transient
+    @Getter(AccessLevel.NONE)
 	private Set<Integer> dailyDaysSet = null;
 	public Set<Integer> getDays(){
 		if(dailyDaysSet == null){

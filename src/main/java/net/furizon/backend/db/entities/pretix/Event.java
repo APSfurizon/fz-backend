@@ -1,6 +1,7 @@
 package net.furizon.backend.db.entities.pretix;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.utils.TextUtil;
@@ -10,32 +11,31 @@ import java.util.Set;
 
 @Entity
 @Table(name = "events")
+@Getter
+@Setter
 public final class Event {
 
-	@Id @Getter
+	@Id
 	@Column(name = "event_slug")
+	@Setter(AccessLevel.NONE)
 	private String slug;
 
-	@Getter @Setter
 	@Column(name = "event_public_url")
 	private String publicUrl;
 
-	@Getter @Transient //TODO transform to string
+	@Transient //TODO transform to string
+	@Setter(AccessLevel.NONE)
 	private Map<String, String> eventName; //map lang -> name
 
-	@Getter @Setter
 	@Column(name = "event_date_from")
 	private String dateFrom;
 
-	@Getter @Setter
 	@Column(name = "event_date_end")
 	private String dateEnd;
 
-	@Getter @Setter
 	@Column(name = "event_is_current")
 	private boolean isCurrentEvent;
 
-	@Getter @Setter
 	@OneToMany(mappedBy = "orderEvent", fetch = FetchType.LAZY)
 	private Set<Order> orders;
 

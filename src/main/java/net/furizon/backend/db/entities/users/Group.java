@@ -8,19 +8,18 @@ import java.util.List;
 
 @Entity
 @Table(name = "groups")
+@Getter
 public class Group {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Getter
 	@Column(name="group_id", nullable = false)
 	private long id;
 
-	@Getter @Setter
+	@Setter
 	@Column(name = "group_name", nullable = false)
 	private String name;
 
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-	@Getter
 	private List<UserGroup> userGroupAssociations;
 
 }

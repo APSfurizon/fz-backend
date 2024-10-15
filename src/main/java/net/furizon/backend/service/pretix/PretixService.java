@@ -13,11 +13,12 @@ import net.furizon.backend.utils.pretix.QuestionType;
 import net.furizon.backend.utils.pretix.Sponsorship;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
-import net.furizon.backend.utils.Tuple;
 import net.furizon.backend.utils.configs.PretixConfig;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import org.springframework.data.util.Pair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class PretixService {
 		public Map<Integer, ExtraDays> extraDaysIds = new HashMap<>();
 
 		public Set<Integer> roomItemIds = new HashSet<>();
-		public Map<Integer, Tuple<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
+		public Map<Integer, Pair<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
 
 		public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
 		public Map<Integer, String> questionIdentifiers = new HashMap<>();
@@ -166,7 +167,7 @@ public class PretixService {
 						String[] sp = s.split("_");
 						String hotelName = sp[0];
 						int capacity = Integer.parseInt(sp[1]);
-						pretixIdsCache.roomVariationIds.put(variationId, new Tuple<>(capacity, hotelName));
+						pretixIdsCache.roomVariationIds.put(variationId, Pair.of(capacity, hotelName));
 					});
 					break;
 				}
@@ -240,9 +241,9 @@ public class PretixService {
 			} else
 
 			if(pCache.roomItemIds.contains(item)) {
-				Tuple<Integer, String> room = pCache.roomVariationIds.get(position.getInt("variation"));
-				roomCapacity = room.getA();
-				hotelLocation = room.getB();
+				Pair<Integer, String> room = pCache.roomVariationIds.get(position.getInt("variation"));
+				roomCapacity = room.getFirst();
+				hotelLocation = room.getSecond();
 			}
 		}
 
@@ -265,20 +266,20 @@ public class PretixService {
 	}
 
 	//TODO: Organizers and events can change slug and we have no other way to uniquely identify an event. Eventually: Create "something" which can move the events and related orders to a new one
-	private List<Tuple<String, String>> reloadOrganizers() throws TimeoutException {
-		List<Tuple<String, String>> organizers = new LinkedList<>();
-		getAllPages("organizers/", pretixConfig.getBaseUrl(), (res) -> organizers.add(new Tuple<>(res.getString("slug"), res.getString("public_url"))));
+	private List<Pair<String, String>> reloadOrganizers() throws TimeoutException {
+		List<Pair<String, String>> organizers = new LinkedList<>();
+		getAllPages("organizers/", pretixConfig.getBaseUrl(), (res) -> organizers.add(Pair.of(res.getString("slug"), res.getString("public_url"))));
 		return organizers;
 	}
 
 	public void reloadEvents() throws TimeoutException {
-		List<Tuple<String, String>> organizers = reloadOrganizers();
+		List<Pair<String, String>> organizers = reloadOrganizers();
 
 		//List<Event> ret = new LinkedList<>();
 		String currentEvent = pretixConfig.getCurrentEvent();
 		String currentOrg = pretixConfig.getOrganizer();
-		for(Tuple<String, String> organizerTuple : organizers){
-			String organizer = organizerTuple.getA();
+		for(Pair<String, String> organizerPair : organizers){
+			String organizer = organizerPair.getFirst();
 			getAllPages(TextUtil.url("organizers", organizer, "events"), pretixConfig.getBaseUrl(), (res) -> {
 
 				Map<String, String> names = new HashMap<>();
@@ -291,7 +292,7 @@ public class PretixService {
 					evt = new Event(
 							organizer,
 							res.getString("slug"),
-							organizerTuple.getB(),
+							organizerPair.getSecond(),
 							names,
 							res.getString("date_from"),
 							res.getString("date_to")

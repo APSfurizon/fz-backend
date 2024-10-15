@@ -26,6 +26,7 @@ public class Constants {
 
 	public static final String QUESTIONS_FILE_KEEP = "file:keep";
 
+	// Why? you have Spring Http Codes Class :)
 	public static final int[] STATUS_CODES_WITH_404 = new int[] { 200, 404 };
 	public static final int[] STATUS_CODES_ONLY_200 = new int[] { 200 };
 }

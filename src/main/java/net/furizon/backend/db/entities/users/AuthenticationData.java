@@ -1,52 +1,46 @@
 package net.furizon.backend.db.entities.users;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "authentications")
-public class  AuthenticationData {
+@Data
+public class AuthenticationData {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
+    @Setter(AccessLevel.NONE)
     @Column(name="authentication_id", nullable = false)
     private long id;
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    @Getter @Setter
     private User authenticationOwner;
 
     @Column(name="authentication_password", nullable = false)
-    @Getter @Setter
     private String passwordHash;
 
     @Column(name = "authentication_email", unique = true, nullable = false)
-    @Getter @Setter
     private String email;
 
     @Column(name = "authentication_email_verified")
-    @Getter @Setter
     private boolean emailVerified = false;
 
     @Column(name = "authentication_2fa_enabled")
-    @Getter @Setter
     private boolean is2faEnabled = false;
 
     @Column(name = "authentication_token")
-    @Getter @Setter
     private String totpToken = null;
 
     @Column(name = "authentication_from_oauth")
-    @Getter @Setter
     private boolean isOauthLogin = false;
 
     @Column(name = "authentication_disabled")
-    @Getter @Setter
     private boolean isLoginDisabled = false;
 
     @Column(name = "authentication_expired")
-    @Getter @Setter
     private boolean isLoginExpired = false;
 }

@@ -25,45 +25,50 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@Getter
 public final class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter @Column(name="user_id", nullable = false)
+    @Column(name="user_id", nullable = false)
     private long id;
 
-    @Getter @Column(name="user_secret", nullable = false)
+    @Column(name="user_secret", nullable = false)
     private String secret;
 
-    @Getter @Setter @Column(name = "user_first_name")
+    @Setter @Column(name = "user_first_name")
+    // TODO -> nullable?
     private String firstName;
 
-    @Getter @Setter @Column(name = "user_last_name")
+    @Setter @Column(name = "user_last_name")
+    // TODO -> nullable?
     private String lastName;
 
-    @Getter @Setter @Column(name = "user_locale")
+    @Setter @Column(name = "user_locale")
+    // TODO -> nullable?
     private String locale = "en";
 
     @OneToMany(mappedBy = "orderOwner")
-    @Getter
+    // TODO -> nullable?
     private Set<Order> orders;
 
     @OneToOne(mappedBy = "authenticationOwner")
-    @Getter @Setter
+    @Setter
+    // TODO -> nullable?
     private AuthenticationData authentication;
 
     @OneToMany(mappedBy = "user")
-    @Getter
+    // TODO -> nullable?
     private List<UserGroup> userGroupAssociations;
 
     @OneToMany(mappedBy = "mediaOwner")
-    @Getter
+    // TODO -> nullable?
     private List<Media> userMedias;
 
     @OneToMany(mappedBy = "fursuitOwner")
-    @Getter
+    // TODO -> nullable?
     private List<Fursuit> userFursuits;
 
     @OneToMany(mappedBy = "guest")
-    @Getter
+    // TODO -> nullable?
     private List<RoomGuest> userAsGuestList;
 
     public User(String secret) {
