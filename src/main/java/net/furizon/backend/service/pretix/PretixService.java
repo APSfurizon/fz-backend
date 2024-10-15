@@ -43,7 +43,7 @@ public class PretixService {
 	private PretixConfig pretixConfig;
 
 	@Autowired
-	public PretixService (IUserRepository userRepository, IEventRepository eventRepository, IOrderRepository orderRepository, PretixConfig pretixConfig) {
+	private PretixService (IUserRepository userRepository, IEventRepository eventRepository, IOrderRepository orderRepository, PretixConfig pretixConfig) {
 		this.userRepository = userRepository;
 		this.eventRepository = eventRepository;
 		this.orderRepository = orderRepository;
@@ -52,8 +52,8 @@ public class PretixService {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(PretixService.class);
 
-	private static PretixIdsMap pretixIdsCache = null;
-	private static class PretixIdsMap {
+	private PretixIdsMap pretixIdsCache = null;
+	private class PretixIdsMap {
 
 		public Set<Integer> ticketIds = new HashSet<>();
 		public Map<Integer, Integer> dailyIds = new HashMap<>(); //map id -> day idx
@@ -99,11 +99,11 @@ public class PretixService {
 		}
 	}
 
-	private void reloadOrders() throws TimeoutException {
+	private synchronized void reloadOrders() throws TimeoutException {
 		getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDB);
 	}
 
-	private void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
+	private synchronized void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
 		getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
 			int id = item.getInt("id");
 			String identifier = item.getString("identifier");
@@ -115,7 +115,7 @@ public class PretixService {
 				pretixIdsCache.questionSecret = id;
 		});
 	}
-	private void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
+	private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
 		TriConsumer<JSONObject, String, BiConsumer<Integer, String>> searchVariations = (item, prefix, fnc) -> {
 			JSONArray variations = item.getJSONArray("variations");
 			for(int i = 0; i < variations.length(); i++){
@@ -246,20 +246,21 @@ public class PretixService {
 			}
 		}
 
+		// Fetch Order by code
+		Order order = orderRepository.findByCodeAndEvent(code, pretixConfig.getCurrentEventObj().getSlug()).orElse(null);
 		if(hasTicket) {
 			// fetch user from db by userSecret
 			User usr = null;
-			if (!TextUtil.isEmpty(userSecret)) {
+			if (!TextUtil.isEmpty(userSecret))
 				usr = userRepository.findBySecret(userSecret).orElse(null);
-			}
-			// Fetch Order by code
-			Order order = orderRepository.findByCodeAndEvent(code, pretixConfig.getCurrentEventObj().getSlug()).orElse(null);
+
 			if (order == null) //order not found
 				order = new Order();
 			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, usr, pretixConfig.getCurrentEventObj(), answers);
 			orderRepository.save(order);
 		} else {
-			//TODO: delete order
+			if(order != null)
+				orderRepository.delete(order);
 		}
 	}
 
@@ -284,7 +285,6 @@ public class PretixService {
 				JSONObject obj = res.getJSONObject("name");
 				for(String s : obj.keySet()) names.put(s, obj.getString(s));
 
-				//TODO check first if the order already exists, if not create a new object, if yes, obtain it and set the parameters. Then save it back to the db\
 				String eventCode = res.getString("slug");
 				Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
 				if (evt == null) {
@@ -308,18 +308,18 @@ public class PretixService {
 	}
 
 
-	public static String translateQuestionId(int answerId){
+	public synchronized String translateQuestionId(int answerId){
 		return pretixIdsCache.questionIdentifiers.get(answerId);
 	}
-	public static QuestionType translateQuestionType(int answerId){
+	public synchronized QuestionType translateQuestionType(int answerId){
 		return pretixIdsCache.questionTypeIds.get(answerId);
 	}
-	public static QuestionType translateQuestionType(String questionIdentifier){
+	public synchronized QuestionType translateQuestionType(String questionIdentifier){
 		return pretixIdsCache.questionTypeIds.get(pretixIdsCache.questionIdentifiersToId.get(questionIdentifier));
 	}
 
 	//Push orders to pretix
-	public static void uploadToPretixDb(){
+	public synchronized void uploadToPretixDb(){
 		//TODO: I will need to store the full raw questions of every order to reupload them (diocane)
 	}
 
