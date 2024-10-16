@@ -1,7 +1,7 @@
 package net.furizon.jooq.infrastructure.query;
 
+import net.furizon.jooq.infrastructure.JooqOptional;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jooq.Record;
 import org.jooq.Select;
 
@@ -30,6 +30,6 @@ public interface SqlQuery {
     /**
      * @throws org.jooq.exception.DataAccessException if something went wrong executing the query
      */
-    @Nullable
-    <R extends Record, Q extends Select<R>> R fetchFirst(Q query);
+    @NotNull
+    <R extends Record, Q extends Select<R>> JooqOptional<R> fetchFirst(Q query);
 }

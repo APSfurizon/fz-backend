@@ -1,8 +1,8 @@
 package net.furizon.jooq.infrastructure.query;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.jooq.infrastructure.JooqOptional;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Select;
@@ -40,10 +40,10 @@ public class JooqSqlQuery implements SqlQuery {
         return query.fetchSingle();
     }
 
-    @Nullable
+    @NotNull
     @Override
-    public <R extends Record, Q extends Select<R>> R fetchFirst(Q query) {
+    public <R extends Record, Q extends Select<R>> JooqOptional<R> fetchFirst(Q query) {
         query.attach(dslContext.configuration());
-        return query.fetchAny();
+        return JooqOptional.of(query.fetchAny());
     }
 }
