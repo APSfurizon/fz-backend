@@ -18,13 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/authentication")
 @Slf4j
 public class AuthenticationController {
-
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login (HttpServletRequest request, HttpServletResponse response, @Valid @RequestBody UserLoginRequest body) {
+    public ResponseEntity<?> login(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        @Valid @RequestBody UserLoginRequest body
+    ) {
         userService.login(request, response, body);
-
+        // TODO -> Implement
+        return ResponseEntity.noContent().build();
     }
-
 }

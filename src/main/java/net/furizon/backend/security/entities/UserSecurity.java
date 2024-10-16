@@ -8,14 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 public class UserSecurity implements UserDetails {
-
-    @Getter
     private User user;
 
-    public UserSecurity() {}
+    public UserSecurity() {
+    }
 
-    public UserSecurity (User from) {
+    public UserSecurity(User from) {
         this.user = from;
     }
 
@@ -54,7 +54,7 @@ public class UserSecurity implements UserDetails {
         return !this.user.getAuthentication().isLoginDisabled();
     }
 
-    public boolean is2faEnabled () {
+    public boolean is2faEnabled() {
         return this.user.getAuthentication().is2faEnabled();
     }
 }

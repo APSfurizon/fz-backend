@@ -1,11 +1,21 @@
 package net.furizon.backend.db.entities.users.content;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
+
+// TODO -> Replace on JOOQ
 
 @Entity
 @Table(name = "fursuits")
@@ -14,7 +24,7 @@ public class Fursuit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
-    @Column(name="fursuit_id", nullable = false)
+    @Column(name = "fursuit_id", nullable = false)
     @Setter(AccessLevel.NONE)
     private long id;
 

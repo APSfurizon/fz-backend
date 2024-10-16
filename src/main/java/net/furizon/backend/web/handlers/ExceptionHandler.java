@@ -1,7 +1,7 @@
 package net.furizon.backend.web.handlers;
 
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.web.entities.HttpErrorResponse;
-import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,16 +16,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO -> Better implement it another way
+@Slf4j
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
-
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ExceptionHandler.class);
-
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException ex,
+        HttpHeaders headers,
+        HttpStatusCode status,
+        WebRequest request
+    ) {
         Map<String, String> errors = new HashMap<String, String>();
         List<String> generalErrors = new ArrayList<String>();
-        ex.getBindingResult().getAllErrors().forEach((error)-> {
-            if (error instanceof FieldError ferr){
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            if (error instanceof FieldError ferr) {
                 String fieldName = ferr.getField();
                 String errorMessage = ferr.getDefaultMessage();
                 errors.put(fieldName, errorMessage);

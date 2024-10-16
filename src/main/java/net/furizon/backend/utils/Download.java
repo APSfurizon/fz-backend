@@ -1,22 +1,6 @@
 package net.furizon.backend.utils;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HostnameVerifier;
-
-import java.util.Objects;
-
+import lombok.ToString;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -31,7 +15,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -53,12 +41,27 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.SSLContexts;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+
+import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /*
  * GNU GENERAL PUBLIC LICENSE
@@ -738,356 +741,433 @@ Public License instead of this License.  But first, please read
 
  */
 
+// If it is an HttpClient class, why it calls Download?
+// Anyway, better replace it
 public class Download {
-	
-	public static final int DEFAULT_MAX_CONNECTIONS = 20;
-	public static final int DEFAULT_TIMEOUT = 4000;
-	private CookieStore cookieStore = new BasicCookieStore();
-	private CredentialsProvider provider = new BasicCredentialsProvider();
-	private PoolingHttpClientConnectionManager connManager;
-	private RequestConfig defaultParams;
-	private HttpHost defaultProxy;
-	private int defaultTimeout;
-	private HttpClient client;
-	
-	public Download() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		this(DEFAULT_TIMEOUT, null, null, DEFAULT_MAX_CONNECTIONS, true);
-	}
-	public Download(int defaultTimeout, Map<String, String> defaultHeaders, HttpHost defaultProxy, int maxConnections, boolean checkSSL) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		 Builder requestConfigBuilder = RequestConfig.custom()
-					.setConnectionRequestTimeout(defaultTimeout)
-					.setConnectTimeout(defaultTimeout)
-					.setSocketTimeout(defaultTimeout)
-					.setRedirectsEnabled(true);
-		this.defaultTimeout = defaultTimeout;
-		if(defaultProxy != null) {
-			//App.LOGGER.config("Starting download client with a proxy " + proxy);
-			requestConfigBuilder.setProxy(defaultProxy);
-			this.defaultProxy = defaultProxy;
-		}
-		defaultParams = requestConfigBuilder.build();
-		
-		HttpClientBuilder httpClientBuilder = HttpClients.custom()
-					.setDefaultCredentialsProvider(provider)
-					.setDefaultRequestConfig(defaultParams)
-					.setDefaultCookieStore(cookieStore);
-		if(defaultHeaders != null) {
-			List<Header> hs = new LinkedList<Header>();
-			for(Entry<String, String> e : defaultHeaders.entrySet())
-				hs.add(new BasicHeader(e.getKey(), e.getValue()));
-			httpClientBuilder.setDefaultHeaders(hs);
-		}
-		SSLConnectionSocketFactory scsf = null;
-		if(!checkSSL) {
-			//System.out.println("Starting download client without checking ssl certificates");
-			scsf = new SSLConnectionSocketFactory(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build(), NoopHostnameVerifier.INSTANCE);
-			httpClientBuilder.setSSLSocketFactory(scsf);
-			httpClientBuilder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
-			httpClientBuilder.setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build());
-		} else {
-			HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier(PublicSuffixMatcherLoader.getDefault());
-			scsf = new SSLConnectionSocketFactory(SSLContexts.createDefault(), hostnameVerifier);
-		}
-		connManager = new PoolingHttpClientConnectionManager(
-			RegistryBuilder.<ConnectionSocketFactory>create().register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", scsf).build(),
-			null,
-			null,
-			null, //DNS to null I suppose?
-			-1l,
-			TimeUnit.MILLISECONDS);
-		connManager.setDefaultMaxPerRoute(maxConnections);		
-		connManager.setMaxTotal(maxConnections);
-		httpClientBuilder.setConnectionManager(connManager);
-		
-		client = httpClientBuilder.build();
-	}
+    public static final int DEFAULT_MAX_CONNECTIONS = 20;
+    public static final int DEFAULT_TIMEOUT = 4000;
+    private CookieStore cookieStore = new BasicCookieStore();
+    private CredentialsProvider provider = new BasicCredentialsProvider();
+    private PoolingHttpClientConnectionManager connManager;
+    private RequestConfig defaultParams;
+    private HttpHost defaultProxy;
+    private int defaultTimeout;
+    private HttpClient client;
 
-	public enum RequestMethod {GET, POST, PATCH}
-	
-	public static class Request {
-		private RequestMethod method = RequestMethod.GET;
-		private boolean redirectsDisabled;
-		private Map<String, String> headers = new LinkedHashMap<String, String>();
-		private List<NameValuePair> bodyParams = new ArrayList<NameValuePair>();
-		private Download originalDwn;
-		private HttpEntity body;
-		private HttpHost proxy;
-		private int timeout;
-		private String url;
-		
-		public Request(String url) {
-			this.url = url;
-		}
-		public Request addHeaders(Map<String, String> headers) {
-			if(headers != null)
-				this.headers.putAll(headers);
-			return this;
-		}
-		public Request setHeader(String name, String value) {
-			headers.put(name, value);
-			return this;
-		}
-		public Request setBodyParam(String name, String value) {
-			bodyParams.add(new BasicNameValuePair(name, value));
-			return this;
-		}
-		public Request setBody(Object body) throws UnsupportedEncodingException {
-			switch (body) {
-				case String s -> setBodyString(s);
-				case byte[] bytes -> setBodyRaw(bytes);
-				case JSONObject jsonObject -> setJson(jsonObject);
-				case null, default -> throw new RuntimeException("Unsupported object type");
-			}
-			return this;
-		}
-		public Request setPostBody(Object body, ContentType contentType){
-			switch (body) {
-				case String s -> setBodyString(s, contentType);
-				case byte[] bytes -> setBodyRaw(bytes, contentType);
-				case JSONObject jsonObject -> setJson(jsonObject, contentType);
-				case null, default -> throw new RuntimeException("Unsupported object type");
-			}
-			return this;
-		}
-		public Request setBodyString(String body) throws UnsupportedEncodingException {
-			this.body = new StringEntity(body);
-			return this;
-		}
-		public Request setBodyString(String body, ContentType contentType) {
-			this.body = new StringEntity(body, contentType);
-			headers.put(HttpHeaders.CONTENT_TYPE, contentType.toString());
-			return this;
-		}
-		public Request setBodyRaw(byte[] body) {
-			this.body = new ByteArrayEntity(body, ContentType.APPLICATION_OCTET_STREAM);
-			//headers.put("Content-type", contentType.toString());
-			return this;
-		}
-		public Request setBodyRaw(byte[] body, ContentType contentType) {
-			this.body = new ByteArrayEntity(body, contentType);
-			//headers.put("Content-type", contentType.toString());
-			return this;
-		}
-		public Request setJson(JSONObject json) {
-			body = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
-			return this;
-		}
-		public Request setJson(JSONObject json, ContentType contentType) {
-			body = new StringEntity(json.toString(), contentType);
-			return this;
-		}
-		public Request setTimeout(int timeout) {
-			this.timeout = timeout;
-			return this;
-		}
-		public Request setProxy(HttpHost proxy) {
-			this.proxy = proxy;
-			return this;
-		}
-		public Request setGet() {
-			method = RequestMethod.GET;
-			return this;
-		}
-		public Request setPost() {
-			method = RequestMethod.POST;
-			return this;
-		}
-		public Request setPatch(){
-			method = RequestMethod.PATCH;
-			return this;
-		}
-		public Request setMethod(RequestMethod method){
-			this.method = method;
-			return this;
-		}
-		public Request disableRedirects() {
-			redirectsDisabled = true;
-			return this;
-		}
-		public Request enableRedirects() {
-			redirectsDisabled = false;
-			return this;
-		}
-		
-		private Request setOriginalDwn(Download dwn) {
-			timeout = dwn.defaultTimeout;
-			originalDwn = dwn;
-			return this;
-		}
-		public Response go() throws IOException {
-			return switch(method){
-				case GET -> originalDwn.get(this);
-				case POST -> originalDwn.post(this);
-				case PATCH -> originalDwn.patch(this);
-			};
-		}
-		
-		private void setHeaders(HttpRequestBase request) {
-			for(Entry<String, String> e : headers.entrySet()) {
-				request.setHeader(e.getKey(), e.getValue());
-			}
-		}
-		private HttpEntity getEntity() throws UnsupportedEncodingException {
-			if(body != null)
-				return body;
-			return new UrlEncodedFormEntity(bodyParams, "UTF-8");
-		}
-	}
-	public static class Response {
-		private int respCode;
-		private ArrayList<Header> respHeaders = new ArrayList<Header>();
-		private byte[] response;
-		private String respStr;
-		private String landingUrl;
-		private JSONObject respJson;
-		
-		@Override
-		public String toString() {
-			return "Response [respCode=" + respCode + ", respHeaders=" + respHeaders + ", landingUrl=" + landingUrl + "]";
-		}
+    public Download() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        this(DEFAULT_TIMEOUT, null, null, DEFAULT_MAX_CONNECTIONS, true);
+    }
 
-		private Response(HttpResponse response, HttpEntity responseEntity) throws IOException {
-			respCode = response.getStatusLine().getStatusCode();
-			setResponseBody(responseEntity);
-			setHeaders(response.getAllHeaders());
-		}
-		
-		public int getStatusCode() {
-			return respCode;
-		}
-		public String getHeader(String name) {
-			return getHeader(name, 0);
-		}
-		public String getHeader(String name, int headerNo) {
-			int found = 0;
-			for(Header h : respHeaders)
-				if(h.getName().equalsIgnoreCase(name))
-					if(found++ == headerNo)
-						return h.getValue();
-			return null;
-		}
-		public String getLandingUrl() {
-			return landingUrl;
-		}
-		public byte[] getResponseRaw() {
-			return response;
-		}
-		public String getResponse() {
-			if(respStr == null)
-				respStr = new String(response);
-			return respStr;
-		}
-		public JSONObject getResponseJson() {
-			if(respJson == null)
-				respJson = new JSONObject(getResponse());
-			return respJson;
-		}
-		
-		private void setHeaders(Header[] headers) {
-			for(Header h : headers)
-				respHeaders.add(h);
-		}
-		private void setResponseBody(HttpEntity resp) throws IOException {
-			response = EntityUtils.toByteArray(resp);
-			EntityUtils.consume(resp);
-		}
-	}
-	
-	private Response doRequest(Request req, HttpRequestBase httpReq) throws IOException {
-		boolean updateTimeout = req.timeout != defaultTimeout;
-		boolean updateProxy = req.proxy != null && !Objects.equals(req.proxy, defaultProxy);
-		if(updateTimeout || updateProxy || req.redirectsDisabled) {
-			Builder requestConfigBuilder = RequestConfig.custom();
-			if(updateTimeout)
-				requestConfigBuilder.setConnectionRequestTimeout(req.timeout).setConnectTimeout(req.timeout).setSocketTimeout(req.timeout);
-			if(updateProxy)
-				requestConfigBuilder.setProxy(req.proxy);
-			if(req.redirectsDisabled)
-				requestConfigBuilder.setRedirectsEnabled(false);
-			httpReq.setConfig(requestConfigBuilder.build());
-		}
-		req.setHeaders(httpReq);
-		HttpContext context = new BasicHttpContext();
+    public Download(
+        int defaultTimeout,
+        Map<String, String>
+            defaultHeaders,
+        HttpHost defaultProxy,
+        int maxConnections,
+        boolean checkSsl
+    ) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        Builder requestConfigBuilder = RequestConfig.custom()
+            .setConnectionRequestTimeout(defaultTimeout)
+            .setConnectTimeout(defaultTimeout)
+            .setSocketTimeout(defaultTimeout)
+            .setRedirectsEnabled(true);
+        this.defaultTimeout = defaultTimeout;
+        if (defaultProxy != null) {
+            //App.LOGGER.config("Starting download client with a proxy " + proxy);
+            requestConfigBuilder.setProxy(defaultProxy);
+            this.defaultProxy = defaultProxy;
+        }
+        defaultParams = requestConfigBuilder.build();
+
+        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+            .setDefaultCredentialsProvider(provider)
+            .setDefaultRequestConfig(defaultParams)
+            .setDefaultCookieStore(cookieStore);
+        if (defaultHeaders != null) {
+            List<Header> hs = new LinkedList<Header>();
+            for (Entry<String, String> e : defaultHeaders.entrySet()) {
+                hs.add(new BasicHeader(e.getKey(), e.getValue()));
+            }
+            httpClientBuilder.setDefaultHeaders(hs);
+        }
+        SSLConnectionSocketFactory scsf = null;
+        if (!checkSsl) {
+            //System.out.println("Starting download client without checking ssl certificates");
+            scsf = new SSLConnectionSocketFactory(
+                SSLContexts.custom()
+                    .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+                    .build(),
+                NoopHostnameVerifier.INSTANCE
+            );
+            httpClientBuilder.setSSLSocketFactory(scsf);
+            httpClientBuilder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+            httpClientBuilder.setSSLContext(
+                new SSLContextBuilder()
+                    .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+                    .build()
+            );
+        } else {
+            HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier(PublicSuffixMatcherLoader.getDefault());
+            scsf = new SSLConnectionSocketFactory(SSLContexts.createDefault(), hostnameVerifier);
+        }
+        connManager = new PoolingHttpClientConnectionManager(
+            RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", scsf)
+                .build(),
+            null,
+            null,
+            null, //DNS to null I suppose?
+            -1L,
+            TimeUnit.MILLISECONDS
+        );
+        connManager.setDefaultMaxPerRoute(maxConnections);
+        connManager.setMaxTotal(maxConnections);
+        httpClientBuilder.setConnectionManager(connManager);
+
+        client = httpClientBuilder.build();
+    }
+
+    public enum RequestMethod {
+        GET,
+        POST,
+        PATCH
+    }
+
+    public static class Request {
+        private RequestMethod method = RequestMethod.GET;
+        private boolean redirectsDisabled;
+        private Map<String, String> headers = new LinkedHashMap<String, String>();
+        private List<NameValuePair> bodyParams = new ArrayList<NameValuePair>();
+        private Download originalDwn;
+        private HttpEntity body;
+        private HttpHost proxy;
+        private int timeout;
+        private String url;
+
+        public Request(String url) {
+            this.url = url;
+        }
+
+        public Request addHeaders(Map<String, String> headers) {
+            if (headers != null) {
+                this.headers.putAll(headers);
+            }
+            return this;
+        }
+
+        public Request setHeader(String name, String value) {
+            headers.put(name, value);
+            return this;
+        }
+
+        public Request setBodyParam(String name, String value) {
+            bodyParams.add(new BasicNameValuePair(name, value));
+            return this;
+        }
+
+        public Request setBody(Object body) throws UnsupportedEncodingException {
+            switch (body) {
+                case String s -> setBodyString(s);
+                case byte[] bytes -> setBodyRaw(bytes);
+                case JSONObject jsonObject -> setJson(jsonObject);
+                case null, default -> throw new RuntimeException("Unsupported object type");
+            }
+            return this;
+        }
+
+        public Request setPostBody(Object body, ContentType contentType) {
+            switch (body) {
+                case String s -> setBodyString(s, contentType);
+                case byte[] bytes -> setBodyRaw(bytes, contentType);
+                case JSONObject jsonObject -> setJson(jsonObject, contentType);
+                case null, default -> throw new RuntimeException("Unsupported object type");
+            }
+            return this;
+        }
+
+        public Request setBodyString(String body) throws UnsupportedEncodingException {
+            this.body = new StringEntity(body);
+            return this;
+        }
+
+        public Request setBodyString(String body, ContentType contentType) {
+            this.body = new StringEntity(body, contentType);
+            headers.put(HttpHeaders.CONTENT_TYPE, contentType.toString());
+            return this;
+        }
+
+        public Request setBodyRaw(byte[] body) {
+            this.body = new ByteArrayEntity(body, ContentType.APPLICATION_OCTET_STREAM);
+            //headers.put("Content-type", contentType.toString());
+            return this;
+        }
+
+        public Request setBodyRaw(byte[] body, ContentType contentType) {
+            this.body = new ByteArrayEntity(body, contentType);
+            //headers.put("Content-type", contentType.toString());
+            return this;
+        }
+
+        public Request setJson(JSONObject json) {
+            body = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
+            return this;
+        }
+
+        public Request setJson(JSONObject json, ContentType contentType) {
+            body = new StringEntity(json.toString(), contentType);
+            return this;
+        }
+
+        public Request setTimeout(int timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        public Request setProxy(HttpHost proxy) {
+            this.proxy = proxy;
+            return this;
+        }
+
+        public Request setGet() {
+            method = RequestMethod.GET;
+            return this;
+        }
+
+        public Request setPost() {
+            method = RequestMethod.POST;
+            return this;
+        }
+
+        public Request setPatch() {
+            method = RequestMethod.PATCH;
+            return this;
+        }
+
+        public Request setMethod(RequestMethod method) {
+            this.method = method;
+            return this;
+        }
+
+        public Request disableRedirects() {
+            redirectsDisabled = true;
+            return this;
+        }
+
+        public Request enableRedirects() {
+            redirectsDisabled = false;
+            return this;
+        }
+
+        private Request setOriginalDwn(Download dwn) {
+            timeout = dwn.defaultTimeout;
+            originalDwn = dwn;
+            return this;
+        }
+
+        public Response go() throws IOException {
+            return switch (method) {
+                case GET -> originalDwn.get(this);
+                case POST -> originalDwn.post(this);
+                case PATCH -> originalDwn.patch(this);
+            };
+        }
+
+        private void setHeaders(HttpRequestBase request) {
+            for (Entry<String, String> e : headers.entrySet()) {
+                request.setHeader(e.getKey(), e.getValue());
+            }
+        }
+
+        private HttpEntity getEntity() throws UnsupportedEncodingException {
+            if (body != null) {
+                return body;
+            }
+            return new UrlEncodedFormEntity(bodyParams, "UTF-8");
+        }
+    }
+
+    @ToString
+    public static class Response {
+        private int respCode;
+        private ArrayList<Header> respHeaders = new ArrayList<Header>();
+        private byte[] response;
+        private String respStr;
+        private String landingUrl;
+        private JSONObject respJson;
+
+        private Response(HttpResponse response, HttpEntity responseEntity) throws IOException {
+            respCode = response.getStatusLine().getStatusCode();
+            setResponseBody(responseEntity);
+            setHeaders(response.getAllHeaders());
+        }
+
+        public int getStatusCode() {
+            return respCode;
+        }
+
+        public String getHeader(String name) {
+            return getHeader(name, 0);
+        }
+
+        public String getHeader(String name, int headerNo) {
+            int found = 0;
+            for (Header h : respHeaders) {
+                if (h.getName().equalsIgnoreCase(name)) {
+                    if (found++ == headerNo) {
+                        return h.getValue();
+                    }
+                }
+            }
+            return null;
+        }
+
+        public String getLandingUrl() {
+            return landingUrl;
+        }
+
+        public byte[] getResponseRaw() {
+            return response;
+        }
+
+        public String getResponse() {
+            if (respStr == null) {
+                respStr = new String(response);
+            }
+            return respStr;
+        }
+
+        public JSONObject getResponseJson() {
+            if (respJson == null) {
+                respJson = new JSONObject(getResponse());
+            }
+            return respJson;
+        }
+
+        private void setHeaders(Header[] headers) {
+            for (Header h : headers) {
+                respHeaders.add(h);
+            }
+        }
+
+        private void setResponseBody(HttpEntity resp) throws IOException {
+            response = EntityUtils.toByteArray(resp);
+            EntityUtils.consume(resp);
+        }
+    }
+
+    private Response doRequest(Request req, HttpRequestBase httpReq) throws IOException {
+        boolean updateTimeout = req.timeout != defaultTimeout;
+        boolean updateProxy = req.proxy != null && !Objects.equals(req.proxy, defaultProxy);
+        if (updateTimeout || updateProxy || req.redirectsDisabled) {
+            Builder requestConfigBuilder = RequestConfig.custom();
+            if (updateTimeout) {
+                requestConfigBuilder.setConnectionRequestTimeout(req.timeout)
+                    .setConnectTimeout(req.timeout)
+                    .setSocketTimeout(req.timeout);
+            }
+            if (updateProxy) {
+                requestConfigBuilder.setProxy(req.proxy);
+            }
+            if (req.redirectsDisabled) {
+                requestConfigBuilder.setRedirectsEnabled(false);
+            }
+            httpReq.setConfig(requestConfigBuilder.build());
+        }
+        req.setHeaders(httpReq);
+        HttpContext context = new BasicHttpContext();
         HttpResponse response = client.execute(httpReq, context);
         HttpUriRequest currentReq = (HttpUriRequest) context.getAttribute(HttpCoreContext.HTTP_REQUEST);
         HttpHost currentHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-        String currentUrl = (currentReq.getURI().isAbsolute()) ? currentReq.getURI().toString() : (currentHost.toURI() + currentReq.getURI());
-		HttpEntity entity = response.getEntity();
-		if (entity != null) { 
-			Response resp = new Response(response, entity);
-			resp.landingUrl = currentUrl;
-			httpReq.releaseConnection();
-		    return resp;
-		}
-		return null;
-	}
-	public Request get(String url) {
-		return new Request(url).setGet().setOriginalDwn(this);
-	}
-	public Request post(String url) {
-		return new Request(url).setPost().setOriginalDwn(this);
-	}
-	public Request patch(String url) {
-		return new Request(url).setPatch().setOriginalDwn(this);
-	}
-	
-	public Response get(Request req) throws IOException {
-		HttpGet httpGet = new HttpGet(req.url);
-		return doRequest(req, httpGet);
-	}
-	public Response post(Request req) throws IOException {
-		HttpPost httpPost = new HttpPost(req.url);
-		httpPost.setEntity(req.getEntity());
-		return doRequest(req, httpPost);
-	}
-	public Response patch(Request req) throws IOException {
-		HttpPatch httpPatch = new HttpPatch(req.url);
-		httpPatch.setEntity(req.getEntity());
-		return doRequest(req, httpPatch);
-	}
+        String currentUrl = (currentReq.getURI().isAbsolute())
+            ? currentReq.getURI().toString()
+            : (currentHost.toURI() + currentReq.getURI());
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            Response resp = new Response(response, entity);
+            resp.landingUrl = currentUrl;
+            httpReq.releaseConnection();
+            return resp;
+        }
+        return null;
+    }
 
-	public Download setLogin(String username, String password) {
+    public Request get(String url) {
+        return new Request(url).setGet().setOriginalDwn(this);
+    }
+
+    public Response get(Request req) throws IOException {
+        HttpGet httpGet = new HttpGet(req.url);
+        return doRequest(req, httpGet);
+    }
+
+    public Request post(String url) {
+        return new Request(url).setPost().setOriginalDwn(this);
+    }
+
+    public Response post(Request req) throws IOException {
+        HttpPost httpPost = new HttpPost(req.url);
+        httpPost.setEntity(req.getEntity());
+        return doRequest(req, httpPost);
+    }
+
+    public Request patch(String url) {
+        return new Request(url).setPatch().setOriginalDwn(this);
+    }
+
+    public Response patch(Request req) throws IOException {
+        HttpPatch httpPatch = new HttpPatch(req.url);
+        httpPatch.setEntity(req.getEntity());
+        return doRequest(req, httpPatch);
+    }
+
+    public Download setLogin(String username, String password) {
         provider.setCredentials(
-                AuthScope.ANY,
-                new UsernamePasswordCredentials(username, password)
+            AuthScope.ANY,
+            new UsernamePasswordCredentials(username, password)
         );
         return this;
-	}
-	
-	public Download setCookie(String key, String value, String domain, String path) {
-		BasicClientCookie cookie = new BasicClientCookie(key, value);
-		cookie.setPath(path);
-		cookie.setDomain(domain);
-		cookieStore.addCookie(cookie);
-		return this;
-	}
-	public String getCookie(String name) {
-		return getCookieObj(name, 0).getValue();
-	}
-	public Cookie getCookieObj(String name, int cookieNo) {
-		List<Cookie> cookies = cookieStore.getCookies();
-		int found = 0;
-		for(Cookie c : cookies)
-			if(c.getName().equalsIgnoreCase(name))
-				if(found++ == cookieNo)
-					return c;
-		return null;
-	}
-	public List<Cookie> getCookies(){
-		return new ArrayList<Cookie>(cookieStore.getCookies());
-	}
-	
-	@SuppressWarnings("unused")
-	private static void copyrightTM(){
-		System.out.println("Download engine made by https://stranck.ovh (c)\n"
-						 + "\n"
-						 + "Need help? Contact me!\n"
-						 + "Telegram channel: https://t.me/Stranck\n"
-						 + "Telegram user: https://t.me/LucaStranck\n"
-						 + "YouTube channel: https://www.youtube.com/channel/UCmMWUz0QZ7WhIBx-1Dz-IGg\n"
-						 + "Twitter: https://twitter.com/LStranck https://twitter.com/stranckV2\n"
-						 + "Instagram: https://www.instagram.com/stranck/\n"
-						 + "Github: https://github.com/stranck\n"
-						 + "Pastebin: https://pastebin.com/u/Stranck\n");
-	}
+    }
+
+    public Download setCookie(String key, String value, String domain, String path) {
+        BasicClientCookie cookie = new BasicClientCookie(key, value);
+        cookie.setPath(path);
+        cookie.setDomain(domain);
+        cookieStore.addCookie(cookie);
+        return this;
+    }
+
+    public String getCookie(String name) {
+        return getCookieObj(name, 0).getValue();
+    }
+
+    public Cookie getCookieObj(String name, int cookieNo) {
+        List<Cookie> cookies = cookieStore.getCookies();
+        int found = 0;
+        for (Cookie c : cookies) {
+            if (c.getName().equalsIgnoreCase(name)) {
+                if (found++ == cookieNo) {
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Cookie> getCookies() {
+        return new ArrayList<Cookie>(cookieStore.getCookies());
+    }
+
+    @SuppressWarnings("unused")
+    private static void copyright() {
+        System.out.println("Download engine made by https://stranck.ovh (c)\n"
+            + "\n"
+            + "Need help? Contact me!\n"
+            + "Telegram channel: https://t.me/Stranck\n"
+            + "Telegram user: https://t.me/LucaStranck\n"
+            + "YouTube channel: https://www.youtube.com/channel/UCmMWUz0QZ7WhIBx-1Dz-IGg\n"
+            + "Twitter: https://twitter.com/LStranck https://twitter.com/stranckV2\n"
+            + "Instagram: https://www.instagram.com/stranck/\n"
+            + "Github: https://github.com/stranck\n"
+            + "Pastebin: https://pastebin.com/u/Stranck\n");
+    }
 }
