@@ -5,7 +5,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.utils.TextUtil;
+import org.json.JSONObject;
 
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,15 +27,18 @@ public final class Event {
 	@Column(name = "event_public_url")
 	private String publicUrl;
 
-	@Transient //TODO transform to string
+	@Transient
 	@Setter(AccessLevel.NONE)
-	private Map<String, String> eventName; //map lang -> name
+	@Getter(AccessLevel.NONE)
+	private Map<String, String> eventNames;
+	private String eventNamesRaw;//map lang -> name
 
 	@Column(name = "event_date_from")
-	private String dateFrom;
-
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dateFrom;
 	@Column(name = "event_date_end")
-	private String dateEnd;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dateEnd;
 
 	@Column(name = "event_is_current")
 	private boolean isCurrentEvent;
@@ -39,16 +46,24 @@ public final class Event {
 	@OneToMany(mappedBy = "orderEvent", fetch = FetchType.LAZY)
 	private Set<Order> orders;
 
-	public Event() {
-
-	}
+	public Event() {}
 
 	public Event(String organizer, String eventCode, String publicUrl, Map<String, String> eventName, String dateFrom, String dateEnd){
 		slug = getSlug(organizer, eventCode);
 		this.publicUrl = TextUtil.leadingSlash(publicUrl) + eventCode;
-		this.eventName = eventName;
-		this.dateFrom = dateFrom;
-		this.dateEnd = dateEnd;
+		this.eventNames = eventName;
+		this.eventNamesRaw = new JSONObject(eventName).toString();
+		this.dateFrom = Date.from(ZonedDateTime.parse(dateFrom).toInstant());
+		this.dateEnd = Date.from(ZonedDateTime.parse(dateEnd).toInstant());
+	}
+
+	public String getEventName(String lang){
+		if(eventNames == null){
+			eventNames = new HashMap<>();
+			JSONObject obj = new JSONObject(eventNamesRaw);
+			for(String s : obj.keySet()) eventNames.put(s, obj.getString(s));
+		}
+		return eventNames.get(lang);
 	}
 
 	public void setSlug (String organizer, String event) {

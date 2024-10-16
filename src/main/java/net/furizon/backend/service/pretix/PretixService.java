@@ -7,15 +7,13 @@ import net.furizon.backend.db.repositories.pretix.IEventRepository;
 import net.furizon.backend.db.repositories.pretix.IOrderRepository;
 import net.furizon.backend.db.repositories.users.IUserRepository;
 import net.furizon.backend.utils.TextUtil;
-import net.furizon.backend.utils.pretix.Constants;
-import net.furizon.backend.utils.pretix.ExtraDays;
-import net.furizon.backend.utils.pretix.QuestionType;
-import net.furizon.backend.utils.pretix.Sponsorship;
+import net.furizon.backend.utils.pretix.*;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.configs.PretixConfig;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.springframework.data.util.Pair;
@@ -188,6 +186,7 @@ public class PretixService {
 
 		String code = orderData.getString("code");
 		String secret = orderData.getString("secret");
+		OrderStatus status = OrderStatus.fromCode(orderData.getString("status"));
 
 		Set<Integer> days = new HashSet<>();
 		Sponsorship sponsorship = Sponsorship.NONE;
@@ -200,31 +199,28 @@ public class PretixService {
 		int roomCapacity = 0;
 
 		JSONArray positions = orderData.getJSONArray("positions");
-		for(int i = 0; i < positions.length(); i++){
+		if(positions.length() == 0) status = OrderStatus.CANCELED;
+		for(int i = 0; i < positions.length(); i++) {
 			JSONObject position = positions.getJSONObject(i);
 			int item = position.getInt("item");
 
-			if(pCache.ticketIds.contains(item)){
+			if (pCache.ticketIds.contains(item)) {
 				hasTicket = true;
 				answersMainPositionId = position.getInt("id");
 				answers = position.getJSONArray("answers");
-				for(int j = 0; j < answers.length(); j++){
+				for (int j = 0; j < answers.length(); j++) {
 					JSONObject answer = answers.getJSONObject(j);
 					int qId = answer.getInt("question");
-					if(translateQuestionType(qId) == QuestionType.FILE)
-						answer.put("answer", Constants.QUESTIONS_FILE_KEEP); //TODO: check if changes are reflected in original array (they should)
-					if(qId == pCache.questionSecret)
+					if (translateQuestionType(qId) == QuestionType.FILE)
+						answer.put("answer", Constants.QUESTIONS_FILE_KEEP);
+					if (qId == pCache.questionSecret)
 						userSecret = answer.getString("answer");
 				}
-			} else
-
-			if(pCache.dailyIds.containsKey(item))
+			} else if (pCache.dailyIds.containsKey(item)) {
 				days.add(pCache.dailyIds.get(item));
-			else
-
-			if(pCache.membershipCardIds.contains(item))
+			} else if (pCache.membershipCardIds.contains(item)) {
 				membership = true;
-			else
+			} else
 
 			if(pCache.sponsorshipItemIds.contains(item)) {
 				Sponsorship s = pCache.sponsorshipVariationIds.get(position.getInt("variation"));
@@ -249,7 +245,7 @@ public class PretixService {
 
 		// Fetch Order by code
 		Order order = orderRepository.findByCodeAndEvent(code, pretixConfig.getCurrentEventObj().getSlug()).orElse(null);
-		if(hasTicket) {
+		if(hasTicket && (status == OrderStatus.PENDING || status == OrderStatus.PAID)) {
 			// fetch user from db by userSecret
 			User usr = null;
 			if (!TextUtil.isEmpty(userSecret))
@@ -257,7 +253,7 @@ public class PretixService {
 
 			if (order == null) //order not found
 				order = new Order();
-			order.update(code, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, usr, pretixConfig.getCurrentEventObj(), answers);
+			order.update(code, status, secret, answersMainPositionId, days, sponsorship, extraDays, roomCapacity, hotelLocation, membership, usr, pretixConfig.getCurrentEventObj(), answers);
 			orderRepository.save(order);
 		} else {
 			if(order != null)
@@ -320,8 +316,27 @@ public class PretixService {
 	}
 
 	//Push orders to pretix
-	public synchronized void uploadToPretixDb(){
-		//TODO: I will need to store the full raw questions of every order to reupload them (diocane)
+	public synchronized void submitAnswersToPretix(Order order) throws TimeoutException {
+		JSONObject payload = new JSONObject();
+		JSONArray ans = order.getOrderStatus() == OrderStatus.CANCELED ? new JSONArray() : new JSONArray(order.getAnswersRaw());
+		payload.put("answers", ans);
+
+		Download.Response res = doPatch("orderpositions/" + order.getAnswersMainPositionId(), payload, pretixConfig.getEventUrl(), null);
+
+		if(res.getStatusCode() != 200){
+			try {
+				JSONObject d = res.getResponseJson();
+				if (d.has("answers")) {
+					JSONArray errs = d.getJSONArray("answers");
+					for(int i = 0; i < errs.length() && i < ans.length(); i++)
+						LOGGER.error("[ANSWERS SENDING] ERROR ON '" + ans.getString(0) + "': " + errs.getString(i));
+				} else LOGGER.error("[ANSWERS SENDING] GENERIC ERROR. Response: " + res.toString());
+			} catch(JSONException e) {
+				throw new RuntimeException("There has been an error while updating this answers.");
+			}
+		}
+
+		order.resetFileUploadAnswers(this);
 	}
 
 	private void getAllPages(String url, String baseUrl, Consumer<JSONObject> elementFnc) throws TimeoutException {

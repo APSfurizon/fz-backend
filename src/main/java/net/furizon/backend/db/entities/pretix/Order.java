@@ -6,13 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.service.pretix.PretixService;
-import net.furizon.backend.utils.pretix.Constants;
-import net.furizon.backend.utils.pretix.ExtraDays;
-import net.furizon.backend.utils.pretix.QuestionType;
-import net.furizon.backend.utils.pretix.Sponsorship;
+import net.furizon.backend.utils.pretix.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Entity
@@ -22,6 +22,8 @@ public class Order {
 
 	@Id
 	private String code;
+
+	private OrderStatus orderStatus;
 
     @Getter(AccessLevel.NONE)
 	private long dailyDays = 0L; //bitmask of days
@@ -74,9 +76,9 @@ public class Order {
 				case LIST_SINGLE_CHOICE -> value;
 				case LIST_MULTIPLE_CHOICE -> value;
 				case FILE -> Constants.QUESTIONS_FILE_KEEP;
-				case DATE -> value; //TODO convert
-				case TIME -> value; //TODO convert
-				case DATE_TIME -> value; //TODO convert
+				case DATE -> LocalDate.parse(value);
+				case TIME -> LocalTime.parse(value);
+				case DATE_TIME -> ZonedDateTime.parse(value);
 				case COUNTRY_CODE -> value;
 				case PHONE_NUMBER -> value;
 			};
@@ -97,19 +99,20 @@ public class Order {
 				case LIST_SINGLE_CHOICE -> (String) o;
 				case LIST_MULTIPLE_CHOICE -> (String) o;
 				case FILE -> Constants.QUESTIONS_FILE_KEEP;
-				case DATE -> o.toString(); //TODO convert
-				case TIME -> o.toString(); //TODO convert
-				case DATE_TIME -> o.toString(); //TODO convert
+				case DATE -> o.toString();
+				case TIME -> o.toString();
+				case DATE_TIME -> o.toString();
 				case COUNTRY_CODE -> (String) o;
 				case PHONE_NUMBER -> (String) o;
 			};
-			jsonArray.put(out);
+			out = out.strip();
+			if(!out.isEmpty())
+				jsonArray.put(out);
 		}
 		answers = jsonArray.toString();
 	}
 
 	public Object getAnswerValue(String answer, PretixService ps){
-        // TODO -> Think about lazy load?
         if(answersData == null) loadAnswers(ps);
 		return answersData.get(answer);
 
@@ -119,8 +122,20 @@ public class Order {
 		answersData.put(answer, value);
 		saveAnswers(ps);
 	}
+	public void removeAnswer(String answer, PretixService ps){
+		if(answersData == null) loadAnswers(ps);
+		answersData.remove(answer);
+		saveAnswers(ps);
+	}
 	public String getAnswersRaw(){
 		return answers;
+	}
+	public void resetFileUploadAnswers(PretixService ps){ //After uploading a file, we need to change it's value to "file:keep"
+		for (String key : answersData.keySet()) {
+			if(ps.translateQuestionType(key) == QuestionType.FILE)
+				answersData.put(key, Constants.QUESTIONS_FILE_KEEP);
+		}
+		saveAnswers(ps);
 	}
 
 	public boolean isDaily(){
@@ -149,8 +164,9 @@ public class Order {
 		return roomCapacity > 0;
 	}
 
-	public void update(String code, String pretixOrderSecret, int positionId, Set<Integer> days, Sponsorship sponsorship, ExtraDays extraDays, int roomCapacity, String hotelLocation, boolean hasMembership, User orderOwner, Event orderEvent, JSONArray answersJson){
+	public void update(String code, OrderStatus status, String pretixOrderSecret, int positionId, Set<Integer> days, Sponsorship sponsorship, ExtraDays extraDays, int roomCapacity, String hotelLocation, boolean hasMembership, User orderOwner, Event orderEvent, JSONArray answersJson){
 		this.code = code;
+		this.orderStatus = status;
 		this.extraDays = extraDays;
 		this.sponsorship = sponsorship;
 		this.roomCapacity = roomCapacity;
