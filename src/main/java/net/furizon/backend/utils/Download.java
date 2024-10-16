@@ -819,7 +819,8 @@ public class Download {
 			this.url = url;
 		}
 		public Request addHeaders(Map<String, String> headers) {
-			this.headers.putAll(headers);
+			if(headers != null)
+				this.headers.putAll(headers);
 			return this;
 		}
 		public Request setHeader(String name, String value) {

@@ -7,6 +7,7 @@ import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.service.pretix.PretixService;
 import net.furizon.backend.utils.pretix.*;
+import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 @Entity
 @Table(name = "orders")
@@ -98,7 +100,7 @@ public class Order {
 				case BOOLEAN -> ((boolean) o) ? "true" : "false";
 				case LIST_SINGLE_CHOICE -> (String) o;
 				case LIST_MULTIPLE_CHOICE -> (String) o;
-				case FILE -> Constants.QUESTIONS_FILE_KEEP;
+				case FILE -> (String) o;
 				case DATE -> o.toString();
 				case TIME -> o.toString();
 				case DATE_TIME -> o.toString();
@@ -116,6 +118,10 @@ public class Order {
         if(answersData == null) loadAnswers(ps);
 		return answersData.get(answer);
 
+	}
+	public void setAnswerFile(String answer, ContentType mimeType, String fileName, byte[] bytes, PretixService ps) throws TimeoutException {
+		String newAns = ps.uploadFile(mimeType, fileName, bytes);
+		this.setAnswerValue(answer, newAns, ps);
 	}
 	public void setAnswerValue(String answer, Object value, PretixService ps){
 		if(answersData == null) loadAnswers(ps);

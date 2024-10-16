@@ -1,5 +1,6 @@
 package net.furizon.backend.service.pretix;
 
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
@@ -11,6 +12,7 @@ import net.furizon.backend.utils.pretix.*;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.configs.PretixConfig;
+import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,8 +20,6 @@ import org.json.JSONObject;
 
 import org.springframework.data.util.Pair;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +35,7 @@ import java.util.function.Consumer;
  * Describes all the iteractions via Pretix
  */
 @Service
+@Slf4j
 public class PretixService {
 	private final IUserRepository userRepository;
 	private final IEventRepository eventRepository;
@@ -48,8 +49,6 @@ public class PretixService {
 		this.orderRepository = orderRepository;
 		this.pretixConfig = pretixConfig;
 	}
-
-	private final static Logger LOGGER = LoggerFactory.getLogger(PretixService.class);
 
 	private PretixIdsMap pretixIdsCache = null;
 	private class PretixIdsMap {
@@ -174,7 +173,7 @@ public class PretixService {
 	}
 
 	public void fetchOrder(String code, String secret) throws TimeoutException {
-		Download.Response res = doGet("orders" + code.replaceAll("[^A-Za-z0-9]+", ""), pretixConfig.getEventUrl(), Constants.STATUS_CODES_WITH_404);
+		Download.Response res = doGet("orders" + code.replaceAll("[^A-Za-z0-9]+", ""), pretixConfig.getEventUrl(), Constants.STATUS_CODES_WITH_404, null);
 		if(res.getStatusCode() == 404) throw new RuntimeException("Order not found");
 		JSONObject orderData = res.getResponseJson();
 		if(!orderData.getString("secret").equals(secret)) throw new RuntimeException("Order not found"); //Same exception to not leak matched order code
@@ -303,6 +302,14 @@ public class PretixService {
 	}
 
 
+	public String uploadFile(ContentType mimeType, String fileName, byte[] data) throws TimeoutException {
+		Map<String, String> headers = new HashMap<>();
+		headers.put("Content-Type", mimeType.toString());
+		headers.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+		return doPost("upload", data, pretixConfig.getBaseUrl(), Constants.STATUS_CODES_FILE_UPLOAD, headers).getResponseJson().getString("id");
+	}
+
+
 	public synchronized String translateQuestionId(int answerId){
 		return pretixIdsCache.questionIdentifiers.get(answerId);
 	}
@@ -319,7 +326,7 @@ public class PretixService {
 		JSONArray ans = order.getOrderStatus() == OrderStatus.CANCELED ? new JSONArray() : new JSONArray(order.getAnswersRaw());
 		payload.put("answers", ans);
 
-		Download.Response res = doPatch("orderpositions/" + order.getAnswersMainPositionId(), payload, pretixConfig.getEventUrl(), null);
+		Download.Response res = doPatch("orderpositions/" + order.getAnswersMainPositionId(), payload, pretixConfig.getEventUrl(), null, null);
 
 		if(res.getStatusCode() != 200){
 			try {
@@ -327,8 +334,8 @@ public class PretixService {
 				if (d.has("answers")) {
 					JSONArray errs = d.getJSONArray("answers");
 					for(int i = 0; i < errs.length() && i < ans.length(); i++)
-						LOGGER.error("[ANSWERS SENDING] ERROR ON '" + ans.getString(0) + "': " + errs.getString(i));
-				} else LOGGER.error("[ANSWERS SENDING] GENERIC ERROR. Response: " + res.toString());
+						log.error("[ANSWERS SENDING] ERROR ON '" + ans.getString(0) + "': " + errs.getString(i));
+				} else log.error("[ANSWERS SENDING] GENERIC ERROR. Response: " + res.toString());
 			} catch(JSONException e) {
 				throw new RuntimeException("There has been an error while updating this answers.");
 			}
@@ -342,7 +349,7 @@ public class PretixService {
 		while(true){
 			pages += 1;
 
-			Download.Response res = doGet(TextUtil.leadingSlash(url) + "?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404);
+			Download.Response res = doGet(TextUtil.leadingSlash(url) + "?page=" + pages, baseUrl, Constants.STATUS_CODES_WITH_404, null);
 			if(res.getStatusCode() == 404) break;
 
 			JSONObject response = res.getResponseJson();
@@ -354,22 +361,22 @@ public class PretixService {
 		}
 	}
 
-	private static Download httpClient;
+	private Download httpClient;
 
 	public void setupClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		httpClient = new Download(pretixConfig.getConnectionTimeout(), pretixConfig.getConnectionHeaders(), null, pretixConfig.getMaxConnections(), false);
 	}
 
-	private Download.Response doGet(String url, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.get(TextUtil.leadingSlash(baseUrl) + url).go(), null, expectedStatusCodes, "GETing");
+	private Download.Response doGet(String url, String baseUrl, int[] expectedStatusCodes, Map<String, String> headers) throws TimeoutException {
+		return doRequest(url, () -> httpClient.get(TextUtil.leadingSlash(baseUrl) + url).addHeaders(headers).go(), null, expectedStatusCodes, "GETing");
 	}
 
-	private Download.Response doPost(String url, Object content, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.post(TextUtil.leadingSlash(baseUrl) + url).setBody(content).go(), null, expectedStatusCodes, "POSTing");
+	private Download.Response doPost(String url, Object content, String baseUrl, int[] expectedStatusCodes, Map<String, String> headers) throws TimeoutException {
+		return doRequest(url, () -> httpClient.post(TextUtil.leadingSlash(baseUrl) + url).addHeaders(headers).setBody(content).go(), null, expectedStatusCodes, "POSTing");
 	}
 
-	private Download.Response doPatch(String url, JSONObject json, String baseUrl, int[] expectedStatusCodes) throws TimeoutException {
-		return doRequest(url, () -> httpClient.patch(TextUtil.leadingSlash(baseUrl) + url).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
+	private Download.Response doPatch(String url, JSONObject json, String baseUrl, int[] expectedStatusCodes, Map<String, String> headers) throws TimeoutException {
+		return doRequest(url, () -> httpClient.patch(TextUtil.leadingSlash(baseUrl) + url).addHeaders(headers).setJson(json).go(), null, expectedStatusCodes, "PATCHing");
 	}
 
 	private Download.Response doRequest(String url, ThrowableSupplier<Download.Response, Exception> doReq, Runnable metricsFunc, int[] expectedStatusCodes, String opLogStr) throws TimeoutException {
@@ -385,19 +392,19 @@ public class PretixService {
 				int statusCode = r.getStatusCode();
 				if(allowedStates != null && !allowedStates.contains(statusCode)){
 					//incPretixErrors(); TODO
-					LOGGER.warn("[PRETIX] Got an unexpected status code ({}) while {} '{}'. Allowed status codes: {}", statusCode, opLogStr, url, allowedStates);
+					log.warn("[PRETIX] Got an unexpected status code ({}) while {} '{}'. Allowed status codes: {}", statusCode, opLogStr, url, allowedStates);
 					continue;
 				}
 				res = r;
 
 			} catch (Exception e) {
 				//incPretixErrors(); TODO
-				LOGGER.warn("[PRETIX] An error ({}) occurred while {} '{}':\n{}", i, opLogStr, url, e.getMessage());
+				log.warn("[PRETIX] An error ({}) occurred while {} '{}':\n{}", i, opLogStr, url, e.getMessage());
 			}
 			if (res != null) break;
 		}
 		if(res == null){
-			LOGGER.error("[PRETIX] Reached PRETIX_REQUESTS_MAX ({}) while {} '{}'. Aborting", maxRetries, opLogStr, url);
+			log.error("[PRETIX] Reached PRETIX_REQUESTS_MAX ({}) while {} '{}'. Aborting", maxRetries, opLogStr, url);
 			throw new TimeoutException("PRETIX_REQUESTS_MAX reached while " + opLogStr + " to pretix.");
 		}
 		return res;
