@@ -2,6 +2,9 @@ package net.furizon.backend.web.entities.users;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class UserResponse {
     private Long id;
@@ -9,6 +12,6 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String profileImageUrl;
-    private List<ConnectedAccountResponse> connectedAccounts = new ArrayList<>();
+    //    private List<ConnectedAccountResponse> connectedAccounts = new ArrayList<>();
     private List<String> authorities = new ArrayList<>();
 }

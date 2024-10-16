@@ -11,9 +11,8 @@ public class UserCreationRequest {
     private String email;
 
     @NotNull
-    @Length(min=8)
+    @Length(min = 8)
     private String password;
 
     private String passwordConfirmation;
-
 }

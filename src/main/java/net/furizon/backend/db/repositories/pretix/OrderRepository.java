@@ -6,7 +6,7 @@ import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.Optional;
 
-public interface IOrderRepository extends ListCrudRepository<Order, String> {
+public interface OrderRepository extends ListCrudRepository<Order, String> {
     @Query(value = "SELECT O FROM Order O INNER JOIN Event E on O.orderEvent = E WHERE O.code = ?1 AND E.slug = ?2")
     Optional<Order> findByCodeAndEvent(String orderCode, String eventSlug);
 }

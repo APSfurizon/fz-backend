@@ -12,10 +12,13 @@ public class HttpErrorResponse {
     private Map<String, String> errors;
     private List<String> generalErrors;
 
-    public static HttpErrorResponse of(String message, int status, Map<String, String> errors, List<String> generalErrors) {
-        HttpErrorResponse toReturn = new HttpErrorResponse();
-        toReturn.message = message;
-        toReturn.status = status;
+    public static HttpErrorResponse of(
+        String message,
+        int status,
+        Map<String, String> errors,
+        List<String> generalErrors
+    ) {
+        HttpErrorResponse toReturn = of(message, status);
         toReturn.errors = errors;
         toReturn.generalErrors = generalErrors;
         return toReturn;
@@ -27,5 +30,4 @@ public class HttpErrorResponse {
         toReturn.status = status;
         return toReturn;
     }
-
 }

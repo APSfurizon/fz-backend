@@ -1,26 +1,33 @@
 package net.furizon.backend.db.entities.users;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 
+// TODO -> Replace on JOOQ
 @Entity
 @Table(name = "authentications")
 @Data
 public class AuthenticationData {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
-    @Column(name="authentication_id", nullable = false)
+    @Column(name = "authentication_id", nullable = false)
     private long id;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User authenticationOwner;
 
-    @Column(name="authentication_password", nullable = false)
+    @Column(name = "authentication_password", nullable = false)
     private String passwordHash;
 
     @Column(name = "authentication_email", unique = true, nullable = false)

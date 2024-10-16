@@ -3,24 +3,26 @@ package net.furizon.backend.utils.pretix;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public enum OrderStatus {
-	CANCELED("c"), PENDING("n"), PAID("p"), EXPIRED("e");
+    CANCELED("c"),
+    PENDING("n"),
+    PAID("p"),
+    EXPIRED("e");
 
-	@Getter
-	private final String code;
+    @Getter
+    private final String code;
 
-	private static final Map<String, OrderStatus> MAP = new HashMap<>();
+    private static final Map<String, OrderStatus> MAP = Arrays
+        .stream(OrderStatus.values())
+        .collect(Collectors.toMap(OrderStatus::getCode, Function.identity()));
 
-	static {
-		for (OrderStatus type : OrderStatus.values())
-			MAP.put(type.code, type);
-	}
-
-	public static OrderStatus fromCode(String code) {
-		return MAP.get(code);
-	}
+    public static OrderStatus get(String code) {
+        return MAP.get(code);
+    }
 }
