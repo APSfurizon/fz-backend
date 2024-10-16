@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public enum OrderStatus {
-	PENDING("n"), PAID("p"), EXPIRED("e"), CANCELED("c");
+	CANCELED("c"), PENDING("n"), PAID("p"), EXPIRED("e");
 
 	@Getter
 	private final String code;

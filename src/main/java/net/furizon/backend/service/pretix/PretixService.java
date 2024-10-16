@@ -271,7 +271,6 @@ public class PretixService {
 	public void reloadEvents() throws TimeoutException {
 		List<Pair<String, String>> organizers = reloadOrganizers();
 
-		//List<Event> ret = new LinkedList<>();
 		String currentEvent = pretixConfig.getCurrentEvent();
 		String currentOrg = pretixConfig.getOrganizer();
 		for(Pair<String, String> organizerPair : organizers){
@@ -301,7 +300,6 @@ public class PretixService {
 				}
 			});
 		}
-		//return ret;
 	}
 
 
