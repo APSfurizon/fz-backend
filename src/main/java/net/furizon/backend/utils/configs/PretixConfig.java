@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.furizon.backend.db.entities.pretix.Event;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Map;
 
 @Data
 @Component
-@PropertySource(value = "file:config.properties")
 @ConfigurationProperties(prefix = "pretix")
 @NoArgsConstructor
 public class PretixConfig {

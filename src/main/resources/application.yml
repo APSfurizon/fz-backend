@@ -1,0 +1,36 @@
+server:
+  port: ${BACKEND_SERVER_PORT:8080}
+
+spring:
+  application:
+    name: fz-backend
+  datasource:
+    url: ${BACKEND_DATASOURCE_URL:jdbc:postgresql://localhost:5432/furizon}
+    username: ${BACKEND_DATASOURCE_USERNAME:user}
+    password: ${BACKEND_DATASOURCE_PASSWORD:pass}
+    driver-class-name: org.postgresql.Driver
+  # TODO -> Remove it after Jooq migration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# TODO -> Env variables
+pretix:
+  protocol: http
+  host-name: localhost
+  port: 8000
+  api-key: xxx
+  organizer: org
+  current-event: evt
+  run-healthcheck: true
+  max-connection-retries: 3
+  max-connections: 10
+  connection-timeout: 10000
+  max-propic-file-size-bytes: 5242880
+  max-propic-width: 3000
+  min-propic-width: 3000
+  max-propic-height: 300
+  min-propic-height: 300
