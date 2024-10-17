@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -47,11 +46,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class PretixService {
     private final UserRepository userRepository;
-
     private final EventRepository eventRepository;
-
     private final OrderRepository orderRepository;
-
     private final PretixConfig pretixConfig;
 
     private PretixIdsMap pretixIdsCache = null;
@@ -71,6 +67,7 @@ public class PretixService {
 
         public Set<Integer> roomItemIds = new HashSet<>();
         public Map<Integer, Pair<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
+        public Map<Pair<Integer, String>, String> roomNames = new HashMap<>(); //map capacity/name -> room name TODO CHECK IF THIS WORKS
 
         public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
         public Map<Integer, String> questionIdentifiers = new HashMap<>();
@@ -122,19 +119,21 @@ public class PretixService {
     }
 
     private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
-        TriConsumer<JSONObject, String, BiConsumer<Integer, String>> searchVariations = (item, prefix, fnc) -> {
-            JSONArray variations = item.getJSONArray("variations");
-            for (int i = 0; i < variations.length(); i++) {
-                JSONObject variation = variations.getJSONObject(i);
-                String identifierVariation = variation.getJSONObject("meta_data")
-                    .getString(Constants.METADATA_IDENTIFIER_ITEM);
-                int variationId = variation.getInt("id");
+        TriConsumer<JSONObject, String, TriConsumer<Integer, String, String>> searchVariations =
+                (item, prefix, fnc) -> {
+                    JSONArray variations = item.getJSONArray("variations");
+                    for (int i = 0; i < variations.length(); i++) {
+                        JSONObject variation = variations.getJSONObject(i);
+                        String variationName = variation.getString("name");
+                        String identifierVariation = variation.getJSONObject("meta_data")
+                                .getString(Constants.METADATA_IDENTIFIER_ITEM);
+                        int variationId = variation.getInt("id");
 
-                if (identifierVariation.startsWith(prefix)) {
-                    fnc.accept(variationId, identifierVariation.substring(prefix.length()));
-                }
-            }
-        };
+                        if (identifierVariation.startsWith(prefix)) {
+                            fnc.accept(variationId, identifierVariation.substring(prefix.length()), variationName);
+                        }
+                    }
+                };
 
         getAllPages("items", pretixConfig.getEventUrl(), (item) -> {
             String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
@@ -166,7 +165,7 @@ public class PretixService {
                         searchVariations.accept(
                             item,
                             Constants.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
-                            (variationId, s) -> {
+                            (variationId, s, name) -> {
                                 Sponsorship ss = Sponsorship.valueOf(s);
                                 pretixIdsCache.sponsorshipVariationIds.put(variationId, ss);
                             }
@@ -178,17 +177,21 @@ public class PretixService {
                         searchVariations.accept(
                             item,
                             Constants.METADATA_ROOM_TYPE_TAG_PREFIX,
-                            (variationId, s) -> {
+                            (variationId, s, name) -> {
                                 String[] sp = s.split("_");
                                 String hotelName = sp[0];
                                 int capacity = Integer.parseInt(sp[1]);
-                                pretixIdsCache.roomVariationIds.put(variationId, Pair.of(capacity, hotelName));
+                                Pair<Integer, String> p = Pair.of(capacity, hotelName);
+                                pretixIdsCache.roomVariationIds.put(variationId, p);
+                                pretixIdsCache.roomNames.put(p, name);
                             }
                         );
                         break;
                     }
                     default:
-                        // TODO -> Log?
+                        log.warn(
+                                "Unrecognized identifier while parsing product (" + itemId + ") :'" + identifier + "'"
+                        );
                         break;
                 }
             }
@@ -381,6 +384,10 @@ public class PretixService {
             Constants.STATUS_CODES_FILE_UPLOAD,
             headers
         ).getResponseJson().getString("id");
+    }
+
+    public synchronized String getRoomName(int quantity, String hotelName) {
+        return pretixIdsCache.roomNames.get(Pair.of(quantity, hotelName));
     }
 
     // Bad synchronized blocks, better to avoid it
