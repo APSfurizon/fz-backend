@@ -160,7 +160,7 @@ public class Groups extends TableImpl<Record> {
      */
     public UserGroupPath userGroup() {
         if (_userGroup == null)
-            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__FKBEGTGNL3OQ004958PISKO4FU4.getInverseKey());
+            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__USER_GROUP_GROUPS_FK.getInverseKey());
 
         return _userGroup;
     }

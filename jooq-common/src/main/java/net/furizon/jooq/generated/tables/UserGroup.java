@@ -33,7 +33,6 @@ import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
-import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
@@ -68,11 +67,6 @@ public class UserGroup extends TableImpl<Record> {
     }
 
     /**
-     * The column <code>public.user_group.user_group_id</code>.
-     */
-    public final TableField<Record, Long> USER_GROUP_ID = createField(DSL.name("user_group_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
-
-    /**
      * The column <code>public.user_group.group_id</code>.
      */
     public final TableField<Record, Long> GROUP_ID = createField(DSL.name("group_id"), SQLDataType.BIGINT, this, "");
@@ -81,6 +75,11 @@ public class UserGroup extends TableImpl<Record> {
      * The column <code>public.user_group.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.user_group.user_group_id</code>.
+     */
+    public final TableField<Record, Long> USER_GROUP_ID = createField(DSL.name("user_group_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     private UserGroup(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -156,25 +155,8 @@ public class UserGroup extends TableImpl<Record> {
     }
 
     @Override
-    public UniqueKey<Record> getPrimaryKey() {
-        return Keys.USER_GROUP_PKEY;
-    }
-
-    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.USER_GROUP__FK7K9ADE3LQBO483U9VURYXMM34, Keys.USER_GROUP__FKBEGTGNL3OQ004958PISKO4FU4);
-    }
-
-    private transient UsersPath _users;
-
-    /**
-     * Get the implicit join path to the <code>public.users</code> table.
-     */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.USER_GROUP__FK7K9ADE3LQBO483U9VURYXMM34, null);
-
-        return _users;
+        return Arrays.asList(Keys.USER_GROUP__USER_GROUP_GROUPS_FK, Keys.USER_GROUP__USER_GROUP_USERS_FK);
     }
 
     private transient GroupsPath _groups;
@@ -184,9 +166,21 @@ public class UserGroup extends TableImpl<Record> {
      */
     public GroupsPath groups() {
         if (_groups == null)
-            _groups = new GroupsPath(this, Keys.USER_GROUP__FKBEGTGNL3OQ004958PISKO4FU4, null);
+            _groups = new GroupsPath(this, Keys.USER_GROUP__USER_GROUP_GROUPS_FK, null);
 
         return _groups;
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.USER_GROUP__USER_GROUP_USERS_FK, null);
+
+        return _users;
     }
 
     @Override

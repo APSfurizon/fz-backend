@@ -12,6 +12,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -86,6 +87,11 @@ public class Fursuits extends TableImpl<Record> {
      * The column <code>public.fursuits.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.fursuits.media_id_propic</code>.
+     */
+    public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.fursuits.media_id</code>.
@@ -177,7 +183,33 @@ public class Fursuits extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.FURSUITS__FKGS95COIQ3BDFGO4RRI2XXA01E, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O);
+        return Arrays.asList(Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O, Keys.FURSUITS__FURSUITS_MEDIA_FK, Keys.FURSUITS__FURSUITS_USERS_FK);
+    }
+
+    private transient MediaPath _fkom4xajcquvf8ounsrelsw3a2o;
+
+    /**
+     * Get the implicit join path to the <code>public.media</code> table, via
+     * the <code>fkom4xajcquvf8ounsrelsw3a2o</code> key.
+     */
+    public MediaPath fkom4xajcquvf8ounsrelsw3a2o() {
+        if (_fkom4xajcquvf8ounsrelsw3a2o == null)
+            _fkom4xajcquvf8ounsrelsw3a2o = new MediaPath(this, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O, null);
+
+        return _fkom4xajcquvf8ounsrelsw3a2o;
+    }
+
+    private transient MediaPath _fursuitsMediaFk;
+
+    /**
+     * Get the implicit join path to the <code>public.media</code> table, via
+     * the <code>fursuits_media_fk</code> key.
+     */
+    public MediaPath fursuitsMediaFk() {
+        if (_fursuitsMediaFk == null)
+            _fursuitsMediaFk = new MediaPath(this, Keys.FURSUITS__FURSUITS_MEDIA_FK, null);
+
+        return _fursuitsMediaFk;
     }
 
     private transient UsersPath _users;
@@ -187,21 +219,30 @@ public class Fursuits extends TableImpl<Record> {
      */
     public UsersPath users() {
         if (_users == null)
-            _users = new UsersPath(this, Keys.FURSUITS__FKGS95COIQ3BDFGO4RRI2XXA01E, null);
+            _users = new UsersPath(this, Keys.FURSUITS__FURSUITS_USERS_FK, null);
 
         return _users;
     }
 
-    private transient MediaPath _media;
+    private transient FursuitsEventsPath _fursuitsEvents;
 
     /**
-     * Get the implicit join path to the <code>public.media</code> table.
+     * Get the implicit to-many join path to the
+     * <code>public.fursuits_events</code> table
+     */
+    public FursuitsEventsPath fursuitsEvents() {
+        if (_fursuitsEvents == null)
+            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_FURSUIT_FK.getInverseKey());
+
+        return _fursuitsEvents;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.media</code>
+     * table
      */
     public MediaPath media() {
-        if (_media == null)
-            _media = new MediaPath(this, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O, null);
-
-        return _media;
+        return fursuitsEvents().media();
     }
 
     @Override

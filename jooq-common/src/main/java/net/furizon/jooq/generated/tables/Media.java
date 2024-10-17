@@ -13,6 +13,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
+import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.MediaTags.MediaTagsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -196,17 +197,51 @@ public class Media extends TableImpl<Record> {
         return _mediaTags;
     }
 
-    private transient FursuitsPath _fursuits;
+    private transient FursuitsPath _fkom4xajcquvf8ounsrelsw3a2o;
 
     /**
      * Get the implicit to-many join path to the <code>public.fursuits</code>
-     * table
+     * table, via the <code>fkom4xajcquvf8ounsrelsw3a2o</code> key
+     */
+    public FursuitsPath fkom4xajcquvf8ounsrelsw3a2o() {
+        if (_fkom4xajcquvf8ounsrelsw3a2o == null)
+            _fkom4xajcquvf8ounsrelsw3a2o = new FursuitsPath(this, null, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O.getInverseKey());
+
+        return _fkom4xajcquvf8ounsrelsw3a2o;
+    }
+
+    private transient FursuitsEventsPath _fursuitsEvents;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.fursuits_events</code> table
+     */
+    public FursuitsEventsPath fursuitsEvents() {
+        if (_fursuitsEvents == null)
+            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK.getInverseKey());
+
+        return _fursuitsEvents;
+    }
+
+    private transient FursuitsPath _fursuitsMediaFk;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.fursuits</code>
+     * table, via the <code>fursuits_media_fk</code> key
+     */
+    public FursuitsPath fursuitsMediaFk() {
+        if (_fursuitsMediaFk == null)
+            _fursuitsMediaFk = new FursuitsPath(this, null, Keys.FURSUITS__FURSUITS_MEDIA_FK.getInverseKey());
+
+        return _fursuitsMediaFk;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.fursuits</code> table
      */
     public FursuitsPath fursuits() {
-        if (_fursuits == null)
-            _fursuits = new FursuitsPath(this, null, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O.getInverseKey());
-
-        return _fursuits;
+        return fursuitsEvents().fursuits();
     }
 
     @Override
