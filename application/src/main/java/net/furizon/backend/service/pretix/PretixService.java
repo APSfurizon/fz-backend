@@ -66,8 +66,10 @@ public class PretixService {
         public Map<Integer, ExtraDays> extraDaysIds = new HashMap<>();
 
         public Set<Integer> roomItemIds = new HashSet<>();
-        public Map<Integer, Pair<Integer, String>> roomVariationIds = new HashMap<>(); //map id -> (capacity, hotelName)
-        public Map<Pair<Integer, String>, String> roomNames = new HashMap<>(); //map capacity/name -> room name TODO CHECK IF THIS WORKS
+        //map id -> (capacity, hotelName)
+        public Map<Integer, Pair<Integer, String>> roomVariationIds = new HashMap<>();
+        //map capacity/name -> room name TODO CHECK IF THIS WORKS
+        public Map<Pair<Integer, String>, String> roomNames = new HashMap<>();
 
         public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
         public Map<Integer, String> questionIdentifiers = new HashMap<>();
@@ -120,20 +122,20 @@ public class PretixService {
 
     private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
         TriConsumer<JSONObject, String, TriConsumer<Integer, String, String>> searchVariations =
-                (item, prefix, fnc) -> {
-                    JSONArray variations = item.getJSONArray("variations");
-                    for (int i = 0; i < variations.length(); i++) {
-                        JSONObject variation = variations.getJSONObject(i);
-                        String variationName = variation.getString("name");
-                        String identifierVariation = variation.getJSONObject("meta_data")
-                                .getString(Constants.METADATA_IDENTIFIER_ITEM);
-                        int variationId = variation.getInt("id");
+            (item, prefix, fnc) -> {
+                JSONArray variations = item.getJSONArray("variations");
+                for (int i = 0; i < variations.length(); i++) {
+                    JSONObject variation = variations.getJSONObject(i);
+                    String variationName = variation.getString("name");
+                    String identifierVariation = variation.getJSONObject("meta_data")
+                        .getString(Constants.METADATA_IDENTIFIER_ITEM);
+                    int variationId = variation.getInt("id");
 
-                        if (identifierVariation.startsWith(prefix)) {
-                            fnc.accept(variationId, identifierVariation.substring(prefix.length()), variationName);
-                        }
+                    if (identifierVariation.startsWith(prefix)) {
+                        fnc.accept(variationId, identifierVariation.substring(prefix.length()), variationName);
                     }
-                };
+                }
+            };
 
         getAllPages("items", pretixConfig.getEventUrl(), (item) -> {
             String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
@@ -190,7 +192,7 @@ public class PretixService {
                     }
                     default:
                         log.warn(
-                                "Unrecognized identifier while parsing product (" + itemId + ") :'" + identifier + "'"
+                            "Unrecognized identifier while parsing product (" + itemId + ") :'" + identifier + "'"
                         );
                         break;
                 }

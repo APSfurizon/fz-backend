@@ -743,6 +743,7 @@ Public License instead of this License.  But first, please read
 
 // If it is an HttpClient class, why it calls Download?
 // Anyway, better replace it
+@Deprecated(forRemoval = true, since = "new http implementation")
 public class Download {
     public static final int DEFAULT_MAX_CONNECTIONS = 20;
     public static final int DEFAULT_TIMEOUT = 4000;
