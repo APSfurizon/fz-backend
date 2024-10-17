@@ -5,16 +5,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.web.handlers.Oauth2LoginSuccessHandler;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,13 +37,13 @@ import java.util.function.Supplier;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-//@Configuration
+@Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private final UserDetailsService userDetailsService;
+    //private final UserDetailsService userDetailsService;
 
-    private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
+    //private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -55,12 +54,14 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(customizer -> {
             customizer
                 .requestMatchers(antMatcher(HttpMethod.POST, "/api/v1/authentication/login")).permitAll()
-                .anyRequest().authenticated();
+                .requestMatchers("/restapi/v0/**").permitAll()
+                .anyRequest()
+                .authenticated();
         });
 
-        http.oauth2Login(customizer -> {
-            customizer.successHandler(oauth2LoginSuccessHandler);
-        });
+        //http.oauth2Login(customizer -> {
+        //customizer.successHandler(oauth2LoginSuccessHandler);
+        //});
 
         // Show unauthorized error
         http.exceptionHandling(customizer -> {
@@ -72,7 +73,7 @@ public class SecurityConfiguration {
 
         // Add the credentials verification filter
         http.addFilterBefore(new UsernamePasswordAuthenticationFilter(), LogoutFilter.class);
-        http.userDetailsService(userDetailsService);
+        //http.userDetailsService(userDetailsService);
 
         http.csrf(csrf -> {
             csrf
@@ -109,7 +110,7 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        //daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(daoAuthenticationProvider);
     }

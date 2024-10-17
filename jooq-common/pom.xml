@@ -12,6 +12,11 @@
     </parent>
 
     <artifactId>jooq-common</artifactId>
+    <properties>
+        <jooq.codegen.jdbc>jdbc:postgresql://localhost:5433/postgres</jooq.codegen.jdbc>
+        <jooq.codegen.username>postgres</jooq.codegen.username>
+        <jooq.codegen.password>postgres</jooq.codegen.password>
+    </properties>
 
     <!-- Module-specific dependencies -->
     <dependencies>
@@ -20,5 +25,70 @@
             <artifactId>jooq</artifactId>
             <version>${jooq.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>26.0.1</version>
+        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <!--<logging>WARN</logging>-->
+                    <!-- JDBC connection parameters -->
+                    <jdbc>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>${jooq.codegen.jdbc}</url>
+                        <user>${jooq.codegen.username}</user>
+                        <password>${jooq.codegen.password}</password>
+                    </jdbc>
+
+                    <!-- Generator parameters -->
+                    <generator>
+                        <name>org.jooq.codegen.JavaGenerator</name>
+                        <database>
+                            <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                            <inputSchema>public</inputSchema>
+                        </database>
+                        <generate>
+                            <generatedAnnotation>true</generatedAnnotation>
+                            <nullableAnnotation>true</nullableAnnotation>
+                            <nullableAnnotationType>org.jetbrains.annotations.Nullable</nullableAnnotationType>
+                            <nonnullAnnotationType>org.jetbrains.annotations.NotNull</nonnullAnnotationType>
+                            <records>false</records>
+                            <deprecated>false</deprecated>
+                            <pojos>false</pojos>
+                        </generate>
+                        <target>
+                            <packageName>net.furizon.jooq.generated</packageName>
+                            <directory>src/main/java</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

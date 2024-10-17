@@ -1,5 +1,5 @@
 server:
-  port: ${BACKEND_SERVER_PORT:8080}
+  port: ${BACKEND_SERVER_PORT:9090}
 
 spring:
   application:
@@ -16,13 +16,21 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  jooq:
+    sql-dialect: postgres
+
+logbook:
+  format:
+    style: http
+  httpclient:
+    decompress-response: true
 
 # TODO -> Env variables
 pretix:
   protocol: http
   host-name: localhost
   port: 8000
-  api-key: xxx
+  api-key: zcz7tfhipd6t3i51pf29vgrpbstab19r4wtlv5r464sasdknxzo7nk6c4ixxnmg2
   organizer: org
   current-event: evt
   run-healthcheck: true
