@@ -8,15 +8,15 @@ import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.db.repositories.pretix.EventRepository;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.db.repositories.users.UserRepository;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.model.QuestionType;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.TextUtil;
 import net.furizon.backend.utils.ThrowableSupplier;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.utils.pretix.Constants;
-import net.furizon.backend.utils.pretix.ExtraDays;
-import net.furizon.backend.utils.pretix.OrderStatus;
-import net.furizon.backend.utils.pretix.QuestionType;
-import net.furizon.backend.utils.pretix.Sponsorship;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
@@ -490,7 +490,7 @@ public class PretixService {
             //pretixConfig.getConnectionHeaders(),
             null,
             null,
-            0,//pretixConfig.getMaxConnections(),
+            0, //pretixConfig.getMaxConnections(),
             false
         );
     }
@@ -551,7 +551,7 @@ public class PretixService {
     ) throws TimeoutException {
         List<Integer> allowedStates = Arrays.stream(expectedStatusCodes).boxed().toList();
         Download.Response res = null;
-        int maxRetries = 0;//pretixConfig.getMaxConnectionRetries();
+        int maxRetries = 0; //pretixConfig.getMaxConnectionRetries();
         for (int i = 0; i < maxRetries; i++) {
             try {
                 //metricsFunc.run(); TODO

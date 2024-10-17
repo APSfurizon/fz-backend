@@ -106,7 +106,7 @@ public class Authentications extends TableImpl<Record> {
     /**
      * The column <code>public.authentications.authentication_password</code>.
      */
-    public final TableField<Record, String> AUTHENTICATION_PASSWORD = createField(DSL.name("authentication_password"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<Record, String> AUTHENTICATION_PASSWORD = createField(DSL.name("authentication_password"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>public.authentications.authentication_token</code>.

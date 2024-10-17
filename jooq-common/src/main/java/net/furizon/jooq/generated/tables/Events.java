@@ -86,12 +86,17 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.event_public_url</code>.
      */
-    public final TableField<Record, String> EVENT_PUBLIC_URL = createField(DSL.name("event_public_url"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> EVENT_PUBLIC_URL = createField(DSL.name("event_public_url"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.events.event_names</code>.
      */
     public final TableField<Record, String> EVENT_NAMES = createField(DSL.name("event_names"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.events.event_names_raw</code>.
+     */
+    public final TableField<Record, String> EVENT_NAMES_RAW = createField(DSL.name("event_names_raw"), SQLDataType.VARCHAR(255), this, "");
 
     private Events(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

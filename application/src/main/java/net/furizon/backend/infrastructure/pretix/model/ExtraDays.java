@@ -1,4 +1,4 @@
-package net.furizon.backend.utils.pretix;
+package net.furizon.backend.infrastructure.pretix.model;
 
 public enum ExtraDays {
     NONE,

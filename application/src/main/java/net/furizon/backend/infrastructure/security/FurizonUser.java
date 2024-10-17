@@ -1,38 +1,29 @@
-package net.furizon.backend.security.entities;
+package net.furizon.backend.infrastructure.security;
 
-import lombok.Getter;
-import net.furizon.backend.db.entities.users.User;
+import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
-@Deprecated
-@Getter
-public class UserSecurity implements UserDetails {
-    private User user;
-
-    public UserSecurity() {
-    }
-
-    public UserSecurity(User from) {
-        this.user = from;
-    }
+public class FurizonUser implements UserDetails {
+    // TODO -> Import from user database model
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
-        return this.user.getAuthentication().getPasswordHash();
+        return "";
     }
 
     @Override
     public String getUsername() {
-        return this.user.getAuthentication().getEmail();
+        return "";
     }
 
     @Override
@@ -47,15 +38,15 @@ public class UserSecurity implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return !this.user.getAuthentication().isLoginExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return !this.user.getAuthentication().isLoginDisabled();
+        return true;
     }
 
-    public boolean is2faEnabled() {
-        return this.user.getAuthentication().is2faEnabled();
+    public boolean is2FaEnabled() {
+        return false;
     }
 }

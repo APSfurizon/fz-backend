@@ -16,12 +16,14 @@ import net.furizon.jooq.generated.tables.FursuitsEvents;
 import net.furizon.jooq.generated.tables.GroupPermissions;
 import net.furizon.jooq.generated.tables.Groups;
 import net.furizon.jooq.generated.tables.Media;
+import net.furizon.jooq.generated.tables.MediaTags;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
+import net.furizon.jooq.generated.tables.Tags;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -86,6 +88,11 @@ public class Public extends SchemaImpl {
     public final Media MEDIA = Media.MEDIA;
 
     /**
+     * The table <code>public.media_tags</code>.
+     */
+    public final MediaTags MEDIA_TAGS = MediaTags.MEDIA_TAGS;
+
+    /**
      * The table <code>public.membership_cards</code>.
      */
     public final MembershipCards MEMBERSHIP_CARDS = MembershipCards.MEMBERSHIP_CARDS;
@@ -114,6 +121,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.schema_migrations</code>.
      */
     public final SchemaMigrations SCHEMA_MIGRATIONS = SchemaMigrations.SCHEMA_MIGRATIONS;
+
+    /**
+     * The table <code>public.tags</code>.
+     */
+    public final Tags TAGS = Tags.TAGS;
 
     /**
      * The table <code>public.user_group</code>.
@@ -148,12 +160,14 @@ public class Public extends SchemaImpl {
             GroupPermissions.GROUP_PERMISSIONS,
             Groups.GROUPS,
             Media.MEDIA,
+            MediaTags.MEDIA_TAGS,
             MembershipCards.MEMBERSHIP_CARDS,
             MembershipInfo.MEMBERSHIP_INFO,
             Orders.ORDERS,
             RoomGuests.ROOM_GUESTS,
             Rooms.ROOMS,
             SchemaMigrations.SCHEMA_MIGRATIONS,
+            Tags.TAGS,
             UserGroup.USER_GROUP,
             Users.USERS
         );

@@ -86,17 +86,27 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_locale</code>.
      */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(255).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.users.user_secret</code>.
      */
-    public final TableField<Record, String> USER_SECRET = createField(DSL.name("user_secret"), SQLDataType.VARCHAR(70).nullable(false), this, "");
+    public final TableField<Record, String> USER_SECRET = createField(DSL.name("user_secret"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
      */
     public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.users.user_first_name</code>.
+     */
+    public final TableField<Record, String> USER_FIRST_NAME = createField(DSL.name("user_first_name"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.users.user_last_name</code>.
+     */
+    public final TableField<Record, String> USER_LAST_NAME = createField(DSL.name("user_last_name"), SQLDataType.VARCHAR(255), this, "");
 
     private Users(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
