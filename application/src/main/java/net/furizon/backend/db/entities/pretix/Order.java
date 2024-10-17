@@ -4,19 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import net.furizon.backend.db.entities.users.User;
-import net.furizon.backend.service.pretix.PretixService;
-import net.furizon.backend.utils.pretix.Constants;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
+import net.furizon.backend.service.pretix.PretixService;
+import net.furizon.backend.utils.pretix.Constants;
 import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,9 +67,6 @@ public class Order {
     @JoinColumn(name = "event_id")
     private Event orderEvent;
 
-    @OneToOne(mappedBy = "roomOrder")
-    @Setter
-    private Room orderRoom;
 
     @Transient
     @Getter(AccessLevel.NONE)

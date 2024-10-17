@@ -2,12 +2,10 @@ package net.furizon.backend.service.pretix;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.db.repositories.pretix.EventRepository;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
-import net.furizon.backend.db.repositories.users.UserRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -46,7 +44,6 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 @Deprecated
 public class PretixService {
-    private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final OrderRepository orderRepository;
     private final PretixConfig pretixConfig;
@@ -299,7 +296,7 @@ public class PretixService {
             // fetch user from db by userSecret
             User usr = null;
             if (!TextUtil.isEmpty(userSecret)) {
-                usr = userRepository.findBySecret(userSecret).orElse(null);
+                //usr = userRepository.findBySecret(userSecret).orElse(null);
             }
 
             if (order == null) {
@@ -363,22 +360,22 @@ public class PretixService {
                 }
 
                 String eventCode = res.getString("slug");
-                Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
-                if (evt == null) {
-                    evt = new Event(
-                        organizer,
-                        res.getString("slug"),
-                        organizerPair.getSecond(),
-                        names,
-                        res.getString("date_from"),
-                        res.getString("date_to")
-                    );
-                    evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
-                    evt = eventRepository.save(evt);
-                }
-                if (evt != null && evt.isCurrentEvent()) {
-                    //pretixConfig.setCurrentEventObj(evt); // not responsibility of config
-                }
+                //Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
+                //if (evt == null) {
+                //evt = new Event(
+                //organizer,
+                //res.getString("slug"),
+                //organizerPair.getSecond(),
+                //names,
+                //res.getString("date_from"),
+                //res.getString("date_to")
+                //);
+                //evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
+                //evt = eventRepository.save(evt);
+                //}
+                //if (evt != null && evt.isCurrentEvent()) {
+                //pretixConfig.setCurrentEventObj(evt); // not responsibility of config
+                //}
             });
         }
     }
