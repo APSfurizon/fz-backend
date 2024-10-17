@@ -6,4 +6,6 @@
     <logger name="org.jooq.tools.LoggerListener" level="DEBUG"/>
     <logger name="net.furizon" level="TRACE"/>
     <logger name="org.zalando.logbook.Logbook" level="TRACE"/>
+    <logger name="org.springframework.web.client" level="TRACE"/>
+    <logger name="org.apache.hc.client5" level="INFO"/>
 </configuration>
