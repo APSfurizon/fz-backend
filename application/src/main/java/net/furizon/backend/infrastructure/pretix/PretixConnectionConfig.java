@@ -1,4 +1,4 @@
-package net.furizon.backend.utils.configs;
+package net.furizon.backend.infrastructure.pretix;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
