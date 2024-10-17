@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.web.handlers.Oauth2LoginSuccessHandler;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -39,7 +38,7 @@ import java.util.function.Supplier;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-@Configuration
+//@Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
