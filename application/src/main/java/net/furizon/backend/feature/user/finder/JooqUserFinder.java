@@ -32,7 +32,7 @@ public class JooqUserFinder implements UserFinder {
 
     @Nullable
     @Override
-    public User findUserById(long id) {
+    public User findById(long id) {
         return sqlQuery
             .fetchFirst(
                 selectUser()

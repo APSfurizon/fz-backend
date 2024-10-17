@@ -1,7 +1,8 @@
-package net.furizon.backend.infrastructure.pretix;
+package net.furizon.backend.infrastructure.pretix.configuration;
 
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.SimpleHttpClient;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,12 +25,6 @@ public class PretixHttpClientConfiguration {
             new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
         factory.setConnectTimeout(config.getConnectionTimeout());
         return new SimpleHttpClient(
-            // TODO -> Setup Http Client Settings, like
-            // max-connection-retries // use spring retry
-            // max-connections
-            // connection-timeout
-            // etc...
-
             RestClient.builder()
                 .requestFactory(factory)
                 .build(),

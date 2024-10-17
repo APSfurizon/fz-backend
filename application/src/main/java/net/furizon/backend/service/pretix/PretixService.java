@@ -72,7 +72,9 @@ public class PretixService {
         public Map<Pair<Integer, String>, String> roomNames = new HashMap<>();
 
         public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
+
         public Map<Integer, String> questionIdentifiers = new HashMap<>();
+
         public Map<String, Integer> questionIdentifiersToId = new HashMap<>();
 
         public int questionSecret = -1;

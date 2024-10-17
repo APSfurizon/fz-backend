@@ -47,14 +47,10 @@ public class PretixConfig implements HttpConfig {
 
     private long minPropicHeight;
 
-    /******************
-     * Generated data *
-     ******************/
-
     @NotNull
     @Override
     public String getBaseUrl() {
-        return String.format("%s://%s:%d", protocol, hostName, port);
+        return "%s://%s:%d".formatted(protocol, hostName, port);
     }
 
     @NotNull
@@ -68,7 +64,7 @@ public class PretixConfig implements HttpConfig {
     public MultiValueMap<String, String> headers() {
         return new LinkedMultiValueMap<>() {
             {
-                add(HttpHeaders.AUTHORIZATION, "Token " + apiKey);
+                add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(apiKey));
                 add(HttpHeaders.HOST, hostName);
             }
         };
