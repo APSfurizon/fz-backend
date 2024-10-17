@@ -1,0 +1,9 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.jooq" level="DEBUG"/>
+    <logger name="org.jooq.tools.LoggerListener" level="DEBUG"/>
+    <logger name="net.furizon" level="TRACE"/>
+    <logger name="org.zalando.logbook.Logbook" level="TRACE"/>
+</configuration>
