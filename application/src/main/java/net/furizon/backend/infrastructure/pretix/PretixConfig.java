@@ -13,50 +13,30 @@ import org.springframework.util.MultiValueMap;
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "pretix")
 public class PretixConfig implements HttpConfig {
-    private String protocol;
+    @NotNull
+    private String url;
 
-    private String hostName;
+    @NotNull
+    private String apiPath;
 
-    private long port;
-
+    @NotNull
     private String apiKey;
 
+    @NotNull
     private String organizer;
 
-    private boolean runHealthcheck;
-
-    private String currentEvent;
-
-    /* Connection */
-
-    private int maxConnectionRetries;
-
-    private int maxConnections;
-
     private int connectionTimeout;
-
-    /* Profile pic */
-
-    private long maxPropicFileSizeBytes;
-
-    private long maxPropicWidth;
-
-    private long minPropicWidth;
-
-    private long maxPropicHeight;
-
-    private long minPropicHeight;
 
     @NotNull
     @Override
     public String getBaseUrl() {
-        return "%s://%s:%d".formatted(protocol, hostName, port);
+        return url;
     }
 
     @NotNull
     @Override
     public String getBasePath() {
-        return "/api/v1/";
+        return apiPath;
     }
 
     @NotNull
@@ -65,7 +45,6 @@ public class PretixConfig implements HttpConfig {
         return new LinkedMultiValueMap<>() {
             {
                 add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(apiKey));
-                add(HttpHeaders.HOST, hostName);
             }
         };
     }

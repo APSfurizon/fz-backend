@@ -9,13 +9,6 @@ spring:
     username: ${BACKEND_DATASOURCE_USERNAME:user}
     password: ${BACKEND_DATASOURCE_PASSWORD:pass}
     driver-class-name: org.postgresql.Driver
-  # TODO -> Remove it after Jooq migration
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   jooq:
     sql-dialect: postgres
 
@@ -25,20 +18,9 @@ logbook:
   httpclient:
     decompress-response: true
 
-# TODO -> Env variables
 pretix:
-  protocol: http
-  host-name: localhost
-  port: 8000
-  api-key: zcz7tfhipd6t3i51pf29vgrpbstab19r4wtlv5r464sasdknxzo7nk6c4ixxnmg2
-  organizer: org
-  current-event: evt
-  run-healthcheck: true
-  max-connection-retries: 3
-  max-connections: 10
-  connection-timeout: 10000
-  max-propic-file-size-bytes: 5242880
-  max-propic-width: 3000
-  min-propic-width: 3000
-  max-propic-height: 300
-  min-propic-height: 300
+  url: ${PRETIX_BASE_URL:http://localhost:8000}
+  apiPath: ${PRETIX_API_PATH:/api/v1/}
+  api-key: ${PRETIX_API_KEY:zcz7tfhipd6t3i51pf29vgrpbstab19r4wtlv5r464sasdknxzo7nk6c4ixxnmg2}
+  organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
+  connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}

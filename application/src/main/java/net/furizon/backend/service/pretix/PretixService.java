@@ -44,6 +44,7 @@ import java.util.function.Consumer;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Deprecated
 public class PretixService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -349,7 +350,7 @@ public class PretixService {
     public void reloadEvents() throws TimeoutException {
         List<Pair<String, String>> organizers = reloadOrganizers();
 
-        String currentEvent = pretixConfig.getCurrentEvent();
+        String currentEvent = ""; //pretixConfig.getCurrentEvent();
         String currentOrg = pretixConfig.getOrganizer();
         for (Pair<String, String> organizerPair : organizers) {
             String organizer = organizerPair.getFirst();
@@ -489,7 +490,7 @@ public class PretixService {
             //pretixConfig.getConnectionHeaders(),
             null,
             null,
-            pretixConfig.getMaxConnections(),
+            0,//pretixConfig.getMaxConnections(),
             false
         );
     }
@@ -550,7 +551,7 @@ public class PretixService {
     ) throws TimeoutException {
         List<Integer> allowedStates = Arrays.stream(expectedStatusCodes).boxed().toList();
         Download.Response res = null;
-        int maxRetries = pretixConfig.getMaxConnectionRetries();
+        int maxRetries = 0;//pretixConfig.getMaxConnectionRetries();
         for (int i = 0; i < maxRetries; i++) {
             try {
                 //metricsFunc.run(); TODO
