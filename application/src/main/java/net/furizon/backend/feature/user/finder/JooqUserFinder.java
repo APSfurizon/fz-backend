@@ -22,9 +22,8 @@ public class JooqUserFinder implements UserFinder {
     @NotNull
     @Override
     public List<User> getAllUsers() {
-        return sqlQuery.fetch(
-                selectUser()
-            )
+        return sqlQuery
+            .fetch(selectUser())
             .stream()
             .map(JooqUserMapper::map)
             .toList();
