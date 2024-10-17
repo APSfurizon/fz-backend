@@ -3,7 +3,6 @@ package net.furizon.backend.feature.user.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
-import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
