@@ -42,11 +42,7 @@ public class JooqUserFinder implements UserFinder {
 
     private SelectJoinStep<?> selectUser() {
         return DSL
-            .select(
-                USERS.USER_ID,
-                USERS.USER_FIRST_NAME,
-                USERS.USER_LAST_NAME
-            )
+            .select(USERS.USER_ID)
             .from(USERS);
     }
 }

@@ -85,7 +85,7 @@ public class Rooms extends TableImpl<Record> {
     /**
      * The column <code>public.rooms.order_id</code>.
      */
-    public final TableField<Record, String> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.VARCHAR(64), this, "");
 
     private Rooms(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -166,13 +166,8 @@ public class Rooms extends TableImpl<Record> {
     }
 
     @Override
-    public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.UK3VXYR1CTRNQ6O6K36MF8KAD20);
-    }
-
-    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.ROOMS__FK8WMI1L6M4HI0FKSPAQDB26RIS);
+        return Arrays.asList(Keys.ROOMS__ROOMS_ORDERS_ID);
     }
 
     private transient OrdersPath _orders;
@@ -182,7 +177,7 @@ public class Rooms extends TableImpl<Record> {
      */
     public OrdersPath orders() {
         if (_orders == null)
-            _orders = new OrdersPath(this, Keys.ROOMS__FK8WMI1L6M4HI0FKSPAQDB26RIS, null);
+            _orders = new OrdersPath(this, Keys.ROOMS__ROOMS_ORDERS_ID, null);
 
         return _orders;
     }
@@ -195,7 +190,7 @@ public class Rooms extends TableImpl<Record> {
      */
     public RoomGuestsPath roomGuests() {
         if (_roomGuests == null)
-            _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__FKIJFN5MTG319VQTL9JPUA6XWFT.getInverseKey());
+            _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK.getInverseKey());
 
         return _roomGuests;
     }

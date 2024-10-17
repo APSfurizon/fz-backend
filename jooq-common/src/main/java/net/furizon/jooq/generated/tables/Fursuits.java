@@ -12,6 +12,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -88,9 +89,9 @@ public class Fursuits extends TableImpl<Record> {
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
 
     /**
-     * The column <code>public.fursuits.media_id</code>.
+     * The column <code>public.fursuits.media_id_propic</code>.
      */
-    public final TableField<Record, Long> MEDIA_ID = createField(DSL.name("media_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
 
     private Fursuits(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -171,25 +172,8 @@ public class Fursuits extends TableImpl<Record> {
     }
 
     @Override
-    public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.UK47Y138Q5E9DQWRWTJWI5OVLMW);
-    }
-
-    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.FURSUITS__FKGS95COIQ3BDFGO4RRI2XXA01E, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O);
-    }
-
-    private transient UsersPath _users;
-
-    /**
-     * Get the implicit join path to the <code>public.users</code> table.
-     */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.FURSUITS__FKGS95COIQ3BDFGO4RRI2XXA01E, null);
-
-        return _users;
+        return Arrays.asList(Keys.FURSUITS__FURSUITS_MEDIA_FK, Keys.FURSUITS__FURSUITS_USERS_FK);
     }
 
     private transient MediaPath _media;
@@ -199,9 +183,34 @@ public class Fursuits extends TableImpl<Record> {
      */
     public MediaPath media() {
         if (_media == null)
-            _media = new MediaPath(this, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O, null);
+            _media = new MediaPath(this, Keys.FURSUITS__FURSUITS_MEDIA_FK, null);
 
         return _media;
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.FURSUITS__FURSUITS_USERS_FK, null);
+
+        return _users;
+    }
+
+    private transient FursuitsEventsPath _fursuitsEvents;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.fursuits_events</code> table
+     */
+    public FursuitsEventsPath fursuitsEvents() {
+        if (_fursuitsEvents == null)
+            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_FURSUIT_FK.getInverseKey());
+
+        return _fursuitsEvents;
     }
 
     @Override
