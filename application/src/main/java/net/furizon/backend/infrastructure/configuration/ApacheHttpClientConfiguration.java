@@ -1,6 +1,6 @@
 package net.furizon.backend.infrastructure.configuration;
 
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
@@ -13,9 +13,9 @@ import org.zalando.logbook.httpclient5.LogbookHttpExecHandler;
 public class ApacheHttpClientConfiguration {
     @Bean
     @Scope(scopeName = "prototype")
-    public CloseableHttpClient closeableHttpClient(@NotNull final Logbook logbook) {
+    public HttpClientBuilder httpClientBuilder(@NotNull final Logbook logbook) {
         return HttpClients.custom()
             .addExecInterceptorFirst("Logbook", new LogbookHttpExecHandler(logbook))
-            .build();
+            .disableAutomaticRetries();
     }
 }
