@@ -2,21 +2,19 @@ package net.furizon.backend.service.pretix;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.db.repositories.pretix.EventRepository;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
-import net.furizon.backend.db.repositories.users.UserRepository;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.model.QuestionType;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.TextUtil;
 import net.furizon.backend.utils.ThrowableSupplier;
-import net.furizon.backend.utils.configs.PretixConfig;
 import net.furizon.backend.utils.pretix.Constants;
-import net.furizon.backend.utils.pretix.ExtraDays;
-import net.furizon.backend.utils.pretix.OrderStatus;
-import net.furizon.backend.utils.pretix.QuestionType;
-import net.furizon.backend.utils.pretix.Sponsorship;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.json.JSONArray;
@@ -44,8 +42,8 @@ import java.util.function.Consumer;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Deprecated
 public class PretixService {
-    private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final OrderRepository orderRepository;
     private final PretixConfig pretixConfig;
@@ -72,7 +70,9 @@ public class PretixService {
         public Map<Pair<Integer, String>, String> roomNames = new HashMap<>();
 
         public Map<Integer, QuestionType> questionTypeIds = new HashMap<>();
+
         public Map<Integer, String> questionIdentifiers = new HashMap<>();
+
         public Map<String, Integer> questionIdentifiersToId = new HashMap<>();
 
         public int questionSecret = -1;
@@ -103,21 +103,23 @@ public class PretixService {
     }
 
     private synchronized void reloadOrders() throws TimeoutException {
-        getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDatabase);
+        // TODO -> Replace on new HTTP Client
+        //getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDatabase);
     }
 
     private synchronized void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
-        getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
-            int id = item.getInt("id");
-            String identifier = item.getString("identifier");
-            pretixIdsCache.questionTypeIds.put(id, QuestionType.get(item.getString("type")));
-            pretixIdsCache.questionIdentifiers.put(id, identifier);
-            pretixIdsCache.questionIdentifiersToId.put(identifier, id);
+        // TODO -> Replace on new HTTP Client
+        //getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
+        //int id = item.getInt("id");
+        //String identifier = item.getString("identifier");
+        //pretixIdsCache.questionTypeIds.put(id, QuestionType.get(item.getString("type")));
+        //pretixIdsCache.questionIdentifiers.put(id, identifier);
+        //pretixIdsCache.questionIdentifiersToId.put(identifier, id);
 
-            if (item.getString("identifier").equals(Constants.QUESTIONS_ACCOUNT_SECRET)) {
-                pretixIdsCache.questionSecret = id;
-            }
-        });
+        //if (item.getString("identifier").equals(Constants.QUESTIONS_ACCOUNT_SECRET)) {
+        //pretixIdsCache.questionSecret = id;
+        //}
+        //});
     }
 
     private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
@@ -137,7 +139,8 @@ public class PretixService {
                 }
             };
 
-        getAllPages("items", pretixConfig.getEventUrl(), (item) -> {
+        // pretixConfig.getEventUrl(), not responsibility of config
+        getAllPages("items", "", (item) -> {
             String identifier = item.getJSONObject("meta_data").getString(Constants.METADATA_IDENTIFIER_ITEM);
             int itemId = item.getInt("id");
 
@@ -203,7 +206,8 @@ public class PretixService {
     public void fetchOrder(String code, String secret) throws TimeoutException {
         Download.Response res = doGet(
             "orders" + code.replaceAll("[^A-Za-z0-9]+", ""),
-            pretixConfig.getEventUrl(),
+            //pretixConfig.getEventUrl(), // pretixConfig.getEventUrl(), not responsibility of config
+            "",
             Constants.STATUS_CODES_WITH_404,
             null
         );
@@ -285,13 +289,14 @@ public class PretixService {
         // Fetch Order by code
         Order order = orderRepository.findByCodeAndEvent(
             code,
-            pretixConfig.getCurrentEventObj().getSlug()
+            //pretixConfig.getCurrentEventObj().getSlug() // not responsibility of config
+            ""
         ).orElse(null);
         if (hasTicket && (status == OrderStatus.PENDING || status == OrderStatus.PAID)) {
             // fetch user from db by userSecret
             User usr = null;
             if (!TextUtil.isEmpty(userSecret)) {
-                usr = userRepository.findBySecret(userSecret).orElse(null);
+                //usr = userRepository.findBySecret(userSecret).orElse(null);
             }
 
             if (order == null) {
@@ -310,7 +315,8 @@ public class PretixService {
                 hotelLocation,
                 membership,
                 usr,
-                pretixConfig.getCurrentEventObj(),
+                //pretixConfig.getCurrentEventObj(), // not responsibility of config
+                null,
                 answers
             );
             orderRepository.save(order);
@@ -341,7 +347,7 @@ public class PretixService {
     public void reloadEvents() throws TimeoutException {
         List<Pair<String, String>> organizers = reloadOrganizers();
 
-        String currentEvent = pretixConfig.getCurrentEvent();
+        String currentEvent = ""; //pretixConfig.getCurrentEvent();
         String currentOrg = pretixConfig.getOrganizer();
         for (Pair<String, String> organizerPair : organizers) {
             String organizer = organizerPair.getFirst();
@@ -354,22 +360,22 @@ public class PretixService {
                 }
 
                 String eventCode = res.getString("slug");
-                Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
-                if (evt == null) {
-                    evt = new Event(
-                        organizer,
-                        res.getString("slug"),
-                        organizerPair.getSecond(),
-                        names,
-                        res.getString("date_from"),
-                        res.getString("date_to")
-                    );
-                    evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
-                    evt = eventRepository.save(evt);
-                }
-                if (evt != null && evt.isCurrentEvent()) {
-                    pretixConfig.setCurrentEventObj(evt);
-                }
+                //Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
+                //if (evt == null) {
+                //evt = new Event(
+                //organizer,
+                //res.getString("slug"),
+                //organizerPair.getSecond(),
+                //names,
+                //res.getString("date_from"),
+                //res.getString("date_to")
+                //);
+                //evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
+                //evt = eventRepository.save(evt);
+                //}
+                //if (evt != null && evt.isCurrentEvent()) {
+                //pretixConfig.setCurrentEventObj(evt); // not responsibility of config
+                //}
             });
         }
     }
@@ -418,7 +424,8 @@ public class PretixService {
         Download.Response res = doPatch(
             "orderpositions/" + order.getAnswersMainPositionId(),
             payload,
-            pretixConfig.getEventUrl(),
+            //pretixConfig.getEventUrl(), // not responsibility of config
+            "",
             null,
             null
         );
@@ -470,14 +477,17 @@ public class PretixService {
     }
 
     // Let's find a best alternative for a custom client :3
+    // TODO -> Remove
     private Download httpClient;
 
     public void setupClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        // TODO -> Remove
         httpClient = new Download(
             pretixConfig.getConnectionTimeout(),
-            pretixConfig.getConnectionHeaders(),
+            //pretixConfig.getConnectionHeaders(),
             null,
-            pretixConfig.getMaxConnections(),
+            null,
+            0, //pretixConfig.getMaxConnections(),
             false
         );
     }
@@ -538,7 +548,7 @@ public class PretixService {
     ) throws TimeoutException {
         List<Integer> allowedStates = Arrays.stream(expectedStatusCodes).boxed().toList();
         Download.Response res = null;
-        int maxRetries = pretixConfig.getMaxConnectionRetries();
+        int maxRetries = 0; //pretixConfig.getMaxConnectionRetries();
         for (int i = 0; i < maxRetries; i++) {
             try {
                 //metricsFunc.run(); TODO

@@ -11,8 +11,6 @@ public class JooqUserMapper {
     public static User map(Record record) {
         return User.builder()
             .id(record.get(USERS.USER_ID))
-            .firstname(record.get(USERS.USER_FIRST_NAME))
-            .lastname(record.get(USERS.USER_LAST_NAME))
             .build();
     }
 }

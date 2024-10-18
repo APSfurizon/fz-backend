@@ -22,9 +22,8 @@ public class JooqUserFinder implements UserFinder {
     @NotNull
     @Override
     public List<User> getAllUsers() {
-        return sqlQuery.fetch(
-                selectUser()
-            )
+        return sqlQuery
+            .fetch(selectUser())
             .stream()
             .map(JooqUserMapper::map)
             .toList();
@@ -32,7 +31,7 @@ public class JooqUserFinder implements UserFinder {
 
     @Nullable
     @Override
-    public User findUserById(long id) {
+    public User findById(long id) {
         return sqlQuery
             .fetchFirst(
                 selectUser()
@@ -43,11 +42,7 @@ public class JooqUserFinder implements UserFinder {
 
     private SelectJoinStep<?> selectUser() {
         return DSL
-            .select(
-                USERS.USER_ID,
-                USERS.USER_FIRST_NAME,
-                USERS.USER_LAST_NAME
-            )
+            .select(USERS.USER_ID)
             .from(USERS);
     }
 }

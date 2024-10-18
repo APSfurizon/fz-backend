@@ -4,7 +4,6 @@
 package net.furizon.jooq.generated.tables;
 
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 import javax.annotation.processing.Generated;
@@ -72,17 +71,12 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.event_date_end</code>.
      */
-    public final TableField<Record, LocalDateTime> EVENT_DATE_END = createField(DSL.name("event_date_end"), SQLDataType.LOCALDATETIME(6), this, "");
+    public final TableField<Record, String> EVENT_DATE_END = createField(DSL.name("event_date_end"), SQLDataType.VARCHAR(32), this, "");
 
     /**
      * The column <code>public.events.event_date_from</code>.
      */
-    public final TableField<Record, LocalDateTime> EVENT_DATE_FROM = createField(DSL.name("event_date_from"), SQLDataType.LOCALDATETIME(6), this, "");
-
-    /**
-     * The column <code>public.events.event_names_raw</code>.
-     */
-    public final TableField<Record, String> EVENT_NAMES_RAW = createField(DSL.name("event_names_raw"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> EVENT_DATE_FROM = createField(DSL.name("event_date_from"), SQLDataType.VARCHAR(32), this, "");
 
     /**
      * The column <code>public.events.event_is_current</code>.
@@ -93,6 +87,16 @@ public class Events extends TableImpl<Record> {
      * The column <code>public.events.event_public_url</code>.
      */
     public final TableField<Record, String> EVENT_PUBLIC_URL = createField(DSL.name("event_public_url"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.events.event_names</code>.
+     */
+    public final TableField<Record, String> EVENT_NAMES = createField(DSL.name("event_names"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.events.event_names_raw</code>.
+     */
+    public final TableField<Record, String> EVENT_NAMES_RAW = createField(DSL.name("event_names_raw"), SQLDataType.VARCHAR(255), this, "");
 
     private Events(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -175,7 +179,7 @@ public class Events extends TableImpl<Record> {
      */
     public OrdersPath orders() {
         if (_orders == null)
-            _orders = new OrdersPath(this, null, Keys.ORDERS__FK43G2YROY6L7LFOMW37WAJKQRN.getInverseKey());
+            _orders = new OrdersPath(this, null, Keys.ORDERS__ORDERS_EVENTS_ID.getInverseKey());
 
         return _orders;
     }

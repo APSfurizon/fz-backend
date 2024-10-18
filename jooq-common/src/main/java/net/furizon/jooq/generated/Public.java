@@ -12,12 +12,17 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.tables.Authentications;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.Fursuits;
+import net.furizon.jooq.generated.tables.FursuitsEvents;
+import net.furizon.jooq.generated.tables.GroupPermissions;
 import net.furizon.jooq.generated.tables.Groups;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MediaTags;
+import net.furizon.jooq.generated.tables.MembershipCards;
+import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
+import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Tags;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
@@ -63,6 +68,16 @@ public class Public extends SchemaImpl {
     public final Fursuits FURSUITS = Fursuits.FURSUITS;
 
     /**
+     * The table <code>public.fursuits_events</code>.
+     */
+    public final FursuitsEvents FURSUITS_EVENTS = FursuitsEvents.FURSUITS_EVENTS;
+
+    /**
+     * The table <code>public.group_permissions</code>.
+     */
+    public final GroupPermissions GROUP_PERMISSIONS = GroupPermissions.GROUP_PERMISSIONS;
+
+    /**
      * The table <code>public.groups</code>.
      */
     public final Groups GROUPS = Groups.GROUPS;
@@ -78,6 +93,16 @@ public class Public extends SchemaImpl {
     public final MediaTags MEDIA_TAGS = MediaTags.MEDIA_TAGS;
 
     /**
+     * The table <code>public.membership_cards</code>.
+     */
+    public final MembershipCards MEMBERSHIP_CARDS = MembershipCards.MEMBERSHIP_CARDS;
+
+    /**
+     * The table <code>public.membership_info</code>.
+     */
+    public final MembershipInfo MEMBERSHIP_INFO = MembershipInfo.MEMBERSHIP_INFO;
+
+    /**
      * The table <code>public.orders</code>.
      */
     public final Orders ORDERS = Orders.ORDERS;
@@ -91,6 +116,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.rooms</code>.
      */
     public final Rooms ROOMS = Rooms.ROOMS;
+
+    /**
+     * The table <code>public.schema_migrations</code>.
+     */
+    public final SchemaMigrations SCHEMA_MIGRATIONS = SchemaMigrations.SCHEMA_MIGRATIONS;
 
     /**
      * The table <code>public.tags</code>.
@@ -126,12 +156,17 @@ public class Public extends SchemaImpl {
             Authentications.AUTHENTICATIONS,
             Events.EVENTS,
             Fursuits.FURSUITS,
+            FursuitsEvents.FURSUITS_EVENTS,
+            GroupPermissions.GROUP_PERMISSIONS,
             Groups.GROUPS,
             Media.MEDIA,
             MediaTags.MEDIA_TAGS,
+            MembershipCards.MEMBERSHIP_CARDS,
+            MembershipInfo.MEMBERSHIP_INFO,
             Orders.ORDERS,
             RoomGuests.ROOM_GUESTS,
             Rooms.ROOMS,
+            SchemaMigrations.SCHEMA_MIGRATIONS,
             Tags.TAGS,
             UserGroup.USER_GROUP,
             Users.USERS
