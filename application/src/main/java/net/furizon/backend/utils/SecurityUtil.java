@@ -26,10 +26,10 @@ public class SecurityUtil {
             return user;
         } else {
             log.error("User requested but not found in SecurityContextHolder");
-            throw ApiException.builder()
-                .status(HttpStatus.UNAUTHORIZED)
-                .message("Authentication required")
-                .build();
+            throw new ApiException(
+                HttpStatus.UNAUTHORIZED,
+                "Authentication required"
+            );
         }
     }
 

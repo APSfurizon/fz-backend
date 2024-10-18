@@ -1,8 +1,10 @@
 package net.furizon.backend.infrastructure.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.furizon.backend.infrastructure.web.dto.HttpErrorResponse;
 import net.furizon.backend.infrastructure.web.dto.MethodArgumentNotValidError;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,14 +14,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class CommonControllerAdvice {
     @ExceptionHandler(ApiException.class)
-    ResponseEntity<HttpErrorResponse<?>> handleApiException(ApiException ex) {
+    ResponseEntity<HttpErrorResponse<?>> handleApiException(
+        @NotNull ApiException ex,
+        @NotNull HttpServletRequest request
+    ) {
         return ResponseEntity
             .status(ex.getStatus())
             .body(
                 HttpErrorResponse.builder()
                     .message(ex.getMessage())
                     .errors(ex.getErrors())
-                    .requestId("requestId") // TODO -> Implement it later
+                    .requestId(request.getRequestId()) // TODO -> Implement it later
                     .build()
             );
     }

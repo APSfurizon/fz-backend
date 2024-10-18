@@ -1,4 +1,4 @@
-package net.furizon.backend.infrastructure.security;
+package net.furizon.backend.infrastructure.security.filter;
 
 
 import jakarta.servlet.FilterChain;

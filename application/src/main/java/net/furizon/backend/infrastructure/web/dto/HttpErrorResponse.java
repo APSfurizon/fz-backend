@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,10 @@ public class HttpErrorResponse<R> {
     @NotNull
     private final String message;
 
-    @Nullable
-    private final List<R> errors;
-
     @NotNull
     private final String requestId;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Nullable
+    private final List<R> errors;
 }

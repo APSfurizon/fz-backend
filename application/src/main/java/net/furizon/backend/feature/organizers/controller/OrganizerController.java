@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/restapi/v0/organizers")
+@RequestMapping("/internal/organizers")
 @RequiredArgsConstructor
 public class OrganizerController {
     private final OrganizersFinder finder;

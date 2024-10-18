@@ -1,10 +1,11 @@
-package net.furizon.backend.security;
+package net.furizon.backend.infrastructure.security.configuration;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
@@ -41,51 +38,44 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    //private final UserDetailsService userDetailsService;
-
-    //private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
+    private final DatabaseSessionFilter databaseSessionFilter;
 
     @Bean
     public SecurityFilterChain filterChain(
-        HttpSecurity http,
-        AuthenticationSuccessHandler primarySuccessHandler
+        HttpSecurity http
     ) throws Exception {
         // Map the allowed endpoints
-        http.authorizeHttpRequests(customizer -> {
-            customizer
-                .requestMatchers(antMatcher(HttpMethod.POST, "/api/v1/authentication/login")).permitAll()
-                .requestMatchers("/restapi/v0/**").permitAll()
+        return http
+            .cors(customizer ->
+                customizer.configurationSource(corsConfigurationSource())
+            )
+            .authorizeHttpRequests(customizer -> customizer
+                .requestMatchers(antMatcher(HttpMethod.POST, "/api/v1/authentication/login"))
+                .permitAll()
+                // TODO -> Remove it later (just for testing)
+                .requestMatchers("/internal/**")
+                .permitAll()
                 .anyRequest()
-                .authenticated();
-        });
-
-        //http.oauth2Login(customizer -> {
-        //customizer.successHandler(oauth2LoginSuccessHandler);
-        //});
-
-        // Show unauthorized error
-        http.exceptionHandling(customizer -> {
-            customizer.authenticationEntryPoint(
-                (request, response, authException) -> {
-                    response.sendError(401, "Unauthorized");
-                });
-        });
-
-        // Add the credentials verification filter
-        http.addFilterBefore(new UsernamePasswordAuthenticationFilter(), LogoutFilter.class);
-        //http.userDetailsService(userDetailsService);
-
-        http.csrf(csrf -> {
-            csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler());
-        }).addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
-
-        http.cors(customizer -> {
-            customizer.configurationSource(corsConfigurationSource());
-        });
-
-        return http.build();
+                .authenticated()
+            )
+            // Show unauthorized error
+            .exceptionHandling(customizer -> {
+                customizer.authenticationEntryPoint(
+                    (request, response, authException) -> {
+                        response.sendError(401, "Unauthorized");
+                    });
+            })
+            .addFilterAt(
+                databaseSessionFilter,
+                BasicAuthenticationFilter.class
+            )
+            .build();
+        // if we will implement token based auth - we don't need it (remove it if will not plan to use csrf)
+        //http.csrf(csrf -> {
+        //csrf
+        //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        //.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler());
+        //}).addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
     }
 
     @Bean
@@ -94,16 +84,26 @@ public class SecurityConfiguration {
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(@NotNull HttpServletRequest request) {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost"));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setAllowCredentials(true);
-                return config;
-            }
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(
+                List.of("http://localhost"))
+            ;
+            config.setAllowedMethods(
+                List.of(
+                    HttpMethod.GET.name(),
+                    HttpMethod.POST.name(),
+                    HttpMethod.PUT.name(),
+                    HttpMethod.DELETE.name(),
+                    HttpMethod.PATCH.name(),
+                    HttpMethod.OPTIONS.name()
+                )
+            );
+            config.setAllowedHeaders(
+                List.of("*")
+            );
+            config.setAllowCredentials(true);
+            return config;
         };
     }
 
