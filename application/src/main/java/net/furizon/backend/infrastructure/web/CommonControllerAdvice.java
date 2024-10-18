@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import static net.furizon.backend.infrastructure.web.Web.Constants.Mdc.MDC_CORRELATION_ID;
+
 @RestControllerAdvice
 public class CommonControllerAdvice {
     @ExceptionHandler(ApiException.class)
@@ -24,13 +26,16 @@ public class CommonControllerAdvice {
                 HttpErrorResponse.builder()
                     .message(ex.getMessage())
                     .errors(ex.getErrors())
-                    .requestId(request.getRequestId()) // TODO -> Implement it later
+                    .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()
             );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<HttpErrorResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    ResponseEntity<HttpErrorResponse<?>> handleMethodArgumentNotValidException(
+        @NotNull MethodArgumentNotValidException ex,
+        @NotNull HttpServletRequest request
+    ) {
         //.forEach(
         //(error) -> {
         //if (error instanceof FieldError fieldError) {
@@ -59,7 +64,7 @@ public class CommonControllerAdvice {
                 HttpErrorResponse.<MethodArgumentNotValidError>builder()
                     .message("Unprocessable entity")
                     .errors(errors)
-                    .requestId("requestId")
+                    .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()
             );
     }
