@@ -12,12 +12,8 @@ import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.furizon.backend.utils.TextUtil;
-import org.json.JSONObject;
 
-import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,46 +50,4 @@ public final class Event {
 
     @OneToMany(mappedBy = "orderEvent", fetch = FetchType.LAZY)
     private Set<Order> orders;
-
-    public Event() {
-    }
-
-    public Event(
-        String organizer,
-        String eventCode,
-        String publicUrl,
-        Map<String, String> eventName,
-        String dateFrom,
-        String dateEnd
-    ) {
-        slug = getSlug(organizer, eventCode);
-        this.publicUrl = TextUtil.leadingSlash(publicUrl) + eventCode;
-        this.eventNames = eventName;
-        this.eventNamesRaw = new JSONObject(eventName).toString();
-        this.dateFrom = Date.from(ZonedDateTime.parse(dateFrom).toInstant());
-        this.dateEnd = Date.from(ZonedDateTime.parse(dateEnd).toInstant());
-    }
-
-    public String getEventName(String lang) {
-        if (eventNames == null) {
-            eventNames = new HashMap<>();
-            JSONObject obj = new JSONObject(eventNamesRaw);
-            for (String s : obj.keySet()) {
-                eventNames.put(s, obj.getString(s));
-            }
-        }
-        return eventNames.get(lang);
-    }
-
-    public void setSlug(String organizer, String event) {
-        this.slug = getSlug(organizer, event);
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
-
-    public static String getSlug(String organizer, String event) {
-        return organizer + "/" + event;
-    }
 }

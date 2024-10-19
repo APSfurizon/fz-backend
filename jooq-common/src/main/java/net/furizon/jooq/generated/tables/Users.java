@@ -4,7 +4,9 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.processing.Generated;
 
@@ -13,6 +15,8 @@ import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Authentications.AuthenticationsPath;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
+import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
+import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
 import net.furizon.jooq.generated.tables.UserGroup.UserGroupPath;
@@ -75,6 +79,26 @@ public class Users extends TableImpl<Record> {
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
+     * The column <code>public.users.user_fursona_name</code>.
+     */
+    public final TableField<Record, String> USER_FURSONA_NAME = createField(DSL.name("user_fursona_name"), SQLDataType.VARCHAR(64), this, "");
+
+    /**
+     * The column <code>public.users.user_locale</code>.
+     */
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(255).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
+
+    /**
+     * The column <code>public.users.user_secret</code>.
+     */
+    public final TableField<Record, String> USER_SECRET = createField(DSL.name("user_secret"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>public.users.media_id_propic</code>.
+     */
+    public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.users.user_first_name</code>.
      */
     public final TableField<Record, String> USER_FIRST_NAME = createField(DSL.name("user_first_name"), SQLDataType.VARCHAR(255), this, "");
@@ -83,16 +107,6 @@ public class Users extends TableImpl<Record> {
      * The column <code>public.users.user_last_name</code>.
      */
     public final TableField<Record, String> USER_LAST_NAME = createField(DSL.name("user_last_name"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.users.user_locale</code>.
-     */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.users.user_secret</code>.
-     */
-    public final TableField<Record, String> USER_SECRET = createField(DSL.name("user_secret"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     private Users(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -172,17 +186,26 @@ public class Users extends TableImpl<Record> {
         return Keys.USERS_PKEY;
     }
 
-    private transient OrdersPath _orders;
+    @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.USERS_UNIQUE_SECRET);
+    }
+
+    @Override
+    public List<ForeignKey<Record, ?>> getReferences() {
+        return Arrays.asList(Keys.USERS__USER_MEDIA_FK);
+    }
+
+    private transient MediaPath _media;
 
     /**
-     * Get the implicit to-many join path to the <code>public.orders</code>
-     * table
+     * Get the implicit join path to the <code>public.media</code> table.
      */
-    public OrdersPath orders() {
-        if (_orders == null)
-            _orders = new OrdersPath(this, null, Keys.ORDERS__FK32QL8UBNTJ5UH44PH9659TIIH.getInverseKey());
+    public MediaPath media() {
+        if (_media == null)
+            _media = new MediaPath(this, Keys.USERS__USER_MEDIA_FK, null);
 
-        return _orders;
+        return _media;
     }
 
     private transient AuthenticationsPath _authentications;
@@ -193,22 +216,22 @@ public class Users extends TableImpl<Record> {
      */
     public AuthenticationsPath authentications() {
         if (_authentications == null)
-            _authentications = new AuthenticationsPath(this, null, Keys.AUTHENTICATIONS__FK3NIFXK39Y3BOH8Q91NFNPFJF1.getInverseKey());
+            _authentications = new AuthenticationsPath(this, null, Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK.getInverseKey());
 
         return _authentications;
     }
 
-    private transient UserGroupPath _userGroup;
+    private transient MembershipCardsPath _membershipCards;
 
     /**
-     * Get the implicit to-many join path to the <code>public.user_group</code>
-     * table
+     * Get the implicit to-many join path to the
+     * <code>public.membership_cards</code> table
      */
-    public UserGroupPath userGroup() {
-        if (_userGroup == null)
-            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__FK7K9ADE3LQBO483U9VURYXMM34.getInverseKey());
+    public MembershipCardsPath membershipCards() {
+        if (_membershipCards == null)
+            _membershipCards = new MembershipCardsPath(this, null, Keys.MEMBERSHIP_CARDS__CARD_USER_FK.getInverseKey());
 
-        return _userGroup;
+        return _membershipCards;
     }
 
     private transient FursuitsPath _fursuits;
@@ -219,9 +242,35 @@ public class Users extends TableImpl<Record> {
      */
     public FursuitsPath fursuits() {
         if (_fursuits == null)
-            _fursuits = new FursuitsPath(this, null, Keys.FURSUITS__FKGS95COIQ3BDFGO4RRI2XXA01E.getInverseKey());
+            _fursuits = new FursuitsPath(this, null, Keys.FURSUITS__FURSUITS_USERS_FK.getInverseKey());
 
         return _fursuits;
+    }
+
+    private transient MembershipInfoPath _membershipInfo;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.membership_info</code> table
+     */
+    public MembershipInfoPath membershipInfo() {
+        if (_membershipInfo == null)
+            _membershipInfo = new MembershipInfoPath(this, null, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK.getInverseKey());
+
+        return _membershipInfo;
+    }
+
+    private transient OrdersPath _orders;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.orders</code>
+     * table
+     */
+    public OrdersPath orders() {
+        if (_orders == null)
+            _orders = new OrdersPath(this, null, Keys.ORDERS__ORDERS_USERS_ID.getInverseKey());
+
+        return _orders;
     }
 
     private transient RoomGuestsPath _roomGuests;
@@ -232,21 +281,22 @@ public class Users extends TableImpl<Record> {
      */
     public RoomGuestsPath roomGuests() {
         if (_roomGuests == null)
-            _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__FKL1DL60HSAFJ4YVCHREURMFFFN.getInverseKey());
+            _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__ROOM_GUESTS_USERS_FK.getInverseKey());
 
         return _roomGuests;
     }
 
-    private transient MediaPath _media;
+    private transient UserGroupPath _userGroup;
 
     /**
-     * Get the implicit to-many join path to the <code>public.media</code> table
+     * Get the implicit to-many join path to the <code>public.user_group</code>
+     * table
      */
-    public MediaPath media() {
-        if (_media == null)
-            _media = new MediaPath(this, null, Keys.MEDIA__FKND8HH0YN7QVV4PQYK8MG7L1OX.getInverseKey());
+    public UserGroupPath userGroup() {
+        if (_userGroup == null)
+            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__USER_GROUP_USERS_FK.getInverseKey());
 
-        return _media;
+        return _userGroup;
     }
 
     @Override

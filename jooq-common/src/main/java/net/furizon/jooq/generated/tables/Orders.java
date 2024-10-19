@@ -70,6 +70,61 @@ public class Orders extends TableImpl<Record> {
     }
 
     /**
+     * The column <code>public.orders.order_code</code>.
+     */
+    public final TableField<Record, String> ORDER_CODE = createField(DSL.name("order_code"), SQLDataType.VARCHAR(64).nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_answers</code>.
+     */
+    public final TableField<Record, String> ORDER_ANSWERS = createField(DSL.name("order_answers"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_status</code>.
+     */
+    public final TableField<Record, Short> ORDER_STATUS = createField(DSL.name("order_status"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
+
+    /**
+     * The column <code>public.orders.order_answers_main_position_id</code>.
+     */
+    public final TableField<Record, Integer> ORDER_ANSWERS_MAIN_POSITION_ID = createField(DSL.name("order_answers_main_position_id"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_daily_days</code>.
+     */
+    public final TableField<Record, Long> ORDER_DAILY_DAYS = createField(DSL.name("order_daily_days"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_extra_days_type</code>.
+     */
+    public final TableField<Record, Short> ORDER_EXTRA_DAYS_TYPE = createField(DSL.name("order_extra_days_type"), SQLDataType.SMALLINT, this, "");
+
+    /**
+     * The column <code>public.orders.has_membership</code>.
+     */
+    public final TableField<Record, Boolean> HAS_MEMBERSHIP = createField(DSL.name("has_membership"), SQLDataType.BOOLEAN.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_secret</code>.
+     */
+    public final TableField<Record, String> ORDER_SECRET = createField(DSL.name("order_secret"), SQLDataType.VARCHAR(32), this, "");
+
+    /**
+     * The column <code>public.orders.order_sponsorship_type</code>.
+     */
+    public final TableField<Record, Short> ORDER_SPONSORSHIP_TYPE = createField(DSL.name("order_sponsorship_type"), SQLDataType.SMALLINT, this, "");
+
+    /**
+     * The column <code>public.orders.event_id</code>.
+     */
+    public final TableField<Record, String> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.orders.user_id</code>.
+     */
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.orders.code</code>.
      */
     public final TableField<Record, String> CODE = createField(DSL.name("code"), SQLDataType.VARCHAR(255).nullable(false), this, "");
@@ -95,19 +150,9 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> EXTRA_DAYS = createField(DSL.name("extra_days"), SQLDataType.SMALLINT, this, "");
 
     /**
-     * The column <code>public.orders.has_membership</code>.
-     */
-    public final TableField<Record, Boolean> HAS_MEMBERSHIP = createField(DSL.name("has_membership"), SQLDataType.BOOLEAN.nullable(false), this, "");
-
-    /**
      * The column <code>public.orders.hotel_location</code>.
      */
     public final TableField<Record, String> HOTEL_LOCATION = createField(DSL.name("hotel_location"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.orders.order_status</code>.
-     */
-    public final TableField<Record, Short> ORDER_STATUS = createField(DSL.name("order_status"), SQLDataType.SMALLINT, this, "");
 
     /**
      * The column <code>public.orders.pretix_order_secret</code>.
@@ -123,16 +168,6 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.sponsorship</code>.
      */
     public final TableField<Record, Short> SPONSORSHIP = createField(DSL.name("sponsorship"), SQLDataType.SMALLINT, this, "");
-
-    /**
-     * The column <code>public.orders.event_id</code>.
-     */
-    public final TableField<Record, String> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.orders.user_id</code>.
-     */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
 
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -209,19 +244,7 @@ public class Orders extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.ORDERS__FK32QL8UBNTJ5UH44PH9659TIIH, Keys.ORDERS__FK43G2YROY6L7LFOMW37WAJKQRN);
-    }
-
-    private transient UsersPath _users;
-
-    /**
-     * Get the implicit join path to the <code>public.users</code> table.
-     */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.ORDERS__FK32QL8UBNTJ5UH44PH9659TIIH, null);
-
-        return _users;
+        return Arrays.asList(Keys.ORDERS__ORDERS_EVENTS_ID, Keys.ORDERS__ORDERS_USERS_ID);
     }
 
     private transient EventsPath _events;
@@ -231,9 +254,21 @@ public class Orders extends TableImpl<Record> {
      */
     public EventsPath events() {
         if (_events == null)
-            _events = new EventsPath(this, Keys.ORDERS__FK43G2YROY6L7LFOMW37WAJKQRN, null);
+            _events = new EventsPath(this, Keys.ORDERS__ORDERS_EVENTS_ID, null);
 
         return _events;
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.ORDERS__ORDERS_USERS_ID, null);
+
+        return _users;
     }
 
     private transient RoomsPath _rooms;
@@ -243,7 +278,7 @@ public class Orders extends TableImpl<Record> {
      */
     public RoomsPath rooms() {
         if (_rooms == null)
-            _rooms = new RoomsPath(this, null, Keys.ROOMS__FK8WMI1L6M4HI0FKSPAQDB26RIS.getInverseKey());
+            _rooms = new RoomsPath(this, null, Keys.ROOMS__ROOMS_ORDERS_ID.getInverseKey());
 
         return _rooms;
     }
@@ -251,9 +286,11 @@ public class Orders extends TableImpl<Record> {
     @Override
     public List<Check<Record>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("orders_extra_days_check"), "(((extra_days >= 0) AND (extra_days <= 3)))", true),
-            Internal.createCheck(this, DSL.name("orders_order_status_check"), "(((order_status >= 0) AND (order_status <= 3)))", true),
-            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((sponsorship >= 0) AND (sponsorship <= 2)))", true)
+            Internal.createCheck(this, DSL.name("orders_extra_days_check"), "(((order_extra_days_type >= 0) AND (order_extra_days_type <= 3)))", true),
+            Internal.createCheck(this, DSL.name("orders_extra_days_check1"), "(((extra_days >= 0) AND (extra_days <= 3)))", true),
+            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2)))", true),
+            Internal.createCheck(this, DSL.name("orders_sponsorship_check1"), "(((sponsorship >= 0) AND (sponsorship <= 2)))", true),
+            Internal.createCheck(this, DSL.name("orders_status_check"), "(((order_status >= 0) AND (order_status <= 3)))", true)
         );
     }
 

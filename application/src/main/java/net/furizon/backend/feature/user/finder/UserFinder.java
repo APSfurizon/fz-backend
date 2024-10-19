@@ -11,5 +11,5 @@ public interface UserFinder {
     List<User> getAllUsers();
 
     @Nullable
-    User findUserById(long id);
+    User findById(long id);
 }

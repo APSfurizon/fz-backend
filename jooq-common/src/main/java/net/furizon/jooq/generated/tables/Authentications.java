@@ -198,12 +198,12 @@ public class Authentications extends TableImpl<Record> {
 
     @Override
     public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.UK558QV80E1CP0TIYV7YYBTGQQ2, Keys.UKSJIUBBLOQ36P1Q26IHVY31IG1);
+        return Arrays.asList(Keys.AUTHENTICATIONS_UNIQUE_EMAIL, Keys.AUTHENTICATIONS_UNIQUE_USER_ID);
     }
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.AUTHENTICATIONS__FK3NIFXK39Y3BOH8Q91NFNPFJF1);
+        return Arrays.asList(Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK);
     }
 
     private transient UsersPath _users;
@@ -213,7 +213,7 @@ public class Authentications extends TableImpl<Record> {
      */
     public UsersPath users() {
         if (_users == null)
-            _users = new UsersPath(this, Keys.AUTHENTICATIONS__FK3NIFXK39Y3BOH8Q91NFNPFJF1, null);
+            _users = new UsersPath(this, Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK, null);
 
         return _users;
     }

@@ -162,7 +162,7 @@ public class RoomGuests extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.ROOM_GUESTS__FKIJFN5MTG319VQTL9JPUA6XWFT, Keys.ROOM_GUESTS__FKL1DL60HSAFJ4YVCHREURMFFFN);
+        return Arrays.asList(Keys.ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK, Keys.ROOM_GUESTS__ROOM_GUESTS_USERS_FK);
     }
 
     private transient RoomsPath _rooms;
@@ -172,7 +172,7 @@ public class RoomGuests extends TableImpl<Record> {
      */
     public RoomsPath rooms() {
         if (_rooms == null)
-            _rooms = new RoomsPath(this, Keys.ROOM_GUESTS__FKIJFN5MTG319VQTL9JPUA6XWFT, null);
+            _rooms = new RoomsPath(this, Keys.ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK, null);
 
         return _rooms;
     }
@@ -184,7 +184,7 @@ public class RoomGuests extends TableImpl<Record> {
      */
     public UsersPath users() {
         if (_users == null)
-            _users = new UsersPath(this, Keys.ROOM_GUESTS__FKL1DL60HSAFJ4YVCHREURMFFFN, null);
+            _users = new UsersPath(this, Keys.ROOM_GUESTS__ROOM_GUESTS_USERS_FK, null);
 
         return _users;
     }
