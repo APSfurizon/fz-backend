@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.db.entities.pretix.Order;
 import net.furizon.backend.db.entities.users.User;
-import net.furizon.backend.db.repositories.pretix.EventRepository;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -44,7 +43,6 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 @Deprecated
 public class PretixService {
-    private final EventRepository eventRepository;
     private final OrderRepository orderRepository;
     private final PretixConfig pretixConfig;
 
@@ -80,13 +78,9 @@ public class PretixService {
     }
 
     public boolean reloadEverything() {
-        try {
-            reloadEvents();
-            reloadOrderData();
-            return true;
-        } catch (TimeoutException te) {
-            return false;
-        }
+        // TODO -> Migrate
+        reloadOrderData();
+        return true;
     }
 
     public boolean reloadOrderData() {
@@ -342,42 +336,6 @@ public class PretixService {
             )
         );
         return organizers;
-    }
-
-    public void reloadEvents() throws TimeoutException {
-        List<Pair<String, String>> organizers = reloadOrganizers();
-
-        String currentEvent = ""; //pretixConfig.getCurrentEvent();
-        String currentOrg = pretixConfig.getOrganizer();
-        for (Pair<String, String> organizerPair : organizers) {
-            String organizer = organizerPair.getFirst();
-            getAllPages(TextUtil.url("organizers", organizer, "events"), pretixConfig.getBaseUrl(), (res) -> {
-
-                Map<String, String> names = new HashMap<>();
-                JSONObject obj = res.getJSONObject("name");
-                for (String s : obj.keySet()) {
-                    names.put(s, obj.getString(s));
-                }
-
-                String eventCode = res.getString("slug");
-                //Event evt = eventRepository.findById(Event.getSlug(organizer, eventCode)).orElse(null);
-                //if (evt == null) {
-                //evt = new Event(
-                //organizer,
-                //res.getString("slug"),
-                //organizerPair.getSecond(),
-                //names,
-                //res.getString("date_from"),
-                //res.getString("date_to")
-                //);
-                //evt.setCurrentEvent(evt.getSlug().equals(Event.getSlug(currentOrg, currentEvent)));
-                //evt = eventRepository.save(evt);
-                //}
-                //if (evt != null && evt.isCurrentEvent()) {
-                //pretixConfig.setCurrentEventObj(evt); // not responsibility of config
-                //}
-            });
-        }
     }
 
 

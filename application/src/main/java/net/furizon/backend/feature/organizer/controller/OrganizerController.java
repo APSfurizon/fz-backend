@@ -1,8 +1,8 @@
-package net.furizon.backend.feature.organizers.controller;
+package net.furizon.backend.feature.organizer.controller;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.organizers.Organizer;
-import net.furizon.backend.feature.organizers.finder.OrganizersFinder;
+import net.furizon.backend.feature.organizer.PretixOrganizer;
+import net.furizon.backend.feature.organizer.finder.OrganizersFinder;
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ public class OrganizerController {
     private final OrganizersFinder finder;
 
     @GetMapping
-    PretixPaging<Organizer> organizers() {
+    PretixPaging<PretixOrganizer> organizers() {
         return finder.getPagedOrganizers(1);
     }
 }

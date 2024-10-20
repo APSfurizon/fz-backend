@@ -1,11 +1,11 @@
-package net.furizon.backend.feature.organizers;
+package net.furizon.backend.feature.organizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-public class Organizer {
+public class PretixOrganizer {
     @NotNull
     private final String name;
 

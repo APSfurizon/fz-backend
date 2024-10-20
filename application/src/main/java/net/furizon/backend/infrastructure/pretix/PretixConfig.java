@@ -23,7 +23,10 @@ public class PretixConfig implements HttpConfig {
     private String apiKey;
 
     @NotNull
-    private String organizer;
+    private String defaultOrganizer;
+
+    @NotNull
+    private String defaultEvent;
 
     private int connectionTimeout;
 
