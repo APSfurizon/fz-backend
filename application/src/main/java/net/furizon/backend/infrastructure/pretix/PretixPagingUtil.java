@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.pretix;
 
-import kotlin.Pair;
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
+import org.springframework.data.util.Pair;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -20,7 +20,7 @@ public class PretixPagingUtil {
                 continue;
             }
 
-            consumer.accept(new Pair<>(response.getResults(), response));
+            consumer.accept(Pair.of(response.getResults(), response));
 
             hasNext = response.hasNext();
             if (hasNext) {
