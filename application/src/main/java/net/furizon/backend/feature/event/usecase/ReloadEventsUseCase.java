@@ -80,7 +80,7 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
 
                         insertEventAction.invoke(newEvent);
 
-                        // in case if we will can't find an existed current event
+                        // in case if we won't find an existed current event
                         if (isCurrentEvent) {
                             currentEvent = newEvent;
                         }
