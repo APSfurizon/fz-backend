@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.pretix.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +24,7 @@ public enum QuestionType {
     COUNTRY_CODE("CC"),
     PHONE_NUMBER("TEL");
 
+    @JsonValue
     @Getter
     private final String code;
 

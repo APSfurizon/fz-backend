@@ -1,5 +1,7 @@
 package net.furizon.backend.utils.pretix;
 
+// TODO -> Remove it later
+@Deprecated
 public class Constants {
     public static final String METADATA_IDENTIFIER_ITEM = "item_name";
     //public static final String METADATA_CATEGORY_IDENTIFIER = "category_name";
