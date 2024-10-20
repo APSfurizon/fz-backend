@@ -9,5 +9,7 @@ public interface PretixInformation {
     @NotNull
     Optional<Event> getCurrentEvent();
 
+    int getQuestionSecretId();
+
     void resetCache();
 }

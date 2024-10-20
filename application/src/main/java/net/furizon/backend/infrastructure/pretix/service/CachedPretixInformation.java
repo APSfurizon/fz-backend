@@ -21,7 +21,10 @@ public class CachedPretixInformation implements PretixInformation {
     private final UseCaseExecutor useCaseExecutor;
 
     @NotNull
-    private final AtomicReference<Event> currentEvent = new AtomicReference<>();
+    private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
+
+    @NotNull
+    private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
 
     @PostConstruct
     public void init() {
@@ -33,6 +36,11 @@ public class CachedPretixInformation implements PretixInformation {
     @Override
     public Optional<Event> getCurrentEvent() {
         return Optional.ofNullable(currentEvent.get());
+    }
+
+    @Override
+    public int getQuestionSecretId() {
+        return questionSecretId.get();
     }
 
     @Override
