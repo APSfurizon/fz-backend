@@ -8,6 +8,7 @@ import net.furizon.backend.feature.event.finder.EventFinder;
 import net.furizon.backend.feature.event.finder.pretix.PretixEventFinder;
 import net.furizon.backend.feature.organizer.finder.OrganizersFinder;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -49,60 +51,54 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
             throw new ApiException("Could not get organizers from pretix");
         }
 
-        Event currentEvent = null;
+        AtomicReference<Event> currentEvent = new AtomicReference<>(null);
         for (final var organizer : organizers) {
-            var currentEventPage = PretixPaging.DEFAULT_PAGE;
-            boolean hasNext = true;
-            while (hasNext) {
-                final var eventResult = pretixEventFinder.getPagedEvents(organizer.getSlug(), currentEventPage);
-                final var events = eventResult.getResults();
-                if (events == null) {
-                    continue;
-                }
-                final var eventsName = events.stream().map(it -> it.getName().values())
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
+            PretixPagingUtil.fetchAll(
+                paging -> pretixEventFinder.getPagedEvents(organizer.getSlug(), paging),
+                result -> {
+                    final var events = result.getFirst();
+                    final var eventsName = events.stream().map(it -> it.getName().values())
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet());
 
-                for (final var pretixEvent : events) {
-                    final var databaseEvent = eventFinder.findEventBySlug(pretixEvent.getSlug());
-                    if (databaseEvent == null) {
-                        final boolean isCurrentEvent = pretixConfig.getDefaultOrganizer().equals(organizer.getSlug())
-                            && pretixConfig.getDefaultEvent().equals(pretixEvent.getSlug());
+                    for (final var event : events) {
+                        final var databaseEvent = eventFinder.findEventBySlug(event.getSlug());
+                        if (databaseEvent == null) {
+                            final boolean isCurrentEvent = pretixConfig
+                                .getDefaultOrganizer()
+                                .equals(organizer.getSlug()) && pretixConfig
+                                .getDefaultEvent()
+                                .equals(event.getSlug());
 
-                        final var newEvent = Event.builder()
-                            .slug(pretixEvent.getSlug())
-                            .publicUrl(pretixEvent.getPublicUrl())
-                            .eventNames(eventsName)
-                            .isCurrent(isCurrentEvent)
-                            .dateEnd(pretixEvent.getDateFrom()) // huh? namings in db not the same as in pretix?
-                            .dateFrom(pretixEvent.getDateTo()) // is from is start?
-                            .build();
+                            final var newEvent = Event.builder()
+                                .slug(event.getSlug())
+                                .publicUrl(event.getPublicUrl())
+                                .eventNames(eventsName)
+                                .isCurrent(isCurrentEvent)
+                                .dateEnd(event.getDateFrom()) // huh? namings in db not the same as in pretix?
+                                .dateFrom(event.getDateTo()) // is from is start?
+                                .build();
 
-                        insertEventAction.invoke(newEvent);
+                            insertEventAction.invoke(newEvent);
 
-                        // in case if we won't find an existed current event
-                        if (isCurrentEvent) {
-                            currentEvent = newEvent;
+                            // in case if we won't find an existed current event
+                            if (isCurrentEvent) {
+                                currentEvent.set(newEvent);
+                            }
+                        }
+
+                        if (databaseEvent != null && Boolean.TRUE.equals(databaseEvent.getIsCurrent())) {
+                            currentEvent.set(databaseEvent);
                         }
                     }
-
-                    if (databaseEvent != null && Boolean.TRUE.equals(databaseEvent.getIsCurrent())) {
-                        currentEvent = databaseEvent;
-                    }
                 }
-
-                hasNext = eventResult.hasNext();
-                if (hasNext) {
-                    currentEventPage = eventResult.nextPage();
-                }
-            }
-
+            );
         }
 
-        if (currentEvent == null) {
+        if (currentEvent.get() == null) {
             log.warn("Could not find the current event");
         }
 
-        return Optional.ofNullable(currentEvent);
+        return Optional.ofNullable(currentEvent.get());
     }
 }
