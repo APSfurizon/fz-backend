@@ -22,5 +22,6 @@ pretix:
   url: ${PRETIX_BASE_URL:http://localhost:8000}
   apiPath: ${PRETIX_API_PATH:/api/v1/}
   api-key: ${PRETIX_API_KEY:zcz7tfhipd6t3i51pf29vgrpbstab19r4wtlv5r464sasdknxzo7nk6c4ixxnmg2}
-  organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
+  default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
+  default-event: ${PRETIX_DEFAULT_EVENT:org}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}

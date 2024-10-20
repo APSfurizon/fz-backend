@@ -106,7 +106,7 @@ public class HttpRequest<R> {
         }
 
         public HttpRequest<R> build() {
-            return new HttpRequest<R>(
+            return new HttpRequest<>(
                 method,
                 path,
                 headers,
