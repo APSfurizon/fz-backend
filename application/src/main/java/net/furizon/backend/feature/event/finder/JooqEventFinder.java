@@ -16,7 +16,6 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 public class JooqEventFinder implements EventFinder {
     public final SqlQuery query;
 
-
     @Override
     public @Nullable Event findEventBySlug(@NotNull String slug) {
         return query.fetchFirst(
