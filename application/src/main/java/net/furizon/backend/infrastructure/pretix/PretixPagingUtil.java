@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.pretix;
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import org.springframework.data.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,5 +28,14 @@ public class PretixPagingUtil {
                 currentPage = response.nextPage();
             }
         }
+    }
+
+    public static <U, P extends PretixPaging<U>> List<U> combineAll(
+        Function<Integer, P> callable
+    ) {
+        final var combined = new ArrayList<U>();
+        fetchAll(callable, result -> combined.addAll(result.getFirst()));
+
+        return combined;
     }
 }
