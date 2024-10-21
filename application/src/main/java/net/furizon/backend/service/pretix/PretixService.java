@@ -87,7 +87,6 @@ public class PretixService {
         try {
             PretixIdsMap cache = new PretixIdsMap();
             reloadProducts(cache);
-            reloadQuestions(cache);
             pretixIdsCache = cache;
             reloadOrders();
             return true;
@@ -99,21 +98,6 @@ public class PretixService {
     private synchronized void reloadOrders() throws TimeoutException {
         // TODO -> Replace on new HTTP Client
         //getAllPages("orders", pretixConfig.getEventUrl(), this::parseOrderAndUpdateDatabase);
-    }
-
-    private synchronized void reloadQuestions(PretixIdsMap pretixIdsCache) throws TimeoutException {
-        // TODO -> Replace on new HTTP Client
-        //getAllPages("questions", pretixConfig.getEventUrl(), (item) -> {
-        //int id = item.getInt("id");
-        //String identifier = item.getString("identifier");
-        //pretixIdsCache.questionTypeIds.put(id, QuestionType.get(item.getString("type")));
-        //pretixIdsCache.questionIdentifiers.put(id, identifier);
-        //pretixIdsCache.questionIdentifiersToId.put(identifier, id);
-
-        //if (item.getString("identifier").equals(Constants.QUESTIONS_ACCOUNT_SECRET)) {
-        //pretixIdsCache.questionSecret = id;
-        //}
-        //});
     }
 
     private synchronized void reloadProducts(PretixIdsMap pretixIdsCache) throws TimeoutException {
