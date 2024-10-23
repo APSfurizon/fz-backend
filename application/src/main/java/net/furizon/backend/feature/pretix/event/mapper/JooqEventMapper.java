@@ -6,7 +6,6 @@ import org.jooq.Record;
 import org.json.JSONObject;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 

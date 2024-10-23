@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.JSON;
 import org.jooq.util.postgres.PostgresDSL;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
