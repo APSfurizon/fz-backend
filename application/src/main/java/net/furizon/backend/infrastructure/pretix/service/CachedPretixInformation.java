@@ -7,16 +7,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.event.Event;
 import net.furizon.backend.feature.event.usecase.ReloadEventsUseCase;
+import net.furizon.backend.feature.product.PretixProductResults;
+import net.furizon.backend.feature.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.question.PretixQuestion;
 import net.furizon.backend.feature.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
@@ -28,11 +36,32 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull private final UseCaseExecutor useCaseExecutor;
 
     @NotNull private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
+
+    //Event Struct
+
+    //Contains tickets, memberships, sponsors, rooms
+    @NotNull private final Cache<CacheItemTypes, Set<Integer>> itemIdsCache = Caffeine.newBuilder().build();
+
+    //Questions
     @NotNull private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
-    
     @NotNull private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull private final Cache<Integer, String> questionIdToIdentifier = Caffeine.newBuilder().build();
     @NotNull private final Cache<String, Integer> questionIdentifierToId = Caffeine.newBuilder().build();
+
+    //Tickets
+    @NotNull private final Cache<Integer, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
+
+    //Sponsors
+    @NotNull private final Cache<Integer, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+
+    //Extra days
+    @NotNull private final Cache<Integer, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
+
+    //Rooms
+    //map id -> (capacity, hotelName)
+    @NotNull private final Cache<Integer, Pair<Integer, String>> roomIdToInfo = Caffeine.newBuilder().build();
+    //map capacity/name -> room name TODO CHECK IF THIS WORKS
+    @NotNull private final Cache<Pair<Integer, String>, String> roomInfoToName = Caffeine.newBuilder().build();
 
     @PostConstruct
     public void init() {
@@ -70,15 +99,34 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     private void invalidateEventsCache() {
+        log.info("[PRETIX] Resetting event cache");
         currentEvent.set(null);
     }
 
     private void invalidateEventStructCache() {
+        log.info("[PRETIX] Resetting event's struct cache");
+
+        //General
+        itemIdsCache.invalidateAll();
+
         //Questions
         questionSecretId.set(-1);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
+
+        //Tickets
+        dailyIdToDay.invalidateAll();
+
+        //Sponsors
+        sponsorshipIdToType.invalidateAll();
+
+        //Extra days
+        extraDaysIdToDay.invalidateAll();
+
+        //Rooms
+        roomIdToInfo.invalidateAll();
+        roomInfoToName.invalidateAll();
     }
 
 
@@ -99,6 +147,7 @@ public class CachedPretixInformation implements PretixInformation {
         }
 
         reloadQuestions(event);
+        reloadProducts(event);
     }
 
     private void reloadQuestions(Event event) {
@@ -120,5 +169,20 @@ public class CachedPretixInformation implements PretixInformation {
                 log.info("[PRETIX] Account secret id found, setup it on value = '{}'", it.getId());
                 questionSecretId.set(it.getId());
             });
+    }
+
+    private void reloadProducts(Event event) {
+        PretixProductResults res = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
+
+        itemIdsCache.put(CacheItemTypes.TICKETS, res.ticketItemIds());
+        itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, res.membershipCardItemIds());
+        itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, res.sponsorshipItemIds());
+        itemIdsCache.put(CacheItemTypes.ROOMS, res.roomItemIds());
+
+        dailyIdToDay.putAll(res.dailyIdToDay());
+        sponsorshipIdToType.putAll(res.sponsorshipIdToType());
+        extraDaysIdToDay.putAll(res.extraDaysIdToDay());
+        roomIdToInfo.putAll(res.roomIdToInfo());
+        roomInfoToName.putAll(res.roomInfoToName());
     }
 }
