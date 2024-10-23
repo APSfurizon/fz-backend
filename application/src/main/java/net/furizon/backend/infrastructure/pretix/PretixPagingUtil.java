@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PretixPagingUtil {
-    public static <U, P extends PretixPaging<U>> void fetchAll(
+    public static <U, P extends PretixPaging<U>> void forEachPage(
         Function<Integer, P> callable,
         Consumer<Pair<List<U>, P>> consumer
     ) {
@@ -18,8 +18,8 @@ public class PretixPagingUtil {
         while (hasNext) {
             final P response = callable.apply(currentPage);
             if (response.getResults() == null) {
-                //TODO: Are we really sure we want to continue? Won't this cause infinite loops?
-                continue;
+                hasNext = false;
+                break;
             }
 
             consumer.accept(Pair.of(response.getResults(), response));
@@ -31,11 +31,18 @@ public class PretixPagingUtil {
         }
     }
 
-    public static <U, P extends PretixPaging<U>> List<U> combineAll(
+    public static <U, P extends PretixPaging<U>> void forEachElement(
+            Function<Integer, P> callable,
+            Consumer<Pair<U, P>> consumer
+    ) {
+        forEachPage(callable, r -> r.getFirst().forEach(el -> consumer.accept(Pair.of(el, r.getSecond()))));
+    }
+
+    public static <U, P extends PretixPaging<U>> List<U> fetchAll(
         Function<Integer, P> callable
     ) {
         final var combined = new ArrayList<U>();
-        fetchAll(callable, result -> combined.addAll(result.getFirst()));
+        forEachPage(callable, result -> combined.addAll(result.getFirst()));
 
         return combined;
     }

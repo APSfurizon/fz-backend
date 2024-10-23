@@ -5,6 +5,7 @@ import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -44,7 +45,7 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     event.getPublicUrl(),
                     Optional
                         .ofNullable(event.getEventNames())
-                        .map(it -> String.join(",", it))
+                        .map(it -> new JSONObject(it).toString())
                         .orElse(null)
                 )
         );

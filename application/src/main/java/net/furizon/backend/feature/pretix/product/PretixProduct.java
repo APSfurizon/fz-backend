@@ -31,8 +31,8 @@ public class PretixProduct {
     }
 
     public void forEachVariationByIdentifierPrefix(String prefix, BiConsumer<PretixProductVariation, String> callback) {
-        variations.stream().filter(
-                v -> v.getIdentifier() != null && v.getIdentifier().startsWith(prefix)
-        ).forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));
+        variations.stream()
+            .filter(v -> v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
+            .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));
     }
 }

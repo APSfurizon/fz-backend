@@ -27,7 +27,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
         final var pair = event.getOrganizerAndEventPair();
         PretixProductResults result = new PretixProductResults();
 
-        PretixPagingUtil.fetchAll(
+        PretixPagingUtil.forEachPage(
             paged -> pretixProductFinder.getPagedProducts(pair.getFirst(), pair.getSecond(), paged),
             r -> {
                 for (final PretixProduct product : r.getFirst()) {

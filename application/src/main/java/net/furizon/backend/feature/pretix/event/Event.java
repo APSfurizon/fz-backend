@@ -3,12 +3,13 @@ package net.furizon.backend.feature.pretix.event;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.util.Pair;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Data
@@ -29,11 +30,11 @@ public class Event {
     private String publicUrl;
 
     @Nullable
-    private Set<String> eventNames;
+    private Map<String, String> eventNames;
 
     public static class EventBuilder {
         public EventBuilder slug(String eventSlug, String organizerSlug) {
-            this.slug = buildSlug(eventSlug, organizerSlug);
+            this.slug = PretixGenericUtils.buildOrgEventSlug(eventSlug, organizerSlug);
             return this;
         }
     }
@@ -44,7 +45,4 @@ public class Event {
         return Pair.of(sp[0], sp[1]);
     }
 
-    public static String buildSlug(String eventSlug, String organizerSlug) {
-        return eventSlug + "/" + organizerSlug;
-    }
 }

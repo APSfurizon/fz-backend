@@ -171,17 +171,17 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     private void reloadProducts(Event event) {
-        PretixProductResults res = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
+        PretixProductResults products = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
 
-        itemIdsCache.put(CacheItemTypes.TICKETS, res.ticketItemIds());
-        itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, res.membershipCardItemIds());
-        itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, res.sponsorshipItemIds());
-        itemIdsCache.put(CacheItemTypes.ROOMS, res.roomItemIds());
+        itemIdsCache.put(CacheItemTypes.TICKETS, products.ticketItemIds());
+        itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
+        itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
+        itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
 
-        dailyIdToDay.putAll(res.dailyIdToDay());
-        sponsorshipIdToType.putAll(res.sponsorshipIdToType());
-        extraDaysIdToDay.putAll(res.extraDaysIdToDay());
-        roomIdToInfo.putAll(res.roomIdToInfo());
-        roomInfoToName.putAll(res.roomInfoToName());
+        dailyIdToDay.putAll(products.dailyIdToDay());
+        sponsorshipIdToType.putAll(products.sponsorshipIdToType());
+        extraDaysIdToDay.putAll(products.extraDaysIdToDay());
+        roomIdToInfo.putAll(products.roomIdToInfo());
+        roomInfoToName.putAll(products.roomInfoToName());
     }
 }
