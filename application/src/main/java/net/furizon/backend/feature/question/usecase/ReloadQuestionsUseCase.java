@@ -23,10 +23,6 @@ public class ReloadQuestionsUseCase implements UseCase<Event, List<PretixQuestio
     @Override
     public List<PretixQuestion> executor(@NotNull Event input) {
         final var pair = input.getOrganizerAndEventPair();
-        if (pair == null) {
-            log.warn("Couldn't find an organizer and event by provided input: {}", input);
-            return Collections.emptyList();
-        }
 
         return PretixPagingUtil.combineAll(
             paging -> pretixQuestionFinder.getPagedQuestions(
