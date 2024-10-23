@@ -16,8 +16,8 @@ public class JooqEventMapper {
     public static Event map(Record record) {
         return Event.builder()
             .slug(record.get(EVENTS.EVENT_SLUG))
-            .dateEnd(
-                Optional.ofNullable(record.get(EVENTS.EVENT_DATE_END))
+            .dateTo(
+                Optional.ofNullable(record.get(EVENTS.EVENT_DATE_TO))
                     .map(OffsetDateTime::parse)
                     .orElse(null)
             )

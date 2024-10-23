@@ -18,6 +18,7 @@ public class PretixPagingUtil {
         while (hasNext) {
             final P response = callable.apply(currentPage);
             if (response.getResults() == null) {
+                //TODO: Are we really sure we want to continue? Won't this cause infinite loops?
                 continue;
             }
 

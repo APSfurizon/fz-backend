@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS events (
 	event_slug varchar(255) NOT NULL,
-	event_date_end varchar(32) NULL, -- Probable better to use timestamp type --
+	event_date_to varchar(32) NULL, -- Probable better to use timestamp type --
 	event_date_from varchar(32) NULL, -- Probable better to use timestamp type --
-	event_is_current bool NULL,
-	event_public_url text NULL,
+	event_is_current bool NOT NULL,
+	event_public_url text NOT NULL,
 	event_names text NULL,
 	CONSTRAINT events_pkey PRIMARY KEY (event_slug)
 );

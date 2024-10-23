@@ -22,7 +22,7 @@ public class JooqEventFinder implements EventFinder {
                 PostgresDSL
                     .select(
                         EVENTS.EVENT_SLUG,
-                        EVENTS.EVENT_DATE_END,
+                        EVENTS.EVENT_DATE_TO,
                         EVENTS.EVENT_DATE_FROM,
                         EVENTS.EVENT_IS_CURRENT,
                         EVENTS.EVENT_PUBLIC_URL,

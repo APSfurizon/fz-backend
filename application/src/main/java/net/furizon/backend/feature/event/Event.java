@@ -7,8 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.util.Pair;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
@@ -20,42 +18,33 @@ public class Event {
     private final String slug;
 
     @Nullable
-    private final OffsetDateTime dateEnd;
+    private OffsetDateTime dateTo;
 
     @Nullable
-    private final OffsetDateTime dateFrom;
+    private OffsetDateTime dateFrom;
+
+    private boolean isCurrent;
+
+    @NotNull
+    private String publicUrl;
 
     @Nullable
-    private final Boolean isCurrent;
+    private Set<String> eventNames;
 
-    @Nullable
-    private final String publicUrl;
+    public static class EventBuilder {
+        public EventBuilder slug(String eventSlug, String organizerSlug) {
+            this.slug = buildSlug(eventSlug, organizerSlug);
+            return this;
+        }
+    }
 
-    @Nullable
-    private final Set<String> eventNames;
-
-    @Nullable
+    @NotNull
     public Pair<String, String> getOrganizerAndEventPair() {
-        if (publicUrl == null) {
-            return null;
-        }
+        String[] sp = slug.split("/");
+        return Pair.of(sp[0], sp[1]);
+    }
 
-        try {
-            URI uri = new URI(publicUrl);
-
-            // Split the path by "/" and filter out any empty parts
-            String[] parts = uri.getPath().split("/");
-
-            if (parts.length >= 3) {
-                String organizer = parts[1];  // First part after base is the organizer
-                String eventName = parts[2];  // Second part after base is the event name
-
-                return Pair.of(organizer, eventName);
-            } else {
-                throw new IllegalArgumentException("URL does not contain organizer and event name");
-            }
-        } catch (URISyntaxException e) {
-            return null;
-        }
+    public static String buildSlug(String eventSlug, String organizerSlug) {
+        return eventSlug + "/" + organizerSlug;
     }
 }

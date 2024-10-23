@@ -24,7 +24,7 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                 .insertInto(
                     EVENTS,
                     EVENTS.EVENT_SLUG,
-                    EVENTS.EVENT_DATE_END,
+                    EVENTS.EVENT_DATE_TO,
                     EVENTS.EVENT_DATE_FROM,
                     EVENTS.EVENT_IS_CURRENT,
                     EVENTS.EVENT_PUBLIC_URL,
@@ -33,15 +33,18 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                 .values(
                     event.getSlug(),
                     Optional
-                        .ofNullable(event.getDateEnd()).map(OffsetDateTime::toString)
+                        .ofNullable(event.getDateTo())
+                        .map(OffsetDateTime::toString)
                         .orElse(null),
                     Optional
-                        .ofNullable(event.getDateFrom()).map(OffsetDateTime::toString)
+                        .ofNullable(event.getDateFrom())
+                        .map(OffsetDateTime::toString)
                         .orElse(null),
-                    event.getIsCurrent(),
+                    event.isCurrent(),
                     event.getPublicUrl(),
                     Optional
-                        .ofNullable(event.getEventNames()).map(it -> String.join(",", it))
+                        .ofNullable(event.getEventNames())
+                        .map(it -> String.join(",", it))
                         .orElse(null)
                 )
         );

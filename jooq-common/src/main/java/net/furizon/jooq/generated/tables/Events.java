@@ -71,7 +71,7 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.event_date_end</code>.
      */
-    public final TableField<Record, String> EVENT_DATE_END = createField(DSL.name("event_date_end"), SQLDataType.VARCHAR(32), this, "");
+    public final TableField<Record, String> EVENT_DATE_TO = createField(DSL.name("event_date_end"), SQLDataType.VARCHAR(32), this, "");
 
     /**
      * The column <code>public.events.event_date_from</code>.

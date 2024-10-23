@@ -21,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class RestPretixEventFinder implements PretixEventFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixEvent>> pretixEvents =
-        new ParameterizedTypeReference<>() {
+            new ParameterizedTypeReference<>() {
         };
 
     @Qualifier("pretixHttpClient")
