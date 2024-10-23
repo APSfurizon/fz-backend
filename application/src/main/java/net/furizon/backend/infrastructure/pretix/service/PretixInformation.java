@@ -1,6 +1,6 @@
 package net.furizon.backend.infrastructure.pretix.service;
 
-import net.furizon.backend.feature.event.Event;
+import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
 
