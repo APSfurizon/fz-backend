@@ -15,13 +15,15 @@ on:
     branches: [ master ]
     paths:
       - ".github/workflows/checkstyle-analysis.yml"
-      - "src/**"
+      - "./**/src/**"
+      - "./**/pom.xml"
       - "pom.xml"
   pull_request:
     branches: [ master ]
     paths:
       - ".github/workflows/checkstyle-analysis.yml"
-      - "src/**"
+      - "./**/src/**"
+      - "./**/pom.xml"
       - "pom.xml"
 
   # Allows you to run this workflow manually from the Actions tab
