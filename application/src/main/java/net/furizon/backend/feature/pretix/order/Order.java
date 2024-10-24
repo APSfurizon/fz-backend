@@ -3,9 +3,12 @@ package net.furizon.backend.feature.pretix.order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.db.entities.pretix.Event;
 import net.furizon.backend.db.entities.users.User;
@@ -34,6 +37,7 @@ import java.util.TreeSet;
 public class Order {
 
     @NotNull
+    @Setter(AccessLevel.NONE)
     private String code;
 
     @NotNull
@@ -48,7 +52,7 @@ public class Order {
     @NotNull
     private final Set<Integer> dailyDays;
 
-    private int roomCapacity = 0; // 0 = has no room
+    private short roomCapacity = 0; // 0 = has no room
 
     @Nullable
     private String hotelLocation;
@@ -56,6 +60,9 @@ public class Order {
     @NotNull
     private String pretixOrderSecret;
 
+    //Manually defining getters/setters because lombok's default names are ugly lol
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private boolean hasMembership = false;
 
     private int answersMainPositionId = -1;
@@ -75,8 +82,15 @@ public class Order {
         return dailyDays.contains(day);
     }
 
+    public boolean hasMembership() {
+        return hasMembership;
+    }
+    public void setMembership(boolean membership) {
+        this.hasMembership = membership;
+    }
+
     @NotNull
-    public String getAnswersJson(PretixInformation pi) {
+    public String getAnswersJson(@NotNull PretixInformation pi) {
         List<PretixAnswer> answers = new ArrayList<>();
         for (String key : this.answers.keySet()) {
             Object o = this.answers.get(key);
@@ -114,6 +128,14 @@ public class Order {
             log.error("Error while serializing answers for order {}", getCode(), e);
             return "[]";
         }
+    }
+
+    public long getDailyDaysBitmask() {
+        long ret = 0L;
+        for (int day : dailyDays) {
+            ret |= (1L << day);
+        }
+        return ret;
     }
 
     public static class OrderBuilder {

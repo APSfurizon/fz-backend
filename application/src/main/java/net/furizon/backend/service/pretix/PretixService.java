@@ -2,7 +2,7 @@ package net.furizon.backend.service.pretix;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.pretix.DeprOrder;
 import net.furizon.backend.db.entities.users.User;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -265,7 +265,7 @@ public class PretixService {
         }
 
         // Fetch Order by code
-        Order order = orderRepository.findByCodeAndEvent(
+        DeprOrder order = orderRepository.findByCodeAndEvent(
             code,
             //pretixConfig.getCurrentEventObj().getSlug() // not responsibility of config
             ""
@@ -278,7 +278,7 @@ public class PretixService {
             }
 
             if (order == null) {
-                order = new Order(); //order not found
+                order = new DeprOrder(); //order not found
             }
 
             order.update(
@@ -356,7 +356,7 @@ public class PretixService {
     }
 
     //Push orders to pretix
-    public synchronized void submitAnswersToPretix(Order order) throws TimeoutException {
+    public synchronized void submitAnswersToPretix(DeprOrder order) throws TimeoutException {
         JSONObject payload = new JSONObject();
         JSONArray ans = order.getOrderStatus() == OrderStatus.CANCELED
             ? new JSONArray()

@@ -33,7 +33,7 @@ import java.util.concurrent.TimeoutException;
 @Entity
 @Table(name = "orders")
 @Getter
-public class Order {
+public class DeprOrder {
     @Id
     private String code;
 

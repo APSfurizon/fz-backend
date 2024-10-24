@@ -14,7 +14,7 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 @Component
 @RequiredArgsConstructor
 public class JooqEventFinder implements EventFinder {
-    public final SqlQuery query;
+    private final SqlQuery query;
 
     @Override
     public @Nullable Event findEventBySlug(@NotNull String slug) {
@@ -30,7 +30,6 @@ public class JooqEventFinder implements EventFinder {
                     )
                     .from(EVENTS)
                     .where(EVENTS.EVENT_SLUG.eq(slug))
-            )
-            .mapOrNull(JooqEventMapper::map);
+            ).mapOrNull(JooqEventMapper::map);
     }
 }

@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Identity;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -75,11 +74,6 @@ public class UserGroup extends TableImpl<Record> {
      * The column <code>public.user_group.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
-
-    /**
-     * The column <code>public.user_group.user_group_id</code>.
-     */
-    public final TableField<Record, Long> USER_GROUP_ID = createField(DSL.name("user_group_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     private UserGroup(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -147,11 +141,6 @@ public class UserGroup extends TableImpl<Record> {
     @Nullable
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
-    }
-
-    @Override
-    public Identity<Record, Long> getIdentity() {
-        return (Identity<Record, Long>) super.getIdentity();
     }
 
     @Override
