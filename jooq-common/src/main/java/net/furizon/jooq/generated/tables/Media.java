@@ -4,9 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import javax.annotation.processing.Generated;
 
@@ -14,7 +12,6 @@ import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
-import net.furizon.jooq.generated.tables.MediaTags.MediaTagsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -77,17 +74,12 @@ public class Media extends TableImpl<Record> {
     /**
      * The column <code>public.media.media_path</code>.
      */
-    public final TableField<Record, String> MEDIA_PATH = createField(DSL.name("media_path"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> MEDIA_PATH = createField(DSL.name("media_path"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.media.media_type</code>.
      */
     public final TableField<Record, String> MEDIA_TYPE = createField(DSL.name("media_type"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.media.user_id</code>.
-     */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
 
     private Media(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -167,49 +159,6 @@ public class Media extends TableImpl<Record> {
         return Keys.MEDIA_PKEY;
     }
 
-    @Override
-    public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.MEDIA__FKND8HH0YN7QVV4PQYK8MG7L1OX);
-    }
-
-    private transient UsersPath _users;
-
-    /**
-     * Get the implicit join path to the <code>public.users</code> table.
-     */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.MEDIA__FKND8HH0YN7QVV4PQYK8MG7L1OX, null);
-
-        return _users;
-    }
-
-    private transient MediaTagsPath _mediaTags;
-
-    /**
-     * Get the implicit to-many join path to the <code>public.media_tags</code>
-     * table
-     */
-    public MediaTagsPath mediaTags() {
-        if (_mediaTags == null)
-            _mediaTags = new MediaTagsPath(this, null, Keys.MEDIA_TAGS__FK88C8WCOPLIS4O99Y53CCN21GT.getInverseKey());
-
-        return _mediaTags;
-    }
-
-    private transient FursuitsPath _fkom4xajcquvf8ounsrelsw3a2o;
-
-    /**
-     * Get the implicit to-many join path to the <code>public.fursuits</code>
-     * table, via the <code>fkom4xajcquvf8ounsrelsw3a2o</code> key
-     */
-    public FursuitsPath fkom4xajcquvf8ounsrelsw3a2o() {
-        if (_fkom4xajcquvf8ounsrelsw3a2o == null)
-            _fkom4xajcquvf8ounsrelsw3a2o = new FursuitsPath(this, null, Keys.FURSUITS__FKOM4XAJCQUVF8OUNSRELSW3A2O.getInverseKey());
-
-        return _fkom4xajcquvf8ounsrelsw3a2o;
-    }
-
     private transient FursuitsEventsPath _fursuitsEvents;
 
     /**
@@ -223,25 +172,29 @@ public class Media extends TableImpl<Record> {
         return _fursuitsEvents;
     }
 
-    private transient FursuitsPath _fursuitsMediaFk;
+    private transient FursuitsPath _fursuits;
 
     /**
      * Get the implicit to-many join path to the <code>public.fursuits</code>
-     * table, via the <code>fursuits_media_fk</code> key
-     */
-    public FursuitsPath fursuitsMediaFk() {
-        if (_fursuitsMediaFk == null)
-            _fursuitsMediaFk = new FursuitsPath(this, null, Keys.FURSUITS__FURSUITS_MEDIA_FK.getInverseKey());
-
-        return _fursuitsMediaFk;
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>public.fursuits</code> table
+     * table
      */
     public FursuitsPath fursuits() {
-        return fursuitsEvents().fursuits();
+        if (_fursuits == null)
+            _fursuits = new FursuitsPath(this, null, Keys.FURSUITS__FURSUITS_MEDIA_FK.getInverseKey());
+
+        return _fursuits;
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.users</code> table
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, null, Keys.USERS__USER_MEDIA_FK.getInverseKey());
+
+        return _users;
     }
 
     @Override

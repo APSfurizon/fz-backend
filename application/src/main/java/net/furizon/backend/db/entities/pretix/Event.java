@@ -49,5 +49,5 @@ public final class Event {
     private boolean isCurrentEvent;
 
     @OneToMany(mappedBy = "orderEvent", fetch = FetchType.LAZY)
-    private Set<Order> orders;
+    private Set<DeprOrder> orders;
 }

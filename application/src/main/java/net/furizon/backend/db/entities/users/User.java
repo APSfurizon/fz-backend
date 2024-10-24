@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.furizon.backend.db.entities.pretix.Order;
+import net.furizon.backend.db.entities.pretix.DeprOrder;
 
 import java.util.Set;
 
@@ -54,7 +54,7 @@ public final class User {
 
     @OneToMany(mappedBy = "orderOwner")
     // TODO -> nullable?
-    private Set<Order> orders;
+    private Set<DeprOrder> orders;
 
     public User(String secret) {
         this.secret = secret;

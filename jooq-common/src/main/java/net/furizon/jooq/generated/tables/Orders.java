@@ -100,6 +100,16 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> ORDER_EXTRA_DAYS_TYPE = createField(DSL.name("order_extra_days_type"), SQLDataType.SMALLINT, this, "");
 
     /**
+     * The column <code>public.orders.order_room_capacity</code>.
+     */
+    public final TableField<Record, Short> ORDER_ROOM_CAPACITY = createField(DSL.name("order_room_capacity"), SQLDataType.SMALLINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_hotel_location</code>.
+     */
+    public final TableField<Record, String> ORDER_HOTEL_LOCATION = createField(DSL.name("order_hotel_location"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
      * The column <code>public.orders.has_membership</code>.
      */
     public final TableField<Record, Boolean> HAS_MEMBERSHIP = createField(DSL.name("has_membership"), SQLDataType.BOOLEAN.nullable(false), this, "");
@@ -123,51 +133,6 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
-
-    /**
-     * The column <code>public.orders.code</code>.
-     */
-    public final TableField<Record, String> CODE = createField(DSL.name("code"), SQLDataType.VARCHAR(255).nullable(false), this, "");
-
-    /**
-     * The column <code>public.orders.answers</code>.
-     */
-    public final TableField<Record, String> ANSWERS = createField(DSL.name("answers"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.orders.answers_main_position_id</code>.
-     */
-    public final TableField<Record, Integer> ANSWERS_MAIN_POSITION_ID = createField(DSL.name("answers_main_position_id"), SQLDataType.INTEGER.nullable(false), this, "");
-
-    /**
-     * The column <code>public.orders.daily_days</code>.
-     */
-    public final TableField<Record, Long> DAILY_DAYS = createField(DSL.name("daily_days"), SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>public.orders.extra_days</code>.
-     */
-    public final TableField<Record, Short> EXTRA_DAYS = createField(DSL.name("extra_days"), SQLDataType.SMALLINT, this, "");
-
-    /**
-     * The column <code>public.orders.hotel_location</code>.
-     */
-    public final TableField<Record, String> HOTEL_LOCATION = createField(DSL.name("hotel_location"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.orders.pretix_order_secret</code>.
-     */
-    public final TableField<Record, String> PRETIX_ORDER_SECRET = createField(DSL.name("pretix_order_secret"), SQLDataType.VARCHAR(255), this, "");
-
-    /**
-     * The column <code>public.orders.room_capacity</code>.
-     */
-    public final TableField<Record, Integer> ROOM_CAPACITY = createField(DSL.name("room_capacity"), SQLDataType.INTEGER.nullable(false), this, "");
-
-    /**
-     * The column <code>public.orders.sponsorship</code>.
-     */
-    public final TableField<Record, Short> SPONSORSHIP = createField(DSL.name("sponsorship"), SQLDataType.SMALLINT, this, "");
 
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -287,9 +252,7 @@ public class Orders extends TableImpl<Record> {
     public List<Check<Record>> getChecks() {
         return Arrays.asList(
             Internal.createCheck(this, DSL.name("orders_extra_days_check"), "(((order_extra_days_type >= 0) AND (order_extra_days_type <= 3)))", true),
-            Internal.createCheck(this, DSL.name("orders_extra_days_check1"), "(((extra_days >= 0) AND (extra_days <= 3)))", true),
             Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2)))", true),
-            Internal.createCheck(this, DSL.name("orders_sponsorship_check1"), "(((sponsorship >= 0) AND (sponsorship <= 2)))", true),
             Internal.createCheck(this, DSL.name("orders_status_check"), "(((order_status >= 0) AND (order_status <= 3)))", true)
         );
     }

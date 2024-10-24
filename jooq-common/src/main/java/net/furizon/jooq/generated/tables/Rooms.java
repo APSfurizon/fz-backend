@@ -85,7 +85,7 @@ public class Rooms extends TableImpl<Record> {
     /**
      * The column <code>public.rooms.order_id</code>.
      */
-    public final TableField<Record, String> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.VARCHAR(64), this, "");
 
     private Rooms(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

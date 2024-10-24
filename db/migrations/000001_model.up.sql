@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS events (
 	event_slug varchar(255) NOT NULL,
-	event_date_end varchar(32) NULL, -- Probable better to use timestamp type --
+	event_date_to varchar(32) NULL, -- Probable better to use timestamp type --
 	event_date_from varchar(32) NULL, -- Probable better to use timestamp type --
-	event_is_current bool NULL,
-	event_public_url text NULL,
+	event_is_current bool NOT NULL,
+	event_public_url text NOT NULL,
 	event_names text NULL,
 	CONSTRAINT events_pkey PRIMARY KEY (event_slug)
 );
@@ -107,6 +107,8 @@ CREATE TABLE IF NOT EXISTS orders (
 	order_answers_main_position_id int4 NOT NULL,
 	order_daily_days int8 NOT NULL,
 	order_extra_days_type int2 NULL,
+    order_room_capacity int2 NULL,
+    order_hotel_location varchar(255),
 	has_membership bool NOT NULL,
 	order_secret varchar(32) NULL,
 	order_sponsorship_type int2 NULL,
