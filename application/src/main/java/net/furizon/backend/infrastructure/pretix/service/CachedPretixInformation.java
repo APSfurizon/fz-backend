@@ -81,8 +81,28 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<QuestionType> getQuestionTypeById(int id) {
+    public Optional<QuestionType> getQuestionTypeFromId(int id) {
         return Optional.ofNullable(questionIdToType.getIfPresent(id));
+    }
+
+    @NotNull
+    @Override
+    public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
+        return Optional.ofNullable(
+                questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier))
+        );
+    }
+
+    @NotNull
+    @Override
+    public Optional<String> getQuestionIdentifierFromId(int id) {
+        return Optional.ofNullable(questionIdToIdentifier.getIfPresent(id));
+    }
+
+    @NotNull
+    @Override
+    public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
+        return Optional.ofNullable(questionIdentifierToId.getIfPresent(identifier));
     }
 
     @Override

@@ -107,6 +107,8 @@ CREATE TABLE IF NOT EXISTS orders (
 	order_answers_main_position_id int4 NOT NULL,
 	order_daily_days int8 NOT NULL,
 	order_extra_days_type int2 NULL,
+    order_room_capacity int2 NULL,
+    order_hotel_location varchar(255),
 	has_membership bool NOT NULL,
 	order_secret varchar(32) NULL,
 	order_sponsorship_type int2 NULL,
