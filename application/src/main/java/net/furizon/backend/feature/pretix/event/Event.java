@@ -1,10 +1,11 @@
 package net.furizon.backend.feature.pretix.event;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.util.Pair;
 
 import java.time.OffsetDateTime;
 import java.util.Map;

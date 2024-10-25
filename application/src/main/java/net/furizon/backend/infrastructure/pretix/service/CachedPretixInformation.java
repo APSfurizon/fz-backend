@@ -15,23 +15,26 @@ import net.furizon.backend.feature.pretix.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
-import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
-import net.furizon.backend.infrastructure.pretix.model.*;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.model.QuestionType;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
-import net.furizon.backend.utils.pretix.Constants;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
 
