@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 @Slf4j
@@ -142,6 +144,10 @@ public class Order {
 
     public static class OrderBuilder {
 
+        public OrderBuilder dailyDays(Set<Integer> days) {
+            dailyDays = days;
+            return this;
+        }
         public OrderBuilder dailyDays(long days) {
             dailyDays = new TreeSet<>();
             for (int i = 0; i < 63; i++) {

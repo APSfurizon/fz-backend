@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.event;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 public class Event {
@@ -32,6 +34,10 @@ public class Event {
     private Map<String, String> eventNames;
 
     public static class EventBuilder {
+        public EventBuilder slug(String fullSlug) {
+            this.slug = fullSlug;
+            return this;
+        }
         public EventBuilder slug(String eventSlug, String organizerSlug) {
             this.slug = PretixGenericUtils.buildOrgEventSlug(eventSlug, organizerSlug);
             return this;
