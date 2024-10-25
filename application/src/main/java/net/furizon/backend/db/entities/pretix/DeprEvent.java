@@ -23,7 +23,7 @@ import java.util.Set;
 @Table(name = "events")
 @Getter
 @Setter
-public final class Event {
+public final class DeprEvent {
     @Id
     @Column(name = "event_slug")
     @Setter(AccessLevel.NONE)

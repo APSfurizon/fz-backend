@@ -32,7 +32,7 @@ public class PretixOrganizersFinder implements OrganizersFinder {
     public PretixPaging<PretixOrganizer> getPagedOrganizers(int page) {
         final var request = HttpRequest.<PretixPaging<PretixOrganizer>>create()
             .method(HttpMethod.GET)
-            .path("/organizers")
+            .path("/organizers/")
             .queryParam("page", String.valueOf(page))
             .responseParameterizedType(pretixOrganization)
             .build();

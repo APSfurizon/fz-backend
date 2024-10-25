@@ -3,7 +3,7 @@ package net.furizon.backend.service.pretix;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.db.entities.pretix.DeprOrder;
-import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.db.entities.users.DeprUser;
 import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -272,7 +272,7 @@ public class PretixService {
         ).orElse(null);
         if (hasTicket && (status == OrderStatus.PENDING || status == OrderStatus.PAID)) {
             // fetch user from db by userSecret
-            User usr = null;
+            DeprUser usr = null;
             if (!TextUtil.isEmpty(userSecret)) {
                 //usr = userRepository.findBySecret(userSecret).orElse(null);
             }

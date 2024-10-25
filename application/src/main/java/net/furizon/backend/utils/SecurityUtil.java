@@ -1,7 +1,7 @@
 package net.furizon.backend.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.db.entities.users.DeprUser;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,9 +20,9 @@ public class SecurityUtil {
      *
      * @throws ApiException if the user is not found in the SecurityContextHolder
      */
-    public static User getAuthenticatedUser() {
+    public static DeprUser getAuthenticatedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof User user) {
+        if (principal instanceof DeprUser user) {
             return user;
         } else {
             log.error("User requested but not found in SecurityContextHolder");
@@ -33,9 +33,9 @@ public class SecurityUtil {
         }
     }
 
-    public static Optional<User> getOptionalAuthenticatedUser() {
+    public static Optional<DeprUser> getOptionalAuthenticatedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof User user) {
+        if (principal instanceof DeprUser user) {
             return Optional.of(user);
         } else {
             return Optional.empty();

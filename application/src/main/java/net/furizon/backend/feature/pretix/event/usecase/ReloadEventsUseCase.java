@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This use case should get all events from Pretix
- * Insert it to Database if not exist there (yet)
+ * Insert it to Database if not exist there (yet) or update them
  * Returns the current event object or null if non was found
  */
 @Component

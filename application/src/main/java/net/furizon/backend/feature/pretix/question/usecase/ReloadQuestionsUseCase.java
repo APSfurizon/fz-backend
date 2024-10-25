@@ -25,8 +25,8 @@ public class ReloadQuestionsUseCase implements UseCase<Event, List<PretixQuestio
 
         return PretixPagingUtil.fetchAll(
             paging -> pretixQuestionFinder.getPagedQuestions(
-                pair.getFirst(),
-                pair.getSecond(),
+                pair.getOrganizer(),
+                pair.getEvent(),
                 paging
             )
         );

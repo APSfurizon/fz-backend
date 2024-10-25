@@ -28,7 +28,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
         PretixProductResults result = new PretixProductResults();
 
         PretixPagingUtil.forEachPage(
-            paged -> pretixProductFinder.getPagedProducts(pair.getFirst(), pair.getSecond(), paged),
+            paged -> pretixProductFinder.getPagedProducts(pair.getOrganizer(), pair.getEvent(), paged),
             r -> {
                 for (final PretixProduct product : r.getFirst()) {
                     String identifier = product.getIdentifier();
@@ -74,8 +74,8 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                                     (variation, strippedIdentifier) -> {
                                         String[] sp = strippedIdentifier.split("_");
                                         String hotelName = sp[0];
-                                        int capacity = Integer.parseInt(sp[1]);
-                                        Pair<Integer, String> p = Pair.of(capacity, hotelName);
+                                        short capacity = Short.parseShort(sp[1]);
+                                        Pair<Short, String> p = Pair.of(capacity, hotelName);
                                         result.roomIdToInfo().put(variation.getId(), p);
                                         result.roomInfoToName().put(p, variation.getName());
                                     }

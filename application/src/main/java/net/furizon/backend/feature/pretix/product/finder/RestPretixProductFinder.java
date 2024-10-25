@@ -35,7 +35,7 @@ public class RestPretixProductFinder implements PretixProductFinder {
     ) {
         final var request = HttpRequest.<PretixPaging<PretixProduct>>create()
                 .method(HttpMethod.GET)
-                .path("/organizers/{organizer}/events/{event}/items")
+                .path("/organizers/{organizer}/events/{event}/items/")
                 .queryParam("page", String.valueOf(page))
                 .uriVariable("organizer", organizer)
                 .uriVariable("event", event)

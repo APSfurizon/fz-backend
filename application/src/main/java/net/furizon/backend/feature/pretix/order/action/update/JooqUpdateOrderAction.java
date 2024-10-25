@@ -33,7 +33,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                     //.set(ORDERS.USER_ID, order.getOrderOwner())
                     //.set(ORDERS.EVENT_ID, order.getOrderEvent())
                     .set(ORDERS.ORDER_ANSWERS, order.getAnswersJson(pretixInformation))
-                .where(ORDERS.ORDER_ANSWERS.eq(order.getCode()))
+                .where(ORDERS.ORDER_CODE.eq(order.getCode()))
         );
     }
 }

@@ -28,7 +28,7 @@ import java.util.Set;
 @Table(name = "users")
 @NoArgsConstructor
 @Getter
-public final class User {
+public final class DeprUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
@@ -56,7 +56,7 @@ public final class User {
     // TODO -> nullable?
     private Set<DeprOrder> orders;
 
-    public User(String secret) {
+    public DeprUser(String secret) {
         this.secret = secret;
     }
 }

@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.db.entities.users.DeprUser;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
@@ -61,11 +61,11 @@ public class DeprOrder {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User orderOwner;
+    private DeprUser orderOwner;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
-    private Event orderEvent;
+    private DeprEvent orderEvent;
 
 
     @Transient
@@ -217,8 +217,8 @@ public class DeprOrder {
         int roomCapacity,
         String hotelLocation,
         boolean hasMembership,
-        User orderOwner,
-        Event orderEvent,
+        DeprUser orderOwner,
+        DeprEvent orderEvent,
         JSONArray answersJson
     ) {
         this.code = code;

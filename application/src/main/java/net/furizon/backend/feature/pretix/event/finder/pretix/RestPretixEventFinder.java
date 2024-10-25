@@ -32,7 +32,7 @@ public class RestPretixEventFinder implements PretixEventFinder {
     public PretixPaging<PretixEvent> getPagedEvents(@NotNull String organizer, int page) {
         final var request = HttpRequest.<PretixPaging<PretixEvent>>create()
             .method(HttpMethod.GET)
-            .path("/organizers/{organizer}/events")
+            .path("/organizers/{organizer}/events/")
             .queryParam("page", String.valueOf(page))
             .uriVariable("organizer", organizer)
             .responseParameterizedType(pretixEvents)

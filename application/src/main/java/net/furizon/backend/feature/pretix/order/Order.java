@@ -10,8 +10,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.Event;
-import net.furizon.backend.db.entities.users.User;
+import net.furizon.backend.feature.pretix.event.Event;
+import net.furizon.backend.feature.user.User;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -67,8 +67,10 @@ public class Order {
 
     private int answersMainPositionId = -1;
 
+    @Nullable
     private User orderOwner; //TODO load from db! (lazy load?)
 
+    @NotNull
     private Event orderEvent; //TODO load from db! (lazy load?)
 
     @NotNull
@@ -150,39 +152,43 @@ public class Order {
             return this;
         }
 
-        public OrderBuilder answers(@NotNull String answersStr, @NotNull PretixInformation pi) {
+        public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
             this.answers = new HashMap<String, Object>();
-            try {
-                ObjectMapper om = new ObjectMapper();
-                List<PretixAnswer> answers = om.readValue(answersStr, new TypeReference<List<PretixAnswer>>() {});
-                for (PretixAnswer answer : answers) {
-                    int questionId = answer.getQuestionId();
-                    var identifier = pi.getQuestionIdentifierFromId(questionId);
-                    if (identifier.isPresent()) {
-                        String answerIdentifier = identifier.get();
-                        String value = answer.getAnswer();
-                        if (value != null) {
-                            var type = pi.getQuestionTypeFromId(questionId);
-                            if (type.isPresent()) {
-                                Object o = switch (type.get()) {
-                                    case NUMBER -> Float.parseFloat(value);
-                                    case STRING_ONE_LINE -> value;
-                                    case STRING_MULTI_LINE -> value;
-                                    case BOOLEAN -> value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes");
-                                    case LIST_SINGLE_CHOICE -> value;
-                                    case LIST_MULTIPLE_CHOICE -> value;
-                                    case FILE -> Const.QUESTIONS_FILE_KEEP;
-                                    case DATE -> LocalDate.parse(value);
-                                    case TIME -> LocalTime.parse(value);
-                                    case DATE_TIME -> ZonedDateTime.parse(value);
-                                    case COUNTRY_CODE -> value;
-                                    case PHONE_NUMBER -> value;
-                                };
-                                this.answers.put(answerIdentifier, o);
-                            }
+            for (PretixAnswer answer : answers) {
+                int questionId = answer.getQuestionId();
+                var identifier = pi.getQuestionIdentifierFromId(questionId);
+                if (identifier.isPresent()) {
+                    String answerIdentifier = identifier.get();
+                    String value = answer.getAnswer();
+                    if (value != null) {
+                        var type = pi.getQuestionTypeFromId(questionId);
+                        if (type.isPresent()) {
+                            Object o = switch (type.get()) {
+                                case NUMBER -> Float.parseFloat(value);
+                                case STRING_ONE_LINE -> value;
+                                case STRING_MULTI_LINE -> value;
+                                case BOOLEAN -> value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes");
+                                case LIST_SINGLE_CHOICE -> value;
+                                case LIST_MULTIPLE_CHOICE -> value;
+                                case FILE -> Const.QUESTIONS_FILE_KEEP;
+                                case DATE -> LocalDate.parse(value);
+                                case TIME -> LocalTime.parse(value);
+                                case DATE_TIME -> ZonedDateTime.parse(value);
+                                case COUNTRY_CODE -> value;
+                                case PHONE_NUMBER -> value;
+                            };
+                            this.answers.put(answerIdentifier, o);
                         }
                     }
                 }
+            }
+            return this;
+        }
+        public OrderBuilder answers(@NotNull String answersStr, @NotNull PretixInformation pi) {
+            try {
+                ObjectMapper om = new ObjectMapper();
+                List<PretixAnswer> answers = om.readValue(answersStr, new TypeReference<List<PretixAnswer>>() {});
+                return answers(answers, pi);
             } catch (JsonProcessingException e) {
                 log.error("Unable to parse answers json", e);
             }

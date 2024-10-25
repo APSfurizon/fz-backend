@@ -40,6 +40,17 @@ public class JooqUserFinder implements UserFinder {
             .mapOrNull(JooqUserMapper::map);
     }
 
+    @Nullable
+    @Override
+    public User findBySecret(String secret) {
+        return sqlQuery
+                .fetchFirst(
+                        selectUser()
+                                .where(USERS.USER_SECRET.eq(secret))
+                )
+                .mapOrNull(JooqUserMapper::map);
+    }
+
     private SelectJoinStep<?> selectUser() {
         return DSL
             .select(USERS.USER_ID)

@@ -35,7 +35,7 @@ public class RestPretixQuestionFinder implements PretixQuestionFinder {
     ) {
         final var request = HttpRequest.<PretixPaging<PretixQuestion>>create()
             .method(HttpMethod.GET)
-            .path("/organizers/{organizer}/events/{event}/questions")
+            .path("/organizers/{organizer}/events/{event}/questions/")
             .queryParam("page", String.valueOf(page))
             .uriVariable("organizer", organizer)
             .uriVariable("event", event)

@@ -1,8 +1,6 @@
 package net.furizon.backend.feature.pretix.event;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,10 +37,16 @@ public class Event {
         }
     }
 
+    @Data
+    public static class OrganizerAndEventPair {
+        private final String organizer;
+        private final String event;
+    }
+
     @NotNull
-    public Pair<String, String> getOrganizerAndEventPair() {
+    public OrganizerAndEventPair getOrganizerAndEventPair() {
         String[] sp = slug.split("/");
-        return Pair.of(sp[0], sp[1]);
+        return new OrganizerAndEventPair(sp[0], sp[1]);
     }
 
 }

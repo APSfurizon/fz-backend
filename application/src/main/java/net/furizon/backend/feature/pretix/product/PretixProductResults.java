@@ -35,8 +35,8 @@ public record PretixProductResults(
         Map<Integer, Sponsorship> sponsorshipIdToType,
         Map<Integer, ExtraDays> extraDaysIdToDay,
         Set<Integer> roomItemIds,
-        Map<Integer, Pair<Integer, String>> roomIdToInfo,
-        Map<Pair<Integer, String>, String> roomInfoToName) {
+        Map<Integer, Pair<Short, String>> roomIdToInfo,
+        Map<Pair<Short, String>, String> roomInfoToName) {
     public PretixProductResults() {
         this(
             new HashSet<>(),

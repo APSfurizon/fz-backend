@@ -7,24 +7,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.feature.pretix.event.usecase.ReloadEventsUseCase;
+import net.furizon.backend.feature.pretix.order.Order;
+import net.furizon.backend.feature.pretix.order.PretixAnswer;
+import net.furizon.backend.feature.pretix.order.PretixOrder;
+import net.furizon.backend.feature.pretix.order.PretixPosition;
 import net.furizon.backend.feature.pretix.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
-import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
-import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
-import net.furizon.backend.infrastructure.pretix.model.QuestionType;
-import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
+import net.furizon.backend.feature.user.User;
+import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.model.*;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
+import net.furizon.backend.utils.pretix.Constants;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
 
@@ -33,6 +40,10 @@ import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_
 @Slf4j
 public class CachedPretixInformation implements PretixInformation {
     @NotNull private final UseCaseExecutor useCaseExecutor;
+
+    @NotNull private final UserFinder userFinder;
+
+    // *** CACHE
 
     @NotNull private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
 
@@ -58,9 +69,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Rooms
     //map id -> (capacity, hotelName)
-    @NotNull private final Cache<Integer, Pair<Integer, String>> roomIdToInfo = Caffeine.newBuilder().build();
+    @NotNull private final Cache<Integer, Pair<Short, String>> roomIdToInfo = Caffeine.newBuilder().build();
     //map capacity/name -> room name TODO CHECK IF THIS WORKS
-    @NotNull private final Cache<Pair<Integer, String>, String> roomInfoToName = Caffeine.newBuilder().build();
+    @NotNull private final Cache<Pair<Short, String>, String> roomInfoToName = Caffeine.newBuilder().build();
 
     @PostConstruct
     public void init() {
@@ -103,6 +114,106 @@ public class CachedPretixInformation implements PretixInformation {
     @Override
     public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
         return Optional.ofNullable(questionIdentifierToId.getIfPresent(identifier));
+    }
+
+    @NotNull
+    @Override
+    public Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
+        Integer cacheDay;
+        ExtraDays cacheExtraDays;
+        BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
+            Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
+
+        boolean hasTicket = false; //If no ticket is found, we don't store the order at all
+
+        String code = pretixOrder.getCode();
+        String secret = pretixOrder.getSecret();
+        OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
+
+        Set<Integer> days = new HashSet<>();
+        Sponsorship sponsorship = Sponsorship.NONE;
+        ExtraDays extraDays = ExtraDays.NONE;
+        List<PretixAnswer> answers = null;
+        int answersMainPositionId = 0;
+        String hotelLocation = null;
+        boolean membership = false;
+        String userSecret = null;
+        short roomCapacity = 0;
+
+        List<PretixPosition> positions = pretixOrder.getPositions();
+        if (positions.isEmpty()) {
+            status = OrderStatus.CANCELED;
+        }
+
+        for (PretixPosition position : positions) {
+            int item = position.getItemId();
+
+            if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
+                hasTicket = true;
+                answersMainPositionId = position.getPositionId();
+                answers = position.getAnswers();
+                for (PretixAnswer answer : answers) {
+                    int questionId = answer.getQuestionId();
+                    var questionType = getQuestionTypeFromId(questionId);
+                    if (questionType.isPresent()) {
+                        if (questionType.get() == QuestionType.FILE) {
+                            answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
+                        }
+                        if (questionId == this.getQuestionSecretId()) {
+                            userSecret = answer.getAnswer();
+                        }
+                    }
+                }
+
+            } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null)  {
+                days.add(cacheDay);
+
+            } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
+                membership = true;
+
+            } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, item)) {
+                Sponsorship s = sponsorshipIdToType.getIfPresent(position.getVariationId());
+                if (s != null && s.ordinal() > sponsorship.ordinal()) {
+                    sponsorship = s; //keep the best sponsorship
+                }
+
+            } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null)  {
+                if (extraDays != ExtraDays.BOTH) {
+                    if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
+                        extraDays = ExtraDays.BOTH;
+                    } else {
+                        extraDays = cacheExtraDays;
+                    }
+                }
+
+            } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
+                Pair<Short, String> room = roomIdToInfo.getIfPresent(position.getVariationId());
+                if (room != null) {
+                    roomCapacity = room.getFirst();
+                    hotelLocation = room.getSecond();
+                }
+            }
+        }
+
+        if (hasTicket) {
+            Order order = Order.builder()
+                    .code(code)
+                    .orderStatus(status)
+                    .sponsorship(sponsorship)
+                    .extraDays(extraDays)
+                    .dailyDays(days)
+                    .roomCapacity(roomCapacity)
+                    .hotelLocation(hotelLocation)
+                    .pretixOrderSecret(secret)
+                    .hasMembership(membership)
+                    .answersMainPositionId(answersMainPositionId)
+                    .orderOwner(userFinder.findBySecret(userSecret))
+                    .orderEvent(event)
+                    .answers(answers, this)
+                .build();
+            return Optional.of(order);
+        }
+        return Optional.empty();
     }
 
     @Override
