@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -78,6 +79,8 @@ public class Order {
     private Event orderEvent; //TODO load from db! (lazy load?)
 
     @NotNull
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Map<String, Object> answers;
 
     public boolean isDaily() {
@@ -96,6 +99,37 @@ public class Order {
     }
 
     @NotNull
+    public Optional<Object> getAnswer(String questionIdentifier) {
+        return Optional.ofNullable(answers.get(questionIdentifier));
+    }
+    public boolean hasAnswer(String questionIdentifier) {
+        return answers.containsKey(questionIdentifier);
+    }
+    public boolean deleteAnswer(String questionIdentifier) {
+        return answers.remove(questionIdentifier) != null;
+    }
+    public void setAnswer(String questionIdentifier, Object answer) {
+        if (answer instanceof String
+                || answer instanceof Float
+                || answer instanceof Boolean
+                || answer instanceof String[]
+                || answer instanceof LocalDate
+                || answer instanceof LocalTime
+                || answer instanceof ZonedDateTime) {
+            answers.put(questionIdentifier, answer);
+        } else {
+            throw new IllegalArgumentException("answer must be of one of the following types: "
+                    + "String, "
+                    + "Float, "
+                    + "Boolean, "
+                    + "String[], "
+                    + "LocalDate, "
+                    + "LocalTime, "
+                    + "ZonedDateTime");
+        }
+    }
+
+    @NotNull
     public String getAnswersJson(@NotNull PretixInformation pi) {
         List<PretixAnswer> answers = new ArrayList<>();
         for (String key : this.answers.keySet()) {
@@ -106,7 +140,7 @@ public class Order {
                 var type = pi.getQuestionTypeFromId(id);
                 if (type.isPresent()) {
                     String out = switch (type.get()) {
-                        case NUMBER -> String.valueOf(o);
+                        case NUMBER -> Float.toString((float) o);
                         case STRING_ONE_LINE -> (String) o;
                         case STRING_MULTI_LINE -> (String) o;
                         case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python

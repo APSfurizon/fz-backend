@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -35,6 +36,10 @@ public class HttpRequest<R> {
 
     @Nullable
     private final Object body;
+    private final long bodySize;
+    @Nullable
+    private final MediaType contentType;
+
 
     @Nullable
     private final Class<R> responseType;
@@ -43,10 +48,12 @@ public class HttpRequest<R> {
     private final ParameterizedTypeReference<R> responseParameterizedType;
 
     public static class Builder<R> {
-        private HttpMethod method = null;
+        private long bodySize = 0L;
+        private Class<R> responseType;
         private String path = null;
         private Object body = null;
-        private Class<R> responseType;
+        private HttpMethod method = null;
+        private MediaType mediaType = null;
         private ParameterizedTypeReference<R> responseParameterizedType;
 
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -88,8 +95,10 @@ public class HttpRequest<R> {
             return this;
         }
 
-        public Builder<R> body(@NotNull final Object body) {
+        public Builder<R> body(@NotNull final Object body, @NotNull final MediaType mediaType, final long size) {
             this.body = body;
+            this.mediaType = mediaType;
+            this.bodySize = size;
             return this;
         }
 
@@ -113,6 +122,8 @@ public class HttpRequest<R> {
                 uriVariables,
                 queryParams,
                 body,
+                bodySize,
+                mediaType,
                 responseType,
                 responseParameterizedType
             );

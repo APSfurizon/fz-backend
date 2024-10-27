@@ -2,7 +2,6 @@ package net.furizon.backend.feature.pretix.product;
 
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
-import org.springframework.data.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;

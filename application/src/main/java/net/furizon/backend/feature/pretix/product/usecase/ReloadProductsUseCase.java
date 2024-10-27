@@ -13,7 +13,6 @@ import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 @Component

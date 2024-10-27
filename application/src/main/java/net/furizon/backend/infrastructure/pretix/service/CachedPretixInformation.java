@@ -27,7 +27,6 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
