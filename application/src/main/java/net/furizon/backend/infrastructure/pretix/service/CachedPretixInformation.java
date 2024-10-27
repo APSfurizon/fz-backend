@@ -12,6 +12,7 @@ import net.furizon.backend.feature.pretix.order.PretixAnswer;
 import net.furizon.backend.feature.pretix.order.PretixOrder;
 import net.furizon.backend.feature.pretix.order.PretixPosition;
 import net.furizon.backend.feature.pretix.order.usecase.ReloadOrdersUseCase;
+import net.furizon.backend.feature.pretix.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.question.PretixQuestion;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -73,9 +75,10 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Rooms
     //map id -> (capacity, hotelName)
-    @NotNull private final Cache<Integer, Pair<Short, String>> roomIdToInfo = Caffeine.newBuilder().build();
-    //map capacity/name -> room name TODO CHECK IF THIS WORKS
-    @NotNull private final Cache<Pair<Short, String>, String> roomInfoToName = Caffeine.newBuilder().build();
+    @NotNull private final Cache<Integer, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    //map capacity/name -> room name
+    @NotNull private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
+            Caffeine.newBuilder().build();
 
     @PostConstruct
     public void init() {
@@ -193,10 +196,10 @@ public class CachedPretixInformation implements PretixInformation {
                 }
 
             } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                Pair<Short, String> room = roomIdToInfo.getIfPresent(position.getVariationId());
+                HotelCapacityPair room = roomIdToInfo.getIfPresent(position.getVariationId());
                 if (room != null) {
-                    roomCapacity = room.getFirst();
-                    hotelLocation = room.getSecond();
+                    roomCapacity = room.capacity();
+                    hotelLocation = room.hotel();
                 }
             }
         }
@@ -262,7 +265,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Rooms
         roomIdToInfo.invalidateAll();
-        roomInfoToName.invalidateAll();
+        roomInfoToNames.invalidateAll();
     }
 
 
@@ -298,13 +301,11 @@ public class CachedPretixInformation implements PretixInformation {
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_SECRET
-        questionList.stream()
-            .filter(it -> it.getIdentifier().equals(QUESTIONS_ACCOUNT_SECRET))
-            .findFirst()
-            .ifPresent(it -> {
-                log.info("[PRETIX] Account secret id found, setup it on value = '{}'", it.getId());
-                questionSecretId.set(it.getId());
-            });
+        Integer accountSecretId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_SECRET);
+        if (accountSecretId != null) {
+            log.info("[PRETIX] Account secret id found, setup it on value = '{}'", accountSecretId);
+            questionSecretId.set(accountSecretId);
+        }
     }
 
     private void reloadProducts(Event event) {
@@ -319,7 +320,7 @@ public class CachedPretixInformation implements PretixInformation {
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
-        roomInfoToName.putAll(products.roomInfoToName());
+        roomInfoToNames.putAll(products.roomInfoToNames());
     }
 
     @Override

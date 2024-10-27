@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,13 +109,13 @@ public class Order {
                         case NUMBER -> String.valueOf(o);
                         case STRING_ONE_LINE -> (String) o;
                         case STRING_MULTI_LINE -> (String) o;
-                        case BOOLEAN -> ((boolean) o) ? "true" : "false";
+                        case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
                         case LIST_SINGLE_CHOICE -> (String) o;
-                        case LIST_MULTIPLE_CHOICE -> (String) o;
+                        case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
                         case FILE -> (String) o;
                         case DATE -> o.toString();
                         case TIME -> o.toString();
-                        case DATE_TIME -> o.toString();
+                        case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
                         case COUNTRY_CODE -> (String) o;
                         case PHONE_NUMBER -> (String) o;
                     };
@@ -175,11 +177,11 @@ public class Order {
                                 case STRING_MULTI_LINE -> value;
                                 case BOOLEAN -> value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes");
                                 case LIST_SINGLE_CHOICE -> value;
-                                case LIST_MULTIPLE_CHOICE -> value;
+                                case LIST_MULTIPLE_CHOICE -> value.split(", ");
                                 case FILE -> Const.QUESTIONS_FILE_KEEP;
                                 case DATE -> LocalDate.parse(value);
                                 case TIME -> LocalTime.parse(value);
-                                case DATE_TIME -> ZonedDateTime.parse(value);
+                                case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);
                                 case COUNTRY_CODE -> value;
                                 case PHONE_NUMBER -> value;
                             };

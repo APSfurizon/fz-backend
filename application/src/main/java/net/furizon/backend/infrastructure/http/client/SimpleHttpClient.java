@@ -57,7 +57,6 @@ public class SimpleHttpClient implements HttpClient {
             .method(request.getMethod())
             .uri(builder.build(request.getUriVariables()))
             .headers((headers) -> {
-                System.out.println(config.headers());
                 headers.addAll(config.headers());
                 if (!request.getHeaders().isEmpty()) {
                     headers.addAll(request.getHeaders());

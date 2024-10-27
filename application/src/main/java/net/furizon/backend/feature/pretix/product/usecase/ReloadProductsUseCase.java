@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.product.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
+import net.furizon.backend.feature.pretix.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.product.PretixProduct;
 import net.furizon.backend.feature.pretix.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.product.finder.PretixProductFinder;
@@ -38,7 +39,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
 
                 if (identifier.startsWith(Const.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
-                    ExtraDays ed = ExtraDays.valueOf(s);
+                    ExtraDays ed = ExtraDays.get(Integer.parseInt(s));
                     result.extraDaysIdToDay().put(product.getId(), ed);
 
                 } else if (identifier.startsWith(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
@@ -61,7 +62,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             product.forEachVariationByIdentifierPrefix(
                                 Const.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
                                 (variation, strippedIdentifier) -> {
-                                    Sponsorship ss = Sponsorship.valueOf(strippedIdentifier);
+                                    Sponsorship ss = Sponsorship.get(Integer.parseInt(strippedIdentifier));
                                     result.sponsorshipIdToType().put(variation.getId(), ss);
                                 }
                             );
@@ -75,9 +76,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                                     String[] sp = strippedIdentifier.split("_");
                                     String hotelName = sp[0];
                                     short capacity = Short.parseShort(sp[1]);
-                                    Pair<Short, String> p = Pair.of(capacity, hotelName);
+                                    HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
                                     result.roomIdToInfo().put(variation.getId(), p);
-                                    result.roomInfoToName().put(p, variation.getName());
+                                    result.roomInfoToNames().put(p, variation.getNames());
                                 }
                             );
                             break;

@@ -13,11 +13,12 @@ public class PretixProductVariation {
 
     private final int id;
 
-    @Nullable
-    private final String name;
-
-    @JsonProperty("meta_data")
     @NotNull
+    @JsonProperty("value")
+    private final Map<String, String> names;
+
+    @NotNull
+    @JsonProperty("meta_data")
     private final Map<String, String> metadata;
 
     @Nullable
