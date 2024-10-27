@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.pretix.order.usecase;
 
-import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
@@ -20,10 +19,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class FetchSingleOrderUseCase implements UseCase<Pair<Event, String>, Optional<Order>>  {
+public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.Input, Optional<Order>>  {
     @NotNull private final PretixOrderFinder pretixOrderFinder;
-
-    @NotNull private final PretixInformation pretixInformation;
 
     @NotNull private final InsertOrUpdateOrderAction insertOrUpdateOrderAction;
     @NotNull private final DeleteOrderAction deleteOrderAction;
@@ -31,9 +28,9 @@ public class FetchSingleOrderUseCase implements UseCase<Pair<Event, String>, Opt
     @Transactional
     @NotNull
     @Override
-    public Optional<Order> executor(@NotNull Pair<Event, String> info) {
-        Event event = info.getFirst();
-        String orderCode = info.getSecond();
+    public Optional<Order> executor(@NotNull Input input) {
+        Event event = input.event;
+        String orderCode = input.code;
         var eventInfo = event.getOrganizerAndEventPair();
 
         Optional<PretixOrder> pretixOrder = pretixOrderFinder.fetchOrderByCode(
@@ -42,10 +39,10 @@ public class FetchSingleOrderUseCase implements UseCase<Pair<Event, String>, Opt
                 orderCode
         );
         if (pretixOrder.isPresent()) {
-            var orderOpt = pretixInformation.parseOrderFromId(pretixOrder.get(), event);
+            var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.get(), event);
             if (orderOpt.isPresent()) {
                 Order order = orderOpt.get();
-                insertOrUpdateOrderAction.invoke(order);
+                insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
                 return Optional.of(order);
             } else {
                 deleteOrderAction.invoke(orderCode);
@@ -55,4 +52,6 @@ public class FetchSingleOrderUseCase implements UseCase<Pair<Event, String>, Opt
         }
         return Optional.empty();
     }
+
+    public record Input(@NotNull Event event, @NotNull String code, @NotNull PretixInformation pretixInformation) {}
 }

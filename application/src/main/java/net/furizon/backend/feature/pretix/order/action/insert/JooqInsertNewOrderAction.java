@@ -14,10 +14,9 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqInsertNewOrderAction implements InsertNewOrderAction {
     private final SqlCommand command;
-    private final PretixInformation pretixInformation; //TODO is this possible?
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
         command.execute(
             PostgresDSL
                 .insertInto(

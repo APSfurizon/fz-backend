@@ -11,6 +11,7 @@ import net.furizon.backend.feature.pretix.order.Order;
 import net.furizon.backend.feature.pretix.order.PretixAnswer;
 import net.furizon.backend.feature.pretix.order.PretixOrder;
 import net.furizon.backend.feature.pretix.order.PretixPosition;
+import net.furizon.backend.feature.pretix.order.usecase.ReloadOrdersUseCase;
 import net.furizon.backend.feature.pretix.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.question.PretixQuestion;
@@ -80,6 +81,7 @@ public class CachedPretixInformation implements PretixInformation {
     public void init() {
         log.info("[PRETIX] Initializing pretix information and cache it");
         resetCache();
+        reloadAllOrders();
     }
 
     @NotNull
@@ -160,6 +162,7 @@ public class CachedPretixInformation implements PretixInformation {
                     var questionType = getQuestionTypeFromId(questionId);
                     if (questionType.isPresent()) {
                         if (questionType.get() == QuestionType.FILE) {
+                            //TODO change the setAnswer
                             answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
                         }
                         if (questionId == this.getQuestionSecretId()) {
@@ -317,5 +320,14 @@ public class CachedPretixInformation implements PretixInformation {
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
         roomInfoToName.putAll(products.roomInfoToName());
+    }
+
+    @Override
+    public void reloadAllOrders() {
+        var event = getCurrentEvent();
+        if (event.isPresent()) {
+            var input = new ReloadOrdersUseCase.Input(event.get(), this);
+            useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
+        }
     }
 }

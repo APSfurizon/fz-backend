@@ -1,6 +1,6 @@
 package net.furizon.backend.utils;
 
-import lombok.extern.slf4j.Slf4j;
+/*import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.db.entities.users.DeprUser;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -8,18 +8,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
-import java.util.Optional;
+import java.util.Optional;*/
 
-@Slf4j
+//@Slf4j
 public class SecurityUtil {
-    private static final SecurityContextRepository securityContextRepository =
+    /*private static final SecurityContextRepository securityContextRepository =
         new HttpSessionSecurityContextRepository();
 
     /**
      * Get the authenticated user from the SecurityContextHolder
      *
      * @throws ApiException if the user is not found in the SecurityContextHolder
-     */
+     *//*
     public static DeprUser getAuthenticatedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof DeprUser user) {
@@ -40,5 +40,5 @@ public class SecurityUtil {
         } else {
             return Optional.empty();
         }
-    }
+    }*/
 }

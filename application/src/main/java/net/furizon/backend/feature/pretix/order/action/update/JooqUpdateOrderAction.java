@@ -14,10 +14,9 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqUpdateOrderAction implements UpdateOrderAction {
     private final SqlCommand command;
-    private final PretixInformation pretixInformation;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
         command.execute(
             PostgresDSL
                 .update(ORDERS)

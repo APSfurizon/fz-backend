@@ -23,10 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReloadOrdersUseCase implements UseCase<Event, Boolean>  {
+public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, Boolean>  {
     @NotNull private final PretixOrderFinder pretixOrderFinder;
-
-    @NotNull private final PretixInformation pretixInformation;
 
     @NotNull private final InsertOrUpdateOrderAction insertOrUpdateOrderAction;
     @NotNull private final DeleteOrderAction deleteOrderAction;
@@ -34,16 +32,16 @@ public class ReloadOrdersUseCase implements UseCase<Event, Boolean>  {
     @Transactional
     @NotNull
     @Override
-    public Boolean executor(@NotNull Event event) {
+    public Boolean executor(@NotNull Input input) {
         AtomicReference<Boolean> success = new AtomicReference<>(true);
-        var eventInfo = event.getOrganizerAndEventPair();
+        var eventInfo = input.event.getOrganizerAndEventPair();
 
         PretixPagingUtil.forEachElement(
             page -> pretixOrderFinder.getPagedOrders(eventInfo.getOrganizer(), eventInfo.getEvent(), page),
             pretixOrder -> {
-                var order = pretixInformation.parseOrderFromId(pretixOrder.getFirst(), event);
+                var order = input.pretixInformation.parseOrderFromId(pretixOrder.getFirst(), input.event);
                 if (order.isPresent()) {
-                    insertOrUpdateOrderAction.invoke(order.get());
+                    insertOrUpdateOrderAction.invoke(order.get(), input.pretixInformation);
                 } else {
                     deleteOrderAction.invoke(pretixOrder.getFirst().getCode());
                 }
@@ -52,4 +50,6 @@ public class ReloadOrdersUseCase implements UseCase<Event, Boolean>  {
 
         return success.get();
     }
+
+    public record Input(@NotNull Event event, @NotNull PretixInformation pretixInformation) {}
 }

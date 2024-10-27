@@ -14,10 +14,9 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqInsertOrUpdateAction implements InsertOrUpdateOrderAction {
     private final SqlCommand command;
-    private final PretixInformation pretixInformation;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
         String code = order.getCode();
         short orderStatus = (short) order.getOrderStatus().ordinal();
         short sponsorship = (short) order.getSponsorship().ordinal();

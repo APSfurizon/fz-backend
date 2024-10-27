@@ -30,4 +30,6 @@ public interface PretixInformation {
     Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event);
 
     void resetCache();
+
+    void reloadAllOrders();
 }

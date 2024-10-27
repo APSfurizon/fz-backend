@@ -1,16 +1,12 @@
 package net.furizon.backend.service.pretix;
 
-import lombok.RequiredArgsConstructor;
+/*import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.DeprOrder;
-import net.furizon.backend.db.entities.users.DeprUser;
-import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
-import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.TextUtil;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.pretix.Constants;
@@ -33,17 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.function.Consumer;*/
 
 /**
  * Describes all the iteractions via Pretix
  */
-@Service
-@Slf4j
-@RequiredArgsConstructor
-@Deprecated
+//@Service
+//@Slf4j
+//@RequiredArgsConstructor
+//@Deprecated
 public class PretixService {
-    private final OrderRepository orderRepository;
+    /*private final OrderRepository orderRepository;
     private final PretixConfig pretixConfig;
 
     private PretixIdsMap pretixIdsCache = null;
@@ -524,5 +520,5 @@ public class PretixService {
             throw new TimeoutException("PRETIX_REQUESTS_MAX reached while " + opLogStr + " to pretix.");
         }
         return res;
-    }
+    }*/
 }
