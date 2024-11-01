@@ -15,7 +15,7 @@ public class OrganizerController {
     private final OrganizersFinder finder;
 
     @GetMapping
-    PretixPaging<PretixOrganizer> organizers() {
+    public PretixPaging<PretixOrganizer> organizers() {
         return finder.getPagedOrganizers(1);
     }
 }

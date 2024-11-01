@@ -33,7 +33,7 @@ public class JooqUpdateEventAction implements UpdateEventAction {
                 .set(EVENTS.EVENT_PUBLIC_URL, event.getPublicUrl())
                 .set(EVENTS.EVENT_NAMES, Optional
                     .ofNullable(event.getEventNames())
-                    .map(jsonSerializer::serialize)
+                    .map(jsonSerializer::serializeAsString)
                     .orElse(null))
                 .set(EVENTS.EVENT_DATE_TO, Optional
                     .ofNullable(event.getDateTo())

@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,6 +140,39 @@ public class Order {
         return ret;
     }
 
+    public List<PretixAnswer> getAllAnswers(@NotNull PretixInformation pretixInformation) {
+        final var list = new ArrayList<PretixAnswer>();
+        final var answers = getAnswers();
+        for (String key : answers.keySet()) {
+            final var questionId = pretixInformation.getQuestionIdFromIdentifier(key);
+            if (questionId.isEmpty()) {
+                continue;
+            }
+
+            int id = questionId.get();
+            var type = pretixInformation.getQuestionTypeFromId(id);
+            if (type.isEmpty()) {
+                continue;
+            }
+            Object o = answers.get(key);
+            String out = switch (type.get()) {
+                case NUMBER -> Float.toString((float) o);
+                case STRING_ONE_LINE, FILE, COUNTRY_CODE, PHONE_NUMBER, STRING_MULTI_LINE, LIST_SINGLE_CHOICE ->
+                    (String) o;
+                case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
+                case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
+                case DATE, TIME -> o.toString();
+                case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
+            };
+
+            if (out != null && !(out = out.strip()).isEmpty()) {
+                list.add(new PretixAnswer(id, out));
+            }
+        }
+
+        return list;
+    }
+
     public static class OrderBuilder {
         public OrderBuilder dailyDays(Set<Integer> days) {
             dailyDays = days;
@@ -160,27 +194,31 @@ public class Order {
             for (PretixAnswer answer : answers) {
                 int questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);
-                if (identifier.isPresent()) {
-                    String answerIdentifier = identifier.get();
-                    String value = answer.getAnswer();
-                    if (value != null) {
-                        var type = pi.getQuestionTypeFromId(questionId);
-                        if (type.isPresent()) {
-                            Object o = switch (type.get()) {
-                                case NUMBER -> Float.parseFloat(value);
-                                case STRING_ONE_LINE, STRING_MULTI_LINE, COUNTRY_CODE, PHONE_NUMBER,
-                                     LIST_SINGLE_CHOICE -> value;
-                                case BOOLEAN -> value.equalsIgnoreCase("true")
-                                    || value.equalsIgnoreCase("yes");
-                                case LIST_MULTIPLE_CHOICE -> value.split(", ");
-                                case FILE -> Const.QUESTIONS_FILE_KEEP;
-                                case DATE -> LocalDate.parse(value);
-                                case TIME -> LocalTime.parse(value);
-                                case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);
-                            };
-                            this.answers.put(answerIdentifier, o);
-                        }
-                    }
+                if (identifier.isEmpty()) {
+                    throw new IllegalArgumentException("Answer identifier is empty");
+                }
+
+                String answerIdentifier = identifier.get();
+                String value = answer.getAnswer();
+                if (value == null) {
+                    throw new IllegalArgumentException("Answer " + answerIdentifier + " has null value");
+                }
+
+                var type = pi.getQuestionTypeFromId(questionId);
+                if (type.isPresent()) {
+                    Object o = switch (type.get()) {
+                        case NUMBER -> Float.parseFloat(value);
+                        case STRING_ONE_LINE, STRING_MULTI_LINE, COUNTRY_CODE, PHONE_NUMBER,
+                             LIST_SINGLE_CHOICE -> value;
+                        case BOOLEAN -> value.equalsIgnoreCase("true")
+                            || value.equalsIgnoreCase("yes");
+                        case LIST_MULTIPLE_CHOICE -> value.split(", ");
+                        case FILE -> Const.QUESTIONS_FILE_KEEP;
+                        case DATE -> LocalDate.parse(value);
+                        case TIME -> LocalTime.parse(value);
+                        case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);
+                    };
+                    this.answers.put(answerIdentifier, o);
                 }
             }
             return this;

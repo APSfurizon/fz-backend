@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.event.Event;
+import net.furizon.backend.feature.pretix.event.mapper.JooqEventMapper;
 import net.furizon.backend.feature.pretix.order.Order;
 import net.furizon.backend.feature.pretix.order.PretixAnswer;
+import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -17,20 +20,24 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
 public class JooqOrderMapper {
-    private final TypeReference<List<PretixAnswer>> ref = new TypeReference<>() {};
+    private final TypeReference<List<PretixAnswer>> ref = new TypeReference<>() {
+    };
 
     private final ObjectMapper objectMapper;
 
     private final PretixInformation pretixInformation;
 
+    private final JooqEventMapper jooqEventMapper;
+
     @NotNull
     public Order map(Record record) {
         try {
-            final var answerList = objectMapper.readValue(record.get(ORDERS.ORDER_ANSWERS), ref);
+            final var answerList = objectMapper.readValue(record.get(ORDERS.ORDER_ANSWERS_JSON).data(), ref);
             return Order.builder()
                 .code(record.get(ORDERS.ORDER_CODE))
                 .orderStatus(OrderStatus.values()[record.get(ORDERS.ORDER_STATUS)])
@@ -42,8 +49,8 @@ public class JooqOrderMapper {
                 .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))
                 .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
                 .answersMainPositionId(record.get(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID))
-                //.orderOwner() TODO
-                //.orderEvent() TODO
+                .orderOwner(record.get(USERS.USER_ID) != null ? JooqUserMapper.map(record) : null)
+                .orderEvent(jooqEventMapper.map(record))
                 .answers(answerList, pretixInformation)
                 .build();
         } catch (JsonProcessingException e) {

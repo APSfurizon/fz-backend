@@ -1,13 +1,13 @@
-package net.furizon.backend.feature.pretix.order.action.addAnswer;
+package net.furizon.backend.feature.pretix.order.action.pushAnswer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
+import net.furizon.backend.feature.pretix.order.dto.PushPretixAnswerRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
@@ -19,25 +19,25 @@ import org.springframework.web.client.HttpClientErrorException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RestAddPretixAnswerAction implements AddPretixAnswerAction {
+public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
     @Qualifier("pretixHttpClient")
     private final HttpClient pretixHttpClient;
-
-    private final OrderTransformationUtil orderTransformation;
 
     @Override
     public boolean invoke(
         @NotNull final Order order,
-        @NotNull final Event.OrganizerAndEventPair pair
+        @NotNull final PretixInformation pretixInformation
     ) {
-        final var request = HttpRequest.create()
+        final var pair = order.getOrderEvent().getOrganizerAndEventPair();
+        final var request = HttpRequest.<Void>create()
             .method(HttpMethod.PATCH)
             .path("/organizers/{organizer}/events/{event}/orderpositions/{position}/")
             .uriVariable("organizer", pair.getOrganizer())
             .uriVariable("event", pair.getEvent())
             .uriVariable("position", String.valueOf(order.getAnswersMainPositionId()))
             .contentType(MediaType.APPLICATION_JSON)
-            .body(orderTransformation.getAnswersAsJson(order))
+            .body(new PushPretixAnswerRequest(order.getAllAnswers(pretixInformation)))
+            .responseType(Void.class)
             .build();
         try {
             return pretixHttpClient.send(PretixConfig.class, request).getStatusCode() == HttpStatus.OK;

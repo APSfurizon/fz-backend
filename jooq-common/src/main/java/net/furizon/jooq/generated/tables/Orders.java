@@ -22,6 +22,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.InverseForeignKey;
+import org.jooq.JSON;
 import org.jooq.Name;
 import org.jooq.Path;
 import org.jooq.PlainSQL;
@@ -75,9 +76,9 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, String> ORDER_CODE = createField(DSL.name("order_code"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
-     * The column <code>public.orders.order_answers</code>.
+     * The column <code>public.orders.order_answers_json</code>.
      */
-    public final TableField<Record, String> ORDER_ANSWERS = createField(DSL.name("order_answers"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JSON> ORDER_ANSWERS_JSON = createField(DSL.name("order_answers_json"), SQLDataType.JSON, this, "");
 
     /**
      * The column <code>public.orders.order_status</code>.

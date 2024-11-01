@@ -2,7 +2,8 @@ package net.furizon.backend.feature.pretix.order.action.insertNewOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
+import net.furizon.backend.infrastructure.jackson.JsonSerializer;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -15,10 +16,13 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 public class JooqInsertNewOrderAction implements InsertNewOrderAction {
     private final SqlCommand command;
 
-    private final OrderTransformationUtil orderTransformationUtil;
+    private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(
+        @NotNull final Order order,
+        @NotNull final PretixInformation pretixInformation
+    ) {
         command.execute(
             PostgresDSL
                 .insertInto(
@@ -35,7 +39,7 @@ public class JooqInsertNewOrderAction implements InsertNewOrderAction {
                     ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
                     //ORDERS.USER_ID, TODO
                     //ORDERS.EVENT_ID,
-                    ORDERS.ORDER_ANSWERS
+                    ORDERS.ORDER_ANSWERS_JSON
                 )
                 .values(
                     order.getCode(),
@@ -50,7 +54,7 @@ public class JooqInsertNewOrderAction implements InsertNewOrderAction {
                     order.getAnswersMainPositionId(),
                     //order.getOrderOwner(),
                     //order.getOrderEvent(),
-                    orderTransformationUtil.getAnswersAsJson(order)
+                    jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation))
                 )
         );
     }

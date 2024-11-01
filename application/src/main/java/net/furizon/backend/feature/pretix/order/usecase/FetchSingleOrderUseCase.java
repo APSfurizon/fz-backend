@@ -49,14 +49,14 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
         }
 
         var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.get(), event);
-        if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
-            insertOrUpdateOrderAction.invoke(order);
-            return Optional.of(order);
-        } else {
+        if (orderOpt.isEmpty()) {
             deleteOrderAction.invoke(orderCode);
             return Optional.empty();
         }
+
+        Order order = orderOpt.get();
+        insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
+        return orderOpt;
     }
 
     public record Input(

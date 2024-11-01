@@ -2,7 +2,8 @@ package net.furizon.backend.feature.pretix.order.action.updateOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
+import net.furizon.backend.infrastructure.jackson.JsonSerializer;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -15,10 +16,13 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 public class JooqUpdateOrderAction implements UpdateOrderAction {
     private final SqlCommand command;
 
-    private final OrderTransformationUtil orderTransformationUtil;
+    private final JsonSerializer serializer;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(
+        @NotNull final Order order,
+        @NotNull final PretixInformation pretixInformation
+    ) {
         command.execute(
             PostgresDSL
                 .update(ORDERS)
@@ -33,7 +37,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, order.getAnswersMainPositionId())
                 //.set(ORDERS.USER_ID, order.getOrderOwner())
                 //.set(ORDERS.EVENT_ID, order.getOrderEvent())
-                .set(ORDERS.ORDER_ANSWERS, orderTransformationUtil.getAnswersAsJson(order))
+                .set(ORDERS.ORDER_ANSWERS_JSON, serializer.serializeAsJson(order.getAllAnswers(pretixInformation)))
                 .where(ORDERS.ORDER_CODE.eq(order.getCode()))
         );
     }

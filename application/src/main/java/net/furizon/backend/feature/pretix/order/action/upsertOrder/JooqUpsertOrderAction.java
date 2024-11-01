@@ -2,7 +2,8 @@ package net.furizon.backend.feature.pretix.order.action.upsertOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
+import net.furizon.backend.infrastructure.jackson.JsonSerializer;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -15,10 +16,10 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 public class JooqUpsertOrderAction implements UpsertOrderAction {
     private final SqlCommand command;
 
-    private final OrderTransformationUtil orderTransformationUtil;
+    private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
         String code = order.getCode();
         short orderStatus = (short) order.getOrderStatus().ordinal();
         short sponsorship = (short) order.getSponsorship().ordinal();
@@ -31,7 +32,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         int answersMainPositionId = order.getAnswersMainPositionId();
         //User user = order.getOrderOwner();
         //Event event = order.getOrderEvent();
-        String answersJson = orderTransformationUtil.getAnswersAsJson(order);
+        final var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
 
 
         command.execute(
@@ -50,7 +51,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
                     //ORDERS.USER_ID, TODO
                     //ORDERS.EVENT_ID,
-                    ORDERS.ORDER_ANSWERS
+                    ORDERS.ORDER_ANSWERS_JSON
                 )
                 .values(
                     code,
@@ -65,7 +66,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     answersMainPositionId,
                     //user,
                     //event,
-                    answersJson
+                    answers
                 )
                 .onConflict(ORDERS.ORDER_CODE)
                 .doUpdate()
@@ -80,7 +81,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, answersMainPositionId)
                 //.set(ORDERS.USER_ID, user)
                 //.set(ORDERS.EVENT_ID, event)
-                .set(ORDERS.ORDER_ANSWERS, answersJson)
+                .set(ORDERS.ORDER_ANSWERS_JSON, answers)
         );
     }
 }

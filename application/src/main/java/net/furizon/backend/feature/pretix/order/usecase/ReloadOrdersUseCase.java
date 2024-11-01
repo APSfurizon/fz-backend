@@ -49,7 +49,7 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
                     Order order = orderOpt.get();
                     OrderStatus os = order.getOrderStatus();
                     if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
-                        insertOrUpdateOrderAction.invoke(order);
+                        insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
                         shouldDelete = false;
                     }
                 }
