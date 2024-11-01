@@ -51,7 +51,7 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
             PretixPagingUtil.forEachElement(
                 paging -> pretixEventFinder.getPagedEvents(organizer.getSlug(), paging),
                 result -> {
-                    final PretixEvent event = result.getFirst();
+                    final PretixEvent event = result.getLeft();
 
                     Event dbEvent = eventFinder.findEventBySlug(
                             PretixGenericUtils.buildOrgEventSlug(event.getSlug(), organizer.getSlug()));

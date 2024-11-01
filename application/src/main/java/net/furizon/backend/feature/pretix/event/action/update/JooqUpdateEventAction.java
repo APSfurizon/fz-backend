@@ -5,7 +5,6 @@ import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -31,7 +30,7 @@ public class JooqUpdateEventAction implements UpdateEventAction {
                 .set(EVENTS.EVENT_PUBLIC_URL, event.getPublicUrl())
                 .set(EVENTS.EVENT_NAMES, Optional
                     .ofNullable(event.getEventNames())
-                    .map(it -> new JSONObject(it).toString()) // TODO -> use object mapper here
+                    .map(it -> "new JSONObject(it).toString()") // TODO -> use object mapper here
                     .orElse(null))
                 .set(EVENTS.EVENT_DATE_TO, Optional
                     .ofNullable(event.getDateTo())

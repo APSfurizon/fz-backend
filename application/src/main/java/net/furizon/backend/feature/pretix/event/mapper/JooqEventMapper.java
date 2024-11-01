@@ -3,11 +3,10 @@ package net.furizon.backend.feature.pretix.event.mapper;
 import net.furizon.backend.feature.pretix.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
-import org.json.JSONObject;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
 
@@ -31,8 +30,9 @@ public class JooqEventMapper {
             .eventNames(
                 Optional.ofNullable(record.get(EVENTS.EVENT_NAMES))
                     .map(it -> {
-                        JSONObject d = new JSONObject(it); //TODO update deserialization method
-                        return d.keySet().stream().collect(Collectors.toMap(k -> k, d::getString));
+                        //JSONObject d = new JSONObject(it); //TODO update deserialization method
+                        //return d.keySet().stream().collect(Collectors.toMap(k -> k, d::getString));
+                        return new HashMap<String, String>();
                     })
                     .orElse(null)
             )

@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.pretix;
 
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
-import org.springframework.data.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +35,14 @@ public class PretixPagingUtil {
             Function<Integer, P> callable,
             Consumer<Pair<U, P>> consumer
     ) {
-        forEachPage(callable, r -> r.getFirst().forEach(el -> consumer.accept(Pair.of(el, r.getSecond()))));
+        forEachPage(callable, r -> r.getLeft().forEach(el -> consumer.accept(Pair.of(el, r.getRight()))));
     }
 
     public static <U, P extends PretixPaging<U>> List<U> fetchAll(
         Function<Integer, P> callable
     ) {
         final var combined = new ArrayList<U>();
-        forEachPage(callable, result -> combined.addAll(result.getFirst()));
+        forEachPage(callable, result -> combined.addAll(result.getLeft()));
 
         return combined;
     }

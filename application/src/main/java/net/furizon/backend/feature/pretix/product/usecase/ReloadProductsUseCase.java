@@ -30,7 +30,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
         PretixPagingUtil.forEachElement(
             paged -> pretixProductFinder.getPagedProducts(pair.getOrganizer(), pair.getEvent(), paged),
             r -> {
-                PretixProduct product = r.getFirst();
+                PretixProduct product = r.getLeft();
                 String identifier = product.getIdentifier();
                 if (identifier == null) {
                     return;
