@@ -1,7 +1,10 @@
 package net.furizon.backend.feature.pretix.event.action.insert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.event.Event;
+import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -16,6 +19,8 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 @RequiredArgsConstructor
 public class JooqInsertNewEventAction implements InsertNewEventAction {
     private final SqlCommand command;
+
+    private final JsonSerializer jsonSerializer;
 
     @Override
     public void invoke(@NotNull Event event) {
@@ -44,7 +49,7 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     event.getPublicUrl(),
                     Optional
                         .ofNullable(event.getEventNames())
-                        .map(it -> "new JSONObject(it).toString()") // TODO -> use object mapper here.
+                        .map(jsonSerializer::serialize)
                         .orElse(null)
                 )
         );
