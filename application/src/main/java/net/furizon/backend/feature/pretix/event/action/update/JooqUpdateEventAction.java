@@ -1,7 +1,5 @@
 package net.furizon.backend.feature.pretix.event.action.update;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
