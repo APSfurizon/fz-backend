@@ -1,8 +1,14 @@
 package net.furizon.backend.feature.pretix.event.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -10,9 +16,16 @@ import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
 
+@Component
+@RequiredArgsConstructor
+@Slf4j
 public class JooqEventMapper {
+    private final TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {};
+
+    private final ObjectMapper objectMapper;
+
     @NotNull
-    public static Event map(Record record) {
+    public Event map(Record record) {
         return Event.builder()
             .slug(record.get(EVENTS.EVENT_SLUG))
             .dateTo(
@@ -30,9 +43,12 @@ public class JooqEventMapper {
             .eventNames(
                 Optional.ofNullable(record.get(EVENTS.EVENT_NAMES))
                     .map(it -> {
-                        //JSONObject d = new JSONObject(it); //TODO update deserialization method
-                        //return d.keySet().stream().collect(Collectors.toMap(k -> k, d::getString));
-                        return new HashMap<String, String>();
+                        try {
+                            return objectMapper.readValue(it, typeRef);
+                        } catch (JsonProcessingException e) {
+                            log.error("Could not parse event names", e);
+                            throw new RuntimeException(e);
+                        }
                     })
                     .orElse(null)
             )
