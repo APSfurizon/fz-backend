@@ -37,3 +37,4 @@ build/
 
 ### Configurations ###
 .env
+.env.local
