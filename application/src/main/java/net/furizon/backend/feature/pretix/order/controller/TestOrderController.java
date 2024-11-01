@@ -5,7 +5,6 @@ import net.furizon.backend.feature.pretix.order.action.pushAnswer.PushPretixAnsw
 import net.furizon.backend.feature.pretix.order.finder.OrderFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
-import net.furizon.backend.service.pretix.PretixService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
