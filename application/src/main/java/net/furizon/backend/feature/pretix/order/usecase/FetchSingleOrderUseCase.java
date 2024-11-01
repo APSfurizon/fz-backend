@@ -29,9 +29,6 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
     @NotNull
     private final DeleteOrderAction deleteOrderAction;
 
-    @NotNull
-    private final PretixInformation pretixInformation;
-
     @Transactional
     @NotNull
     @Override
@@ -51,7 +48,7 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
             return Optional.empty();
         }
 
-        var orderOpt = pretixInformation.parseOrderFromId(pretixOrder.get(), event);
+        var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.get(), event);
         if (orderOpt.isPresent()) {
             Order order = orderOpt.get();
             insertOrUpdateOrderAction.invoke(order);
@@ -64,6 +61,7 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
 
     public record Input(
         @NotNull Event event,
-        @NotNull String code
+        @NotNull String code,
+        @NotNull PretixInformation pretixInformation
     ) {}
 }

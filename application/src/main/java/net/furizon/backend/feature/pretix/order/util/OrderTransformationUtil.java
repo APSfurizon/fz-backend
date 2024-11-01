@@ -9,6 +9,7 @@ import net.furizon.backend.feature.pretix.order.PretixAnswer;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -20,6 +21,9 @@ import java.util.ArrayList;
 public class OrderTransformationUtil {
     private final ObjectMapper objectMapper;
 
+    // @Lazy annotation will help here to avoid
+    //circular-injection, but let's avoid to reuse it
+    @Lazy
     private final PretixInformation pretixInformation;
 
     @NotNull

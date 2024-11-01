@@ -325,7 +325,7 @@ public class CachedPretixInformation implements PretixInformation {
     public void reloadAllOrders() {
         var event = getCurrentEvent();
         if (event.isPresent()) {
-            var input = new ReloadOrdersUseCase.Input(event.get());
+            var input = new ReloadOrdersUseCase.Input(event.get(), this);
             useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
         }
     }

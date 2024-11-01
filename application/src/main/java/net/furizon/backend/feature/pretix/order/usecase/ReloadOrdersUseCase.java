@@ -33,9 +33,6 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
     @NotNull
     private final DeleteOrderAction deleteOrderAction;
 
-    @NotNull
-    private final PretixInformation pretixInformation;
-
     @Transactional
     @NotNull
     @Override
@@ -47,7 +44,7 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
             pretixOrder -> {
                 boolean shouldDelete = true;
 
-                var orderOpt = pretixInformation.parseOrderFromId(pretixOrder.getFirst(), input.event);
+                var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.getFirst(), input.event);
                 if (orderOpt.isPresent()) {
                     Order order = orderOpt.get();
                     OrderStatus os = order.getOrderStatus();
@@ -66,5 +63,8 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
         return true;
     }
 
-    public record Input(@NotNull Event event) {}
+    public record Input(
+        @NotNull Event event,
+        @NotNull PretixInformation pretixInformation
+    ) {}
 }
