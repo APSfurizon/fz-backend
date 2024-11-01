@@ -21,15 +21,17 @@ import java.util.Optional;
 @Slf4j
 public class RestPretixOrderFinder implements PretixOrderFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixOrder>> pretixPagedOrder =
-        new ParameterizedTypeReference<>() {
-        };
+        new ParameterizedTypeReference<>() {};
 
     @Qualifier("pretixHttpClient")
     private final HttpClient pretixHttpClient;
 
     @Override
     public @NotNull PretixPaging<PretixOrder> getPagedOrders(
-        @NotNull String organizer, @NotNull String event, int page) {
+        @NotNull final String organizer,
+        @NotNull final String event,
+        int page
+    ) {
         final var request = HttpRequest.<PretixPaging<PretixOrder>>create()
             .method(HttpMethod.GET)
             .path("/organizers/{organizer}/events/{event}/orders/")
@@ -51,9 +53,9 @@ public class RestPretixOrderFinder implements PretixOrderFinder {
 
     @Override
     public @NotNull Optional<PretixOrder> fetchOrderByCode(
-        @NotNull String organizer,
-        @NotNull String event,
-        @NotNull String code
+        @NotNull final String organizer,
+        @NotNull final String event,
+        @NotNull final String code
     ) {
         final var request = HttpRequest.<PretixOrder>create()
             .method(HttpMethod.GET)

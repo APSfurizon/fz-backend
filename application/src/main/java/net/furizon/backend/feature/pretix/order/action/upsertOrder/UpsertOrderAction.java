@@ -5,5 +5,8 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 
 public interface UpsertOrderAction {
-    void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation);
+    void invoke(
+        @NotNull final Order order,
+        @NotNull final PretixInformation pretixInformation
+    );
 }

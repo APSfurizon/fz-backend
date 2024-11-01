@@ -19,7 +19,10 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
     private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
+    public void invoke(
+        @NotNull final Order order,
+        @NotNull final PretixInformation pretixInformation
+    ) {
         String code = order.getCode();
         short orderStatus = (short) order.getOrderStatus().ordinal();
         short sponsorship = (short) order.getSponsorship().ordinal();
@@ -33,7 +36,6 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         //User user = order.getOrderOwner();
         //Event event = order.getOrderEvent();
         final var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
-
 
         command.execute(
             PostgresDSL

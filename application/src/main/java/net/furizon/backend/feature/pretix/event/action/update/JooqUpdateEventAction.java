@@ -21,7 +21,7 @@ public class JooqUpdateEventAction implements UpdateEventAction {
     private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(@NotNull Event event) {
+    public void invoke(@NotNull final Event event) {
         command.execute(
             PostgresDSL
                 .update(EVENTS)

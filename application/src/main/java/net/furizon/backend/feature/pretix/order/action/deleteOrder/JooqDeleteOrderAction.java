@@ -15,12 +15,12 @@ public class JooqDeleteOrderAction implements DeleteOrderAction {
     private final SqlCommand command;
 
     @Override
-    public void invoke(@NotNull Order order) {
+    public void invoke(@NotNull final Order order) {
         this.invoke(order.getCode());
     }
 
     @Override
-    public void invoke(@NotNull String code) {
+    public void invoke(@NotNull final String code) {
         command.execute(
             PostgresDSL
                 .deleteFrom(ORDERS)
