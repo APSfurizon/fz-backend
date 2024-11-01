@@ -36,10 +36,9 @@ public class HttpRequest<R> {
 
     @Nullable
     private final Object body;
-    private final long bodySize;
+
     @Nullable
     private final MediaType contentType;
-
 
     @Nullable
     private final Class<R> responseType;
@@ -48,12 +47,11 @@ public class HttpRequest<R> {
     private final ParameterizedTypeReference<R> responseParameterizedType;
 
     public static class Builder<R> {
-        private long bodySize = 0L;
         private Class<R> responseType;
         private String path = null;
         private Object body = null;
         private HttpMethod method = null;
-        private MediaType mediaType = null;
+        private MediaType contentType = null;
         private ParameterizedTypeReference<R> responseParameterizedType;
 
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -95,10 +93,13 @@ public class HttpRequest<R> {
             return this;
         }
 
-        public Builder<R> body(@NotNull final Object body, @NotNull final MediaType mediaType, final long size) {
+        public Builder<R> contentType(@NotNull final MediaType mediaType) {
+            this.contentType = mediaType;
+            return this;
+        }
+
+        public Builder<R> body(@NotNull final Object body) {
             this.body = body;
-            this.mediaType = mediaType;
-            this.bodySize = size;
             return this;
         }
 
@@ -122,8 +123,7 @@ public class HttpRequest<R> {
                 uriVariables,
                 queryParams,
                 body,
-                bodySize,
-                mediaType,
+                contentType,
                 responseType,
                 responseParameterizedType
             );

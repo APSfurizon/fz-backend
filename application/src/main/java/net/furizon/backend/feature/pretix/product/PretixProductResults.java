@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.product;
 
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,15 +11,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public record PretixProductResults(
-        Set<Integer> ticketItemIds,
-        Map<Integer, Integer> dailyIdToDay,
-        Set<Integer> membershipCardItemIds,
-        Set<Integer> sponsorshipItemIds,
-        Map<Integer, Sponsorship> sponsorshipIdToType,
-        Map<Integer, ExtraDays> extraDaysIdToDay,
-        Set<Integer> roomItemIds,
-        Map<Integer, HotelCapacityPair> roomIdToInfo,
-        Map<HotelCapacityPair, Map<String, String>> roomInfoToNames) {
+    @NotNull Set<Integer> ticketItemIds,
+    @NotNull Map<Integer, Integer> dailyIdToDay,
+    @NotNull Set<Integer> membershipCardItemIds,
+    @NotNull Set<Integer> sponsorshipItemIds,
+    @NotNull Map<Integer, Sponsorship> sponsorshipIdToType,
+    @NotNull Map<Integer, ExtraDays> extraDaysIdToDay,
+    @NotNull Set<Integer> roomItemIds,
+    @NotNull Map<Integer, HotelCapacityPair> roomIdToInfo,
+    @NotNull Map<HotelCapacityPair, Map<String, String>> roomInfoToNames
+) {
     public PretixProductResults() {
         this(
             new TreeSet<>(),

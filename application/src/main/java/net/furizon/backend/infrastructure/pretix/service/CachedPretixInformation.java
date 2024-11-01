@@ -164,7 +164,6 @@ public class CachedPretixInformation implements PretixInformation {
                     var questionType = getQuestionTypeFromId(questionId);
                     if (questionType.isPresent()) {
                         if (questionType.get() == QuestionType.FILE) {
-                            //TODO change the setAnswer
                             answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
                         }
                         if (questionId == this.getQuestionSecretId()) {
@@ -326,7 +325,7 @@ public class CachedPretixInformation implements PretixInformation {
     public void reloadAllOrders() {
         var event = getCurrentEvent();
         if (event.isPresent()) {
-            var input = new ReloadOrdersUseCase.Input(event.get(), this);
+            var input = new ReloadOrdersUseCase.Input(event.get());
             useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
         }
     }

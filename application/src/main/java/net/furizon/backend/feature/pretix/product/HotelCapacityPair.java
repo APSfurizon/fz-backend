@@ -1,3 +1,5 @@
 package net.furizon.backend.feature.pretix.product;
 
-public record HotelCapacityPair(String hotel, short capacity) {}
+import org.jetbrains.annotations.NotNull;
+
+public record HotelCapacityPair(@NotNull String hotel, short capacity) {}

@@ -9,15 +9,15 @@ import java.util.Optional;
 public interface PretixOrderFinder {
     @NotNull
     PretixPaging<PretixOrder> getPagedOrders(
-            @NotNull String organizer,
-            @NotNull String event,
-            int page
+        @NotNull String organizer,
+        @NotNull String event,
+        int page
     );
 
     @NotNull
     Optional<PretixOrder> fetchOrderByCode(
-            @NotNull String organizer,
-            @NotNull String event,
-            @NotNull String code
+        @NotNull String organizer,
+        @NotNull String event,
+        @NotNull String code
     );
 }

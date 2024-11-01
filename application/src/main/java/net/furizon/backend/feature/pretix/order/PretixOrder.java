@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class PretixOrder {
-
     @NotNull
     private final String code;
 

@@ -10,7 +10,6 @@ import java.util.Map;
 
 @Data
 public class PretixProductVariation {
-
     private final int id;
 
     @NotNull

@@ -1,8 +1,8 @@
-package net.furizon.backend.feature.pretix.order.action.insertorupdate;
+package net.furizon.backend.feature.pretix.order.action.upsertOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -12,11 +12,13 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
 @RequiredArgsConstructor
-public class JooqInsertOrUpdateAction implements InsertOrUpdateOrderAction {
+public class JooqUpsertOrderAction implements UpsertOrderAction {
     private final SqlCommand command;
 
+    private final OrderTransformationUtil orderTransformationUtil;
+
     @Override
-    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
+    public void invoke(@NotNull Order order) {
         String code = order.getCode();
         short orderStatus = (short) order.getOrderStatus().ordinal();
         short sponsorship = (short) order.getSponsorship().ordinal();
@@ -29,7 +31,7 @@ public class JooqInsertOrUpdateAction implements InsertOrUpdateOrderAction {
         int answersMainPositionId = order.getAnswersMainPositionId();
         //User user = order.getOrderOwner();
         //Event event = order.getOrderEvent();
-        String answersJson = order.getAnswersJson(pretixInformation);
+        String answersJson = orderTransformationUtil.getAnswersAsJson(order);
 
 
         command.execute(
@@ -67,18 +69,18 @@ public class JooqInsertOrUpdateAction implements InsertOrUpdateOrderAction {
                 )
                 .onConflict(ORDERS.ORDER_CODE)
                 .doUpdate()
-                    .set(ORDERS.ORDER_STATUS, orderStatus)
-                    .set(ORDERS.ORDER_SPONSORSHIP_TYPE, sponsorship)
-                    .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, extraDays)
-                    .set(ORDERS.ORDER_DAILY_DAYS, dailyDaysBitmask)
-                    .set(ORDERS.ORDER_ROOM_CAPACITY, roomCapacity)
-                    .set(ORDERS.ORDER_HOTEL_LOCATION, hotelLocation)
-                    .set(ORDERS.ORDER_SECRET, orderSecret)
-                    .set(ORDERS.HAS_MEMBERSHIP, membership)
-                    .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, answersMainPositionId)
-                    //.set(ORDERS.USER_ID, user)
-                    //.set(ORDERS.EVENT_ID, event)
-                    .set(ORDERS.ORDER_ANSWERS, answersJson)
+                .set(ORDERS.ORDER_STATUS, orderStatus)
+                .set(ORDERS.ORDER_SPONSORSHIP_TYPE, sponsorship)
+                .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, extraDays)
+                .set(ORDERS.ORDER_DAILY_DAYS, dailyDaysBitmask)
+                .set(ORDERS.ORDER_ROOM_CAPACITY, roomCapacity)
+                .set(ORDERS.ORDER_HOTEL_LOCATION, hotelLocation)
+                .set(ORDERS.ORDER_SECRET, orderSecret)
+                .set(ORDERS.HAS_MEMBERSHIP, membership)
+                .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, answersMainPositionId)
+                //.set(ORDERS.USER_ID, user)
+                //.set(ORDERS.EVENT_ID, event)
+                .set(ORDERS.ORDER_ANSWERS, answersJson)
         );
     }
 }

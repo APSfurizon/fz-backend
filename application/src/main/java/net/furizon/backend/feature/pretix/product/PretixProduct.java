@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 
 @Data
 public class PretixProduct {
-
     private final int id;
 
     @NotNull
@@ -31,7 +30,10 @@ public class PretixProduct {
         return metadata.get(Const.METADATA_IDENTIFIER_ITEM);
     }
 
-    public void forEachVariationByIdentifierPrefix(String prefix, BiConsumer<PretixProductVariation, String> callback) {
+    public void forEachVariationByIdentifierPrefix(
+        String prefix,
+        BiConsumer<PretixProductVariation, String> callback
+    ) {
         variations.stream()
             .filter(v -> v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
             .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));

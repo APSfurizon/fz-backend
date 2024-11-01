@@ -25,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +38,9 @@ import java.util.TreeSet;
 @Builder
 @Slf4j
 public class Order {
-
     @NotNull
     @Setter(AccessLevel.NONE)
-    private String code;
+    private final String code;
 
     @NotNull
     private OrderStatus orderStatus;
@@ -79,7 +76,6 @@ public class Order {
     private Event orderEvent; //TODO load from db! (lazy load?)
 
     @NotNull
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Map<String, Object> answers;
 
@@ -94,6 +90,7 @@ public class Order {
     public boolean hasMembership() {
         return hasMembership;
     }
+
     public void setMembership(boolean membership) {
         this.hasMembership = membership;
     }
@@ -102,71 +99,33 @@ public class Order {
     public Optional<Object> getAnswer(String questionIdentifier) {
         return Optional.ofNullable(answers.get(questionIdentifier));
     }
+
     public boolean hasAnswer(String questionIdentifier) {
         return answers.containsKey(questionIdentifier);
     }
+
     public boolean deleteAnswer(String questionIdentifier) {
         return answers.remove(questionIdentifier) != null;
     }
+
     public void setAnswer(String questionIdentifier, Object answer) {
         if (answer instanceof String
-                || answer instanceof Float
-                || answer instanceof Boolean
-                || answer instanceof String[]
-                || answer instanceof LocalDate
-                || answer instanceof LocalTime
-                || answer instanceof ZonedDateTime) {
+            || answer instanceof Float
+            || answer instanceof Boolean
+            || answer instanceof String[]
+            || answer instanceof LocalDate
+            || answer instanceof LocalTime
+            || answer instanceof ZonedDateTime) {
             answers.put(questionIdentifier, answer);
         } else {
             throw new IllegalArgumentException("answer must be of one of the following types: "
-                    + "String, "
-                    + "Float, "
-                    + "Boolean, "
-                    + "String[], "
-                    + "LocalDate, "
-                    + "LocalTime, "
-                    + "ZonedDateTime");
-        }
-    }
-
-    @NotNull
-    public String getAnswersJson(@NotNull PretixInformation pi) {
-        List<PretixAnswer> answers = new ArrayList<>();
-        for (String key : this.answers.keySet()) {
-            Object o = this.answers.get(key);
-            var identifierOpt = pi.getQuestionIdFromIdentifier(key);
-            if (identifierOpt.isPresent()) {
-                int id = identifierOpt.get();
-                var type = pi.getQuestionTypeFromId(id);
-                if (type.isPresent()) {
-                    String out = switch (type.get()) {
-                        case NUMBER -> Float.toString((float) o);
-                        case STRING_ONE_LINE -> (String) o;
-                        case STRING_MULTI_LINE -> (String) o;
-                        case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
-                        case LIST_SINGLE_CHOICE -> (String) o;
-                        case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
-                        case FILE -> (String) o;
-                        case DATE -> o.toString();
-                        case TIME -> o.toString();
-                        case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
-                        case COUNTRY_CODE -> (String) o;
-                        case PHONE_NUMBER -> (String) o;
-                    };
-
-                    if (out != null && !(out = out.strip()).isEmpty()) {
-                        answers.add(new PretixAnswer(id, out));
-                    }
-                }
-            }
-        }
-
-        ObjectMapper om = new ObjectMapper();
-        try {
-            return om.writeValueAsString(answers);
-        } catch (JsonProcessingException e) {
-            log.error("Error while serializing answers for order {}", getCode(), e);
-            return "[]";
+                + "String, "
+                + "Float, "
+                + "Boolean, "
+                + "String[], "
+                + "LocalDate, "
+                + "LocalTime, "
+                + "ZonedDateTime");
         }
     }
 
@@ -179,11 +138,11 @@ public class Order {
     }
 
     public static class OrderBuilder {
-
         public OrderBuilder dailyDays(Set<Integer> days) {
             dailyDays = days;
             return this;
         }
+
         public OrderBuilder dailyDays(long days) {
             dailyDays = new TreeSet<>();
             for (int i = 0; i < 63; i++) {
@@ -195,7 +154,7 @@ public class Order {
         }
 
         public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
-            this.answers = new HashMap<String, Object>();
+            this.answers = new HashMap<>();
             for (PretixAnswer answer : answers) {
                 int questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);
@@ -207,17 +166,15 @@ public class Order {
                         if (type.isPresent()) {
                             Object o = switch (type.get()) {
                                 case NUMBER -> Float.parseFloat(value);
-                                case STRING_ONE_LINE -> value;
-                                case STRING_MULTI_LINE -> value;
-                                case BOOLEAN -> value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes");
-                                case LIST_SINGLE_CHOICE -> value;
+                                case STRING_ONE_LINE, STRING_MULTI_LINE, COUNTRY_CODE, PHONE_NUMBER,
+                                     LIST_SINGLE_CHOICE -> value;
+                                case BOOLEAN -> value.equalsIgnoreCase("true")
+                                    || value.equalsIgnoreCase("yes");
                                 case LIST_MULTIPLE_CHOICE -> value.split(", ");
                                 case FILE -> Const.QUESTIONS_FILE_KEEP;
                                 case DATE -> LocalDate.parse(value);
                                 case TIME -> LocalTime.parse(value);
                                 case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);
-                                case COUNTRY_CODE -> value;
-                                case PHONE_NUMBER -> value;
                             };
                             this.answers.put(answerIdentifier, o);
                         }
@@ -226,10 +183,16 @@ public class Order {
             }
             return this;
         }
-        public OrderBuilder answers(@NotNull String answersStr, @NotNull PretixInformation pi) {
+
+        public OrderBuilder answers(
+            @NotNull String answersStr,
+            @NotNull PretixInformation pi
+        ) {
             try {
+                // Whaaaaat? TODO -> Delete
                 ObjectMapper om = new ObjectMapper();
-                List<PretixAnswer> answers = om.readValue(answersStr, new TypeReference<List<PretixAnswer>>() {});
+                List<PretixAnswer> answers = om.readValue(answersStr, new TypeReference<>() {
+                });
                 return answers(answers, pi);
             } catch (JsonProcessingException e) {
                 log.error("Unable to parse answers json", e);

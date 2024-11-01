@@ -64,7 +64,7 @@ public class SimpleHttpClient implements HttpClient {
             });
 
         if (request.getBody() != null) {
-            requestBodySpec = requestBodySpec.body(request.getBody()).contentLength(request.getBodySize());
+            requestBodySpec = requestBodySpec.body(request.getBody());
         }
         if (request.getContentType() != null) {
             requestBodySpec = requestBodySpec.contentType(request.getContentType());

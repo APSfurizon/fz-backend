@@ -45,7 +45,7 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     event.getPublicUrl(),
                     Optional
                         .ofNullable(event.getEventNames())
-                        .map(it -> new JSONObject(it).toString())
+                        .map(it -> new JSONObject(it).toString()) // TODO -> use object mapper here.
                         .orElse(null)
                 )
         );

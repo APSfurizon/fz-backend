@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.action.delete.DeleteOrderAction;
-import net.furizon.backend.feature.pretix.order.action.insertorupdate.InsertOrUpdateOrderAction;
+import net.furizon.backend.feature.pretix.order.action.deleteOrder.DeleteOrderAction;
+import net.furizon.backend.feature.pretix.order.action.upsertOrder.UpsertOrderAction;
 import net.furizon.backend.feature.pretix.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -15,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * This use case should get all orders from Pretix
  * Insert it to Database if not exist there (yet)
@@ -25,17 +23,23 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, Boolean>  {
-    @NotNull private final PretixOrderFinder pretixOrderFinder;
+public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, Boolean> {
+    @NotNull
+    private final PretixOrderFinder pretixOrderFinder;
 
-    @NotNull private final InsertOrUpdateOrderAction insertOrUpdateOrderAction;
-    @NotNull private final DeleteOrderAction deleteOrderAction;
+    @NotNull
+    private final UpsertOrderAction insertOrUpdateOrderAction;
+
+    @NotNull
+    private final DeleteOrderAction deleteOrderAction;
+
+    @NotNull
+    private final PretixInformation pretixInformation;
 
     @Transactional
     @NotNull
     @Override
     public Boolean executor(@NotNull Input input) {
-        AtomicReference<Boolean> success = new AtomicReference<>(true);
         var eventInfo = input.event.getOrganizerAndEventPair();
 
         PretixPagingUtil.forEachElement(
@@ -43,12 +47,12 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
             pretixOrder -> {
                 boolean shouldDelete = true;
 
-                var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.getFirst(), input.event);
+                var orderOpt = pretixInformation.parseOrderFromId(pretixOrder.getFirst(), input.event);
                 if (orderOpt.isPresent()) {
                     Order order = orderOpt.get();
                     OrderStatus os = order.getOrderStatus();
                     if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
-                        insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
+                        insertOrUpdateOrderAction.invoke(order);
                         shouldDelete = false;
                     }
                 }
@@ -59,8 +63,8 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
             }
         );
 
-        return success.get();
+        return true;
     }
 
-    public record Input(@NotNull Event event, @NotNull PretixInformation pretixInformation) {}
+    public record Input(@NotNull Event event) {}
 }

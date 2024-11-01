@@ -55,5 +55,4 @@ public class Event {
         String[] sp = slug.split("/");
         return new OrganizerAndEventPair(sp[0], sp[1]);
     }
-
 }

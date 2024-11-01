@@ -85,8 +85,8 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
 
                         default: {
                             log.warn(
-                                    "Unrecognized identifier while parsing product ({}) :'{}'",
-                                    product.getId(), identifier
+                                "Unrecognized identifier while parsing product ({}) :'{}'",
+                                product.getId(), identifier
                             );
                             break;
                         }

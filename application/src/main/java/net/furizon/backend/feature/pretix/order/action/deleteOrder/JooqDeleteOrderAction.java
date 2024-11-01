@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.order.action.delete;
+package net.furizon.backend.feature.pretix.order.action.deleteOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;

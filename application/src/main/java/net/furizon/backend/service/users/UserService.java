@@ -2,7 +2,7 @@ package net.furizon.backend.service.users;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.utils.TextUtil;
+import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
             //}
             toReturn = null;
         }
-        if (TextUtil.isEmpty(toReturn)) {
+        if (Strings.isEmpty(toReturn)) {
             throw new DuplicateKeyException(
                 "Failed to generate secret after " + MAX_USER_SECRET_GENERATION_TRIES + " times."
             );

@@ -21,29 +21,28 @@ import java.util.Optional;
 @Slf4j
 public class RestPretixOrderFinder implements PretixOrderFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixOrder>> pretixPagedOrder =
-            new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference<PretixOrder> pretixSingleOrder =
-            new ParameterizedTypeReference<>() {};
+        new ParameterizedTypeReference<>() {
+        };
 
     @Qualifier("pretixHttpClient")
     private final HttpClient pretixHttpClient;
 
     @Override
     public @NotNull PretixPaging<PretixOrder> getPagedOrders(
-            @NotNull String organizer, @NotNull String event, int page) {
+        @NotNull String organizer, @NotNull String event, int page) {
         final var request = HttpRequest.<PretixPaging<PretixOrder>>create()
-                .method(HttpMethod.GET)
-                .path("/organizers/{organizer}/events/{event}/orders/")
-                .queryParam("page", String.valueOf(page))
-                .uriVariable("organizer", organizer)
-                .uriVariable("event", event)
-                .responseParameterizedType(pretixPagedOrder)
-                .build();
+            .method(HttpMethod.GET)
+            .path("/organizers/{organizer}/events/{event}/orders/")
+            .queryParam("page", String.valueOf(page))
+            .uriVariable("organizer", organizer)
+            .uriVariable("event", event)
+            .responseParameterizedType(pretixPagedOrder)
+            .build();
 
         try {
             return Optional
-                    .ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody())
-                    .orElse(PretixPaging.empty());
+                .ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody())
+                .orElse(PretixPaging.empty());
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
@@ -52,15 +51,18 @@ public class RestPretixOrderFinder implements PretixOrderFinder {
 
     @Override
     public @NotNull Optional<PretixOrder> fetchOrderByCode(
-            @NotNull String organizer, @NotNull String event, @NotNull String code) {
+        @NotNull String organizer,
+        @NotNull String event,
+        @NotNull String code
+    ) {
         final var request = HttpRequest.<PretixOrder>create()
-                .method(HttpMethod.GET)
-                .path("/organizers/{organizer}/events/{event}/orders/{code}/")
-                .uriVariable("organizer", organizer)
-                .uriVariable("event", event)
-                .uriVariable("code", code)
-                .responseParameterizedType(pretixSingleOrder)
-                .build();
+            .method(HttpMethod.GET)
+            .path("/organizers/{organizer}/events/{event}/orders/{code}/")
+            .uriVariable("organizer", organizer)
+            .uriVariable("event", event)
+            .uriVariable("code", code)
+            .responseType(PretixOrder.class)
+            .build();
 
         try {
             return Optional.ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody());
