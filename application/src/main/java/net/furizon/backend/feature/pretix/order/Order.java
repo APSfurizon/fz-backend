@@ -71,6 +71,7 @@ public class Order {
     @Setter(AccessLevel.NONE)
     private boolean hasMembership = false;
 
+    @Builder.Default
     private int answersMainPositionId = -1;
 
     @Nullable
