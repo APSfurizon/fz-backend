@@ -3,7 +3,6 @@ package net.furizon.backend.feature.pretix.order.action.updateOrder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
 import net.furizon.backend.feature.pretix.order.util.OrderTransformationUtil;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -19,7 +18,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
     private final OrderTransformationUtil orderTransformationUtil;
 
     @Override
-    public void invoke(@NotNull Order order, @NotNull PretixInformation pretixInformation) {
+    public void invoke(@NotNull Order order) {
         command.execute(
             PostgresDSL
                 .update(ORDERS)
