@@ -27,6 +27,8 @@ public enum Permission {
      */
     REVIEW_UPLOADS("REVIEW_UPLOADS");
 
+
+    // TODO -> Why do you need it if enums can be as value (Enum.name())
     // TODO -> Maybe Int ids?
     private final String value;
 

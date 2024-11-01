@@ -34,3 +34,7 @@ build/
 
 ### draw.io ###
 .$*.drawio.bkp
+
+### Configurations ###
+.env
+.env.local

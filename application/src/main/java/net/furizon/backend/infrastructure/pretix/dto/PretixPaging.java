@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.pretix.dto;
 
 import lombok.Data;
+import net.minidev.json.annotate.JsonIgnore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 public class PretixPaging<R> {
     public static final int DEFAULT_PAGE = 1;
 
+    @JsonIgnore
     private final Pattern pageNumberPatter = Pattern.compile("page=(\\d+)");
 
     private final int page;

@@ -1,16 +1,12 @@
 package net.furizon.backend.service.pretix;
 
-import lombok.RequiredArgsConstructor;
+/*import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.db.entities.pretix.Order;
-import net.furizon.backend.db.entities.users.User;
-import net.furizon.backend.db.repositories.pretix.OrderRepository;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
-import net.furizon.backend.utils.Download;
 import net.furizon.backend.utils.TextUtil;
 import net.furizon.backend.utils.ThrowableSupplier;
 import net.furizon.backend.utils.pretix.Constants;
@@ -33,17 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.function.Consumer;*/
 
 /**
  * Describes all the iteractions via Pretix
  */
-@Service
-@Slf4j
-@RequiredArgsConstructor
-@Deprecated
+//@Service
+//@Slf4j
+//@RequiredArgsConstructor
+//@Deprecated
 public class PretixService {
-    private final OrderRepository orderRepository;
+    /*private final OrderRepository orderRepository;
     private final PretixConfig pretixConfig;
 
     private PretixIdsMap pretixIdsCache = null;
@@ -265,20 +261,20 @@ public class PretixService {
         }
 
         // Fetch Order by code
-        Order order = orderRepository.findByCodeAndEvent(
+        DeprOrder order = orderRepository.findByCodeAndEvent(
             code,
             //pretixConfig.getCurrentEventObj().getSlug() // not responsibility of config
             ""
         ).orElse(null);
         if (hasTicket && (status == OrderStatus.PENDING || status == OrderStatus.PAID)) {
             // fetch user from db by userSecret
-            User usr = null;
+            DeprUser usr = null;
             if (!TextUtil.isEmpty(userSecret)) {
                 //usr = userRepository.findBySecret(userSecret).orElse(null);
             }
 
             if (order == null) {
-                order = new Order(); //order not found
+                order = new DeprOrder(); //order not found
             }
 
             order.update(
@@ -356,7 +352,7 @@ public class PretixService {
     }
 
     //Push orders to pretix
-    public synchronized void submitAnswersToPretix(Order order) throws TimeoutException {
+    public synchronized void submitAnswersToPretix(DeprOrder order) throws TimeoutException {
         JSONObject payload = new JSONObject();
         JSONArray ans = order.getOrderStatus() == OrderStatus.CANCELED
             ? new JSONArray()
@@ -524,5 +520,5 @@ public class PretixService {
             throw new TimeoutException("PRETIX_REQUESTS_MAX reached while " + opLogStr + " to pretix.");
         }
         return res;
-    }
+    }*/
 }

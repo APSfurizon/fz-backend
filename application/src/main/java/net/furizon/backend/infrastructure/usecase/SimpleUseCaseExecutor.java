@@ -32,11 +32,20 @@ public class SimpleUseCaseExecutor implements UseCaseExecutor {
         @NotNull I input
     ) {
         log.debug("Executing use case: {}", useCaseClass.getSimpleName());
+        final var startTime = System.currentTimeMillis();
         final UseCase<?, ?> useCase = useCaseMap.get(useCaseClass.getCanonicalName());
         if (useCase == null) {
             throw new IllegalArgumentException("Use case not found: " + useCaseClass.getSimpleName());
         }
 
-        return ((UseCase<I, R>) useCase).executor(input);
+        final var result = ((UseCase<I, R>) useCase).executor(input);
+
+        log.debug(
+            "Use case '{}' finished with {} ms",
+            useCaseClass.getSimpleName(),
+            System.currentTimeMillis() - startTime
+        );
+
+        return result;
     }
 }

@@ -16,6 +16,7 @@
         <jooq.codegen.jdbc>jdbc:postgresql://localhost:5433/postgres</jooq.codegen.jdbc>
         <jooq.codegen.username>postgres</jooq.codegen.username>
         <jooq.codegen.password>postgres</jooq.codegen.password>
+        <jooq.codegen.skip>false</jooq.codegen.skip>
     </properties>
 
     <!-- Module-specific dependencies -->
@@ -65,7 +66,7 @@
                         <user>${jooq.codegen.username}</user>
                         <password>${jooq.codegen.password}</password>
                     </jdbc>
-
+                    <skip>${jooq.codegen.skip}</skip>
                     <!-- Generator parameters -->
                     <generator>
                         <name>org.jooq.codegen.JavaGenerator</name>

@@ -66,6 +66,9 @@ public class SimpleHttpClient implements HttpClient {
         if (request.getBody() != null) {
             requestBodySpec = requestBodySpec.body(request.getBody());
         }
+        if (request.getContentType() != null) {
+            requestBodySpec = requestBodySpec.contentType(request.getContentType());
+        }
 
         if (request.getResponseParameterizedType() == null && request.getResponseType() == null) {
             throw new IllegalArgumentException("responseParameterizedType or responseType is required");

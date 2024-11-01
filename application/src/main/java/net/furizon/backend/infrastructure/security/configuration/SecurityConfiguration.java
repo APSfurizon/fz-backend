@@ -15,6 +15,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,14 +42,14 @@ public class SecurityConfiguration {
     private final DatabaseSessionFilter databaseSessionFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(
-        HttpSecurity http
-    ) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Map the allowed endpoints
         return http
             .cors(customizer ->
-                customizer.configurationSource(corsConfigurationSource())
+                //customizer.configurationSource(corsConfigurationSource())
+                customizer.disable()
             )
+            .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(antMatcher(HttpMethod.POST, "/api/v1/authentication/login"))
                 .permitAll()
@@ -87,8 +88,8 @@ public class SecurityConfiguration {
         return request -> {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(
-                List.of("http://localhost"))
-            ;
+                List.of("*") // TODO -> Replace for prod
+            );
             config.setAllowedMethods(
                 List.of(
                     HttpMethod.GET.name(),

@@ -6,7 +6,7 @@ public enum ExtraDays {
     LATE,
     BOTH;
 
-    public static Sponsorship get(int ordinal) {
-        return Sponsorship.values()[ordinal];
+    public static ExtraDays get(int ordinal) {
+        return ExtraDays.values()[ordinal];
     }
 }
