@@ -45,15 +45,18 @@ public class Order {
     @NotNull
     private OrderStatus orderStatus;
 
+    @Builder.Default
     @NotNull
     private Sponsorship sponsorship = Sponsorship.NONE;
 
+    @Builder.Default
     @NotNull
     private ExtraDays extraDays = ExtraDays.NONE;
 
     @NotNull
     private final Set<Integer> dailyDays;
 
+    @Builder.Default
     private short roomCapacity = 0; // 0 = has no room
 
     @Nullable
@@ -63,6 +66,7 @@ public class Order {
     private String pretixOrderSecret;
 
     //Manually defining getters/setters because lombok's default names are ugly lol
+    @Builder.Default
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private boolean hasMembership = false;
