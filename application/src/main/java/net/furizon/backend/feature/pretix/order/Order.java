@@ -1,8 +1,5 @@
 package net.furizon.backend.feature.pretix.order;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -185,22 +182,6 @@ public class Order {
                         }
                     }
                 }
-            }
-            return this;
-        }
-
-        public OrderBuilder answers(
-            @NotNull String answersStr,
-            @NotNull PretixInformation pi
-        ) {
-            try {
-                // Whaaaaat? TODO -> Delete
-                ObjectMapper om = new ObjectMapper();
-                List<PretixAnswer> answers = om.readValue(answersStr, new TypeReference<>() {
-                });
-                return answers(answers, pi);
-            } catch (JsonProcessingException e) {
-                log.error("Unable to parse answers json", e);
             }
             return this;
         }
