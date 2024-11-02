@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.pretix.event.action.insert;
 
-import com.google.common.hash.Hashing;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
@@ -9,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;

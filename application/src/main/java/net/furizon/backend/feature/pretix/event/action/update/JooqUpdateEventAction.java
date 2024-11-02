@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
