@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.event;
 
+import com.google.common.hash.Hashing;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
@@ -33,11 +35,16 @@ public class Event {
     @Nullable
     private Map<String, String> eventNames;
 
+    public int getId() {
+        return Hashing.sha512().hashString(slug, StandardCharsets.UTF_8).asInt();
+    }
+
     public static class EventBuilder {
         public EventBuilder slug(String fullSlug) {
             this.slug = fullSlug;
             return this;
         }
+
         public EventBuilder slug(String eventSlug, String organizerSlug) {
             this.slug = PretixGenericUtils.buildOrgEventSlug(eventSlug, organizerSlug);
             return this;

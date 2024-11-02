@@ -2,12 +2,15 @@ package net.furizon.backend.feature.pretix.order.action.upsertOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
+import net.furizon.backend.feature.user.User;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
@@ -33,14 +36,15 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String orderSecret = order.getPretixOrderSecret();
         boolean membership = order.hasMembership();
         int answersMainPositionId = order.getAnswersMainPositionId();
-        //User user = order.getOrderOwner();
-        //Event event = order.getOrderEvent();
+        final var userId = Optional.ofNullable(order.getOrderOwner()).map(User::getId).orElse(null);
+        final var eventId = order.getOrderEvent().getId();
         final var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
 
         command.execute(
             PostgresDSL
                 .insertInto(
                     ORDERS,
+                    ORDERS.ID,
                     ORDERS.ORDER_CODE,
                     ORDERS.ORDER_STATUS,
                     ORDERS.ORDER_SPONSORSHIP_TYPE,
@@ -51,11 +55,12 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
-                    //ORDERS.USER_ID, TODO
-                    //ORDERS.EVENT_ID,
+                    ORDERS.USER_ID,
+                    ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON
                 )
                 .values(
+                    order.getId(),
                     code,
                     orderStatus,
                     sponsorship,
@@ -66,11 +71,11 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     orderSecret,
                     membership,
                     answersMainPositionId,
-                    //user,
-                    //event,
+                    userId,
+                    eventId,
                     answers
                 )
-                .onConflict(ORDERS.ORDER_CODE)
+                .onConflict(ORDERS.ID)
                 .doUpdate()
                 .set(ORDERS.ORDER_STATUS, orderStatus)
                 .set(ORDERS.ORDER_SPONSORSHIP_TYPE, sponsorship)

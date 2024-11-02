@@ -25,21 +25,15 @@ public class JooqUpdateEventAction implements UpdateEventAction {
         command.execute(
             PostgresDSL
                 .update(EVENTS)
-                .set(EVENTS.EVENT_DATE_FROM, Optional
-                    .ofNullable(event.getDateFrom())
-                    .map(OffsetDateTime::toString)
-                    .orElse(null))
+                .set(EVENTS.EVENT_DATE_FROM, event.getDateFrom())
                 .set(EVENTS.EVENT_IS_CURRENT, event.isCurrent())
                 .set(EVENTS.EVENT_PUBLIC_URL, event.getPublicUrl())
-                .set(EVENTS.EVENT_NAMES, Optional
+                .set(EVENTS.EVENT_NAMES_JSON, Optional
                     .ofNullable(event.getEventNames())
-                    .map(jsonSerializer::serializeAsString)
+                    .map(jsonSerializer::serializeAsJson)
                     .orElse(null))
-                .set(EVENTS.EVENT_DATE_TO, Optional
-                    .ofNullable(event.getDateTo())
-                    .map(OffsetDateTime::toString)
-                    .orElse(null))
-                .where(EVENTS.EVENT_SLUG.eq(event.getSlug()))
+                .set(EVENTS.EVENT_DATE_TO, event.getDateTo())
+                .where(EVENTS.ID.eq(event.getId()))
         );
     }
 }

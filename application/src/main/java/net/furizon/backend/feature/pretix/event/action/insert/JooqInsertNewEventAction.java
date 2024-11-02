@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.event.action.insert;
 
+import com.google.common.hash.Hashing;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.event.Event;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -26,28 +28,24 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
             PostgresDSL
                 .insertInto(
                     EVENTS,
+                    EVENTS.ID,
                     EVENTS.EVENT_SLUG,
                     EVENTS.EVENT_DATE_TO,
                     EVENTS.EVENT_DATE_FROM,
                     EVENTS.EVENT_IS_CURRENT,
                     EVENTS.EVENT_PUBLIC_URL,
-                    EVENTS.EVENT_NAMES
+                    EVENTS.EVENT_NAMES_JSON
                 )
                 .values(
+                    event.getId(),
                     event.getSlug(),
-                    Optional
-                        .ofNullable(event.getDateTo())
-                        .map(OffsetDateTime::toString)
-                        .orElse(null),
-                    Optional
-                        .ofNullable(event.getDateFrom())
-                        .map(OffsetDateTime::toString)
-                        .orElse(null),
+                    event.getDateTo(),
+                    event.getDateFrom(),
                     event.isCurrent(),
                     event.getPublicUrl(),
                     Optional
                         .ofNullable(event.getEventNames())
-                        .map(jsonSerializer::serializeAsString)
+                        .map(jsonSerializer::serializeAsJson)
                         .orElse(null)
                 )
         );

@@ -2,12 +2,15 @@ package net.furizon.backend.feature.pretix.order.action.updateOrder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.order.Order;
+import net.furizon.backend.feature.user.User;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
@@ -23,6 +26,8 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
+        final var userId = Optional.ofNullable(order.getOrderOwner()).map(User::getId).orElse(null);
+
         command.execute(
             PostgresDSL
                 .update(ORDERS)
@@ -35,10 +40,10 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_SECRET, order.getPretixOrderSecret())
                 .set(ORDERS.HAS_MEMBERSHIP, order.hasMembership())
                 .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, order.getAnswersMainPositionId())
-                //.set(ORDERS.USER_ID, order.getOrderOwner())
-                //.set(ORDERS.EVENT_ID, order.getOrderEvent())
+                .set(ORDERS.USER_ID, userId)
+                .set(ORDERS.EVENT_ID, order.getOrderEvent().getId())
                 .set(ORDERS.ORDER_ANSWERS_JSON, serializer.serializeAsJson(order.getAllAnswers(pretixInformation)))
-                .where(ORDERS.ORDER_CODE.eq(order.getCode()))
+                .where(ORDERS.ID.eq(order.getId()))
         );
     }
 }

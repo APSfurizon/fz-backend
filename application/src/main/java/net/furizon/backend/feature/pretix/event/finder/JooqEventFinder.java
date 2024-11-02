@@ -28,7 +28,7 @@ public class JooqEventFinder implements EventFinder {
                     EVENTS.EVENT_DATE_FROM,
                     EVENTS.EVENT_IS_CURRENT,
                     EVENTS.EVENT_PUBLIC_URL,
-                    EVENTS.EVENT_NAMES
+                    EVENTS.EVENT_NAMES_JSON
                 )
                 .from(EVENTS)
                 .where(EVENTS.EVENT_SLUG.eq(slug))

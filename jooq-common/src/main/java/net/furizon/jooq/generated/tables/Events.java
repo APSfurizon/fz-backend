@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 import javax.annotation.processing.Generated;
@@ -17,6 +18,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.InverseForeignKey;
+import org.jooq.JSON;
 import org.jooq.Name;
 import org.jooq.Path;
 import org.jooq.PlainSQL;
@@ -64,6 +66,11 @@ public class Events extends TableImpl<Record> {
     }
 
     /**
+     * The column <code>public.events.id</code>.
+     */
+    public final TableField<Record, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>public.events.event_slug</code>.
      */
     public final TableField<Record, String> EVENT_SLUG = createField(DSL.name("event_slug"), SQLDataType.VARCHAR(255).nullable(false), this, "");
@@ -71,12 +78,12 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.event_date_to</code>.
      */
-    public final TableField<Record, String> EVENT_DATE_TO = createField(DSL.name("event_date_to"), SQLDataType.VARCHAR(32), this, "");
+    public final TableField<Record, OffsetDateTime> EVENT_DATE_TO = createField(DSL.name("event_date_to"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.events.event_date_from</code>.
      */
-    public final TableField<Record, String> EVENT_DATE_FROM = createField(DSL.name("event_date_from"), SQLDataType.VARCHAR(32), this, "");
+    public final TableField<Record, OffsetDateTime> EVENT_DATE_FROM = createField(DSL.name("event_date_from"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.events.event_is_current</code>.
@@ -89,9 +96,9 @@ public class Events extends TableImpl<Record> {
     public final TableField<Record, String> EVENT_PUBLIC_URL = createField(DSL.name("event_public_url"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.events.event_names</code>.
+     * The column <code>public.events.event_names_json</code>.
      */
-    public final TableField<Record, String> EVENT_NAMES = createField(DSL.name("event_names"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JSON> EVENT_NAMES_JSON = createField(DSL.name("event_names_json"), SQLDataType.JSON, this, "");
 
     private Events(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

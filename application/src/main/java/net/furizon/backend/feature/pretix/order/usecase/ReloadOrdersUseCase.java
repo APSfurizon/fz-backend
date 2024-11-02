@@ -27,8 +27,9 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
     @NotNull
     private final PretixOrderFinder pretixOrderFinder;
 
+    // TODO -> Do we need InsertNewOrderAction if we have UpsertOrderAction?
     @NotNull
-    private final UpsertOrderAction insertOrUpdateOrderAction;
+    private final UpsertOrderAction upsertOrderAction;
 
     @NotNull
     private final DeleteOrderAction deleteOrderAction;
@@ -49,7 +50,7 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
                     Order order = orderOpt.get();
                     OrderStatus os = order.getOrderStatus();
                     if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
-                        insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
+                        upsertOrderAction.invoke(order, input.pretixInformation);
                         shouldDelete = false;
                     }
                 }
