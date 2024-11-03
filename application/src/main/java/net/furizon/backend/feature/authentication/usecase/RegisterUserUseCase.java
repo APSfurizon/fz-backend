@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.authentication.action.createAuthentication.CreateAuthenticationAction;
 import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
 import net.furizon.backend.feature.user.User;
@@ -17,13 +18,18 @@ public class RegisterUserUseCase implements UseCase<RegisterUserRequest, User> {
 
     private final CreateUserAction createUserAction;
 
+    private final CreateAuthenticationAction createAuthenticationAction;
+
     @Transactional
     @Override
     public @NotNull User executor(@NotNull RegisterUserRequest input) {
         validation.validate(input);
         final var user = createUserAction.invoke(input.getFursuitName());
-        // TODO -> Logic
-
+        createAuthenticationAction.invoke(
+            user.getId(),
+            input.getEmail(),
+            input.getPassword()
+        );
 
         return user;
     }

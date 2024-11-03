@@ -2,7 +2,7 @@ package net.furizon.backend.infrastructure.web.exception;
 
 import lombok.Getter;
 import lombok.ToString;
-import net.furizon.backend.infrastructure.web.ApiCommonError;
+import net.furizon.backend.infrastructure.web.ApiCommonErrorCode;
 import net.furizon.backend.infrastructure.web.dto.ApiError;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class ApiException extends RuntimeException {
 
     public ApiException(@NotNull String message) {
         this.status = HttpStatus.BAD_REQUEST;
-        this.errors = List.of(new ApiError(message, ApiCommonError.UNKNOWN.name()));
+        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN.name()));
     }
 
     public ApiException(

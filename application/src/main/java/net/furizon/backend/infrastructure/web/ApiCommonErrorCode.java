@@ -1,6 +1,6 @@
 package net.furizon.backend.infrastructure.web;
 
-public enum ApiCommonError {
+public enum ApiCommonErrorCode {
     UNKNOWN;
 
     @Override

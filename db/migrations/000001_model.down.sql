@@ -1,4 +1,5 @@
 DROP INDEX IF EXISTS authentications_email_idx;
+DROP INDEX IF EXISTS authentication_hashed_password;
 
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS "groups";

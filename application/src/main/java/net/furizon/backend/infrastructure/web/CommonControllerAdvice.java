@@ -16,7 +16,7 @@ import static net.furizon.backend.infrastructure.web.Web.Constants.Mdc.MDC_CORRE
 @RestControllerAdvice
 public class CommonControllerAdvice {
     @ExceptionHandler(ApiException.class)
-    ResponseEntity<HttpErrorResponse<?>> handleApiException(
+    ResponseEntity<HttpErrorResponse> handleApiException(
         @NotNull ApiException ex,
         @NotNull HttpServletRequest request
     ) {
@@ -24,7 +24,6 @@ public class CommonControllerAdvice {
             .status(ex.getStatus())
             .body(
                 HttpErrorResponse.builder()
-                    .message(ex.getMessage())
                     .errors(ex.getErrors())
                     .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()
@@ -32,7 +31,7 @@ public class CommonControllerAdvice {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<HttpErrorResponse<?>> handleMethodArgumentNotValidException(
+    ResponseEntity<HttpErrorResponse> handleMethodArgumentNotValidException(
         @NotNull MethodArgumentNotValidException ex,
         @NotNull HttpServletRequest request
     ) {
@@ -63,7 +62,6 @@ public class CommonControllerAdvice {
             .status(HttpStatus.UNPROCESSABLE_ENTITY)
             .body(
                 HttpErrorResponse.builder()
-                    .message("Unprocessable entity")
                     .errors(errors)
                     .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()

@@ -98,7 +98,7 @@ public class Authentications extends TableImpl<Record> {
     /**
      * The column <code>public.authentications.authentication_expired</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_EXPIRED = createField(DSL.name("authentication_expired"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> AUTHENTICATION_EXPIRED = createField(DSL.name("authentication_expired"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_from_oauth</code>.
@@ -106,9 +106,10 @@ public class Authentications extends TableImpl<Record> {
     public final TableField<Record, Boolean> AUTHENTICATION_FROM_OAUTH = createField(DSL.name("authentication_from_oauth"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
-     * The column <code>public.authentications.authentication_password</code>.
+     * The column
+     * <code>public.authentications.authentication_hashed_password</code>.
      */
-    public final TableField<Record, String> AUTHENTICATION_PASSWORD = createField(DSL.name("authentication_password"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<Record, String> AUTHENTICATION_HASHED_PASSWORD = createField(DSL.name("authentication_hashed_password"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.authentications.authentication_token</code>.
@@ -190,7 +191,7 @@ public class Authentications extends TableImpl<Record> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.AUTHENTICATIONS_EMAIL_IDX);
+        return Arrays.asList(Indexes.AUTHENTICATION_HASHED_PASSWORD, Indexes.AUTHENTICATIONS_EMAIL_IDX);
     }
 
     @Override
