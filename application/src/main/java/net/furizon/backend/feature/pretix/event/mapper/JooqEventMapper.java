@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -28,23 +27,15 @@ public class JooqEventMapper {
     public Event map(Record record) {
         return Event.builder()
             .slug(record.get(EVENTS.EVENT_SLUG))
-            .dateTo(
-                Optional.ofNullable(record.get(EVENTS.EVENT_DATE_TO))
-                    .map(OffsetDateTime::parse)
-                    .orElse(null)
-            )
-            .dateFrom(
-                Optional.ofNullable(record.get(EVENTS.EVENT_DATE_FROM))
-                    .map(OffsetDateTime::parse)
-                    .orElse(null)
-            )
+            .dateTo(record.get(EVENTS.EVENT_DATE_TO))
+            .dateFrom(record.get(EVENTS.EVENT_DATE_FROM))
             .isCurrent(record.get(EVENTS.EVENT_IS_CURRENT))
             .publicUrl(record.get(EVENTS.EVENT_PUBLIC_URL))
             .eventNames(
-                Optional.ofNullable(record.get(EVENTS.EVENT_NAMES))
+                Optional.ofNullable(record.get(EVENTS.EVENT_NAMES_JSON))
                     .map(it -> {
                         try {
-                            return objectMapper.readValue(it, typeRef);
+                            return objectMapper.readValue(it.data(), typeRef);
                         } catch (JsonProcessingException e) {
                             log.error("Could not parse event names", e);
                             throw new RuntimeException(e);

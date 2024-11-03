@@ -1,3 +1,5 @@
+DROP INDEX IF EXISTS event_slug_idx;
+
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS "groups";
 DROP TABLE IF EXISTS users;

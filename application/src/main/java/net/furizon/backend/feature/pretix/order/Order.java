@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.order;
 
+import com.google.common.hash.Hashing;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -73,14 +75,18 @@ public class Order {
     private int answersMainPositionId = -1;
 
     @Nullable
-    private User orderOwner; //TODO load from db! (lazy load?)
+    private User orderOwner;
 
     @NotNull
-    private Event orderEvent; //TODO load from db! (lazy load?)
+    private Event orderEvent;
 
     @NotNull
     @Setter(AccessLevel.NONE)
     private Map<String, Object> answers;
+
+    public int getId() {
+        return Hashing.sha512().hashString(code, StandardCharsets.UTF_8).asInt();
+    }
 
     public boolean isDaily() {
         return !dailyDays.isEmpty();

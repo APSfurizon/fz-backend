@@ -71,6 +71,11 @@ public class Orders extends TableImpl<Record> {
     }
 
     /**
+     * The column <code>public.orders.id</code>.
+     */
+    public final TableField<Record, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>public.orders.order_code</code>.
      */
     public final TableField<Record, String> ORDER_CODE = createField(DSL.name("order_code"), SQLDataType.VARCHAR(64).nullable(false), this, "");
@@ -128,7 +133,7 @@ public class Orders extends TableImpl<Record> {
     /**
      * The column <code>public.orders.event_id</code>.
      */
-    public final TableField<Record, String> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, Integer> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>public.orders.user_id</code>.
