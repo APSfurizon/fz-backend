@@ -2,8 +2,9 @@ package net.furizon.backend.infrastructure.web.exception;
 
 import lombok.Getter;
 import lombok.ToString;
+import net.furizon.backend.infrastructure.web.ApiCommonError;
+import net.furizon.backend.infrastructure.web.dto.ApiError;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -15,22 +16,44 @@ public class ApiException extends RuntimeException {
     private final HttpStatus status;
 
     @NotNull
-    private final String message;
-
-    // TODO -> Do we need it here?
-    @Nullable
-    private List<Object> errors;
+    private final List<ApiError> errors;
 
     public ApiException(@NotNull String message) {
         this.status = HttpStatus.BAD_REQUEST;
-        this.message = message;
+        this.errors = List.of(new ApiError(message, ApiCommonError.UNKNOWN.name()));
+    }
+
+    public ApiException(
+        @NotNull String message,
+        @NotNull String code
+    ) {
+        this.status = HttpStatus.BAD_REQUEST;
+        this.errors = List.of(new ApiError(message, code));
+    }
+
+    public ApiException(
+        @NotNull String message,
+        ApiError @NotNull ... errors
+    ) {
+        this.status = HttpStatus.BAD_REQUEST;
+        this.errors = List.of(errors);
     }
 
     public ApiException(
         @NotNull HttpStatus status,
-        @NotNull String message
+        @NotNull String message,
+        @NotNull String code
     ) {
         this.status = status;
-        this.message = message;
+        this.errors = List.of(new ApiError(message, code));
+    }
+
+    public ApiException(
+        @NotNull HttpStatus status,
+        @NotNull String message,
+        ApiError @NotNull ... errors
+    ) {
+        this.status = status;
+        this.errors = List.of(errors);
     }
 }

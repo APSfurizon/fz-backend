@@ -46,12 +46,14 @@ public class SecurityConfiguration {
         // Map the allowed endpoints
         return http
             .cors(customizer ->
-                //customizer.configurationSource(corsConfigurationSource())
-                customizer.disable()
+                customizer.configurationSource(corsConfigurationSource())
             )
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
-                .requestMatchers(antMatcher(HttpMethod.POST, "/api/v1/authentication/login"))
+                .requestMatchers(
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register")
+                )
                 .permitAll()
                 // TODO -> Remove it later (just for testing)
                 .requestMatchers("/internal/**")
@@ -60,12 +62,12 @@ public class SecurityConfiguration {
                 .authenticated()
             )
             // Show unauthorized error
-            .exceptionHandling(customizer -> {
-                customizer.authenticationEntryPoint(
-                    (request, response, authException) -> {
-                        response.sendError(401, "Unauthorized");
-                    });
-            })
+//            .exceptionHandling(customizer -> {
+//                customizer.authenticationEntryPoint(
+//                    (request, response, authException) -> {
+//                        response.sendError(401, "Unauthorized");
+//                    });
+//            })
             .addFilterAt(
                 databaseSessionFilter,
                 BasicAuthenticationFilter.class

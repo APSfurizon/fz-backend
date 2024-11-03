@@ -1,8 +1,8 @@
 package net.furizon.backend.infrastructure.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.furizon.backend.infrastructure.web.dto.ApiError;
 import net.furizon.backend.infrastructure.web.dto.HttpErrorResponse;
-import net.furizon.backend.infrastructure.web.dto.MethodArgumentNotValidError;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -52,16 +52,17 @@ public class CommonControllerAdvice {
             .getAllErrors()
             .stream()
             .map(
-                (err) -> // TODO -> error instanceof FieldError fieldError
-                    MethodArgumentNotValidError.builder()
-                        .message(err.getDefaultMessage())
-                        .build()
+                (err) ->
+                    new ApiError(
+                        err.getDefaultMessage(),
+                        ""
+                    )
             )
             .toList();
         return ResponseEntity
             .status(HttpStatus.UNPROCESSABLE_ENTITY)
             .body(
-                HttpErrorResponse.<MethodArgumentNotValidError>builder()
+                HttpErrorResponse.builder()
                     .message("Unprocessable entity")
                     .errors(errors)
                     .requestId((String) request.getAttribute(MDC_CORRELATION_ID))

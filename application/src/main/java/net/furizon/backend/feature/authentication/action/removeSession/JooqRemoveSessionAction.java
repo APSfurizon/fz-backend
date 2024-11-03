@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.authentication.action;
+package net.furizon.backend.feature.authentication.action.removeSession;
 
 import org.springframework.stereotype.Component;
 

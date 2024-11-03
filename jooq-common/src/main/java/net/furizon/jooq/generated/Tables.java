@@ -19,6 +19,7 @@ import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
+import net.furizon.jooq.generated.tables.Sessions;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -100,6 +101,11 @@ public class Tables {
      * The table <code>public.schema_migrations</code>.
      */
     public static final SchemaMigrations SCHEMA_MIGRATIONS = SchemaMigrations.SCHEMA_MIGRATIONS;
+
+    /**
+     * The table <code>public.sessions</code>.
+     */
+    public static final Sessions SESSIONS = Sessions.SESSIONS;
 
     /**
      * The table <code>public.user_group</code>.

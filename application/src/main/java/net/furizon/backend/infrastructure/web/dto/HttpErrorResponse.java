@@ -21,5 +21,5 @@ public class HttpErrorResponse<R> {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Nullable
-    private final List<R> errors;
+    private final List<ApiError> errors;
 }

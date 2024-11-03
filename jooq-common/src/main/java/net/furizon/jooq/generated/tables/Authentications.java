@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import net.furizon.jooq.generated.Indexes;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
@@ -19,6 +20,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -80,18 +82,18 @@ public class Authentications extends TableImpl<Record> {
      * The column
      * <code>public.authentications.authentication_email_verified</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_EMAIL_VERIFIED = createField(DSL.name("authentication_email_verified"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> AUTHENTICATION_EMAIL_VERIFIED = createField(DSL.name("authentication_email_verified"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column
      * <code>public.authentications.authentication_2fa_enabled</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_2FA_ENABLED = createField(DSL.name("authentication_2fa_enabled"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> AUTHENTICATION_2FA_ENABLED = createField(DSL.name("authentication_2fa_enabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_disabled</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_DISABLED = createField(DSL.name("authentication_disabled"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> AUTHENTICATION_DISABLED = createField(DSL.name("authentication_disabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_expired</code>.
@@ -101,7 +103,7 @@ public class Authentications extends TableImpl<Record> {
     /**
      * The column <code>public.authentications.authentication_from_oauth</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_FROM_OAUTH = createField(DSL.name("authentication_from_oauth"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> AUTHENTICATION_FROM_OAUTH = createField(DSL.name("authentication_from_oauth"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_password</code>.
@@ -116,7 +118,7 @@ public class Authentications extends TableImpl<Record> {
     /**
      * The column <code>public.authentications.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private Authentications(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -187,6 +189,11 @@ public class Authentications extends TableImpl<Record> {
     }
 
     @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.AUTHENTICATIONS_EMAIL_IDX);
+    }
+
+    @Override
     public Identity<Record, Long> getIdentity() {
         return (Identity<Record, Long>) super.getIdentity();
     }
@@ -198,7 +205,7 @@ public class Authentications extends TableImpl<Record> {
 
     @Override
     public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.AUTHENTICATIONS_UNIQUE_EMAIL, Keys.AUTHENTICATIONS_UNIQUE_USER_ID);
+        return Arrays.asList(Keys.AUTHENTICATIONS_UNIQUE_USER_ID);
     }
 
     @Override

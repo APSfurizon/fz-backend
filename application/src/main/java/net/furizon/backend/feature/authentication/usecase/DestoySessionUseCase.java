@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.action.RemoveSessionAction;
+import net.furizon.backend.feature.authentication.action.removeSession.RemoveSessionAction;
 import net.furizon.backend.feature.authentication.dto.LogoutRequest;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;

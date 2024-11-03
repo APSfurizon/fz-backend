@@ -9,11 +9,8 @@ import org.jetbrains.annotations.Nullable;
 @RequiredArgsConstructor
 @Builder
 public class User {
-    final long id;
+    private final long id;
 
     @Nullable
-    final String firstname;
-
-    @Nullable
-    final String lastname;
+    private final String fursonaName;
 }

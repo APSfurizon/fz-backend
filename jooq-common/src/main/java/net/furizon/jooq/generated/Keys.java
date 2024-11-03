@@ -19,6 +19,7 @@ import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
+import net.furizon.jooq.generated.tables.Sessions;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -49,7 +50,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<Record> AUTHENTICATIONS_PKEY = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_pkey"), new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
-    public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_EMAIL = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_email"), new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_EMAIL }, true);
     public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_USER_ID = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_user_id"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, true);
     public static final UniqueKey<Record> EVENTS_PKEY = Internal.createUniqueKey(Events.EVENTS, DSL.name("events_pkey"), new TableField[] { Events.EVENTS.ID }, true);
     public static final UniqueKey<Record> FURSUITS_PKEY = Internal.createUniqueKey(Fursuits.FURSUITS, DSL.name("fursuits_pkey"), new TableField[] { Fursuits.FURSUITS.FURSUIT_ID }, true);
@@ -63,6 +63,7 @@ public class Keys {
     public static final UniqueKey<Record> ROOM_GUESTS_PKEY = Internal.createUniqueKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_pkey"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_GUEST_ID }, true);
     public static final UniqueKey<Record> ROOMS_PKEY = Internal.createUniqueKey(Rooms.ROOMS, DSL.name("rooms_pkey"), new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
+    public static final UniqueKey<Record> SESSIONS_PKEY = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("sessions_pkey"), new TableField[] { Sessions.SESSIONS.ID }, true);
     public static final UniqueKey<Record> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.USER_ID }, true);
     public static final UniqueKey<Record> USERS_UNIQUE_SECRET = Internal.createUniqueKey(Users.USERS, DSL.name("users_unique_secret"), new TableField[] { Users.USERS.USER_SECRET }, true);
 
