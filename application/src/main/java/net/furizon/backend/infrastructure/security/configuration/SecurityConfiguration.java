@@ -61,13 +61,13 @@ public class SecurityConfiguration {
                 .anyRequest()
                 .authenticated()
             )
-            // Show unauthorized error
-//            .exceptionHandling(customizer -> {
-//                customizer.authenticationEntryPoint(
-//                    (request, response, authException) -> {
-//                        response.sendError(401, "Unauthorized");
-//                    });
-//            })
+            //Show unauthorized error
+            .exceptionHandling(customizer -> {
+                customizer.authenticationEntryPoint(
+                    (request, response, authException) -> {
+                        response.sendError(401, "Unauthorized");
+                    });
+            })
             .addFilterAt(
                 databaseSessionFilter,
                 BasicAuthenticationFilter.class

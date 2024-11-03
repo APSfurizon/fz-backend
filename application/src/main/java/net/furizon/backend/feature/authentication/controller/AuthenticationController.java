@@ -5,7 +5,6 @@ import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.dto.RegisterUserResponse;
 import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import net.furizon.backend.service.users.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
