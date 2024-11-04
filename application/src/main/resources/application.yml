@@ -30,4 +30,4 @@ pretix:
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
-  enable-sync: true
+  enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
