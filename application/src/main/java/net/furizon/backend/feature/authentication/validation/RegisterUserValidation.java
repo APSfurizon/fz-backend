@@ -8,24 +8,13 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.regex.Pattern;
-
 @Component
 @RequiredArgsConstructor
 public class RegisterUserValidation {
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
-
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
-
     private final AuthenticationFinder authenticationFinder;
 
     public void validate(@NotNull RegisterUserRequest input) {
-        if (!EMAIL_PATTERN.matcher(input.getEmail()).matches()) {
-            throw new ApiException(
-                "Invalid email",
-                AuthenticationErrorCode.EMAIL_INVALID.name()
-            );
-        }
+        AuthenticationException.validateEmailOrThrow(input.getEmail());
 
         final var authentication = authenticationFinder.findByEmail(input.getEmail());
         if (authentication != null) {

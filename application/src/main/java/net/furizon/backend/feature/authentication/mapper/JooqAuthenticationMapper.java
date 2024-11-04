@@ -16,6 +16,7 @@ public class JooqAuthenticationMapper {
             .isDisabled(record.get(AUTHENTICATIONS.AUTHENTICATION_DISABLED))
             .isTwoFactorEnabled(record.get(AUTHENTICATIONS.AUTHENTICATION_2FA_ENABLED))
             .isFrom0Auth(record.get(AUTHENTICATIONS.AUTHENTICATION_FROM_OAUTH))
+            .hashedPassword(record.get(AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD))
             .userId(record.get(AUTHENTICATIONS.USER_ID))
             .build();
     }

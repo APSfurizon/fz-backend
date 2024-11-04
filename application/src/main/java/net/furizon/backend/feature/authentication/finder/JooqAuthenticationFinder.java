@@ -6,6 +6,7 @@ import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMappe
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -18,21 +19,26 @@ public class JooqAuthenticationFinder implements AuthenticationFinder {
 
     @Override
     public @Nullable Authentication findByEmail(@NotNull String email) {
-        return sqlQuery
-            .fetchFirst(
-                PostgresDSL
-                    .select(
-                        AUTHENTICATIONS.AUTHENTICATION_ID,
-                        AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                        AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED,
-                        AUTHENTICATIONS.AUTHENTICATION_2FA_ENABLED,
-                        AUTHENTICATIONS.AUTHENTICATION_DISABLED,
-                        AUTHENTICATIONS.AUTHENTICATION_FROM_OAUTH,
-                        AUTHENTICATIONS.USER_ID
-                    )
-                    .from(AUTHENTICATIONS)
-                    .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
-            )
-            .mapOrNull(JooqAuthenticationMapper::map);
+        try {
+            return sqlQuery
+                .fetchSingle(
+                    PostgresDSL
+                        .select(
+                            AUTHENTICATIONS.AUTHENTICATION_ID,
+                            AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                            AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED,
+                            AUTHENTICATIONS.AUTHENTICATION_2FA_ENABLED,
+                            AUTHENTICATIONS.AUTHENTICATION_DISABLED,
+                            AUTHENTICATIONS.AUTHENTICATION_FROM_OAUTH,
+                            AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                            AUTHENTICATIONS.USER_ID
+                        )
+                        .from(AUTHENTICATIONS)
+                        .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+                )
+                .map(JooqAuthenticationMapper::map);
+        } catch (NoDataFoundException e) {
+            return null;
+        }
     }
 }

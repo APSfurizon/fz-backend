@@ -4,10 +4,9 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-public class LoginRequest {
-    @NotNull
-    private final String email;
+public class LoginResponse {
+    private final long userId;
 
     @NotNull
-    private final String password;
+    private final String accessToken;
 }

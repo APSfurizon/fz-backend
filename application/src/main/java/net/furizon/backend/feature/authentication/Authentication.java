@@ -22,5 +22,8 @@ public class Authentication {
 
     private final boolean isFrom0Auth;
 
+    @NotNull
+    private final String hashedPassword;
+
     private final long userId;
 }

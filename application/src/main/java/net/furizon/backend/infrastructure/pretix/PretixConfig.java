@@ -1,7 +1,6 @@
 package net.furizon.backend.infrastructure.pretix;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,8 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-@Getter
-@RequiredArgsConstructor
+@Data
 @ConfigurationProperties(prefix = "pretix")
 public class PretixConfig implements HttpConfig {
     @NotNull
