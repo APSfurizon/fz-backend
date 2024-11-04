@@ -1,6 +1,5 @@
 package net.furizon.backend.infrastructure.pretix;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
