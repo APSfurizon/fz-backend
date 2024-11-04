@@ -19,6 +19,7 @@ import net.furizon.backend.feature.pretix.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -44,43 +45,59 @@ import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_
 @RequiredArgsConstructor
 @Slf4j
 public class CachedPretixInformation implements PretixInformation {
-    @NotNull private final UseCaseExecutor useCaseExecutor;
+    private final UseCaseExecutor useCaseExecutor;
 
-    @NotNull private final UserFinder userFinder;
+    private final UserFinder userFinder;
+
+    private final PretixConfig pretixConfig;
 
     // *** CACHE
-
-    @NotNull private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
+    @NotNull
+    private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
 
     //Event Struct
 
     //Contains tickets, memberships, sponsors, rooms
-    @NotNull private final Cache<CacheItemTypes, Set<Integer>> itemIdsCache = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<CacheItemTypes, Set<Integer>> itemIdsCache = Caffeine.newBuilder().build();
 
     //Questions
-    @NotNull private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
-    @NotNull private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
-    @NotNull private final Cache<Integer, String> questionIdToIdentifier = Caffeine.newBuilder().build();
-    @NotNull private final Cache<String, Integer> questionIdentifierToId = Caffeine.newBuilder().build();
+    @NotNull
+    private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
+    @NotNull
+    private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Integer, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<String, Integer> questionIdentifierToId = Caffeine.newBuilder().build();
 
     //Tickets
-    @NotNull private final Cache<Integer, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
+    @NotNull
+    private final Cache<Integer, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
 
     //Sponsors
-    @NotNull private final Cache<Integer, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Integer, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
 
     //Extra days
-    @NotNull private final Cache<Integer, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Integer, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
 
     //Rooms
     //map id -> (capacity, hotelName)
-    @NotNull private final Cache<Integer, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Integer, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
     //map capacity/name -> room name
-    @NotNull private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
-            Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
+        Caffeine.newBuilder().build();
 
     @PostConstruct
     public void init() {
+        if (!pretixConfig.isEnableSync()) {
+            log.warn("[PRETIX] Pretix initialization has been disabled");
+            return;
+        }
         log.info("[PRETIX] Initializing pretix information and cache it");
         resetCache();
         reloadAllOrders();
@@ -107,7 +124,7 @@ public class CachedPretixInformation implements PretixInformation {
     @Override
     public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
         return Optional.ofNullable(
-                questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier))
+            questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier))
         );
     }
 
@@ -132,9 +149,6 @@ public class CachedPretixInformation implements PretixInformation {
             Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
 
         boolean hasTicket = false; //If no ticket is found, we don't store the order at all
-
-        String code = pretixOrder.getCode();
-        String secret = pretixOrder.getSecret();
         OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
 
         Set<Integer> days = new HashSet<>();
@@ -172,7 +186,7 @@ public class CachedPretixInformation implements PretixInformation {
                     }
                 }
 
-            } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null)  {
+            } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null) {
                 days.add(cacheDay);
 
             } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
@@ -184,7 +198,7 @@ public class CachedPretixInformation implements PretixInformation {
                     sponsorship = s; //keep the best sponsorship
                 }
 
-            } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null)  {
+            } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null) {
                 if (extraDays != ExtraDays.BOTH) {
                     if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
                         extraDays = ExtraDays.BOTH;
@@ -202,25 +216,27 @@ public class CachedPretixInformation implements PretixInformation {
             }
         }
 
-        if (hasTicket) {
-            Order order = Order.builder()
-                    .code(code)
-                    .orderStatus(status)
-                    .sponsorship(sponsorship)
-                    .extraDays(extraDays)
-                    .dailyDays(days)
-                    .roomCapacity(roomCapacity)
-                    .hotelLocation(hotelLocation)
-                    .pretixOrderSecret(secret)
-                    .hasMembership(membership)
-                    .answersMainPositionId(answersMainPositionId)
-                    .orderOwner(userFinder.findBySecret(userSecret))
-                    .orderEvent(event)
-                    .answers(answers, this)
-                .build();
-            return Optional.of(order);
+        if (!hasTicket) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        return Optional.of(
+            Order.builder()
+                .code(pretixOrder.getCode())
+                .orderStatus(status)
+                .sponsorship(sponsorship)
+                .extraDays(extraDays)
+                .dailyDays(days)
+                .roomCapacity(roomCapacity)
+                .hotelLocation(hotelLocation)
+                .pretixOrderSecret(pretixOrder.getSecret())
+                .hasMembership(membership)
+                .answersMainPositionId(answersMainPositionId)
+                .orderOwner(userFinder.findBySecret(userSecret))
+                .orderEvent(event)
+                .answers(answers, this)
+                .build()
+        );
     }
 
     @Override

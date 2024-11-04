@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.authentication.action.createAuthentication;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -15,6 +16,8 @@ public class JooqCreateAuthenticationAction implements CreateAuthenticationActio
     private final SqlCommand sqlCommand;
 
     private final PasswordEncoder encoder;
+
+    private final SecurityConfig securityConfig;
 
     @Override
     public void invoke(
@@ -33,7 +36,7 @@ public class JooqCreateAuthenticationAction implements CreateAuthenticationActio
                 .values(
                     userId,
                     email,
-                    encoder.encode(password) // TODO -> Apply secret for password encoding
+                    encoder.encode(securityConfig.getPasswordSalt() + password)
                 )
         );
     }

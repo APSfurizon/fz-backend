@@ -20,6 +20,9 @@ logbook:
   httpclient:
     decompress-response: true
 
+security:
+  password-salt: ${SECURITY_HASHED_PASSWORD_SALT:changeit}
+
 pretix:
   url: ${PRETIX_BASE_URL:http://localhost:8000}
   apiPath: ${PRETIX_API_PATH:/api/v1/}
@@ -27,3 +30,4 @@ pretix:
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
+  enable-sync: false

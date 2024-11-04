@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.pretix;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,25 +11,27 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 @ConfigurationProperties(prefix = "pretix")
 public class PretixConfig implements HttpConfig {
     @NotNull
-    private String url;
+    private final String url;
 
     @NotNull
-    private String apiPath;
+    private final String apiPath;
 
     @NotNull
-    private String apiKey;
+    private final String apiKey;
 
     @NotNull
-    private String defaultOrganizer;
+    private final String defaultOrganizer;
 
     @NotNull
-    private String defaultEvent;
+    private final String defaultEvent;
 
-    private int connectionTimeout;
+    private final int connectionTimeout;
+
+    private final boolean enableSync;
 
     @NotNull
     @Override
