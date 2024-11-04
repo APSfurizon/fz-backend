@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.authentication.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.dto.LoginRequest;
 import net.furizon.backend.feature.authentication.dto.LoginResponse;
@@ -8,8 +9,11 @@ import net.furizon.backend.feature.authentication.dto.RegisterUserResponse;
 import net.furizon.backend.feature.authentication.usecase.CreateLoginSessionUseCase;
 import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +25,18 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public LoginResponse loginUser(
-        @RequestBody final LoginRequest loginRequest
+        @RequestBody final LoginRequest loginRequest,
+        @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) @Nullable String userAgent,
+        HttpServletRequest httpServletRequest
     ) {
         return executor.execute(
             CreateLoginSessionUseCase.class,
-            loginRequest
+            new CreateLoginSessionUseCase.Input(
+                loginRequest.getEmail(),
+                loginRequest.getPassword(),
+                httpServletRequest.getRemoteAddr(),
+                userAgent
+            )
         );
     }
 

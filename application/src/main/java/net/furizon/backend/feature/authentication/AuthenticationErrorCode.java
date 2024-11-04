@@ -5,4 +5,5 @@ public enum AuthenticationErrorCode {
     EMAIL_NOT_REGISTERED,
     EMAIL_INVALID,
     INVALID_CREDENTIALS,
+    AUTHENTICATION_IS_DISABLED
 }

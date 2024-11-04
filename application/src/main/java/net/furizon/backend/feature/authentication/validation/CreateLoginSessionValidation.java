@@ -2,8 +2,8 @@ package net.furizon.backend.feature.authentication.validation;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.AuthenticationErrorCode;
-import net.furizon.backend.feature.authentication.dto.LoginRequest;
 import net.furizon.backend.feature.authentication.finder.AuthenticationFinder;
+import net.furizon.backend.feature.authentication.usecase.CreateLoginSessionUseCase;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +19,10 @@ public class CreateLoginSessionValidation {
 
     private final PasswordEncoder passwordEncoder;
 
-    public long validateAndGetUserId(@NotNull LoginRequest input) {
-        AuthenticationException.validateEmailOrThrow(input.getEmail());
+    public long validateAndGetUserId(@NotNull CreateLoginSessionUseCase.Input input) {
+        AuthenticationException.validateEmailOrThrow(input.email());
 
-        final var authentication = authenticationFinder.findByEmail(input.getEmail());
+        final var authentication = authenticationFinder.findByEmail(input.email());
         if (authentication == null) {
             throw new ApiException(
                 "User not found",
@@ -30,8 +30,15 @@ public class CreateLoginSessionValidation {
             );
         }
 
+        if (authentication.isDisabled()) {
+            throw new ApiException(
+                "Not possible to login",
+                AuthenticationErrorCode.AUTHENTICATION_IS_DISABLED.name()
+            );
+        }
+
         final var passwordMatches = passwordEncoder.matches(
-            securityConfig.getPasswordSalt() + input.getPassword(),
+            securityConfig.getPasswordSalt() + input.password(),
             authentication.getHashedPassword()
         );
         if (!passwordMatches) {

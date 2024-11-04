@@ -33,7 +33,6 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -77,26 +76,14 @@ public class Sessions extends TableImpl<Record> {
     public final TableField<Record, String> USER_AGENT = createField(DSL.name("user_agent"), SQLDataType.VARCHAR(255), this, "");
 
     /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * The column <code>public.sessions.created_by_ip_address</code>.
      */
-    @Deprecated
-    public final TableField<Record, Object> CREATED_BY_IP_ADDRESS = createField(DSL.name("created_by_ip_address"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "");
+    public final TableField<Record, String> CREATED_BY_IP_ADDRESS = createField(DSL.name("created_by_ip_address"), SQLDataType.VARCHAR(16).nullable(false), this, "");
 
     /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * The column <code>public.sessions.last_used_by_ip_address</code>.
      */
-    @Deprecated
-    public final TableField<Record, Object> LAST_USED_BY_IP_ADDRESS = createField(DSL.name("last_used_by_ip_address"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "");
+    public final TableField<Record, String> LAST_USED_BY_IP_ADDRESS = createField(DSL.name("last_used_by_ip_address"), SQLDataType.VARCHAR(16).nullable(false), this, "");
 
     /**
      * The column <code>public.sessions.user_id</code>.
