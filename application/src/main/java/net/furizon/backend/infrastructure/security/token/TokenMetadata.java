@@ -10,5 +10,7 @@ import java.util.UUID;
 @Builder
 @RequiredArgsConstructor
 public class TokenMetadata {
+    private final long userId;
+
     private final UUID sessionId;
 }

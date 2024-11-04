@@ -35,6 +35,7 @@ public class CreateLoginSessionUseCase implements UseCase<CreateLoginSessionUseC
             userId,
             tokenEncoder.encode(
                 TokenMetadata.builder()
+                    .userId(userId)
                     .sessionId(sessionId)
                     .build()
             )

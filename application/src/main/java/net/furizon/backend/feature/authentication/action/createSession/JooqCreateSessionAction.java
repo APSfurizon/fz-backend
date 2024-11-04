@@ -23,7 +23,7 @@ public class JooqCreateSessionAction implements CreateSessionAction {
     private final SecurityConfig securityConfig;
 
     @Override
-    public UUID invoke(
+    public @NotNull UUID invoke(
         long userId,
         @NotNull String clientIp,
         @Nullable String userAgent
@@ -55,6 +55,7 @@ public class JooqCreateSessionAction implements CreateSessionAction {
                     expiredAt
                 )
         );
-        return null;
+
+        return sessionId;
     }
 }

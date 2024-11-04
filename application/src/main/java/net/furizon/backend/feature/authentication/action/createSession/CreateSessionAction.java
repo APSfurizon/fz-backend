@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public interface CreateSessionAction {
+    @NotNull
     UUID invoke(
         long userId,
         @NotNull String clientIp,
