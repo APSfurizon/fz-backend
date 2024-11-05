@@ -1,9 +1,13 @@
 package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.action.createSession.CreateSessionAction;
 import net.furizon.backend.feature.authentication.dto.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
+import net.furizon.backend.infrastructure.security.SecurityConfig;
+import net.furizon.backend.infrastructure.security.session.action.clearNewestUserSessions.ClearNewestUserSessionsAction;
+import net.furizon.backend.infrastructure.security.session.finder.SessionFinder;
 import net.furizon.backend.infrastructure.security.token.TokenMetadata;
 import net.furizon.backend.infrastructure.security.token.encoder.TokenEncoder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CreateLoginSessionUseCase implements UseCase<CreateLoginSessionUseCase.Input, LoginResponse> {
     private final CreateLoginSessionValidation validation;
 
@@ -21,10 +26,26 @@ public class CreateLoginSessionUseCase implements UseCase<CreateLoginSessionUseC
 
     private final TokenEncoder tokenEncoder;
 
+    private final SessionFinder sessionFinder;
+
+    private final ClearNewestUserSessionsAction clearNewestUserSessionsAction;
+
+    private final SecurityConfig securityConfig;
+
     @Transactional
     @Override
     public @NotNull LoginResponse executor(@NotNull CreateLoginSessionUseCase.Input input) {
         final var userId = validation.validateAndGetUserId(input);
+        int sessionsCount = sessionFinder.getUserSessionsCount(userId);
+        if (sessionsCount >= securityConfig.getSession().getMaxAllowedSessionsSize()) {
+            log.warn(
+                "Maximum allowed sessions size reached. Sessions count = '{}', userId = '{}'; Running the cleaning",
+                sessionsCount,
+                userId
+            );
+            clearNewestUserSessionsAction.invoke(userId);
+        }
+
         final var sessionId = createSessionAction.invoke(
             userId,
             input.clientIp,

@@ -29,6 +29,7 @@ public class JooqUpdateSessionAction implements UpdateSessionAction {
                 .set(SESSIONS.LAST_USED_BY_IP_ADDRESS, clientIp)
                 .set(SESSIONS.MODIFIED_AT, now)
                 .set(SESSIONS.EXPIRES_AT, expireAt)
+                .where(SESSIONS.ID.eq(sessionId))
         );
     }
 }

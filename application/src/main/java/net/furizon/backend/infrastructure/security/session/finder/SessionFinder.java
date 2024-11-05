@@ -13,6 +13,8 @@ public interface SessionFinder {
     @NotNull
     List<Session> getUserSessions(long userId);
 
+    int getUserSessionsCount(long userId);
+
     @Nullable
     Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId);
 }

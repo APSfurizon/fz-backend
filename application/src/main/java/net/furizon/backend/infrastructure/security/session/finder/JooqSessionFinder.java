@@ -30,15 +30,28 @@ public class JooqSessionFinder implements SessionFinder {
                 PostgresDSL
                     .select(
                         SESSIONS.ID,
+                        SESSIONS.USER_AGENT,
                         SESSIONS.CREATED_AT,
+                        SESSIONS.MODIFIED_AT,
                         SESSIONS.EXPIRES_AT
                     )
                     .from(SESSIONS)
                     .where(SESSIONS.USER_ID.eq(userId))
+                    .orderBy(SESSIONS.CREATED_AT.desc())
             )
             .stream()
             .map(JooqSessionMapper::map)
             .toList();
+    }
+
+    @Override
+    public int getUserSessionsCount(long userId) {
+        return sqlQuery.count(
+            PostgresDSL
+                .select(SESSIONS.ID)
+                .from(SESSIONS)
+                .where(SESSIONS.USER_ID.eq(userId))
+        );
     }
 
     @Override
@@ -48,7 +61,9 @@ public class JooqSessionFinder implements SessionFinder {
                 PostgresDSL
                     .select(
                         SESSIONS.ID,
+                        SESSIONS.USER_AGENT,
                         SESSIONS.CREATED_AT,
+                        SESSIONS.MODIFIED_AT,
                         SESSIONS.EXPIRES_AT,
                         AUTHENTICATIONS.AUTHENTICATION_ID,
                         AUTHENTICATIONS.AUTHENTICATION_EMAIL,
