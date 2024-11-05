@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
     private final UseCaseExecutor executor;
 
-    @PostMapping("/login")
+    @PostMapping("/loginn")
     public LoginResponse loginUser(
         @RequestBody final LoginRequest loginRequest,
         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) @Nullable String userAgent,
