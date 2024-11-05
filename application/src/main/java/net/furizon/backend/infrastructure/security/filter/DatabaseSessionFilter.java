@@ -63,7 +63,6 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var tokenMetadata = tokenDecoder.decode(
                 authHeader.replaceFirst("(?i)^Bearer ", "")
             );
-            // TODO -> get sessionId and find session in database to validate it
             final var session = sessionFinder.findSessionById(tokenMetadata.getSessionId());
             if (session == null) {
                 throw new SessionAuthenticationException("Session not found");
@@ -71,7 +70,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var sessionId = session.getId();
             final var expiresAt = session.getExpiresAt();
             // Check if session has expired
-            if (expiresAt != null && expiresAt.isBefore(OffsetDateTime.now())) {
+            if (expiresAt.isBefore(OffsetDateTime.now())) {
                 sessionExecutor.execute(() -> {
                     log.debug("Session '{}' expired, deleting", sessionId);
                     deleteSessionAction.invoke(sessionId);
@@ -86,6 +85,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                         FurizonUser.builder()
                             .userId(tokenMetadata.getUserId())
                             .sessionId(sessionId)
+                            .authentication(session.getAuthentication())
                             .build(),
                         null,
                         List.of() // TODO -> Implement authorities
@@ -95,7 +95,6 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var clientIp = request.getRemoteAddr();
             sessionExecutor.execute(() -> updateSessionAction.invoke(sessionId, clientIp));
         } catch (AuthenticationException ex) {
-            // TODO -> send fail error if exception
             log.error("Authentication failed", ex);
             SecurityContextHolder.clearContext();
             authenticationFailureHandler.onAuthenticationFailure(request, response, ex);

@@ -3,6 +3,8 @@ package net.furizon.backend.infrastructure.security.session;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.authentication.Authentication;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,9 +13,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Builder
 public class Session {
+    @NotNull
     private final UUID id;
 
+    @NotNull
     private final OffsetDateTime createdAt;
 
+    @NotNull
     private final OffsetDateTime expiresAt;
+
+    @NotNull
+    private final Authentication authentication;
 }
