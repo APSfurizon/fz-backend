@@ -1,13 +1,18 @@
 package net.furizon.backend.infrastructure.security.session.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.authentication.Authentication;
+import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMapper;
 import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
@@ -19,7 +24,25 @@ public class JooqSessionFinder implements SessionFinder {
     private final SqlQuery sqlQuery;
 
     @Override
-    public @Nullable Session findSessionById(UUID id) {
+    public @NotNull List<Session> getUserSessions(long userId) {
+        return sqlQuery
+            .fetch(
+                PostgresDSL
+                    .select(
+                        SESSIONS.ID,
+                        SESSIONS.CREATED_AT,
+                        SESSIONS.EXPIRES_AT
+                    )
+                    .from(SESSIONS)
+                    .where(SESSIONS.USER_ID.eq(userId))
+            )
+            .stream()
+            .map(JooqSessionMapper::map)
+            .toList();
+    }
+
+    @Override
+    public @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId) {
         return sqlQuery
             .fetchFirst(
                 PostgresDSL
@@ -39,8 +62,13 @@ public class JooqSessionFinder implements SessionFinder {
                     .from(SESSIONS)
                     .leftOuterJoin(AUTHENTICATIONS)
                     .on(AUTHENTICATIONS.USER_ID.eq(SESSIONS.USER_ID))
-                    .where(SESSIONS.ID.eq(id))
+                    .where(SESSIONS.ID.eq(sessionId))
             )
-            .mapOrNull(JooqSessionMapper::map);
+            .mapOrNull(record ->
+                Pair.of(
+                    JooqSessionMapper.map(record),
+                    JooqAuthenticationMapper.map(record)
+                )
+            );
     }
 }

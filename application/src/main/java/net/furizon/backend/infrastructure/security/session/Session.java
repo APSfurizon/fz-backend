@@ -3,7 +3,6 @@ package net.furizon.backend.infrastructure.security.session;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.Authentication;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.OffsetDateTime;
@@ -21,7 +20,4 @@ public class Session {
 
     @NotNull
     private final OffsetDateTime expiresAt;
-
-    @NotNull
-    private final Authentication authentication;
 }

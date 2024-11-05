@@ -63,10 +63,11 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var tokenMetadata = tokenDecoder.decode(
                 authHeader.replaceFirst("(?i)^Bearer ", "")
             );
-            final var session = sessionFinder.findSessionById(tokenMetadata.getSessionId());
-            if (session == null) {
+            final var pair = sessionFinder.findSessionWithAuthenticationById(tokenMetadata.getSessionId());
+            if (pair == null) {
                 throw new SessionAuthenticationException("Session not found");
             }
+            final var session = pair.getLeft();
             final var sessionId = session.getId();
             final var expiresAt = session.getExpiresAt();
             // Check if session has expired
@@ -85,7 +86,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                         FurizonUser.builder()
                             .userId(tokenMetadata.getUserId())
                             .sessionId(sessionId)
-                            .authentication(session.getAuthentication())
+                            .authentication(pair.getRight())
                             .build(),
                         null,
                         List.of() // TODO -> Implement authorities
