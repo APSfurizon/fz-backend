@@ -21,14 +21,14 @@ public class UserController {
 
     @GetMapping("/me")
     public FurizonUser getMe(
-        @AuthenticationPrincipal @NotNull FurizonUser user
+        @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return user;
     }
 
     @GetMapping("/me/sessions")
     public List<UserSession> getMeSessions(
-        @AuthenticationPrincipal @NotNull FurizonUser user
+        @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
             GetUserSessionsUseCase.class,

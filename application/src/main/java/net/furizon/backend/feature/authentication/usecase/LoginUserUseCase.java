@@ -2,7 +2,7 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.authentication.action.createSession.CreateSessionAction;
+import net.furizon.backend.infrastructure.security.session.action.createSession.CreateSessionAction;
 import net.furizon.backend.feature.authentication.dto.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CreateLoginSessionUseCase implements UseCase<CreateLoginSessionUseCase.Input, LoginResponse> {
+public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginResponse> {
     private final CreateLoginSessionValidation validation;
 
     private final CreateSessionAction createSessionAction;
@@ -34,7 +34,7 @@ public class CreateLoginSessionUseCase implements UseCase<CreateLoginSessionUseC
 
     @Transactional
     @Override
-    public @NotNull LoginResponse executor(@NotNull CreateLoginSessionUseCase.Input input) {
+    public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
         final var userId = validation.validateAndGetUserId(input);
         int sessionsCount = sessionFinder.getUserSessionsCount(userId);
         if (sessionsCount >= securityConfig.getSession().getMaxAllowedSessionsSize()) {

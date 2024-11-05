@@ -3,7 +3,7 @@ package net.furizon.backend.feature.authentication.validation;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.AuthenticationErrorCode;
 import net.furizon.backend.feature.authentication.finder.AuthenticationFinder;
-import net.furizon.backend.feature.authentication.usecase.CreateLoginSessionUseCase;
+import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public class CreateLoginSessionValidation {
 
     private final PasswordEncoder passwordEncoder;
 
-    public long validateAndGetUserId(@NotNull CreateLoginSessionUseCase.Input input) {
+    public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         AuthenticationException.validateEmailOrThrow(input.email());
 
         final var authentication = authenticationFinder.findByEmail(input.email());

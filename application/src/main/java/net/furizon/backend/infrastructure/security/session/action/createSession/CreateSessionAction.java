@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.authentication.action.createSession;
+package net.furizon.backend.infrastructure.security.session.action.createSession;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

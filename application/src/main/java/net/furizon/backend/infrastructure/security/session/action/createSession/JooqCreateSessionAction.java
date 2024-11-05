@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.authentication.action.createSession;
+package net.furizon.backend.infrastructure.security.session.action.createSession;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
