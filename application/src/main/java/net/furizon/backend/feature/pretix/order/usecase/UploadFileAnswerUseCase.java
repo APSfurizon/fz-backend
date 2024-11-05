@@ -18,6 +18,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
+import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+
 // TODO -> Why do we need this class if we don't use it?
 @Component
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class UploadFileAnswerUseCase implements UseCase<UploadFileAnswerUseCase.
         new ParameterizedTypeReference<>() {
         };
 
-    @Qualifier("pretixHttpClient")
+    @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
 
     @Transactional

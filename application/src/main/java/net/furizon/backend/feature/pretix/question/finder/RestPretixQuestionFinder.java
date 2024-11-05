@@ -16,6 +16,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
+import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +25,7 @@ public class RestPretixQuestionFinder implements PretixQuestionFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixQuestion>> pretixPagedQuestion =
         new ParameterizedTypeReference<>() {};
 
-    @Qualifier("pretixHttpClient")
+    @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
 
     @NotNull

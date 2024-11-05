@@ -22,5 +22,7 @@ public class SecurityConfig {
     public static class Session {
         @NotNull
         private final Duration expiration;
+
+        private final int corePoolUpdateSize;
     }
 }

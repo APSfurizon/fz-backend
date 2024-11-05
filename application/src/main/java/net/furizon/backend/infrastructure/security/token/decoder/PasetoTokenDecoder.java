@@ -11,7 +11,7 @@ import org.paseto4j.commons.SecretKey;
 import org.paseto4j.commons.Version;
 import org.paseto4j.version4.Paseto;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.web.authentication.session.SessionAuthenticationException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -46,7 +46,7 @@ public class PasetoTokenDecoder implements TokenDecoder {
             throw new AuthenticationServiceException("Bad message", ex);
         } catch (PasetoException e) {
             log.warn("Could not decode token", e);
-            throw new SessionAuthenticationException("Invalid Session Token");
+            throw new BadCredentialsException("Invalid Session Token");
         }
     }
 }
