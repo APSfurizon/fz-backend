@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.configuration;
 
+import net.furizon.backend.infrastructure.concurrent.MdcTaskDecorator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -19,13 +20,14 @@ import java.util.concurrent.Executors;
 public class ThreadConfig {
     @Bean
     public AsyncTaskExecutor applicationTaskExecutor() {
-        return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
+        final var executor = new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
+        executor.setTaskDecorator(new MdcTaskDecorator());
+
+        return executor;
     }
 
     @Bean
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
-        return protocolHandler -> {
-            protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-        };
+        return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
     }
 }

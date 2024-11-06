@@ -30,7 +30,7 @@ security:
   allowed-origins: [ "*" ] # TODO -> Only for dev
   session:
     expiration: ${SECURITY_SESSION_EXPIRATION_DURATION:1d}
-    core-pool-update-size: ${SECURITY_SESSION_CORE_POOL_UPDATE_SIZE:4}
+    core-pool-update-size: ${SECURITY_SESSION_CORE_POOL_UPDATE_SIZE:6}
     max-allowed-sessions-size: ${SECURITY_SESSION_MAX_ALLOWED_SESSIONS_SIZE:4}
 
 pretix:
