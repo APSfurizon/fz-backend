@@ -19,7 +19,7 @@ public class SecurityThreadConfiguration {
     @Bean(SESSION_THREAD_POOL_TASK_EXECUTOR)
     public Executor sessionThreadPoolTaskExecutor() {
         final var corePoolUpdateSize = securityConfig.getSession().getCorePoolUpdateSize();
-        final var executor = new ThreadPoolTaskExecutor();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolUpdateSize);
         executor.setMaxPoolSize(corePoolUpdateSize);
         executor.setThreadNamePrefix("session-thread-");
