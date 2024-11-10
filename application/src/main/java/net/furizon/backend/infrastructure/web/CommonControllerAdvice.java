@@ -7,6 +7,8 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -35,28 +37,11 @@ public class CommonControllerAdvice {
         @NotNull MethodArgumentNotValidException ex,
         @NotNull HttpServletRequest request
     ) {
-        //.forEach(
-        //(error) -> {
-        //if (error instanceof FieldError fieldError) {
-        //String fieldName = fieldError.getField();
-        //String errorMessage = fieldError.getDefaultMessage();
-        //errors.put(fieldName, errorMessage);
-        //} else {
-        //generalErrors.add(error.getDefaultMessage());
-        //}
-        //}
-        //);
         final var errors = ex
             .getBindingResult()
             .getAllErrors()
             .stream()
-            .map(
-                (err) ->
-                    new ApiError(
-                        err.getDefaultMessage(),
-                        ""
-                    )
-            )
+            .map(this::matchObjectError)
             .toList();
         return ResponseEntity
             .status(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -66,5 +51,22 @@ public class CommonControllerAdvice {
                     .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()
             );
+    }
+
+    @NotNull
+    private ApiError matchObjectError(@NotNull ObjectError error) {
+        if (error instanceof FieldError fieldError) {
+            return new ApiError(
+                "Field '%s' %s; (value '%s' is invalid)".formatted(
+                    fieldError.getField(),
+                    error.getDefaultMessage(),
+                    fieldError.getRejectedValue()
+                ),
+                ApiCommonErrorCode.INVALID_INPUT.toString()
+            );
+        }
+
+        final var message = error.getDefaultMessage();
+        return new ApiError(message != null ? message : "Unknown error", ApiCommonErrorCode.UNKNOWN.toString());
     }
 }

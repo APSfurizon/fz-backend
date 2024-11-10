@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.authentication.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.dto.LoginRequest;
 import net.furizon.backend.feature.authentication.dto.LoginResponse;
@@ -30,7 +31,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public LoginResponse loginUser(
-        @RequestBody final LoginRequest loginRequest,
+        @Valid @RequestBody final LoginRequest loginRequest,
         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) @Nullable String userAgent,
         HttpServletRequest httpServletRequest
     ) {
@@ -60,7 +61,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public RegisterUserResponse registerUser(
-        @RequestBody final RegisterUserRequest registerUserRequest
+        @Valid @RequestBody final RegisterUserRequest registerUserRequest
     ) {
         executor.execute(
             RegisterUserUseCase.class,

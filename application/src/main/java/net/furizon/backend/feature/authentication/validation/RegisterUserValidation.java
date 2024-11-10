@@ -14,8 +14,6 @@ public class RegisterUserValidation {
     private final AuthenticationFinder authenticationFinder;
 
     public void validate(@NotNull RegisterUserRequest input) {
-        AuthenticationException.validateEmailOrThrow(input.getEmail());
-
         final var authentication = authenticationFinder.findByEmail(input.getEmail());
         if (authentication != null) {
             throw new ApiException(

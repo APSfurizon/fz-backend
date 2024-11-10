@@ -5,7 +5,6 @@ import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +18,7 @@ public class JooqCreateUserAction implements CreateUserAction {
     private final SqlCommand sqlCommand;
 
     @Override
-    public @NotNull User invoke(@Nullable String fursonaName) {
+    public @NotNull User invoke(@NotNull String fursonaName) {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         USERS,

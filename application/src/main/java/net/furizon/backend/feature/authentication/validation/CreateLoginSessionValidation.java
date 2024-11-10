@@ -20,8 +20,6 @@ public class CreateLoginSessionValidation {
     private final PasswordEncoder passwordEncoder;
 
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
-        AuthenticationException.validateEmailOrThrow(input.email());
-
         final var authentication = authenticationFinder.findByEmail(input.email());
         if (authentication == null) {
             throw new ApiException(
