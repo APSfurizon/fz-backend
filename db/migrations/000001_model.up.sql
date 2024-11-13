@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS membership_cards
     issue_year int2                                                                                                                     NOT NULL,
     user_id    int8                                                                                                                     NOT NULL,
     CONSTRAINT cards_pkey PRIMARY KEY (card_db_id),
-    CONSTRAINT card_user_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT card_user_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS orders
