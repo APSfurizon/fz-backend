@@ -27,6 +27,7 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -88,24 +89,24 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Event> getCurrentEvent() {
+    public synchronized Optional<Event> getCurrentEvent() {
         return Optional.ofNullable(currentEvent.get());
     }
 
     @Override
-    public int getQuestionSecretId() {
+    public synchronized int getQuestionSecretId() {
         return questionSecretId.get();
     }
 
     @NotNull
     @Override
-    public Optional<QuestionType> getQuestionTypeFromId(int id) {
+    public synchronized Optional<QuestionType> getQuestionTypeFromId(int id) {
         return Optional.ofNullable(questionIdToType.getIfPresent(id));
     }
 
     @NotNull
     @Override
-    public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
+    public synchronized Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
         return Optional.ofNullable(
                 questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier))
         );
@@ -113,19 +114,19 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<String> getQuestionIdentifierFromId(int id) {
+    public synchronized Optional<String> getQuestionIdentifierFromId(int id) {
         return Optional.ofNullable(questionIdToIdentifier.getIfPresent(id));
     }
 
     @NotNull
     @Override
-    public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
+    public synchronized Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
         return Optional.ofNullable(questionIdentifierToId.getIfPresent(identifier));
     }
 
     @NotNull
     @Override
-    public Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
+    public synchronized Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
         Integer cacheDay;
         ExtraDays cacheExtraDays;
         BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
@@ -224,7 +225,7 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public void resetCache() {
+    public synchronized void resetCache() {
         log.info("[PRETIX] Resetting cache for pretix information");
 
         invalidateEventsCache();
@@ -328,5 +329,11 @@ public class CachedPretixInformation implements PretixInformation {
             var input = new ReloadOrdersUseCase.Input(event.get(), this);
             useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
         }
+    }
+
+    @Scheduled(cron = Const.RELOAD_CACHE_CRONJOB)
+    private void cronReloadCache() {
+        log.info("[PRETIX] Cronjob running");
+        init();
     }
 }
