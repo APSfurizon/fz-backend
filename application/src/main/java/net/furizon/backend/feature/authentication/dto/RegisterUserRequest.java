@@ -23,7 +23,7 @@ public class RegisterUserRequest {
     private final String password;
 
     @NotNull
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\- ]{3,20}$")
+    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
     private final String fursonaName;
 
     @NotNull
