@@ -72,9 +72,14 @@ public class MembershipCards extends TableImpl<Record> {
     public final TableField<Record, Long> CARD_DB_ID = createField(DSL.name("card_db_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>public.membership_cards.card_year</code>.
+     * The column <code>public.membership_cards.id_in_year</code>.
      */
-    public final TableField<Record, Short> CARD_YEAR = createField(DSL.name("card_year"), SQLDataType.SMALLINT.nullable(false), this, "");
+    public final TableField<Record, Integer> ID_IN_YEAR = createField(DSL.name("id_in_year"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("nextval('membership_cards_id_in_years'::regclass)"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>public.membership_cards.issue_year</code>.
+     */
+    public final TableField<Record, Short> ISSUE_YEAR = createField(DSL.name("issue_year"), SQLDataType.SMALLINT.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_cards.user_id</code>.

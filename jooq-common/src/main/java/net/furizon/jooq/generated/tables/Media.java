@@ -11,7 +11,6 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
-import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -74,12 +73,12 @@ public class Media extends TableImpl<Record> {
     /**
      * The column <code>public.media.media_path</code>.
      */
-    public final TableField<Record, String> MEDIA_PATH = createField(DSL.name("media_path"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> MEDIA_PATH = createField(DSL.name("media_path"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.media.media_type</code>.
      */
-    public final TableField<Record, String> MEDIA_TYPE = createField(DSL.name("media_type"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> MEDIA_TYPE = createField(DSL.name("media_type"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     private Media(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -157,19 +156,6 @@ public class Media extends TableImpl<Record> {
     @Override
     public UniqueKey<Record> getPrimaryKey() {
         return Keys.MEDIA_PKEY;
-    }
-
-    private transient FursuitsEventsPath _fursuitsEvents;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>public.fursuits_events</code> table
-     */
-    public FursuitsEventsPath fursuitsEvents() {
-        if (_fursuitsEvents == null)
-            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK.getInverseKey());
-
-        return _fursuitsEvents;
     }
 
     private transient FursuitsPath _fursuits;

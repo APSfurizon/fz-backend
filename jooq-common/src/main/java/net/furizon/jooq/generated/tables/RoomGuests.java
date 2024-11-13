@@ -75,12 +75,12 @@ public class RoomGuests extends TableImpl<Record> {
     /**
      * The column <code>public.room_guests.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.room_guests.room_id</code>.
      */
-    public final TableField<Record, Long> ROOM_ID = createField(DSL.name("room_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> ROOM_ID = createField(DSL.name("room_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private RoomGuests(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

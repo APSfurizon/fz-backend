@@ -68,12 +68,12 @@ public class UserGroup extends TableImpl<Record> {
     /**
      * The column <code>public.user_group.group_id</code>.
      */
-    public final TableField<Record, Long> GROUP_ID = createField(DSL.name("group_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> GROUP_ID = createField(DSL.name("group_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.user_group.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private UserGroup(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS sessions
     expires_at              timestamptz      NOT NULL
 );
 
-CREATE INDEX sessions_user_id_idx ON sessions (user_id);
-CREATE INDEX sessions_created_at_idx ON sessions USING BRIN (created_at);
-CREATE INDEX sessions_expires_at_idx ON sessions USING BRIN (expires_at);
+CREATE INDEX IF NOT EXISTS sessions_user_id_idx ON sessions (user_id);
+CREATE INDEX IF NOT EXISTS sessions_created_at_idx ON sessions USING BRIN (created_at);
+CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions USING BRIN (expires_at);

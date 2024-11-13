@@ -11,6 +11,8 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
+import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -173,6 +175,19 @@ public class Events extends TableImpl<Record> {
         return Keys.EVENTS_PKEY;
     }
 
+    private transient FursuitsEventsPath _fursuitsEvents;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.fursuits_events</code> table
+     */
+    public FursuitsEventsPath fursuitsEvents() {
+        if (_fursuitsEvents == null)
+            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK.getInverseKey());
+
+        return _fursuitsEvents;
+    }
+
     private transient OrdersPath _orders;
 
     /**
@@ -184,6 +199,14 @@ public class Events extends TableImpl<Record> {
             _orders = new OrdersPath(this, null, Keys.ORDERS__ORDERS_EVENTS_ID.getInverseKey());
 
         return _orders;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.fursuits</code> table
+     */
+    public FursuitsPath fursuits() {
+        return fursuitsEvents().fursuits();
     }
 
     @Override

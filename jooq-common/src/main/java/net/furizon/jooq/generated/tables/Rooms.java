@@ -75,17 +75,17 @@ public class Rooms extends TableImpl<Record> {
     /**
      * The column <code>public.rooms.room_confirmed</code>.
      */
-    public final TableField<Record, Boolean> ROOM_CONFIRMED = createField(DSL.name("room_confirmed"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> ROOM_CONFIRMED = createField(DSL.name("room_confirmed"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>public.rooms.room_name</code>.
      */
-    public final TableField<Record, String> ROOM_NAME = createField(DSL.name("room_name"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> ROOM_NAME = createField(DSL.name("room_name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>public.rooms.order_id</code>.
      */
-    public final TableField<Record, Integer> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.INTEGER, this, "");
+    public final TableField<Record, Integer> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     private Rooms(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
