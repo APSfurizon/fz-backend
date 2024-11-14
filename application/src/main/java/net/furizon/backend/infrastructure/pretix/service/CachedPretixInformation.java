@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
@@ -46,7 +47,7 @@ import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_
 @RequiredArgsConstructor
 @Slf4j
 public class CachedPretixInformation implements PretixInformation {
-    @NotNull private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
+    @NotNull private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     @NotNull private final UseCaseExecutor useCaseExecutor;
 
