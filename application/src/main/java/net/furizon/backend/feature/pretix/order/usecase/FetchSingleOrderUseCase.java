@@ -45,16 +45,19 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
 
         if (pretixOrder.isEmpty()) {
             deleteOrderAction.invoke(orderCode);
+            log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, eventInfo);
             return Optional.empty();
         }
 
         var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.get(), event);
         if (orderOpt.isEmpty()) {
             deleteOrderAction.invoke(orderCode);
+            log.error("[PRETIX] Unable to parse order: {}@{}", orderCode, eventInfo);
             return Optional.empty();
         }
 
         Order order = orderOpt.get();
+        log.debug("[PRETIX] Storing / Updating order: {}@{}", orderCode, eventInfo);
         insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
         return orderOpt;
     }

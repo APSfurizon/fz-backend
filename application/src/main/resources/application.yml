@@ -27,3 +27,4 @@ pretix:
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
+  cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 0 * * *}

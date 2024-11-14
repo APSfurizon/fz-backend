@@ -28,6 +28,9 @@ public class PretixConfig implements HttpConfig {
     @NotNull
     private String defaultEvent;
 
+    @NotNull
+    private String cacheReloadCronjob;
+
     private int connectionTimeout;
 
     @NotNull
