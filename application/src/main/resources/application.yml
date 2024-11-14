@@ -33,6 +33,10 @@ security:
     core-pool-update-size: ${SECURITY_SESSION_CORE_POOL_UPDATE_SIZE:6}
     max-allowed-sessions-size: ${SECURITY_SESSION_MAX_ALLOWED_SESSIONS_SIZE:4}
 
+membership:
+  card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}
+  card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
+
 pretix:
   url: ${PRETIX_BASE_URL:http://localhost:8000}
   apiPath: ${PRETIX_API_PATH:/api/v1/}
