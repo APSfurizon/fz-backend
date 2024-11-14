@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/internal/pretixcache")
+@RequestMapping("/internal/cache/pretix")
 @RequiredArgsConstructor
 //TODO: Only admins are allowed to run these!
-public class CacheController {
+public class PretixCacheController {
     private final PretixInformation pretixService;
 
-    @PostMapping("/reloadstruct")
+    @PostMapping("/reload-struct")
     public void reloadCache() {
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
     }
 
-    @PostMapping("/reloadorders")
+    @PostMapping("/reload-orders")
     public void reloadOrders() {
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();
