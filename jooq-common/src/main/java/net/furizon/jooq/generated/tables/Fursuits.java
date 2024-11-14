@@ -12,6 +12,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
@@ -76,7 +77,7 @@ public class Fursuits extends TableImpl<Record> {
     /**
      * The column <code>public.fursuits.fursuit_name</code>.
      */
-    public final TableField<Record, String> FURSUIT_NAME = createField(DSL.name("fursuit_name"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> FURSUIT_NAME = createField(DSL.name("fursuit_name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>public.fursuits.fursuit_species</code>.
@@ -86,7 +87,7 @@ public class Fursuits extends TableImpl<Record> {
     /**
      * The column <code>public.fursuits.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.fursuits.media_id_propic</code>.
@@ -211,6 +212,14 @@ public class Fursuits extends TableImpl<Record> {
             _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_FURSUIT_FK.getInverseKey());
 
         return _fursuitsEvents;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.events</code>
+     * table
+     */
+    public EventsPath events() {
+        return fursuitsEvents().events();
     }
 
     @Override

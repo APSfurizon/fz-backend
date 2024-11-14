@@ -12,8 +12,8 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
-import net.furizon.jooq.generated.tables.Media.MediaPath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -154,16 +154,16 @@ public class FursuitsEvents extends TableImpl<Record> {
         return Arrays.asList(Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_FURSUIT_FK);
     }
 
-    private transient MediaPath _media;
+    private transient EventsPath _events;
 
     /**
-     * Get the implicit join path to the <code>public.media</code> table.
+     * Get the implicit join path to the <code>public.events</code> table.
      */
-    public MediaPath media() {
-        if (_media == null)
-            _media = new MediaPath(this, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK, null);
+    public EventsPath events() {
+        if (_events == null)
+            _events = new EventsPath(this, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK, null);
 
-        return _media;
+        return _events;
     }
 
     private transient FursuitsPath _fursuits;

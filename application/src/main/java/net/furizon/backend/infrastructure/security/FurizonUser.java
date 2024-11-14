@@ -1,29 +1,50 @@
 package net.furizon.backend.infrastructure.security;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import net.furizon.backend.feature.authentication.Authentication;
 import net.minidev.json.annotate.JsonIgnore;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
+@Builder
 public class FurizonUser implements UserDetails {
-    // TODO -> Import from user database model
+    @Getter
+    private final long userId;
+
+    @Getter
+    @NotNull
+    private final UUID sessionId;
+
+    @Getter(AccessLevel.NONE)
+    @NotNull
+    private final Authentication authentication;
+
+    @JsonIgnore
+    @NotNull
+    @Builder.Default
+    private final List<? extends GrantedAuthority> authorities = List.of();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return authorities;
     }
 
     @JsonIgnore
     @Override
     public String getPassword() {
-        return "";
+        return authentication.getHashedPassword();
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return authentication.getEmail();
     }
 
     @Override
@@ -33,7 +54,7 @@ public class FurizonUser implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return authentication.isDisabled();
     }
 
     @Override
@@ -46,7 +67,7 @@ public class FurizonUser implements UserDetails {
         return true;
     }
 
-    public boolean is2FaEnabled() {
-        return false;
+    public boolean isTwoFactorEnabled() {
+        return authentication.isTwoFactorEnabled();
     }
 }

@@ -1,6 +1,8 @@
 package net.furizon.backend.infrastructure.pretix;
 
 public class Const {
+    public static final String PRETIX_HTTP_CLIENT = "pretixHttpClient";
+
     public static final String METADATA_IDENTIFIER_ITEM = "item_name";
 
     public static final String QUESTIONS_ACCOUNT_SECRET = "account_secret";

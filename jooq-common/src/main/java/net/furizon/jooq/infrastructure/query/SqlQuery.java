@@ -21,7 +21,7 @@ public interface SqlQuery {
 
     /**
      * @throws org.jooq.exception.DataAccessException if something went wrong executing the query
-     * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record
+     * @throws org.jooq.exception.NoDataFoundException – if the query returned no records
      * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record
      */
     @NotNull

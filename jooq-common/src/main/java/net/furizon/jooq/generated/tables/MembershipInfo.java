@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -67,49 +68,34 @@ public class MembershipInfo extends TableImpl<Record> {
     }
 
     /**
+     * The column <code>public.membership_info.id</code>.
+     */
+    public final TableField<Record, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
+
+    /**
      * The column <code>public.membership_info.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_info.info_first_name</code>.
      */
-    public final TableField<Record, String> INFO_FIRST_NAME = createField(DSL.name("info_first_name"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INFO_FIRST_NAME = createField(DSL.name("info_first_name"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_info.info_last_name</code>.
      */
-    public final TableField<Record, String> INFO_LAST_NAME = createField(DSL.name("info_last_name"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INFO_LAST_NAME = createField(DSL.name("info_last_name"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.membership_info.info_address</code>.
+     * The column <code>public.membership_info.info_fiscal_code</code>.
      */
-    public final TableField<Record, String> INFO_ADDRESS = createField(DSL.name("info_address"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.membership_info.info_zip</code>.
-     */
-    public final TableField<Record, String> INFO_ZIP = createField(DSL.name("info_zip"), SQLDataType.VARCHAR(16), this, "");
-
-    /**
-     * The column <code>public.membership_info.info_city</code>.
-     */
-    public final TableField<Record, String> INFO_CITY = createField(DSL.name("info_city"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.membership_info.info_country</code>.
-     */
-    public final TableField<Record, String> INFO_COUNTRY = createField(DSL.name("info_country"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.membership_info.info_tax_id</code>.
-     */
-    public final TableField<Record, String> INFO_TAX_ID = createField(DSL.name("info_tax_id"), SQLDataType.VARCHAR(16), this, "");
+    public final TableField<Record, String> INFO_FISCAL_CODE = createField(DSL.name("info_fiscal_code"), SQLDataType.VARCHAR(16), this, "");
 
     /**
      * The column <code>public.membership_info.info_birth_city</code>.
      */
-    public final TableField<Record, String> INFO_BIRTH_CITY = createField(DSL.name("info_birth_city"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INFO_BIRTH_CITY = createField(DSL.name("info_birth_city"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_info.info_birth_region</code>.
@@ -119,7 +105,27 @@ public class MembershipInfo extends TableImpl<Record> {
     /**
      * The column <code>public.membership_info.info_birth_country</code>.
      */
-    public final TableField<Record, String> INFO_BIRTH_COUNTRY = createField(DSL.name("info_birth_country"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INFO_BIRTH_COUNTRY = createField(DSL.name("info_birth_country"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_birthday</code>.
+     */
+    public final TableField<Record, LocalDate> INFO_BIRTHDAY = createField(DSL.name("info_birthday"), SQLDataType.LOCALDATE.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_address</code>.
+     */
+    public final TableField<Record, String> INFO_ADDRESS = createField(DSL.name("info_address"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_zip</code>.
+     */
+    public final TableField<Record, String> INFO_ZIP = createField(DSL.name("info_zip"), SQLDataType.VARCHAR(16).nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_city</code>.
+     */
+    public final TableField<Record, String> INFO_CITY = createField(DSL.name("info_city"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_info.info_region</code>.
@@ -127,9 +133,14 @@ public class MembershipInfo extends TableImpl<Record> {
     public final TableField<Record, String> INFO_REGION = createField(DSL.name("info_region"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>public.membership_info.info_country</code>.
+     */
+    public final TableField<Record, String> INFO_COUNTRY = createField(DSL.name("info_country"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
      * The column <code>public.membership_info.info_phone</code>.
      */
-    public final TableField<Record, String> INFO_PHONE = createField(DSL.name("info_phone"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INFO_PHONE = createField(DSL.name("info_phone"), SQLDataType.CLOB.nullable(false), this, "");
 
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

@@ -19,6 +19,7 @@ import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
+import net.furizon.jooq.generated.tables.Sessions;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -49,7 +50,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<Record> AUTHENTICATIONS_PKEY = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_pkey"), new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
-    public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_EMAIL = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_email"), new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_EMAIL }, true);
     public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_USER_ID = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_user_id"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, true);
     public static final UniqueKey<Record> EVENTS_PKEY = Internal.createUniqueKey(Events.EVENTS, DSL.name("events_pkey"), new TableField[] { Events.EVENTS.ID }, true);
     public static final UniqueKey<Record> FURSUITS_PKEY = Internal.createUniqueKey(Fursuits.FURSUITS, DSL.name("fursuits_pkey"), new TableField[] { Fursuits.FURSUITS.FURSUIT_ID }, true);
@@ -58,11 +58,12 @@ public class Keys {
     public static final UniqueKey<Record> GROUPS_PKEY = Internal.createUniqueKey(Groups.GROUPS, DSL.name("groups_pkey"), new TableField[] { Groups.GROUPS.GROUP_ID }, true);
     public static final UniqueKey<Record> MEDIA_PKEY = Internal.createUniqueKey(Media.MEDIA, DSL.name("media_pkey"), new TableField[] { Media.MEDIA.MEDIA_ID }, true);
     public static final UniqueKey<Record> CARDS_PKEY = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("cards_pkey"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.CARD_DB_ID }, true);
-    public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.USER_ID }, true);
+    public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.ID }, true);
     public static final UniqueKey<Record> ORDERS_PKEY = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_pkey"), new TableField[] { Orders.ORDERS.ID }, true);
     public static final UniqueKey<Record> ROOM_GUESTS_PKEY = Internal.createUniqueKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_pkey"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_GUEST_ID }, true);
     public static final UniqueKey<Record> ROOMS_PKEY = Internal.createUniqueKey(Rooms.ROOMS, DSL.name("rooms_pkey"), new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
+    public static final UniqueKey<Record> SESSIONS_PKEY = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("sessions_pkey"), new TableField[] { Sessions.SESSIONS.ID }, true);
     public static final UniqueKey<Record> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.USER_ID }, true);
     public static final UniqueKey<Record> USERS_UNIQUE_SECRET = Internal.createUniqueKey(Users.USERS, DSL.name("users_unique_secret"), new TableField[] { Users.USERS.USER_SECRET }, true);
 
@@ -73,7 +74,7 @@ public class Keys {
     public static final ForeignKey<Record, Record> AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK = Internal.createForeignKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_users_fk"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS__FURSUITS_MEDIA_FK = Internal.createForeignKey(Fursuits.FURSUITS, DSL.name("fursuits_media_fk"), new TableField[] { Fursuits.FURSUITS.MEDIA_ID_PROPIC }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS__FURSUITS_USERS_FK = Internal.createForeignKey(Fursuits.FURSUITS, DSL.name("fursuits_users_fk"), new TableField[] { Fursuits.FURSUITS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
-    public static final ForeignKey<Record, Record> FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK = Internal.createForeignKey(FursuitsEvents.FURSUITS_EVENTS, DSL.name("fursuits_events_event_fk"), new TableField[] { FursuitsEvents.FURSUITS_EVENTS.EVENT_ID }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true);
+    public static final ForeignKey<Record, Record> FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK = Internal.createForeignKey(FursuitsEvents.FURSUITS_EVENTS, DSL.name("fursuits_events_event_fk"), new TableField[] { FursuitsEvents.FURSUITS_EVENTS.EVENT_ID }, Keys.EVENTS_PKEY, new TableField[] { Events.EVENTS.ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS_EVENTS__FURSUITS_EVENTS_FURSUIT_FK = Internal.createForeignKey(FursuitsEvents.FURSUITS_EVENTS, DSL.name("fursuits_events_fursuit_fk"), new TableField[] { FursuitsEvents.FURSUITS_EVENTS.FURSUIT_ID }, Keys.FURSUITS_PKEY, new TableField[] { Fursuits.FURSUITS.FURSUIT_ID }, true);
     public static final ForeignKey<Record, Record> MEMBERSHIP_CARDS__CARD_USER_FK = Internal.createForeignKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("card_user_fk"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK = Internal.createForeignKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_users_fk"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);

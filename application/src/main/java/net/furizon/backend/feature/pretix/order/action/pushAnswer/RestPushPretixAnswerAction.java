@@ -16,11 +16,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
-    @Qualifier("pretixHttpClient")
+    @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
 
     @Override

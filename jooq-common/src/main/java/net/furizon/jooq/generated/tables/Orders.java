@@ -128,7 +128,7 @@ public class Orders extends TableImpl<Record> {
     /**
      * The column <code>public.orders.order_sponsorship_type</code>.
      */
-    public final TableField<Record, Short> ORDER_SPONSORSHIP_TYPE = createField(DSL.name("order_sponsorship_type"), SQLDataType.SMALLINT, this, "");
+    public final TableField<Record, Short> ORDER_SPONSORSHIP_TYPE = createField(DSL.name("order_sponsorship_type"), SQLDataType.SMALLINT.nullable(false), this, "");
 
     /**
      * The column <code>public.orders.event_id</code>.

@@ -22,10 +22,12 @@ import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
+import net.furizon.jooq.generated.tables.Sessions;
 import net.furizon.jooq.generated.tables.UserGroup;
 import net.furizon.jooq.generated.tables.Users;
 
 import org.jooq.Catalog;
+import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
@@ -116,6 +118,11 @@ public class Public extends SchemaImpl {
     public final SchemaMigrations SCHEMA_MIGRATIONS = SchemaMigrations.SCHEMA_MIGRATIONS;
 
     /**
+     * The table <code>public.sessions</code>.
+     */
+    public final Sessions SESSIONS = Sessions.SESSIONS;
+
+    /**
      * The table <code>public.user_group</code>.
      */
     public final UserGroup USER_GROUP = UserGroup.USER_GROUP;
@@ -139,6 +146,13 @@ public class Public extends SchemaImpl {
     }
 
     @Override
+    public final List<Sequence<?>> getSequences() {
+        return Arrays.asList(
+            Sequences.MEMBERSHIP_CARDS_ID_IN_YEARS
+        );
+    }
+
+    @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             Authentications.AUTHENTICATIONS,
@@ -154,6 +168,7 @@ public class Public extends SchemaImpl {
             RoomGuests.ROOM_GUESTS,
             Rooms.ROOMS,
             SchemaMigrations.SCHEMA_MIGRATIONS,
+            Sessions.SESSIONS,
             UserGroup.USER_GROUP,
             Users.USERS
         );

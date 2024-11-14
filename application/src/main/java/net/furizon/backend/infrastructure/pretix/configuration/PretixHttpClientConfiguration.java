@@ -13,10 +13,12 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
+import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+
 @Configuration
 @EnableConfigurationProperties(PretixConfig.class)
 public class PretixHttpClientConfiguration {
-    @Bean("pretixHttpClient")
+    @Bean(PRETIX_HTTP_CLIENT)
     HttpClient pretixHttpClient(
         @NotNull final HttpClientBuilder httpClientBuilder,
         @NotNull final PretixConfig config
