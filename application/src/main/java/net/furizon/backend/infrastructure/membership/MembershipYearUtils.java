@@ -1,23 +1,32 @@
 package net.furizon.backend.infrastructure.membership;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 
+
+@Component
 public class MembershipYearUtils {
+    @Getter
+    @Value("${membership.card-enumeration-reset-month}")
+    private final int membershipYearResetMonth = 10;
+    @Getter
+    @Value("${membership.card-enumeration-reset-day}")
+    private final int membershipYearResetDay = 1;
 
-    public static final int MEMBERSHIP_YEAR_RESET_MONTH = 10;
-    public static final int MEMBERSHIP_YEAR_RESET_DAY = 1;
-
-    public static short getCurrentMembershipYear() {
+    public short getCurrentMembershipYear() {
         return getMembershipYear(LocalDate.now());
     }
 
-    public static short getMembershipYear(LocalDate date) {
-        LocalDate reset = date.withMonth(MEMBERSHIP_YEAR_RESET_MONTH).withDayOfMonth(MEMBERSHIP_YEAR_RESET_DAY);
-        short year = (short) date.getYear();
+    public short getMembershipYear(LocalDate date) {
+        int year = date.getYear();
+        LocalDate reset = LocalDate.of(year, membershipYearResetMonth, membershipYearResetDay);
 
         if (date.isBefore(reset)) {
             year--;
         }
-        return year;
+        return (short) year;
     }
 }
