@@ -265,7 +265,6 @@ public class CachedPretixInformation implements PretixInformation {
         } finally {
             lock.readLock().unlock();
         }
-        return Optional.empty();
     }
 
     @Override
