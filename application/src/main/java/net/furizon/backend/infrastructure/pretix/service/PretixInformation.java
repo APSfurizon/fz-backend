@@ -1,8 +1,8 @@
 package net.furizon.backend.infrastructure.pretix.service;
 
-import net.furizon.backend.feature.pretix.event.Event;
-import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.PretixOrder;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
 
