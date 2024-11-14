@@ -19,7 +19,6 @@ import net.furizon.backend.feature.pretix.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -38,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
 import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
@@ -46,6 +46,8 @@ import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_
 @RequiredArgsConstructor
 @Slf4j
 public class CachedPretixInformation implements PretixInformation {
+    @NotNull private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
+
     @NotNull private final UseCaseExecutor useCaseExecutor;
 
     @NotNull private final UserFinder userFinder;
@@ -80,7 +82,6 @@ public class CachedPretixInformation implements PretixInformation {
     //map capacity/name -> room name
     @NotNull private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
             Caffeine.newBuilder().build();
-    private final PretixConfig pretixConfig;
 
     @PostConstruct
     public void init() {
@@ -91,151 +92,177 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public synchronized Optional<Event> getCurrentEvent() {
-        return Optional.ofNullable(currentEvent.get());
+    public Optional<Event> getCurrentEvent() {
+        lock.readLock().lock();
+        var v = currentEvent.get();
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
     }
 
     @Override
-    public synchronized int getQuestionSecretId() {
-        return questionSecretId.get();
-    }
-
-    @NotNull
-    @Override
-    public synchronized Optional<QuestionType> getQuestionTypeFromId(int id) {
-        return Optional.ofNullable(questionIdToType.getIfPresent(id));
-    }
-
-    @NotNull
-    @Override
-    public synchronized Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
-        return Optional.ofNullable(
-                questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier))
-        );
+    public int getQuestionSecretId() {
+        lock.readLock().lock();
+        var v = questionSecretId.get();
+        lock.readLock().unlock();
+        return v;
     }
 
     @NotNull
     @Override
-    public synchronized Optional<String> getQuestionIdentifierFromId(int id) {
-        return Optional.ofNullable(questionIdToIdentifier.getIfPresent(id));
+    public Optional<QuestionType> getQuestionTypeFromId(int id) {
+        lock.readLock().lock();
+        var v = questionIdToType.getIfPresent(id);
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
     }
 
     @NotNull
     @Override
-    public synchronized Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
-        return Optional.ofNullable(questionIdentifierToId.getIfPresent(identifier));
+    public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
+        lock.readLock().lock();
+        var v = questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier));
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
     }
 
     @NotNull
     @Override
-    public synchronized Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
-        Integer cacheDay;
-        ExtraDays cacheExtraDays;
-        BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
-            Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
+    public Optional<String> getQuestionIdentifierFromId(int id) {
+        lock.readLock().lock();
+        var v = questionIdToIdentifier.getIfPresent(id);
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
+    }
 
-        boolean hasTicket = false; //If no ticket is found, we don't store the order at all
+    @NotNull
+    @Override
+    public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
+        lock.readLock().lock();
+        var v = questionIdentifierToId.getIfPresent(identifier);
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
+    }
 
-        String code = pretixOrder.getCode();
-        String secret = pretixOrder.getSecret();
-        OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
+    @NotNull
+    @Override
+    public Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
+        lock.readLock().lock();
+        try {
+            Integer cacheDay;
+            ExtraDays cacheExtraDays;
+            BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
+                    Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
 
-        Set<Integer> days = new HashSet<>();
-        Sponsorship sponsorship = Sponsorship.NONE;
-        ExtraDays extraDays = ExtraDays.NONE;
-        List<PretixAnswer> answers = null;
-        int answersMainPositionId = 0;
-        String hotelLocation = null;
-        boolean membership = false;
-        String userSecret = null;
-        short roomCapacity = 0;
+            boolean hasTicket = false; //If no ticket is found, we don't store the order at all
 
-        List<PretixPosition> positions = pretixOrder.getPositions();
-        if (positions.isEmpty()) {
-            status = OrderStatus.CANCELED;
-        }
+            String code = pretixOrder.getCode();
+            String secret = pretixOrder.getSecret();
+            OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
 
-        for (PretixPosition position : positions) {
-            int item = position.getItemId();
+            Set<Integer> days = new HashSet<>();
+            Sponsorship sponsorship = Sponsorship.NONE;
+            ExtraDays extraDays = ExtraDays.NONE;
+            List<PretixAnswer> answers = null;
+            int answersMainPositionId = 0;
+            String hotelLocation = null;
+            boolean membership = false;
+            String userSecret = null;
+            short roomCapacity = 0;
 
-            if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
-                hasTicket = true;
-                answersMainPositionId = position.getPositionId();
-                answers = position.getAnswers();
-                for (PretixAnswer answer : answers) {
-                    int questionId = answer.getQuestionId();
-                    var questionType = getQuestionTypeFromId(questionId);
-                    if (questionType.isPresent()) {
-                        if (questionType.get() == QuestionType.FILE) {
-                            answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
-                        }
-                        if (questionId == this.getQuestionSecretId()) {
-                            userSecret = answer.getAnswer();
+            List<PretixPosition> positions = pretixOrder.getPositions();
+            if (positions.isEmpty()) {
+                status = OrderStatus.CANCELED;
+            }
+
+            for (PretixPosition position : positions) {
+                int item = position.getItemId();
+
+                if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
+                    hasTicket = true;
+                    answersMainPositionId = position.getPositionId();
+                    answers = position.getAnswers();
+                    for (PretixAnswer answer : answers) {
+                        int questionId = answer.getQuestionId();
+                        var questionType = getQuestionTypeFromId(questionId);
+                        if (questionType.isPresent()) {
+                            if (questionType.get() == QuestionType.FILE) {
+                                answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
+                            }
+                            if (questionId == this.getQuestionSecretId()) {
+                                userSecret = answer.getAnswer();
+                            }
                         }
                     }
-                }
 
-            } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null)  {
-                days.add(cacheDay);
+                } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null) {
+                    days.add(cacheDay);
 
-            } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
-                membership = true;
+                } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
+                    membership = true;
 
-            } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, item)) {
-                Sponsorship s = sponsorshipIdToType.getIfPresent(position.getVariationId());
-                if (s != null && s.ordinal() > sponsorship.ordinal()) {
-                    sponsorship = s; //keep the best sponsorship
-                }
-
-            } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null)  {
-                if (extraDays != ExtraDays.BOTH) {
-                    if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
-                        extraDays = ExtraDays.BOTH;
-                    } else {
-                        extraDays = cacheExtraDays;
+                } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, item)) {
+                    Sponsorship s = sponsorshipIdToType.getIfPresent(position.getVariationId());
+                    if (s != null && s.ordinal() > sponsorship.ordinal()) {
+                        sponsorship = s; //keep the best sponsorship
                     }
-                }
 
-            } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                HotelCapacityPair room = roomIdToInfo.getIfPresent(position.getVariationId());
-                if (room != null) {
-                    roomCapacity = room.capacity();
-                    hotelLocation = room.hotel();
+                } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null) {
+                    if (extraDays != ExtraDays.BOTH) {
+                        if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
+                            extraDays = ExtraDays.BOTH;
+                        } else {
+                            extraDays = cacheExtraDays;
+                        }
+                    }
+
+                } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
+                    HotelCapacityPair room = roomIdToInfo.getIfPresent(position.getVariationId());
+                    if (room != null) {
+                        roomCapacity = room.capacity();
+                        hotelLocation = room.hotel();
+                    }
                 }
             }
-        }
 
-        if (hasTicket) {
-            Order order = Order.builder()
-                    .code(code)
-                    .orderStatus(status)
-                    .sponsorship(sponsorship)
-                    .extraDays(extraDays)
-                    .dailyDays(days)
-                    .roomCapacity(roomCapacity)
-                    .hotelLocation(hotelLocation)
-                    .pretixOrderSecret(secret)
-                    .hasMembership(membership)
-                    .answersMainPositionId(answersMainPositionId)
-                    .orderOwner(userFinder.findBySecret(userSecret))
-                    .orderEvent(event)
-                    .answers(answers, this)
-                .build();
-            return Optional.of(order);
+            if (hasTicket) {
+                Order order = Order.builder()
+                        .code(code)
+                        .orderStatus(status)
+                        .sponsorship(sponsorship)
+                        .extraDays(extraDays)
+                        .dailyDays(days)
+                        .roomCapacity(roomCapacity)
+                        .hotelLocation(hotelLocation)
+                        .pretixOrderSecret(secret)
+                        .hasMembership(membership)
+                        .answersMainPositionId(answersMainPositionId)
+                        .orderOwner(userFinder.findBySecret(userSecret))
+                        .orderEvent(event)
+                        .answers(answers, this)
+                        .build();
+                return Optional.of(order);
+            }
+            return Optional.empty();
+        } finally {
+            lock.readLock().unlock();
         }
-        return Optional.empty();
     }
 
     @Override
-    public synchronized void resetCache() {
+    public void resetCache() {
         log.info("[PRETIX] Resetting cache for pretix information");
 
-        invalidateEventsCache();
-        invalidateEventStructCache();
+        lock.writeLock().lock();
+        try {
+            invalidateEventsCache();
+            invalidateEventStructCache();
 
-        // reloading events
-        reloadEvents();
-        reloadEventStructure();
+            // reloading events
+            reloadEvents();
+            reloadEventStructure();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     private void invalidateEventsCache() {
