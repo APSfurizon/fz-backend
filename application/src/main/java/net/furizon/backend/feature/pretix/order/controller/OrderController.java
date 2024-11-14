@@ -26,23 +26,24 @@ public class OrderController {
     public ResponseEntity<Void> pretixWebhook(OrderWebhookRequest request) {
         log.info("[PRETIX WEBHOOK] Fetching order {}", request);
         var e = pretixService.getCurrentEvent();
-        if (e.isPresent()) {
-            String slug = PretixGenericUtils.buildOrgEventSlug(request.getEvent(), request.getOrganizer());
-            Event event = e.get();
-
-            if (event.getSlug().equals(slug)) {
-                var res = useCaseExecutor.execute(FetchSingleOrderUseCase.class, new FetchSingleOrderUseCase.Input(
-                    event,
-                    request.getCode(),
-                    pretixService
-                ));
-                return res.isPresent() ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
-            } else {
-                log.error("[PRETIX WEBHOOK] Webhook request is not for the current event!");
-            }
-        } else {
+        if (!e.isPresent()) {
             log.error("[PRETIX WEBHOOK] No current event set!");
+            return ResponseEntity.internalServerError().build();
         }
-        return ResponseEntity.internalServerError().build();
+
+        String slug = PretixGenericUtils.buildOrgEventSlug(request.getEvent(), request.getOrganizer());
+        Event event = e.get();
+
+        if (!event.getSlug().equals(slug)) {
+            log.error("[PRETIX WEBHOOK] Webhook request is not for the current event!");
+            return ResponseEntity.internalServerError().build();
+        }
+
+        var res = useCaseExecutor.execute(FetchSingleOrderUseCase.class, new FetchSingleOrderUseCase.Input(
+            event,
+            request.getCode(),
+            pretixService
+        ));
+        return res.isPresent() ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
     }
 }
