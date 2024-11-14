@@ -19,6 +19,7 @@ import net.furizon.backend.feature.pretix.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -79,6 +80,7 @@ public class CachedPretixInformation implements PretixInformation {
     //map capacity/name -> room name
     @NotNull private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
             Caffeine.newBuilder().build();
+    private final PretixConfig pretixConfig;
 
     @PostConstruct
     public void init() {
@@ -331,7 +333,7 @@ public class CachedPretixInformation implements PretixInformation {
         }
     }
 
-    @Scheduled(cron = Const.RELOAD_CACHE_CRONJOB)
+    @Scheduled(cron = "${pretix.cache-reload-cronjob}")
     private void cronReloadCache() {
         log.info("[PRETIX] Cronjob running");
         init();
