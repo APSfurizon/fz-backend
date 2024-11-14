@@ -29,6 +29,11 @@ public class PretixConfig implements HttpConfig {
     private final int connectionTimeout;
 
     private final boolean enableSync;
+  
+    @NotNull
+    private String cacheReloadCronjob;
+
+    private int connectionTimeout;
 
     @NotNull
     @Override
