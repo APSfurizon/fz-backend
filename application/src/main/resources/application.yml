@@ -38,7 +38,9 @@ membership:
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
 
 pretix:
-  url: ${PRETIX_BASE_URL:http://localhost:8000}
+  host: ${PRETIX_BASE_URL_HOST:http://localhost:8000}
+  path: ${PRETIX_BASE_URL_PATH:}
+  url: ${pretix.host}${pretix.path}
   apiPath: ${PRETIX_API_PATH:/api/v1/}
   api-key: ${PRETIX_API_KEY:OwO}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
