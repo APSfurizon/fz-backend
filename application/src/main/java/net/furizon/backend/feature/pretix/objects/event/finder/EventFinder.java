@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface EventFinder {
-    @Nullable
-    Event findEventBySlug(@NotNull String slug);
+    @Nullable Event findEventBySlug(@NotNull String slug);
+
+    @Nullable Event findEventById(long id);
 }

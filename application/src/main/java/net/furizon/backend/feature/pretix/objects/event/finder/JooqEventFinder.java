@@ -23,6 +23,7 @@ public class JooqEventFinder implements EventFinder {
         return query.fetchFirst(
             PostgresDSL
                 .select(
+                    EVENTS.ID,
                     EVENTS.EVENT_SLUG,
                     EVENTS.EVENT_DATE_TO,
                     EVENTS.EVENT_DATE_FROM,
@@ -32,6 +33,24 @@ public class JooqEventFinder implements EventFinder {
                 )
                 .from(EVENTS)
                 .where(EVENTS.EVENT_SLUG.eq(slug))
+        ).mapOrNull(mapper::map);
+    }
+
+    @Override
+    public @Nullable Event findEventById(long id) {
+        return query.fetchFirst(
+                PostgresDSL
+                        .select(
+                                EVENTS.ID,
+                                EVENTS.EVENT_SLUG,
+                                EVENTS.EVENT_DATE_TO,
+                                EVENTS.EVENT_DATE_FROM,
+                                EVENTS.EVENT_IS_CURRENT,
+                                EVENTS.EVENT_PUBLIC_URL,
+                                EVENTS.EVENT_NAMES_JSON
+                        )
+                        .from(EVENTS)
+                        .where(EVENTS.ID.eq(id))
         ).mapOrNull(mapper::map);
     }
 }

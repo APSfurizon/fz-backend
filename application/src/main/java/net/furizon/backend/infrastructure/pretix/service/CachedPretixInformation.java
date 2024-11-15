@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.event.usecase.ReloadEventsUseCase;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
@@ -55,6 +56,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final UseCaseExecutor useCaseExecutor;
     @NotNull
     private final UserFinder userFinder;
+    @NotNull
+    private final EventFinder eventFinder;
     @NotNull
     private final PretixConfig pretixConfig;
 
@@ -257,9 +260,11 @@ public class CachedPretixInformation implements PretixInformation {
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .answersMainPositionId(answersMainPositionId)
-                    .orderOwner(userFinder.findBySecret(userSecret))
-                    .orderEvent(event)
+                    .eventId(event.getId())
+                    //TODO add orderOwenrId
                     .answers(answers, this)
+                    .userFinder(userFinder)
+                    .eventFinder(eventFinder)
                     .build()
             );
         } finally {

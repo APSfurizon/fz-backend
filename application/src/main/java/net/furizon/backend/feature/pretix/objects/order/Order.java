@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.user.User;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -74,49 +76,95 @@ public class Order {
     @Builder.Default
     private int answersMainPositionId = -1;
 
+    @Builder.Default
+    @Setter(AccessLevel.NONE)
+    private long orderOwnerUserId = -1L;
     @Nullable
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private User orderOwner;
-
     @NotNull
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private UserFinder userFinder;
+
+    private final long eventId; //eventId CANNOT change
+    @Nullable
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Event orderEvent;
+    @NotNull
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private EventFinder eventFinder;
 
     @NotNull
     @Setter(AccessLevel.NONE)
     private Map<String, Object> answers;
 
-    public int getId() {
-        return Hashing.sha512().hashString(code, StandardCharsets.UTF_8).asInt();
+
+
+    public long getId() {
+        return Hashing.sha512().hashString(code + String.format("%016x", eventId), StandardCharsets.UTF_8).asLong();
     }
 
     public boolean isDaily() {
         return !dailyDays.isEmpty();
     }
-
     public boolean hasDay(int day) {
         return dailyDays.contains(day);
+    }
+    public long getDailyDaysBitmask() {
+        long ret = 0L;
+        for (int day : dailyDays) {
+            ret |= (1L << day);
+        }
+        return ret;
     }
 
     public boolean hasMembership() {
         return hasMembership;
     }
-
     public void setMembership(boolean membership) {
         this.hasMembership = membership;
     }
+
+    public void setOrderOwnerUserId(long userId) {
+        this.orderOwnerUserId = userId;
+        orderOwner = null;
+    }
+    public void setOrderOwner(@NotNull User orderOwner) {
+        this.orderOwner = orderOwner;
+        orderOwnerUserId = orderOwner.getId();
+    }
+    public @Nullable User getOrderOwner() {
+        if (orderOwner == null && orderOwnerUserId >= 0L) {
+            orderOwner = userFinder.findById(orderOwnerUserId);
+        }
+        return orderOwner;
+    }
+
+    public @NotNull Event getOrderEvent() {
+        if (orderEvent == null) {
+            orderEvent = eventFinder.findEventById(eventId);
+            if (orderEvent == null) {
+                throw new RuntimeException("Event " + eventId + "not found");
+            }
+        }
+        return orderEvent;
+    }
+
 
     @NotNull
     public Optional<Object> getAnswer(String questionIdentifier) {
         return Optional.ofNullable(answers.get(questionIdentifier));
     }
-
     public boolean hasAnswer(String questionIdentifier) {
         return answers.containsKey(questionIdentifier);
     }
-
     public boolean deleteAnswer(String questionIdentifier) {
         return answers.remove(questionIdentifier) != null;
     }
-
     public void setAnswer(String questionIdentifier, Object answer) {
         if (answer instanceof String
             || answer instanceof Float
@@ -137,15 +185,6 @@ public class Order {
                 + "ZonedDateTime");
         }
     }
-
-    public long getDailyDaysBitmask() {
-        long ret = 0L;
-        for (int day : dailyDays) {
-            ret |= (1L << day);
-        }
-        return ret;
-    }
-
     public List<PretixAnswer> getAllAnswers(@NotNull PretixInformation pretixInformation) {
         final var list = new ArrayList<PretixAnswer>();
         final var answers = getAnswers();
@@ -164,7 +203,7 @@ public class Order {
             String out = switch (type.get()) {
                 case NUMBER -> Float.toString((float) o);
                 case STRING_ONE_LINE, FILE, COUNTRY_CODE, PHONE_NUMBER, STRING_MULTI_LINE, LIST_SINGLE_CHOICE ->
-                    (String) o;
+                        (String) o;
                 case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
                 case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
                 case DATE, TIME -> o.toString();
@@ -178,6 +217,7 @@ public class Order {
 
         return list;
     }
+
 
     public static class OrderBuilder {
         public OrderBuilder dailyDays(Set<Integer> days) {

@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.cache.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 //TODO: Only admins are allowed to run these!
 public class PretixCacheController {
+    @NotNull
     private final PretixInformation pretixService;
 
     @PostMapping("/reload-struct")

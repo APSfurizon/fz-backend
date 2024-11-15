@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.InverseForeignKey;
 import org.jooq.JSON;
 import org.jooq.Name;
@@ -70,7 +71,7 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.id</code>.
      */
-    public final TableField<Record, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>public.events.event_slug</code>.
@@ -171,8 +172,13 @@ public class Events extends TableImpl<Record> {
     }
 
     @Override
+    public Identity<Record, Long> getIdentity() {
+        return (Identity<Record, Long>) super.getIdentity();
+    }
+
+    @Override
     public UniqueKey<Record> getPrimaryKey() {
-        return Keys.EVENTS_PKEY;
+        return Keys.EVENT_PKEY;
     }
 
     private transient FursuitsEventsPath _fursuitsEvents;

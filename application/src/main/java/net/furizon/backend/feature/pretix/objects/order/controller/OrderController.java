@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.order.usecase.FetchSingleOrder
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OrderController {
     private final UseCaseExecutor useCaseExecutor;
-
+    @NotNull
     private final PretixInformation pretixService;
 
     @PostMapping("/webhook")

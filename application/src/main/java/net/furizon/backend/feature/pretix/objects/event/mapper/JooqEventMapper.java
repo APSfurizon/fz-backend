@@ -26,6 +26,7 @@ public class JooqEventMapper {
     @NotNull
     public Event map(Record record) {
         return Event.builder()
+            .id(record.get(EVENTS.ID))
             .slug(record.get(EVENTS.EVENT_SLUG))
             .dateTo(record.get(EVENTS.EVENT_DATE_TO))
             .dateFrom(record.get(EVENTS.EVENT_DATE_FROM))

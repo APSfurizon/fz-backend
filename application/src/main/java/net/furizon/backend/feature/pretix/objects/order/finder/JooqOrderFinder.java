@@ -35,19 +35,10 @@ public class JooqOrderFinder implements OrderFinder {
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
                     ORDERS.ORDER_ANSWERS_JSON,
-                    USERS.USER_ID,
-                    EVENTS.EVENT_SLUG,
-                    EVENTS.EVENT_DATE_TO,
-                    EVENTS.EVENT_DATE_FROM,
-                    EVENTS.EVENT_IS_CURRENT,
-                    EVENTS.EVENT_PUBLIC_URL,
-                    EVENTS.EVENT_NAMES_JSON
+                    ORDERS.USER_ID,
+                    ORDERS.EVENT_ID
                 )
                 .from(ORDERS)
-                .leftOuterJoin(USERS)
-                .on(USERS.USER_ID.eq(ORDERS.USER_ID))
-                .leftOuterJoin(EVENTS)
-                .on(EVENTS.ID.eq(ORDERS.EVENT_ID))
                 .where(ORDERS.ORDER_CODE.eq(code))
         ).mapOrNull(orderMapper::map);
     }
