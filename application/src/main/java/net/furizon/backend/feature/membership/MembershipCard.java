@@ -3,7 +3,7 @@ package net.furizon.backend.feature.membership;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.PersonalUserInformation;
+import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import org.jetbrains.annotations.NotNull;
 
 @Data

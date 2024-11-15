@@ -7,6 +7,7 @@ import net.furizon.backend.feature.authentication.validation.RegisterUserValidat
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.action.createUser.CreateUserAction;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,9 @@ public class RegisterUserUseCase implements UseCase<RegisterUserRequest, User> {
     private final RegisterUserValidation validation;
 
     private final CreateUserAction createUserAction;
-
     private final CreateAuthenticationAction createAuthenticationAction;
-
     private final AddMembershipInfoAction addMembershipInfoAction;
-
+    
     @Transactional
     @Override
     public @NotNull User executor(@NotNull RegisterUserRequest input) {

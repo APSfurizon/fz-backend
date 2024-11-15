@@ -1,10 +1,11 @@
-package net.furizon.backend.feature.authentication.dto;
+package net.furizon.backend.feature.membership.dto;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 // If for some reason you have to adopt this codebase in your country,
 // you probably must adapt or change the membership code
 @Data
+@Builder
 public class PersonalUserInformation {
     @NotNull
     @NotEmpty
@@ -78,4 +80,8 @@ public class PersonalUserInformation {
     @NotEmpty
     @Size(min = 2)
     private final String phoneNumber;
+
+    private final long lastUpdatedEventId;
+
+    private final long userId;
 }

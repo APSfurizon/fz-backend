@@ -52,7 +52,7 @@ public class AuthenticationController {
     ) {
         executor.execute(
             LogoutUserUseCase.class,
-            new LogoutUserUseCase.Input(user.getSessionId())
+            user.getSessionId()
         );
 
         return LogoutUserResponse.SUCCESS;

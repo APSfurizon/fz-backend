@@ -1,6 +1,6 @@
 package net.furizon.backend.feature.membership.action.addMembershipInfo;
 
-import net.furizon.backend.feature.authentication.dto.PersonalUserInformation;
+import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import org.jetbrains.annotations.NotNull;
 
 public interface AddMembershipInfoAction {

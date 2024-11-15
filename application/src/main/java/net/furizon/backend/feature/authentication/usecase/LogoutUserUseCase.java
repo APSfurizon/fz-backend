@@ -11,17 +11,13 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class LogoutUserUseCase implements UseCase<LogoutUserUseCase.Input, Boolean> {
+public class LogoutUserUseCase implements UseCase<UUID, Boolean> {
     private final DeleteSessionAction deleteSessionAction;
 
     @Transactional
     @Override
-    public @NotNull Boolean executor(@NotNull Input input) {
-        deleteSessionAction.invoke(input.sessionId);
-
+    public @NotNull Boolean executor(@NotNull UUID sessionId) {
+        deleteSessionAction.invoke(sessionId);
         return true;
     }
-
-
-    public record Input(@NotNull UUID sessionId) {}
 }

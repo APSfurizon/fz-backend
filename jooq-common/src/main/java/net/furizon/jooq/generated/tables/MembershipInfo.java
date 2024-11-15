@@ -13,6 +13,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -142,6 +143,11 @@ public class MembershipInfo extends TableImpl<Record> {
      */
     public final TableField<Record, String> INFO_PHONE = createField(DSL.name("info_phone"), SQLDataType.CLOB.nullable(false), this, "");
 
+    /**
+     * The column <code>public.membership_info.last_updated_event_id</code>.
+     */
+    public final TableField<Record, Long> LAST_UPDATED_EVENT_ID = createField(DSL.name("last_updated_event_id"), SQLDataType.BIGINT, this, "");
+
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -222,7 +228,19 @@ public class MembershipInfo extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK);
+        return Arrays.asList(Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_UPDATED_EVENT_ID, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK);
+    }
+
+    private transient EventsPath _events;
+
+    /**
+     * Get the implicit join path to the <code>public.events</code> table.
+     */
+    public EventsPath events() {
+        if (_events == null)
+            _events = new EventsPath(this, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_UPDATED_EVENT_ID, null);
+
+        return _events;
     }
 
     private transient UsersPath _users;
