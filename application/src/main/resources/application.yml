@@ -48,3 +48,7 @@ pretix:
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 0 * * *}
+  shop-url: ${PRETIX_SHOP_URL:http://localhost:8080/organizer/event/}
+  autocart:
+    priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
+    priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}

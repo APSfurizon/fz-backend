@@ -5,17 +5,18 @@ import net.furizon.backend.feature.authentication.action.createAuthentication.Cr
 import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.action.createUser.CreateUserAction;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterUserUseCase implements UseCase<RegisterUserRequest, User> {
+public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
     private final RegisterUserValidation validation;
 
     private final CreateUserAction createUserAction;
@@ -24,19 +25,24 @@ public class RegisterUserUseCase implements UseCase<RegisterUserRequest, User> {
     
     @Transactional
     @Override
-    public @NotNull User executor(@NotNull RegisterUserRequest input) {
-        validation.validate(input);
-        final var user = createUserAction.invoke(input.getFursonaName());
+    public @NotNull User executor(@NotNull RegisterUserUseCase.Input input) {
+        RegisterUserRequest regUserReq = input.user;
+
+        validation.validate(regUserReq);
+        final var user = createUserAction.invoke(regUserReq.getFursonaName());
         createAuthenticationAction.invoke(
             user.getId(),
-            input.getEmail(),
-            input.getPassword()
+            regUserReq.getEmail(),
+            regUserReq.getPassword()
         );
         addMembershipInfoAction.invoke(
             user.getId(),
-            input.getPersonalUserInformation()
+            regUserReq.getPersonalUserInformation(),
+            input.event
         );
 
         return user;
     }
+
+    public record Input(@NotNull RegisterUserRequest user, @Nullable Event event){}
 }

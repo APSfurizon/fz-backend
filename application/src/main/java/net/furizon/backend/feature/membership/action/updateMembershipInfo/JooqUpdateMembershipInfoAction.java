@@ -2,9 +2,11 @@ package net.furizon.backend.feature.membership.action.updateMembershipInfo;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +19,8 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
     private final SqlCommand sqlCommand;
 
     @Override
-    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation) {
-        long eventId = -1L;
-        var e = pretixService.getCurrentEvent();
-        if (e.isPresent()) {
-            eventId = e.get().getId();
-        }
+    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
+        long eventId = event == null ? -1L : event.getId();
 
         sqlCommand.execute(
             PostgresDSL

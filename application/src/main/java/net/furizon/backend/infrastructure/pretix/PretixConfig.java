@@ -33,8 +33,6 @@ public class PretixConfig implements HttpConfig {
     @NotNull
     private String cacheReloadCronjob;
 
-    private int connectionTimeout;
-
     @NotNull
     @Override
     public String getBaseUrl() {
