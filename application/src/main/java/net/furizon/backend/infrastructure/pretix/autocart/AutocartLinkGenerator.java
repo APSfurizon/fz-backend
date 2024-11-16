@@ -1,9 +1,7 @@
 package net.furizon.backend.infrastructure.pretix.autocart;
 
-import ch.qos.logback.core.CoreConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +9,17 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.cert.CertificateFactory;
-import java.util.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Data
@@ -33,13 +37,6 @@ public class AutocartLinkGenerator {
     private final PrivateKey privateKey;
 
     private final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-
-    @PostConstruct
-    public void init() {
-        List<AutocartAction<?>> actions = new ArrayList<>();
-        var s = generateUrl(actions);
-        System.out.println(s);
-    }
 
     @NotNull
     public Optional<String> generateUrl(@NotNull List<AutocartAction<?>> actions) {

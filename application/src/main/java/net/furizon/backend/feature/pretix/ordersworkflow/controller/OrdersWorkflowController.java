@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.dto.LogoutUserResponse;
-import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ public class OrdersWorkflowController {
     private final UseCaseExecutor executor;
 
     /*@PostMapping("/generate-pretix-shop-link")
-    public LogoutUserResponse logoutUser(
+    public LinkResponse generatePretixShopLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(

@@ -7,6 +7,9 @@ import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.JSON;
+import org.jooq.Record13;
+import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +40,18 @@ public class JooqOrderFinder implements OrderFinder {
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID
                 )
-                .from(ORDERS)
-                .where(ORDERS.ORDER_CODE.eq(code))
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .from(ORDERS)
+            .where(ORDERS.ORDER_CODE.eq(code))
+            .and(ORDERS.EVENT_ID.eq(event.getId()))
         ).mapOrNull(orderMapper::map);
+    }
+
+    @Override
+    public int countOrdersOfUserOnEvent(long userId, @NotNull Event event) {
+        return query.count(
+            PostgresDSL.select(ORDERS.ID)
+            .where(ORDERS.USER_ID.eq(userId))
+            .and(ORDERS.EVENT_ID.eq(event.getId()))
+        );
     }
 }

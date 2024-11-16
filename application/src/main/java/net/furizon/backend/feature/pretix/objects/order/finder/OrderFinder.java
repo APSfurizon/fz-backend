@@ -8,4 +8,6 @@ import org.jetbrains.annotations.Nullable;
 public interface OrderFinder {
     @Nullable
     Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event);
+
+    int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 }

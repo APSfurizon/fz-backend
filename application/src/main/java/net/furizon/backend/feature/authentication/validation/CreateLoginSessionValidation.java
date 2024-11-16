@@ -22,6 +22,7 @@ public class CreateLoginSessionValidation {
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         final var authentication = authenticationFinder.findByEmail(input.email());
         if (authentication == null) {
+            //TODO match with the invalid credentials exception to not leak registered emails
             throw new ApiException(
                 "User not found",
                 AuthenticationErrorCode.EMAIL_NOT_REGISTERED.name()
