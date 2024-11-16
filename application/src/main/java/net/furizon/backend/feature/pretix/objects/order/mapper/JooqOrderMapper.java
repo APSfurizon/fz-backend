@@ -3,14 +3,11 @@ package net.furizon.backend.feature.pretix.objects.order.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.jfr.EventFactory;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
-import net.furizon.backend.feature.pretix.objects.event.mapper.JooqEventMapper;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -22,7 +19,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
-import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor

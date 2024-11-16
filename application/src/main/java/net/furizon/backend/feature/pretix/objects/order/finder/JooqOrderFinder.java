@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.pretix.objects.order.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -9,9 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.Tables.EVENTS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
-import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class JooqOrderFinder implements OrderFinder {
     private final JooqOrderMapper orderMapper;
 
     @Override
-    public @Nullable Order findOrderByCode(@NotNull String code) {
+    public @Nullable Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event) {
         return query.fetchFirst(
             PostgresDSL.select(
                     ORDERS.ORDER_CODE,
@@ -40,6 +39,7 @@ public class JooqOrderFinder implements OrderFinder {
                 )
                 .from(ORDERS)
                 .where(ORDERS.ORDER_CODE.eq(code))
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
         ).mapOrNull(orderMapper::map);
     }
 }

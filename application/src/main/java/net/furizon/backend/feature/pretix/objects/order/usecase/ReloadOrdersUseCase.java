@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +28,7 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
     @NotNull
     private final PretixOrderFinder pretixOrderFinder;
 
-    // TODO -> Do we need InsertNewOrderAction if we have UpsertOrderAction?
-    @NotNull
-    private final UpsertOrderAction upsertOrderAction;
-
-    @NotNull
-    private final DeleteOrderAction deleteOrderAction;
+    private final UpdateOrderInDb updateOrderInDb;
 
     @Transactional
     @NotNull
@@ -42,23 +38,11 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
 
         PretixPagingUtil.forEachElement(
             page -> pretixOrderFinder.getPagedOrders(eventInfo.getOrganizer(), eventInfo.getEvent(), page),
-            pretixOrder -> {
-                boolean shouldDelete = true;
-
-                var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.getLeft(), input.event);
-                if (orderOpt.isPresent()) {
-                    Order order = orderOpt.get();
-                    OrderStatus os = order.getOrderStatus();
-                    if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
-                        upsertOrderAction.invoke(order, input.pretixInformation);
-                        shouldDelete = false;
-                    }
-                }
-
-                if (shouldDelete) {
-                    deleteOrderAction.invoke(pretixOrder.getLeft().getCode());
-                }
-            }
+            pretixOrder -> updateOrderInDb.execute(
+                pretixOrder.getLeft(),
+                input.event,
+                input.pretixInformation
+            )
         );
 
         return true;

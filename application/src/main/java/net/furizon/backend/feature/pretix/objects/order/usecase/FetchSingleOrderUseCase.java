@@ -6,7 +6,6 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.order.action.deleteOrder.DeleteOrderAction;
-import net.furizon.backend.feature.pretix.objects.order.action.upsertOrder.UpsertOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -24,10 +23,10 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
     private final PretixOrderFinder pretixOrderFinder;
 
     @NotNull
-    private final UpsertOrderAction insertOrUpdateOrderAction;
+    private final DeleteOrderAction deleteOrderAction;
 
     @NotNull
-    private final DeleteOrderAction deleteOrderAction;
+    private final UpdateOrderInDb updateOrderInDb;
 
     @Transactional
     @NotNull
@@ -45,21 +44,11 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
 
         if (pretixOrder.isEmpty()) {
             deleteOrderAction.invoke(orderCode);
-            log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, eventInfo);
+            log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, event.getSlug());
             return Optional.empty();
         }
 
-        var orderOpt = input.pretixInformation.parseOrderFromId(pretixOrder.get(), event);
-        if (orderOpt.isEmpty()) {
-            deleteOrderAction.invoke(orderCode);
-            log.error("[PRETIX] Unable to parse order: {}@{}", orderCode, eventInfo);
-            return Optional.empty();
-        }
-
-        Order order = orderOpt.get();
-        log.debug("[PRETIX] Storing / Updating order: {}@{}", orderCode, eventInfo);
-        insertOrUpdateOrderAction.invoke(order, input.pretixInformation);
-        return orderOpt;
+        return updateOrderInDb.execute(pretixOrder.get(), event, input.pretixInformation);
     }
 
     public record Input(

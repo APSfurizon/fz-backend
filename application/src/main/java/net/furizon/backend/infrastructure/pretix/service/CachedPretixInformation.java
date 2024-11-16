@@ -168,7 +168,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
+    public Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
         lock.readLock().lock();
         try {
             Integer cacheDay;

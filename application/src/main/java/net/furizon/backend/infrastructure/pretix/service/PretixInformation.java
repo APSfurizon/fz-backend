@@ -27,7 +27,7 @@ public interface PretixInformation {
     Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier);
 
     @NotNull
-    Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event);
+    Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event);
 
     void resetCache();
 
