@@ -18,6 +18,7 @@ import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -102,6 +103,10 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
         Caffeine.newBuilder().build();
 
+    //States TODO
+    @NotNull
+    private final Cache<String, List<PretixState>> pretixStatesRegions = Caffeine.newBuilder().build();
+
     @PostConstruct
     public void init() {
         if (!pretixConfig.isEnableSync()) {
@@ -111,6 +116,15 @@ public class CachedPretixInformation implements PretixInformation {
         log.info("[PRETIX] Initializing pretix information and cache it");
         resetCache();
         reloadAllOrders();
+    }
+
+    @NotNull
+    @Override
+    public Set<Integer> getIdsForItemType(CacheItemTypes type) {
+        lock.readLock().lock();
+        var v = itemIdsCache.getIfPresent(type);
+        lock.readLock().unlock();
+        return v == null ? new HashSet<>() : v;
     }
 
     @NotNull

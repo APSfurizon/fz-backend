@@ -3,16 +3,21 @@ package net.furizon.backend.infrastructure.pretix.service;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface PretixInformation {
     @NotNull
     Optional<Event> getCurrentEvent();
 
     int getQuestionSecretId();
+
+    @NotNull
+    Set<Integer> getIdsForItemType(CacheItemTypes type);
 
     @NotNull
     Optional<QuestionType> getQuestionTypeFromId(int id);

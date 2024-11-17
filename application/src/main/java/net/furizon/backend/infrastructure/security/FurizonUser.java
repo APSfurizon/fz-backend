@@ -44,6 +44,10 @@ public class FurizonUser implements UserDetails {
 
     @Override
     public String getUsername() {
+        return getEmail();
+    }
+
+    public String getEmail() {
         return authentication.getEmail();
     }
 

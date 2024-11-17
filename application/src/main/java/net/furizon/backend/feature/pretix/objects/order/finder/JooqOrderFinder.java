@@ -25,23 +25,17 @@ public class JooqOrderFinder implements OrderFinder {
     @Override
     public @Nullable Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event) {
         return query.fetchFirst(
-            PostgresDSL.select(
-                    ORDERS.ORDER_CODE,
-                    ORDERS.ORDER_STATUS,
-                    ORDERS.ORDER_SPONSORSHIP_TYPE,
-                    ORDERS.ORDER_EXTRA_DAYS_TYPE,
-                    ORDERS.ORDER_DAILY_DAYS,
-                    ORDERS.ORDER_ROOM_CAPACITY,
-                    ORDERS.ORDER_HOTEL_LOCATION,
-                    ORDERS.ORDER_SECRET,
-                    ORDERS.HAS_MEMBERSHIP,
-                    ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
-                    ORDERS.ORDER_ANSWERS_JSON,
-                    ORDERS.USER_ID,
-                    ORDERS.EVENT_ID
-                )
-            .from(ORDERS)
+            selectFrom()
             .where(ORDERS.ORDER_CODE.eq(code))
+            .and(ORDERS.EVENT_ID.eq(event.getId()))
+        ).mapOrNull(orderMapper::map);
+    }
+
+    @Override
+    public @Nullable Order findOrderByUserIdEvent(long userId, @NotNull Event event) {
+        return query.fetchFirst(
+            selectFrom()
+            .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
         ).mapOrNull(orderMapper::map);
     }
@@ -53,5 +47,23 @@ public class JooqOrderFinder implements OrderFinder {
             .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
         );
+    }
+
+    private @NotNull SelectJoinStep<?> selectFrom(){
+        return PostgresDSL.select(
+                        ORDERS.ORDER_CODE,
+                        ORDERS.ORDER_STATUS,
+                        ORDERS.ORDER_SPONSORSHIP_TYPE,
+                        ORDERS.ORDER_EXTRA_DAYS_TYPE,
+                        ORDERS.ORDER_DAILY_DAYS,
+                        ORDERS.ORDER_ROOM_CAPACITY,
+                        ORDERS.ORDER_HOTEL_LOCATION,
+                        ORDERS.ORDER_SECRET,
+                        ORDERS.HAS_MEMBERSHIP,
+                        ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
+                        ORDERS.ORDER_ANSWERS_JSON,
+                        ORDERS.USER_ID,
+                        ORDERS.EVENT_ID
+                ).from(ORDERS);
     }
 }

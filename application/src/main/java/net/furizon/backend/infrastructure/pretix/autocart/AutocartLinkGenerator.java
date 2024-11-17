@@ -43,7 +43,7 @@ public class AutocartLinkGenerator {
 
         Map<String, String> data = new LinkedHashMap<>();
         for (AutocartAction<?> action : actions) {
-            AutocartActionType type = action.getType();
+            AutocartActionType type = action.type();
 
             if (type == AutocartActionType.VALUE) {
                 data.put(action.targetId(), type.getValue() + action.value().toString());

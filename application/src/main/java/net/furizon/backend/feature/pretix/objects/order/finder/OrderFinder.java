@@ -9,5 +9,8 @@ public interface OrderFinder {
     @Nullable
     Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event);
 
+    @Nullable
+    Order findOrderByUserIdEvent(long userId, @NotNull Event event);
+
     int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 }
