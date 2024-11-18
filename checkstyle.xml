@@ -157,7 +157,7 @@
     <module name="EmptyLineSeparator">
       <property name="tokens"
                value="IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF,
-                    STATIC_INIT, INSTANCE_INIT, CTOR_DEF, VARIABLE_DEF, RECORD_DEF,
+                    STATIC_INIT, INSTANCE_INIT, CTOR_DEF, RECORD_DEF,
                     COMPACT_CTOR_DEF"/>
       <property name="allowNoEmptyLineBetweenFields" value="true"/>
     </module>
@@ -275,6 +275,7 @@
     </module>
     <module name="AbbreviationAsWordInName">
       <property name="ignoreFinal" value="false"/>
+      <property name="allowedAbbreviations" value="RSA"/>
       <property name="allowedAbbreviationLength" value="0"/>
       <property name="tokens"
                value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
