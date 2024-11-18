@@ -47,9 +47,6 @@ public class AutocartPrivKeyConfiguration {
             PEMKeyPair ukp = (PEMKeyPair) object;
             kp = converter.getKeyPair(ukp);
         }
-        //Not needed I suppose?
-        //KeyFactory keyFac = KeyFactory.getInstance("RSA");
-        //RSAPrivateCrtKeySpec privateKey = keyFac.getKeySpec(kp.getPrivate(), RSAPrivateCrtKeySpec.class);
 
         return kp.getPrivate();
     }

@@ -37,9 +37,9 @@ public class RestPretixStateFinder implements PretixStateFinder {
 
     private final ParameterizedTypeReference<PretixStateResponse> pretixStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference</*List<PretixState>*/String> italyStatesType =
+    private final ParameterizedTypeReference<String> italyStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference</*List<GitCountry>*/String> countriesType =
+    private final ParameterizedTypeReference<String> countriesType =
             new ParameterizedTypeReference<>() {};
 
     @Qualifier(PRETIX_HTTP_CLIENT)
