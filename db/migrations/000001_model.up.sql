@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS orders
     order_sponsorship_type         int2             NOT NULL,
     event_id                       int8             NOT NULL,
     user_id                        int8             NULL,
+    creation_ts                    timestamp        NOT NULL DEFAULT NOW(), -- just for stats reasons --
     CONSTRAINT orders_extra_days_check CHECK (((order_extra_days_type >= 0) AND (order_extra_days_type <= 3))),
     CONSTRAINT orders_sponsorship_check CHECK (((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2))),
     CONSTRAINT orders_status_check CHECK (((order_status >= 0) AND (order_status <= 3))),
