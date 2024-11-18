@@ -24,9 +24,6 @@ public class HttpClientConfiguration {
         @NotNull final HttpClientBuilder httpClientBuilder,
         @Nullable final List<HttpConfig> configs
     ) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(Arrays.asList(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
-
         return new SimpleHttpClient(
             RestClient.builder()
                 .requestFactory(
@@ -34,7 +31,6 @@ public class HttpClientConfiguration {
                         httpClientBuilder.build()
                     )
                 )
-                .messageConverters(c -> c.add(converter))
                 .build(),
             configs != null
                 ? configs

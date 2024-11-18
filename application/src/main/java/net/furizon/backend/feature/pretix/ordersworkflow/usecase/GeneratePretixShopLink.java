@@ -10,12 +10,14 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
+import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,24 +35,32 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PersonalInfoFinder personalInfoFinder;
+    @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
         List<AutocartAction<?>> actions = new ArrayList<>();
         long userId = input.user.getUserId();
         String mail = input.user.getEmail();
-        Event event = input.event;
+        PretixInformation pretixService = input.pretixService;
+        var e = pretixService.getCurrentEvent();
 
-        int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
-        if (ordersNo > 0) {
-            throw new ApiException(
-                    "You already made an order!",
-                    OrderWorkflowErrorCode.ORDER_ALREADY_DONE.name()
-            );
-        }
-
-        int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
+        int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
+        @Nullable Event event = e.orElse(null);
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
+        if (event != null) {
+            int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
+            if (ordersNo > 0) {
+                throw new ApiException(
+                        "You already made an order!",
+                        OrderWorkflowErrorCode.ORDER_ALREADY_DONE.name()
+                );
+            }
+
+            membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
+        } else {
+            log.error("Unable to fetch current event. Generating pretix shop link anyway without a membership card");
+        }
 
         actions.add(new AutocartAction<>("id_email", mail, VALUE));
         if (info != null) {
@@ -74,11 +84,15 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             }
         }
 
-        return null;
+        var generatedUrl = autocartLinkGenerator.generateUrl(actions);
+        if (!generatedUrl.isPresent()) {
+            throw new RuntimeException("Autocart link generation failed.");
+        }
+        return new LinkResponse(generatedUrl.get());
+
     }
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull Event event,
             @NotNull PretixInformation pretixService) {}
 }

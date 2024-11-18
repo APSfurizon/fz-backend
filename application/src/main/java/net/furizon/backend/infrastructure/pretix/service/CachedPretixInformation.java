@@ -108,7 +108,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
-            .expireAfterWrite(2L, TimeUnit.DAYS)
+            .expireAfterWrite(7L, TimeUnit.DAYS)
             .build();
 
     @PostConstruct
