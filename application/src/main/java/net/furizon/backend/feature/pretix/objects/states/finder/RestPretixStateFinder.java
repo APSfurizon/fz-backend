@@ -1,5 +1,8 @@
 package net.furizon.backend.feature.pretix.objects.states.finder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
@@ -34,13 +37,15 @@ public class RestPretixStateFinder implements PretixStateFinder {
 
     private final ParameterizedTypeReference<PretixStateResponse> pretixStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference<List<PretixState>> italyStatesType =
+    private final ParameterizedTypeReference</*List<PretixState>*/String> italyStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference<List<GitCountry>> countriesType =
+    private final ParameterizedTypeReference</*List<GitCountry>*/String> countriesType =
             new ParameterizedTypeReference<>() {};
 
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public @NotNull List<PretixState> getPretixStates(@NotNull String countryCode) {
@@ -51,6 +56,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
                 .path("/js_helpers/states/")
                 .queryParam("country", countryCode)
                 .responseParameterizedType(pretixStatesType)
+                .sendConfigHeaders(false)
                 .build();
         try {
             var res = pretixHttpClient.send(PretixConfig.class, request).getBody();
@@ -64,38 +70,67 @@ public class RestPretixStateFinder implements PretixStateFinder {
     @Override
     public @NotNull List<PretixState> getItalianStates() {
         log.info("Loading state list for italy");
-        final var request = HttpRequest.<List<PretixState>>create()
+        final var request = HttpRequest.<String>create()
                 .method(HttpMethod.GET)
                 .overrideBaseUrl(ITALIAN_STATES_BASE_URL)
                 .overrideBasePath("")
                 .path(ITALIAN_STATES_PATH)
                 .responseParameterizedType(italyStatesType)
+                .sendConfigHeaders(false)
                 .build();
         try {
-            var res = pretixHttpClient.send(PretixConfig.class, request).getBody();
-            return res != null ? res : new LinkedList<>();
+            String res = pretixHttpClient.send(PretixConfig.class, request).getBody();
+            //Unfortunately, the response content type header is set to text/plain, and the RestClient
+            //Won't interpret it as a json. This is a workaround
+            if (res != null) {
+                return objectMapper.readValue(
+                        res,
+                        TypeFactory.defaultInstance().constructCollectionType(List.class, PretixState.class)
+                );
+            } else {
+                log.error("Unable to fetch italian states. Returning an empty list");
+                return new LinkedList<>();
+            }
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
+        } catch (final JsonProcessingException ex) {
+            log.error("Unable to decode italian states json");
+            throw new RuntimeException(ex);
         }
     }
 
     @Override
     public @NotNull List<PretixState> getCountries() {
         log.info("Loading country list");
-        final var request = HttpRequest.<List<GitCountry>>create()
+        final var request = HttpRequest.<String>create()
                 .method(HttpMethod.GET)
                 .overrideBaseUrl(COUNTRIES_BASE_URL)
                 .overrideBasePath("")
                 .path(COUNTRIES_PATH)
                 .responseParameterizedType(countriesType)
+                .sendConfigHeaders(false)
                 .build();
         try {
-            var res = pretixHttpClient.send(PretixConfig.class, request).getBody();
-            return res != null ? res.stream().map(GitCountry::toState).toList() : new LinkedList<>();
+            String res = pretixHttpClient.send(PretixConfig.class, request).getBody();
+            //Unfortunately, the response content type header is set to text/plain, and the RestClient
+            //Won't interpret it as a json. This is a workaround
+            if (res != null) {
+                List<GitCountry> countries = objectMapper.readValue(
+                        res,
+                        TypeFactory.defaultInstance().constructCollectionType(List.class, GitCountry.class)
+                );
+                return countries.stream().map(GitCountry::toState).toList();
+            } else {
+                log.error("Unable to fetch countries. Returning an empty list");
+                return new LinkedList<>();
+            }
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
+        } catch (final JsonProcessingException ex) {
+            log.error("Unable to decode countries json");
+            throw new RuntimeException(ex);
         }
     }
 }

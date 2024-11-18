@@ -7,11 +7,12 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/states")
@@ -24,8 +25,8 @@ public class PretixStatesController {
                                              @NotNull
                                              @Size(min = 2)
                                              @RequestParam("code")
-                                             final Optional<String> code) {
-        return code.map(pretixInformation::getStatesOfCountry).orElseGet(LinkedList::new);
+                                             final String code) {
+        return pretixInformation.getStatesOfCountry(code);
     }
 
     @GetMapping("/get-countries")

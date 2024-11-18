@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -25,7 +24,7 @@ public class FetchStatesByCountry implements UseCase<String, List<PretixState>> 
         List<PretixState> ret;
         if (countryIsoCode.equalsIgnoreCase("IT")) {
             ret = stateFinder.getItalianStates();
-        } else if(countryIsoCode.equalsIgnoreCase(Const.ALL_COUNTRIES_STATE_KEY)) {
+        } else if (countryIsoCode.equalsIgnoreCase(Const.ALL_COUNTRIES_STATE_KEY)) {
             ret = stateFinder.getCountries();
         } else {
             ret = stateFinder.getPretixStates(countryIsoCode);

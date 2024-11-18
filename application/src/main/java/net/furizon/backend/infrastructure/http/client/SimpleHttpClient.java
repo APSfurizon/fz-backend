@@ -55,12 +55,11 @@ public class SimpleHttpClient implements HttpClient {
             builder = builder.queryParams(request.getQueryParams());
         }
 
-
         RestClient.RequestBodySpec requestBodySpec = restClient
             .method(request.getMethod())
             .uri(builder.build(request.getUriVariables()))
             .headers((headers) -> {
-                if(request.sendConfigHeaders()) {
+                if (request.sendConfigHeaders()) {
                     headers.addAll(config.headers());
                 }
                 if (!request.getHeaders().isEmpty()) {

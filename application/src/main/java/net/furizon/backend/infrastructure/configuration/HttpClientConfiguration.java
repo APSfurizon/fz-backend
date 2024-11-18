@@ -8,9 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestClient;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +24,9 @@ public class HttpClientConfiguration {
         @NotNull final HttpClientBuilder httpClientBuilder,
         @Nullable final List<HttpConfig> configs
     ) {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Arrays.asList(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
+
         return new SimpleHttpClient(
             RestClient.builder()
                 .requestFactory(
@@ -28,6 +34,7 @@ public class HttpClientConfiguration {
                         httpClientBuilder.build()
                     )
                 )
+                .messageConverters(c -> c.add(converter))
                 .build(),
             configs != null
                 ? configs

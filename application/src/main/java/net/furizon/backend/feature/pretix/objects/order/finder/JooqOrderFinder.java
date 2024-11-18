@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.JSON;
-import org.jooq.Record13;
 import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -23,21 +22,25 @@ public class JooqOrderFinder implements OrderFinder {
     private final JooqOrderMapper orderMapper;
 
     @Override
-    public @Nullable Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event) {
+    public @Nullable Order findOrderByCodeEvent(@NotNull String code,
+                                                @NotNull Event event,
+                                                @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
             .where(ORDERS.ORDER_CODE.eq(code))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
-        ).mapOrNull(orderMapper::map);
+        ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
 
     @Override
-    public @Nullable Order findOrderByUserIdEvent(long userId, @NotNull Event event) {
+    public @Nullable Order findOrderByUserIdEvent(long userId,
+                                                  @NotNull Event event,
+                                                  @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
             .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
-        ).mapOrNull(orderMapper::map);
+        ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
 
     @Override
@@ -49,7 +52,7 @@ public class JooqOrderFinder implements OrderFinder {
         );
     }
 
-    private @NotNull SelectJoinStep<?> selectFrom(){
+    private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,
                         ORDERS.ORDER_STATUS,

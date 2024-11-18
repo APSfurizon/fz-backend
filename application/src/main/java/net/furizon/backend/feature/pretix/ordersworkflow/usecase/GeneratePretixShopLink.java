@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.pretix.ordersworkflow.usecase;
 
-import com.beust.ah.A;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
@@ -35,8 +34,6 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PersonalInfoFinder personalInfoFinder;
 
-    @NotNull private final PretixInformation pretixService;
-
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
         List<AutocartAction<?>> actions = new ArrayList<>();
@@ -56,7 +53,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
 
         actions.add(new AutocartAction<>("id_email", mail, VALUE));
-        if(info != null) {
+        if (info != null) {
             actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), VALUE));
             actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), VALUE));
             actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), VALUE));
@@ -64,15 +61,15 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             actions.add(new AutocartAction<>("id_city", info.getResidenceZipCode(), VALUE));
             actions.add(new AutocartAction<>("id_country", info.getResidenceCountry(), DROPDOWN));
             String region = info.getResidenceRegion();
-            if(region != null) {
+            if (region != null) {
                 actions.add(new AutocartAction<>("id_state", info.getResidenceRegion(), DROPDOWN));
             }
             actions.add(new AutocartAction<>("id_$-attendee_name_parts_0", info.getFirstName(), VALUE));
             actions.add(new AutocartAction<>("id_$-attendee_name_parts_1", info.getLastName(), VALUE));
         }
-        if (membershipNo == 0){
-            Set<Integer> mcIds = pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
-            for (int membershipCardId : mcIds){
+        if (membershipNo == 0) {
+            Set<Integer> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
+            for (int membershipCardId : mcIds) {
                 actions.add(new AutocartAction<>("cp_$_item_" + membershipCardId, true, BOOL));
             }
         }
@@ -80,5 +77,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         return null;
     }
 
-    public record Input(FurizonUser user, Event event) {}
+    public record Input(
+            @NotNull FurizonUser user,
+            @NotNull Event event,
+            @NotNull PretixInformation pretixService) {}
 }

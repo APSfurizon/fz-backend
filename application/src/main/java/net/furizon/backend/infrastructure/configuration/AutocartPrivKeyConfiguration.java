@@ -30,7 +30,7 @@ public class AutocartPrivKeyConfiguration {
 
     @Bean
     @Primary
-    PrivateKey privateRSAkeyConfiguration() throws IOException {
+    PrivateKey privateRSAKeyConfiguration() throws IOException {
         log.info("Loading private RSA key from file '{}'. Cwd: '{}'", privKeyPath, System.getProperty("user.dir"));
 
         //From https://stackoverflow.com/questions/22920131/read-an-encrypted-private-key-with-bouncycastle-spongycastle

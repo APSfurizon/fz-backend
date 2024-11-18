@@ -2,7 +2,6 @@ package net.furizon.backend.infrastructure.pretix.autocart;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.service.annotation.GetExchange;
 
 @Getter
 @RequiredArgsConstructor

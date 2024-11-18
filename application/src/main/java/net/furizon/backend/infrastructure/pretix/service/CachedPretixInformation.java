@@ -34,7 +34,13 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -100,11 +106,10 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
         Caffeine.newBuilder().build();
 
-    //States TODO
     @NotNull
     private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
-            .expireAfterWrite(2, TimeUnit.DAYS)
-            .build(k -> useCaseExecutor.execute(FetchStatesByCountry.class, k));
+            .expireAfterWrite(2L, TimeUnit.DAYS)
+            .build();
 
     @PostConstruct
     public void init() {
@@ -121,9 +126,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public List<PretixState> getStatesOfCountry(String countryIsoCode){
+    public List<PretixState> getStatesOfCountry(String countryIsoCode) {
         //No cache lock needed!
-        var ret = statesOfCountry.getIfPresent(countryIsoCode);
+        var ret = statesOfCountry.get(countryIsoCode, k -> useCaseExecutor.execute(FetchStatesByCountry.class, k));
         return ret != null ? ret : new LinkedList<>();
     }
 

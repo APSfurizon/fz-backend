@@ -49,19 +49,29 @@ public class HttpRequest<R> {
     @Nullable
     @Getter(AccessLevel.NONE)
     private final String overrideBaseUrl;
-    @NotNull public String overrideBaseUrl() {return overrideBaseUrl != null ? overrideBaseUrl : "";}
-    public boolean shouldOverrideUrl() { return overrideBaseUrl != null; }
+    @NotNull public String overrideBaseUrl() {
+        return overrideBaseUrl != null ? overrideBaseUrl : "";
+    }
+    public boolean shouldOverrideUrl() {
+        return overrideBaseUrl != null;
+    }
 
     @Nullable
     @Getter(AccessLevel.NONE)
     private final String overrideBasePath;
-    @NotNull public String overrideBasePath() {return overrideBasePath != null ? overrideBasePath : "";}
-    public boolean shouldOverridePath() { return overrideBasePath != null; }
+    @NotNull public String overrideBasePath() {
+        return overrideBasePath != null ? overrideBasePath : "";
+    }
+    public boolean shouldOverridePath() {
+        return overrideBasePath != null;
+    }
 
     //Overriding the getter for naming reasons
     @Getter(AccessLevel.NONE)
     private final boolean sendConfigHeaders;
-    public final boolean sendConfigHeaders() { return sendConfigHeaders; }
+    public final boolean sendConfigHeaders() {
+        return sendConfigHeaders;
+    }
 
     public static class Builder<R> {
         private Class<R> responseType;

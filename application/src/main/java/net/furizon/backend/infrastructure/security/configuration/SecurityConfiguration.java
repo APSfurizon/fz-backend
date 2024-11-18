@@ -40,7 +40,9 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register")
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
+                    antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
+                    antMatcher(HttpMethod.GET, "/api/v1/states/by-country")
                 )
                 .permitAll()
                 // TODO -> Remove it later (just for testing)

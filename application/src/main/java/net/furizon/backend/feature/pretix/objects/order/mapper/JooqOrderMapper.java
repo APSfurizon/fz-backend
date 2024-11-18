@@ -27,14 +27,12 @@ public class JooqOrderMapper {
 
     private final ObjectMapper objectMapper;
 
-    private final PretixInformation pretixInformation;
-
     private final EventFinder eventFinder;
     private final UserFinder userFinder;
 
 
     @NotNull
-    public Order map(Record record) {
+    public Order map(Record record, PretixInformation pretixInformation) {
         try {
             final var answerList = objectMapper.readValue(
                 record.get(ORDERS.ORDER_ANSWERS_JSON).data(),

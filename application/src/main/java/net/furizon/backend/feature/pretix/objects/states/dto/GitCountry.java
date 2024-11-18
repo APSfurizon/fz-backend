@@ -15,7 +15,7 @@ public class GitCountry {
     @JsonProperty("alpha-2")
     private final String code;
 
-    public PretixState toState(){
+    public PretixState toState() {
         return new PretixState(name, code);
     }
 }
