@@ -16,6 +16,6 @@ public class GitCountry {
     private final String code;
 
     public PretixState toState() {
-        return new PretixState(name, code);
+        return new PretixState(code, name);
     }
 }
