@@ -19,6 +19,7 @@ import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProducts
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
+import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -33,12 +34,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -105,7 +102,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     //States TODO
     @NotNull
-    private final Cache<String, List<PretixState>> pretixStatesRegions = Caffeine.newBuilder().build();
+    private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
+            .expireAfterWrite(2, TimeUnit.DAYS)
+            .build(k -> useCaseExecutor.execute(FetchStatesByCountry.class, k));
 
     @PostConstruct
     public void init() {
@@ -114,8 +113,18 @@ public class CachedPretixInformation implements PretixInformation {
             return;
         }
         log.info("[PRETIX] Initializing pretix information and cache it");
+        long start = System.currentTimeMillis();
         resetCache();
         reloadAllOrders();
+        log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
+    }
+
+    @NotNull
+    @Override
+    public List<PretixState> getStatesOfCountry(String countryIsoCode){
+        //No cache lock needed!
+        var ret = statesOfCountry.getIfPresent(countryIsoCode);
+        return ret != null ? ret : new LinkedList<>();
     }
 
     @NotNull

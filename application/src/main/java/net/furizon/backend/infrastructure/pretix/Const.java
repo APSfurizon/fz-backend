@@ -23,6 +23,5 @@ public class Const {
 
     public static final String QUESTIONS_FILE_KEEP = "file:keep";
 
-
-    public static final String RELOAD_CACHE_CRONJOB = "0 0 * * * *";
+    public static final String ALL_COUNTRIES_STATE_KEY = "countries";
 }

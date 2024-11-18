@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrdersWorkflowController {
     private final UseCaseExecutor executor;
 
-    /*@PostMapping("/generate-pretix-shop-link")
+    /*@GetMapping("/generate-pretix-shop-link")
     public LinkResponse generatePretixShopLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
@@ -26,7 +26,7 @@ public class OrdersWorkflowController {
         );
     }
 
-    @PostMapping("/get-order-edit-link")
+    @GetMapping("/get-order-edit-link")
     public LogoutUserResponse logoutUser(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {

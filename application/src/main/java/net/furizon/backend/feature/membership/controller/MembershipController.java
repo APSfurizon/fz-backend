@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class MembershipController {
     private final PretixInformation pretixInformation;
     private final UseCaseExecutor executor;
 
-    @PostMapping("/should-update-info")
+    @GetMapping("/should-update-info")
     public ShouldUpdateInfoResponse logoutUser(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {

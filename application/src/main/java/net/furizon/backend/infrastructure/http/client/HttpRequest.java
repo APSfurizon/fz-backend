@@ -46,17 +46,52 @@ public class HttpRequest<R> {
     @Nullable
     private final ParameterizedTypeReference<R> responseParameterizedType;
 
+    @Nullable
+    @Getter(AccessLevel.NONE)
+    private final String overrideBaseUrl;
+    @NotNull public String overrideBaseUrl() {return overrideBaseUrl != null ? overrideBaseUrl : "";}
+    public boolean shouldOverrideUrl() { return overrideBaseUrl != null; }
+
+    @Nullable
+    @Getter(AccessLevel.NONE)
+    private final String overrideBasePath;
+    @NotNull public String overrideBasePath() {return overrideBasePath != null ? overrideBasePath : "";}
+    public boolean shouldOverridePath() { return overrideBasePath != null; }
+
+    //Overriding the getter for naming reasons
+    @Getter(AccessLevel.NONE)
+    private final boolean sendConfigHeaders;
+    public final boolean sendConfigHeaders() { return sendConfigHeaders; }
+
     public static class Builder<R> {
         private Class<R> responseType;
         private String path = null;
         private Object body = null;
         private HttpMethod method = null;
         private MediaType contentType = null;
+        private String overrideBaseUrl = null;
+        private String overrideBasePath = null;
+        private boolean sendConfigHeaders = true;
         private ParameterizedTypeReference<R> responseParameterizedType;
 
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         private final Map<String, String> uriVariables = new LinkedHashMap<>();
         private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+
+        public Builder<R> sendConfigHeaders(boolean sendConfigHeaders) {
+            this.sendConfigHeaders = sendConfigHeaders;
+            return this;
+        }
+
+        public Builder<R> overrideBasePath(@NotNull String overrideBasePath) {
+            this.overrideBasePath = overrideBasePath;
+            return this;
+        }
+
+        public Builder<R> overrideBaseUrl(@NotNull String overrideBaseUrl) {
+            this.overrideBaseUrl = overrideBaseUrl;
+            return this;
+        }
 
         public Builder<R> method(@NotNull final HttpMethod method) {
             this.method = method;
@@ -125,7 +160,10 @@ public class HttpRequest<R> {
                 body,
                 contentType,
                 responseType,
-                responseParameterizedType
+                responseParameterizedType,
+                overrideBaseUrl,
+                overrideBasePath,
+                sendConfigHeaders
             );
         }
     }
