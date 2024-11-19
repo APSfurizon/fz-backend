@@ -3,8 +3,6 @@ package net.furizon.backend.infrastructure.pretix;
 import lombok.Data;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;

@@ -7,11 +7,11 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Data
@@ -21,9 +21,7 @@ import org.springframework.stereotype.Component;
 public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkResponse> {
     @NotNull private final OrderFinder orderFinder;
 
-    @NotNull
-    @Value("${pretix.shop.url}")
-    private String shopUrl = "";
+    @NotNull private final PretixConfig pretixConfig;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GetEditOrderLink.Input input) {
@@ -45,7 +43,12 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
             throw new RuntimeException("Unable to find the order");
         }
 
-        return new LinkResponse(shopUrl + "order/" + order.getCode() + "/" + order.getPretixOrderSecret());
+        return new LinkResponse(
+                  pretixConfig.getShop().getUrl()
+                + "order/"
+                + order.getCode()
+                + "/"
+                + order.getPretixOrderSecret());
     }
 
     public record Input(

@@ -37,6 +37,9 @@ membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
 
+frontend:
+  login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
+
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}

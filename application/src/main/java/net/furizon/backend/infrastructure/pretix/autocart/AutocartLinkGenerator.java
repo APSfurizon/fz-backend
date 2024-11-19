@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -30,12 +30,12 @@ public class AutocartLinkGenerator {
     private final ObjectMapper objectMapper;
 
     @NotNull
-    @Value("${pretix.shop.url}")
-    private String shopUrl = "";
+    private final PretixConfig pretixConfig;
 
     @NotNull
     private final PrivateKey privateKey;
 
+    @NotNull
     private final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
     @NotNull
@@ -79,6 +79,6 @@ public class AutocartLinkGenerator {
         }
 
 
-        return Optional.of(shopUrl + "#a=" + encodedData + "&s=" + encodedSignature);
+        return Optional.of(pretixConfig.getShop().getUrl() + "#a=" + encodedData + "&s=" + encodedSignature);
     }
 }
