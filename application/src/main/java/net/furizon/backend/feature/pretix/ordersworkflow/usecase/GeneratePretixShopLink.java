@@ -63,7 +63,10 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         }
 
         actions.add(new AutocartAction<>("id_email", mail, VALUE));
+        actions.add(new AutocartAction<>("id_email_repeat", mail, VALUE));
         if (info != null) {
+            actions.add(new AutocartAction<>("id_phone_0", info.getPhoneNumber(), DROPDOWN)); //TODO
+            actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), VALUE));
             actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), VALUE));
             actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), VALUE));
             actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), VALUE));
@@ -76,6 +79,14 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             }
             actions.add(new AutocartAction<>("id_$-attendee_name_parts_0", info.getFirstName(), VALUE));
             actions.add(new AutocartAction<>("id_$-attendee_name_parts_1", info.getLastName(), VALUE));
+            actions.add(new AutocartAction<>("id_$-attendee_email", mail, VALUE));
+            actions.add(new AutocartAction<>("id_$-street", info.getResidenceAddress(), VALUE));
+            actions.add(new AutocartAction<>("id_$-zipcode", info.getResidenceZipCode(), VALUE));
+            actions.add(new AutocartAction<>("id_$-city", info.getResidenceCity(), VALUE));
+            actions.add(new AutocartAction<>("id_$-country", info.getResidenceCountry(), VALUE));
+            if (region != null) {
+                actions.add(new AutocartAction<>("id_$-state", info.getResidenceRegion(), DROPDOWN));
+            }
         }
         if (membershipNo == 0) {
             Set<Integer> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
@@ -89,7 +100,6 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             throw new RuntimeException("Autocart link generation failed.");
         }
         return new LinkResponse(generatedUrl.get());
-
     }
 
     public record Input(
