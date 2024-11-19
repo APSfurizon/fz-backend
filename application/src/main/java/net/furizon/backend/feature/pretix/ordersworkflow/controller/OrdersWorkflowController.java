@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -29,13 +30,14 @@ public class OrdersWorkflowController {
         );
     }
 
-    /*@GetMapping("/get-order-edit-link")
-    public LogoutUserResponse logoutUser(
+    @GetMapping("/get-order-edit-link")
+    public LinkResponse logoutUser(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
-
+                GetEditOrderLink.class,
+                new GetEditOrderLink.Input(user, pretixService)
         );
-    }*/
+    }
 
 }
