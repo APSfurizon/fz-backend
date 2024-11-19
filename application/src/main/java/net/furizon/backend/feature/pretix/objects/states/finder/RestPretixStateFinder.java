@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
-import net.furizon.backend.feature.pretix.objects.states.dto.GitCountry;
+import net.furizon.backend.feature.pretix.objects.states.dto.GitPhoneCountry;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixStateResponse;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
@@ -30,9 +30,9 @@ public class RestPretixStateFinder implements PretixStateFinder {
     private static final String ITALIAN_STATES_BASE_URL = "https://gist.githubusercontent.com";
     private static final String ITALIAN_STATES_PATH =
             "/LucaRosaldi/3081928/raw/elenco_province_italiane_json_array.json";
-    private static final String COUNTRIES_BASE_URL = "https://raw.githubusercontent.com";
+    private static final String COUNTRIES_BASE_URL = "https://gist.githubusercontent.com";
     private static final String COUNTRIES_PATH =
-            "/lukes/ISO-3166-Countries-with-Regional-Codes/refs/heads/master/slim-2/slim-2.json";
+            "/anubhavshrimal/75f6183458db8c453306f93521e93d37/raw/CountryCodes.json";
 
 
     private final ParameterizedTypeReference<PretixStateResponse> pretixStatesType =
@@ -116,11 +116,11 @@ public class RestPretixStateFinder implements PretixStateFinder {
             //Unfortunately, the response content type header is set to text/plain, and the RestClient
             //Won't interpret it as a json. This is a workaround
             if (res != null) {
-                List<GitCountry> countries = objectMapper.readValue(
+                List<GitPhoneCountry> countries = objectMapper.readValue(
                         res,
-                        TypeFactory.defaultInstance().constructCollectionType(List.class, GitCountry.class)
+                        TypeFactory.defaultInstance().constructCollectionType(List.class, GitPhoneCountry.class)
                 );
-                return countries.stream().map(GitCountry::toState).toList();
+                return countries.stream().map(k -> (PretixState) k.toPhoneCountry()).toList();
             } else {
                 log.error("Unable to fetch countries. Returning an empty list");
                 return new LinkedList<>();
