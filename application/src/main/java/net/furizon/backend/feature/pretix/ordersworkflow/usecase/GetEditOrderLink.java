@@ -22,7 +22,7 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
     @NotNull private final OrderFinder orderFinder;
 
     @NotNull
-    @Value("${pretix.shop-url}")
+    @Value("${pretix.shop.url}")
     private String shopUrl = "";
 
     @Override

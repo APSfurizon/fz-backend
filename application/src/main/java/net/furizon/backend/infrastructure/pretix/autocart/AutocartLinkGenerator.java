@@ -30,7 +30,7 @@ public class AutocartLinkGenerator {
     private final ObjectMapper objectMapper;
 
     @NotNull
-    @Value("${pretix.shop-url}")
+    @Value("${pretix.shop.url}")
     private String shopUrl = "";
 
     @NotNull
