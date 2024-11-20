@@ -47,13 +47,12 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
 
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
         @Nullable Event event = e.orElse(null);
-        PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
         if (event != null) {
             int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
             if (ordersNo > 0) {
                 throw new ApiException(
                         "You already made an order!",
-                        OrderWorkflowErrorCode.ORDER_ALREADY_DONE.name()
+                        OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
                 );
             }
 
@@ -61,6 +60,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         } else {
             log.error("Unable to fetch current event. Generating pretix shop link anyway without a membership card");
         }
+
+        PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
 
         actions.add(new AutocartAction<>("id_email", mail, VALUE));
         actions.add(new AutocartAction<>("id_email_repeat", mail, VALUE));

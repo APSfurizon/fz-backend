@@ -47,8 +47,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         var e = pretixService.getCurrentEvent();
         if (!e.isPresent()) {
             log.error("[PRETIX] Registration of order {} failed: Unable to fetch current event", input.code);
-            //TODO error event not present
-            return null;
+            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
         }
         Event event = e.get();
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
@@ -57,8 +56,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
         if (ordersNo > 0) {
             log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
-            //TODO error order already exist!
-            return null;
+            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE));
         }
 
         Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
@@ -73,8 +71,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
             if (!pretixOrder.isPresent()) {
                 log.error("[PRETIX] Registration of order {} failed: "
                         + "Order was not in the db and we were unable to fetch it from pretix", input.code);
-                //TODO error unable to fetch order
-                return null;
+                return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
             }
 
             var o = updateOrderInDb.execute(pretixOrder.get(), event, pretixService);
@@ -82,15 +79,13 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
                 log.error("[PRETIX] Registration of order {} failed: "
                         + "Order was not in the db and an error occurred in "
                         + "parsing or storing the newly fetched order", input.code);
-                //TODO error unable to parse order
-                return null;
+                return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
             }
             order = o.get();
         }
 
         if (!order.getPretixOrderSecret().equals(input.secret)) {
-            //TODO error secret doesnt match
-            return null;
+            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH));
         }
 
         //If this order is already owned by someone who, for some reasons, owns more than one order we can reclaim it
@@ -102,8 +97,8 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
                 //since it's already checked in the ordersNo check
                 log.error("[PRETIX] Registration of order {} failed: The order was already owned by {}",
                         input.code, prevOwnerId);
-                //TODO error trying to steal an already claimed order!
-                return null;
+                return new RedirectView(config.getOrderHomepageUrl(
+                        OrderWorkflowErrorCode.ORDER_ALREADY_OWNED_BY_SOMEBODY_ELSE));
             }
             log.info("[PRETIX] Order {} was already owned by {} (who had multiple orders). Changing ownership to {}",
                     input.code, prevOwnerId, user.getUserId());
@@ -115,7 +110,6 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         if (!success) {
             log.error("[PRETIX] Registration of order {} failed: An error occurred while pushing answers to pretix!",
                     input.code);
-            //TODO error pushing answers not good
             return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
         }
 

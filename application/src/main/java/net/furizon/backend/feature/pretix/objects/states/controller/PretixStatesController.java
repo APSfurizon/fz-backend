@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixStateResponse;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/states")

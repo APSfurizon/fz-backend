@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 import static net.furizon.jooq.generated.tables.Users.USERS;
 
 @Component

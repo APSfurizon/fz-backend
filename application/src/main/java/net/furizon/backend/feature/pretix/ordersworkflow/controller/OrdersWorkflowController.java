@@ -2,8 +2,10 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.SanityCheck;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -17,8 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/orders-workflow")
 @RequiredArgsConstructor
 public class OrdersWorkflowController {
-    private final UseCaseExecutor executor;
-    private final PretixInformation pretixService;
+    @NotNull private final UseCaseExecutor executor;
+    @NotNull private final PretixInformation pretixService;
+    @NotNull private final SanityCheck sanityCheck;
 
     @GetMapping("/generate-pretix-shop-link")
     public LinkResponse generatePretixShopLink(
@@ -31,7 +34,7 @@ public class OrdersWorkflowController {
     }
 
     @GetMapping("/get-order-edit-link")
-    public LinkResponse logoutUser(
+    public LinkResponse getOrderEditLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
@@ -40,4 +43,10 @@ public class OrdersWorkflowController {
         );
     }
 
+    @GetMapping("/order-sanity-check")
+    public SanityCheckResponse doSanityChecks(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return sanityCheck.execute(user, pretixService);
+    }
 }
