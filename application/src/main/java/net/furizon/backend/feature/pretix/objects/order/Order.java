@@ -132,10 +132,12 @@ public class Order {
     public void setOrderOwnerUserId(long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
+        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
         orderOwnerUserId = orderOwner.getId();
+        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public @Nullable User getOrderOwner() {
         if (orderOwner == null && orderOwnerUserId >= 0L) {

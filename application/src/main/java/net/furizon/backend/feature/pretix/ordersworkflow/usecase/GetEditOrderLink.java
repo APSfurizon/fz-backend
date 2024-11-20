@@ -55,5 +55,6 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull PretixInformation pretixService) {}
+            @NotNull PretixInformation pretixService
+    ) {}
 }

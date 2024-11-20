@@ -2,7 +2,8 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.infrastructure.configuration.FrontendConfig;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.RegisterUserOrder;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +22,10 @@ but we catch them from the reverse proxy. This class is responsible for handling
 @RequestMapping("${pretix.shop.path}")
 @RequiredArgsConstructor
 public class PretixUrlController {
+    @NotNull
     private final UseCaseExecutor executor;
-
-    private final FrontendConfig config;
+    @NotNull
+    private final PretixInformation pretixService;
 
     //hmac is used by pretix to confirm an user has opened the link in his email.
     //it is sent ONLY through emails and when an user opens a link with it
@@ -39,12 +41,15 @@ public class PretixUrlController {
             @PathVariable("code") @NotNull final String code,
             @PathVariable("mainSecret") @NotNull final String mainSecret
     ) {
-        if (user == null) {
-            return new RedirectView(config.getLoginRedirectUrl(request.getRequestURL().toString()));
-        }
-        /*return executor.execute(
-
-        );*/
-        return null;
+        return executor.execute(
+            RegisterUserOrder.class,
+            new RegisterUserOrder.Input(
+                    user,
+                    code,
+                    mainSecret,
+                    request,
+                    pretixService
+            )
+        );
     }
 }
