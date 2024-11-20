@@ -16,7 +16,7 @@ public interface PretixInformation {
     @NotNull
     Optional<Event> getCurrentEvent();
 
-    int getQuestionSecretId();
+    int getQuestionUserId();
 
     @NotNull
     List<PretixState> getStatesOfCountry(String countryIsoCode);

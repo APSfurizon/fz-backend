@@ -22,12 +22,10 @@ public class JooqCreateUserAction implements CreateUserAction {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         USERS,
-                        USERS.USER_FURSONA_NAME,
-                        USERS.USER_SECRET
+                        USERS.USER_FURSONA_NAME
                     )
                     .values(
-                        fursonaName,
-                        UUID.randomUUID().toString()
+                        fursonaName
                     )
                     .returning(
                         USERS.USER_ID,

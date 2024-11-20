@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -33,12 +34,13 @@ public class PretixUrlController {
     @NotNull
     @GetMapping("order/{code}/{mainSecret}/open/{hmac}/")
     public RedirectView openOrderConfirmationLink(
+            HttpServletRequest request,
             @AuthenticationPrincipal final FurizonUser user,
             @PathVariable("code") @NotNull final String code,
             @PathVariable("mainSecret") @NotNull final String mainSecret
     ) {
         if (user == null) {
-
+            return new RedirectView(config.getLoginRedirectUrl(request.getRequestURL().toString()));
         }
         /*return executor.execute(
 

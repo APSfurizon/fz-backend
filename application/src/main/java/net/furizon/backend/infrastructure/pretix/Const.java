@@ -5,7 +5,7 @@ public class Const {
 
     public static final String METADATA_IDENTIFIER_ITEM = "item_name";
 
-    public static final String QUESTIONS_ACCOUNT_SECRET = "account_secret";
+    public static final String QUESTIONS_ACCOUNT_USERID = "account_userid";
 
     public static final String METADATA_EVENT_TICKET = "ticket";
     public static final String METADATA_EVENT_TICKET_DAILY_TAG_PREFIX = "ticket_daily_";

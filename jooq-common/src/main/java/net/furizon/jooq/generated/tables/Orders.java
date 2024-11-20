@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -139,6 +140,11 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.creation_ts</code>.
+     */
+    public final TableField<Record, LocalDateTime> CREATION_TS = createField(DSL.name("creation_ts"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

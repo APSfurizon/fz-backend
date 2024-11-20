@@ -47,7 +47,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
-import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
+import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_USERID;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +77,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Questions
     @NotNull
-    private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
+    private final AtomicReference<Integer> questionUserId = new AtomicReference<>(-1);
     @NotNull
     private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
@@ -150,10 +150,9 @@ public class CachedPretixInformation implements PretixInformation {
         return Optional.ofNullable(v);
     }
 
-    @Override
-    public int getQuestionSecretId() {
+    public int getQuestionUserId() {
         lock.readLock().lock();
-        var v = questionSecretId.get();
+        var v = questionUserId.get();
         lock.readLock().unlock();
         return v;
     }
@@ -214,8 +213,8 @@ public class CachedPretixInformation implements PretixInformation {
             int answersMainPositionId = 0;
             String hotelLocation = null;
             boolean membership = false;
-            String userSecret = null;
             short roomCapacity = 0;
+            long userId = -1L;
 
             List<PretixPosition> positions = pretixOrder.getPositions();
             if (positions.isEmpty()) {
@@ -236,8 +235,11 @@ public class CachedPretixInformation implements PretixInformation {
                             if (questionType.get() == QuestionType.FILE) {
                                 answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
                             }
-                            if (questionId == this.getQuestionSecretId()) {
-                                userSecret = answer.getAnswer();
+                            if (questionId == this.getQuestionUserId()) {
+                                String s = answer.getAnswer();
+                                if (s != null) {
+                                    userId = Long.parseLong(s);
+                                }
                             }
                         }
                     }
@@ -289,7 +291,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .hasMembership(membership)
                     .answersMainPositionId(answersMainPositionId)
                     .eventId(event.getId())
-                    //TODO add orderOwenrId
+                    .orderOwnerUserId(userId)
                     .answers(answers, this)
                     .userFinder(userFinder)
                     .eventFinder(eventFinder)
@@ -329,7 +331,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.invalidateAll();
 
         //Questions
-        questionSecretId.set(-1);
+        questionUserId.set(-1);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
@@ -380,11 +382,11 @@ public class CachedPretixInformation implements PretixInformation {
             questionIdToIdentifier.put(questionId, questionIdentifier);
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
-        // searching QUESTIONS_ACCOUNT_SECRET
-        Integer accountSecretId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_SECRET);
-        if (accountSecretId != null) {
-            log.info("[PRETIX] Account secret id found, setup it on value = '{}'", accountSecretId);
-            questionSecretId.set(accountSecretId);
+        // searching QUESTIONS_ACCOUNT_USERID
+        Integer accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
+        if (accountUserId != null) {
+            log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
+            questionUserId.set(accountUserId);
         }
     }
 

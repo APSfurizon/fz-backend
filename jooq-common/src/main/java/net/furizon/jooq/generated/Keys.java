@@ -65,7 +65,6 @@ public class Keys {
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
     public static final UniqueKey<Record> SESSIONS_PKEY = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("sessions_pkey"), new TableField[] { Sessions.SESSIONS.ID }, true);
     public static final UniqueKey<Record> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.USER_ID }, true);
-    public static final UniqueKey<Record> USERS_UNIQUE_SECRET = Internal.createUniqueKey(Users.USERS, DSL.name("users_unique_secret"), new TableField[] { Users.USERS.USER_SECRET }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
