@@ -48,7 +48,9 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
                 + "order/"
                 + order.getCode()
                 + "/"
-                + order.getPretixOrderSecret());
+                + order.getPretixOrderSecret()
+                + "/change"
+        );
     }
 
     public record Input(
