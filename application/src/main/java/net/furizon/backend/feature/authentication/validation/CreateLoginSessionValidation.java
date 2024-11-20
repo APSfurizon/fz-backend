@@ -22,11 +22,8 @@ public class CreateLoginSessionValidation {
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         final var authentication = authenticationFinder.findByEmail(input.email());
         if (authentication == null) {
-            //TODO match with the invalid credentials exception to not leak registered emails
-            throw new ApiException(
-                "User not found",
-                AuthenticationErrorCode.EMAIL_NOT_REGISTERED.name()
-            );
+            //Using the same exception to not leak registered emails
+            throw createInvalidCredentialsException();
         }
 
         if (authentication.isDisabled()) {
@@ -41,12 +38,16 @@ public class CreateLoginSessionValidation {
             authentication.getHashedPassword()
         );
         if (!passwordMatches) {
-            throw new ApiException(
-                "Invalid Credentials",
-                AuthenticationErrorCode.INVALID_CREDENTIALS.name()
-            );
+            throw createInvalidCredentialsException();
         }
 
         return authentication.getUserId();
+    }
+
+    private final ApiException createInvalidCredentialsException() {
+        return new ApiException(
+                "Invalid Credentials",
+                AuthenticationErrorCode.INVALID_CREDENTIALS.name()
+        );
     }
 }
