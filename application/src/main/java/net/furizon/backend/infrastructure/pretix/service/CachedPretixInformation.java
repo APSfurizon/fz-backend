@@ -214,7 +214,7 @@ public class CachedPretixInformation implements PretixInformation {
             String hotelLocation = null;
             boolean membership = false;
             short roomCapacity = 0;
-            long userId = -1L;
+            Long userId = null;
 
             List<PretixPosition> positions = pretixOrder.getPositions();
             if (positions.isEmpty()) {
@@ -237,7 +237,7 @@ public class CachedPretixInformation implements PretixInformation {
                             }
                             if (questionId == this.getQuestionUserId()) {
                                 String s = answer.getAnswer();
-                                if (s != null) {
+                                if (s != null && !s.isBlank()) {
                                     userId = Long.parseLong(s);
                                 }
                             }

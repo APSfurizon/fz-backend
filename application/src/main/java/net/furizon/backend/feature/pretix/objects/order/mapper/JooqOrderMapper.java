@@ -51,7 +51,7 @@ public class JooqOrderMapper {
                 .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
                 .answersMainPositionId(record.get(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID))
                 .answers(answerList, pretixInformation)
-                .orderOwnerUserId(userId == null ? -1L : userId)
+                .orderOwnerUserId(userId)
                 .eventId(record.get(ORDERS.EVENT_ID))
                 .userFinder(userFinder)
                 .eventFinder(eventFinder)

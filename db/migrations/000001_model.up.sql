@@ -120,21 +120,21 @@ CREATE TABLE IF NOT EXISTS membership_cards
 
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                             int8 PRIMARY KEY NOT NULL,
-    order_code                     varchar(64)      NOT NULL,
-    order_answers_json             json             NULL,
-    order_status                   int2 DEFAULT 0   NOT NULL,
-    order_answers_main_position_id int4             NOT NULL,
-    order_daily_days               int8             NOT NULL,
-    order_extra_days_type          int2             NULL,
-    order_room_capacity            int2             NULL,
-    order_hotel_location           varchar(255)     NULL,
-    has_membership                 bool             NOT NULL,
-    order_secret                   varchar(32)      NULL, -- todo remove --
-    order_sponsorship_type         int2             NOT NULL,
-    event_id                       int8             NOT NULL,
-    user_id                        int8             NULL,
-    creation_ts                    timestamp        NOT NULL DEFAULT NOW(), -- just for stats reasons --
+    id                             int8 PRIMARY KEY             NOT NULL,
+    order_code                     varchar(64)                  NOT NULL,
+    order_answers_json             json                         NULL,
+    order_status                   int2 DEFAULT 0               NOT NULL,
+    order_answers_main_position_id int4                         NOT NULL,
+    order_daily_days               int8                         NOT NULL,
+    order_extra_days_type          int2                         NULL,
+    order_room_capacity            int2                         NULL,
+    order_hotel_location           varchar(255)                 NULL,
+    has_membership                 bool                         NOT NULL,
+    order_secret                   varchar(32)                  NULL, -- todo remove --
+    order_sponsorship_type         int2                         NOT NULL,
+    event_id                       int8                         NOT NULL,
+    user_id                        int8 DEFAULT NULL            NULL,
+    creation_ts                    timestamp                    NOT NULL DEFAULT NOW(), -- just for stats reasons --
     CONSTRAINT orders_extra_days_check CHECK (((order_extra_days_type >= 0) AND (order_extra_days_type <= 3))),
     CONSTRAINT orders_sponsorship_check CHECK (((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2))),
     CONSTRAINT orders_status_check CHECK (((order_status >= 0) AND (order_status <= 3))),

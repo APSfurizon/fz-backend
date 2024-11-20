@@ -39,6 +39,7 @@ membership:
 
 frontend:
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
+  order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
 
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}

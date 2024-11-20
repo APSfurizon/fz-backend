@@ -76,9 +76,10 @@ public class Order {
     @Builder.Default
     private int answersMainPositionId = -1;
 
+    @Nullable
     @Builder.Default
     @Setter(AccessLevel.NONE)
-    private long orderOwnerUserId = -1L;
+    private Long orderOwnerUserId = null;
     @Nullable
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -140,7 +141,7 @@ public class Order {
         setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public @Nullable User getOrderOwner() {
-        if (orderOwner == null && orderOwnerUserId >= 0L) {
+        if (orderOwner == null && orderOwnerUserId != null && orderOwnerUserId >= 0L) {
             orderOwner = userFinder.findById(orderOwnerUserId);
         }
         return orderOwner;
