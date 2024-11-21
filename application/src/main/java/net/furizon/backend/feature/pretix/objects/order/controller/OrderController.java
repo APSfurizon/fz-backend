@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.order.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -23,6 +24,11 @@ public class OrderController {
     @NotNull
     private final PretixInformation pretixService;
 
+    @Operation(summary = "A pretix order has changed", description =
+            "Each time a pretix order changes, pretix will hit this webhook with the information "
+            + "about the order we need to update in db. This method must be used ONLY by pretix, it's not meant "
+            + "to be exposed to public API"
+    )
     @PostMapping("/webhook")
     public ResponseEntity<Void> pretixWebhook(OrderWebhookRequest request) {
         log.info("[PRETIX WEBHOOK] Fetching order {}", request);
