@@ -106,8 +106,9 @@ public class CachedPretixInformation implements PretixInformation {
             return;
         }
         log.info("[PRETIX] Initializing pretix information and cache it");
-        resetCache();
-        reloadAllOrders();
+        //TODO UNCOMMENT
+        //resetCache();
+        //reloadAllOrders();
     }
 
     @NotNull
