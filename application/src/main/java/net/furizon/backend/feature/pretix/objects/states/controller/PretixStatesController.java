@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.objects.states.dto.PretixCountryResponse;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixStateResponse;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -29,8 +30,8 @@ public class PretixStatesController {
     }
 
     @GetMapping("/get-countries")
-    public PretixStateResponse getCountries() {
+    public PretixCountryResponse getCountries() {
         var countries = pretixInformation.getStatesOfCountry(Const.ALL_COUNTRIES_STATE_KEY);
-        return new PretixStateResponse(countries);
+        return new PretixCountryResponse(countries);
     }
 }
