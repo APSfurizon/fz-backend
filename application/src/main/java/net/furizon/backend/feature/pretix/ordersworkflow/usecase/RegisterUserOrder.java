@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.ordersworkflow.usecase;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,12 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
     @NotNull private final FrontendConfig config;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
 
+    private RedirectView successView;
+    @PostConstruct
+    private void init() {
+        successView = new RedirectView(config.getOrderHomepageUrl());
+    }
+
     @Override
     public @NotNull RedirectView executor(@NotNull RegisterUserOrder.Input input) {
         PretixInformation pretixService = input.pretixService;
@@ -53,11 +60,17 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
                 user.getUserId(), input.code, input.secret);
 
-        if (ordersNo > 0) {
+        //Check if user already owns an order
+        Order prevOrder = orderFinder.findOrderByUserIdEvent(user.getUserId(), event, pretixService);
+        if (prevOrder != null) {
+            //If the order the user owns is the same we're trying to claim, do nothing and return
+            if (prevOrder.getCode().equals(input.code)) {
+                log.debug("[PRETIX] User {} already owned order {}", user.getUserId(), input.code);
+                return successView;
+            }
             log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
             return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE));
         }
-        //TODO if the user ows one order, check if the order is the same we got in input. If yes do nothing, nor return an error
 
         Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
         if (order == null) {
@@ -84,6 +97,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
             order = o.get();
         }
 
+        //Check if secret matches
         if (!order.getPretixOrderSecret().equals(input.secret)) {
             return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH));
         }
@@ -93,8 +107,6 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         if (prevOwnerId != null && prevOwnerId > 0L) {
             int ordersNoPrevOwner = orderFinder.countOrdersOfUserOnEvent(prevOwnerId, event);
             if (ordersNoPrevOwner <= 1) {
-                //We don't need to check if the user is already the owner of this order,
-                //since it's already checked in the ordersNo check
                 log.error("[PRETIX] Registration of order {} failed: The order was already owned by {}",
                         input.code, prevOwnerId);
                 return new RedirectView(config.getOrderHomepageUrl(
@@ -116,7 +128,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         updateOrderAction.invoke(order, pretixService);
         log.info("[PRETIX] Order {} was successfully claimed by {}!", input.code, user.getUserId());
 
-        return new RedirectView(config.getOrderHomepageUrl());
+        return successView;
     }
 
     public record Input(
