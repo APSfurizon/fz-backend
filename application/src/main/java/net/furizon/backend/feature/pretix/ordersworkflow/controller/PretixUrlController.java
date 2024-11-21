@@ -1,5 +1,10 @@
 package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.links.Link;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.RegisterUserOrder;
@@ -33,6 +38,20 @@ public class PretixUrlController {
     //If yes, a flag is set inside the order that the email was verified
     //so that pretix admins can search thru "email confirmed" orders
     //TLDR; For us it's useless :D
+    @Operation(summary = "Links an order to a user and redirects to home page", description =
+        "When a user makes an order, changes an order or cancels the change of an order, it is "
+        + "automatically redirected to this page. Using a reverse proxy this *pretix* page should be "
+        + "redirected to the backend. Whenever an user loads this page, the backend should use its "
+        + "session to link the order to the user, and later redirect the user to the frontend "
+        + "order page. This SHOULD NOT be implemented in the frontend / app")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Homepage link with eventual error codes in the "
+            + "`error` query param. Take a look at "
+            + "[`net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode`]"
+            + "(https://github.com/APSfurizon/fz-backend/blob/master/application/"
+            + "src/main/java/net/furizon/backend/feature/pretix/ordersworkflow/OrderWorkflowErrorCode.java)"
+            + " for a full list of error codes with description", content = @Content)
+    })
     @NotNull
     @GetMapping("order/{code}/{mainSecret}/open/{hmac}/")
     public RedirectView openOrderConfirmationLink(

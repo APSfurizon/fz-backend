@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.ShouldUpdateInfoResponse;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
@@ -19,6 +20,10 @@ public class MembershipController {
     private final PretixInformation pretixInformation;
     private final UseCaseExecutor executor;
 
+    @Operation(summary = "Check if an user has updated his membership card within the last event", description =
+        "Every event the user should be prompted to double check if his personal information are still up to date, "
+        + "together with a link to the page to change them. The text should also warn the user that his information "
+        + "are used for health policy in furizon, so he should be sure they are correct.")
     @GetMapping("/should-update-info")
     public ShouldUpdateInfoResponse logoutUser(
             @AuthenticationPrincipal @NotNull final FurizonUser user

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,12 @@ public class AuthenticationController {
     }
 
 
+    @Operation(summary = "Registers a new user", description =
+        "Birthday and residence countries should be passed as a ISO 3166-1 A-2 string. "
+        + "Birthday and residence state instead must correspond to the `code` field obtained "
+        + "with the [`/states/by-country`](#/pretix-states-controller/getPretixStates) endpoint. "
+        + "If a state is unsupported (the previous endpoint returns an empty array), the user "
+        + "should be prompted with a normal text field which can be normally submitted as state")
     @PostMapping("/register")
     public RegisterUserResponse registerUser(
         @Valid @RequestBody final RegisterUserRequest registerUserRequest

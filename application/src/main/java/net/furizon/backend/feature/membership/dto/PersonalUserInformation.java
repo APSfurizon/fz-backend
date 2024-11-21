@@ -73,7 +73,7 @@ public class PersonalUserInformation {
 
     @NotNull
     @NotEmpty
-    @Size(min = 2)
+    @Size(min = 2, max = 2)
     private final String residenceCountry;
 
     @NotNull
