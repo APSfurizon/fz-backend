@@ -53,11 +53,11 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
                 user.getUserId(), input.code, input.secret);
 
-        int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
         if (ordersNo > 0) {
             log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
             return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE));
         }
+        //TODO if the user ows one order, check if the order is the same we got in input. If yes do nothing, nor return an error
 
         Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
         if (order == null) {
