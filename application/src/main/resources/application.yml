@@ -27,6 +27,9 @@ logbook:
 springdoc:
   api-docs:
     path: /docs/api-docs
+    enabled: ${DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${DOCS_ENABLED:false}
 
 security:
   password-salt: ${SECURITY_HASHED_PASSWORD_SALT:changeit}
