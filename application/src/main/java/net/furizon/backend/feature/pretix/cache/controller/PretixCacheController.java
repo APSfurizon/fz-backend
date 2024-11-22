@@ -25,6 +25,7 @@ public class PretixCacheController {
             + "to be launched ONLY by the backend admins")
     @PostMapping("/reload-struct")
     public void reloadCache() {
+        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
     }
@@ -33,6 +34,7 @@ public class PretixCacheController {
             "This method is meant to be launched ONLY by the backend admins")
     @PostMapping("/reload-orders")
     public void reloadOrders() {
+        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();
     }
