@@ -21,6 +21,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
     private final MembershipYearUtils membershipYearUtils;
     private final SqlQuery sqlQuery;
 
+    @Override
     public int countCardsPerUserPerEvent(long userId, @NotNull Event event) {
         OffsetDateTime from = event.getDateFrom();
         if (from == null) {
@@ -31,7 +32,6 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
         LocalDate date = from.toLocalDate();
         short year = membershipYearUtils.getMembershipYear(date);
 
-        //TODO: Ask stark if this is the correct way to count
         return sqlQuery.count(
                 PostgresDSL
                         .select(MEMBERSHIP_CARDS.CARD_DB_ID)

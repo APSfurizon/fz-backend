@@ -74,7 +74,7 @@ public class MembershipCards extends TableImpl<Record> {
     /**
      * The column <code>public.membership_cards.id_in_year</code>.
      */
-    public final TableField<Record, Integer> ID_IN_YEAR = createField(DSL.name("id_in_year"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("nextval('membership_cards_id_in_years'::regclass)"), SQLDataType.INTEGER)), this, "");
+    public final TableField<Record, Integer> ID_IN_YEAR = createField(DSL.name("id_in_year"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>public.membership_cards.issue_year</code>.
