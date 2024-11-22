@@ -81,7 +81,7 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_fursona_name</code>.
      */
-    public final TableField<Record, String> USER_FURSONA_NAME = createField(DSL.name("user_fursona_name"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<Record, String> USER_FURSONA_NAME = createField(DSL.name("user_fursona_name"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.users.user_locale</code>.

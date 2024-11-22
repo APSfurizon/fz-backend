@@ -24,7 +24,7 @@ public class CreateMembershipUseCase implements UseCase<CreateMembershipUseCase.
                 "Admin {} is manually creating membership card for user {} ",
                 input.user.getUserId(), input.req.getUserId()
         );
-        createMembershipCardAction.invoke(input.req.getUserId(), input.event);
+        createMembershipCardAction.invoke(input.req.getUserId(), input.event, null);
         return true;
     }
 

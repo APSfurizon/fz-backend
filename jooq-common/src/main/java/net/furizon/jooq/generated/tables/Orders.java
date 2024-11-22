@@ -14,6 +14,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Events.EventsPath;
+import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.Rooms.RoomsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -246,6 +247,19 @@ public class Orders extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.ORDERS__ORDERS_USERS_ID, null);
 
         return _users;
+    }
+
+    private transient MembershipCardsPath _membershipCards;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.membership_cards</code> table
+     */
+    public MembershipCardsPath membershipCards() {
+        if (_membershipCards == null)
+            _membershipCards = new MembershipCardsPath(this, null, Keys.MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK.getInverseKey());
+
+        return _membershipCards;
     }
 
     private transient RoomsPath _rooms;

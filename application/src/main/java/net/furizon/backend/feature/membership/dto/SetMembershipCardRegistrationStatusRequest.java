@@ -5,8 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AddMembershipCardRequest {
+public class SetMembershipCardRegistrationStatusRequest {
     @NotNull
     @Min(0L)
-    private long userId;
+    private final long membershipCardId;
+
+    @NotNull
+    private final boolean registered;
 }

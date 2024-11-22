@@ -16,6 +16,8 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class PersonalUserInformation {
+    private final long id;
+
     @NotNull
     @NotEmpty
     @Size(min = 2)

@@ -23,6 +23,7 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
                 .fetchSingle(
                     PostgresDSL
                         .select(
+                            MEMBERSHIP_INFO.ID,
                             MEMBERSHIP_INFO.INFO_FIRST_NAME,
                             MEMBERSHIP_INFO.INFO_LAST_NAME,
                             MEMBERSHIP_INFO.INFO_FISCAL_CODE,

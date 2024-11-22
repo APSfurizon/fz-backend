@@ -3,7 +3,6 @@ package net.furizon.backend.feature.membership.action.updateMembershipInfo;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,12 +14,11 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @Component
 @RequiredArgsConstructor
 public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoAction {
-    private final PretixInformation pretixService;
-    private final SqlCommand sqlCommand;
+    @NotNull private final SqlCommand sqlCommand;
 
     @Override
     public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
-        long eventId = event == null ? -1L : event.getId();
+        Long eventId = event == null ? null : event.getId();
 
         sqlCommand.execute(
             PostgresDSL

@@ -18,7 +18,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
 
     @Override
     public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
-        long eventId = event == null ? -1L : event.getId();
+        Long eventId = event == null ? null : event.getId();
 
         sqlCommand.execute(
             PostgresDSL

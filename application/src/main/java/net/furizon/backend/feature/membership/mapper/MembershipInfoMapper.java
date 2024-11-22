@@ -10,6 +10,7 @@ public class MembershipInfoMapper {
     @NotNull
     public static PersonalUserInformation map(Record record) {
         return PersonalUserInformation.builder()
+                .id(record.getValue(MEMBERSHIP_INFO.ID))
                 .firstName(record.get(MEMBERSHIP_INFO.INFO_FIRST_NAME))
                 .lastName(record.get(MEMBERSHIP_INFO.INFO_LAST_NAME))
                 .fiscalCode(record.get(MEMBERSHIP_INFO.INFO_FISCAL_CODE))

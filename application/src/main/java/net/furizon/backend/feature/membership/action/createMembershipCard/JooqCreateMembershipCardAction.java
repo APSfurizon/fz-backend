@@ -3,11 +3,11 @@ package net.furizon.backend.feature.membership.action.createMembershipCard;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.jooq.infrastructure.JooqOptional;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
@@ -27,7 +27,9 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
     private final SqlQuery sqlQuery;
 
     @Override
-    public synchronized void invoke(long userId, @Nullable Event event) {
+    public synchronized void invoke(long userId, @Nullable Event event, @Nullable Order order) {
+        Long orderId = order == null ? null : order.getId();
+
         OffsetDateTime from;
         if (event != null) {
             from = event.getDateFrom();
@@ -59,11 +61,13 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
                         MEMBERSHIP_CARDS,
                         MEMBERSHIP_CARDS.ISSUE_YEAR,
                         MEMBERSHIP_CARDS.USER_ID,
-                        MEMBERSHIP_CARDS.ID_IN_YEAR
+                        MEMBERSHIP_CARDS.ID_IN_YEAR,
+                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER
                 ).values(
                         year,
                         userId,
-                        id
+                        id,
+                        orderId
                 )
         );
     }

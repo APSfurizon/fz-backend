@@ -12,6 +12,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +86,16 @@ public class MembershipCards extends TableImpl<Record> {
      * The column <code>public.membership_cards.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_cards.already_registered</code>.
+     */
+    public final TableField<Record, Boolean> ALREADY_REGISTERED = createField(DSL.name("already_registered"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.membership_cards.created_for_order</code>.
+     */
+    public final TableField<Record, Long> CREATED_FOR_ORDER = createField(DSL.name("created_for_order"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private MembershipCards(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -166,7 +177,7 @@ public class MembershipCards extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.MEMBERSHIP_CARDS__CARD_USER_FK);
+        return Arrays.asList(Keys.MEMBERSHIP_CARDS__CARD_USER_FK, Keys.MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK);
     }
 
     private transient UsersPath _users;
@@ -179,6 +190,18 @@ public class MembershipCards extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.MEMBERSHIP_CARDS__CARD_USER_FK, null);
 
         return _users;
+    }
+
+    private transient OrdersPath _orders;
+
+    /**
+     * Get the implicit join path to the <code>public.orders</code> table.
+     */
+    public OrdersPath orders() {
+        if (_orders == null)
+            _orders = new OrdersPath(this, Keys.MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK, null);
+
+        return _orders;
     }
 
     @Override
