@@ -42,4 +42,18 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         )
         );
     }
+
+    @Override
+    public boolean checkIfMembershipCardIsCreatedByOrder(long userId, long orderId) {
+        return sqlQuery.count(
+                PostgresDSL
+                        .select(MEMBERSHIP_CARDS.CARD_DB_ID)
+                        .from(MEMBERSHIP_CARDS)
+                        .where(
+                            MEMBERSHIP_CARDS.USER_ID.eq(userId)
+                            .and(MEMBERSHIP_CARDS.CREATED_FOR_ORDER.eq(orderId))
+                        )
+                        .limit(1)
+        ) > 0;
+    }
 }
