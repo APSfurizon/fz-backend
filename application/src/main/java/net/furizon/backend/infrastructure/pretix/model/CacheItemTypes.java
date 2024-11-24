@@ -4,5 +4,6 @@ public enum CacheItemTypes {
     TICKETS,
     MEMBERSHIP_CARDS,
     SPONSORSHIPS,
-    ROOMS
+    ROOMS,
+    NO_ROOM_VARIATION
 }

@@ -19,6 +19,7 @@ public class Const {
 
     public static final String METADATA_ROOM = "room";
     public static final String METADATA_ROOM_TYPE_TAG_PREFIX = "room_type_";
+    public static final String METADATA_ROOM_NO_ROOM_VARIATION = "no_room";
 
 
     public static final String QUESTIONS_FILE_KEEP = "file:keep";

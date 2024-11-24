@@ -72,12 +72,16 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             product.forEachVariationByIdentifierPrefix(
                                 Const.METADATA_ROOM_TYPE_TAG_PREFIX,
                                 (variation, strippedIdentifier) -> {
-                                    String[] sp = strippedIdentifier.split("_");
-                                    String hotelName = sp[0];
-                                    short capacity = Short.parseShort(sp[1]);
-                                    HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
-                                    result.roomIdToInfo().put(variation.getId(), p);
-                                    result.roomInfoToNames().put(p, variation.getNames());
+                                    if (strippedIdentifier.equals(Const.METADATA_ROOM_NO_ROOM_VARIATION)) {
+                                        result.noRoomVariationIds().add(variation.getId());
+                                    } else {
+                                        String[] sp = strippedIdentifier.split("_");
+                                        String hotelName = sp[0];
+                                        short capacity = Short.parseShort(sp[1]);
+                                        HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
+                                        result.roomIdToInfo().put(variation.getId(), p);
+                                        result.roomInfoToNames().put(p, variation.getNames());
+                                    }
                                 }
                             );
                             break;
