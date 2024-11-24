@@ -403,6 +403,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
+        itemIdsCache.put(CacheItemTypes.NO_ROOM_VARIATION, products.noRoomVariationIds());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
