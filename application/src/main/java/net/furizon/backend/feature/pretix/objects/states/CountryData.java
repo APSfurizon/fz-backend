@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class PhoneCountry extends PretixState {
+public class CountryData extends PretixState {
     @NotNull String phonePrefix;
 
-    public PhoneCountry(@NotNull String name, @NotNull String code, @NotNull String phonePrefix) {
-        super(name, code);
+    public CountryData(@NotNull String name, @NotNull String code, @NotNull String phonePrefix) {
+        super(code, name);
         this.phonePrefix = phonePrefix;
     }
 }

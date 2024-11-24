@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
-import net.furizon.backend.feature.pretix.objects.states.dto.GitPhoneCountry;
+import net.furizon.backend.feature.pretix.objects.states.dto.CountryDataRaw;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixStateResponse;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
@@ -116,9 +116,9 @@ public class RestPretixStateFinder implements PretixStateFinder {
             //Unfortunately, the response content type header is set to text/plain, and the RestClient
             //Won't interpret it as a json. This is a workaround
             if (res != null) {
-                List<GitPhoneCountry> countries = objectMapper.readValue(
+                List<CountryDataRaw> countries = objectMapper.readValue(
                         res,
-                        TypeFactory.defaultInstance().constructCollectionType(List.class, GitPhoneCountry.class)
+                        TypeFactory.defaultInstance().constructCollectionType(List.class, CountryDataRaw.class)
                 );
                 return countries.stream().map(k -> (PretixState) k.toPhoneCountry()).toList();
             } else {
