@@ -18,5 +18,6 @@ public class User {
     @Nullable
     private final String locale;
 
-    private final long propicId;
+    @Nullable
+    private final Long propicId;
 }

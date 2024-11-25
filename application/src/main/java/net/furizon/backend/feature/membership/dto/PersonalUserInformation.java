@@ -40,7 +40,6 @@ public class PersonalUserInformation {
     private final String birthCity;
 
     @Nullable
-    @NotEmpty
     @Size(min = 2)
     private final String birthRegion;
 
@@ -69,7 +68,6 @@ public class PersonalUserInformation {
     private final String residenceCity;
 
     @Nullable
-    @NotEmpty
     @Size(min = 2)
     private final String residenceRegion;
 
