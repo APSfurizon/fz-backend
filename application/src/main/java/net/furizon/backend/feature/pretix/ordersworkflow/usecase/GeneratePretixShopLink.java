@@ -24,9 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.BOOL;
-import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.VALUE;
-import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.DROPDOWN;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.*;
 
 @Component
 @RequiredArgsConstructor
@@ -63,28 +61,28 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
 
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
 
-        actions.add(new AutocartAction<>("id_email", mail, VALUE));
-        actions.add(new AutocartAction<>("id_email_repeat", mail, VALUE));
+        actions.add(new AutocartAction<>("id_email", mail, INPUT));
+        actions.add(new AutocartAction<>("id_email_repeat", mail, INPUT));
         if (info != null) {
             actions.add(new AutocartAction<>("id_phone_0", info.getPhoneNumber(), DROPDOWN)); //TODO
-            actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), VALUE));
-            actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), VALUE));
-            actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), VALUE));
-            actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), VALUE));
-            actions.add(new AutocartAction<>("id_zipcode", info.getResidenceZipCode(), VALUE));
-            actions.add(new AutocartAction<>("id_city", info.getResidenceZipCode(), VALUE));
+            actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), INPUT));
+            actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), INPUT));
+            actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), INPUT));
+            actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), TEXT_AREA));
+            actions.add(new AutocartAction<>("id_zipcode", info.getResidenceZipCode(), INPUT));
+            actions.add(new AutocartAction<>("id_city", info.getResidenceZipCode(), INPUT));
             actions.add(new AutocartAction<>("id_country", info.getResidenceCountry(), DROPDOWN));
             String region = info.getResidenceRegion();
             if (region != null) {
                 actions.add(new AutocartAction<>("id_state", info.getResidenceRegion(), DROPDOWN));
             }
-            actions.add(new AutocartAction<>("id_$-attendee_name_parts_0", info.getFirstName(), VALUE));
-            actions.add(new AutocartAction<>("id_$-attendee_name_parts_1", info.getLastName(), VALUE));
-            actions.add(new AutocartAction<>("id_$-attendee_email", mail, VALUE));
-            actions.add(new AutocartAction<>("id_$-street", info.getResidenceAddress(), VALUE));
-            actions.add(new AutocartAction<>("id_$-zipcode", info.getResidenceZipCode(), VALUE));
-            actions.add(new AutocartAction<>("id_$-city", info.getResidenceCity(), VALUE));
-            actions.add(new AutocartAction<>("id_$-country", info.getResidenceCountry(), VALUE));
+            actions.add(new AutocartAction<>("id_$-attendee_name_parts_0", info.getFirstName(), INPUT));
+            actions.add(new AutocartAction<>("id_$-attendee_name_parts_1", info.getLastName(), INPUT));
+            actions.add(new AutocartAction<>("id_$-attendee_email", mail, INPUT));
+            actions.add(new AutocartAction<>("id_$-street", info.getResidenceAddress(), TEXT_AREA));
+            actions.add(new AutocartAction<>("id_$-zipcode", info.getResidenceZipCode(), INPUT));
+            actions.add(new AutocartAction<>("id_$-city", info.getResidenceCity(), INPUT));
+            actions.add(new AutocartAction<>("id_$-country", info.getResidenceCountry(), INPUT));
             if (region != null) {
                 actions.add(new AutocartAction<>("id_$-state", info.getResidenceRegion(), DROPDOWN));
             }
@@ -100,7 +98,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         if (!generatedUrl.isPresent()) {
             throw new RuntimeException("Autocart link generation failed.");
         }
-        return new LinkResponse(generatedUrl.get());
+        return new LinkResponse(generatedUrl.get() + "&z=0"); //Random param to prevent typos from destroying payload
     }
 
     public record Input(

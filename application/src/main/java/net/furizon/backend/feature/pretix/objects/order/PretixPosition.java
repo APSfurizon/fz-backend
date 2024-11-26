@@ -19,4 +19,6 @@ public class PretixPosition {
 
     @NotNull
     private final List<PretixAnswer> answers;
+
+    private final boolean canceled;
 }
