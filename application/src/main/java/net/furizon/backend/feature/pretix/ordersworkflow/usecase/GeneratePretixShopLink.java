@@ -64,7 +64,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         actions.add(new AutocartAction<>("id_email", mail, INPUT));
         actions.add(new AutocartAction<>("id_email_repeat", mail, INPUT));
         if (info != null) {
-            actions.add(new AutocartAction<>("id_phone_0", info.getPhoneNumber(), DROPDOWN)); //TODO
+            actions.add(new AutocartAction<>("id_phone_0", info.getPhoneNumber(), DROPDOWN));
             actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), INPUT));
             actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), INPUT));
             actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), INPUT));
