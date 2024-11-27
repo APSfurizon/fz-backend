@@ -222,6 +222,10 @@ public class CachedPretixInformation implements PretixInformation {
             }
 
             for (PretixPosition position : positions) {
+                if (position.isCanceled()) {
+                    continue;
+                }
+
                 int item = position.getItemId();
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {

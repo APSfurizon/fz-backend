@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AutocartActionType {
-    BOOL('b'), VALUE('v'), DROPDOWN('d');
+    BOOL('b'),
+    INPUT('i'),
+    TEXT_AREA('t'),
+    DROPDOWN('d');
+
     private final char value;
 }
