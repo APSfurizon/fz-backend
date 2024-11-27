@@ -46,6 +46,21 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     int day = Integer.parseInt(s);
                     result.dailyIdToDay().put(product.getId(), day);
 
+                } else if (identifier.startsWith(Const.METADATA_ROOM_TYPE_TAG_PREFIX)) {
+                    result.roomItemIds().add(product.getId());
+                    String s = identifier.substring(Const.METADATA_ROOM_TYPE_TAG_PREFIX.length());
+                    if (s.equals(Const.METADATA_ROOM_NO_ROOM_VARIATION)) {
+                        result.noRoomVariationIds().add(product.getId());
+                    } else {
+                        String[] sp = s.split("_");
+                        String hotelName = sp[0];
+                        short capacity = Short.parseShort(sp[1]);
+                        HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
+                        result.roomIdToInfo().put(product.getId(), p);
+                        result.roomInfoToNames().put(p, product.getNames());
+                    }
+
+
                 } else {
                     switch (identifier) {
                         case Const.METADATA_EVENT_TICKET: {
@@ -63,25 +78,6 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                                 (variation, strippedIdentifier) -> {
                                     Sponsorship ss = Sponsorship.get(Integer.parseInt(strippedIdentifier));
                                     result.sponsorshipIdToType().put(variation.getId(), ss);
-                                }
-                            );
-                            break;
-                        }
-                        case Const.METADATA_ROOM: {
-                            result.roomItemIds().add(product.getId());
-                            product.forEachVariationByIdentifierPrefix(
-                                Const.METADATA_ROOM_TYPE_TAG_PREFIX,
-                                (variation, strippedIdentifier) -> {
-                                    if (strippedIdentifier.equals(Const.METADATA_ROOM_NO_ROOM_VARIATION)) {
-                                        result.noRoomVariationIds().add(variation.getId());
-                                    } else {
-                                        String[] sp = strippedIdentifier.split("_");
-                                        String hotelName = sp[0];
-                                        short capacity = Short.parseShort(sp[1]);
-                                        HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
-                                        result.roomIdToInfo().put(variation.getId(), p);
-                                        result.roomInfoToNames().put(p, variation.getNames());
-                                    }
                                 }
                             );
                             break;

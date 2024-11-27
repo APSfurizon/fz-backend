@@ -266,12 +266,11 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                    int variationId = position.getVariationId();
-                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, variationId)) {
+                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, item)) {
                         roomCapacity = 0;
                         hotelLocation = null;
                     } else {
-                        HotelCapacityPair room = roomIdToInfo.getIfPresent(variationId);
+                        HotelCapacityPair room = roomIdToInfo.getIfPresent(item);
                         if (room != null) {
                             roomCapacity = room.capacity();
                             hotelLocation = room.hotel();
