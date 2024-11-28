@@ -25,7 +25,6 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
             PostgresDSL
                 .insertInto(
                     EVENTS,
-                    EVENTS.ID,
                     EVENTS.EVENT_SLUG,
                     EVENTS.EVENT_DATE_TO,
                     EVENTS.EVENT_DATE_FROM,
@@ -34,7 +33,6 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     EVENTS.EVENT_NAMES_JSON
                 )
                 .values(
-                    event.getId(),
                     event.getSlug(),
                     event.getDateTo(),
                     event.getDateFrom(),
