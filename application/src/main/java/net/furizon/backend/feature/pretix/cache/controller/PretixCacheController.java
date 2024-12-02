@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 //TODO: Only admins are allowed to run these!
 public class PretixCacheController {
+    @NotNull
     private final PretixInformation pretixService;
 
     @Operation(summary = "Reloads the pretix's events, organizers, questions and products", description =
@@ -23,6 +25,7 @@ public class PretixCacheController {
             + "to be launched ONLY by the backend admins")
     @PostMapping("/reload-struct")
     public void reloadCache() {
+        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
     }
@@ -31,6 +34,7 @@ public class PretixCacheController {
             "This method is meant to be launched ONLY by the backend admins")
     @PostMapping("/reload-orders")
     public void reloadOrders() {
+        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();
     }

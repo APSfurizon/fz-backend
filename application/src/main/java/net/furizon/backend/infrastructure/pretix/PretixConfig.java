@@ -12,13 +12,7 @@ import org.springframework.util.MultiValueMap;
 @ConfigurationProperties(prefix = "pretix")
 public class PretixConfig implements HttpConfig {
     @NotNull
-    private final String url;
-
-    @NotNull
-    private final String apiPath;
-
-    @NotNull
-    private final String apiKey;
+    private final Api api;
 
     @NotNull
     private final String defaultOrganizer;
@@ -31,18 +25,21 @@ public class PretixConfig implements HttpConfig {
     private final boolean enableSync;
   
     @NotNull
-    private String cacheReloadCronjob;
+    private final String cacheReloadCronjob;
+
+    @NotNull
+    private final Shop shop;
 
     @NotNull
     @Override
     public String getBaseUrl() {
-        return url;
+        return api.url;
     }
 
     @NotNull
     @Override
     public String getBasePath() {
-        return apiPath;
+        return api.path;
     }
 
     @NotNull
@@ -50,8 +47,25 @@ public class PretixConfig implements HttpConfig {
     public MultiValueMap<String, String> headers() {
         return new LinkedMultiValueMap<>() {
             {
-                add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(apiKey));
+                add(HttpHeaders.HOST, shop.host); //Needed in prod, which talks locally with pretix
+                add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(api.key));
             }
         };
+    }
+
+    @Data
+    public static class Api {
+        @NotNull private final String url;
+        @NotNull private final String path;
+        @NotNull private final String key;
+    }
+
+    @Data
+    public static class Shop {
+        @NotNull private final String host;
+        @NotNull private final String port;
+        @NotNull private final String basePath;
+        @NotNull private final String path;
+        @NotNull private final String url;
     }
 }

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 
 import static net.furizon.backend.feature.authentication.Const.EMAIL_REGEX;
 

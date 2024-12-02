@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import net.furizon.backend.feature.authentication.dto.RegisterUserResponse;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final UseCaseExecutor executor;
+    private final PretixInformation pretixService;
 
     @PostMapping("/login")
     public LoginResponse loginUser(
@@ -52,20 +55,29 @@ public class AuthenticationController {
     ) {
         executor.execute(
             LogoutUserUseCase.class,
-            new LogoutUserUseCase.Input(user.getSessionId())
+            user.getSessionId()
         );
 
         return LogoutUserResponse.SUCCESS;
     }
 
 
+    @Operation(summary = "Registers a new user", description =
+        "Birthday and residence countries should be passed as a ISO 3166-1 A-2 string. "
+        + "Birthday and residence state instead must correspond to the `code` field obtained "
+        + "with the [`/states/by-country`](#/pretix-states-controller/getPretixStates) endpoint. "
+        + "If a state is unsupported (the previous endpoint returns an empty array), the user "
+        + "should be prompted with a normal text field which can be normally submitted as state")
     @PostMapping("/register")
     public RegisterUserResponse registerUser(
         @Valid @RequestBody final RegisterUserRequest registerUserRequest
     ) {
         executor.execute(
             RegisterUserUseCase.class,
-            registerUserRequest
+            new RegisterUserUseCase.Input(
+                registerUserRequest,
+                pretixService.getCurrentEvent().orElse(null)
+            )
         );
 
         return RegisterUserResponse.SUCCESS;

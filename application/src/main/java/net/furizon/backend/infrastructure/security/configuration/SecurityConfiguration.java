@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.security.configuration;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,8 @@ public class SecurityConfiguration {
 
     private final SecurityConfig securityConfig;
 
+    private final PretixConfig pretixConfig;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Map the allowed endpoints
@@ -42,7 +45,10 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.GET, "/docs/**"),
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register")
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
+                    antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
+                    antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
+                    antMatcher(HttpMethod.GET, pretixConfig.getShop().getPath() + "order/**")
                 )
                 .permitAll()
                 // TODO -> Remove it later (just for testing)

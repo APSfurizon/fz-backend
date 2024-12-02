@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Events.EventsPath;
+import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.Rooms.RoomsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -73,7 +75,7 @@ public class Orders extends TableImpl<Record> {
     /**
      * The column <code>public.orders.id</code>.
      */
-    public final TableField<Record, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.orders.order_code</code>.
@@ -133,12 +135,17 @@ public class Orders extends TableImpl<Record> {
     /**
      * The column <code>public.orders.event_id</code>.
      */
-    public final TableField<Record, Integer> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.orders.user_id</code>.
      */
     public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.creation_ts</code>.
+     */
+    public final TableField<Record, LocalDateTime> CREATION_TS = createField(DSL.name("creation_ts"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -240,6 +247,19 @@ public class Orders extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.ORDERS__ORDERS_USERS_ID, null);
 
         return _users;
+    }
+
+    private transient MembershipCardsPath _membershipCards;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.membership_cards</code> table
+     */
+    public MembershipCardsPath membershipCards() {
+        if (_membershipCards == null)
+            _membershipCards = new MembershipCardsPath(this, null, Keys.MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK.getInverseKey());
+
+        return _membershipCards;
     }
 
     private transient RoomsPath _rooms;

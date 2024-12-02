@@ -1,9 +1,11 @@
 package net.furizon.backend.feature.membership.action.addMembershipInfo;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.PersonalUserInformation;
+import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +17,9 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
     private final SqlCommand sqlCommand;
 
     @Override
-    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation) {
+    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
+        Long eventId = event == null ? null : event.getId();
+
         sqlCommand.execute(
             PostgresDSL
                 .insertInto(
@@ -33,7 +37,8 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     MEMBERSHIP_INFO.INFO_REGION,
                     MEMBERSHIP_INFO.INFO_COUNTRY,
                     MEMBERSHIP_INFO.INFO_PHONE,
-                    MEMBERSHIP_INFO.USER_ID
+                    MEMBERSHIP_INFO.USER_ID,
+                    MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID
                 )
                 .values(
                     personalUserInformation.getFirstName(),
@@ -49,7 +54,8 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getResidenceRegion(),
                     personalUserInformation.getResidenceCountry(),
                     personalUserInformation.getPhoneNumber(),
-                    userId
+                    userId,
+                    eventId
                 )
         );
     }

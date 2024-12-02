@@ -13,12 +13,14 @@ import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
+import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.InverseForeignKey;
 import org.jooq.JSON;
 import org.jooq.Name;
@@ -70,7 +72,7 @@ public class Events extends TableImpl<Record> {
     /**
      * The column <code>public.events.id</code>.
      */
-    public final TableField<Record, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>public.events.event_slug</code>.
@@ -171,8 +173,13 @@ public class Events extends TableImpl<Record> {
     }
 
     @Override
+    public Identity<Record, Long> getIdentity() {
+        return (Identity<Record, Long>) super.getIdentity();
+    }
+
+    @Override
     public UniqueKey<Record> getPrimaryKey() {
-        return Keys.EVENTS_PKEY;
+        return Keys.EVENT_PKEY;
     }
 
     private transient FursuitsEventsPath _fursuitsEvents;
@@ -186,6 +193,19 @@ public class Events extends TableImpl<Record> {
             _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK.getInverseKey());
 
         return _fursuitsEvents;
+    }
+
+    private transient MembershipInfoPath _membershipInfo;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.membership_info</code> table
+     */
+    public MembershipInfoPath membershipInfo() {
+        if (_membershipInfo == null)
+            _membershipInfo = new MembershipInfoPath(this, null, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_UPDATED_EVENT_ID.getInverseKey());
+
+        return _membershipInfo;
     }
 
     private transient OrdersPath _orders;

@@ -81,17 +81,12 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_fursona_name</code>.
      */
-    public final TableField<Record, String> USER_FURSONA_NAME = createField(DSL.name("user_fursona_name"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<Record, String> USER_FURSONA_NAME = createField(DSL.name("user_fursona_name"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.users.user_locale</code>.
      */
     public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
-
-    /**
-     * The column <code>public.users.user_secret</code>.
-     */
-    public final TableField<Record, String> USER_SECRET = createField(DSL.name("user_secret"), SQLDataType.VARCHAR(70).nullable(false), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
@@ -174,11 +169,6 @@ public class Users extends TableImpl<Record> {
     @Override
     public UniqueKey<Record> getPrimaryKey() {
         return Keys.USERS_PKEY;
-    }
-
-    @Override
-    public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.USERS_UNIQUE_SECRET);
     }
 
     @Override

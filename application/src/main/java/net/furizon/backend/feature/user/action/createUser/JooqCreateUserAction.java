@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 import static net.furizon.jooq.generated.tables.Users.USERS;
 
 @Component
@@ -22,12 +20,10 @@ public class JooqCreateUserAction implements CreateUserAction {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         USERS,
-                        USERS.USER_FURSONA_NAME,
-                        USERS.USER_SECRET
+                        USERS.USER_FURSONA_NAME
                     )
                     .values(
-                        fursonaName,
-                        UUID.randomUUID().toString()
+                        fursonaName
                     )
                     .returning(
                         USERS.USER_ID,

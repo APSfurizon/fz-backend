@@ -12,6 +12,8 @@ public class JooqUserMapper {
         return User.builder()
             .id(record.get(USERS.USER_ID))
             .fursonaName(record.get(USERS.USER_FURSONA_NAME))
+            .locale(record.get(USERS.USER_LOCALE))
+            .propicId(record.get(USERS.MEDIA_ID_PROPIC))
             .build();
     }
 }

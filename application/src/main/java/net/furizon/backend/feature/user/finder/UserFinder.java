@@ -6,7 +6,4 @@ import org.jetbrains.annotations.Nullable;
 public interface UserFinder {
     @Nullable
     User findById(long id);
-
-    @Nullable
-    User findBySecret(String secret);
 }

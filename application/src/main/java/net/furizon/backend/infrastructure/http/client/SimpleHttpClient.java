@@ -44,20 +44,24 @@ public class SimpleHttpClient implements HttpClient {
             throw new IllegalArgumentException("No config found for " + configClass.getSimpleName());
         }
 
-        UriBuilder builder = new DefaultUriBuilderFactory(config.getBaseUrl())
+        String baseUrl = request.shouldOverrideUrl() ? request.overrideBaseUrl() : config.getBaseUrl();
+        String basePath = request.shouldOverridePath() ? request.overrideBasePath() : config.getBasePath();
+
+        UriBuilder builder = new DefaultUriBuilderFactory(baseUrl)
             .builder()
-            .path(config.getBasePath() + request.getPath());
+            .path(basePath + request.getPath());
 
         if (!request.getQueryParams().isEmpty()) {
             builder = builder.queryParams(request.getQueryParams());
         }
 
-
         RestClient.RequestBodySpec requestBodySpec = restClient
             .method(request.getMethod())
             .uri(builder.build(request.getUriVariables()))
             .headers((headers) -> {
-                headers.addAll(config.headers());
+                if (request.sendConfigHeaders()) {
+                    headers.addAll(config.headers());
+                }
                 if (!request.getHeaders().isEmpty()) {
                     headers.addAll(request.getHeaders());
                 }

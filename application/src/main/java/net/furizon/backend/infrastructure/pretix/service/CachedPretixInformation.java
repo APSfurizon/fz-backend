@@ -5,18 +5,21 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.event.Event;
-import net.furizon.backend.feature.pretix.event.usecase.ReloadEventsUseCase;
-import net.furizon.backend.feature.pretix.order.Order;
-import net.furizon.backend.feature.pretix.order.PretixAnswer;
-import net.furizon.backend.feature.pretix.order.PretixOrder;
-import net.furizon.backend.feature.pretix.order.PretixPosition;
-import net.furizon.backend.feature.pretix.order.usecase.ReloadOrdersUseCase;
-import net.furizon.backend.feature.pretix.product.HotelCapacityPair;
-import net.furizon.backend.feature.pretix.product.PretixProductResults;
-import net.furizon.backend.feature.pretix.product.usecase.ReloadProductsUseCase;
-import net.furizon.backend.feature.pretix.question.PretixQuestion;
-import net.furizon.backend.feature.pretix.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
+import net.furizon.backend.feature.pretix.objects.event.usecase.ReloadEventsUseCase;
+import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
+import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
+import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
+import net.furizon.backend.feature.pretix.objects.order.usecase.ReloadOrdersUseCase;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
+import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
+import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
+import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.feature.pretix.objects.states.PretixState;
+import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -32,17 +35,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
-import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_SECRET;
+import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_USERID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +60,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final UseCaseExecutor useCaseExecutor;
     @NotNull
     private final UserFinder userFinder;
+    @NotNull
+    private final EventFinder eventFinder;
     @NotNull
     private final PretixConfig pretixConfig;
 
@@ -70,7 +77,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Questions
     @NotNull
-    private final AtomicReference<Integer> questionSecretId = new AtomicReference<>(-1);
+    private final AtomicReference<Integer> questionUserId = new AtomicReference<>(-1);
     @NotNull
     private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
@@ -99,6 +106,11 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
         Caffeine.newBuilder().build();
 
+    @NotNull
+    private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
+            .expireAfterWrite(7L, TimeUnit.DAYS)
+            .build();
+
     @PostConstruct
     public void init() {
         if (!pretixConfig.isEnableSync()) {
@@ -106,9 +118,27 @@ public class CachedPretixInformation implements PretixInformation {
             return;
         }
         log.info("[PRETIX] Initializing pretix information and cache it");
-        //TODO UNCOMMENT
-        //resetCache();
-        //reloadAllOrders();
+        long start = System.currentTimeMillis();
+        resetCache();
+        reloadAllOrders();
+        log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
+    }
+
+    @NotNull
+    @Override
+    public List<PretixState> getStatesOfCountry(String countryIsoCode) {
+        //No cache lock needed!
+        var ret = statesOfCountry.get(countryIsoCode, k -> useCaseExecutor.execute(FetchStatesByCountry.class, k));
+        return ret != null ? ret : new LinkedList<>();
+    }
+
+    @NotNull
+    @Override
+    public Set<Integer> getIdsForItemType(CacheItemTypes type) {
+        lock.readLock().lock();
+        var v = itemIdsCache.getIfPresent(type);
+        lock.readLock().unlock();
+        return v == null ? new HashSet<>() : v;
     }
 
     @NotNull
@@ -120,10 +150,9 @@ public class CachedPretixInformation implements PretixInformation {
         return Optional.ofNullable(v);
     }
 
-    @Override
-    public int getQuestionSecretId() {
+    public int getQuestionUserId() {
         lock.readLock().lock();
-        var v = questionSecretId.get();
+        var v = questionUserId.get();
         lock.readLock().unlock();
         return v;
     }
@@ -166,7 +195,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Order> parseOrderFromId(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
+    public Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
         lock.readLock().lock();
         try {
             Integer cacheDay;
@@ -184,8 +213,8 @@ public class CachedPretixInformation implements PretixInformation {
             int answersMainPositionId = 0;
             String hotelLocation = null;
             boolean membership = false;
-            String userSecret = null;
             short roomCapacity = 0;
+            Long userId = null;
 
             List<PretixPosition> positions = pretixOrder.getPositions();
             if (positions.isEmpty()) {
@@ -193,6 +222,10 @@ public class CachedPretixInformation implements PretixInformation {
             }
 
             for (PretixPosition position : positions) {
+                if (position.isCanceled()) {
+                    continue;
+                }
+
                 int item = position.getItemId();
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
@@ -206,8 +239,11 @@ public class CachedPretixInformation implements PretixInformation {
                             if (questionType.get() == QuestionType.FILE) {
                                 answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
                             }
-                            if (questionId == this.getQuestionSecretId()) {
-                                userSecret = answer.getAnswer();
+                            if (questionId == this.getQuestionUserId()) {
+                                String s = answer.getAnswer();
+                                if (s != null && !s.isBlank()) {
+                                    userId = Long.parseLong(s);
+                                }
                             }
                         }
                     }
@@ -234,10 +270,16 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                    HotelCapacityPair room = roomIdToInfo.getIfPresent(position.getVariationId());
-                    if (room != null) {
-                        roomCapacity = room.capacity();
-                        hotelLocation = room.hotel();
+                    int variationId = position.getVariationId();
+                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, variationId)) {
+                        roomCapacity = 0;
+                        hotelLocation = null;
+                    } else {
+                        HotelCapacityPair room = roomIdToInfo.getIfPresent(variationId);
+                        if (room != null) {
+                            roomCapacity = room.capacity();
+                            hotelLocation = room.hotel();
+                        }
                     }
                 }
             }
@@ -258,9 +300,11 @@ public class CachedPretixInformation implements PretixInformation {
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .answersMainPositionId(answersMainPositionId)
-                    .orderOwner(userFinder.findBySecret(userSecret))
-                    .orderEvent(event)
+                    .eventId(event.getId())
+                    .orderOwnerUserId(userId)
                     .answers(answers, this)
+                    .userFinder(userFinder)
+                    .eventFinder(eventFinder)
                     .build()
             );
         } finally {
@@ -297,7 +341,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.invalidateAll();
 
         //Questions
-        questionSecretId.set(-1);
+        questionUserId.set(-1);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
@@ -348,11 +392,11 @@ public class CachedPretixInformation implements PretixInformation {
             questionIdToIdentifier.put(questionId, questionIdentifier);
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
-        // searching QUESTIONS_ACCOUNT_SECRET
-        Integer accountSecretId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_SECRET);
-        if (accountSecretId != null) {
-            log.info("[PRETIX] Account secret id found, setup it on value = '{}'", accountSecretId);
-            questionSecretId.set(accountSecretId);
+        // searching QUESTIONS_ACCOUNT_USERID
+        Integer accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
+        if (accountUserId != null) {
+            log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
+            questionUserId.set(accountUserId);
         }
     }
 
@@ -363,6 +407,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
+        itemIdsCache.put(CacheItemTypes.NO_ROOM_VARIATION, products.noRoomVariationIds());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
