@@ -151,7 +151,7 @@ public class Order {
         if (orderEvent == null) {
             orderEvent = eventFinder.findEventById(eventId);
             if (orderEvent == null) {
-                throw new RuntimeException("Event " + eventId + "not found");
+                throw new RuntimeException("Event " + eventId + " not found");
             }
         }
         return orderEvent;
