@@ -20,8 +20,8 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
     private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(@NotNull Event event) {
-        command.execute(
+    public long invoke(@NotNull Event event) {
+        return command.executeResult(
             PostgresDSL
                 .insertInto(
                     EVENTS,
@@ -42,7 +42,7 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                         .ofNullable(event.getEventNames())
                         .map(jsonSerializer::serializeAsJson)
                         .orElse(null)
-                )
-        );
+                ).returning(EVENTS.ID)
+        ).getFirst().get(EVENTS.ID);
     }
 }

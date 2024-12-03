@@ -16,7 +16,7 @@ import java.util.Map;
 @Data
 @Builder
 public class Event {
-    private final long id;
+    private long id;
 
     @NotNull
     private String slug;

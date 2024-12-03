@@ -70,11 +70,12 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
                                 .publicUrl(event.getPublicUrl())
                                 .eventNames(event.getName())
                                 .isCurrent(isCurrentEvent)
-                                .dateTo(event.getDateTo()) // namings in db not the same as in pretix?
-                                .dateFrom(event.getDateFrom()) // is from is start?
+                                .dateTo(event.getDateTo())
+                                .dateFrom(event.getDateFrom())
                                 .build();
 
-                        insertEventAction.invoke(newEvent);
+                        long dbId = insertEventAction.invoke(newEvent);
+                        newEvent.setId(dbId);
 
                         // in case if we won't find an existed current event
                         if (isCurrentEvent) {
