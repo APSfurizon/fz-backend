@@ -13,7 +13,6 @@ import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
     @org.jetbrains.annotations.NotNull
     private final PretixInformation pretixInformation;
-    @Qualifier("${room.logic}")
     @org.jetbrains.annotations.NotNull
     private final RoomLogic roomLogic;
 
