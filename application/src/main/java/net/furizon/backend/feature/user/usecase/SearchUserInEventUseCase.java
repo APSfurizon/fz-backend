@@ -21,12 +21,20 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
     public @NotNull SearchUsersResponse executor(@NotNull SearchUserInEventUseCase.Input input) {
         var e = input.pretixService.getCurrentEvent();
         if (e.isPresent()) {
-            return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(input.fursonaName, e.get()));
+            return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(
+                    input.fursonaName,
+                    e.get(),
+                    input.filterRoom
+            ));
         } else {
             log.warn("Current event is null!");
             return new SearchUsersResponse(new LinkedList<>());
         }
     }
 
-    public record Input(@NotNull String fursonaName, @NotNull PretixInformation pretixService) {}
+    public record Input(
+            @NotNull String fursonaName,
+            @NotNull PretixInformation pretixService,
+            boolean filterRoom
+    ) {}
 }

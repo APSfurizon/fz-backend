@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,9 @@ public class UserController {
         + "This method is intended for search&select purpose (eg: while inviting someone to your own room) and "
         + "it returns a list of users with their id, full fursona name and propic url (it can be null!). "
         + "This method purposely ignores the `show_in_nosecount` flag iff the name fully matches except "
-        + "for one single character. Results are ordered by match and alphabetically")
+        + "for one single character. Results are ordered by match and alphabetically. "
+        + "Using the optional `filter-room` parameter you can filter out people who already "
+        + "own a room or are in a room")
     @GetMapping("/search-in-current-event")
     public SearchUsersResponse searchByFursonaNameInCurrentEvent(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -70,13 +73,18 @@ public class UserController {
             @jakarta.validation.constraints.NotNull
             @Size(min = 2)
             @RequestParam("fursona-name")
-            final String fursonaName
+            final String fursonaName,
+            @Valid
+            @Nullable
+            @RequestParam("filter-room")
+            final Boolean filterRoom
     ) {
         return executor.execute(
                 SearchUserInEventUseCase.class,
                 new SearchUserInEventUseCase.Input(
                         fursonaName,
-                        pretixInformation
+                        pretixInformation,
+                        filterRoom == null ? false : filterRoom
                 )
         );
     }

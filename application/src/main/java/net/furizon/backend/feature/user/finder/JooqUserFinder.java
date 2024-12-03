@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.*;
 
 @Component
 @RequiredArgsConstructor
@@ -35,10 +34,11 @@ public class JooqUserFinder implements UserFinder {
     }
 
     public List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
-            @NotNull String fursonaName, @NotNull Event event
+            @NotNull String fursonaName,
+            @NotNull Event event,
+            boolean filterRoom
     ) {
-        return sqlQuery.fetch(
-            PostgresDSL
+        var query = PostgresDSL
             .select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
@@ -58,7 +58,29 @@ public class JooqUserFinder implements UserFinder {
                         .and(USERS.SHOW_IN_NOSECOUNT.eq(false))
                     )
                 )
-            )
+            );
+
+        if (filterRoom) {
+            query = query
+                .innerJoin(ORDERS)
+                .on(
+                    USERS.USER_ID.eq(ORDERS.USER_ID)
+                    .and(
+                        ORDERS.ORDER_ROOM_CAPACITY.isNull()
+                        .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
+                    )
+                    .and(
+                        USERS.USER_ID.notIn(
+                            PostgresDSL.select(ROOM_GUESTS.USER_ID)
+                            .from(ROOM_GUESTS)
+                            .where(ROOM_GUESTS.CONFIRMED.eq(true))
+                        )
+                    )
+                );
+        }
+
+        return sqlQuery.fetch(
+            query
             .orderBy(
                 PostgresDSL.position(fursonaName, USERS.USER_FURSONA_NAME),
                 USERS.USER_FURSONA_NAME

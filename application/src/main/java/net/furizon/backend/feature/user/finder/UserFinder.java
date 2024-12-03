@@ -12,5 +12,9 @@ public interface UserFinder {
     @Nullable
     User findById(long id);
 
-    List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(@NotNull String fursonaName, @NotNull Event event);
+    List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
+            @NotNull String fursonaName,
+            @NotNull Event event,
+            boolean filterRoom
+    );
 }
