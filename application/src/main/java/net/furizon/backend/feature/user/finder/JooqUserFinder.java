@@ -33,7 +33,8 @@ public class JooqUserFinder implements UserFinder {
                     USERS.USER_ID,
                     USERS.USER_FURSONA_NAME,
                     USERS.USER_LOCALE,
-                    USERS.MEDIA_ID_PROPIC
+                    USERS.MEDIA_ID_PROPIC,
+                    USERS.SHOW_IN_NOSECOUNT
             )
             .from(USERS);
     }

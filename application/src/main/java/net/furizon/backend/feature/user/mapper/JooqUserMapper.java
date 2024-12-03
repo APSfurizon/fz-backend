@@ -14,6 +14,7 @@ public class JooqUserMapper {
             .fursonaName(record.get(USERS.USER_FURSONA_NAME))
             .locale(record.get(USERS.USER_LOCALE))
             .propicId(record.get(USERS.MEDIA_ID_PROPIC))
+            .showInNoseCount(record.get(USERS.SHOW_IN_NOSECOUNT))
             .build();
     }
 }

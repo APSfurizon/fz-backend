@@ -29,7 +29,6 @@ public class OrdersWorkflowController {
         + "so the order's products and questions are automatically filled. This link should be used by the frontend "
         + "to show buttons or redirect the user")
     @GetMapping("/generate-pretix-shop-link")
-
     public LinkResponse generatePretixShopLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {

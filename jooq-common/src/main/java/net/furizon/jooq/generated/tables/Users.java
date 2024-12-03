@@ -93,6 +93,11 @@ public class Users extends TableImpl<Record> {
      */
     public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
 
+    /**
+     * The column <code>public.users.show_in_nosecount</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
+
     private Users(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

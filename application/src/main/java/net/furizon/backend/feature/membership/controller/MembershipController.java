@@ -147,19 +147,6 @@ public class MembershipController {
         );
     }
 
-    //This should not be needed
-    /*@Operation(summary = "Exports the membership cards for the given year in CSV", description =
-        "If no year is specified or `year < 0`, the list of the current event is returned")
-    public void exportMembershipCardList(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid
-            @RequestParam("year")
-            final short year
-    ) {
-        //TODO [ADMIN_CHECK]
-        //TODO
-    }*/
-
     @Nullable
     private Event getEvent() {
         return pretixInformation.getCurrentEvent().orElse(null);
