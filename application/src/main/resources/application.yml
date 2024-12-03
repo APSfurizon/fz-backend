@@ -48,6 +48,9 @@ frontend:
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
 
+room:
+  logic: ${ROOM_LOGIC:roomLogic-default}
+
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
