@@ -12,12 +12,13 @@ import static net.furizon.jooq.generated.Tables.USERS;
 public class JooqDisplayUserMapper {
     @NotNull
     public static UserDisplayDataResponse map(Record record) {
+        Short sponsor = record.get(ORDERS.ORDER_SPONSORSHIP_TYPE);
         return UserDisplayDataResponse.builder()
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .locale(record.get(USERS.USER_LOCALE))
                 .propicUrl(record.get(MEDIA.MEDIA_PATH))
-                .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
+                .sponsorship(sponsor != null ? Sponsorship.get(sponsor) : null)
             .build();
     }
 }
