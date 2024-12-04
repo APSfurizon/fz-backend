@@ -47,6 +47,7 @@ public class JooqOrderFinder implements OrderFinder {
     public int countOrdersOfUserOnEvent(long userId, @NotNull Event event) {
         return query.count(
             PostgresDSL.select(ORDERS.ID)
+            .from(ORDERS)
             .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
         );

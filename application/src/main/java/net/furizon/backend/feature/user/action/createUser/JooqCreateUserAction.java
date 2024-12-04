@@ -27,7 +27,8 @@ public class JooqCreateUserAction implements CreateUserAction {
                     )
                     .returning(
                         USERS.USER_ID,
-                        USERS.USER_FURSONA_NAME
+                        USERS.USER_FURSONA_NAME,
+                        USERS.SHOW_IN_NOSECOUNT
                     )
             )
             .stream()
