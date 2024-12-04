@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.ordersworkflow.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;

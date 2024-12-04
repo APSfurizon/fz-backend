@@ -4,15 +4,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
+import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.feature.room.usecase.userBuysFullRoom.GetRoomInfoUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,15 +34,18 @@ public class RoomController {
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
     private final RoomLogic roomLogic;
+    @org.jetbrains.annotations.NotNull
+    private final UseCaseExecutor executor;
 
+    @NotNull
     @Operation(summary = "Creates a new room", description =
         "If the user doesn't have created a new room yet, it creates a new room with the specified name")
     @PostMapping("/create")
-    public boolean createRoom(
+    public RoomInfo createRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid @RequestBody final CreateRoomRequest createRoomRequest
     ) {
-        return false;
+        return null;
     }
 
     @Operation(summary = "Deletes user's room", description =
@@ -61,6 +70,7 @@ public class RoomController {
         return false;
     }
 
+    @NotNull
     @Operation(summary = "Invites (also forcefully) another user to the room", description =
         "This operation can be performed only by the room's owner or an administrator ."
         + "It invites the person specified in the `userId` param in the owner's room. "
@@ -69,11 +79,11 @@ public class RoomController {
         + "If the user is already part of a room and the `forceExit` param is set to `true`, then the user "
         + "it's forcefully moved to this room, otherwise an error is returned")
     @PostMapping("/invite")
-    public boolean invitePersonToRoom(
+    public RoomGuestResponse invitePersonToRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
     ) {
-        return false;
+        return null;
     }
 
     @Operation(summary = "Accept the specified invitation", description =
@@ -113,8 +123,11 @@ public class RoomController {
         "Kicks the person specified in the `guestId` parameter from the room"
         + "This operation can be performed only by the room's owner or by an administrator.")
     @PostMapping("/kick")
-    public void kickFromRoom(){
-
+    public boolean kickFromRoom(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @RequestBody final GuestIdRequest guestIdRequest
+    ) {
+        return false;
     }
 
     @Operation(summary = "Leaves the current room", description =
@@ -157,6 +170,14 @@ public class RoomController {
     @GetMapping("/info")
     @NotNull
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
-        return null;
+        return executor.execute(
+            GetRoomInfoUseCase.class,
+            new GetRoomInfoUseCase.Input(user, getEvent())
+        );
+    }
+
+    @Nullable
+    private Event getEvent() {
+        return pretixInformation.getCurrentEvent().orElse(null);
     }
 }

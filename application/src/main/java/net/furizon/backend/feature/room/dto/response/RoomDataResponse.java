@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.ordersworkflow.dto;
+package net.furizon.backend.feature.room.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

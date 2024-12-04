@@ -40,7 +40,7 @@ public class JooqUserFinder implements UserFinder {
 
     @Nullable
     @Override
-    public UserDisplayDataResponse getDisplayUser(long userId) {
+    public UserDisplayDataResponse getDisplayUser(long userId, @NotNull Event event) {
         return sqlQuery.fetchFirst(
             PostgresDSL
             .select(
@@ -57,7 +57,10 @@ public class JooqUserFinder implements UserFinder {
                 .and(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             )
             .leftJoin(ORDERS)
-            .on(USERS.USER_ID.eq(ORDERS.USER_ID))
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         ).mapOrNull(JooqDisplayUserMapper::map);
     }
 

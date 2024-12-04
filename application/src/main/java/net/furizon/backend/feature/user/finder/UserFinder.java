@@ -21,5 +21,5 @@ public interface UserFinder {
     );
 
     @Nullable
-    UserDisplayDataResponse getDisplayUser(long userId);
+    UserDisplayDataResponse getDisplayUser(long userId, @NotNull Event event);
 }
