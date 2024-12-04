@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -28,7 +29,7 @@ public class OrderDataResponse {
 
     private boolean isDailyTicket;
     @Nullable
-    private final Set<Integer> dailyDays;
+    private final Set<LocalDate> dailyDays;
 
     @Nullable
     private RoomDataResponse room;

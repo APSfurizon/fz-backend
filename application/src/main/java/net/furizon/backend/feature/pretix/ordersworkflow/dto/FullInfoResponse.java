@@ -6,7 +6,7 @@ import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +15,10 @@ import java.util.Map;
 public class FullInfoResponse {
     private final boolean shouldDisplayCountdown;
     @Nullable
-    private final LocalDateTime bookingStartTime;
+    private final OffsetDateTime bookingStartTime;
 
     @Nullable
-    private final LocalDateTime editBookEndTime;
+    private final OffsetDateTime editBookEndTime;
 
     @Nullable
     private final Map<String, String> eventNames;

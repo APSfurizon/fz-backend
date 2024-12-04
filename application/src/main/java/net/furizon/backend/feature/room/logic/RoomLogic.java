@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.room.logic;
 
 public interface RoomLogic {
-    //Security checks must be done BEFORE calling the following methods!
+    /*//Security checks must be done BEFORE calling the following methods!
 
     long createRoom(String name, long userId);
     boolean deleteRoom(long roomId);
@@ -19,5 +19,5 @@ public interface RoomLogic {
     boolean confirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
-    void doSanityChecks();
+    void doSanityChecks();*/
 }

@@ -7,6 +7,7 @@ import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,9 @@ public class JooqRoomFinder implements RoomFinder {
 
     @Nullable
     @Override
-    public RoomInfo getRoomInfoForUser(long userId, @NotNull Event event) {
+    public RoomInfo getRoomInfoForUser(
+            long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation
+    ) {
         return query.fetchFirst(
             PostgresDSL
             .select(
@@ -43,7 +46,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ROOMS.ORDER_ID.eq(ORDERS.ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
-        ).mapOrNull(JooqRoomInfoMapper::map);
+        ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation));
     }
 
     @NotNull

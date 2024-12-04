@@ -19,9 +19,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,11 +34,11 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
 
     @Value("${pretix.event.public-booking-start-time}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Nullable private LocalDateTime publicBookingStartTime;
+    @Nullable private OffsetDateTime publicBookingStartTime;
 
     @Value("${pretix.event.edit-booking-end-time}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Nullable private LocalDateTime editBookingEndTime;
+    @Nullable private OffsetDateTime editBookingEndTime;
 
     @Override
     public @NotNull FullInfoResponse executor(@NotNull Input input) {
@@ -64,8 +65,13 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
                 .sponsorship(order.getSponsorship())
                 .isDailyTicket(isDaily);
 
-            if (isDaily) {
-                orderDataBuilder = orderDataBuilder.dailyDays(order.getDailyDays());
+            OffsetDateTime from = event.getDateFrom();
+            if (isDaily && from != null) {
+                orderDataBuilder = orderDataBuilder.dailyDays(
+                        order.getDailyDays().stream().map(
+                                d -> from.plusDays(d).toLocalDate()
+                        ).collect(Collectors.toSet())
+                );
             }
             if (order.hasRoom()) {
                 short roomCapacity = order.getRoomCapacity();

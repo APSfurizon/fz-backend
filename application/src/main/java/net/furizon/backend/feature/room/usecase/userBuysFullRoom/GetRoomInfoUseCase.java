@@ -7,6 +7,7 @@ import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
 
         long userId = input.user.getUserId();
         List<RoomGuestResponse> invitations = null;
-        RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event);
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
 
         if (info == null) {
             invitations = roomFinder.getUserReceivedInvitations(userId, input.event);
@@ -42,5 +43,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         return new RoomInfoResponse(info, invitations);
     }
 
-    public record Input(@NotNull FurizonUser user, @Nullable Event event) {}
+    public record Input(
+            @NotNull FurizonUser user,
+            @Nullable Event event,
+            @NotNull PretixInformation pretixInformation
+    ) {}
 }

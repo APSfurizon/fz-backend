@@ -172,7 +172,7 @@ public class RoomController {
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
         return executor.execute(
             GetRoomInfoUseCase.class,
-            new GetRoomInfoUseCase.Input(user, getEvent())
+            new GetRoomInfoUseCase.Input(user, getEvent(), pretixInformation)
         );
     }
 
