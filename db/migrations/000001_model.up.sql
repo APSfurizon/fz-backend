@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS orders
     order_daily_days               int8                         NOT NULL,
     order_extra_days_type          int2                         NULL,
     order_room_capacity            int2                         NULL,
-    order_hotel_location           varchar(255)                 NULL,
+    order_hotel_internal_name      varchar(255)                 NULL,
     has_membership                 bool                         NOT NULL,
     order_secret                   varchar(32)                  NULL, -- todo remove --
     order_sponsorship_type         int2                         NOT NULL,

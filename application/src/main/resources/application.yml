@@ -52,6 +52,9 @@ room:
   logic: ${ROOM_LOGIC:roomLogic-default}
 
 pretix:
+  event:
+    public-booking-start-time: ${PRETIX_EVENT_START_PUBLIC_BOOKING_TIME:}
+    edit-booking-end-time: ${PRETIX_EVENT_EDIT_BOOKING_END_TIME:}
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}

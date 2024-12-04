@@ -41,7 +41,6 @@ import java.util.TreeSet;
 @Slf4j
 public class Order {
     @NotNull
-    @Setter(AccessLevel.NONE)
     private final String code;
 
     @NotNull
@@ -62,7 +61,7 @@ public class Order {
     private short roomCapacity = 0; // 0 = has no room
 
     @Nullable
-    private String hotelLocation;
+    private String hotelInternalName;
 
     @NotNull
     private String pretixOrderSecret;
@@ -121,6 +120,10 @@ public class Order {
             ret |= (1L << day);
         }
         return ret;
+    }
+
+    public boolean hasRoom() {
+        return roomCapacity > 0;
     }
 
     public boolean hasMembership() {

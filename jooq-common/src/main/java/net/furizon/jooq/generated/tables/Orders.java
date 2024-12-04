@@ -113,9 +113,9 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> ORDER_ROOM_CAPACITY = createField(DSL.name("order_room_capacity"), SQLDataType.SMALLINT, this, "");
 
     /**
-     * The column <code>public.orders.order_hotel_location</code>.
+     * The column <code>public.orders.order_hotel_internal_name</code>.
      */
-    public final TableField<Record, String> ORDER_HOTEL_LOCATION = createField(DSL.name("order_hotel_location"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> ORDER_HOTEL_INTERNAL_NAME = createField(DSL.name("order_hotel_internal_name"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.orders.has_membership</code>.

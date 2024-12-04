@@ -36,7 +36,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, (short) order.getExtraDays().ordinal())
                 .set(ORDERS.ORDER_DAILY_DAYS, order.getDailyDaysBitmask())
                 .set(ORDERS.ORDER_ROOM_CAPACITY, order.getRoomCapacity())
-                .set(ORDERS.ORDER_HOTEL_LOCATION, order.getHotelLocation())
+                .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, order.getHotelInternalName())
                 .set(ORDERS.ORDER_SECRET, order.getPretixOrderSecret())
                 .set(ORDERS.HAS_MEMBERSHIP, order.hasMembership())
                 .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, order.getAnswersMainPositionId())

@@ -34,13 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -122,6 +116,20 @@ public class CachedPretixInformation implements PretixInformation {
         resetCache();
         reloadAllOrders();
         log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
+    }
+
+    @NotNull
+    @Override
+    public Map<String, String> getRoomNamesFromInfo(String hotelInternalName, short roomCapacity) {
+        return getRoomNamesFromInfo(new HotelCapacityPair(hotelInternalName, roomCapacity));
+    }
+    @NotNull
+    @Override
+    public Map<String, String> getRoomNamesFromInfo(HotelCapacityPair roomInfo) {
+        lock.readLock().lock();
+        var v = roomInfoToNames.getIfPresent(roomInfo);
+        lock.readLock().unlock();
+        return v == null ? new HashMap<>() : v;
     }
 
     @NotNull
@@ -211,7 +219,7 @@ public class CachedPretixInformation implements PretixInformation {
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
             int answersMainPositionId = 0;
-            String hotelLocation = null;
+            String hotelInternalName = null;
             boolean membership = false;
             short roomCapacity = 0;
             Long userId = null;
@@ -272,12 +280,12 @@ public class CachedPretixInformation implements PretixInformation {
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
                     if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, item)) {
                         roomCapacity = 0;
-                        hotelLocation = null;
+                        hotelInternalName = null;
                     } else {
                         HotelCapacityPair room = roomIdToInfo.getIfPresent(item);
                         if (room != null) {
                             roomCapacity = room.capacity();
-                            hotelLocation = room.hotel();
+                            hotelInternalName = room.hotelInternalName();
                         }
                     }
                 }
@@ -295,7 +303,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .extraDays(extraDays)
                     .dailyDays(days)
                     .roomCapacity(roomCapacity)
-                    .hotelLocation(hotelLocation)
+                    .hotelInternalName(hotelInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .answersMainPositionId(answersMainPositionId)

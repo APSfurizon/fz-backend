@@ -2,8 +2,10 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GenerateFullStatusUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.SanityCheck;
@@ -65,6 +67,34 @@ public class OrdersWorkflowController {
     public SanityCheckResponse doSanityChecks(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        return sanityCheck.execute(user, pretixService);
+        return new SanityCheckResponse(sanityCheck.execute(user, pretixService));
+    }
+
+    @Operation(summary = "Gets all user's order information aggregated in one call", description =
+        "Returns all user's information that should be displayed in the frontend's user page. "
+        + "If `shouldDisplayCountdown` is `true`, the frontend should display a countdown ending "
+        + "at `bookingStartTime`. After the countdown is finished, a link/button pointing at "
+        + "[`/generate-pretix-shop-link`](#/orders-workflow-controller/generatePretixShopLink) "
+        + "should be displayed instead. Once an user has an order, instead of the shop link the "
+        + "frontend should show a link to [`/get-edit-order-link`](#/orders-workflow-controller/getOrderEditLink). "
+        + "After `editBookEndTime` we don't have to show anything but a notice, "
+        + "since the edit of the orders is disabled pretix side. `eventNames` contains a map "
+        + "language->name of the name of the event. Both `eventNames` and `hasActiveMembershipForEvent` should "
+        + "be displayed regardless if the user owns an order or not. `errors` contains the same list of errors "
+        + "you can find in the [`/order-sanity-check`](#/orders-workflow-controller/doSanityChecks) method. "
+        + "Refer to its documentation for a full description. In the order object, `dailyDays` is a set of "
+        + "indexes of the days the user has bought. `roomTypeNames` is a map language->name of the name "
+        + "of the room.")
+    @GetMapping("/get-full-status")
+    public FullInfoResponse getFullStatus(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                GenerateFullStatusUseCase.class,
+                new GenerateFullStatusUseCase.Input(
+                        pretixService,
+                        user
+                )
+        );
     }
 }

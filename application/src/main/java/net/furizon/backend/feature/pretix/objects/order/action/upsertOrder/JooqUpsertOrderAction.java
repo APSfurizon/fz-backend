@@ -32,7 +32,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         short extraDays = (short) order.getExtraDays().ordinal();
         long dailyDaysBitmask = order.getDailyDaysBitmask();
         short roomCapacity = order.getRoomCapacity();
-        String hotelLocation = order.getHotelLocation();
+        String hotelInternalName = order.getHotelInternalName();
         String orderSecret = order.getPretixOrderSecret();
         boolean membership = order.hasMembership();
         int answersMainPositionId = order.getAnswersMainPositionId();
@@ -51,7 +51,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_EXTRA_DAYS_TYPE,
                     ORDERS.ORDER_DAILY_DAYS,
                     ORDERS.ORDER_ROOM_CAPACITY,
-                    ORDERS.ORDER_HOTEL_LOCATION,
+                    ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
@@ -67,7 +67,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     extraDays,
                     dailyDaysBitmask,
                     roomCapacity,
-                    hotelLocation,
+                    hotelInternalName,
                     orderSecret,
                     membership,
                     answersMainPositionId,
@@ -82,7 +82,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, extraDays)
                 .set(ORDERS.ORDER_DAILY_DAYS, dailyDaysBitmask)
                 .set(ORDERS.ORDER_ROOM_CAPACITY, roomCapacity)
-                .set(ORDERS.ORDER_HOTEL_LOCATION, hotelLocation)
+                .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, hotelInternalName)
                 .set(ORDERS.ORDER_SECRET, orderSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
                 .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, answersMainPositionId)
