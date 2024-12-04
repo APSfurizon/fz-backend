@@ -1,13 +1,15 @@
 package net.furizon.backend.feature.user.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import net.furizon.backend.feature.user.User;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Data
+@Builder
 public class UserDisplayDataResponse {
-    private final long id;
+    private final long userId;
 
     @NotNull
     private final String fursonaName;
@@ -16,20 +18,8 @@ public class UserDisplayDataResponse {
     private final String locale;
 
     @Nullable
-    private final Long propicId;
+    private final String propicUrl;
 
     @Nullable
-    private final String propicPath;
-
-    @Nullable
-    private final Integer sponsorType;
-
-    public UserDisplayDataResponse(User user) {
-        this.id = user.getId();
-        this.fursonaName = user.getFursonaName();
-        this.locale = user.getLocale();
-        this.propicId = user.getPropicId();
-        this.propicPath = null;
-        this.sponsorType = 0;
-    }
+    private final Sponsorship sponsorship;
 }

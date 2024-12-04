@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
+import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -15,7 +17,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
@@ -24,15 +29,40 @@ public class JooqUserFinder implements UserFinder {
 
     @Nullable
     @Override
-    public User findById(long id) {
+    public User findById(long userId) {
         return sqlQuery
             .fetchFirst(
                 selectUser()
-                    .where(USERS.USER_ID.eq(id))
+                    .where(USERS.USER_ID.eq(userId))
             )
             .mapOrNull(JooqUserMapper::map);
     }
 
+    @Nullable
+    @Override
+    public UserDisplayDataResponse getDisplayUser(long userId) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL
+            .select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
+            )
+            .from(USERS)
+            .leftJoin(MEDIA)
+            .on(
+                USERS.USER_ID.eq(userId)
+                .and(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            )
+            .leftJoin(ORDERS)
+            .on(USERS.USER_ID.eq(ORDERS.USER_ID))
+        ).mapOrNull(JooqDisplayUserMapper::map);
+    }
+
+    @NotNull
+    @Override
     public List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,

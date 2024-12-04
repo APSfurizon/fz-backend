@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.user.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -16,7 +15,6 @@ public class GetUserDisplayDataUseCase implements UseCase<Long, Optional<UserDis
 
     @Override
     public @NotNull Optional<UserDisplayDataResponse> executor(@NotNull Long userId) {
-        User userFound = userFinder.findById(userId);
-        return Optional.ofNullable(userFound != null ? new UserDisplayDataResponse(userFound) : null);
+        return Optional.ofNullable(userFinder.getDisplayUser(userId));
     }
 }
