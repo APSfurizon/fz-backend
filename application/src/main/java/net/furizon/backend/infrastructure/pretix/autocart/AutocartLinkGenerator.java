@@ -45,7 +45,7 @@ public class AutocartLinkGenerator {
         for (AutocartAction<?> action : actions) {
             AutocartActionType type = action.type();
 
-            if (type == AutocartActionType.INPUT) {
+            if (type != AutocartActionType.BOOL) {
                 data.put(action.targetId(), type.getValue() + action.value().toString());
             } else {
                 boolean val = (boolean) action.value();

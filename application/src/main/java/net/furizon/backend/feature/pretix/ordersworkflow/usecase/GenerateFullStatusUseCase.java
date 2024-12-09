@@ -63,6 +63,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
                 .code(order.getCode())
                 .orderStatus(order.getOrderStatus())
                 .sponsorship(order.getSponsorship())
+                .extraDays(order.getExtraDays())
                 .isDailyTicket(isDaily);
 
             OffsetDateTime from = event.getDateFrom();
