@@ -22,6 +22,7 @@ public class MembershipInfoMapper {
                 .residenceCity(record.get(MEMBERSHIP_INFO.INFO_CITY))
                 .residenceRegion(record.get(MEMBERSHIP_INFO.INFO_REGION))
                 .residenceCountry(record.get(MEMBERSHIP_INFO.INFO_COUNTRY))
+                .prefixPhoneNumber(record.get(MEMBERSHIP_INFO.INFO_PHONE_PREFIX))
                 .phoneNumber(record.get(MEMBERSHIP_INFO.INFO_PHONE))
                 .lastUpdatedEventId(record.get(MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID))
                 .userId(record.get(MEMBERSHIP_INFO.USER_ID))

@@ -36,6 +36,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     MEMBERSHIP_INFO.INFO_CITY,
                     MEMBERSHIP_INFO.INFO_REGION,
                     MEMBERSHIP_INFO.INFO_COUNTRY,
+                    MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                     MEMBERSHIP_INFO.INFO_PHONE,
                     MEMBERSHIP_INFO.USER_ID,
                     MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID
@@ -53,6 +54,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getResidenceCity(),
                     personalUserInformation.getResidenceRegion(),
                     personalUserInformation.getResidenceCountry(),
+                    personalUserInformation.getPrefixPhoneNumber(),
                     personalUserInformation.getPhoneNumber(),
                     userId,
                     eventId

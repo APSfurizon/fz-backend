@@ -16,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
+public class
+RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
     private final RegisterUserValidation validation;
 
     private final CreateUserAction createUserAction;
