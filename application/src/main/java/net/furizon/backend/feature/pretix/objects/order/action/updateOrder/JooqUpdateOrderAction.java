@@ -35,6 +35,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_SPONSORSHIP_TYPE, (short) order.getSponsorship().ordinal())
                 .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, (short) order.getExtraDays().ordinal())
                 .set(ORDERS.ORDER_DAILY_DAYS, order.getDailyDaysBitmask())
+                .set(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID, order.getPretixRoomItemId())
                 .set(ORDERS.ORDER_ROOM_CAPACITY, order.getRoomCapacity())
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, order.getHotelInternalName())
                 .set(ORDERS.ORDER_SECRET, order.getPretixOrderSecret())

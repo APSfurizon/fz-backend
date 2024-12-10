@@ -55,9 +55,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         String[] sp = s.split("_");
                         String hotelName = sp[0];
                         short capacity = Short.parseShort(sp[1]);
-                        HotelCapacityPair p = new HotelCapacityPair(hotelName, capacity);
-                        result.roomIdToInfo().put(product.getId(), p);
-                        result.roomInfoToNames().put(p, product.getNames());
+                        long pId = product.getId();
+                        result.roomIdToInfo().put(pId, new HotelCapacityPair(hotelName, capacity));
+                        result.roomPretixItemIdToNames().put(pId, product.getNames());
                     }
 
 

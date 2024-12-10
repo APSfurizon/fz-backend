@@ -45,6 +45,7 @@ public class JooqOrderMapper {
                 .sponsorship(Sponsorship.values()[record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)])
                 .extraDays(ExtraDays.values()[record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)])
                 .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
+                .pretixRoomItemId(record.get((ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)))
                 .roomCapacity(record.get(ORDERS.ORDER_ROOM_CAPACITY))
                 .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
                 .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))

@@ -11,16 +11,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public record PretixProductResults(
-    @NotNull Set<Integer> ticketItemIds,
-    @NotNull Map<Integer, Integer> dailyIdToDay,
-    @NotNull Set<Integer> membershipCardItemIds,
-    @NotNull Set<Integer> sponsorshipItemIds,
-    @NotNull Map<Integer, Sponsorship> sponsorshipIdToType,
-    @NotNull Map<Integer, ExtraDays> extraDaysIdToDay,
-    @NotNull Set<Integer> roomItemIds,
-    @NotNull Map<Integer, HotelCapacityPair> roomIdToInfo,
-    @NotNull Map<HotelCapacityPair, Map<String, String>> roomInfoToNames,
-    @NotNull Set<Integer> noRoomVariationIds
+    @NotNull Set<Long> ticketItemIds,
+    @NotNull Map<Long, Integer> dailyIdToDay,
+    @NotNull Set<Long> membershipCardItemIds,
+    @NotNull Set<Long> sponsorshipItemIds,
+    @NotNull Map<Long, Sponsorship> sponsorshipIdToType,
+    @NotNull Map<Long, ExtraDays> extraDaysIdToDay,
+    @NotNull Set<Long> roomItemIds,
+    @NotNull Map<Long, HotelCapacityPair> roomIdToInfo,
+    @NotNull Map<Long, Map<String, String>> roomPretixItemIdToNames,
+    @NotNull Set<Long> noRoomVariationIds
 ) {
     public PretixProductResults() {
         this(

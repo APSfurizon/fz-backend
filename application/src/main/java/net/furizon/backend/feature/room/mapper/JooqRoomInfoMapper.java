@@ -12,7 +12,6 @@ import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 public class JooqRoomInfoMapper {
     @NotNull
     public static RoomInfo map(Record record, PretixInformation pretixInformation) {
-        short roomCapacity = record.get(ORDERS.ORDER_ROOM_CAPACITY);
         return RoomInfo.builder()
                 .roomId(record.get(ROOMS.ROOM_ID))
                 .roomName(record.get(ROOMS.ROOM_NAME))
@@ -20,10 +19,9 @@ public class JooqRoomInfoMapper {
                 .confirmed(record.get(ROOMS.ROOM_CONFIRMED))
                 .roomData(
                         new RoomDataResponse(
-                                roomCapacity,
-                                pretixInformation.getRoomNamesFromInfo(
-                                        record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME),
-                                        roomCapacity
+                                record.get(ORDERS.ORDER_ROOM_CAPACITY),
+                                pretixInformation.getRoomNamesFromRoomPretixItemId(
+                                        record.get(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)
                                 )
                         )
                 )

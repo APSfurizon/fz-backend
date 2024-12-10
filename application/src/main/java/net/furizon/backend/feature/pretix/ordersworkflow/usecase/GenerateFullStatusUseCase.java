@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -79,7 +80,9 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
                 orderDataBuilder = orderDataBuilder.room(
                         new RoomDataResponse(
                             roomCapacity,
-                            input.pretixInformation.getRoomNamesFromInfo(order.getHotelInternalName(), roomCapacity)
+                            input.pretixInformation.getRoomNamesFromRoomPretixItemId(
+                                    Objects.requireNonNull(order.getPretixRoomItemId())
+                            )
                         )
                     );
             }

@@ -95,7 +95,7 @@ public class Orders extends TableImpl<Record> {
     /**
      * The column <code>public.orders.order_answers_main_position_id</code>.
      */
-    public final TableField<Record, Integer> ORDER_ANSWERS_MAIN_POSITION_ID = createField(DSL.name("order_answers_main_position_id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ORDER_ANSWERS_MAIN_POSITION_ID = createField(DSL.name("order_answers_main_position_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.orders.order_daily_days</code>.
@@ -106,6 +106,11 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.order_extra_days_type</code>.
      */
     public final TableField<Record, Short> ORDER_EXTRA_DAYS_TYPE = createField(DSL.name("order_extra_days_type"), SQLDataType.SMALLINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_room_pretix_item_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_PRETIX_ITEM_ID = createField(DSL.name("order_room_pretix_item_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.orders.order_room_capacity</code>.

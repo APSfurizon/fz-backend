@@ -24,7 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.*;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.BOOL;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.DROPDOWN;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.INPUT;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.TEXT_AREA;
 
 @Component
 @RequiredArgsConstructor
@@ -88,8 +91,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             }
         }
         if (membershipNo == 0) {
-            Set<Integer> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
-            for (int membershipCardId : mcIds) {
+            Set<Long> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
+            for (long membershipCardId : mcIds) {
                 actions.add(new AutocartAction<>("cp_$_item_" + membershipCardId, true, BOOL));
             }
         }

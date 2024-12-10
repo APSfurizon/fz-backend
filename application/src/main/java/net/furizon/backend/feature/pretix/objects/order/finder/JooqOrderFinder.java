@@ -60,6 +60,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_SPONSORSHIP_TYPE,
                         ORDERS.ORDER_EXTRA_DAYS_TYPE,
                         ORDERS.ORDER_DAILY_DAYS,
+                        ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,

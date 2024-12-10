@@ -2,7 +2,7 @@ package net.furizon.backend.feature.room.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -10,6 +10,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class RoomDataResponse {
     private short roomCapacity;
-    @Nullable
+    //@NotNull //This shouldn't be needed
+    //private String hotelInternalName;
+    @NotNull
     private Map<String, String> roomTypeNames;
 }

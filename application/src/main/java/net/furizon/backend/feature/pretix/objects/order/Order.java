@@ -57,11 +57,14 @@ public class Order {
     @NotNull
     private final Set<Integer> dailyDays;
 
+    @Nullable
+    @Builder.Default
+    private Long pretixRoomItemId = -1L;
     @Builder.Default
     private short roomCapacity = 0; // 0 = has no room
-
     @Nullable
     private String hotelInternalName;
+
 
     @NotNull
     private String pretixOrderSecret;
@@ -73,7 +76,7 @@ public class Order {
     private boolean hasMembership = false;
 
     @Builder.Default
-    private int answersMainPositionId = -1;
+    private long answersMainPositionId = -1L;
 
     @Nullable
     @Builder.Default
@@ -200,7 +203,7 @@ public class Order {
                 continue;
             }
 
-            int id = questionId.get();
+            long id = questionId.get();
             var type = pretixInformation.getQuestionTypeFromId(id);
             if (type.isEmpty()) {
                 continue;
@@ -244,7 +247,7 @@ public class Order {
         public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
             this.answers = new HashMap<>();
             for (PretixAnswer answer : answers) {
-                int questionId = answer.getQuestionId();
+                long questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);
                 if (identifier.isEmpty()) {
                     throw new IllegalArgumentException("Answer identifier is empty");

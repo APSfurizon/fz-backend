@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 
 @Data
 public class PretixProduct {
-    private final int id;
+    private final long id;
 
     @NotNull
     @JsonProperty("meta_data")

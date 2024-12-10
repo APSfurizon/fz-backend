@@ -34,7 +34,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -67,37 +74,37 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
-    private final Cache<CacheItemTypes, Set<Integer>> itemIdsCache = Caffeine.newBuilder().build();
+    private final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
 
     //Questions
     @NotNull
-    private final AtomicReference<Integer> questionUserId = new AtomicReference<>(-1);
+    private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
     @NotNull
-    private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
+    private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
-    private final Cache<Integer, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
     @NotNull
-    private final Cache<String, Integer> questionIdentifierToId = Caffeine.newBuilder().build();
+    private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
 
     //Tickets
     @NotNull
-    private final Cache<Integer, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
+    private final Cache<Long, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
 
     //Sponsors
     @NotNull
-    private final Cache<Integer, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+    private final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
 
     //Extra days
     @NotNull
-    private final Cache<Integer, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
+    private final Cache<Long, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
 
     //Rooms
     //map id -> (capacity, hotelName)
     @NotNull
-    private final Cache<Integer, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
     //map capacity/name -> room name
     @NotNull
-    private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
+    private final Cache<Long, Map<String, String>> roomPretixItemIdToNames =
         Caffeine.newBuilder().build();
 
     @NotNull
@@ -120,14 +127,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Map<String, String> getRoomNamesFromInfo(String hotelInternalName, short roomCapacity) {
-        return getRoomNamesFromInfo(new HotelCapacityPair(hotelInternalName, roomCapacity));
-    }
-    @NotNull
-    @Override
-    public Map<String, String> getRoomNamesFromInfo(HotelCapacityPair roomInfo) {
+    public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
         lock.readLock().lock();
-        var v = roomInfoToNames.getIfPresent(roomInfo);
+        var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
         return v == null ? new HashMap<>() : v;
     }
@@ -142,7 +144,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Set<Integer> getIdsForItemType(CacheItemTypes type) {
+    public Set<Long> getIdsForItemType(CacheItemTypes type) {
         lock.readLock().lock();
         var v = itemIdsCache.getIfPresent(type);
         lock.readLock().unlock();
@@ -158,7 +160,7 @@ public class CachedPretixInformation implements PretixInformation {
         return Optional.ofNullable(v);
     }
 
-    public int getQuestionUserId() {
+    public long getQuestionUserId() {
         lock.readLock().lock();
         var v = questionUserId.get();
         lock.readLock().unlock();
@@ -167,7 +169,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<QuestionType> getQuestionTypeFromId(int id) {
+    public Optional<QuestionType> getQuestionTypeFromId(long id) {
         lock.readLock().lock();
         var v = questionIdToType.getIfPresent(id);
         lock.readLock().unlock();
@@ -185,7 +187,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<String> getQuestionIdentifierFromId(int id) {
+    public Optional<String> getQuestionIdentifierFromId(long id) {
         lock.readLock().lock();
         var v = questionIdToIdentifier.getIfPresent(id);
         lock.readLock().unlock();
@@ -194,7 +196,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
+    public Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier) {
         lock.readLock().lock();
         var v = questionIdentifierToId.getIfPresent(identifier);
         lock.readLock().unlock();
@@ -208,7 +210,7 @@ public class CachedPretixInformation implements PretixInformation {
         try {
             Integer cacheDay;
             ExtraDays cacheExtraDays;
-            BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
+            BiFunction<CacheItemTypes, @NotNull Long, @NotNull Boolean> checkItemId = (type, item) ->
                     Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
 
             boolean hasTicket = false; //If no ticket is found, we don't store the order at all
@@ -218,7 +220,7 @@ public class CachedPretixInformation implements PretixInformation {
             Sponsorship sponsorship = Sponsorship.NONE;
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
-            int answersMainPositionId = 0;
+            long answersMainPositionId = 0L;
             String hotelInternalName = null;
             boolean membership = false;
             short roomCapacity = 0;
@@ -234,14 +236,14 @@ public class CachedPretixInformation implements PretixInformation {
                     continue;
                 }
 
-                int item = position.getItemId();
+                long item = position.getItemId();
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
                     hasTicket = true;
                     answersMainPositionId = position.getPositionId();
                     answers = position.getAnswers();
                     for (PretixAnswer answer : answers) {
-                        int questionId = answer.getQuestionId();
+                        long questionId = answer.getQuestionId();
                         var questionType = getQuestionTypeFromId(questionId);
                         if (questionType.isPresent()) {
                             if (questionType.get() == QuestionType.FILE) {
@@ -348,7 +350,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.invalidateAll();
 
         //Questions
-        questionUserId.set(-1);
+        questionUserId.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
@@ -364,7 +366,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Rooms
         roomIdToInfo.invalidateAll();
-        roomInfoToNames.invalidateAll();
+        roomPretixItemIdToNames.invalidateAll();
     }
 
 
@@ -391,7 +393,7 @@ public class CachedPretixInformation implements PretixInformation {
     private void reloadQuestions(Event event) {
         List<PretixQuestion> questionList = useCaseExecutor.execute(ReloadQuestionsUseCase.class, event);
         questionList.forEach(question -> {
-            int questionId = question.getId();
+            long questionId = question.getId();
             QuestionType questionType = question.getType();
             String questionIdentifier = question.getIdentifier();
 
@@ -400,7 +402,7 @@ public class CachedPretixInformation implements PretixInformation {
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_USERID
-        Integer accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
+        Long accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
         if (accountUserId != null) {
             log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
             questionUserId.set(accountUserId);
@@ -420,7 +422,7 @@ public class CachedPretixInformation implements PretixInformation {
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
-        roomInfoToNames.putAll(products.roomInfoToNames());
+        roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
     }
 
     @Override

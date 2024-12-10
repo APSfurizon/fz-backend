@@ -9,13 +9,13 @@ import java.util.List;
 @Data
 public class PretixPosition {
     @JsonProperty("item")
-    private final int itemId;
+    private final long itemId;
 
     @JsonProperty("id")
-    private final int positionId;
+    private final long positionId;
 
     @JsonProperty("variation")
-    private final int variationId;
+    private final long variationId;
 
     @NotNull
     private final List<PretixAnswer> answers;

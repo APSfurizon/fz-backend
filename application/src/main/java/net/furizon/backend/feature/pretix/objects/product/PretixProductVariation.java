@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Data
 public class PretixProductVariation {
-    private final int id;
+    private final long id;
 
     @NotNull
     @JsonProperty("value")

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 public class PretixAnswer {
     @JsonProperty("question")
-    private final int questionId;
+    private final long questionId;
 
     @Nullable
     private String answer;
