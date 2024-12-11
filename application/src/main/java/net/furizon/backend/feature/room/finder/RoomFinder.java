@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.finder;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
+import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -11,8 +12,14 @@ import java.util.List;
 
 public interface RoomFinder {
 
+    boolean isUserInAroom(long userId, long eventId);
+    boolean hasUserAlreadyAroom(long userId, long eventId);
+
     @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+
+    RoomDataResponse getRoomDataForUser(
+            long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     @NotNull
     List<RoomGuestResponse> getRoomGuests(long roomId);

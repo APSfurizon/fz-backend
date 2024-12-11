@@ -166,6 +166,11 @@ public class Rooms extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.ROOMS_ONLY_ONE_ORDER);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.ROOMS__ROOMS_ORDERS_ID);
     }

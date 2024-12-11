@@ -3,8 +3,8 @@ package net.furizon.backend.feature.room.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
@@ -13,12 +13,10 @@ import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
-import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.feature.room.usecase.userBuysFullRoom.GetRoomInfoUseCase;
+import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,8 +31,6 @@ public class RoomController {
     @org.jetbrains.annotations.NotNull
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
-    private final RoomLogic roomLogic;
-    @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
 
     @NotNull
@@ -43,7 +39,7 @@ public class RoomController {
     @PostMapping("/create")
     public RoomInfo createRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final CreateRoomRequest createRoomRequest
+            @NotNull @Valid @RequestBody final CreateRoomRequest createRoomRequest
     ) {
         return null;
     }
@@ -54,7 +50,7 @@ public class RoomController {
     @PostMapping("/delete")
     public boolean deleteRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return false;
     }
@@ -65,7 +61,7 @@ public class RoomController {
     @PostMapping("/change-name")
     public boolean changeRoomName(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final ChangeNameToRoomRequest changeNameToRoomRequest
+            @NotNull @Valid @RequestBody final ChangeNameToRoomRequest changeNameToRoomRequest
     ) {
         return false;
     }
@@ -81,7 +77,7 @@ public class RoomController {
     @PostMapping("/invite")
     public RoomGuestResponse invitePersonToRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
+            @NotNull @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
     ) {
         return null;
     }
@@ -92,7 +88,7 @@ public class RoomController {
     @PostMapping("/invite/accept")
     public boolean acceptInvitation(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final GuestIdRequest guestIdRequest
+            @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
         return false;
     }
@@ -103,7 +99,7 @@ public class RoomController {
     @PostMapping("/invite/refuse")
     public boolean refuseInvitation(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final GuestIdRequest guestIdRequest
+            @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
         return false;
     }
@@ -114,7 +110,7 @@ public class RoomController {
     @PostMapping("/invite/cancel")
     public boolean cancelInvitation(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final GuestIdRequest guestIdRequest
+            @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
         return false;
     }
@@ -125,7 +121,7 @@ public class RoomController {
     @PostMapping("/kick")
     public boolean kickFromRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final GuestIdRequest guestIdRequest
+            @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
         return false;
     }
@@ -134,8 +130,7 @@ public class RoomController {
         "This operation can be performed only by a guest in a room.")
     @PostMapping("/leave")
     public boolean leaveRoom(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final GuestIdRequest guestIdRequest
+            @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return false;
     }
@@ -148,7 +143,7 @@ public class RoomController {
     @PostMapping("/confirm")
     public boolean confirmRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return false;
     }
@@ -160,7 +155,7 @@ public class RoomController {
     @PostMapping("/unconfirm")
     public boolean unconfirmRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return false;
     }
@@ -172,12 +167,7 @@ public class RoomController {
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
         return executor.execute(
             GetRoomInfoUseCase.class,
-            new GetRoomInfoUseCase.Input(user, getEvent(), pretixInformation)
+            new GetRoomInfoUseCase.Input(user, pretixInformation.getCurrentEvent(), pretixInformation)
         );
-    }
-
-    @Nullable
-    private Event getEvent() {
-        return pretixInformation.getCurrentEvent().orElse(null);
     }
 }

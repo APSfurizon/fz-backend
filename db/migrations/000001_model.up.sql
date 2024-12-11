@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS orders
     order_room_capacity            int2                         NULL,
     order_hotel_internal_name      varchar(255)                 NULL,
     has_membership                 bool                         NOT NULL,
-    order_secret                   varchar(32)                  NULL, -- todo remove --
+    order_secret                   varchar(32)                  NULL,
     order_sponsorship_type         int2                         NOT NULL,
     event_id                       int8                         NOT NULL,
     user_id                        int8 DEFAULT NULL            NULL,
@@ -142,6 +142,7 @@ CREATE TABLE IF NOT EXISTS membership_cards
     user_id            int8                                                                                                                     NOT NULL,
     already_registered bool DEFAULT false                                                                                                       NOT NULL,
     created_for_order  int8                                                                                                                     NULL, -- this has to be nullable, because manual insertions not linked to orders are possible --
+    CONSTRAINT only_one_card_per_year UNIQUE(issue_year, user_id),
     CONSTRAINT cards_pkey PRIMARY KEY (card_db_id),
     CONSTRAINT card_user_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT membership_cards_order_fk FOREIGN KEY (created_for_order) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -153,6 +154,7 @@ CREATE TABLE IF NOT EXISTS rooms
     room_confirmed bool                                                                                                                     NOT NULL DEFAULT FALSE,
     room_name      varchar(255)                                                                                                             NOT NULL,
     order_id       int8                                                                                                                     NOT NULL,
+    CONSTRAINT rooms_only_one_order UNIQUE (order_id),
     CONSTRAINT rooms_pkey PRIMARY KEY (room_id),
     CONSTRAINT rooms_orders_id FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE
 );

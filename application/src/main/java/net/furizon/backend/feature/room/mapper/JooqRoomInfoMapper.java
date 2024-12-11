@@ -17,14 +17,7 @@ public class JooqRoomInfoMapper {
                 .roomName(record.get(ROOMS.ROOM_NAME))
                 .roomOwnerId(record.get(ORDERS.USER_ID))
                 .confirmed(record.get(ROOMS.ROOM_CONFIRMED))
-                .roomData(
-                        new RoomDataResponse(
-                                record.get(ORDERS.ORDER_ROOM_CAPACITY),
-                                pretixInformation.getRoomNamesFromRoomPretixItemId(
-                                        record.get(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)
-                                )
-                        )
-                )
+                .roomData(JooqRoomDataMapper.map(record, pretixInformation))
             .build();
     }
 }

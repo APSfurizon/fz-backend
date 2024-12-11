@@ -12,6 +12,8 @@ import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
@@ -29,6 +31,7 @@ public class JooqOrderFinder implements OrderFinder {
             selectFrom()
             .where(ORDERS.ORDER_CODE.eq(code))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
 
@@ -40,6 +43,7 @@ public class JooqOrderFinder implements OrderFinder {
             selectFrom()
             .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
 
@@ -51,6 +55,17 @@ public class JooqOrderFinder implements OrderFinder {
             .where(ORDERS.USER_ID.eq(userId))
             .and(ORDERS.EVENT_ID.eq(event.getId()))
         );
+    }
+
+    public @NotNull Optional<Boolean> isOrderDaily(long userId, @NotNull Event event) {
+        Boolean res = query.fetchFirst(
+                PostgresDSL.select(ORDERS.ORDER_DAILY_DAYS)
+                .from(ORDERS)
+                .where(ORDERS.USER_ID.eq(userId))
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .limit(1)
+        ).mapOrNull(e -> e.get(ORDERS.ORDER_DAILY_DAYS) != 0L);
+        return Optional.ofNullable(res);
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {

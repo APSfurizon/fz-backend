@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.room.usecase.userBuysFullRoom;
+package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +7,11 @@ import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,14 +21,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, RoomInfoResponse> {
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final RoomLogic roomLogic;
 
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
-        if (input.event == null) {
-            log.error("Event is null");
-            throw new RuntimeException("Event is null");
-        }
-
         long userId = input.user.getUserId();
         List<RoomGuestResponse> invitations = null;
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
@@ -36,8 +32,11 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         if (info == null) {
             invitations = roomFinder.getUserReceivedInvitations(userId, input.event);
         } else {
-            info.setOwner(info.getRoomOwnerId() == userId);
-            info.setGuests(roomFinder.getRoomGuests(info.getRoomId()));
+            boolean isOwner = info.getRoomOwnerId() == userId;
+            long roomId = info.getRoomId();
+            info.setOwner(isOwner);
+            info.setCanConfirm(roomLogic.canConfirm(roomId));
+            info.setGuests(roomFinder.getRoomGuests(roomId));
         }
 
         return new RoomInfoResponse(info, invitations);
@@ -45,7 +44,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
 
     public record Input(
             @NotNull FurizonUser user,
-            @Nullable Event event,
+            @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {}
 }
