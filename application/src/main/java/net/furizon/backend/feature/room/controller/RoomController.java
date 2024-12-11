@@ -83,7 +83,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Accept the specified invitation", description =
-        "You can invite only people who don't are part of a room yet. "
+        "This operation can be done only by someone who doesn't own a room. "
         + "Using the `guestId` param you can specify which invitation to accept")
     @PostMapping("/invite/accept")
     public boolean acceptInvitation(
@@ -94,8 +94,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Refuse the specified invitation", description =
-        "This operation can be done only by someone who doesn't own a room. "
-        + "Using the `guestId` param you can specify which invitation to refuse")
+        "Using the `guestId` param you can specify which invitation to refuse")
     @PostMapping("/invite/refuse")
     public boolean refuseInvitation(
             @AuthenticationPrincipal @NotNull final FurizonUser user,

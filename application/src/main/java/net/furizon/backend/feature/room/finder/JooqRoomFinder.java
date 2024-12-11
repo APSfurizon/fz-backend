@@ -13,6 +13,8 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Record4;
+import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -110,23 +112,20 @@ public class JooqRoomFinder implements RoomFinder {
 
     @NotNull
     @Override
-    public List<RoomGuestResponse> getRoomGuests(long roomId) {
+    public List<RoomGuestResponse> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed) {
+        var condition = ROOM_GUESTS.ROOM_ID.eq(roomId);
+        if (onlyConfirmed) {
+            condition = condition.and(ROOM_GUESTS.CONFIRMED.eq(true));
+        }
         return query.fetch(
-            PostgresDSL
-                .select(
-                    ROOM_GUESTS.ROOM_GUEST_ID,
-                    ROOM_GUESTS.USER_ID,
-                    ROOM_GUESTS.ROOM_ID,
-                    ROOM_GUESTS.CONFIRMED
-                )
-                .from(ROOM_GUESTS)
-                .where(ROOM_GUESTS.ROOM_ID.eq(roomId))
+                roomGuestSelect()
+                .where(condition)
         ).stream().map(RoomGuestResponseMapper::map).toList();
     }
 
     @NotNull
     @Override
-    public Optional<Long> getRoomIdFromUser(long userId, @NotNull Event event) {
+    public Optional<Long> getRoomIdFromOwnerUserId(long userId, @NotNull Event event) {
         return Optional.ofNullable(query.fetchFirst(
             PostgresDSL
                 .select(ROOMS.ROOM_ID)
@@ -145,14 +144,7 @@ public class JooqRoomFinder implements RoomFinder {
     @Override
     public List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event) {
         return query.fetch(
-            PostgresDSL
-                .select(
-                    ROOM_GUESTS.ROOM_GUEST_ID,
-                    ROOM_GUESTS.USER_ID,
-                    ROOM_GUESTS.ROOM_ID,
-                    ROOM_GUESTS.CONFIRMED
-                )
-                .from(ROOM_GUESTS)
+                roomGuestSelect()
                 .innerJoin(ROOMS)
                 .on(
                     ROOM_GUESTS.USER_ID.eq(userId)
@@ -177,5 +169,40 @@ public class JooqRoomFinder implements RoomFinder {
             .where(ROOMS.ROOM_ID.eq((roomId)))
             .limit(1)
         ).mapOrNull(k -> k.get(ROOMS.ROOM_CONFIRMED)));
+    }
+
+    @NotNull
+    @Override
+    public Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId) {
+        return Optional.ofNullable(query.fetchFirst(
+                roomGuestSelect()
+                .where(ROOM_GUESTS.ROOM_GUEST_ID.eq((roomGuestId)))
+                .limit(1)
+        ).mapOrNull(RoomGuestResponseMapper::map));
+    }
+
+    private @NotNull SelectJoinStep<Record4<Long, Long, Long, Boolean>> roomGuestSelect() {
+        return PostgresDSL
+                .select(
+                        ROOM_GUESTS.ROOM_GUEST_ID,
+                        ROOM_GUESTS.USER_ID,
+                        ROOM_GUESTS.ROOM_ID,
+                        ROOM_GUESTS.CONFIRMED
+                ).from(ROOM_GUESTS);
+    }
+
+    @NotNull
+    @Override
+    public Optional<Short> getRoomCapacity(long roomId) {
+        return Optional.ofNullable(query.fetchFirst(
+                PostgresDSL.select(
+                        ORDERS.ORDER_ROOM_CAPACITY
+                ).from(ORDERS)
+                .innerJoin(ROOMS)
+                .on(
+                        ROOMS.ROOM_ID.eq(roomId)
+                        .and(ORDERS.ID.eq(ROOMS.ORDER_ID))
+                ).limit(1)
+        ).mapOrNull(k -> k.get(ORDERS.ORDER_ROOM_CAPACITY)));
     }
 }

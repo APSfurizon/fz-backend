@@ -9,7 +9,7 @@ public interface RoomLogic {
 
     //force = bypass invitation logic, forceExit = if the user is in another room, add him to the current one forcefully
     long invitePersonToRoom(long invitedUserId, long roomId, boolean force, boolean forceExit);
-    boolean inviteAccept(long guestId);
+    boolean inviteAccept(long guestId, long roomId);
     boolean inviteRefuse(long guestId);
     boolean inviteCancel(long guestId);
 

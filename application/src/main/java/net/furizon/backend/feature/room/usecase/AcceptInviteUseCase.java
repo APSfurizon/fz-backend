@@ -3,7 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
+import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -15,45 +15,34 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-
-public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, RoomGuestResponse> {
+public class AcceptInviteUseCase implements UseCase<AcceptInviteUseCase.Input, Boolean> {
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final CommonRoomChecks commonChecks;
 
-
     @Override
-    public @NotNull RoomGuestResponse executor(@NotNull Input input) {
+    public @NotNull Boolean executor(@NotNull Input input) {
         long requesterUserId = input.user.getUserId();
-        long targetUserId = input.req.getUserId();
+        long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        boolean isAdmin = true; //TODO [ADMIN_CHECK}
+        commonChecks.runCommonChecks(requesterUserId, event);
 
-        commonChecks.runCommonChecks(targetUserId, event);
-
-        long roomId = commonChecks.getAndCheckRoomId(
-                requesterUserId,
-                event,
-                input.req.getRoomId()
-        );
-
-        boolean forceExit = input.req.getForceExit() == null ? false : input.req.getForceExit() && isAdmin;
-        if (!forceExit) {
-            commonChecks.isUserInAroomCheck(targetUserId, event);
-        }
+        RoomGuestResponse guest = commonChecks.getAndCheckRoomGuestFromId(guestId);
+        long roomId = guest.getRoomId();
 
         commonChecks.isRoomAlreadyConfirmedCheck(roomId);
         commonChecks.capacityCheck(roomId);
+        commonChecks.isUserInAroomCheck(requesterUserId, event);
+        commonChecks.userAlreadyOwnsAroomCheck(requesterUserId, event);
 
-        boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
-        long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, force, forceExit);
+        roomLogic.inviteAccept(guestId, roomId);
 
-        return new RoomGuestResponse(guestId, targetUserId, roomId, false);
+        return true;
     }
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull InviteToRoomRequest req,
+            @NotNull GuestIdRequest req,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {}

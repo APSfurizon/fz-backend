@@ -35,6 +35,9 @@ public class RoomInfo {
     @NotNull
     private final RoomDataResponse roomData;
 
+    @Builder.Default
+    private boolean canInvite = false;
+
     @Nullable
     @Builder.Default
     private List<RoomGuestResponse> guests = null;

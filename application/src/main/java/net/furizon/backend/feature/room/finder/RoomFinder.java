@@ -23,14 +23,20 @@ public interface RoomFinder {
             long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     @NotNull
-    List<RoomGuestResponse> getRoomGuests(long roomId);
+    List<RoomGuestResponse> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed);
 
     @NotNull
-    Optional<Long> getRoomIdFromUser(long userId, @NotNull Event event);
+    Optional<Long> getRoomIdFromOwnerUserId(long userId, @NotNull Event event);
 
     @NotNull
     List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event);
 
     @NotNull
     Optional<Boolean> isRoomConfirmed(long roomId);
+
+    @NotNull
+    Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId);
+
+    @NotNull
+    Optional<Short> getRoomCapacity(long roomId);
 }
