@@ -8,7 +8,9 @@ import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
+import net.furizon.backend.feature.pretix.ordersworkflow.controller.OrdersWorkflowController;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
@@ -19,6 +21,7 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +39,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PersonalInfoFinder personalInfoFinder;
     @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
+    @NotNull private final PretixConfig pretixConfig;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
@@ -45,6 +49,13 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         PretixInformation pretixService = input.pretixService;
         Event event = pretixService.getCurrentEvent();
 
+        OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        if (bookingStart != null && (bookingStart.isAfter(OffsetDateTime.now()) || false)) {
+            //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK] add check "is not admin"
+            log.error("User requested a shop link before opening date!");
+            throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET.name());
+        }
+
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
         int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (ordersNo > 0) {
@@ -53,6 +64,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
                     OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
             );
         }
+
 
         membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
 

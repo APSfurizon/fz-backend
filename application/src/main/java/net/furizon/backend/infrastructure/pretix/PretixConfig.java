@@ -3,10 +3,15 @@ package net.furizon.backend.infrastructure.pretix;
 import lombok.Data;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.time.OffsetDateTime;
 
 @Data
 @ConfigurationProperties(prefix = "pretix")
@@ -43,6 +48,9 @@ public class PretixConfig implements HttpConfig {
     }
 
     @NotNull
+    private final Event event;
+
+    @NotNull
     @Override
     public MultiValueMap<String, String> headers() {
         return new LinkedMultiValueMap<>() {
@@ -51,6 +59,14 @@ public class PretixConfig implements HttpConfig {
                 add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(api.key));
             }
         };
+    }
+
+    @Data
+    public static class Event {
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        @Nullable private OffsetDateTime editBookingEndTime;
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        @Nullable private OffsetDateTime publicBookingStartTime;
     }
 
     @Data

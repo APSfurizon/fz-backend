@@ -10,6 +10,7 @@ import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -31,15 +32,8 @@ import java.util.stream.Collectors;
 public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseCase.Input, FullInfoResponse> {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
+    @NotNull private final PretixConfig pretixConfig;
     @NotNull private final SanityCheck sanityCheck;
-
-    @Value("${pretix.event.public-booking-start-time}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Nullable private OffsetDateTime publicBookingStartTime;
-
-    @Value("${pretix.event.edit-booking-end-time}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Nullable private OffsetDateTime editBookingEndTime;
 
     @Override
     public @NotNull FullInfoResponse executor(@NotNull Input input) {
@@ -87,8 +81,8 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
 
         return FullInfoResponse.builder()
             .shouldDisplayCountdown(true) //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK]
-            .bookingStartTime(publicBookingStartTime)
-            .editBookEndTime(editBookingEndTime)
+            .bookingStartTime(pretixConfig.getEvent().getPublicBookingStartTime())
+            .editBookEndTime(pretixConfig.getEvent().getEditBookingEndTime())
             .eventNames(event.getEventNames())
             .hasActiveMembershipForEvent(membershipNo > 0)
             .order(orderDataResponse)
