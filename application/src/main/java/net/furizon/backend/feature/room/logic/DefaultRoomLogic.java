@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class DefaultRoomLogic implements RoomLogic {
     @Override
     public long createRoom(String name, long userId) {
-        return 0L;
+        return -1L;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public long invitePersonToRoom(long invitedUserId, long roomId, boolean force, boolean forceExit) {
-        return 0L;
+        return -1L;
     }
 
     @Override
@@ -50,6 +50,11 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean leaveRoom(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean canConfirm(long roomId) {
         return false;
     }
 

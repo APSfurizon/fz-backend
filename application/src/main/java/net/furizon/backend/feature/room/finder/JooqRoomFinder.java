@@ -17,6 +17,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 import static net.furizon.jooq.generated.tables.Orders.ORDERS;
@@ -83,6 +84,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ROOMS.ORDER_ID.eq(ORDERS.ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
+            .limit(1)
         ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation));
     }
 
@@ -102,6 +104,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ORDERS.USER_ID.eq(userId)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
+            .limit(1)
         ).mapOrNull(k -> JooqRoomDataMapper.map(k, pretixInformation));
     }
 
@@ -119,6 +122,23 @@ public class JooqRoomFinder implements RoomFinder {
                 .from(ROOM_GUESTS)
                 .where(ROOM_GUESTS.ROOM_ID.eq(roomId))
         ).stream().map(RoomGuestResponseMapper::map).toList();
+    }
+
+    @NotNull
+    @Override
+    public Optional<Long> getRoomIdFromUser(long userId, @NotNull Event event) {
+        return Optional.ofNullable(query.fetchFirst(
+            PostgresDSL
+                .select(ROOMS.ROOM_ID)
+                .from(ROOMS)
+                .innerJoin(ORDERS)
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ORDERS.USER_ID.eq(userId))
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                )
+                    .limit(1)
+        ).mapOrNull(k -> k.get(ROOMS.ROOM_ID)));
     }
 
     @NotNull
@@ -145,5 +165,17 @@ public class JooqRoomFinder implements RoomFinder {
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
         ).stream().map(RoomGuestResponseMapper::map).toList();
+    }
+
+    @NotNull
+    @Override
+    public Optional<Boolean> isRoomConfirmed(long roomId) {
+        return Optional.ofNullable(query.fetchFirst(
+            PostgresDSL
+           .select(ROOMS.ROOM_CONFIRMED)
+            .from(ROOMS)
+            .where(ROOMS.ROOM_ID.eq((roomId)))
+            .limit(1)
+        ).mapOrNull(k -> k.get(ROOMS.ROOM_CONFIRMED)));
     }
 }

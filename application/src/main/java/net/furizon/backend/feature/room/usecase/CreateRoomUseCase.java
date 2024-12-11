@@ -30,7 +30,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         Event event = input.event;
 
         commonChecks.userOwnsAroomCheck(userId, event);
-        commonChecks.isUserInARoom(userId, event);
+        commonChecks.isUserInAroomCheck(userId, event);
         commonChecks.runCommonChecks(userId, event);
 
         String name = input.createRoomRequest.getName();

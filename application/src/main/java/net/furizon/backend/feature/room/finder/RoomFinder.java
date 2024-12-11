@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RoomFinder {
 
@@ -25,5 +26,11 @@ public interface RoomFinder {
     List<RoomGuestResponse> getRoomGuests(long roomId);
 
     @NotNull
+    Optional<Long> getRoomIdFromUser(long userId, @NotNull Event event);
+
+    @NotNull
     List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event);
+
+    @NotNull
+    Optional<Boolean> isRoomConfirmed(long roomId);
 }
