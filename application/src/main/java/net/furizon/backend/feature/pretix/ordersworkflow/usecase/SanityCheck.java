@@ -25,17 +25,12 @@ public class SanityCheck {
                                                 @NotNull PretixInformation pretixInformation) {
         List<OrderWorkflowErrorCode> errors = new LinkedList<>();
 
-        var e = pretixInformation.getCurrentEvent();
-        if (e.isPresent()) {
-            Event event = e.get();
+        Event event = pretixInformation.getCurrentEvent();
 
-            int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
-            int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(user.getUserId(), event);
+        int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
+        int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(user.getUserId(), event);
 
-            execute(ordersNo, membershipNo, errors);
-        } else {
-            errors.add(OrderWorkflowErrorCode.SERVER_ERROR);
-        }
+        execute(ordersNo, membershipNo, errors);
 
         return errors;
     }

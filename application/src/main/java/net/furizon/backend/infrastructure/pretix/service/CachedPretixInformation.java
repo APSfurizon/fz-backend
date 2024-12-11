@@ -153,11 +153,15 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Event> getCurrentEvent() {
+    public Event getCurrentEvent() {
         lock.readLock().lock();
         var v = currentEvent.get();
         lock.readLock().unlock();
-        return Optional.ofNullable(v);
+        if (v == null) {
+            log.error("Current event is not set! (null value found)");
+            throw new IllegalStateException("No current event available");
+        }
+        return v;
     }
 
     public long getQuestionUserId() {
@@ -380,12 +384,7 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     private void reloadEventStructure() {
-        final Event event = currentEvent.get();
-        if (event == null) {
-            log.warn("[PRETIX] Current event is null, skipping event structure reload");
-            return;
-        }
-
+        Event event = getCurrentEvent();
         reloadQuestions(event);
         reloadProducts(event);
     }
@@ -427,11 +426,8 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Override
     public void reloadAllOrders() {
-        var event = getCurrentEvent();
-        if (event.isPresent()) {
-            var input = new ReloadOrdersUseCase.Input(event.get(), this);
-            useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
-        }
+        var input = new ReloadOrdersUseCase.Input(getCurrentEvent(), this);
+        useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
     }
 
     @Scheduled(cron = "${pretix.cache-reload-cronjob}")

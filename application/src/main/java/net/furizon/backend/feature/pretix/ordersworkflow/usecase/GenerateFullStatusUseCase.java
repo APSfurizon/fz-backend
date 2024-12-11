@@ -43,12 +43,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
 
     @Override
     public @NotNull FullInfoResponse executor(@NotNull Input input) {
-        var e = input.pretixInformation.getCurrentEvent();
-        if (!e.isPresent()) {
-            log.error("Event is null!");
-            throw new RuntimeException("Event is null");
-        }
-        Event event = e.get();
+        Event event = input.pretixInformation.getCurrentEvent();
         FurizonUser user = input.user;
 
         int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);

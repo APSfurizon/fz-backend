@@ -76,7 +76,7 @@ public class AuthenticationController {
             RegisterUserUseCase.class,
             new RegisterUserUseCase.Input(
                 registerUserRequest,
-                pretixService.getCurrentEvent().orElse(null)
+                pretixService.getCurrentEvent()
             )
         );
 

@@ -7,7 +7,6 @@ import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
 
@@ -28,5 +27,5 @@ public class GetUserDisplayDataUseCase implements
         return Optional.ofNullable(userFinder.getDisplayUser(input.userId, input.event));
     }
 
-    public record Input(long userId, @Nullable Event event) {}
+    public record Input(long userId, @NotNull Event event) {}
 }

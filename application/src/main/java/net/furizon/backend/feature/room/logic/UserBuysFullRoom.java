@@ -8,4 +8,63 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-full-room")
 public class UserBuysFullRoom implements RoomLogic {
+    @Override
+    public long createRoom(String name, long userId) {
+        return 0L;
+    }
+
+    @Override
+    public boolean deleteRoom(long roomId) {
+        return false;
+    }
+
+    @Override
+    public boolean changeRoomName(String name, long roomId) {
+        return false;
+    }
+
+    @Override
+    public long invitePersonToRoom(long invitedUserId, long roomId, boolean force, boolean forceExit) {
+        return 0L;
+    }
+
+    @Override
+    public boolean inviteAccept(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean inviteRefuse(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean inviteCancel(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean kickFromRoom(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean leaveRoom(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean confirmRoom(long roomId) {
+        return false;
+    }
+
+    @Override
+    public boolean unconfirmRoom(long roomId) {
+        return false;
+    }
+
+    @Override
+    public void doSanityChecks() {
+
+    }
 }

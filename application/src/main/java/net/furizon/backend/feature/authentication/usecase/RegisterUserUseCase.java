@@ -10,7 +10,6 @@ import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.action.createUser.CreateUserAction;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,5 +43,5 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         return user;
     }
 
-    public record Input(@NotNull RegisterUserRequest user, @Nullable Event event){}
+    public record Input(@NotNull RegisterUserRequest user, @NotNull Event event){}
 }

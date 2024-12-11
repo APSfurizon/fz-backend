@@ -5,7 +5,6 @@ import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +16,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
     private final SqlCommand sqlCommand;
 
     @Override
-    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
-        Long eventId = event == null ? null : event.getId();
-
+    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @NotNull Event event) {
         sqlCommand.execute(
             PostgresDSL
                 .insertInto(
@@ -57,7 +54,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getPrefixPhoneNumber(),
                     personalUserInformation.getPhoneNumber(),
                     userId,
-                    eventId
+                    event.getId()
                 )
         );
     }

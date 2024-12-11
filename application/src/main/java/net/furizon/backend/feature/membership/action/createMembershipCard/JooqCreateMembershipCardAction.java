@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.jooq.infrastructure.JooqOptional;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
@@ -27,18 +28,13 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
     private final SqlQuery sqlQuery;
 
     @Override
-    public synchronized void invoke(long userId, @Nullable Event event, @Nullable Order order) {
+    public synchronized void invoke(long userId, @NotNull Event event, @Nullable Order order) {
         Long orderId = order == null ? null : order.getId();
 
         OffsetDateTime from;
-        if (event != null) {
-            from = event.getDateFrom();
-            if (from == null) {
-                log.error("From date was unavailable for event {}. Falling back to Date.now()", event.getSlug());
-                from = OffsetDateTime.now();
-            }
-        } else {
-            log.error("Event object was not provided. Falling back to Date.now()");
+        from = event.getDateFrom();
+        if (from == null) {
+            log.error("From date was unavailable for event {}. Falling back to Date.now()", event.getSlug());
             from = OffsetDateTime.now();
         }
 

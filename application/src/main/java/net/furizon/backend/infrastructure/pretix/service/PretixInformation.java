@@ -15,7 +15,7 @@ import java.util.Set;
 
 public interface PretixInformation {
     @NotNull
-    Optional<Event> getCurrentEvent();
+    Event getCurrentEvent();
 
     long getQuestionUserId();
 

@@ -26,11 +26,7 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
     @Override
     public @NotNull LinkResponse executor(@NotNull GetEditOrderLink.Input input) {
         PretixInformation pretixService = input.pretixService;
-        var e = pretixService.getCurrentEvent();
-        if (!e.isPresent()) {
-            throw new RuntimeException("Unable to load current event");
-        }
-        Event event = e.get();
+        Event event = pretixService.getCurrentEvent();
 
         int orderNo = orderFinder.countOrdersOfUserOnEvent(input.user.getUserId(), event);
         if (orderNo > 1) {

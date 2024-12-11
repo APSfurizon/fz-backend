@@ -98,7 +98,18 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
         }
 
         if (currentEvent.get() == null) {
-            log.warn("Could not find the current event");
+            log.warn("Unable to refresh currentEvent from pretix! Trying to fetch it from the DB");
+            Event dbEvent = eventFinder.findEventBySlug(
+                    PretixGenericUtils.buildOrgEventSlug(
+                            pretixConfig.getDefaultEvent(),
+                            pretixConfig.getDefaultOrganizer()
+                    )
+            );
+            if (dbEvent == null) {
+                log.error("Could not load the current event");
+            } else {
+                currentEvent.set(dbEvent);
+            }
         }
 
         return Optional.ofNullable(currentEvent.get());

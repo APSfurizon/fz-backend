@@ -46,7 +46,7 @@ public class UserController {
                 GetUserDisplayDataUseCase.class,
                 new GetUserDisplayDataUseCase.Input(
                     user.getUserId(),
-                    pretixInformation.getCurrentEvent().orElse(null)
+                    pretixInformation.getCurrentEvent()
                 )
         );
     }

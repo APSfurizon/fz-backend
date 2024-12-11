@@ -51,12 +51,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
             log.error("[PRETIX] Registration of order {} failed: User is not logged in", input.code);
             return new RedirectView(config.getLoginRedirectUrl(input.request.getRequestURL().toString()));
         }
-        var e = pretixService.getCurrentEvent();
-        if (!e.isPresent()) {
-            log.error("[PRETIX] Registration of order {} failed: Unable to fetch current event", input.code);
-            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
-        }
-        Event event = e.get();
+        Event event = pretixService.getCurrentEvent();
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
                 user.getUserId(), input.code, input.secret);
 

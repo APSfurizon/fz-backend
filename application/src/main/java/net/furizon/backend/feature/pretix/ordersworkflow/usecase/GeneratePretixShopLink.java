@@ -17,7 +17,6 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -44,23 +43,18 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         long userId = input.user.getUserId();
         String mail = input.user.getEmail();
         PretixInformation pretixService = input.pretixService;
-        var e = pretixService.getCurrentEvent();
+        Event event = pretixService.getCurrentEvent();
 
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
-        @Nullable Event event = e.orElse(null);
-        if (event != null) {
-            int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
-            if (ordersNo > 0) {
-                throw new ApiException(
-                        "You already made an order!",
-                        OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
-                );
-            }
-
-            membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
-        } else {
-            log.error("Unable to fetch current event. Generating pretix shop link anyway without a membership card");
+        int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
+        if (ordersNo > 0) {
+            throw new ApiException(
+                    "You already made an order!",
+                    OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
+            );
         }
+
+        membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
 
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
 

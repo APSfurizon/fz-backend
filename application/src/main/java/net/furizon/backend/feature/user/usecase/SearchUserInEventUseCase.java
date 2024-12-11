@@ -9,8 +9,6 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedList;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -19,17 +17,11 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
 
     @Override
     public @NotNull SearchUsersResponse executor(@NotNull SearchUserInEventUseCase.Input input) {
-        var e = input.pretixService.getCurrentEvent();
-        if (e.isPresent()) {
-            return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(
-                    input.fursonaName,
-                    e.get(),
-                    input.filterRoom
-            ));
-        } else {
-            log.warn("Current event is null!");
-            return new SearchUsersResponse(new LinkedList<>());
-        }
+        return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(
+                input.fursonaName,
+                input.pretixService.getCurrentEvent(),
+                input.filterRoom
+        ));
     }
 
     public record Input(
