@@ -31,10 +31,10 @@ spring:
 
 gg:
   jte:
-    development-mode: true
+    development-mode: ${JTE_DEV_MODE:true}
     templateLocation: templates/jte
     templateSuffix: .jte
-#    usePrecompiledTemplates: true
+    usePrecompiledTemplates: ${JET_PROD_MODE:false}
 
 logbook:
   format:
