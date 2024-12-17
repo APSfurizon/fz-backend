@@ -112,7 +112,16 @@
             <artifactId>bcpkix-jdk18on</artifactId>
             <version>1.79</version>
         </dependency>
-
+        <dependency>
+            <groupId>gg.jte</groupId>
+            <artifactId>jte-spring-boot-starter-3</artifactId>
+            <version>3.1.15</version>
+        </dependency>
+        <dependency>
+            <groupId>gg.jte</groupId>
+            <artifactId>jte</artifactId>
+            <version>3.1.15</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

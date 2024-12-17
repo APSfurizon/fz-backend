@@ -17,6 +17,24 @@ spring:
     driver-class-name: org.postgresql.Driver
   jooq:
     sql-dialect: postgres
+  mail:
+    host: ${MAIL_SENDER_PROVIDER_HOST:stmp.example.com}
+    port: ${MAIL_SENDER_PROVIDER_PORT:465}
+    username: ${MAIL_SENDER_PROVIDER_USERNAME:test@example.com}
+    password: ${MAIL_SENDER_PROVIDER_PASSWORD:changeme}
+    protocol: smtps
+    properties:
+      "mail.smtp.auth": true
+      "mail.smtp.starttls.enable": true
+      "mail.smtp.starttls.required": true
+      "mail.debug": ${MAIL_SENDER_PROVIDER_USE_DEBUG_PROP:true}
+
+gg:
+  jte:
+    development-mode: ${JTE_DEV_MODE:true}
+    templateLocation: templates/jte
+    templateSuffix: .jte
+    usePrecompiledTemplates: ${JTE_PROD_MODE:false}
 
 logbook:
   format:
