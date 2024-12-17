@@ -6,7 +6,6 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, Boolean> {
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final CommonRoomChecks commonChecks;
+    @NotNull private final RoomChecks checks;
 
     @Override
     public @NotNull Boolean executor(@NotNull InviteCancelUseCase.Input input) {
@@ -25,14 +24,15 @@ public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
+        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        checks.assertGuestIsNotConfirmed(guest);
+        long roomId = guest.getRoomId();
 
-        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
-        commonChecks.assertGuestIsNotConfirmed(guest);
-        //long roomId = guest.getRoomId();
-
-        commonChecks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, null);
-        //commonChecks.assertRoomNotConfirmed(roomId);
+        checks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, roomId);
+        checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
+        //If for some reason I end up with a full/confirmed room and there are still pending invitations,
+        // I want to be able to cancel them anyway
+        //checks.assertRoomNotConfirmed(roomId);
 
         return roomLogic.inviteCancel(guestId);
     }
@@ -40,7 +40,6 @@ public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, B
     public record Input(
             @NotNull FurizonUser user,
             @NotNull GuestIdRequest req,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Event event
     ) {}
 }

@@ -6,7 +6,6 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -15,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AcceptInviteUseCase implements UseCase<AcceptInviteUseCase.Input, Boolean> {
+public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, Boolean> {
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final CommonRoomChecks commonChecks;
+    @NotNull private final RoomChecks checks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -25,15 +24,18 @@ public class AcceptInviteUseCase implements UseCase<AcceptInviteUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
+        checks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         long roomId = guest.getRoomId();
 
-        commonChecks.assertRoomNotConfirmed(roomId);
-        commonChecks.assertRoomNotFull(roomId);
-        commonChecks.assertUserIsNotInRoom(requesterUserId, event);
-        commonChecks.assertUserDoesNotOwnAroom(requesterUserId, event);
+        checks.assertRoomNotFull(roomId);
+        checks.assertRoomNotConfirmed(roomId);
+        checks.assertGuestIsNotConfirmed(guest);
+        checks.assertUserIsNotInRoom(requesterUserId, event);
+        checks.assertUserIsNotRoomOwner(requesterUserId, roomId);
+        checks.assertUserDoesNotOwnAroom(requesterUserId, event);
+        checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
 
         return roomLogic.inviteAccept(guestId, roomId);
     }
@@ -41,7 +43,6 @@ public class AcceptInviteUseCase implements UseCase<AcceptInviteUseCase.Input, B
     public record Input(
             @NotNull FurizonUser user,
             @NotNull GuestIdRequest req,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Event event
     ) {}
 }

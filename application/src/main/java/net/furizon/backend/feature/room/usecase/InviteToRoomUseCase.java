@@ -6,7 +6,6 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, RoomGuestResponse> {
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final CommonRoomChecks commonChecks;
+    @NotNull private final RoomChecks checks;
 
 
     @Override
@@ -29,21 +28,23 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
 
         boolean isAdmin = true; //TODO [ADMIN_CHECK}
 
-        commonChecks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
+        checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
+        checks.assertUserDoesNotOwnAroom(targetUserId, event);
 
-        long roomId = commonChecks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.req.getRoomId()
         );
+        checks.assertUserIsNotRoomOwner(targetUserId, roomId);
 
         boolean forceExit = input.req.getForceExit() == null ? false : input.req.getForceExit() && isAdmin;
         if (!forceExit) {
-            commonChecks.assertUserIsNotInRoom(targetUserId, event);
+            checks.assertUserIsNotInRoom(targetUserId, event);
         }
 
-        commonChecks.assertRoomNotConfirmed(roomId);
-        commonChecks.assertRoomNotFull(roomId);
+        checks.assertRoomNotConfirmed(roomId);
+        checks.assertRoomNotFull(roomId);
 
         boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
         long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, force, forceExit);
@@ -54,7 +55,6 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
     public record Input(
             @NotNull FurizonUser user,
             @NotNull InviteToRoomRequest req,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Event event
     ) {}
 }

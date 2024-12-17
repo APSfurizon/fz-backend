@@ -141,6 +141,21 @@ public class JooqRoomFinder implements RoomFinder {
     }
 
     @NotNull
+    public Optional<Long> getOwnerUserIdFromRoomId(long roomId) {
+        return Optional.ofNullable(query.fetchFirst(
+            PostgresDSL
+                .select(ORDERS.USER_ID)
+                .from(ORDERS)
+                .innerJoin(ROOMS)
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ROOMS.ROOM_ID.eq(roomId))
+                )
+                .limit(1)
+        ).mapOrNull(k -> k.get(ORDERS.USER_ID)));
+    }
+
+    @NotNull
     @Override
     public List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event) {
         return query.fetch(

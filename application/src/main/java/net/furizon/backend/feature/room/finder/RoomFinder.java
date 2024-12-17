@@ -29,6 +29,9 @@ public interface RoomFinder {
     Optional<Long> getRoomIdFromOwnerUserId(long userId, @NotNull Event event);
 
     @NotNull
+    Optional<Long> getOwnerUserIdFromRoomId(long roomId);
+
+    @NotNull
     List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event);
 
     @NotNull

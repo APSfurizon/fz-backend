@@ -18,6 +18,7 @@ public interface RoomLogic {
 
     boolean canConfirm(long roomId);
     boolean confirmRoom(long roomId);
+    boolean canUnconfirm(long roomId);
     boolean unconfirmRoom(long roomId);
 
     void doSanityChecks();

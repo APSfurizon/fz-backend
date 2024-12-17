@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -17,18 +16,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boolean> {
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final CommonRoomChecks commonChecks;
+    @NotNull private final RoomChecks checks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
-        long roomId = commonChecks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
+        checks.assertRoomNotConfirmed(roomId);
 
         return roomLogic.deleteRoom(roomId);
     }
@@ -36,7 +36,6 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
     public record Input(
             @NotNull FurizonUser user,
             @Nullable RoomIdRequest roomReq,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Event event
     ) {}
 }

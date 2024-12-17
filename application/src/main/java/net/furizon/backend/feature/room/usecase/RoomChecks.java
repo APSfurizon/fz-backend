@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,13 +18,11 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CommonRoomChecks {
+public class RoomChecks {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final OrderFinder orderFinder;
+    @NotNull private final RoomLogic roomLogic;
 
-    /**
-     * Checks if user has an order and it's not daily
-     */
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         if (!isDaily.isPresent()) {
@@ -53,6 +52,14 @@ public class CommonRoomChecks {
         }
     }
 
+    public void assertUserIsNotRoomOwner(long userId, long roomId) {
+        var roomOwner = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        assertRoomFound(roomOwner, roomId);
+        if (roomOwner.get() == userId) {
+            log.error("User {} is the owner of the room {}!", userId, roomId);
+            throw new ApiException("User is the owner of the room");
+        }
+    }
     public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         long roomId;
@@ -87,9 +94,31 @@ public class CommonRoomChecks {
 
     public void assertRoomNotConfirmed(long roomId) {
         var r = roomFinder.isRoomConfirmed(roomId);
-        if (r.isPresent() && r.get()) {
+        assertRoomFound(r, roomId);
+        if (r.get()) {
             log.error("Room {} is already confirmed!", roomId);
             throw new ApiException("Room is already confirmed");
+        }
+    }
+    public void assertRoomConfirmed(long roomId) {
+        var r = roomFinder.isRoomConfirmed(roomId);
+        assertRoomFound(r, roomId);
+        if (!r.get()) {
+            log.error("Room {} is NOT confirmed!", roomId);
+            throw new ApiException("Room is NOT confirmed");
+        }
+    }
+
+    public void assertRoomCanBeConfirmed(long roomId) {
+        if (!roomLogic.canConfirm(roomId)) {
+            log.error("Room {} cannot be confirmed!", roomId);
+            throw new ApiException("Room cannot be confirmed");
+        }
+    }
+    public void assertRoomCanBeUnconfirmed(long roomId) {
+        if (!roomLogic.canUnconfirm(roomId)) {
+            log.error("Room {} cannot be unconfirmed!", roomId);
+            throw new ApiException("Room cannot be unconfirmed");
         }
     }
 
@@ -115,6 +144,14 @@ public class CommonRoomChecks {
         }
     }
 
+    public void assertIsGuestObjOwnerOrAdmin(RoomGuestResponse guest, long requesterUserId) {
+        boolean isAdmin = true; //TODO [ADMIN_CHECK]
+        if (guest.getUserId() != requesterUserId && !isAdmin) {
+            log.error("User {} has no rights over guest obj {}", requesterUserId, guest.getGuestId());
+            throw new ApiException("User has no rights over specified guest!");
+        }
+    }
+
     public void assertRoomNotFull(long roomId) {
         List<RoomGuestResponse> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         Optional<Short> capacity = roomFinder.getRoomCapacity(roomId);
@@ -127,6 +164,13 @@ public class CommonRoomChecks {
         if (capacity.get() >= roomMates.size()) {
             log.error("Room {} is already full!", roomId);
             throw new ApiException("Room is full");
+        }
+    }
+
+    private void assertRoomFound(Optional<?> o, long roomId) {
+        if (!o.isPresent()) {
+            log.error("Room {} was not found!", roomId);
+            throw new ApiException("Room not found");
         }
     }
 }
