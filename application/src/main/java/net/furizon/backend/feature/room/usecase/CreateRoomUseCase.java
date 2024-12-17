@@ -29,9 +29,9 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         long userId = input.user.getUserId();
         Event event = input.event;
 
-        commonChecks.userAlreadyOwnsAroomCheck(userId, event);
-        commonChecks.isUserInAroomCheck(userId, event);
-        commonChecks.runCommonChecks(userId, event);
+        commonChecks.assertUserDoesNotOwnAroom(userId, event);
+        commonChecks.assertUserIsNotInRoom(userId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(userId, event);
 
         String name = input.createRoomRequest.getName();
         long roomId = roomLogic.createRoom(name, userId);

@@ -9,7 +9,6 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
-import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -26,21 +25,16 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.runCommonChecks(requesterUserId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = commonChecks.getAndCheckRoomGuestFromId(guestId);
-        if (guest.isConfirmed()) {
-            log.error("Cannot refuse the already accepted invitation {}", guestId);
-            throw new ApiException("Cannot refuse an already accepted invitation");
-        }
-        long roomId = guest.getRoomId();
+        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
+        commonChecks.assertGuestIsNotConfirmed(guest);
+        //long roomId = guest.getRoomId();
 
-        commonChecks.isRoomAlreadyConfirmedCheck(roomId);
-        commonChecks.userAlreadyOwnsAroomCheck(requesterUserId, event);
+        //commonChecks.assertRoomNotConfirmed(roomId);
+        //commonChecks.assertUserDoesNotOwnAroom(requesterUserId, event);
 
-        roomLogic.inviteRefuse(guestId);
-
-        return true;
+        return roomLogic.inviteRefuse(guestId);
     }
 
     public record Input(

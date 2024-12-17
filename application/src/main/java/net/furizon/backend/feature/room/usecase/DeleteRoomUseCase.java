@@ -24,15 +24,13 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
-        long roomId = commonChecks.getAndCheckRoomId(
+        long roomId = commonChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
 
-        roomLogic.deleteRoom(roomId);
-
-        return true;
+        return roomLogic.deleteRoom(roomId);
     }
 
     public record Input(

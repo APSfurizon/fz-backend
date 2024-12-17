@@ -29,9 +29,9 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
 
         boolean isAdmin = true; //TODO [ADMIN_CHECK}
 
-        commonChecks.runCommonChecks(targetUserId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
-        long roomId = commonChecks.getAndCheckRoomId(
+        long roomId = commonChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.req.getRoomId()
@@ -39,11 +39,11 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
 
         boolean forceExit = input.req.getForceExit() == null ? false : input.req.getForceExit() && isAdmin;
         if (!forceExit) {
-            commonChecks.isUserInAroomCheck(targetUserId, event);
+            commonChecks.assertUserIsNotInRoom(targetUserId, event);
         }
 
-        commonChecks.isRoomAlreadyConfirmedCheck(roomId);
-        commonChecks.capacityCheck(roomId);
+        commonChecks.assertRoomNotConfirmed(roomId);
+        commonChecks.assertRoomNotFull(roomId);
 
         boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
         long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, force, forceExit);

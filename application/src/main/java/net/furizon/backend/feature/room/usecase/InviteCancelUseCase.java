@@ -9,7 +9,6 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
-import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -26,21 +25,16 @@ public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.runCommonChecks(requesterUserId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = commonChecks.getAndCheckRoomGuestFromId(guestId);
-        if (guest.isConfirmed()) {
-            log.error("Cannot cancel the already accepted invitation {}", guestId);
-            throw new ApiException("Cannot cancel an already accepted invitation");
-        }
-        long roomId = guest.getRoomId();
+        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
+        commonChecks.assertGuestIsNotConfirmed(guest);
+        //long roomId = guest.getRoomId();
 
-        commonChecks.getAndCheckRoomId(requesterUserId, event, null);
-        commonChecks.isRoomAlreadyConfirmedCheck(roomId);
+        commonChecks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, null);
+        //commonChecks.assertRoomNotConfirmed(roomId);
 
-        roomLogic.inviteCancel(guestId);
-
-        return true;
+        return roomLogic.inviteCancel(guestId);
     }
 
     public record Input(

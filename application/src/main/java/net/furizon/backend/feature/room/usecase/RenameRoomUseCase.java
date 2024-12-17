@@ -23,7 +23,7 @@ public class RenameRoomUseCase implements UseCase<RenameRoomUseCase.Input, Boole
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
-        long roomId = commonChecks.getAndCheckRoomId(
+        long roomId = commonChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.req.getRoomId()

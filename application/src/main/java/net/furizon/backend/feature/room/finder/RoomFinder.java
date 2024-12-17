@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface RoomFinder {
 
     boolean isUserInAroom(long userId, long eventId);
-    boolean hasUserAlreadyAroom(long userId, long eventId);
+    boolean userOwnsAroom(long userId, long eventId);
 
     @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);

@@ -25,19 +25,17 @@ public class AcceptInviteUseCase implements UseCase<AcceptInviteUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.runCommonChecks(requesterUserId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = commonChecks.getAndCheckRoomGuestFromId(guestId);
+        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
         long roomId = guest.getRoomId();
 
-        commonChecks.isRoomAlreadyConfirmedCheck(roomId);
-        commonChecks.capacityCheck(roomId);
-        commonChecks.isUserInAroomCheck(requesterUserId, event);
-        commonChecks.userAlreadyOwnsAroomCheck(requesterUserId, event);
+        commonChecks.assertRoomNotConfirmed(roomId);
+        commonChecks.assertRoomNotFull(roomId);
+        commonChecks.assertUserIsNotInRoom(requesterUserId, event);
+        commonChecks.assertUserDoesNotOwnAroom(requesterUserId, event);
 
-        roomLogic.inviteAccept(guestId, roomId);
-
-        return true;
+        return roomLogic.inviteAccept(guestId, roomId);
     }
 
     public record Input(

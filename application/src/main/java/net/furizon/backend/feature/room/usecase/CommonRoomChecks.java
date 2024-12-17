@@ -24,7 +24,7 @@ public class CommonRoomChecks {
     /**
      * Checks if user has an order and it's not daily
      */
-    public void runCommonChecks(long userId, @NotNull Event event) {
+    public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         if (!isDaily.isPresent()) {
             log.error("User is trying to manage a room, but he has no registered order!");
@@ -37,15 +37,15 @@ public class CommonRoomChecks {
         }
     }
 
-    public void userAlreadyOwnsAroomCheck(long userId, @NotNull Event event) {
-        boolean alreadyOwnsAroom = roomFinder.hasUserAlreadyAroom(userId, event.getId());
+    public void assertUserDoesNotOwnAroom(long userId, @NotNull Event event) {
+        boolean alreadyOwnsAroom = roomFinder.userOwnsAroom(userId, event.getId());
         if (alreadyOwnsAroom) {
             log.error("User is trying to manage a room, but already has one!");
             throw new ApiException("User already owns a room");
         }
     }
 
-    public void isUserInAroomCheck(long userId, @NotNull Event event) {
+    public void assertUserIsNotInRoom(long userId, @NotNull Event event) {
         boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId());
         if (userInRoom) {
             log.error("User is trying to manage a room, but he's already in one!");
@@ -53,7 +53,7 @@ public class CommonRoomChecks {
         }
     }
 
-    public long getAndCheckRoomId(long userId, @NotNull Event event, @Nullable Long roomReqId) {
+    public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         long roomId;
 
@@ -85,7 +85,7 @@ public class CommonRoomChecks {
         return roomId;
     }
 
-    public void isRoomAlreadyConfirmedCheck(long roomId) {
+    public void assertRoomNotConfirmed(long roomId) {
         var r = roomFinder.isRoomConfirmed(roomId);
         if (r.isPresent() && r.get()) {
             log.error("Room {} is already confirmed!", roomId);
@@ -93,7 +93,7 @@ public class CommonRoomChecks {
         }
     }
 
-    @NotNull public RoomGuestResponse getAndCheckRoomGuestFromId(long guestId) {
+    @NotNull public RoomGuestResponse getRoomGuestObjAndAssertItExists(long guestId) {
         var r = roomFinder.getRoomGuestFromId(guestId);
         if (!r.isPresent()) {
             log.error("Unable to find roomGuest for id {}", guestId);
@@ -101,8 +101,21 @@ public class CommonRoomChecks {
         }
         return r.get();
     }
+    public void assertGuestIsNotConfirmed(RoomGuestResponse guest) {
+        if (guest.isConfirmed()) {
+            log.error("Guest {} is already confirmed in the room {}", guest.getGuestId(), guest.getRoomId());
+            throw new ApiException("Guest is already confirmed!");
+        }
+    }
+    public void assertGuestIsConfirmed(RoomGuestResponse guest) {
+        if (!guest.isConfirmed()) {
+            log.error("Guest {} is NOT confirmed in the room {}", guest.getGuestId(), guest.getRoomId());
+            throw new ApiException("Guest is NOT confirmed!");
 
-    public void capacityCheck(long roomId) {
+        }
+    }
+
+    public void assertRoomNotFull(long roomId) {
         List<RoomGuestResponse> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         Optional<Short> capacity = roomFinder.getRoomCapacity(roomId);
 

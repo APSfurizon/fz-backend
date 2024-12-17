@@ -9,7 +9,6 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
-import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -27,17 +26,14 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        commonChecks.runCommonChecks(requesterUserId, event);
+        commonChecks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = commonChecks.getAndCheckRoomGuestFromId(guestId);
-        if (!guest.isConfirmed()) {
-            log.error("Cannot kick the still pending invitation {}", guestId);
-            throw new ApiException("Cannot kick a pending member");
-        }
+        RoomGuestResponse guest = commonChecks.getRoomGuestObjAndAssertItExists(guestId);
+        commonChecks.assertGuestIsConfirmed(guest);
         long roomId = guest.getRoomId();
 
-        commonChecks.getAndCheckRoomId(requesterUserId, event, null);
-        commonChecks.isRoomAlreadyConfirmedCheck(roomId);
+        commonChecks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, null);
+        commonChecks.assertRoomNotConfirmed(roomId);
 
         roomLogic.kickFromRoom(guestId);
 
