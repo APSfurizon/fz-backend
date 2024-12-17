@@ -48,7 +48,7 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
         checks.assertRoomNotFull(roomId);
 
         boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
-        long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, force, forceExit);
+        long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, event, force, forceExit);
 
         return new RoomGuestResponse(guestId, targetUserId, roomId, false);
     }

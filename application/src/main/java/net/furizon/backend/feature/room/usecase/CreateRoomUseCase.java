@@ -34,7 +34,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         checks.assertUserHasOrderAndItsNotDaily(userId, event);
 
         String name = input.createRoomRequest.getName();
-        long roomId = roomLogic.createRoom(name, userId);
+        long roomId = roomLogic.createRoom(name, userId, event);
 
         RoomDataResponse roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
 
