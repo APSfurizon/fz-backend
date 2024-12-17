@@ -35,13 +35,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             info.setCanConfirm(!info.isConfirmed() && roomLogic.canConfirm(roomId));
             info.setCanUnconfirm(info.isConfirmed() && roomLogic.canUnconfirm(roomId));
 
-            List<RoomGuestResponse> guests = roomFinder.getRoomGuestsFromRoomId(roomId, false);
+            List<RoomGuestResponse> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
 
-            info.setCanInvite(
-                guests.stream().filter(
-                        RoomGuestResponse::isConfirmed
-                ).count() < (long) info.getRoomData().getRoomCapacity()
-            );
+            info.setCanInvite(guests.size() < (int) info.getRoomData().getRoomCapacity());
             info.setGuests(guests);
         }
         List<RoomGuestResponse> invitations = roomFinder.getUserReceivedInvitations(userId, input.event);

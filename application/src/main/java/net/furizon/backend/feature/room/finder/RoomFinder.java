@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface RoomFinder {
 
     boolean isUserInAroom(long userId, long eventId);
+    boolean isUserInvitedInRoom(long userId, long roomId);
     boolean userOwnsAroom(long userId, long eventId);
 
     @Nullable

@@ -37,6 +37,7 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
                 input.req.getRoomId()
         );
         checks.assertUserIsNotRoomOwner(targetUserId, roomId);
+        checks.assertUserIsNotInvitedToRoom(targetUserId, roomId);
 
         boolean forceExit = input.req.getForceExit() == null ? false : input.req.getForceExit() && isAdmin;
         if (!forceExit) {

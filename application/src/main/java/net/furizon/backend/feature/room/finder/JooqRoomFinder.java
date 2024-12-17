@@ -50,6 +50,20 @@ public class JooqRoomFinder implements RoomFinder {
     }
 
     @Override
+    public boolean isUserInvitedInRoom(long userId, long roomId) {
+        return query.fetchFirst(
+                PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
+                .from(ROOM_GUESTS)
+                .where(
+                    ROOM_GUESTS.USER_ID.eq(userId)
+                    .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
+                    .and(ROOM_GUESTS.CONFIRMED.eq(false))
+                )
+                .limit(1)
+        ).isPresent();
+    }
+
+    @Override
     public boolean userOwnsAroom(long userId, long eventId) {
         return query.fetchFirst(
                 PostgresDSL.select(ROOMS.ROOM_ID)

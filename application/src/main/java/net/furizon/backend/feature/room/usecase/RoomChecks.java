@@ -26,7 +26,8 @@ public class RoomChecks {
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         if (!isDaily.isPresent()) {
-            log.error("User is trying to manage a room, but he has no registered order!");
+            log.error("User {} is trying to manage a room for event {}, but he has no registered order!",
+                    userId, event);
             throw new ApiException("User has no registered order");
         }
 
@@ -39,7 +40,7 @@ public class RoomChecks {
     public void assertUserDoesNotOwnAroom(long userId, @NotNull Event event) {
         boolean alreadyOwnsAroom = roomFinder.userOwnsAroom(userId, event.getId());
         if (alreadyOwnsAroom) {
-            log.error("User is trying to manage a room, but already has one!");
+            log.error("User {} is trying to manage a room for event {}, but already has one!", userId, event);
             throw new ApiException("User already owns a room");
         }
     }
@@ -47,8 +48,15 @@ public class RoomChecks {
     public void assertUserIsNotInRoom(long userId, @NotNull Event event) {
         boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId());
         if (userInRoom) {
-            log.error("User is trying to manage a room, but he's already in one!");
+            log.error("User {} is trying to manage a room for event {}, but he's already in one!", userId, event);
             throw new ApiException("User already is in a room");
+        }
+    }
+    public void assertUserIsNotInvitedToRoom(long userId, long roomId) {
+        boolean userInRoom = roomFinder.isUserInvitedInRoom(userId, roomId);
+        if (userInRoom) {
+            log.error("User {} is already invited to room {}", userId, roomId);
+            throw new ApiException("User is already invited to specified room");
         }
     }
 
