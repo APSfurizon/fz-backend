@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.UserSession;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
 import net.furizon.backend.feature.user.usecase.SearchUserInEventUseCase;
+import net.furizon.backend.feature.user.usecase.SearchUsersByIdsUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +89,23 @@ public class UserController {
                         fursonaName,
                         pretixInformation,
                         filterRoom == null ? false : filterRoom
+                )
+        );
+    }
+
+    @GetMapping("/by-id")
+    public UsersByIdResponse searchUsersByIds(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid
+            @NotNull
+            @Size(min = 1)
+            @RequestParam("id")
+            final String[] userIds
+    ) {
+        return executor.execute(
+                SearchUsersByIdsUseCase.class,
+                new SearchUsersByIdsUseCase.Input(
+                    userIds
                 )
         );
     }

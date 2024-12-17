@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserFinder {
     @Nullable
@@ -22,4 +23,7 @@ public interface UserFinder {
 
     @Nullable
     UserDisplayDataResponse getDisplayUser(long userId, @NotNull Event event);
+
+    @NotNull
+    List<User> findByIds(Set<Long> ids);
 }

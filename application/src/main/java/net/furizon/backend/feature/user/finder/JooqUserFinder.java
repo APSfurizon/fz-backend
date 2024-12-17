@@ -16,6 +16,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -36,6 +37,18 @@ public class JooqUserFinder implements UserFinder {
                     .where(USERS.USER_ID.eq(userId))
             )
             .mapOrNull(JooqUserMapper::map);
+    }
+
+    @NotNull
+    @Override
+    public List<User> findByIds(Set<Long> ids) {
+        return sqlQuery
+            .fetch(
+                selectUser()
+                    .where(USERS.USER_ID.in(ids))
+            ).stream()
+                .map(JooqUserMapper::map)
+                .toList();
     }
 
     @Nullable
