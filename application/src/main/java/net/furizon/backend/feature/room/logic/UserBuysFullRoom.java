@@ -29,7 +29,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean inviteAccept(long guestId) {
+    public boolean inviteAccept(long guestId, long roomId) {
         return false;
     }
 
@@ -50,6 +50,16 @@ public class UserBuysFullRoom implements RoomLogic {
 
     @Override
     public boolean leaveRoom(long guestId) {
+        return false;
+    }
+
+    @Override
+    public boolean canConfirm(long roomId) {
+        return false;
+    }
+
+    @Override
+    public boolean canUnconfirm(long roomId) {
         return false;
     }
 

@@ -26,10 +26,16 @@ public class RoomInfo {
     @Builder.Default
     @Getter(AccessLevel.NONE)
     private boolean canConfirm = false;
+    @Builder.Default
+    @Getter(AccessLevel.NONE)
+    private boolean canUnconfirm = false;
     private final boolean confirmed;
 
     public boolean canBeConfirmed() {
         return canConfirm;
+    }
+    public boolean canBeUnconfirmed() {
+        return canUnconfirm;
     }
 
     @NotNull

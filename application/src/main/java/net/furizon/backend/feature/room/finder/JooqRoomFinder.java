@@ -86,6 +86,12 @@ public class JooqRoomFinder implements RoomFinder {
                 ROOMS.ORDER_ID.eq(ORDERS.ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
+            .innerJoin(ROOM_GUESTS)
+            .on(
+                ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                .and(ROOM_GUESTS.USER_ID.eq(userId))
+                .and(ROOM_GUESTS.CONFIRMED.eq(true))
+            )
             .limit(1)
         ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation));
     }
@@ -188,6 +194,26 @@ public class JooqRoomFinder implements RoomFinder {
 
     @NotNull
     @Override
+    public Optional<RoomGuestResponse> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event) {
+        return Optional.ofNullable(query.fetchFirst(
+                roomGuestSelect()
+                .innerJoin(ROOMS)
+                .on(
+                        ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
+                        .and(ROOM_GUESTS.USER_ID.eq(userId))
+                        .and(ROOM_GUESTS.CONFIRMED.eq(true))
+                )
+                .innerJoin(ORDERS)
+                .on(
+                        ROOMS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                )
+                .limit(1)
+        ).mapOrNull(RoomGuestResponseMapper::map));
+    }
+
+    @NotNull
+    @Override
     public Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId) {
         return Optional.ofNullable(query.fetchFirst(
                 roomGuestSelect()
@@ -217,7 +243,8 @@ public class JooqRoomFinder implements RoomFinder {
                 .on(
                         ROOMS.ROOM_ID.eq(roomId)
                         .and(ORDERS.ID.eq(ROOMS.ORDER_ID))
-                ).limit(1)
+                )
+                .limit(1)
         ).mapOrNull(k -> k.get(ORDERS.ORDER_ROOM_CAPACITY)));
     }
 }

@@ -26,16 +26,14 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
         long userId = input.user.getUserId();
-        List<RoomGuestResponse> invitations = null;
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
 
-        if (info == null) {
-            invitations = roomFinder.getUserReceivedInvitations(userId, input.event);
-        } else {
+        if (info != null) {
             boolean isOwner = info.getRoomOwnerId() == userId;
             long roomId = info.getRoomId();
             info.setOwner(isOwner);
-            info.setCanConfirm(roomLogic.canConfirm(roomId));
+            info.setCanConfirm(!info.isConfirmed() && roomLogic.canConfirm(roomId));
+            info.setCanUnconfirm(info.isConfirmed() && roomLogic.canUnconfirm(roomId));
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestsFromRoomId(roomId, false);
 
@@ -46,6 +44,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             );
             info.setGuests(guests);
         }
+        List<RoomGuestResponse> invitations = roomFinder.getUserReceivedInvitations(userId, input.event);
 
         return new RoomInfoResponse(info, invitations);
     }

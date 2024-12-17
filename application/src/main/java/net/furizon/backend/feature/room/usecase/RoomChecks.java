@@ -122,6 +122,15 @@ public class RoomChecks {
         }
     }
 
+    @NotNull public RoomGuestResponse getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
+            long userId, @NotNull Event event) {
+        var r = roomFinder.getConfirmedRoomGuestFromUserEvent(userId, event);
+        if (!r.isPresent()) {
+            log.error("Could not find any roomGuest obj for user {} at event {}", userId, event);
+            throw new ApiException("Could not find any roomGuest");
+        }
+        return r.get();
+    }
     @NotNull public RoomGuestResponse getRoomGuestObjAndAssertItExists(long guestId) {
         var r = roomFinder.getRoomGuestFromId(guestId);
         if (!r.isPresent()) {

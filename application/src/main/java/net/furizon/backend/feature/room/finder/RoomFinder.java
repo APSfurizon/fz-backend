@@ -38,6 +38,9 @@ public interface RoomFinder {
     Optional<Boolean> isRoomConfirmed(long roomId);
 
     @NotNull
+    Optional<RoomGuestResponse> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event);
+
+    @NotNull
     Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId);
 
     @NotNull

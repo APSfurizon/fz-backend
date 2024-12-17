@@ -29,7 +29,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean inviteAccept(long guestId) {
+    public boolean inviteAccept(long guestId, long roomId) {
         return false;
     }
 
@@ -55,6 +55,11 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean canConfirm(long roomId) {
+        return false;
+    }
+
+    @Override
+    public boolean canUnconfirm(long roomId) {
         return false;
     }
 

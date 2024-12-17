@@ -2,7 +2,7 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -20,11 +20,12 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
     @Override
     public @NotNull Boolean executor(@NotNull LeaveRoomUseCase.Input input) {
         long requesterUserId = input.user.getUserId();
-        long guestId = input.req.getGuestId();
+        Event event = input.event;
 
-        //checks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
-
-        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuestResponse guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
+                requesterUserId,
+                event
+        );
         checks.assertGuestIsConfirmed(guest);
         long roomId = guest.getRoomId();
 
@@ -32,11 +33,11 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
 
-        return roomLogic.leaveRoom(guestId);
+        return roomLogic.leaveRoom(guest.getGuestId());
     }
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull GuestIdRequest req
+            @NotNull Event event
     ) {}
 }

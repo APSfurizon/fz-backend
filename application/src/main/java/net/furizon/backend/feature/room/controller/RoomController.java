@@ -13,7 +13,20 @@ import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
+import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.ConfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.CreateRoomUseCase;
+import net.furizon.backend.feature.room.usecase.DeleteRoomUseCase;
 import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
+import net.furizon.backend.feature.room.usecase.InviteAcceptUseCase;
+import net.furizon.backend.feature.room.usecase.InviteCancelUseCase;
+import net.furizon.backend.feature.room.usecase.InviteRefuseUseCase;
+import net.furizon.backend.feature.room.usecase.InviteToRoomUseCase;
+import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
+import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
+import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
+import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -41,7 +54,15 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final CreateRoomRequest createRoomRequest
     ) {
-        return null;
+        return executor.execute(
+                CreateRoomUseCase.class,
+                new CreateRoomUseCase.Input(
+                    user,
+                    createRoomRequest,
+                    pretixInformation.getCurrentEvent(),
+                    pretixInformation
+                )
+        );
     }
 
     @Operation(summary = "Deletes user's room", description =
@@ -52,7 +73,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
-        return false;
+        return executor.execute(
+                DeleteRoomUseCase.class,
+                new DeleteRoomUseCase.Input(
+                        user,
+                        roomIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Renames user's room", description =
@@ -63,7 +91,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final ChangeNameToRoomRequest changeNameToRoomRequest
     ) {
-        return false;
+        return executor.execute(
+                RenameRoomUseCase.class,
+                new RenameRoomUseCase.Input(
+                        user,
+                        changeNameToRoomRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @NotNull
@@ -79,7 +114,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
     ) {
-        return null;
+        return executor.execute(
+                InviteToRoomUseCase.class,
+                new InviteToRoomUseCase.Input(
+                        user,
+                        inviteToRoomRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Accept the specified invitation", description =
@@ -90,7 +132,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
-        return false;
+        return executor.execute(
+                InviteAcceptUseCase.class,
+                new InviteAcceptUseCase.Input(
+                        user,
+                        guestIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Refuse the specified invitation", description =
@@ -100,7 +149,13 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
-        return false;
+        return executor.execute(
+                InviteRefuseUseCase.class,
+                new InviteRefuseUseCase.Input(
+                        user,
+                        guestIdRequest
+                )
+        );
     }
 
     @Operation(summary = "Cancel the specified invitation", description =
@@ -111,7 +166,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
-        return false;
+        return executor.execute(
+                InviteCancelUseCase.class,
+                new InviteCancelUseCase.Input(
+                        user,
+                        guestIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Kicks someone from the room", description =
@@ -122,7 +184,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final GuestIdRequest guestIdRequest
     ) {
-        return false;
+        return executor.execute(
+                KickMemberUseCase.class,
+                new KickMemberUseCase.Input(
+                        user,
+                        guestIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Leaves the current room", description =
@@ -131,7 +200,56 @@ public class RoomController {
     public boolean leaveRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        return false;
+        return executor.execute(
+                LeaveRoomUseCase.class,
+                new LeaveRoomUseCase.Input(
+                        user,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Checks if the user can confirm the room", description =
+        "The confirmation of the room is highly dependent on the room's chosen logic. "
+        + "Some logic may accept confirmations with any number of users in the room, "
+        + "others only if the room is full and others may not support confirmation at all! "
+        + "This method returns whenever or not a confirmation button *should be showed* to the user. "
+        + "Since, as previously said, some logic may never allow room confirmation, the button must be "
+        + "hidden to the user and NOT disabled, if he can't confirm a room.")
+    @GetMapping("/can-confirm")
+    public boolean canConfirm(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+    ) {
+        return executor.execute(
+                CanConfirmRoomUseCase.class,
+                new CanConfirmRoomUseCase.Input(
+                        user,
+                        roomIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Checks if the user can unconfirm the room", description =
+        "The unconfirmation of the room is highly dependent on the room's chosen logic. "
+        + "Some logic may accept unconfirmations, while others won't. "
+        + "This method returns whenever or not a confirmation button *should be showed* to the user. "
+        + "Since, as previously said, some logic may never allow room unconfirmation, the button must be "
+        + "hidden to the user and NOT disabled, if he can't confirm a room.")
+    @GetMapping("/can-unconfirm")
+    public boolean canUnconfirm(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+    ) {
+        return executor.execute(
+                CanUnconfirmRoomUseCase.class,
+                new CanUnconfirmRoomUseCase.Input(
+                        user,
+                        roomIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Confirms the current room", description =
@@ -144,7 +262,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
-        return false;
+        return executor.execute(
+                ConfirmRoomUseCase.class,
+                new ConfirmRoomUseCase.Input(
+                        user,
+                        roomIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Unconfirms the current room", description =
@@ -156,11 +281,19 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
-        return false;
+        return executor.execute(
+                UnconfirmRoomUseCase.class,
+                new UnconfirmRoomUseCase.Input(
+                        user,
+                        roomIdRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Gets the current user's room status and information", description =
-            "This method returns various information about the status of the accomodance of the user")
+            "This method returns various information about the status of the accomodance of the user."
+            + "Please read the other documentation of this controller to better understand the various fields")
     @GetMapping("/info")
     @NotNull
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
