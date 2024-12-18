@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Data
 @Builder
-public class UserDisplayDataResponse {
+public class UserDisplayData {
     private final long userId;
 
     @NotNull

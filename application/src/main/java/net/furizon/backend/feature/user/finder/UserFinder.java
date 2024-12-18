@@ -3,7 +3,7 @@ package net.furizon.backend.feature.user.finder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
-import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,8 +23,8 @@ public interface UserFinder {
     );
 
     @Nullable
-    UserDisplayDataResponse getDisplayUser(long userId, @NotNull Event event);
+    UserDisplayData getDisplayUser(long userId, @NotNull Event event);
 
     @NotNull
-    List<User> findByIds(Set<Long> ids);
+    List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event);
 }

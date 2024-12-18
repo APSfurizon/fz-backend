@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.room.dto.RoomGuest;
-import net.furizon.backend.feature.user.User;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class RoomGuestResponse {
     @NotNull private final RoomGuest roomGuest;
 
-    @NotNull private final User user;
+    @NotNull private final UserDisplayData user;
 
     @Nullable private final OrderStatus orderStatus;
 }

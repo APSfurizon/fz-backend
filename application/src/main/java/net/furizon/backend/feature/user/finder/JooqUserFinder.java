@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
-import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
@@ -44,19 +44,33 @@ public class JooqUserFinder implements UserFinder {
 
     @NotNull
     @Override
-    public List<User> findByIds(Set<Long> ids) {
-        return sqlQuery
-            .fetch(
-                selectUser()
-                    .where(USERS.USER_ID.in(ids))
-            ).stream()
-                .map(JooqUserMapper::map)
-                .toList();
+    public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
+        return sqlQuery.fetch(
+            PostgresDSL
+            .select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
+            )
+            .from(USERS)
+            .leftJoin(MEDIA)
+            .on(
+                USERS.USER_ID.in(ids)
+                .and(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            )
+            .leftJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+        ).stream().map(JooqDisplayUserMapper::map).toList();
     }
 
     @Nullable
     @Override
-    public UserDisplayDataResponse getDisplayUser(long userId, @NotNull Event event) {
+    public UserDisplayData getDisplayUser(long userId, @NotNull Event event) {
         return sqlQuery.fetchFirst(
             PostgresDSL
             .select(

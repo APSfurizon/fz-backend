@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.feature.room.mapper.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.jooq.generated.Tables;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 import static net.furizon.jooq.generated.tables.Orders.ORDERS;
@@ -154,11 +156,12 @@ public class JooqRoomFinder implements RoomFinder {
                         ROOM_GUESTS.ROOM_ID,
                         ROOM_GUESTS.CONFIRMED,
                         ORDERS.ORDER_STATUS,
+                        ORDERS.ORDER_SPONSORSHIP_TYPE,
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
-                        USERS.MEDIA_ID_PROPIC,
-                        USERS.SHOW_IN_NOSECOUNT
+                        USERS.SHOW_IN_NOSECOUNT,
+                        MEDIA.MEDIA_PATH
                 )
                 .from(ROOM_GUESTS)
                 .innerJoin(USERS)
@@ -171,6 +174,8 @@ public class JooqRoomFinder implements RoomFinder {
                     ORDERS.USER_ID.eq(USERS.USER_ID)
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
+                .leftJoin(MEDIA)
+                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(RoomGuestResponseMapper::map).toList();
     }
 
@@ -187,7 +192,7 @@ public class JooqRoomFinder implements RoomFinder {
                     .and(ORDERS.USER_ID.eq(userId))
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
-                    .limit(1)
+                .limit(1)
         ).mapOrNull(k -> k.get(ROOMS.ROOM_ID)));
     }
 
@@ -213,11 +218,11 @@ public class JooqRoomFinder implements RoomFinder {
         return query.fetch(
                 PostgresDSL
                 .select(
+                        MEDIA.MEDIA_PATH,
                         ROOM_GUESTS.ROOM_GUEST_ID,
                         ROOM_GUESTS.USER_ID,
                         ROOM_GUESTS.ROOM_ID,
                         ROOM_GUESTS.CONFIRMED,
-                        ORDERS.ORDER_STATUS,
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
@@ -225,8 +230,10 @@ public class JooqRoomFinder implements RoomFinder {
                         USERS.SHOW_IN_NOSECOUNT,
                         ROOMS.ROOM_ID,
                         ROOMS.ROOM_NAME,
-                        ORDERS.USER_ID,
                         ROOMS.ROOM_CONFIRMED,
+                        ORDERS.USER_ID,
+                        ORDERS.ORDER_SPONSORSHIP_TYPE,
+                        ORDERS.ORDER_STATUS,
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME
@@ -243,6 +250,10 @@ public class JooqRoomFinder implements RoomFinder {
                     ROOMS.ORDER_ID.eq(ORDERS.ID)
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
+                .innerJoin(USERS)
+                .on(USERS.USER_ID.eq(ROOM_GUESTS.USER_ID))
+                .leftJoin(MEDIA)
+                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService)).toList();
     }
 

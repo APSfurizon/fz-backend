@@ -9,5 +9,5 @@ import java.util.List;
 @Data
 public class UsersByIdResponse {
     @NotNull
-    private final List<User> users;
+    private final List<UserDisplayData> users;
 }

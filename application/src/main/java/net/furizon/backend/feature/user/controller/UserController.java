@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.UserSession;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
-import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
@@ -39,8 +39,8 @@ public class UserController {
         return user;
     }
 
-    @GetMapping("/me/display")
-    public Optional<UserDisplayDataResponse> getMeDisplay(
+    @GetMapping("/display/me")
+    public Optional<UserDisplayData> getMeDisplay(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
@@ -48,6 +48,28 @@ public class UserController {
                 new GetUserDisplayDataUseCase.Input(
                     user.getUserId(),
                     pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Obtains a DisplayUserData for multiple, specified, users", description =
+        "Provide a comma separated list of user ids in the `id` field. This endpoint will return "
+        + "a list of DisplayUserData, one for each found id, which contains all the information needed to "
+        + "display an user on the frontend")
+    @GetMapping("/display/by-id")
+    public UsersByIdResponse searchUsersByIds(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid
+            @NotNull
+            @Size(min = 1)
+            @RequestParam("id")
+            final String[] userIds
+    ) {
+        return executor.execute(
+                SearchUsersByIdsUseCase.class,
+                new SearchUsersByIdsUseCase.Input(
+                        userIds,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -95,23 +117,6 @@ public class UserController {
                         pretixInformation,
                         filterNotInRoom == null ? false : filterNotInRoom,
                         filterPaid == null ? false : filterPaid
-                )
-        );
-    }
-
-    @GetMapping("/by-id")
-    public UsersByIdResponse searchUsersByIds(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid
-            @NotNull
-            @Size(min = 1)
-            @RequestParam("id")
-            final String[] userIds
-    ) {
-        return executor.execute(
-                SearchUsersByIdsUseCase.class,
-                new SearchUsersByIdsUseCase.Input(
-                    userIds
                 )
         );
     }
