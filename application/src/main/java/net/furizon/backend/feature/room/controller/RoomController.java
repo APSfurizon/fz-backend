@@ -48,7 +48,7 @@ public class RoomController {
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
-        "If the user doesn't have created a new room yet, it creates a new room with the specified name")
+        "If the user hasn't created a new room yet, it creates a new room with the specified name")
     @PostMapping("/create")
     public RoomInfo createRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -292,7 +292,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Gets the current user's room status and information", description =
-            "This method returns various information about the status of the accomodance of the user."
+            "This method returns various information about the status of the accommodation of the user."
             + "Please read the other documentation of this controller to better understand the various fields")
     @GetMapping("/info")
     @NotNull
