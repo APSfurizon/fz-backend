@@ -35,6 +35,8 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             info.setUserIsOwner(isOwner);
             info.setCanConfirm(isOwner && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
             info.setCanUnconfirm(isOwner && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
+            info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
+            info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
 
@@ -47,6 +49,10 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         }
         List<RoomInvitationResponse> invitations =
             roomFinder.getUserReceivedInvitations(userId, input.event, input.pretixInformation);
+        for (RoomInvitationResponse invitation : invitations) {
+            var guests = roomFinder.getRoomGuestResponseFromRoomId(invitation.getRoom().getRoomId(), input.event);
+            invitation.getRoom().setGuests(guests);
+        }
 
         boolean canCreateRoom = info == null && roomLogic.canCreateRoom(userId, input.event);
 

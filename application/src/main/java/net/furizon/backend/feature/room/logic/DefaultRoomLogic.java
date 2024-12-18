@@ -208,6 +208,11 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
+    public boolean isConfirmationSupported() {
+        return true;
+    }
+
+    @Override
     public boolean canConfirmRoom(long roomId, @NotNull Event event) {
         boolean everyonePaid = true;
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
@@ -216,12 +221,6 @@ public class DefaultRoomLogic implements RoomLogic {
             everyonePaid &= r.isPresent() && r.get() == OrderStatus.PAID;
         }
         return everyonePaid;
-    }
-
-    @Override
-    public boolean canUnconfirmRoom(long roomId) {
-        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `true` value is returned");
-        return true;
     }
 
     @Override
@@ -238,9 +237,20 @@ public class DefaultRoomLogic implements RoomLogic {
 
         return command.execute(
             PostgresDSL.update(ROOMS)
-            .set(ROOMS.ROOM_CONFIRMED, true)
-            .where(ROOMS.ROOM_ID.eq(roomId))
+                .set(ROOMS.ROOM_CONFIRMED, true)
+                .where(ROOMS.ROOM_ID.eq(roomId))
         ) > 0;
+    }
+
+    @Override
+    public boolean isUnconfirmationSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean canUnconfirmRoom(long roomId) {
+        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `true` value is returned");
+        return true;
     }
 
     @Override

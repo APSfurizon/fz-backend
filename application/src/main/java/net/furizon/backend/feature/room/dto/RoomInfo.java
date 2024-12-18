@@ -22,7 +22,11 @@ public class RoomInfo {
     private boolean userIsOwner = false;
 
     @Builder.Default
+    private boolean confirmationSupported = false;
+    @Builder.Default
     private boolean canConfirm = false;
+    @Builder.Default
+    private boolean unconfirmationSupported = false;
     @Builder.Default
     private boolean canUnconfirm = false;
     private final boolean confirmed;

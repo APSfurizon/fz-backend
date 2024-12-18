@@ -86,6 +86,11 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
+    public boolean isConfirmationSupported() {
+        return false;
+    }
+
+    @Override
     public boolean canConfirmRoom(long roomId, @NotNull Event event) {
         return false;
     }
@@ -98,6 +103,11 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean confirmRoom(long roomId) {
         return defaultRoomLogic.confirmRoom(roomId);
+    }
+
+    @Override
+    public boolean isUnconfirmationSupported() {
+        return false;
     }
 
     @Override
