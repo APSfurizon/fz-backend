@@ -41,8 +41,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
 
             info.setCanInvite(isOwner && (
-                    guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
-                    < (long) info.getRoomData().getRoomCapacity()
+                    //guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
+                    guests.size() //Counting also unconfirmed invites to prevent mass spam
+                    < (int) info.getRoomData().getRoomCapacity()
                 )
             );
             info.setGuests(guests);

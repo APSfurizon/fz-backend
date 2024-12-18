@@ -29,7 +29,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();
 
-        checks.assertRoomNotFull(roomId);
+        checks.assertRoomNotFull(roomId, true);
         checks.assertRoomNotConfirmed(roomId);
         checks.assertGuestIsNotConfirmed(guest);
         checks.assertOrderIsPaid(targetUserId, event);

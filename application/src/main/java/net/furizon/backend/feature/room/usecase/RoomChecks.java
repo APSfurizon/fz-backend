@@ -182,8 +182,8 @@ public class RoomChecks {
         }
     }
 
-    public void assertRoomNotFull(long roomId) {
-        List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, true);
+    public void assertRoomNotFull(long roomId, boolean onlyConfirmed) {
+        List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, onlyConfirmed);
         Optional<Short> capacity = roomFinder.getRoomCapacity(roomId);
 
         if (!capacity.isPresent()) {
