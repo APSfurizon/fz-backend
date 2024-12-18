@@ -13,7 +13,7 @@ public class RoomGuestResponseMapper {
         return new RoomGuestResponse(
             RoomGuestMapper.map(record),
             JooqDisplayUserMapper.map(record),
-            status == null ? null : OrderStatus.values()[status]
+            status == null ? OrderStatus.CANCELED : OrderStatus.values()[status]
         );
     }
 }

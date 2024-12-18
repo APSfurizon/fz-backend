@@ -226,6 +226,11 @@ public class Orders extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.ORDERS_ONE_ORDER_PER_EVENT);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.ORDERS__ORDERS_EVENTS_ID, Keys.ORDERS__ORDERS_USERS_ID);
     }

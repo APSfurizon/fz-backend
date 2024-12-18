@@ -9,7 +9,7 @@ public class RoomInvitationResponseMapper {
     public static RoomInvitationResponse map(Record record, @NotNull PretixInformation pretixInformation) {
         return new RoomInvitationResponse(
             JooqRoomInfoMapper.map(record, pretixInformation),
-            RoomGuestResponseMapper.map(record)
+            RoomGuestMapper.map(record)
         );
     }
 }

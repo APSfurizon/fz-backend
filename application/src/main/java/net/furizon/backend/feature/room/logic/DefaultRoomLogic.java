@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -51,19 +52,23 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
+            throw new ApiException("Order not found while creating a room");
         }
-        return command.executeResult(
+        long orderId = r.get().get(ORDERS.ID);
+        long roomId = command.executeResult(
             PostgresDSL.insertInto(
                 ROOMS,
                 ROOMS.ROOM_NAME,
                 ROOMS.ORDER_ID
             ).values(
                 name,
-                r.get().get(ORDERS.ID)
+                orderId
             ).returning(
                 ROOMS.ROOM_ID
             )
         ).getFirst().get(ROOMS.ROOM_ID);
+        invitePersonToRoom(userId, roomId, event, true, true);
+        return roomId;
     }
 
     @Override
@@ -249,7 +254,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public void doSanityChecks() {
+    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement any sanity check!");
     }
 }

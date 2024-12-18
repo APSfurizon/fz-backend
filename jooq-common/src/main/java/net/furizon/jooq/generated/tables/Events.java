@@ -15,6 +15,7 @@ import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
+import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -227,6 +228,14 @@ public class Events extends TableImpl<Record> {
      */
     public FursuitsPath fursuits() {
         return fursuitsEvents().fursuits();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.users</code>
+     * table
+     */
+    public UsersPath users() {
+        return orders().users();
     }
 
     @Override

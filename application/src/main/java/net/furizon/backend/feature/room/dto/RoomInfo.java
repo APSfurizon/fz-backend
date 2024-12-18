@@ -1,10 +1,9 @@
 package net.furizon.backend.feature.room.dto;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,24 +17,15 @@ public class RoomInfo {
     @Nullable
     private final String roomName;
 
-    private final long roomOwnerId;
+    private final UserDisplayData roomOwner;
     @Builder.Default
-    private boolean isOwner = false;
+    private boolean userIsOwner = false;
 
     @Builder.Default
-    @Getter(AccessLevel.NONE)
     private boolean canConfirm = false;
     @Builder.Default
-    @Getter(AccessLevel.NONE)
     private boolean canUnconfirm = false;
     private final boolean confirmed;
-
-    public boolean canBeConfirmed() {
-        return canConfirm;
-    }
-    public boolean canBeUnconfirmed() {
-        return canUnconfirm;
-    }
 
     @NotNull
     private final RoomData roomData;

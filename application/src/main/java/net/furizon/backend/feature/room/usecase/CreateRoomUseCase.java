@@ -8,6 +8,8 @@ import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -22,6 +24,7 @@ import java.util.LinkedList;
 public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomInfo> {
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final UserFinder userFinder;
     @NotNull private final RoomChecks checks;
 
     @Override
@@ -38,12 +41,13 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         long roomId = roomLogic.createRoom(name, userId, event);
 
         RoomData roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
+        UserDisplayData owner = userFinder.getDisplayUser(userId, event);
 
         return RoomInfo.builder()
                 .roomId(roomId)
                 .roomName(name)
-                .roomOwnerId(userId)
-                .isOwner(true)
+                .roomOwner(owner)
+                .userIsOwner(true)
                 .confirmed(false)
                 .canConfirm(roomLogic.canConfirmRoom(roomId, event))
                 .roomData(roomData)

@@ -19,6 +19,9 @@ public interface RoomFinder {
     boolean isUserInvitedInRoom(long userId, long roomId);
     boolean userOwnsAroom(long userId, long eventId);
 
+    int countRoomsOwnedBy(long userId, long eventId);
+    int countRoomsWithUser(long userId, long eventId);
+
     @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 

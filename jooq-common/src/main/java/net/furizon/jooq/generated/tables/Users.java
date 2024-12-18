@@ -13,6 +13,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Authentications.AuthenticationsPath;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
@@ -282,6 +283,14 @@ public class Users extends TableImpl<Record> {
             _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__USER_GROUP_USERS_FK.getInverseKey());
 
         return _userGroup;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.events</code>
+     * table
+     */
+    public EventsPath events() {
+        return orders().events();
     }
 
     @Override

@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS orders
     event_id                       int8                         NOT NULL,
     user_id                        int8 DEFAULT NULL            NULL,
     creation_ts                    timestamp                    NOT NULL DEFAULT NOW(), -- just for stats reasons --
+    CONSTRAINT orders_one_order_per_event UNIQUE(user_id, event_id),
     CONSTRAINT orders_extra_days_check CHECK (((order_extra_days_type >= 0) AND (order_extra_days_type <= 3))),
     CONSTRAINT orders_sponsorship_check CHECK (((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2))),
     CONSTRAINT orders_status_check CHECK (((order_status >= 0) AND (order_status <= 3))),
@@ -177,3 +178,23 @@ CREATE TABLE IF NOT EXISTS room_guests
     CONSTRAINT room_guests_rooms_fk FOREIGN KEY (room_id) REFERENCES rooms (room_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT room_guests_users_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION deleteRoomGuests() RETURNS TRIGGER AS $_$
+BEGIN
+    DELETE
+    FROM room_guests
+    WHERE
+        room_guests.user_id = OLD.user_id
+        AND room_guests.room_id IN (
+            SELECT rooms.room_id
+            FROM rooms
+            INNER JOIN orders o
+            ON
+                o.id = rooms.order_id
+                AND o.event_id = OLD.event_id
+        );
+    RETURN OLD;
+END $_$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS delete_room_guests_on_order_deletion ON orders;
+CREATE TRIGGER delete_room_guests_on_order_deletion BEFORE DELETE ON orders FOR EACH ROW EXECUTE PROCEDURE deleteRoomGuests();

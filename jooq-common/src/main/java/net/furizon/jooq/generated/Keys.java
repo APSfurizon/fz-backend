@@ -60,6 +60,7 @@ public class Keys {
     public static final UniqueKey<Record> CARDS_PKEY = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("cards_pkey"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.CARD_DB_ID }, true);
     public static final UniqueKey<Record> ONLY_ONE_CARD_PER_YEAR = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("only_one_card_per_year"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.ISSUE_YEAR, MembershipCards.MEMBERSHIP_CARDS.USER_ID }, true);
     public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.ID }, true);
+    public static final UniqueKey<Record> ORDERS_ONE_ORDER_PER_EVENT = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_one_order_per_event"), new TableField[] { Orders.ORDERS.USER_ID, Orders.ORDERS.EVENT_ID }, true);
     public static final UniqueKey<Record> ORDERS_PKEY = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_pkey"), new TableField[] { Orders.ORDERS.ID }, true);
     public static final UniqueKey<Record> ROOM_GUESTS_PKEY = Internal.createUniqueKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_pkey"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_GUEST_ID }, true);
     public static final UniqueKey<Record> ROOMS_ONLY_ONE_ORDER = Internal.createUniqueKey(Rooms.ROOMS, DSL.name("rooms_only_one_order"), new TableField[] { Rooms.ROOMS.ORDER_ID }, true);

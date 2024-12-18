@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.room.logic;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 
 public interface RoomLogic {
@@ -25,5 +26,5 @@ public interface RoomLogic {
     boolean canUnconfirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
-    void doSanityChecks();
+    void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation);
 }

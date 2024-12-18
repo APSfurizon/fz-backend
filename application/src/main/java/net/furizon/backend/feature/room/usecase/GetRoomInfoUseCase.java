@@ -30,9 +30,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
 
         if (info != null) {
-            boolean isOwner = info.getRoomOwnerId() == userId;
+            boolean isOwner = info.getRoomOwner().getUserId() == userId;
             long roomId = info.getRoomId();
-            info.setOwner(isOwner);
+            info.setUserIsOwner(isOwner);
             info.setCanConfirm(isOwner && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
             info.setCanUnconfirm(isOwner && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
 

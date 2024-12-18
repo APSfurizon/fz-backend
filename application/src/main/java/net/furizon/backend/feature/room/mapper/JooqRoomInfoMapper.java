@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.room.mapper;
 
 import net.furizon.backend.feature.room.dto.RoomInfo;
+import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
@@ -14,7 +15,7 @@ public class JooqRoomInfoMapper {
         return RoomInfo.builder()
                 .roomId(record.get(ROOMS.ROOM_ID))
                 .roomName(record.get(ROOMS.ROOM_NAME))
-                .roomOwnerId(record.get(ORDERS.USER_ID))
+                .roomOwner(JooqDisplayUserMapper.map(record))
                 .confirmed(record.get(ROOMS.ROOM_CONFIRMED))
                 .roomData(JooqRoomDataMapper.map(record, pretixInformation))
             .build();
