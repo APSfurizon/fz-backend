@@ -18,6 +18,9 @@ public interface OrderFinder {
 
     int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 
+    @NotNull
+    Optional<Boolean> userHasBoughtAroom(long userId, @NotNull Event event);
+
     //The optional is empty if no event for the user is found!
     @NotNull
     Optional<Boolean> isOrderDaily(long userId, @NotNull Event event);

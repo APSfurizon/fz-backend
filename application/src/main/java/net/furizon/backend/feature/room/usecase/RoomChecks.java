@@ -26,15 +26,27 @@ public class RoomChecks {
 
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
-        if (!isDaily.isPresent()) {
-            log.error("User {} is trying to manage a room for event {}, but he has no registered order!",
-                    userId, event);
-            throw new ApiException("User has no registered order");
-        }
-
+        assertOrderFound(isDaily, userId, event);
         if (isDaily.get()) {
             log.error("User is trying to manage a room, but has a daily ticket!");
             throw new ApiException("User has a daily ticket");
+        }
+    }
+
+    public void assertUserHasBoughtAroom(long userId, @NotNull Event event) {
+        var r = orderFinder.userHasBoughtAroom(userId, event);
+        assertOrderFound(r, userId, event);
+        if (!r.get()) {
+            log.error("User {} doesn't have purchased a room for event {}", userId, event);
+            throw new ApiException("User hasn't purchased a room");
+        }
+    }
+    public void assertUserHasNotBoughtAroom(long userId, @NotNull Event event) {
+        var r = orderFinder.userHasBoughtAroom(userId, event);
+        assertOrderFound(r, userId, event);
+        if (r.get()) {
+            log.error("User {} have purchased a room for event {} and cannot join another room", userId, event);
+            throw new ApiException("User hasn't purchased a room");
         }
     }
 
@@ -194,6 +206,13 @@ public class RoomChecks {
         if (r.get() != OrderStatus.PAID) {
             log.error("Order for user {} on event {} is not paid", userId, event);
             throw new ApiException("Order is not paid");
+        }
+    }
+
+    private void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {
+        if (!r.isPresent()) {
+            log.error("No order found for user {} on event {}", userId, event);
+            throw new ApiException("Order not found");
         }
     }
 

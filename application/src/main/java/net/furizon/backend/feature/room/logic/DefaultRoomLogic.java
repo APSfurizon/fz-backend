@@ -130,8 +130,31 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long roomId) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
         log.info("Guest {} has accepted invitation to room {}", guestId, roomId);
+        //Deletes pending invitation for user in event
+        command.execute(
+            PostgresDSL.deleteFrom(ROOM_GUESTS)
+            .where(
+                ROOM_GUESTS.ROOM_GUEST_ID.eq(guestId)
+                .and(ROOM_GUESTS.ROOM_ID.notEqual(roomId))
+                .and(ROOM_GUESTS.ROOM_GUEST_ID.in(
+                    PostgresDSL.select(ROOM_GUESTS.ROOM_ID)
+                    .from(ROOM_GUESTS)
+                    .join(ROOMS)
+                    .on(
+                        ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
+                        .and(ROOM_GUESTS.USER_ID.eq(invitedUserId))
+                    )
+                    .join(ORDERS)
+                    .on(
+                        ROOMS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                    )
+                ))
+            )
+        );
+
         return command.execute(
             PostgresDSL.update(ROOM_GUESTS)
             .set(ROOM_GUESTS.CONFIRMED, true)
@@ -193,6 +216,15 @@ public class DefaultRoomLogic implements RoomLogic {
     @Override
     public boolean confirmRoom(long roomId) {
         log.info("Room {} has been confirmed!", roomId);
+        //Deletes pending invitations
+        command.execute(
+            PostgresDSL.deleteFrom(ROOM_GUESTS)
+            .where(
+                ROOM_GUESTS.ROOM_ID.eq(roomId)
+                .and(ROOM_GUESTS.CONFIRMED.eq(false))
+            )
+        );
+
         return command.execute(
             PostgresDSL.update(ROOMS)
             .set(ROOMS.ROOM_CONFIRMED, true)
