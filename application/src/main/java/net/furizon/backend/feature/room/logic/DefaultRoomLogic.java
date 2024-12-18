@@ -33,6 +33,11 @@ public class DefaultRoomLogic implements RoomLogic {
     @NotNull private final SqlQuery query;
 
     @Override
+    public boolean canCreateRoom(long userId, @NotNull Event event) {
+        return roomFinder.userOwnsAroom(userId, event.getId());
+    }
+
+    @Override
     @Transactional
     public long createRoom(String name, long userId, @NotNull Event event) {
         log.info("Creating a room for user {} on event {} with name '{}'", userId, event, name);
@@ -130,6 +135,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
+    @Transactional
     public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
         log.info("Guest {} has accepted invitation to room {}", guestId, roomId);
         //Deletes pending invitation for user in event
@@ -197,7 +203,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirm(long roomId, @NotNull Event event) {
+    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
         boolean everyonePaid = true;
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
@@ -208,8 +214,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canUnconfirm(long roomId) {
-        log.warn("DefaultRoomLogic does not implement canUnconfirm! Default `true` value is returned");
+    public boolean canUnconfirmRoom(long roomId) {
+        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `true` value is returned");
         return true;
     }
 

@@ -45,7 +45,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
                 .roomOwnerId(userId)
                 .isOwner(true)
                 .confirmed(false)
-                .canConfirm(roomLogic.canConfirm(roomId, event))
+                .canConfirm(roomLogic.canConfirmRoom(roomId, event))
                 .roomData(roomData)
                 .guests(new LinkedList<>())
                 .build();

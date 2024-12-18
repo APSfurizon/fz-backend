@@ -14,6 +14,8 @@ public class RoomInfoResponse {
     @Nullable
     private final RoomInfo roomInfo;
 
+    private final boolean canCreateRoom;
+
     @Nullable
     private final List<RoomInvitationResponse> invitations;
 }

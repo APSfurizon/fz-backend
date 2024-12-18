@@ -22,6 +22,12 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final OrderFinder orderFinder;
 
     @Override
+    public boolean canCreateRoom(long userId, @NotNull Event event) {
+        var r = orderFinder.userHasBoughtAroom(userId, event);
+        return r.isPresent() && r.get() && defaultRoomLogic.canCreateRoom(userId, event);
+    }
+
+    @Override
     public long createRoom(String name, long userId, @NotNull Event event) {
         checks.assertUserHasBoughtAroom(userId, event);
         return defaultRoomLogic.createRoom(name, userId, event);
@@ -71,12 +77,12 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirm(long roomId, @NotNull Event event) {
+    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
         return false;
     }
 
     @Override
-    public boolean canUnconfirm(long roomId) {
+    public boolean canUnconfirmRoom(long roomId) {
         return false;
     }
 

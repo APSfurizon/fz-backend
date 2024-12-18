@@ -131,13 +131,13 @@ public class RoomChecks {
     }
 
     public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event) {
-        if (!roomLogic.canConfirm(roomId, event)) {
+        if (!roomLogic.canConfirmRoom(roomId, event)) {
             log.error("Room {} cannot be confirmed!", roomId);
             throw new ApiException("Room cannot be confirmed");
         }
     }
     public void assertRoomCanBeUnconfirmed(long roomId) {
-        if (!roomLogic.canUnconfirm(roomId)) {
+        if (!roomLogic.canUnconfirmRoom(roomId)) {
             log.error("Room {} cannot be unconfirmed!", roomId);
             throw new ApiException("Room cannot be unconfirmed");
         }

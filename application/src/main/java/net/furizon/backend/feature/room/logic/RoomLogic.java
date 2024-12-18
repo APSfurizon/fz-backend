@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public interface RoomLogic {
     //Security checks must be done BEFORE calling the following methods!
 
+    boolean canCreateRoom(long userId, @NotNull Event event);
     long createRoom(String name, long userId, @NotNull Event event);
     boolean deleteRoom(long roomId);
     boolean changeRoomName(String name, long roomId);
@@ -19,9 +20,9 @@ public interface RoomLogic {
     boolean kickFromRoom(long guestId);
     boolean leaveRoom(long guestId);
 
-    boolean canConfirm(long roomId, @NotNull Event event);
+    boolean canConfirmRoom(long roomId, @NotNull Event event);
     boolean confirmRoom(long roomId);
-    boolean canUnconfirm(long roomId);
+    boolean canUnconfirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
     void doSanityChecks();
