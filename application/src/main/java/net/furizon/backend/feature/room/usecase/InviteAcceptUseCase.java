@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -24,18 +24,20 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        checks.assertUserHasOrderAndItsNotDaily(requesterUserId, event);
 
-        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         long roomId = guest.getRoomId();
+        long targetUserId = guest.getUserId();
 
         checks.assertRoomNotFull(roomId);
         checks.assertRoomNotConfirmed(roomId);
         checks.assertGuestIsNotConfirmed(guest);
-        checks.assertUserIsNotInRoom(requesterUserId, event);
-        checks.assertUserIsNotRoomOwner(requesterUserId, roomId);
-        checks.assertUserDoesNotOwnAroom(requesterUserId, event);
+        checks.assertOrderIsPaid(targetUserId, event);
+        checks.assertUserIsNotInRoom(targetUserId, event);
+        checks.assertUserIsNotRoomOwner(targetUserId, roomId);
+        checks.assertUserDoesNotOwnAroom(targetUserId, event);
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
+        checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
         return roomLogic.inviteAccept(guestId, roomId);
     }

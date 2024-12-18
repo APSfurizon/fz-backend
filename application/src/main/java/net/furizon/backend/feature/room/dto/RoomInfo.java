@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +38,7 @@ public class RoomInfo {
     }
 
     @NotNull
-    private final RoomDataResponse roomData;
+    private final RoomData roomData;
 
     @Builder.Default
     private boolean canInvite = false;

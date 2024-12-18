@@ -3,7 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -22,7 +22,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
-        RoomGuestResponse guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
+        RoomGuest guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
                 requesterUserId,
                 event
         );

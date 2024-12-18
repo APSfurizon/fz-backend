@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -32,11 +32,12 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         checks.assertUserDoesNotOwnAroom(userId, event);
         checks.assertUserIsNotInRoom(userId, event);
         checks.assertUserHasOrderAndItsNotDaily(userId, event);
+        checks.assertOrderIsPaid(userId, event);
 
         String name = input.createRoomRequest.getName();
         long roomId = roomLogic.createRoom(name, userId, event);
 
-        RoomDataResponse roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
+        RoomData roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
 
         return RoomInfo.builder()
                 .roomId(roomId)
@@ -44,7 +45,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
                 .roomOwnerId(userId)
                 .isOwner(true)
                 .confirmed(false)
-                .canConfirm(roomLogic.canConfirm(roomId))
+                .canConfirm(roomLogic.canConfirm(roomId, event))
                 .roomData(roomData)
                 .guests(new LinkedList<>())
                 .build();

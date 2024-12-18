@@ -20,13 +20,15 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
         return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(
                 input.fursonaName,
                 input.pretixService.getCurrentEvent(),
-                input.filterRoom
+                input.filterRoom,
+                input.filterPaid
         ));
     }
 
     public record Input(
             @NotNull String fursonaName,
             @NotNull PretixInformation pretixService,
-            boolean filterRoom
+            boolean filterRoom,
+            boolean filterPaid
     ) {}
 }

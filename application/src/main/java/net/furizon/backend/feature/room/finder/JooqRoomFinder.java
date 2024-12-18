@@ -4,11 +4,11 @@ package net.furizon.backend.feature.room.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
+import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
-import net.furizon.backend.feature.room.mapper.JooqRoomDataMapper;
-import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
-import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
+import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
+import net.furizon.backend.feature.room.mapper.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 import static net.furizon.jooq.generated.tables.Orders.ORDERS;
 import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
@@ -112,7 +113,7 @@ public class JooqRoomFinder implements RoomFinder {
 
     @Nullable
     @Override
-    public RoomDataResponse getRoomDataForUser(
+    public RoomData getRoomDataForUser(
             long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation
     ) {
         return query.fetchFirst(
@@ -132,7 +133,7 @@ public class JooqRoomFinder implements RoomFinder {
 
     @NotNull
     @Override
-    public List<RoomGuestResponse> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed) {
+    public List<RoomGuest> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed) {
         var condition = ROOM_GUESTS.ROOM_ID.eq(roomId);
         if (onlyConfirmed) {
             condition = condition.and(ROOM_GUESTS.CONFIRMED.eq(true));
@@ -140,6 +141,36 @@ public class JooqRoomFinder implements RoomFinder {
         return query.fetch(
                 roomGuestSelect()
                 .where(condition)
+        ).stream().map(RoomGuestMapper::map).toList();
+    }
+    @NotNull
+    @Override
+    public List<RoomGuestResponse> getRoomGuestResponseFromRoomId(long roomId, @NotNull Event event) {
+        return query.fetch(
+                PostgresDSL
+                .select(
+                        ROOM_GUESTS.ROOM_GUEST_ID,
+                        ROOM_GUESTS.USER_ID,
+                        ROOM_GUESTS.ROOM_ID,
+                        ROOM_GUESTS.CONFIRMED,
+                        ORDERS.ORDER_STATUS,
+                        USERS.USER_ID,
+                        USERS.USER_FURSONA_NAME,
+                        USERS.USER_LOCALE,
+                        USERS.MEDIA_ID_PROPIC,
+                        USERS.SHOW_IN_NOSECOUNT
+                )
+                .from(ROOM_GUESTS)
+                .innerJoin(USERS)
+                .on(
+                    USERS.USER_ID.eq(ROOM_GUESTS.USER_ID)
+                    .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
+                )
+                .innerJoin(ORDERS)
+                .on(
+                    ORDERS.USER_ID.eq(USERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                )
         ).stream().map(RoomGuestResponseMapper::map).toList();
     }
 
@@ -177,9 +208,30 @@ public class JooqRoomFinder implements RoomFinder {
 
     @NotNull
     @Override
-    public List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event) {
+    public List<RoomInvitationResponse> getUserReceivedInvitations(
+            long userId, @NotNull Event event, @NotNull PretixInformation pretixService) {
         return query.fetch(
-                roomGuestSelect()
+                PostgresDSL
+                .select(
+                        ROOM_GUESTS.ROOM_GUEST_ID,
+                        ROOM_GUESTS.USER_ID,
+                        ROOM_GUESTS.ROOM_ID,
+                        ROOM_GUESTS.CONFIRMED,
+                        ORDERS.ORDER_STATUS,
+                        USERS.USER_ID,
+                        USERS.USER_FURSONA_NAME,
+                        USERS.USER_LOCALE,
+                        USERS.MEDIA_ID_PROPIC,
+                        USERS.SHOW_IN_NOSECOUNT,
+                        ROOMS.ROOM_ID,
+                        ROOMS.ROOM_NAME,
+                        ORDERS.USER_ID,
+                        ROOMS.ROOM_CONFIRMED,
+                        ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                        ORDERS.ORDER_ROOM_CAPACITY,
+                        ORDERS.ORDER_HOTEL_INTERNAL_NAME
+                )
+                .from(ROOM_GUESTS)
                 .innerJoin(ROOMS)
                 .on(
                     ROOM_GUESTS.USER_ID.eq(userId)
@@ -191,7 +243,7 @@ public class JooqRoomFinder implements RoomFinder {
                     ROOMS.ORDER_ID.eq(ORDERS.ID)
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
-        ).stream().map(RoomGuestResponseMapper::map).toList();
+        ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService)).toList();
     }
 
     @NotNull
@@ -208,7 +260,7 @@ public class JooqRoomFinder implements RoomFinder {
 
     @NotNull
     @Override
-    public Optional<RoomGuestResponse> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event) {
+    public Optional<RoomGuest> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event) {
         return Optional.ofNullable(query.fetchFirst(
                 roomGuestSelect()
                 .innerJoin(ROOMS)
@@ -223,17 +275,17 @@ public class JooqRoomFinder implements RoomFinder {
                         .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
                 .limit(1)
-        ).mapOrNull(RoomGuestResponseMapper::map));
+        ).mapOrNull(RoomGuestMapper::map));
     }
 
     @NotNull
     @Override
-    public Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId) {
+    public Optional<RoomGuest> getRoomGuestFromId(long roomGuestId) {
         return Optional.ofNullable(query.fetchFirst(
                 roomGuestSelect()
                 .where(ROOM_GUESTS.ROOM_GUEST_ID.eq((roomGuestId)))
                 .limit(1)
-        ).mapOrNull(RoomGuestResponseMapper::map));
+        ).mapOrNull(RoomGuestMapper::map));
     }
 
     private @NotNull SelectJoinStep<Record4<Long, Long, Long, Boolean>> roomGuestSelect() {

@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.room.mapper;
 
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;

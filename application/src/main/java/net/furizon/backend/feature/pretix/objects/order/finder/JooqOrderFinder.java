@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +30,10 @@ public class JooqOrderFinder implements OrderFinder {
                                                 @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
-            .where(ORDERS.ORDER_CODE.eq(code))
-            .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .where(
+                ORDERS.ORDER_CODE.eq(code))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
             .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
@@ -41,8 +44,10 @@ public class JooqOrderFinder implements OrderFinder {
                                                   @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
-            .where(ORDERS.USER_ID.eq(userId))
-            .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .where(
+                ORDERS.USER_ID.eq(userId))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
             .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
@@ -52,8 +57,10 @@ public class JooqOrderFinder implements OrderFinder {
         return query.count(
             PostgresDSL.select(ORDERS.ID)
             .from(ORDERS)
-            .where(ORDERS.USER_ID.eq(userId))
-            .and(ORDERS.EVENT_ID.eq(event.getId()))
+            .where(
+                ORDERS.USER_ID.eq(userId))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
         );
     }
 
@@ -61,11 +68,28 @@ public class JooqOrderFinder implements OrderFinder {
         Boolean res = query.fetchFirst(
                 PostgresDSL.select(ORDERS.ORDER_DAILY_DAYS)
                 .from(ORDERS)
-                .where(ORDERS.USER_ID.eq(userId))
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .where(
+                    ORDERS.USER_ID.eq(userId))
+                    .and(ORDERS.EVENT_ID.eq(event.getId())
+                )
                 .limit(1)
         ).mapOrNull(e -> e.get(ORDERS.ORDER_DAILY_DAYS) != 0L);
         return Optional.ofNullable(res);
+    }
+
+    @Override
+    public Optional<OrderStatus> getOrderStatus(long userId, @NotNull Event event) {
+        return Optional.ofNullable(
+            query.fetchFirst(
+                PostgresDSL.select(ORDERS.ORDER_STATUS)
+                .from(ORDERS)
+                .where(
+                    ORDERS.USER_ID.eq(userId))
+                    .and(ORDERS.EVENT_ID.eq(event.getId())
+                )
+                .limit(1)
+            ).mapOrNull(e -> OrderStatus.values()[e.get(ORDERS.ORDER_STATUS)])
+        );
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {

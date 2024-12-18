@@ -58,7 +58,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirm(long roomId) {
+    public boolean canConfirm(long roomId, @NotNull Event event) {
         return false;
     }
 

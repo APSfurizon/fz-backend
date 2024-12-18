@@ -17,7 +17,8 @@ public interface UserFinder {
     List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
-            boolean filterRoom
+            boolean filterRoom,
+            boolean filterPaid
     );
 
     @Nullable

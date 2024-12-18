@@ -67,8 +67,9 @@ public class UserController {
         + "it returns a list of users with their id, full fursona name and propic url (it can be null!). "
         + "This method purposely ignores the `show_in_nosecount` flag iff the name fully matches except "
         + "for one single character. Results are ordered by match and alphabetically. "
-        + "Using the optional `filter-room` parameter you can filter out people who already "
-        + "own a room or are in a room")
+        + "Using the optional `filter-not-in-room` parameter you can filter out people who already "
+        + "own a room or are in a room. Using the optional `filter-paid` you can filter out only people with "
+        + "orders marked as paid")
     @GetMapping("/search-in-current-event")
     public SearchUsersResponse searchByFursonaNameInCurrentEvent(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -79,15 +80,20 @@ public class UserController {
             final String fursonaName,
             @Valid
             @Nullable
-            @RequestParam("filter-room")
-            final Boolean filterRoom
+            @RequestParam("filter-not-in-room")
+            final Boolean filterNotInRoom,
+            @Valid
+            @Nullable
+            @RequestParam("filter-paid")
+            final Boolean filterPaid
     ) {
         return executor.execute(
                 SearchUserInEventUseCase.class,
                 new SearchUserInEventUseCase.Input(
                         fursonaName,
                         pretixInformation,
-                        filterRoom == null ? false : filterRoom
+                        filterNotInRoom == null ? false : filterNotInRoom,
+                        filterPaid == null ? false : filterPaid
                 )
         );
     }

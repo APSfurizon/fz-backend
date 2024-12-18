@@ -19,7 +19,7 @@ public interface RoomLogic {
     boolean kickFromRoom(long guestId);
     boolean leaveRoom(long guestId);
 
-    boolean canConfirm(long roomId);
+    boolean canConfirm(long roomId, @NotNull Event event);
     boolean confirmRoom(long roomId);
     boolean canUnconfirm(long roomId);
     boolean unconfirmRoom(long roomId);

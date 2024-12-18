@@ -9,15 +9,12 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -67,7 +64,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
             if (order.hasRoom()) {
                 short roomCapacity = order.getRoomCapacity();
                 orderDataBuilder = orderDataBuilder.room(
-                        new RoomDataResponse(
+                        new RoomData(
                             roomCapacity,
                             input.pretixInformation.getRoomNamesFromRoomPretixItemId(
                                     Objects.requireNonNull(order.getPretixRoomItemId())

@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
+import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -32,15 +34,20 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             boolean isOwner = info.getRoomOwnerId() == userId;
             long roomId = info.getRoomId();
             info.setOwner(isOwner);
-            info.setCanConfirm(!info.isConfirmed() && roomLogic.canConfirm(roomId));
+            info.setCanConfirm(!info.isConfirmed() && roomLogic.canConfirm(roomId, input.event));
             info.setCanUnconfirm(info.isConfirmed() && roomLogic.canUnconfirm(roomId));
 
-            List<RoomGuestResponse> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
+            List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
 
-            info.setCanInvite(guests.size() < (int) info.getRoomData().getRoomCapacity());
+            info.setCanInvite(
+                    guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
+                        <
+                    (long) info.getRoomData().getRoomCapacity()
+            );
             info.setGuests(guests);
         }
-        List<RoomGuestResponse> invitations = roomFinder.getUserReceivedInvitations(userId, input.event);
+        List<RoomInvitationResponse> invitations =
+            roomFinder.getUserReceivedInvitations(userId, input.event, input.pretixInformation);
 
         return new RoomInfoResponse(info, invitations);
     }

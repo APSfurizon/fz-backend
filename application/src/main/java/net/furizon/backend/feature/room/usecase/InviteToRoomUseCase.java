@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 
-public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, RoomGuestResponse> {
+public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, RoomGuest> {
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
 
 
     @Override
-    public @NotNull RoomGuestResponse executor(@NotNull Input input) {
+    public @NotNull RoomGuest executor(@NotNull Input input) {
         long requesterUserId = input.user.getUserId();
         long targetUserId = input.req.getUserId();
         Event event = input.event;
@@ -46,11 +46,12 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
 
         checks.assertRoomNotConfirmed(roomId);
         checks.assertRoomNotFull(roomId);
+        checks.assertOrderIsPaid(targetUserId, event);
 
         boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
         long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, event, force, forceExit);
 
-        return new RoomGuestResponse(guestId, targetUserId, roomId, false);
+        return new RoomGuest(guestId, targetUserId, roomId, false);
     }
 
     public record Input(

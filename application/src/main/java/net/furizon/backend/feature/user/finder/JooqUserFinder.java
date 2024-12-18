@@ -8,9 +8,12 @@ import net.furizon.backend.feature.user.dto.UserDisplayDataResponse;
 import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Condition;
+import org.jooq.SelectConnectByStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -69,9 +72,32 @@ public class JooqUserFinder implements UserFinder {
     public List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
-            boolean filterRoom
+            boolean filterRoom,
+            boolean filterPaid
     ) {
-        var query = PostgresDSL
+        Condition condition = PostgresDSL.trueCondition();
+
+        if (filterRoom) {
+            condition = condition.and(
+                USERS.USER_ID.notIn(
+                    PostgresDSL.select(ROOM_GUESTS.USER_ID)
+                    .from(ROOM_GUESTS)
+                    .where(ROOM_GUESTS.CONFIRMED.eq(true))
+                )
+                .and(
+                    ORDERS.ORDER_ROOM_CAPACITY.isNull()
+                    .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
+                )
+            );
+        }
+
+        if (filterPaid) {
+            condition = condition.and(
+                ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
+            );
+        }
+
+        SelectConnectByStep<?> query = PostgresDSL
             .select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
@@ -91,26 +117,10 @@ public class JooqUserFinder implements UserFinder {
                         .and(USERS.SHOW_IN_NOSECOUNT.eq(false))
                     )
                 )
-            );
-
-        if (filterRoom) {
-            query = query
-                .innerJoin(ORDERS)
-                .on(
-                    USERS.USER_ID.eq(ORDERS.USER_ID)
-                    .and(
-                        ORDERS.ORDER_ROOM_CAPACITY.isNull()
-                        .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
-                    )
-                    .and(
-                        USERS.USER_ID.notIn(
-                            PostgresDSL.select(ROOM_GUESTS.USER_ID)
-                            .from(ROOM_GUESTS)
-                            .where(ROOM_GUESTS.CONFIRMED.eq(true))
-                        )
-                    )
-                );
-        }
+            )
+            .leftJoin(ORDERS)
+            .on(USERS.USER_ID.eq(ORDERS.USER_ID))
+            .where(condition);
 
         return sqlQuery.fetch(
             query

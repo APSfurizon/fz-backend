@@ -3,7 +3,10 @@ package net.furizon.backend.feature.room.logic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -12,6 +15,8 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 import static net.furizon.jooq.generated.tables.Orders.ORDERS;
@@ -22,6 +27,7 @@ import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-default", matchIfMissing = true)
 public class DefaultRoomLogic implements RoomLogic {
+    @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final SqlCommand command;
     @NotNull private final SqlQuery query;
@@ -168,9 +174,14 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirm(long roomId) {
-        log.warn("DefaultRoomLogic does not implement canConfirm! Default `true` value is returned");
-        return true;
+    public boolean canConfirm(long roomId, @NotNull Event event) {
+        boolean everyonePaid = true;
+        List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
+        for (RoomGuest guest : guests) {
+            var r = orderFinder.getOrderStatus(guest.getUserId(), event);
+            everyonePaid &= r.isPresent() && r.get() == OrderStatus.PAID;
+        }
+        return everyonePaid;
     }
 
     @Override

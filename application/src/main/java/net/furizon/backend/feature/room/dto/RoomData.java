@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.room.dto.response;
+package net.furizon.backend.feature.room.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class RoomDataResponse {
+public class RoomData {
     private short roomCapacity;
     //@NotNull //This shouldn't be needed
     //private String hotelInternalName;

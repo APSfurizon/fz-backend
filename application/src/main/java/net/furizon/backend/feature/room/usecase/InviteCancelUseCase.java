@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -24,7 +24,7 @@ public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, B
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         checks.assertGuestIsNotConfirmed(guest);
         long roomId = guest.getRoomId();
 

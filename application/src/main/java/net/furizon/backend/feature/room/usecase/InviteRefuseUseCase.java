@@ -3,7 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -22,7 +22,7 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
         long requesterUserId = input.user.getUserId();
         long guestId = input.req.getGuestId();
 
-        RoomGuestResponse guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         checks.assertGuestIsNotConfirmed(guest);
         long roomId = guest.getRoomId();
 

@@ -2,8 +2,10 @@ package net.furizon.backend.feature.room.finder;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.response.RoomDataResponse;
+import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,11 +22,14 @@ public interface RoomFinder {
     @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
-    RoomDataResponse getRoomDataForUser(
+    RoomData getRoomDataForUser(
             long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     @NotNull
-    List<RoomGuestResponse> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed);
+    List<RoomGuest> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed);
+
+    @NotNull
+    List<RoomGuestResponse> getRoomGuestResponseFromRoomId(long roomId, @NotNull Event event);
 
     @NotNull
     Optional<Long> getRoomIdFromOwnerUserId(long userId, @NotNull Event event);
@@ -33,16 +38,17 @@ public interface RoomFinder {
     Optional<Long> getOwnerUserIdFromRoomId(long roomId);
 
     @NotNull
-    List<RoomGuestResponse> getUserReceivedInvitations(long userId, @NotNull Event event);
+    List<RoomInvitationResponse> getUserReceivedInvitations(
+            long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     @NotNull
     Optional<Boolean> isRoomConfirmed(long roomId);
 
     @NotNull
-    Optional<RoomGuestResponse> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event);
+    Optional<RoomGuest> getConfirmedRoomGuestFromUserEvent(long userId, @NotNull Event event);
 
     @NotNull
-    Optional<RoomGuestResponse> getRoomGuestFromId(long roomGuestId);
+    Optional<RoomGuest> getRoomGuestFromId(long roomGuestId);
 
     @NotNull
     Optional<Short> getRoomCapacity(long roomId);

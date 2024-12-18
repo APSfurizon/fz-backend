@@ -11,7 +11,7 @@ import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
 import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
@@ -110,7 +110,7 @@ public class RoomController {
         + "If the user is already part of a room and the `forceExit` param is set to `true`, then the user "
         + "it's forcefully moved to this room, otherwise an error is returned")
     @PostMapping("/invite")
-    public RoomGuestResponse invitePersonToRoom(
+    public RoomGuest invitePersonToRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
     ) {
