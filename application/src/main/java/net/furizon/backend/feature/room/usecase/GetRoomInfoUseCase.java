@@ -10,11 +10,13 @@ import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Slf4j
@@ -23,24 +25,28 @@ import java.util.List;
 public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, RoomInfoResponse> {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
+    @NotNull private final RoomConfig roomConfig;
 
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
         long userId = input.user.getUserId();
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
 
+        OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
+        boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
+
         if (info != null) {
             boolean isOwner = info.getRoomOwner().getUserId() == userId;
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
-            info.setCanConfirm(isOwner && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
-            info.setCanUnconfirm(isOwner && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
+            info.setCanConfirm(isOwner && editingTimeAllowed && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
+            info.setCanUnconfirm(isOwner && editingTimeAllowed && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
             info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
             info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
 
-            info.setCanInvite(isOwner && (
+            info.setCanInvite(isOwner && editingTimeAllowed && (
                     //guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
                     guests.size() //Counting also unconfirmed invites to prevent mass spam
                     < (int) info.getRoomData().getRoomCapacity()
@@ -55,9 +61,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             invitation.getRoom().setGuests(guests);
         }
 
-        boolean canCreateRoom = info == null && roomLogic.canCreateRoom(userId, input.event);
+        boolean canCreateRoom = editingTimeAllowed && info == null && roomLogic.canCreateRoom(userId, input.event);
 
-        return new RoomInfoResponse(info, canCreateRoom, invitations);
+        return new RoomInfoResponse(info, canCreateRoom, endRoomEditingTime, invitations);
     }
 
     public record Input(

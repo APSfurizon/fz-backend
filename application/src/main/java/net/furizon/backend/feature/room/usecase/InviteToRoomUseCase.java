@@ -26,6 +26,7 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
         long targetUserId = input.req.getUserId();
         Event event = input.event;
 
+        checks.assertInTimeframeToEditRooms();
         boolean isAdmin = true; //TODO [ADMIN_CHECK}
 
         checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);

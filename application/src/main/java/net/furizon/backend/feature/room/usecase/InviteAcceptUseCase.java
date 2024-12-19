@@ -25,6 +25,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         Event event = input.event;
 
 
+        checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();

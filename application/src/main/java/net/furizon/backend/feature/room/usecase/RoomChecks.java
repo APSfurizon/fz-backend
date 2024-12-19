@@ -8,11 +8,13 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,16 @@ public class RoomChecks {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
+
+    @NotNull private final RoomConfig roomConfig;
+
+    public void assertInTimeframeToEditRooms() {
+        OffsetDateTime end = roomConfig.getRoomChangesEndTime();
+        if (end != null && end.isBefore(OffsetDateTime.now())) {
+            log.error("Editing of rooms is disabled after the date {}", end);
+            throw new ApiException("Room editing timeframe has ended");
+        }
+    }
 
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);

@@ -5,6 +5,7 @@ import lombok.Data;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -14,6 +15,9 @@ public class RoomInfoResponse {
     private final RoomInfo currentRoomInfo;
 
     private final boolean canCreateRoom;
+
+    @Nullable
+    private final OffsetDateTime editingRoomEndTime;
 
     @Nullable
     private final List<RoomInvitationResponse> invitations;

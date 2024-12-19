@@ -23,6 +23,7 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
+        checks.assertInTimeframeToEditRooms();
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,

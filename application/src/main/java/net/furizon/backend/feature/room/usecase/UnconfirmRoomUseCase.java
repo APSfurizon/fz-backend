@@ -23,6 +23,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
+        checks.assertInTimeframeToEditRooms();
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,

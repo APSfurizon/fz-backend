@@ -32,6 +32,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         long userId = input.user.getUserId();
         Event event = input.event;
 
+        checks.assertInTimeframeToEditRooms();
         checks.assertUserDoesNotOwnAroom(userId, event);
         checks.assertUserIsNotInRoom(userId, event);
         checks.assertUserHasOrderAndItsNotDaily(userId, event);

@@ -22,6 +22,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
+        checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
                 requesterUserId,
                 event

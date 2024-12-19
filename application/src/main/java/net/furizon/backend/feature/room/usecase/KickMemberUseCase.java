@@ -24,7 +24,8 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         long requesterUserId = input.user.getUserId();
         long guestId = input.req.getGuestId();
         Event event = input.event;
-        
+
+        checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         checks.assertGuestIsConfirmed(guest);
         long roomId = guest.getRoomId();
