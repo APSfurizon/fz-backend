@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -53,7 +54,7 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException("Order not found while creating a room");
+            throw new ApiException("Order not found while creating a room", RoomErrorCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
         long roomId = command.executeResult(
@@ -104,7 +105,7 @@ public class DefaultRoomLogic implements RoomLogic {
             if (force && !forceExit) {
                 log.error("User {} is already in a room in event {}, but forceExit was equal to false",
                         invitedUserId, event);
-                throw new ApiException("User is already in a room");
+                throw new ApiException("User is already in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
             }
             if (forceExit) {
                 command.execute(

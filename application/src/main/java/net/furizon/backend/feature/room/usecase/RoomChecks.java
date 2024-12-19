@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -32,7 +33,7 @@ public class RoomChecks {
         OffsetDateTime end = roomConfig.getRoomChangesEndTime();
         if (end != null && end.isBefore(OffsetDateTime.now())) {
             log.error("Editing of rooms is disabled after the date {}", end);
-            throw new ApiException("Room editing timeframe has ended");
+            throw new ApiException("Room editing timeframe has ended", RoomErrorCodes.EDIT_TIMEFRAME_ENDED);
         }
     }
 
@@ -41,7 +42,7 @@ public class RoomChecks {
         assertOrderFound(isDaily, userId, event);
         if (isDaily.get()) {
             log.error("User is trying to manage a room, but has a daily ticket!");
-            throw new ApiException("User has a daily ticket");
+            throw new ApiException("User has a daily ticket", RoomErrorCodes.USER_HAS_DAILY_TICKET);
         }
     }
 
@@ -50,7 +51,7 @@ public class RoomChecks {
         assertOrderFound(r, userId, event);
         if (!r.get()) {
             log.error("User {} doesn't have purchased a room for event {}", userId, event);
-            throw new ApiException("User hasn't purchased a room");
+            throw new ApiException("User hasn't purchased a room", RoomErrorCodes.USER_HAS_NOT_PURCHASED_A_ROOM);
         }
     }
     public void assertUserHasNotBoughtAroom(long userId, @NotNull Event event) {
@@ -58,7 +59,7 @@ public class RoomChecks {
         assertOrderFound(r, userId, event);
         if (r.get()) {
             log.error("User {} have purchased a room for event {} and cannot join another room", userId, event);
-            throw new ApiException("User hasn't purchased a room");
+            throw new ApiException("User has already purchased a room", RoomErrorCodes.USER_HAS_PURCHASED_A_ROOM);
         }
     }
 
@@ -66,7 +67,7 @@ public class RoomChecks {
         boolean alreadyOwnsAroom = roomFinder.userOwnsAroom(userId, event.getId());
         if (alreadyOwnsAroom) {
             log.error("User {} is trying to manage a room for event {}, but already has one!", userId, event);
-            throw new ApiException("User already owns a room");
+            throw new ApiException("User already owns a room", RoomErrorCodes.USER_OWNS_A_ROOM);
         }
     }
 
@@ -74,14 +75,14 @@ public class RoomChecks {
         boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId());
         if (userInRoom) {
             log.error("User {} is trying to manage a room for event {}, but he's already in one!", userId, event);
-            throw new ApiException("User already is in a room");
+            throw new ApiException("User already is in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
         }
     }
     public void assertUserIsNotInvitedToRoom(long userId, long roomId) {
         boolean userInRoom = roomFinder.isUserInvitedInRoom(userId, roomId);
         if (userInRoom) {
             log.error("User {} is already invited to room {}", userId, roomId);
-            throw new ApiException("User is already invited to specified room");
+            throw new ApiException("User is already invited to specified room", RoomErrorCodes.USER_ALREADY_INVITED_TO_ROOM);
         }
     }
 
@@ -90,7 +91,7 @@ public class RoomChecks {
         assertRoomFound(roomOwner, roomId);
         if (roomOwner.get() == userId) {
             log.error("User {} is the owner of the room {}!", userId, roomId);
-            throw new ApiException("User is the owner of the room");
+            throw new ApiException("User is the owner of the room", RoomErrorCodes.USER_IS_OWNER_OF_ROOM);
         }
     }
     public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId) {
@@ -102,7 +103,7 @@ public class RoomChecks {
                 roomId = r.get();
             } else {
                 log.error("User doesn't own a room!");
-                throw new ApiException("User doesn't own a room");
+                throw new ApiException("User doesn't own a room", RoomErrorCodes.USER_DOES_NOT_OWN_A_ROOM);
             }
         } else {
             long rId = roomReqId;
@@ -111,11 +112,11 @@ public class RoomChecks {
                     roomId = rId;
                     if (!roomFinder.isRoomConfirmed(roomId).isPresent()) {
                         log.error("Room with id {} doesn't exist!", roomId);
-                        throw new ApiException("Room not found");
+                        throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
                     }
                 } else {
                     log.error("User is not an admin! It cannot operate on room {}", rId);
-                    throw new ApiException("User is not an admin!");
+                    throw new ApiException("User is not an admin!", RoomErrorCodes.USER_IS_NOT_ADMIN);
                 }
             } else {
                 roomId = rId;
@@ -130,7 +131,7 @@ public class RoomChecks {
         assertRoomFound(r, roomId);
         if (r.get()) {
             log.error("Room {} is already confirmed!", roomId);
-            throw new ApiException("Room is already confirmed");
+            throw new ApiException("Room is already confirmed", RoomErrorCodes.ROOM_ALREADY_CONFIRMED);
         }
     }
     public void assertRoomConfirmed(long roomId) {
@@ -138,20 +139,20 @@ public class RoomChecks {
         assertRoomFound(r, roomId);
         if (!r.get()) {
             log.error("Room {} is NOT confirmed!", roomId);
-            throw new ApiException("Room is NOT confirmed");
+            throw new ApiException("Room is NOT confirmed", RoomErrorCodes.ROOM_NOT_CONFIRMED);
         }
     }
 
     public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event) {
         if (!roomLogic.canConfirmRoom(roomId, event)) {
             log.error("Room {} cannot be confirmed!", roomId);
-            throw new ApiException("Room cannot be confirmed");
+            throw new ApiException("Room cannot be confirmed", RoomErrorCodes.ROOM_CANNOT_BE_CONFIRMED);
         }
     }
     public void assertRoomCanBeUnconfirmed(long roomId) {
         if (!roomLogic.canUnconfirmRoom(roomId)) {
             log.error("Room {} cannot be unconfirmed!", roomId);
-            throw new ApiException("Room cannot be unconfirmed");
+            throw new ApiException("Room cannot be unconfirmed", RoomErrorCodes.ROOM_CANNOT_BE_UNCONFIRMED);
         }
     }
 
@@ -160,7 +161,7 @@ public class RoomChecks {
         var r = roomFinder.getConfirmedRoomGuestFromUserEvent(userId, event);
         if (!r.isPresent()) {
             log.error("Could not find any roomGuest obj for user {} at event {}", userId, event);
-            throw new ApiException("Could not find any roomGuest");
+            throw new ApiException("Could not find any roomGuest", RoomErrorCodes.GUEST_NOT_FOUND);
         }
         return r.get();
     }
@@ -168,20 +169,20 @@ public class RoomChecks {
         var r = roomFinder.getRoomGuestFromId(guestId);
         if (!r.isPresent()) {
             log.error("Unable to find roomGuest for id {}", guestId);
-            throw new ApiException("Unable to find guest");
+            throw new ApiException("Unable to find guest", RoomErrorCodes.GUEST_NOT_FOUND);
         }
         return r.get();
     }
     public void assertGuestIsNotConfirmed(RoomGuest guest) {
         if (guest.isConfirmed()) {
             log.error("Guest {} is already confirmed in the room {}", guest.getGuestId(), guest.getRoomId());
-            throw new ApiException("Guest is already confirmed!");
+            throw new ApiException("Guest is already confirmed!", RoomErrorCodes.GUEST_ALREADY_CONFIRMED);
         }
     }
     public void assertGuestIsConfirmed(RoomGuest guest) {
         if (!guest.isConfirmed()) {
             log.error("Guest {} is NOT confirmed in the room {}", guest.getGuestId(), guest.getRoomId());
-            throw new ApiException("Guest is NOT confirmed!");
+            throw new ApiException("Guest is NOT confirmed!", RoomErrorCodes.GUEST_NOT_CONFIRMED);
 
         }
     }
@@ -190,7 +191,7 @@ public class RoomChecks {
         boolean isAdmin = true; //TODO [ADMIN_CHECK]
         if (guest.getUserId() != requesterUserId && !isAdmin) {
             log.error("User {} has no rights over guest obj {}", requesterUserId, guest.getGuestId());
-            throw new ApiException("User has no rights over specified guest!");
+            throw new ApiException("User has no rights over specified guest!", RoomErrorCodes.USER_IS_NOT_ADMIN);
         }
     }
 
@@ -200,12 +201,12 @@ public class RoomChecks {
 
         if (!capacity.isPresent()) {
             log.error("Room {} not found while checking capacity", roomId);
-            throw new ApiException("Room not found");
+            throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
         }
 
         if (capacity.get() >= roomMates.size()) {
             log.error("Room {} is already full!", roomId);
-            throw new ApiException("Room is full");
+            throw new ApiException("Room is full", RoomErrorCodes.ROOM_FULL);
         }
     }
 
@@ -213,25 +214,25 @@ public class RoomChecks {
         var r = orderFinder.getOrderStatus(userId, event);
         if (!r.isPresent()) {
             log.error("Order for user {} on event {} not found!", userId, event);
-            throw new ApiException("Order not found");
+            throw new ApiException("Order not found", RoomErrorCodes.ORDER_NOT_FOUND);
         }
         if (r.get() != OrderStatus.PAID) {
             log.error("Order for user {} on event {} is not paid", userId, event);
-            throw new ApiException("Order is not paid");
+            throw new ApiException("Order is not paid", RoomErrorCodes.ORDER_NOT_PAID);
         }
     }
 
     private void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {
         if (!r.isPresent()) {
             log.error("No order found for user {} on event {}", userId, event);
-            throw new ApiException("Order not found");
+            throw new ApiException("Order not found", RoomErrorCodes.ORDER_NOT_FOUND);
         }
     }
 
     private void assertRoomFound(Optional<?> o, long roomId) {
         if (!o.isPresent()) {
             log.error("Room {} was not found!", roomId);
-            throw new ApiException("Room not found");
+            throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
         }
     }
 }
