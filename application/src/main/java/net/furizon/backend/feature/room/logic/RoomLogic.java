@@ -4,7 +4,6 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.validation.Errors;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface RoomLogic {
 
     //force = bypass invitation logic, forceExit = if the user is in another room, add him to the current one forcefully
     long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit);
-    boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event);
+    boolean inviteAccept(long guestId, long invitedUserId, @NotNull Event event);
     boolean inviteRefuse(long guestId);
     boolean inviteCancel(long guestId);
 

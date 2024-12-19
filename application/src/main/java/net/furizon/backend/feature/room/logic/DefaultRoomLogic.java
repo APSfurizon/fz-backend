@@ -37,13 +37,14 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
-        return roomFinder.userOwnsAroom(userId, event.getId());
+        return !roomFinder.userOwnsAroom(userId, event.getId());
     }
 
     @Override
     @Transactional
     public long createRoom(String name, long userId, @NotNull Event event) {
         log.info("Creating a room for user {} on event {} with name '{}'", userId, event, name);
+        //Get order id
         var r = query.fetchFirst(
             PostgresDSL.select(ORDERS.ID)
                 .from(ORDERS)
@@ -57,6 +58,7 @@ public class DefaultRoomLogic implements RoomLogic {
             throw new ApiException("Order not found while creating a room", RoomErrorCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
+        //Actual creation of the room
         long roomId = command.executeResult(
             PostgresDSL.insertInto(
                 ROOMS,
@@ -69,6 +71,7 @@ public class DefaultRoomLogic implements RoomLogic {
                 ROOMS.ROOM_ID
             )
         ).getFirst().get(ROOMS.ROOM_ID);
+        //Insertion of the owner in the room
         invitePersonToRoom(userId, roomId, event, true, true);
         return roomId;
     }
@@ -102,12 +105,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
         boolean alreadyInAroom = roomFinder.isUserInAroom(invitedUserId, event.getId());
         if (alreadyInAroom) {
-            if (force && !forceExit) {
-                log.error("User {} is already in a room in event {}, but forceExit was equal to false",
-                        invitedUserId, event);
-                throw new ApiException("User is already in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
-            }
             if (forceExit) {
+                //Delete previous confirmed invitations
                 command.execute(
                     PostgresDSL.deleteFrom(ROOM_GUESTS)
                     .where(
@@ -124,6 +123,10 @@ public class DefaultRoomLogic implements RoomLogic {
                         ))
                     )
                 );
+            } else {
+                log.error("User {} is already in a room in event {}, but forceExit was equal to false",
+                        invitedUserId, event);
+                throw new ApiException("User is already in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
             }
         }
 
@@ -143,22 +146,17 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
-        log.info("Guest {} has accepted invitation to room {}", guestId, roomId);
+    public boolean inviteAccept(long guestId, long invitedUserId, @NotNull Event event) {
+        log.info("Guest {} has accepted room invitation", guestId);
         //Deletes pending invitation for user in event
         command.execute(
             PostgresDSL.deleteFrom(ROOM_GUESTS)
             .where(
-                ROOM_GUESTS.ROOM_GUEST_ID.eq(guestId)
-                .and(ROOM_GUESTS.ROOM_ID.notEqual(roomId))
-                .and(ROOM_GUESTS.ROOM_GUEST_ID.in(
-                    PostgresDSL.select(ROOM_GUESTS.ROOM_ID)
-                    .from(ROOM_GUESTS)
-                    .join(ROOMS)
-                    .on(
-                        ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
-                        .and(ROOM_GUESTS.USER_ID.eq(invitedUserId))
-                    )
+                ROOM_GUESTS.USER_ID.eq(invitedUserId)
+                .and(ROOM_GUESTS.ROOM_GUEST_ID.notEqual(guestId))
+                .and(ROOM_GUESTS.ROOM_ID.in(
+                    PostgresDSL.select(ROOMS.ROOM_ID)
+                    .from(ROOMS)
                     .join(ORDERS)
                     .on(
                         ROOMS.ORDER_ID.eq(ORDERS.ID)
@@ -171,10 +169,7 @@ public class DefaultRoomLogic implements RoomLogic {
         return command.execute(
             PostgresDSL.update(ROOM_GUESTS)
             .set(ROOM_GUESTS.CONFIRMED, true)
-            .where(
-                ROOM_GUESTS.ROOM_GUEST_ID.eq(guestId)
-                .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
-            )
+            .where(ROOM_GUESTS.ROOM_GUEST_ID.eq(guestId))
         ) > 0;
     }
 

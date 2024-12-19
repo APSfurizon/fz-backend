@@ -60,9 +60,9 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
+    public boolean inviteAccept(long guestId, long invitedUserId, @NotNull Event event) {
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
-        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event);
+        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, event);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
     @Override
     public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
-        sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Running room sanity check on room {}", roomId);
+        log.info("[ROOM SANITY CHECKS] Running room sanity check on room {}", roomId);
         Event event = pretixInformation.getCurrentEvent();
         long eventId = event.getId();
         //The following checks are done:
