@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +46,13 @@ public class RoomChecks {
             throw new ApiException("User has a daily ticket", RoomErrorCodes.USER_HAS_DAILY_TICKET);
         }
     }
+    public void assertUserHasNotAnOrder(long userId, @NotNull Event event) {
+        var r = orderFinder.isOrderDaily(userId, event);
+        if (r.isPresent()) {
+            log.error("User {} has bought an order for event {}!", userId, event);
+            throw new ApiException("User has already bought an order", RoomErrorCodes.ORDER_ALREADY_BOUGHT);
+        }
+    }
 
     public void assertUserHasBoughtAroom(long userId, @NotNull Event event) {
         var r = orderFinder.userHasBoughtAroom(userId, event);
@@ -63,14 +71,6 @@ public class RoomChecks {
         }
     }
 
-    public void assertUserDoesNotOwnAroom(long userId, @NotNull Event event) {
-        boolean alreadyOwnsAroom = roomFinder.userOwnsAroom(userId, event.getId());
-        if (alreadyOwnsAroom) {
-            log.error("User {} is trying to manage a room for event {}, but already has one!", userId, event);
-            throw new ApiException("User already owns a room", RoomErrorCodes.USER_OWNS_A_ROOM);
-        }
-    }
-
     public void assertUserIsNotInRoom(long userId, @NotNull Event event) {
         boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId());
         if (userInRoom) {
@@ -86,6 +86,13 @@ public class RoomChecks {
         }
     }
 
+    public void assertUserDoesNotOwnAroom(long userId, @NotNull Event event) {
+        boolean alreadyOwnsAroom = roomFinder.userOwnsAroom(userId, event.getId());
+        if (alreadyOwnsAroom) {
+            log.error("User {} is trying to manage a room for event {}, but already has one!", userId, event);
+            throw new ApiException("User already owns a room", RoomErrorCodes.USER_OWNS_A_ROOM);
+        }
+    }
     public void assertUserIsNotRoomOwner(long userId, long roomId) {
         var roomOwner = roomFinder.getOwnerUserIdFromRoomId(roomId);
         assertRoomFound(roomOwner, roomId);
@@ -156,8 +163,7 @@ public class RoomChecks {
         }
     }
 
-    @NotNull public RoomGuest getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
-            long userId, @NotNull Event event) {
+    @NotNull public RoomGuest getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(long userId, @NotNull Event event) {
         var r = roomFinder.getConfirmedRoomGuestFromUserEvent(userId, event);
         if (!r.isPresent()) {
             log.error("Could not find any roomGuest obj for user {} at event {}", userId, event);
@@ -220,6 +226,16 @@ public class RoomChecks {
             log.error("Order for user {} on event {} is not paid", userId, event);
             throw new ApiException("Order is not paid", RoomErrorCodes.ORDER_NOT_PAID);
         }
+    }
+
+    public long getUserIdAndAssertPermission(@Nullable Long userId, @NotNull FurizonUser user) {
+        long id = userId == null ? user.getUserId() : userId;
+        boolean isAdmin = true; //TODO [ADMIN_CHECK]
+        if (userId != null && userId != user.getUserId() && !isAdmin) {
+            log.error("User {} has no permission over userId {}", user.getUserId(), userId);
+            throw new ApiException("User is not an admin", RoomErrorCodes.USER_IS_NOT_ADMIN);
+        }
+        return id;
     }
 
     private void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {

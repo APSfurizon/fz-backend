@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
-import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
-import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.usecase.RoomChecks;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -18,7 +16,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -113,6 +110,33 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean unconfirmRoom(long roomId) {
         return false;
+    }
+
+    @Override
+    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        /*
+        - Create new room position on target user
+        - Remove room position from source user
+        - Create refund in DONE state for source user
+        - Create payment in CONFIRMED state for target user
+         */
+        return defaultRoomLogic.exchangeRoom(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
+    }
+
+    @Override
+    public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        // - Update userId answer
+        return defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
+    }
+
+    @Override
+    public boolean refundRoom(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        return false; //TODO
+    }
+
+    @Override
+    public boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        return false; //TODO
     }
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
@@ -216,7 +240,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
             }
 
-            var daily = orderFinder.isUserDaily(usrId, event);
+            var daily = orderFinder.isOrderDaily(usrId, event);
             if (!daily.isPresent()) {
                 if (usrId == ownerId) {
                     //delete room, owner has no order

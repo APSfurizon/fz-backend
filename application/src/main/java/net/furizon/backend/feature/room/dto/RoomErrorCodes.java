@@ -11,6 +11,7 @@ public enum RoomErrorCodes {
     GUEST_ALREADY_CONFIRMED, //We expected that the guest had not confirmed yet, but instead it has
     GUEST_NOT_CONFIRMED, //Guest hasn't confirmed yet
     ORDER_NOT_FOUND, //Unable to find the specified order
+    ORDER_ALREADY_BOUGHT, //We expected that the user had no order, but instead he has at least one
     ORDER_NOT_PAID, //An order is not in a paid status
     EDIT_TIMEFRAME_ENDED, //You tried editing a room, but the allowed editing time is passed
     USER_IS_NOT_ADMIN, //TODO use the same error code as other admin checks!

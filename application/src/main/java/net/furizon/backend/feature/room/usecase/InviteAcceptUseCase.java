@@ -40,7 +40,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
         checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
-        return roomLogic.inviteAccept(guestId, targetUserId, roomId, event);
+        return roomLogic.inviteAccept(guestId, targetUserId, event);
     }
 
     public record Input(

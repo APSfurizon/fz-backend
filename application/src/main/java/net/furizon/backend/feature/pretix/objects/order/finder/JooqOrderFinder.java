@@ -66,7 +66,7 @@ public class JooqOrderFinder implements OrderFinder {
 
     @Override
     public @NotNull Optional<Boolean> isOrderDaily(long userId, @NotNull Event event) {
-        Boolean res = query.fetchFirst(
+        return Optional.ofNullable(query.fetchFirst(
                 PostgresDSL.select(ORDERS.ORDER_DAILY_DAYS)
                 .from(ORDERS)
                 .where(
@@ -74,8 +74,7 @@ public class JooqOrderFinder implements OrderFinder {
                     .and(ORDERS.EVENT_ID.eq(event.getId())
                 )
                 .limit(1)
-        ).mapOrNull(e -> e.get(ORDERS.ORDER_DAILY_DAYS) != 0L);
-        return Optional.ofNullable(res);
+        ).mapOrNull(e -> e.get(ORDERS.ORDER_DAILY_DAYS) != 0L));
     }
 
     @Override
@@ -108,21 +107,6 @@ public class JooqOrderFinder implements OrderFinder {
                 Short capacity = e.get(ORDERS.ORDER_ROOM_CAPACITY);
                 return capacity == null ? false : capacity > 0;
             })
-        );
-    }
-
-    @Override
-    public @NotNull Optional<Boolean> isUserDaily(long userId, @NotNull Event event) {
-        return Optional.ofNullable(
-            query.fetchFirst(
-                PostgresDSL
-                .select(ORDERS.ORDER_DAILY_DAYS)
-                .from(ORDERS)
-                .where(
-                    ORDERS.USER_ID.eq(userId)
-                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                )
-            ).mapOrNull(k -> k.get(ORDERS.ORDER_DAILY_DAYS) != 0L)
         );
     }
 
