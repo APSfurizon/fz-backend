@@ -111,6 +111,21 @@ public class JooqOrderFinder implements OrderFinder {
         );
     }
 
+    @Override
+    public @NotNull Optional<Boolean> isUserDaily(long userId, @NotNull Event event) {
+        return Optional.ofNullable(
+            query.fetchFirst(
+                PostgresDSL
+                .select(ORDERS.ORDER_DAILY_DAYS)
+                .from(ORDERS)
+                .where(
+                    ORDERS.USER_ID.eq(userId)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                )
+            ).mapOrNull(k -> k.get(ORDERS.ORDER_DAILY_DAYS) != 0L)
+        );
+    }
+
     private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,

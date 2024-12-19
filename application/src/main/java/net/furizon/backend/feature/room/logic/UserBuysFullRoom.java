@@ -128,56 +128,111 @@ public class UserBuysFullRoom implements RoomLogic {
         //- Owner doesn't own a room
         //- Owner has a daily ticket
         //- User order status == canceled
-        //User order is daily
-
-        var ownerIdOpt = roomFinder.getOwnerUserIdFromRoomId(roomId);
-        if (!ownerIdOpt.isPresent()) {
-            //TODO delete room, no owner found
-            return;
-        }
-        long ownerId = ownerIdOpt.get();
-        Order order = orderFinder.findOrderByUserIdEvent(ownerId, event, pretixInformation);
-        if (order == null) {
-            //TODO delete room, owner has no order
-            return;
-        }
-        if (!order.hasRoom()) {
-            //TODO delete room, owner has no room
-        }
-        if (order.isDaily()) {
-            //TODO delete room, owner has daily ticket
-        }
+        //- User order is daily
 
         //RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
         List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
         List<RoomGuestResponse> confirmedGuests = guests.stream().filter(k -> k.getRoomGuest().isConfirmed()).toList();
 
-        if (confirmedGuests.size() > (int) order.getRoomCapacity()) {
-            //TODO delete room, too many members!
+
+        var ownerIdOpt = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        if (!ownerIdOpt.isPresent()) {
+            //delete room, no owner found
+            log.error("[ROOM SANITY CHECKS] No owner found in room {}. Deleting the room", roomId);
+            this.deleteRoom(roomId);
+            return;
+        }
+        long ownerId = ownerIdOpt.get();
+        Order order = orderFinder.findOrderByUserIdEvent(ownerId, event, pretixInformation);
+        if (order == null) {
+            //delete room, owner has no order
+            log.error("[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", ownerId, roomId);
+            this.deleteRoom(roomId);
+            return;
+        }
+        if (!order.hasRoom()) {
+            //delete room, owner has no room
+            log.error("[ROOM SANITY CHECKS] Owner {} of room {} hasn't bought a room. Deleting the room", ownerId, roomId);
+            this.deleteRoom(roomId);
+            return;
+        }
+        if (order.isDaily()) {
+            //delete room, owner has daily ticket
+            log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", ownerId, roomId);
+            this.deleteRoom(roomId);
+            return;
+        }
+
+        int guestNo = confirmedGuests.size();
+        int capacity = (int) order.getRoomCapacity();
+        if (guestNo > capacity) {
+            //delete room, too many members!
+            log.error("[ROOM SANITY CHECKS] Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
+            this.deleteRoom(roomId);
             return;
         }
 
         boolean ownerFound = false;
         for (RoomGuestResponse guest : confirmedGuests) {
             long usrId = guest.getUser().getUserId();
+            long guestId = guest.getRoomGuest().getGuestId();
 
             //This (together with owner in room check) will also test if a owner has multiple rooms
             int roomNo = roomFinder.countRoomsWithUser(usrId, eventId);
             if (roomNo > 1) {
                 if (usrId == ownerId) {
-                    //TODO delete room, owner is in too many rooms
+                    //delete room, owner is in too many rooms
+                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} is in too many rooms ({})!. Deleting the room", usrId, roomId, roomNo);
+                    this.deleteRoom(roomId);
                     return;
                 } else {
-                    //TODO kick user, he's in too many rooms
+                    //kick user, he's in too many rooms
+                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} is in too many rooms ({})!. Kicking the user", usrId, guestId, roomId, roomNo);
+                    this.kickFromRoom(guestId);
+                    continue;
                 }
             }
 
             OrderStatus status = guest.getOrderStatus();
             if (status == null || status == OrderStatus.CANCELED) {
                 if (usrId == ownerId) {
-                    //TODO delete room, owner's order is canceled
+                    //delete room, owner's order is canceled
+                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
+                    this.deleteRoom(roomId);
+                    return;
                 } else {
-                    //TODO kick user, his order is canceled
+                    //kick user, his order is canceled
+                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
+                    this.kickFromRoom(guestId);
+                    continue;
+                }
+            }
+
+            var daily = orderFinder.isUserDaily(usrId, event);
+            if (!daily.isPresent()) {
+                if (usrId == ownerId) {
+                    //delete room, owner has no order
+                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", usrId, roomId);
+                    this.deleteRoom(roomId);
+                    return;
+                } else {
+                    //kick user, user has no order
+                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
+                    this.kickFromRoom(guestId);
+                    continue;
+                }
+            }
+            if (daily.get()) {
+                if (usrId == ownerId) {
+                    //delete room, owner has a daily ticket
+                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", usrId, roomId);
+                    this.deleteRoom(roomId);
+                    return;
+                } else {
+                    //kick user, he has a daily ticket
+                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
+                    this.kickFromRoom(guestId);
+                    continue;
                 }
             }
 
@@ -187,7 +242,9 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         if (!ownerFound) {
-            //TODO delete room, owner is not in room!
+            //delete room, owner is not in room!
+            log.error("[ROOM SANITY CHECKS] Owner {} of room {} was not found in the room's guest. Deleting the room", ownerId, roomId);
+            this.deleteRoom(roomId);
             return;
         }
     }
