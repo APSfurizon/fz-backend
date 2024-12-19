@@ -14,6 +14,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface PretixInformation {
+
+    void reloadCacheAndOrders();
+
     @NotNull
     Event getCurrentEvent();
 

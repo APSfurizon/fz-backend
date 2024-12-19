@@ -3,6 +3,10 @@ package net.furizon.backend.feature.room.logic;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.validation.Errors;
+
+import java.util.List;
 
 public interface RoomLogic {
     //Security checks must be done BEFORE calling the following methods!
@@ -28,5 +32,5 @@ public interface RoomLogic {
     boolean canUnconfirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
-    void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation);
+    void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors);
 }

@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -115,8 +116,16 @@ public class UserBuysFullRoom implements RoomLogic {
         return false;
     }
 
+    private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
+        log.error(message, args);
+        if (logbook != null) {
+            logbook.add(message);
+        }
+    }
+
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation) {
+    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
+        sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Running room sanity check on room {}", roomId);
         Event event = pretixInformation.getCurrentEvent();
         long eventId = event.getId();
         //The following checks are done:
@@ -138,7 +147,7 @@ public class UserBuysFullRoom implements RoomLogic {
         var ownerIdOpt = roomFinder.getOwnerUserIdFromRoomId(roomId);
         if (!ownerIdOpt.isPresent()) {
             //delete room, no owner found
-            log.error("[ROOM SANITY CHECKS] No owner found in room {}. Deleting the room", roomId);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] No owner found in room {}. Deleting the room", roomId);
             this.deleteRoom(roomId);
             return;
         }
@@ -146,19 +155,19 @@ public class UserBuysFullRoom implements RoomLogic {
         Order order = orderFinder.findOrderByUserIdEvent(ownerId, event, pretixInformation);
         if (order == null) {
             //delete room, owner has no order
-            log.error("[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", ownerId, roomId);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", ownerId, roomId);
             this.deleteRoom(roomId);
             return;
         }
         if (!order.hasRoom()) {
             //delete room, owner has no room
-            log.error("[ROOM SANITY CHECKS] Owner {} of room {} hasn't bought a room. Deleting the room", ownerId, roomId);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} hasn't bought a room. Deleting the room", ownerId, roomId);
             this.deleteRoom(roomId);
             return;
         }
         if (order.isDaily()) {
             //delete room, owner has daily ticket
-            log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", ownerId, roomId);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", ownerId, roomId);
             this.deleteRoom(roomId);
             return;
         }
@@ -167,7 +176,7 @@ public class UserBuysFullRoom implements RoomLogic {
         int capacity = (int) order.getRoomCapacity();
         if (guestNo > capacity) {
             //delete room, too many members!
-            log.error("[ROOM SANITY CHECKS] Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
             this.deleteRoom(roomId);
             return;
         }
@@ -182,12 +191,12 @@ public class UserBuysFullRoom implements RoomLogic {
             if (roomNo > 1) {
                 if (usrId == ownerId) {
                     //delete room, owner is in too many rooms
-                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} is in too many rooms ({})!. Deleting the room", usrId, roomId, roomNo);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} is in too many rooms ({})!. Deleting the room", usrId, roomId, roomNo);
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, he's in too many rooms
-                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} is in too many rooms ({})!. Kicking the user", usrId, guestId, roomId, roomNo);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] User {}g{} of room {} is in too many rooms ({})!. Kicking the user", usrId, guestId, roomId, roomNo);
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -197,12 +206,12 @@ public class UserBuysFullRoom implements RoomLogic {
             if (status == null || status == OrderStatus.CANCELED) {
                 if (usrId == ownerId) {
                     //delete room, owner's order is canceled
-                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, his order is canceled
-                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -212,12 +221,12 @@ public class UserBuysFullRoom implements RoomLogic {
             if (!daily.isPresent()) {
                 if (usrId == ownerId) {
                     //delete room, owner has no order
-                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", usrId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} has no order. Deleting the room", usrId, roomId);
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, user has no order
-                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -225,12 +234,12 @@ public class UserBuysFullRoom implements RoomLogic {
             if (daily.get()) {
                 if (usrId == ownerId) {
                     //delete room, owner has a daily ticket
-                    log.error("[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", usrId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} has a daily ticket. Deleting the room", usrId, roomId);
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, he has a daily ticket
-                    log.error("[ROOM SANITY CHECKS] User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
+                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -243,7 +252,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
         if (!ownerFound) {
             //delete room, owner is not in room!
-            log.error("[ROOM SANITY CHECKS] Owner {} of room {} was not found in the room's guest. Deleting the room", ownerId, roomId);
+            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] Owner {} of room {} was not found in the room's guest. Deleting the room", ownerId, roomId);
             this.deleteRoom(roomId);
             return;
         }

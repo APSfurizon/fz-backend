@@ -12,6 +12,7 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -264,7 +265,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation) {
+    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
         log.warn("DefaultRoomLogic does not implement any sanity check!");
     }
 }

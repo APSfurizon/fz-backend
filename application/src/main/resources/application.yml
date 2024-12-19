@@ -50,6 +50,7 @@ frontend:
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
+  sanity-check-cronjob: ${ROOM_SANITY_CHECKS_CRONJOB:0 30 5 * * *}
 
 pretix:
   event:
@@ -63,7 +64,7 @@ pretix:
     path: ${PRETIX_API_PATH:/api/v1/}
     key: ${PRETIX_API_KEY:OwO}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
-  cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 0 * * *}
+  cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 /8 * * *}
   shop:
     host: ${PRETIX_SHOP_HOST:localhost}
     port: ${PRETIX_SHOP_PORT:8000}

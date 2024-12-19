@@ -12,6 +12,7 @@ import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
+import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
 import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
@@ -28,6 +29,7 @@ import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
 import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
 import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/room")
 @RequiredArgsConstructor
@@ -45,6 +49,8 @@ public class RoomController {
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+    @org.jetbrains.annotations.NotNull
+    private final SanityCheckService sanityCheckService;
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
@@ -289,6 +295,21 @@ public class RoomController {
                         pretixInformation.getCurrentEvent()
                 )
         );
+    }
+
+    @Operation(summary = "Run immediately the room sanity checks", description =
+        "This method is intended to be used by admin only. Runs immediately the room "
+        + "sanity checks to detect if there's something wrong with the rooms. "
+        + "This method is sync, expect a long running time! The returned array contains "
+        + "a list of error logs detailing all the incongruences found. It should directly "
+        + "be displayed to the admin (be aware of xss tho)")
+    @PostMapping("/run-sanity-checks")
+    public AdminSanityChecksResponse runSanityChecks(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        //TODO [ADMIN_CHECK]
+        List<String> errors = sanityCheckService.runSanityChecks();
+        return new AdminSanityChecksResponse(errors);
     }
 
     @Operation(summary = "Gets the current user's room status and information", description =

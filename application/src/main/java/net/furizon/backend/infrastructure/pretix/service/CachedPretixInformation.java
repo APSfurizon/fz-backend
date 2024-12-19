@@ -112,13 +112,14 @@ public class CachedPretixInformation implements PretixInformation {
             .expireAfterWrite(7L, TimeUnit.DAYS)
             .build();
 
+    @Override
     @PostConstruct
-    public void init() {
+    public void reloadCacheAndOrders() {
         if (!pretixConfig.isEnableSync()) {
-            log.warn("[PRETIX] Pretix initialization has been disabled");
+            log.warn("[PRETIX] Pretix synchronization has been disabled");
             return;
         }
-        log.info("[PRETIX] Initializing pretix information and cache it");
+        log.info("[PRETIX] Syncing pretix information and cache it");
         long start = System.currentTimeMillis();
         resetCache();
         reloadAllOrders();
@@ -433,6 +434,6 @@ public class CachedPretixInformation implements PretixInformation {
     @Scheduled(cron = "${pretix.cache-reload-cronjob}")
     private void cronReloadCache() {
         log.info("[PRETIX] Cronjob running");
-        init();
+        reloadCacheAndOrders();
     }
 }
