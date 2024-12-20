@@ -17,10 +17,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Record1;
-import org.jooq.Record4;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOnConditionStep;
+import org.jooq.*;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +36,11 @@ public class JooqRoomFinder implements RoomFinder {
     @NotNull private final SqlQuery query;
 
     @Override
-    public boolean isUserInAroom(long userId, long eventId) {
+    public boolean isUserInAroom(long userId, long eventId, boolean ownRoomAllowed) {
+        Condition c = ROOMS.ORDER_ID.eq(ORDERS.ID).and(ORDERS.EVENT_ID.eq(eventId));
+        if (ownRoomAllowed) {
+            c = c.and(ORDERS.USER_ID.notEqual(userId));
+        }
         return query.fetchFirst(
                 PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
                 .from(ROOM_GUESTS)
@@ -49,10 +50,7 @@ public class JooqRoomFinder implements RoomFinder {
                     .and(ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID))
                     .and(ROOM_GUESTS.CONFIRMED.eq(true))
                 ).innerJoin(ORDERS)
-                .on(
-                    ROOMS.ORDER_ID.eq(ORDERS.ID)
-                    .and(ORDERS.EVENT_ID.eq(eventId))
-                )
+                .on(c)
                 .limit(1)
         ).isPresent();
     }

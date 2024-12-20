@@ -106,7 +106,7 @@ public class DefaultRoomLogic implements RoomLogic {
                 invitedUserId, roomId, event, force, forceExit);
 
         boolean shouldDeleteEntries = false;
-        boolean alreadyInAroom = roomFinder.isUserInAroom(invitedUserId, event.getId());
+        boolean alreadyInAroom = roomFinder.isUserInAroom(invitedUserId, event.getId(), false);
         if (alreadyInAroom) {
             if (forceExit) {
                 shouldDeleteEntries = true;
@@ -269,14 +269,64 @@ public class DefaultRoomLogic implements RoomLogic {
         ) > 0;
     }
 
+    private void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
+        if (!result) {
+            log.error("[ROOM_EXCHANGE] result was false after executing step {} while exchanging between users {} -> {} on event {}", step, sourceUserId, destUserId, event);
+        }
+    }
+
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) ->
-            command.execute(
+        return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) -> {
+            boolean result = true;
+
+            //Check if a full room swap is needed
+            if (targetGuest != null && targetGuest.isConfirmed()) {
+                var r = roomFinder.getRoomIdFromOwnerUserId(targetUsrId, event);
+                if (r.isPresent()) { //If found it means that the target user is owner of a room
+                    long targetRoomId = r.get();
+                    //Target is the owner of another room
+
+                    //Swap the rooms between the two people
+                    result = result && command.execute(
+                            PostgresDSL
+                            .update(ROOM_GUESTS)
+                            .set(ROOM_GUESTS.ROOM_ID, targetGuest.getRoomId())
+                            .where(ROOM_GUESTS.ROOM_GUEST_ID.eq(sourceGuest.getGuestId()))
+                    ) > 0;
+                    logExchangeError(result, 10, targetUsrId, sourceUsrId, event);
+                    result = result && command.execute(
+                            PostgresDSL
+                            .update(ROOM_GUESTS)
+                            .set(ROOM_GUESTS.ROOM_ID, sourceGuest.getRoomId())
+                            .where(ROOM_GUESTS.ROOM_GUEST_ID.eq(targetGuest.getGuestId()))
+                    ) > 0;
+                    logExchangeError(result, 11, targetUsrId, sourceUsrId, event);
+                    result = result && command.execute(
+                        PostgresDSL.update(ROOMS)
+                        .set(
+                            ROOMS.ORDER_ID,
+                            PostgresDSL.select(ORDERS.ID)
+                                .from(ORDERS)
+                                .where(
+                                    ORDERS.USER_ID.eq(sourceUsrId)
+                                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                                )
+                                .limit(1)
+                        )
+                        .where(
+                            ROOMS.ROOM_ID.eq(targetRoomId)
+                        )
+                    ) > 0;
+                    logExchangeError(result, 12, targetUsrId, sourceUsrId, event);
+                }
+            }
+
+            result = result && command.execute(
                 PostgresDSL.update(ROOMS)
                 .set(
                     ROOMS.ORDER_ID,
-                        PostgresDSL.select(ORDERS.ID)
+                    PostgresDSL.select(ORDERS.ID)
                         .from(ORDERS)
                         .where(
                             ORDERS.USER_ID.eq(targetUsrId)
@@ -287,30 +337,36 @@ public class DefaultRoomLogic implements RoomLogic {
                 .where(
                     ROOMS.ROOM_ID.eq(roomId)
                 )
-            ) > 0
-        );
+            ) > 0;
+            logExchangeError(result, 13, targetUsrId, sourceUsrId, event);
+
+            return result;
+        });
     }
 
     @Override
     public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) ->
-            command.execute(
+        return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) -> {
+            boolean result = command.execute(
                 PostgresDSL.update(ORDERS)
                 .set(ORDERS.USER_ID, targetUsrId)
                 .where(
                     ORDERS.USER_ID.eq(sourceUsrId)
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 )
-            ) > 0
-        );
+            ) > 0;
+            logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
+            return result;
+        });
     }
 
     private boolean exchange(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
+        log.info("[ROOM_EXCHANGE] Doing an exchange between users: {} -> {} on event {}", sourceUsrId, targetUsrId, event);
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, false);
         RoomGuest targetGuest = guests.stream().filter(g -> g.getUserId() == targetUsrId).findFirst().orElse(null);
         RoomGuest sourceGuest = guests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
         if (sourceGuest == null) {
-            log.error("No guest found in room {} with userId {}", roomId, sourceUsrId);
+            log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
             throw new ApiException("No guest found", RoomErrorCodes.GUEST_NOT_FOUND);
         }
 
@@ -318,32 +374,34 @@ public class DefaultRoomLogic implements RoomLogic {
 
         if (targetGuest == null) {
             //Target is not in the room
-            result &= this.kickFromRoom(sourceGuest.getGuestId());
-            result &= this.invitePersonToRoom(targetUsrId, roomId, event, true, true) > 0L;
+            result = result && this.kickFromRoom(sourceGuest.getGuestId());
+            logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
+            result = result && this.invitePersonToRoom(targetUsrId, roomId, event, true, true) > 0L;
+            logExchangeError(result, 1, targetUsrId, sourceUsrId, event);
 
         } else if (targetGuest != null && targetGuest.isConfirmed()) {
             //Target is inside the room and accepted the invitation
-            result &= true;
+            //In this case we also handle (by doing nothing lol) the case where a full room swap is needed
 
         } else if (targetGuest != null && !targetGuest.isConfirmed()) {
             //Target was invited to the room, but hasn't accepted yet
-            result &= this.kickFromRoom(sourceGuest.getGuestId());
-            result &= this.inviteAccept(targetGuest.getGuestId(), targetUsrId, event);
+            result = result && this.kickFromRoom(sourceGuest.getGuestId());
+            logExchangeError(result, 2, targetUsrId, sourceUsrId, event);
+            result = result && this.inviteAccept(targetGuest.getGuestId(), targetUsrId, event);
+            logExchangeError(result, 3, targetUsrId, sourceUsrId, event);
 
         } else {
-            log.error("No proper room exchange case. We shouldn't be here... {}", targetUsrId);
-            result &= false;
+            log.error("[ROOM_EXCHANGE] No proper room exchange case. We shouldn't be here... {}", targetUsrId);
+            result = false;
         }
 
         if (result) {
-            result &= updateDbFnc.apply(targetGuest, sourceGuest);
+            result = updateDbFnc.apply(targetGuest, sourceGuest);
             if (!result) {
-                log.error("Unable to update db in an exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}",
-                    sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
+                log.error("[ROOM_EXCHANGE] Unable to update db in an exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}", sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
             }
         } else {
-            log.error("Unable to modify room members in a exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}",
-                    sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
+            log.error("[ROOM_EXCHANGE] Unable to modify room members in a exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}", sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
         }
 
         return result;

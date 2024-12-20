@@ -20,5 +20,14 @@ public class PretixPosition {
     @NotNull
     private final List<PretixAnswer> answers;
 
+    @NotNull //Price ALWAYS include taxes
+    private final String price;
+    @NotNull
+    @JsonProperty("tax_rate")
+    private final String taxRate;
+    @NotNull
+    @JsonProperty("tax_value")
+    private final String taxValue;
+
     private final boolean canceled;
 }

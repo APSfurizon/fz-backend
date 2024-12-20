@@ -34,7 +34,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
         checks.assertInTimeframeToEditRooms();
         checks.assertUserDoesNotOwnAroom(userId, event);
-        checks.assertUserIsNotInRoom(userId, event);
+        checks.assertUserIsNotInRoom(userId, event, false);
         checks.assertUserHasOrderAndItsNotDaily(userId, event);
         checks.assertOrderIsPaid(userId, event);
 

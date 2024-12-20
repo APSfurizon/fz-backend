@@ -225,8 +225,10 @@ public class CachedPretixInformation implements PretixInformation {
             Sponsorship sponsorship = Sponsorship.NONE;
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
-            long answersMainPositionId = 0L;
             String hotelInternalName = null;
+            Long pretixRoomItemId = null;
+            long ticketPositionId = 0L;
+            Long roomPositionId = null;
             boolean membership = false;
             short roomCapacity = 0;
             Long userId = null;
@@ -241,11 +243,11 @@ public class CachedPretixInformation implements PretixInformation {
                     continue;
                 }
 
-                long item = position.getItemId();
+                long itemId = position.getItemId();
 
-                if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
+                if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
-                    answersMainPositionId = position.getPositionId();
+                    ticketPositionId = position.getPositionId();
                     answers = position.getAnswers();
                     for (PretixAnswer answer : answers) {
                         long questionId = answer.getQuestionId();
@@ -263,19 +265,19 @@ public class CachedPretixInformation implements PretixInformation {
                         }
                     }
 
-                } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null) {
+                } else if ((cacheDay = dailyIdToDay.getIfPresent(itemId)) != null) {
                     days.add(cacheDay);
 
-                } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
+                } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, itemId)) {
                     membership = true;
 
-                } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, item)) {
+                } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, itemId)) {
                     Sponsorship s = sponsorshipIdToType.getIfPresent(position.getVariationId());
                     if (s != null && s.ordinal() > sponsorship.ordinal()) {
                         sponsorship = s; //keep the best sponsorship
                     }
 
-                } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null) {
+                } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
                     if (extraDays != ExtraDays.BOTH) {
                         if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
                             extraDays = ExtraDays.BOTH;
@@ -284,12 +286,15 @@ public class CachedPretixInformation implements PretixInformation {
                         }
                     }
 
-                } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, item)) {
+                } else if (checkItemId.apply(CacheItemTypes.ROOMS, itemId)) {
+                    //Set the room position and item id anyway, even if we have a NO_ROOM item
+                    roomPositionId = position.getPositionId();
+                    pretixRoomItemId = itemId;
+                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, itemId)) {
                         roomCapacity = 0;
                         hotelInternalName = null;
                     } else {
-                        HotelCapacityPair room = roomIdToInfo.getIfPresent(item);
+                        HotelCapacityPair room = roomIdToInfo.getIfPresent(itemId);
                         if (room != null) {
                             roomCapacity = room.capacity();
                             hotelInternalName = room.hotelInternalName();
@@ -310,10 +315,12 @@ public class CachedPretixInformation implements PretixInformation {
                     .extraDays(extraDays)
                     .dailyDays(days)
                     .roomCapacity(roomCapacity)
+                    .pretixRoomItemId(pretixRoomItemId)
                     .hotelInternalName(hotelInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
-                    .answersMainPositionId(answersMainPositionId)
+                    .ticketPositionId(ticketPositionId)
+                    .roomPositionId(roomPositionId)
                     .eventId(event.getId())
                     .orderOwnerUserId(userId)
                     .answers(answers, this)

@@ -71,8 +71,8 @@ public class RoomChecks {
         }
     }
 
-    public void assertUserIsNotInRoom(long userId, @NotNull Event event) {
-        boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId());
+    public void assertUserIsNotInRoom(long userId, @NotNull Event event, boolean ownRoomAllowed) {
+        boolean userInRoom = roomFinder.isUserInAroom(userId, event.getId(), ownRoomAllowed);
         if (userInRoom) {
             log.error("User {} is trying to manage a room for event {}, but he's already in one!", userId, event);
             throw new ApiException("User already is in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);

@@ -93,9 +93,14 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> ORDER_STATUS = createField(DSL.name("order_status"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
-     * The column <code>public.orders.order_answers_main_position_id</code>.
+     * The column <code>public.orders.order_ticket_position_id</code>.
      */
-    public final TableField<Record, Long> ORDER_ANSWERS_MAIN_POSITION_ID = createField(DSL.name("order_answers_main_position_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> ORDER_TICKET_POSITION_ID = createField(DSL.name("order_ticket_position_id"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_room_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_POSITION_ID = createField(DSL.name("order_room_position_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.orders.order_daily_days</code>.

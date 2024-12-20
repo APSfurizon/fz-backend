@@ -33,10 +33,11 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String hotelInternalName = order.getHotelInternalName();
         String orderSecret = order.getPretixOrderSecret();
         boolean membership = order.hasMembership();
-        long answersMainPositionId = order.getAnswersMainPositionId();
-        final Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
-        final long eventId = order.getOrderEvent().getId();
-        final var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
+        long ticketPositionId = order.getTicketPositionId();
+        Long roomPositionId = order.getRoomPositionId();
+        Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
+        long eventId = order.getOrderEvent().getId();
+        var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
 
         command.execute(
             PostgresDSL
@@ -53,7 +54,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
-                    ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID,
+                    ORDERS.ORDER_TICKET_POSITION_ID,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON
@@ -70,7 +71,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     hotelInternalName,
                     orderSecret,
                     membership,
-                    answersMainPositionId,
+                    ticketPositionId,
                     userId,
                     eventId,
                     answers
@@ -86,7 +87,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, hotelInternalName)
                 .set(ORDERS.ORDER_SECRET, orderSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
-                .set(ORDERS.ORDER_ANSWERS_MAIN_POSITION_ID, answersMainPositionId)
+                .set(ORDERS.ORDER_TICKET_POSITION_ID, ticketPositionId)
+                .set(ORDERS.ORDER_ROOM_POSITION_ID, roomPositionId)
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, eventId)
                 .set(ORDERS.ORDER_ANSWERS_JSON, answers)

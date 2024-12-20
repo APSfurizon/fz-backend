@@ -4,7 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
+import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
+import net.furizon.backend.feature.pretix.objects.order.action.yeetPayment.IssuePaymentAction;
+import net.furizon.backend.feature.pretix.objects.order.action.yeetRefund.IssueRefundAction;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
+import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.usecase.RoomChecks;
@@ -26,6 +32,14 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final RoomChecks checks;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
+
+    //Exchange related stuff
+    @NotNull private final PretixProductFinder pretixProductFinder;
+    @NotNull private final PretixPositionFinder pretixPositionFinder;
+    @NotNull private final PushPretixPositionAction pushPretixPositionAction;
+    @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
+    @NotNull private final IssuePaymentAction issuePaymentAction;
+    @NotNull private final IssueRefundAction issueRefundAction;
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
@@ -115,11 +129,52 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         /*
-        - Create new room position on target user
-        - Remove room position from source user
-        - Create refund in DONE state for source user
-        - Create payment in CONFIRMED state for target user
+        if (targetHasRoom) {
+            - Obtain how much target user has paid the room
+            - change room position on target user to match source item id
+            - Obtain how much source user has paid the room
+            - Change room position on source user to match target item id
+
+        } else {
+            if(user has NO_ROOM item as room) {
+                - Change room position on target user
+            } else {
+                - Create new room position on target user
+            }
+            - Obtain how much the source user has paid the room
+            - Change room position of source user to NO_ROOM item
+            - Create refund in DONE state for source user
+            - Obtain how much the room normally costs
+            - Create payment in CONFIRMED state for target user
+        }
+        - update db
+        - refresh both orders from pretix
          */
+
+        Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUsrId, event, pretixInformation);
+        Order targetOrder = orderFinder.findOrderByUserIdEvent(targetUsrId, event, pretixInformation);
+        if (sourceOrder == null) {
+            //TODO source has no order
+            return false;
+        }
+        if (targetOrder == null) {
+            //TODO target has no order
+            return false;
+        }
+
+        var sp = pretixPositionFinder.fetchPositionById(event, sourceOrder.getRoomPositionId());
+        if (!sp.isPresent()) {
+            //TODO unable to fetch source position
+            return false;
+        }
+        String sourcePrice = sp.get().getPrice();
+
+        if (targetOrder.hasRoom()) {
+
+        } else {
+            
+        }
+
         return defaultRoomLogic.exchangeRoom(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
     }
 

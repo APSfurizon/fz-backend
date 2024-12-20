@@ -15,6 +15,10 @@ public class PretixProduct {
     private final long id;
 
     @NotNull
+    @JsonProperty("default_price")
+    private final String price;
+
+    @NotNull
     @JsonProperty("meta_data")
     private final Map<String, String> metadata;
 

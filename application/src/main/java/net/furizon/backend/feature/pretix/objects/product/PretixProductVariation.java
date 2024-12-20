@@ -20,6 +20,9 @@ public class PretixProductVariation {
     @JsonProperty("meta_data")
     private final Map<String, String> metadata;
 
+    @NotNull
+    private final String price;
+
     @Nullable
     public String getIdentifier() {
         return metadata.get(Const.METADATA_IDENTIFIER_ITEM);

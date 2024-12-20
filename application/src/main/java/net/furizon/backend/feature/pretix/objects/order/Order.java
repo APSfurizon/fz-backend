@@ -76,7 +76,8 @@ public class Order {
     private boolean hasMembership = false;
 
     @Builder.Default
-    private long answersMainPositionId = -1L;
+    private long ticketPositionId = -1L;
+    private Long roomPositionId;
 
     @Nullable
     @Builder.Default
@@ -125,6 +126,7 @@ public class Order {
         return ret;
     }
 
+    //we can't use roomPositionId to validate, since it IS set even when we have a NO_ROOM item
     public boolean hasRoom() {
         return roomCapacity > 0;
     }

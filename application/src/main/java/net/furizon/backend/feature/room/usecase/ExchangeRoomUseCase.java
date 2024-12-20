@@ -30,12 +30,13 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         checks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
         checks.assertUserHasOrderAndItsNotDaily(destUserId, event);
 
-        checks.assertUserHasNotBoughtAroom(destUserId, event);
+        //We can exchange room with someone else
+        //checks.assertUserHasNotBoughtAroom(destUserId, event);
         checks.assertUserHasBoughtAroom(sourceUserId, event);
 
-        checks.assertUserIsNotInRoom(destUserId, event);
+        checks.assertUserIsNotInRoom(destUserId, event, true);
 
-        checks.assertUserDoesNotOwnAroom(destUserId, event);
+        //checks.assertUserDoesNotOwnAroom(destUserId, event);
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
 
         checks.assertRoomNotConfirmed(roomId);

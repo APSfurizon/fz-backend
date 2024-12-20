@@ -18,9 +18,9 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
@@ -30,13 +30,14 @@ public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
+        log.info("Pushing new answers to order {} on event {}", order.getCode(), order.getOrderEvent());
         final var pair = order.getOrderEvent().getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
             .method(HttpMethod.PATCH)
             .path("/organizers/{organizer}/events/{event}/orderpositions/{position}/")
             .uriVariable("organizer", pair.getOrganizer())
             .uriVariable("event", pair.getEvent())
-            .uriVariable("position", String.valueOf(order.getAnswersMainPositionId()))
+            .uriVariable("position", String.valueOf(order.getTicketPositionId()))
             .contentType(MediaType.APPLICATION_JSON)
             .body(new PushPretixAnswerRequest(order.getAllAnswers(pretixInformation)))
             .responseType(Void.class)
@@ -44,7 +45,7 @@ public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
         try {
             return pretixHttpClient.send(PretixConfig.class, request).getStatusCode() == HttpStatus.OK;
         } catch (final HttpClientErrorException ex) {
-            log.error("Error while sending Pretix answer to order ", ex);
+            log.error("Error while sending Pretix answer to order", ex);
             return false;
         }
     }
