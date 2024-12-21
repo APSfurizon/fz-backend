@@ -201,12 +201,10 @@ public class JooqRoomFinder implements RoomFinder {
                     .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
                 )
                 .leftJoin(ORDERS)
-                .on(
-                    ORDERS.USER_ID.eq(USERS.USER_ID)
-                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                )
+                .on(ORDERS.USER_ID.eq(USERS.USER_ID))
                 .leftJoin(MEDIA)
                 .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+                .where(ORDERS.EVENT_ID.eq(event.getId()))
         ).stream().map(RoomGuestResponseMapper::map).toList();
     }
 

@@ -56,15 +56,13 @@ public class JooqUserFinder implements UserFinder {
             )
             .from(USERS)
             .leftJoin(MEDIA)
-            .on(
-                USERS.USER_ID.in(ids)
-                .and(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            )
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .leftJoin(ORDERS)
             .on(
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
+            .where(USERS.USER_ID.in(ids))
         ).stream().map(JooqDisplayUserMapper::map).toList();
     }
 
@@ -82,15 +80,12 @@ public class JooqUserFinder implements UserFinder {
             )
             .from(USERS)
             .leftJoin(MEDIA)
-            .on(
-                USERS.USER_ID.eq(userId)
-                .and(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            )
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .leftJoin(ORDERS)
             .on(
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
-            )
+            ).where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqDisplayUserMapper::map);
     }
 
