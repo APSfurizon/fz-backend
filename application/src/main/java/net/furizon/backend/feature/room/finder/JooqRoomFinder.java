@@ -130,6 +130,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(
                 ROOMS.ORDER_ID.eq(ORDERS.ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .and(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID.isNotNull())
             )
             .innerJoin(ROOM_GUESTS)
             .on(

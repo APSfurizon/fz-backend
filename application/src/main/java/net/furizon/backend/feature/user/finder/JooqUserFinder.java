@@ -8,6 +8,7 @@ import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
+import net.furizon.backend.feature.user.objects.SearchUser;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +92,7 @@ public class JooqUserFinder implements UserFinder {
 
     @NotNull
     @Override
-    public List<SearchUsersResponse.SearchUser> searchUserInCurrentEvent(
+    public List<SearchUser> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
             boolean filterRoom,
@@ -126,23 +127,20 @@ public class JooqUserFinder implements UserFinder {
                 MEDIA.MEDIA_PATH
             )
             .from(USERS)
-            .innerJoin(MEDIA)
-            .on(
-                USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID)
-                .and(
-                    USERS.USER_FURSONA_NAME.like("%" + fursonaName + "%")
-                    .and(USERS.SHOW_IN_NOSECOUNT.eq(true))
-                    .or(
-                        //If someone doesn't want to be displayed in the nosecount,
-                        // find him only if it's a almost exact match
-                        USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
-                        .and(USERS.SHOW_IN_NOSECOUNT.eq(false))
-                    )
-                )
-            )
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .leftJoin(ORDERS)
             .on(USERS.USER_ID.eq(ORDERS.USER_ID))
-            .where(condition);
+            .where(condition.and(
+                    USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
+                    .and(USERS.SHOW_IN_NOSECOUNT.eq(true))
+                    .or(
+                            //If someone doesn't want to be displayed in the nosecount,
+                            // find him only if it's a almost exact match
+                            USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
+                                    .and(USERS.SHOW_IN_NOSECOUNT.eq(false))
+                    )
+            ));
 
         return sqlQuery.fetch(
             query
