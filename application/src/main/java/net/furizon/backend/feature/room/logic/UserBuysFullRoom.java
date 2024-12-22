@@ -66,14 +66,16 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public long invitePersonToRoom(
             long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit) {
+        checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
         return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, force, forceExit);
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, @NotNull Event event) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
+        checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
-        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, event);
+        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event);
     }
 
     @Override
@@ -172,7 +174,7 @@ public class UserBuysFullRoom implements RoomLogic {
         if (targetOrder.hasRoom()) {
 
         } else {
-            
+
         }
 
         return defaultRoomLogic.exchangeRoom(targetUsrId, sourceUsrId, roomId, event, pretixInformation);

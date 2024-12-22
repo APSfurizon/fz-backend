@@ -122,6 +122,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
+                        ORDERS.ORDER_ROOM_POSITION_ID,
                         ORDERS.ORDER_TICKET_POSITION_ID,
                         ORDERS.ORDER_ANSWERS_JSON,
                         ORDERS.USER_ID,

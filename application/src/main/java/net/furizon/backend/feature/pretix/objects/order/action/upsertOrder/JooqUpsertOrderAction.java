@@ -55,6 +55,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_TICKET_POSITION_ID,
+                    ORDERS.ORDER_ROOM_POSITION_ID,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON
@@ -72,6 +73,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     orderSecret,
                     membership,
                     ticketPositionId,
+                    roomPositionId,
                     userId,
                     eventId,
                     answers

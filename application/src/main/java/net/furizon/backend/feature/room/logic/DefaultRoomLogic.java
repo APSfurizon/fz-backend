@@ -155,7 +155,7 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public boolean inviteAccept(long guestId, long invitedUserId, @NotNull Event event) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
         log.info("Guest {} has accepted room invitation", guestId);
         //Deletes pending invitation for user in event
         command.execute(
@@ -387,7 +387,7 @@ public class DefaultRoomLogic implements RoomLogic {
             //Target was invited to the room, but hasn't accepted yet
             result = result && this.kickFromRoom(sourceGuest.getGuestId());
             logExchangeError(result, 2, targetUsrId, sourceUsrId, event);
-            result = result && this.inviteAccept(targetGuest.getGuestId(), targetUsrId, event);
+            result = result && this.inviteAccept(targetGuest.getGuestId(), targetUsrId, roomId, event);
             logExchangeError(result, 3, targetUsrId, sourceUsrId, event);
 
         } else {

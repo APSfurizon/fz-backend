@@ -30,7 +30,6 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();
 
-        checks.assertRoomNotFull(roomId, true);
         checks.assertRoomNotConfirmed(roomId);
         checks.assertGuestIsNotConfirmed(guest);
         checks.assertOrderIsPaid(targetUserId, event);
@@ -40,7 +39,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
         checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
-        return roomLogic.inviteAccept(guestId, targetUserId, event);
+        return roomLogic.inviteAccept(guestId, targetUserId, roomId, event);
     }
 
     public record Input(

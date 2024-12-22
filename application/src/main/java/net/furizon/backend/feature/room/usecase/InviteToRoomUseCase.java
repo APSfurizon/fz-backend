@@ -46,7 +46,6 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, R
         }
 
         checks.assertRoomNotConfirmed(roomId);
-        checks.assertRoomNotFull(roomId, false);
         checks.assertOrderIsPaid(targetUserId, event);
 
         boolean force = input.req.getForce() == null ? false : input.req.getForce() && isAdmin;
