@@ -28,6 +28,7 @@ import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
 import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
 import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
 import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
+import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -108,15 +109,15 @@ public class RoomController {
     }
 
     @NotNull
-    @Operation(summary = "Invites (also forcefully) another user to the room", description =
+    @Operation(summary = "Invites (forcefully, if desired) users to the room", description =
         "This operation can be performed only by the room's owner or an administrator ."
-        + "It invites the person specified in the `userId` param in the owner's room. "
-        + "An administrator  needs to specify the `roomId` param as well. "
+        + "It invites the users specified in the `userId` param in the owner's room. "
+        + "An administrator needs to specify the `roomId` param as well. "
         + "By setting `force` to true, this operation will bypass the invitation step. "
-        + "If the user is already part of a room and the `forceExit` param is set to `true`, then the user "
-        + "it's forcefully moved to this room, otherwise an error is returned")
+        + "If the users are already part of a room and the `forceExit` param is set to `true`, "
+        + "then they're forcefully moved to this room, otherwise an error is returned")
     @PostMapping("/invite")
-    public RoomGuest invitePersonToRoom(
+    public InviteToRoomResponse invitePersonToRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final InviteToRoomRequest inviteToRoomRequest
     ) {
