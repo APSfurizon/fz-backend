@@ -25,6 +25,7 @@ public class FullInfoResponse {
 
     private final boolean hasActiveMembershipForEvent;
 
+    private boolean shouldUpdateInfo;
 
     @Nullable
     private final OrderDataResponse order;

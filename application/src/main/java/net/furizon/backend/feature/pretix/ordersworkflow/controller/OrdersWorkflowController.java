@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
@@ -89,12 +90,22 @@ public class OrdersWorkflowController {
     public FullInfoResponse getFullStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        return executor.execute(
+        FullInfoResponse r = executor.execute(
                 GenerateFullStatusUseCase.class,
                 new GenerateFullStatusUseCase.Input(
                         pretixService,
                         user
                 )
         );
+        //Zozzating
+        r.setShouldUpdateInfo(executor.execute(
+                CheckIfUserShouldUpdateInfoUseCase.class,
+                new CheckIfUserShouldUpdateInfoUseCase.Input(
+                    user,
+                    pretixService.getCurrentEvent()
+                )
+            )
+        );
+        return r;
     }
 }
