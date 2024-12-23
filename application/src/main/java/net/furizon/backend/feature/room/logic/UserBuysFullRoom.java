@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Slf4j
+@Primary
 @Component
 @RequiredArgsConstructor
-@Primary
 @ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-full-room")
 public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
