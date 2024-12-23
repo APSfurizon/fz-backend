@@ -28,7 +28,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         RegisterUserRequest regUserReq = input.user;
 
         validation.validate(regUserReq);
-        final var user = createUserAction.invoke(regUserReq.getFursonaName());
+        final var user = createUserAction.invoke(regUserReq.getFursonaName(),
+                regUserReq.getPersonalUserInformation().getResidenceCountry());
         createAuthenticationAction.invoke(
             user.getId(),
             regUserReq.getEmail(),
