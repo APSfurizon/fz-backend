@@ -48,9 +48,15 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
         JooqOptional<Record1<Integer>> r = sqlQuery.fetchFirst(
             PostgresDSL.select(
                 PostgresDSL.max(MEMBERSHIP_CARDS.ID_IN_YEAR)
-            ).where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+            )
+            .from(MEMBERSHIP_CARDS)
+            .where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
         );
-        int id = r.isPresent() ? r.get().get(1, Integer.class) + 1 : 1;
+        int id = 1;
+        if (r.isPresent()) {
+            var res = r.get().get(0);
+            id = res == null ? 1 : ((int) res) + 1;
+        }
 
         sqlCommand.execute(
                 PostgresDSL.insertInto(

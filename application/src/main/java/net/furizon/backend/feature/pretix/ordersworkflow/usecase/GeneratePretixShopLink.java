@@ -79,7 +79,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), INPUT));
             actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), TEXT_AREA));
             actions.add(new AutocartAction<>("id_zipcode", info.getResidenceZipCode(), INPUT));
-            actions.add(new AutocartAction<>("id_city", info.getResidenceZipCode(), INPUT));
+            actions.add(new AutocartAction<>("id_city", info.getResidenceCity(), INPUT));
             actions.add(new AutocartAction<>("id_country", info.getResidenceCountry(), DROPDOWN));
             String region = info.getResidenceRegion();
             if (region != null) {
