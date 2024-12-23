@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
 import org.jooq.util.postgres.PostgresDSL;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-default", matchIfMissing = true)
 public class DefaultRoomLogic implements RoomLogic {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;

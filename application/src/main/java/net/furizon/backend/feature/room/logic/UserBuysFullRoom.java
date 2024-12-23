@@ -19,6 +19,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Primary
 @ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-full-room")
 public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
