@@ -31,7 +31,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomNotConfirmed(roomId);
-        checks.assertRoomCanBeConfirmed(roomId, event);
+        checks.assertRoomCanBeConfirmed(roomId, event, roomLogic);
         roomFinder.getRoomGuestsFromRoomId(roomId, true).forEach(g -> checks.assertOrderIsPaid(g.getUserId(), event));
         //TODO run sanity checks
 

@@ -30,7 +30,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomConfirmed(roomId);
-        checks.assertRoomCanBeUnconfirmed(roomId);
+        checks.assertRoomCanBeUnconfirmed(roomId, roomLogic);
 
         return roomLogic.unconfirmRoom(roomId);
     }

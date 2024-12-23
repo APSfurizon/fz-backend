@@ -26,7 +26,6 @@ import java.util.Optional;
 public class RoomChecks {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
-    @NotNull private final RoomLogic roomLogic;
 
     @NotNull private final RoomConfig roomConfig;
 
@@ -150,14 +149,14 @@ public class RoomChecks {
         }
     }
 
-    public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event) {
-        if (!roomLogic.canConfirmRoom(roomId, event)) {
+    public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event, @NotNull RoomLogic logic) {
+        if (!logic.canConfirmRoom(roomId, event)) {
             log.error("Room {} cannot be confirmed!", roomId);
             throw new ApiException("Room cannot be confirmed", RoomErrorCodes.ROOM_CANNOT_BE_CONFIRMED);
         }
     }
-    public void assertRoomCanBeUnconfirmed(long roomId) {
-        if (!roomLogic.canUnconfirmRoom(roomId)) {
+    public void assertRoomCanBeUnconfirmed(long roomId, @NotNull RoomLogic logic) {
+        if (!logic.canUnconfirmRoom(roomId)) {
             log.error("Room {} cannot be unconfirmed!", roomId);
             throw new ApiException("Room cannot be unconfirmed", RoomErrorCodes.ROOM_CANNOT_BE_UNCONFIRMED);
         }
