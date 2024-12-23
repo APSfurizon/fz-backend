@@ -53,7 +53,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         if (bookingStart != null && (bookingStart.isAfter(OffsetDateTime.now()) || false)) {
             //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK] add check "is not admin"
             log.error("User requested a shop link before opening date!");
-            throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET.name());
+            throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
         }
 
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
@@ -61,7 +61,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         if (ordersNo > 0) {
             throw new ApiException(
                     "You already made an order!",
-                    OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
+                    OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE
             );
         }
 

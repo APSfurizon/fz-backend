@@ -6,10 +6,7 @@ import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInf
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
-import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GenerateFullStatusUseCase;
-import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
-import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
-import net.furizon.backend.feature.pretix.ordersworkflow.usecase.SanityCheck;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -30,7 +27,7 @@ public class OrdersWorkflowController {
     @Operation(summary = "Generates an user personalized link for the pretix shop", description =
         "Generates a link to the pretix shop which contains the parameters for pretixautocart, "
         + "so the order's products and questions are automatically filled. This link should be used by the frontend "
-        + "to show buttons or redirect the user")
+        + "to show buttons or redirect the user. This button should be showed only if the user has no order")
     @GetMapping("/generate-pretix-shop-link")
     public LinkResponse generatePretixShopLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -42,8 +39,9 @@ public class OrdersWorkflowController {
     }
 
     @Operation(summary = "Returns a link to the pretix shop where an user can edit his order", description =
-        "Generates a link to the pretix shop which points to the user's order page, so he can change it."
-        + "This order should be used by the frontend to show buttons or redirect the user")
+        "Generates a link to the pretix shop which points to the user's order page, so he can change it. "
+        + "This link should be showed only if the user has a registered order. "
+        + "This link should be used by the frontend to show buttons or redirect the user")
     @GetMapping("/get-order-edit-link")
     public LinkResponse getOrderEditLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -51,6 +49,20 @@ public class OrdersWorkflowController {
         return executor.execute(
                 GetEditOrderLink.class,
                 new GetEditOrderLink.Input(user, pretixService)
+        );
+    }
+
+    @Operation(summary = "Returns a link for retrying the payment of the user's order", description =
+            "Generates a link to the pretix shop which points to the user's order retry payment page. "
+                    + "This link should be showed only if the user has an order in the PENDING state. "
+                    + "This link should be used by the frontend to show buttons or redirect the user")
+    @GetMapping("/get-order-retry-payment-link")
+    public LinkResponse getRetryPaymentLink(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                GetPayOrderLink.class,
+                new GetPayOrderLink.Input(user, pretixService)
         );
     }
 
