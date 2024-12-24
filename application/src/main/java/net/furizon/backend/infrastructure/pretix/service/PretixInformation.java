@@ -27,6 +27,8 @@ public interface PretixInformation {
 
     @NotNull
     Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
+    @Nullable
+    Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache);
 
     @NotNull
     List<PretixState> getStatesOfCountry(String countryIsoCode);

@@ -15,6 +15,7 @@ import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.usecase.ReloadOrdersUseCase;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
+import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
@@ -27,6 +28,7 @@ import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCo
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -71,6 +73,8 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     private final PretixQuotaFinder quotaFinder;
     @NotNull
+    private final PretixProductFinder pretixProductFinder;
+    @NotNull
     private final PretixConfig pretixConfig;
 
     // *** CACHE
@@ -109,6 +113,9 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> (capacity, hotelName)
     @NotNull
     private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    //map id -> price * 100
+    @NotNull
+    private final Cache<Long, Long> roomIdToPrice = Caffeine.newBuilder().build();
     //map capacity/name -> room name
     @NotNull
     private final Cache<Long, Map<String, String>> roomPretixItemIdToNames =
@@ -145,6 +152,26 @@ public class CachedPretixInformation implements PretixInformation {
         var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
         return v == null ? new HashMap<>() : v;
+    }
+
+    @Override
+    public @Nullable Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache) {
+        if (ignoreCache) {
+            var v = pretixProductFinder.fetchProductById(getCurrentEvent(), roomPretixItemId);
+            if (!v.isPresent()) {
+                return null;
+            }
+            long value = PretixGenericUtils.fromStrPriceToLong(v.get().getPrice());
+            lock.writeLock().lock();
+            roomIdToPrice.put(roomPretixItemId, value);
+            lock.writeLock().unlock();
+            return value;
+        } else {
+            lock.readLock().lock();
+            Long value = roomIdToPrice.getIfPresent(roomPretixItemId);
+            lock.readLock().unlock();
+            return value;
+        }
     }
 
     @NotNull
@@ -410,6 +437,7 @@ public class CachedPretixInformation implements PretixInformation {
         //Rooms
         roomIdToInfo.invalidateAll();
         roomPretixItemIdToNames.invalidateAll();
+        roomIdToPrice.invalidateAll();
 
         //Quotas
         itemIdToQuota.invalidateAll();
@@ -464,6 +492,7 @@ public class CachedPretixInformation implements PretixInformation {
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
+        roomIdToPrice.putAll(products.roomIdToPrice());
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
     }
 

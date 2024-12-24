@@ -167,32 +167,27 @@ public class UserBuysFullRoom implements RoomLogic {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomPositionId", sourceUsrId, targetUsrId, event);
             return false;
         }
-        var sPaid = pretixPositionFinder.fetchPositionById(event, sourceRoomPositionId);
-        if (!sPaid.isPresent()) {
+        var sp = pretixPositionFinder.fetchPositionById(event, sourceRoomPositionId);
+        if (!sp.isPresent()) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room position", sourceUsrId, targetUsrId, event);
             return false;
         }
+        long sourcePaid = PretixGenericUtils.fromStrPriceToLong(sp.get().getPrice());
 
         Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
         if (sourceRoomItemId == null) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomItemId", sourceUsrId, targetUsrId, event);
             return false;
         }
-        var sPrice = pretixProductFinder.fetchProductById(event, sourceRoomItemId);
-        if (!sPrice.isPresent()) {
+        Long sourcePrice = pretixInformation.getRoomPriceByItemId(sourceRoomItemId, true);
+        if (sourcePrice == null) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price", sourceUsrId, targetUsrId, event);
             return false;
         }
 
         boolean targetHasRoomItem = false;
-        String sourcePaidStr = sPaid.get().getPrice();
-        long sourcePaid = PretixGenericUtils.fromStrPriceToLong(sourcePaidStr);
-        String sourcePriceStr = sPrice.get().getPrice();
-        long sourcePrice = PretixGenericUtils.fromStrPriceToLong(sourcePriceStr);
-        String targetPaidStr = "0.00";
         long targetPaid = 0L;
-        String targetPriceStr = "0.00";
-        long targetPrice = 0L;
+        Long targetPrice = 0L;
 
         Long targetRoomItemId = targetOrder.getPretixRoomItemId();
         Long targetRoomPositionId = targetOrder.getRoomPositionId();
@@ -202,22 +197,19 @@ public class UserBuysFullRoom implements RoomLogic {
 
             //Get how much the target user has paid for his room and how much does it costs now
             //This works also if the target user has a NO_ROOM
-            var tPaid = pretixPositionFinder.fetchPositionById(event, targetRoomPositionId);
-            if (!tPaid.isPresent()) {
+            var tp = pretixPositionFinder.fetchPositionById(event, targetRoomPositionId);
+            if (!tp.isPresent()) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target room position", sourceUsrId, targetUsrId, event);
                 return false;
             }
+            targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
 
-            var tPrice = pretixProductFinder.fetchProductById(event, targetRoomItemId);
-            if (!tPrice.isPresent()) {
+            targetPrice = pretixInformation.getRoomPriceByItemId(targetRoomItemId, true);
+            if (targetPrice == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target room price", sourceUsrId, targetUsrId, event);
                 return false;
             }
 
-            targetPaidStr = tPaid.get().getPrice();
-            targetPaid = PretixGenericUtils.fromStrPriceToLong(targetPaidStr);
-            targetPriceStr = tPrice.get().getPrice();
-            targetPrice = PretixGenericUtils.fromStrPriceToLong(targetPriceStr);
         } else {
             //If the target user doesn't have a room in his order, default it with NO_ROOM item
             targetRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];

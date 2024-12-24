@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -32,6 +33,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
             r -> {
                 PretixProduct product = r.getLeft();
                 String identifier = product.getIdentifier();
+                long productId = product.getId();
                 if (identifier == null) {
                     return;
                 }
@@ -39,40 +41,40 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 if (identifier.startsWith(Const.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(s));
-                    result.extraDaysIdToDay().put(product.getId(), ed);
+                    result.extraDaysIdToDay().put(productId, ed);
 
                 } else if (identifier.startsWith(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
                     int day = Integer.parseInt(s);
-                    result.dailyIdToDay().put(product.getId(), day);
+                    result.dailyIdToDay().put(productId, day);
 
                 } else if (identifier.startsWith(Const.METADATA_ROOM_TYPE_TAG_PREFIX)) {
-                    result.roomItemIds().add(product.getId());
+                    result.roomItemIds().add(productId);
+                    result.roomIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
                     String s = identifier.substring(Const.METADATA_ROOM_TYPE_TAG_PREFIX.length());
                     if (s.equals(Const.METADATA_ROOM_NO_ROOM_ITEM)) {
-                        result.noRoomItemIds().add(product.getId());
+                        result.noRoomItemIds().add(productId);
                     } else {
                         String[] sp = s.split("_");
                         String hotelName = sp[0];
                         short capacity = Short.parseShort(sp[1]);
-                        long pId = product.getId();
-                        result.roomIdToInfo().put(pId, new HotelCapacityPair(hotelName, capacity));
-                        result.roomPretixItemIdToNames().put(pId, product.getNames());
+                        result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, capacity));
+                        result.roomPretixItemIdToNames().put(productId, product.getNames());
                     }
 
 
                 } else {
                     switch (identifier) {
                         case Const.METADATA_EVENT_TICKET: {
-                            result.ticketItemIds().add(product.getId());
+                            result.ticketItemIds().add(productId);
                             break;
                         }
                         case Const.METADATA_MEMBERSHIP_CARD: {
-                            result.membershipCardItemIds().add(product.getId());
+                            result.membershipCardItemIds().add(productId);
                             break;
                         }
                         case Const.METADATA_SPONSORSHIP: {
-                            result.sponsorshipItemIds().add(product.getId());
+                            result.sponsorshipItemIds().add(productId);
                             product.forEachVariationByIdentifierPrefix(
                                 Const.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
                                 (variation, strippedIdentifier) -> {
