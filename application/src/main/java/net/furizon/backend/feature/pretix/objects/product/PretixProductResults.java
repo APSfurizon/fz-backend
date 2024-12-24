@@ -20,7 +20,7 @@ public record PretixProductResults(
     @NotNull Set<Long> roomItemIds,
     @NotNull Map<Long, HotelCapacityPair> roomIdToInfo,
     @NotNull Map<Long, Map<String, String>> roomPretixItemIdToNames,
-    @NotNull Set<Long> noRoomVariationIds
+    @NotNull Set<Long> noRoomItemIds
 ) {
     public PretixProductResults() {
         this(

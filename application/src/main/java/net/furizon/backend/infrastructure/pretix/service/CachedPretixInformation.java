@@ -290,7 +290,7 @@ public class CachedPretixInformation implements PretixInformation {
                     //Set the room position and item id anyway, even if we have a NO_ROOM item
                     roomPositionId = position.getPositionId();
                     pretixRoomItemId = itemId;
-                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, itemId)) {
+                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_ITEM, itemId)) {
                         roomCapacity = 0;
                         hotelInternalName = null;
                     } else {
@@ -423,7 +423,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
-        itemIdsCache.put(CacheItemTypes.NO_ROOM_VARIATION, products.noRoomVariationIds());
+        itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());

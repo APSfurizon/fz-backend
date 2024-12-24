@@ -81,6 +81,8 @@ public class UpdateOrderInDb {
                 }
 
                 shouldDelete = false;
+            } else {
+                order = null;
             }
         } else {
             log.error("[PRETIX] Unable to parse order: {}@{}", pretixOrder.getCode(), event.getSlug());

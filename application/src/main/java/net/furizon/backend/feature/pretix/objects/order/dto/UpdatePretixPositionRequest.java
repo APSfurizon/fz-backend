@@ -6,5 +6,5 @@ import lombok.Data;
 public class UpdatePretixPositionRequest {
     private final String order;
 
-    private final int item;
+    private final long item;
 }

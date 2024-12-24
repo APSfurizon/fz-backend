@@ -26,7 +26,7 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
 
     @Override
     public boolean invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
-        log.info("Pushing a new position ({}) to order {} on event {}", position.getItem(), position.getOrder(), event);
+        log.info("Pushing a new position ({}) to order {} on event {}", position.getItem(), position.getOrderCode(), event);
         final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
                 .method(HttpMethod.POST)

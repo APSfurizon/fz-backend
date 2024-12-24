@@ -267,7 +267,7 @@ public class DefaultRoomLogic implements RoomLogic {
         ) > 0;
     }
 
-    private void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
+    public void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
         if (!result) {
             log.error("[ROOM_EXCHANGE] result was false after executing step {} while exchanging between users {} -> {} on event {}", step, sourceUserId, destUserId, event);
         }
@@ -359,7 +359,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     private boolean exchange(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
-        log.info("[ROOM_EXCHANGE] Doing an exchange between users: {} -> {} on event {}", sourceUsrId, targetUsrId, event);
+        log.info("[ROOM_EXCHANGE] DefaultRoomLogic: Exchange between users: {} -> {} on event {}", sourceUsrId, targetUsrId, event);
         boolean result = true;
         RoomGuest targetGuest = null;
         RoomGuest sourceGuest = null;

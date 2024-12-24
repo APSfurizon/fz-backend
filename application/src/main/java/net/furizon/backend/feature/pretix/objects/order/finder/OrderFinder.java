@@ -18,6 +18,7 @@ public interface OrderFinder {
 
     int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 
+    //This checks directly on the capacity, so NO_ROOM item is still counted as not having a room
     @NotNull
     Optional<Boolean> userHasBoughtAroom(long userId, @NotNull Event event);
     

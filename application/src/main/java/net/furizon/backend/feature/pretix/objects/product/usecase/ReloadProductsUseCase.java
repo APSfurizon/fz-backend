@@ -49,8 +49,8 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 } else if (identifier.startsWith(Const.METADATA_ROOM_TYPE_TAG_PREFIX)) {
                     result.roomItemIds().add(product.getId());
                     String s = identifier.substring(Const.METADATA_ROOM_TYPE_TAG_PREFIX.length());
-                    if (s.equals(Const.METADATA_ROOM_NO_ROOM_VARIATION)) {
-                        result.noRoomVariationIds().add(product.getId());
+                    if (s.equals(Const.METADATA_ROOM_NO_ROOM_ITEM)) {
+                        result.noRoomItemIds().add(product.getId());
                     } else {
                         String[] sp = s.split("_");
                         String hotelName = sp[0];
