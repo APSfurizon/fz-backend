@@ -25,6 +25,10 @@ public interface RoomFinder {
     @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
+    @Nullable
+    RoomData getRoomDataFromPretixItemId(long pretixItemId, @NotNull PretixInformation pretixInformation);
+
+    @Nullable
     RoomData getRoomDataForUser(
             long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 

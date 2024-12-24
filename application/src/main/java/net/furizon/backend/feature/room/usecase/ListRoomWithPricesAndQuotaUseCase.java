@@ -39,7 +39,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         Event event = pretixInformation.getCurrentEvent();
 
         RoomData currentRoomData = roomFinder.getRoomDataForUser(userId, event, pretixInformation);
-        Long currentRoomPrice = pretixInformation.getRoomPriceByItemId(currentRoomData.getRoomPretixItemId(), false);
+        Long currentRoomPrice = currentRoomData == null ? null : pretixInformation.getRoomPriceByItemId(currentRoomData.getRoomPretixItemId(), false);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());

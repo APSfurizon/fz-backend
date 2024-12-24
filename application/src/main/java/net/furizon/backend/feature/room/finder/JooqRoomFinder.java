@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -144,6 +145,16 @@ public class JooqRoomFinder implements RoomFinder {
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .limit(1)
         ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation));
+    }
+
+    @Override
+    public @Nullable RoomData getRoomDataFromPretixItemId(long pretixItemId, @NotNull PretixInformation pretixInformation) {
+        HotelCapacityPair pair = pretixInformation.getRoomInfoFromPretixItemId(pretixItemId);
+        return new RoomData(
+                pair == null ? 0 : pair.capacity(),
+                pretixItemId,
+                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixItemId)
+        );
     }
 
     @Nullable
