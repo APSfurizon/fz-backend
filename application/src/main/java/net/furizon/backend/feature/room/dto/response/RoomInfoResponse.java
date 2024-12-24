@@ -16,6 +16,8 @@ public class RoomInfoResponse {
 
     private final boolean canCreateRoom;
 
+    private final boolean canBuyOrUpgradeRoom;
+
     @Nullable
     private final OffsetDateTime editingRoomEndTime;
 

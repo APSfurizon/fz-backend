@@ -36,5 +36,8 @@ public interface RoomLogic {
     boolean refundRoom(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
+    boolean isRoomBuyOrUpgradeSupported(@NotNull Event even);
+    boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation);
+
     void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors);
 }

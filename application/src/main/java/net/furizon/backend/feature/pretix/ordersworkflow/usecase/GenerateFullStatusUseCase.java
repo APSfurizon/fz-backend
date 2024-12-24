@@ -10,8 +10,10 @@ import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -27,10 +29,12 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseCase.Input, FullInfoResponse> {
+    @NotNull private final RoomLogic roomLogic;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final SanityCheck sanityCheck;
+    @NotNull private final RoomConfig roomConfig;
 
     @Override
     public @NotNull FullInfoResponse executor(@NotNull Input input) {
@@ -76,12 +80,20 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
             orderDataResponse = orderDataBuilder.build();
         }
 
+        OffsetDateTime startBooking = pretixConfig.getEvent().getPublicBookingStartTime();
+        boolean displayCountdown = true && OffsetDateTime.now().isBefore(startBooking); //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK]
+
+        OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
+        boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
+        boolean canBuyOrUpgradeRoom = roomEditingTimeAllowed && roomLogic.isRoomBuyOrUpgradeSupported(event);
+
         return FullInfoResponse.builder()
-            .shouldDisplayCountdown(true) //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK]
-            .bookingStartTime(pretixConfig.getEvent().getPublicBookingStartTime())
+            .bookingStartTime(startBooking)
+            .shouldDisplayCountdown(displayCountdown)
             .editBookEndTime(pretixConfig.getEvent().getEditBookingEndTime())
-            .eventNames(event.getEventNames())
             .hasActiveMembershipForEvent(membershipNo > 0)
+            .canBuyOrUpgradeRoom(canBuyOrUpgradeRoom)
+            .eventNames(event.getEventNames())
             .order(orderDataResponse)
             .errors(errors)
             .build();

@@ -3,10 +3,13 @@ package net.furizon.backend.infrastructure.pretix.service;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,11 @@ public interface PretixInformation {
 
     @NotNull
     Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event);
+
+    @Nullable
+    PretixQuota getQuotaFromItemId(long itemId);
+    @NotNull
+    Optional<PretixQuotaAvailability> getAvailabilityFromItemId(long itemId);
 
     void resetCache();
 

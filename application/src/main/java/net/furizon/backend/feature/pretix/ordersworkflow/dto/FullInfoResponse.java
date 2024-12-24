@@ -27,6 +27,8 @@ public class FullInfoResponse {
 
     private boolean shouldUpdateInfo;
 
+    private final boolean canBuyOrUpgradeRoom;
+
     @Nullable
     private final OrderDataResponse order;
 

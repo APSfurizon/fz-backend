@@ -419,6 +419,17 @@ public class DefaultRoomLogic implements RoomLogic {
         return refund(userId, event, pretixInformation);
     }
 
+    @Override
+    public boolean isRoomBuyOrUpgradeSupported(@NotNull Event even) {
+        return false;
+    }
+
+    @Override
+    public boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation) {
+        log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
+        return false;
+    }
+
     private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         if (!r.isPresent()) {

@@ -18,6 +18,8 @@ import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -31,6 +33,7 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -107,6 +110,11 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<Long, Map<String, String>> roomPretixItemIdToNames =
         Caffeine.newBuilder().build();
 
+
+    //Quotas
+    private final Cache<Long, PretixQuota> itemIdToQuota = Caffeine.newBuilder().build();
+
+    //Countries
     @NotNull
     private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
             .expireAfterWrite(7L, TimeUnit.DAYS)
@@ -331,6 +339,24 @@ public class CachedPretixInformation implements PretixInformation {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    @Override
+    public @Nullable PretixQuota getQuotaFromItemId(long itemId) {
+        lock.readLock().lock();
+        var v = itemIdToQuota.getIfPresent(itemId);
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @Override
+    public @NotNull Optional<PretixQuotaAvailability> getAvailabilityFromItemId(long itemId) {
+        PretixQuota quota = getQuotaFromItemId(itemId);
+        if (quota == null) {
+            log.warn("Quota not found for item {}", itemId);
+            return Optional.of(new PretixQuotaAvailability(true, null, null));
+        }
+
     }
 
     @Override

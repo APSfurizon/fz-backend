@@ -299,7 +299,13 @@ public class UserBuysFullRoom implements RoomLogic {
 
     @Override
     public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        // - gets list of payments
+        // - refund any non-manual payment
+        // - creates a new payment
         // - Update userId answer
+        // - changes in db
+        // - reupdates db from pretix
+
         return defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
     }
 
@@ -312,6 +318,17 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("Refund full order not supported with UserBuysFullRoom");
+        return false;
+    }
+
+    @Override
+    public boolean isRoomBuyOrUpgradeSupported(@NotNull Event even) {
+        return true;
+    }
+
+    @Override
+    public boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation) {
+        //TODO
         return false;
     }
 
