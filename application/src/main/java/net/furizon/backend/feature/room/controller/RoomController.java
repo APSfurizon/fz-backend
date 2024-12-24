@@ -306,7 +306,12 @@ public class RoomController {
         );
     }
 
-    @Operation
+    @Operation(summary = "Buys or upgrades a room", description =
+        "This method takes in input a pretix itemId of a room and tries to book it into the "
+        + "already existent user reservation. Admins can specify a userId of another user to "
+        + "buy the room for them. The room's price must be equal or higher than the room that "
+        + "the specified user currently owns. The returned value is empty if an error occurred, "
+        + "otherwise it's a link where the frontend should redirect the user to complete the payment.")
     @PostMapping("/buy-or-upgrade-room")
     public LinkResponse buyOrUpgradeRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
