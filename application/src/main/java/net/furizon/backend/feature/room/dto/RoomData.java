@@ -10,6 +10,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class RoomData {
     private short roomCapacity;
+    private long roomPretixItemId;
     //@NotNull //This shouldn't be needed
     //private String hotelInternalName;
     @NotNull

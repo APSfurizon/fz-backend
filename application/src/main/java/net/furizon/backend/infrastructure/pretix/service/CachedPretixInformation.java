@@ -174,6 +174,22 @@ public class CachedPretixInformation implements PretixInformation {
         }
     }
 
+    @Override
+    public @NotNull Set<Long> getRoomPretixIds() {
+        lock.readLock().lock();
+        Set<Long> v = new HashSet<Long>(roomIdToPrice.asMap().keySet());
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @Override
+    public @Nullable HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId) {
+        lock.readLock().lock();
+        var v = roomIdToInfo.getIfPresent(roomPretixItemId);
+        lock.readLock().unlock();
+        return v;
+    }
+
     @NotNull
     @Override
     public List<PretixState> getStatesOfCountry(String countryIsoCode) {

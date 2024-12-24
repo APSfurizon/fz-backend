@@ -13,21 +13,9 @@ import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
+import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
-import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CreateRoomUseCase;
-import net.furizon.backend.feature.room.usecase.DeleteRoomUseCase;
-import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
-import net.furizon.backend.feature.room.usecase.InviteAcceptUseCase;
-import net.furizon.backend.feature.room.usecase.InviteCancelUseCase;
-import net.furizon.backend.feature.room.usecase.InviteRefuseUseCase;
-import net.furizon.backend.feature.room.usecase.InviteToRoomUseCase;
-import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
-import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
-import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
-import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.*;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
@@ -294,6 +282,28 @@ public class RoomController {
                         user,
                         roomIdRequest,
                         pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Gets a list of room with prices and quota", description =
+        "This method is intended to be used in the buy or upgrade room flow "
+        + "to display a list of rooms available to the user, together with their "
+        + "prices and quota. Rooms are automatically filtered to what an user can "
+        + "buy with their already purchased room. If no element is returned, a text like "
+        + "\"there's no room you can currently buy\" should be displayed. Together with the "
+        + "room list, the current room names and current room prices is returned to be displayed. "
+        + "Using the returned price, you can also calc and show the difference between what the "
+        + "user has paid and how much the room costs. Note that this difference may not be accurate")
+    @PostMapping("/get-room-list-with-quota")
+    public ListRoomPricesAvailabilityResponse getRoomList(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                ListRoomWithPricesAndQuotaUseCase.class,
+                new ListRoomWithPricesAndQuotaUseCase.Input(
+                        user,
+                        pretixInformation
                 )
         );
     }

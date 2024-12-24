@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.pretix.service;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
@@ -29,6 +30,10 @@ public interface PretixInformation {
     Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
     @Nullable
     Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache);
+    @NotNull
+    Set<Long> getRoomPretixIds();
+    @Nullable
+    HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
 
     @NotNull
     List<PretixState> getStatesOfCountry(String countryIsoCode);

@@ -67,12 +67,12 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
             }
             if (order.hasRoom()) {
                 short roomCapacity = order.getRoomCapacity();
+                long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
                 orderDataBuilder = orderDataBuilder.room(
                         new RoomData(
                             roomCapacity,
-                            input.pretixInformation.getRoomNamesFromRoomPretixItemId(
-                                    Objects.requireNonNull(order.getPretixRoomItemId())
-                            )
+                            roomItemId,
+                            input.pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
                         )
                     );
             }

@@ -10,11 +10,11 @@ import static net.furizon.jooq.generated.tables.Orders.ORDERS;
 public class JooqRoomDataMapper {
     @NotNull
     public static RoomData map(Record record, PretixInformation pretixInformation) {
+        Long roomItemId = record.get(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID);
         return new RoomData(
                 record.get(ORDERS.ORDER_ROOM_CAPACITY),
-                pretixInformation.getRoomNamesFromRoomPretixItemId(
-                        record.get(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)
-                )
+                roomItemId,
+                pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
         );
     }
 }
