@@ -20,6 +20,8 @@ import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
+import net.furizon.backend.feature.pretix.objects.quota.finder.PretixQuotaFinder;
+import net.furizon.backend.feature.pretix.objects.quota.usecase.ReloadQuotaUseCase;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -66,6 +68,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final UserFinder userFinder;
     @NotNull
     private final EventFinder eventFinder;
+    @NotNull
+    private final PretixQuotaFinder quotaFinder;
     @NotNull
     private final PretixConfig pretixConfig;
 
@@ -349,6 +353,7 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    //This is NOT cached!!
     @Override
     public @NotNull Optional<PretixQuotaAvailability> getAvailabilityFromItemId(long itemId) {
         PretixQuota quota = getQuotaFromItemId(itemId);
@@ -356,7 +361,7 @@ public class CachedPretixInformation implements PretixInformation {
             log.warn("Quota not found for item {}", itemId);
             return Optional.of(new PretixQuotaAvailability(true, null, null));
         }
-
+        return quotaFinder.getAvailability(getCurrentEvent(), quota.getId());
     }
 
     @Override
@@ -405,6 +410,9 @@ public class CachedPretixInformation implements PretixInformation {
         //Rooms
         roomIdToInfo.invalidateAll();
         roomPretixItemIdToNames.invalidateAll();
+
+        //Quotas
+        itemIdToQuota.invalidateAll();
     }
 
 
@@ -421,9 +429,10 @@ public class CachedPretixInformation implements PretixInformation {
         Event event = getCurrentEvent();
         reloadQuestions(event);
         reloadProducts(event);
+        reloadQuotas(event);
     }
 
-    private void reloadQuestions(Event event) {
+    private void reloadQuestions(@NotNull Event event) {
         List<PretixQuestion> questionList = useCaseExecutor.execute(ReloadQuestionsUseCase.class, event);
         questionList.forEach(question -> {
             long questionId = question.getId();
@@ -442,7 +451,7 @@ public class CachedPretixInformation implements PretixInformation {
         }
     }
 
-    private void reloadProducts(Event event) {
+    private void reloadProducts(@NotNull Event event) {
         PretixProductResults products = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
 
         itemIdsCache.put(CacheItemTypes.TICKETS, products.ticketItemIds());
@@ -456,6 +465,11 @@ public class CachedPretixInformation implements PretixInformation {
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
+    }
+
+    private void reloadQuotas(@NotNull Event event) {
+        List<PretixQuota> quotas = useCaseExecutor.execute(ReloadQuotaUseCase.class, event);
+        quotas.forEach(quota -> quota.getItems().forEach(i -> itemIdToQuota.put(i, quota)));
     }
 
     @Override

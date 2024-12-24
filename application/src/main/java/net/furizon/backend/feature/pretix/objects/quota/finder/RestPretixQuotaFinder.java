@@ -2,7 +2,9 @@ package net.furizon.backend.feature.pretix.objects.quota.finder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -48,6 +50,26 @@ public class RestPretixQuotaFinder implements PretixQuotaFinder {
             return Optional
                     .ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody())
                     .orElse(PretixPaging.empty());
+        } catch (final HttpClientErrorException ex) {
+            log.error(ex.getResponseBodyAsString());
+            throw ex;
+        }
+    }
+
+    @Override
+    public @NotNull Optional<PretixQuotaAvailability> getAvailability(@NotNull Event event, long quotaId) {
+        var pair = event.getOrganizerAndEventPair();
+        final var request = HttpRequest.<PretixQuotaAvailability>create()
+                .method(HttpMethod.GET)
+                .path("/organizers/{organizer}/events/{event}/quotas/{quota-id}/availability/")
+                .uriVariable("organizer", pair.getOrganizer())
+                .uriVariable("event", pair.getEvent())
+                .uriVariable("quota-id", String.valueOf(quotaId))
+                .responseType(PretixQuotaAvailability.class)
+                .build();
+
+        try {
+            return Optional.ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody());
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;

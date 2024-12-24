@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class ReloadQuestionsUseCase implements UseCase<Event, List<PretixQuestion>> {
-    private final PretixQuestionFinder pretixQuestionFinder;
+    @NotNull private final PretixQuestionFinder pretixQuestionFinder;
 
     @NotNull
     @Override
