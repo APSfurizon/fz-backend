@@ -5,12 +5,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
-import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
-import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
-import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
-import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
+import net.furizon.backend.feature.room.dto.request.*;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
@@ -295,7 +293,7 @@ public class RoomController {
         + "room list, the current room names and current room prices is returned to be displayed. "
         + "Using the returned price, you can also calc and show the difference between what the "
         + "user has paid and how much the room costs. Note that this difference may not be accurate")
-    @PostMapping("/get-room-list-with-quota")
+    @GetMapping("/get-room-list-with-quota")
     public ListRoomPricesAvailabilityResponse getRoomList(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
@@ -306,6 +304,21 @@ public class RoomController {
                         pretixInformation
                 )
         );
+    }
+
+    @Operation
+    @PostMapping("/buy-or-upgrade-room")
+    public LinkResponse buyOrUpgradeRoom(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final BuyUpgradeRoomRequest req
+    ) {
+        boolean success = true; //TODO
+        return success ? executor.execute(GetPayOrderLink.class,
+                new GetPayOrderLink.Input(
+                        user,
+                        pretixInformation
+                )
+        ) : new LinkResponse("");
     }
 
     @Operation(summary = "Run immediately the room sanity checks", description =
