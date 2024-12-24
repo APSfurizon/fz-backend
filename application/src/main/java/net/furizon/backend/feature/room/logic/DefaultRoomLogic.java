@@ -360,37 +360,41 @@ public class DefaultRoomLogic implements RoomLogic {
 
     private boolean exchange(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
         log.info("[ROOM_EXCHANGE] Doing an exchange between users: {} -> {} on event {}", sourceUsrId, targetUsrId, event);
-        List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, false);
-        RoomGuest targetGuest = guests.stream().filter(g -> g.getUserId() == targetUsrId).findFirst().orElse(null);
-        RoomGuest sourceGuest = guests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
-        if (sourceGuest == null) {
-            log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
-            throw new ApiException("No guest found", RoomErrorCodes.GUEST_NOT_FOUND);
-        }
-
         boolean result = true;
+        RoomGuest targetGuest = null;
+        RoomGuest sourceGuest = null;
+        if (roomId > 0L) {
+            List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, false);
+            targetGuest = guests.stream().filter(g -> g.getUserId() == targetUsrId).findFirst().orElse(null);
+            sourceGuest = guests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
+            if (sourceGuest == null) {
+                log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
+                throw new ApiException("No guest found", RoomErrorCodes.GUEST_NOT_FOUND);
+            }
 
-        if (targetGuest == null) {
-            //Target is not in the room
-            result = result && this.kickFromRoom(sourceGuest.getGuestId());
-            logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
-            result = result && this.invitePersonToRoom(targetUsrId, roomId, event, true, true) > 0L;
-            logExchangeError(result, 1, targetUsrId, sourceUsrId, event);
 
-        } else if (targetGuest != null && targetGuest.isConfirmed()) {
-            //Target is inside the room and accepted the invitation
-            //In this case we also handle (by doing nothing lol) the case where a full room swap is needed
+            if (targetGuest == null) {
+                //Target is not in the room
+                result = result && this.kickFromRoom(sourceGuest.getGuestId());
+                logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
+                result = result && this.invitePersonToRoom(targetUsrId, roomId, event, true, true) > 0L;
+                logExchangeError(result, 1, targetUsrId, sourceUsrId, event);
 
-        } else if (targetGuest != null && !targetGuest.isConfirmed()) {
-            //Target was invited to the room, but hasn't accepted yet
-            result = result && this.kickFromRoom(sourceGuest.getGuestId());
-            logExchangeError(result, 2, targetUsrId, sourceUsrId, event);
-            result = result && this.inviteAccept(targetGuest.getGuestId(), targetUsrId, roomId, event);
-            logExchangeError(result, 3, targetUsrId, sourceUsrId, event);
+            } else if (targetGuest != null && targetGuest.isConfirmed()) {
+                //Target is inside the room and accepted the invitation
+                //In this case we also handle (by doing nothing lol) the case where a full room swap is needed
 
-        } else {
-            log.error("[ROOM_EXCHANGE] No proper room exchange case. We shouldn't be here... {}", targetUsrId);
-            result = false;
+            } else if (targetGuest != null && !targetGuest.isConfirmed()) {
+                //Target was invited to the room, but hasn't accepted yet
+                result = result && this.kickFromRoom(sourceGuest.getGuestId());
+                logExchangeError(result, 2, targetUsrId, sourceUsrId, event);
+                result = result && this.inviteAccept(targetGuest.getGuestId(), targetUsrId, roomId, event);
+                logExchangeError(result, 3, targetUsrId, sourceUsrId, event);
+
+            } else {
+                log.error("[ROOM_EXCHANGE] No proper room exchange case. We shouldn't be here... {}", targetUsrId);
+                result = false;
+            }
         }
 
         if (result) {

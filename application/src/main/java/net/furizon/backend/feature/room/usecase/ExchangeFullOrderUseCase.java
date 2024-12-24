@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
+import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 
 public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCase.Input, Boolean> {
+    @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
 
@@ -28,14 +30,15 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
 
         checks.assertInTimeframeToEditRooms();
 
-        checks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
+        checks.assertUserHasOrder(sourceUserId, event);
         checks.assertUserHasNotAnOrder(destUserId, event);
 
-        checks.assertUserHasBoughtAroom(sourceUserId, event);
-
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
-
-        checks.assertRoomNotConfirmed(roomId);
+        long roomId = -1L;
+        var srcRoomId = roomFinder.getRoomIdFromOwnerUserId(sourceUserId, event);
+        if (srcRoomId.isPresent()) {
+            roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+            checks.assertRoomNotConfirmed(roomId);
+        }
 
         checks.assertOrderIsPaid(sourceUserId, event);
 

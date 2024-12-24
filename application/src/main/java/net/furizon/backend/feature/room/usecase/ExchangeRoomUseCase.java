@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
+import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, Boolean> {
+    @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
 
@@ -40,6 +42,8 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
 
         checks.assertRoomNotConfirmed(roomId);
+        var destRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
+        destRoom.ifPresent(checks::assertRoomNotConfirmed);
 
         checks.assertOrderIsPaid(sourceUserId, event);
         checks.assertOrderIsPaid(destUserId, event);

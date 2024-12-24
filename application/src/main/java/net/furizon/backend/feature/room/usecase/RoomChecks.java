@@ -37,6 +37,10 @@ public class RoomChecks {
         }
     }
 
+    public void assertUserHasOrder(long userId, @NotNull Event event) {
+        Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
+        assertOrderFound(isDaily, userId, event);
+    }
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         assertOrderFound(isDaily, userId, event);
