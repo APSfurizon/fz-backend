@@ -209,7 +209,7 @@ public class RoomChecks {
             throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
         }
 
-        if (capacity.get() >= roomMates.size()) {
+        if (capacity.get() <= roomMates.size()) {
             log.error("Room {} is already full!", roomId);
             throw new ApiException("Room is full", RoomErrorCodes.ROOM_FULL);
         }
