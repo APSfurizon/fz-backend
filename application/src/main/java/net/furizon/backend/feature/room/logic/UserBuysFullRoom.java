@@ -47,6 +47,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
 
     //Exchange related stuff
+    @NotNull private final PretixPaymentFinder pretixPaymentFinder;
     @NotNull private final PretixProductFinder pretixProductFinder;
     @NotNull private final PretixPositionFinder pretixPositionFinder;
     @NotNull private final PushPretixPositionAction pushPretixPositionAction;
@@ -294,6 +295,19 @@ public class UserBuysFullRoom implements RoomLogic {
         // - Update userId answer
         // - changes in db
         // - reupdates db from pretix
+        Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUserId, event, pretixInformation);
+        if (order == null) {
+            //TODO order not tound
+            return false;
+        }
+
+        List<PretixPayment> payments =
+                pretixPaymentFinder.getPaymentsForOrder(event, order.getCode())
+                .stream().filter(p -> {
+                    PretixPayment.PaymentState state = p.getState();
+                    return (state == CREATED || state == PENDING || state == CONFIRMED) && !p.getProvider().equals("manual");
+                }).toList();
+
 
         return defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
     }

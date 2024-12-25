@@ -33,14 +33,17 @@ public class RestPretixPaymentFinder implements PretixPaymentFinder {
     public PretixPaging<PretixPayment> getPagedPayments(
             @NotNull String organizer,
             @NotNull String event,
+            @NotNull String orderCode
             int page
     ) {
         final var request = HttpRequest.<PretixPaging<PretixPayment>>create()
                 .method(HttpMethod.GET)
-                .path("/organizers/{organizer}/events/{event}/quotas/")
+                .path("/organizers/{organizer}/events/{event}/orders/{code}/payments/")
                 .queryParam("page", String.valueOf(page))
                 .uriVariable("organizer", organizer)
                 .uriVariable("event", event)
+                .uriVariable("code", orderCode)
+
                 .responseParameterizedType(pretixPagedPayment)
                 .build();
 
@@ -52,5 +55,23 @@ public class RestPretixPaymentFinder implements PretixPaymentFinder {
             log.error(ex.getResponseBodyAsString());
             throw ex;
         }
+    }
+
+    @Override
+    List<PretixPayment> getPaymentsForOrder(
+        @NotNull Event event,
+        @NotNull String orderCode
+    ) {
+        var pair = event.getOrganizerAndEventPair();
+        String e = pair.getEvent();
+        Srring o = pair.getOrganizer();
+        return PretixPagingUtil.fetchAll(
+           page -> getPagedPayments(
+               o, e, orderCode, page
+           )
+
+           
+        );
+
     }
 }
