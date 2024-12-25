@@ -6,7 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.action.yeetPayment.IssuePaymentAction;
+import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
 import net.furizon.backend.feature.pretix.objects.order.action.yeetRefund.IssueRefundAction;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
@@ -22,7 +22,6 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,9 +29,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Slf4j

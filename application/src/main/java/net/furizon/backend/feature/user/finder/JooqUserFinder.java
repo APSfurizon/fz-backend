@@ -121,6 +121,7 @@ public class JooqUserFinder implements UserFinder {
         }
 
         if (filterMembershipCardForYear != null) {
+            joinMembershipCards = true;
             condition = condition.and( //TODO test, it might be broken
                 MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear)
             );

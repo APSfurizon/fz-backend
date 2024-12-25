@@ -1,9 +1,9 @@
-package net.furizon.backend.feature.pretix.objects.order.action.yeetPayment;
+package net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.pretix.objects.order.dto.PretixPaymentRequest;
+import net.furizon.backend.feature.pretix.objects.payment.dto.PretixPaymentRequest;
 
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
