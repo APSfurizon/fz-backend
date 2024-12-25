@@ -32,8 +32,10 @@ public class SearchUserController {
                     + "This method purposely ignores the `show_in_nosecount` flag iff the name fully matches except "
                     + "for one single character. Results are ordered by match and alphabetically. "
                     + "Using the optional `filter-not-in-room` parameter you can filter out people who already "
-                    + "own a room or are in a room. Using the optional `filter-paid` you can filter out only people with "
-                    + "orders marked as paid")
+                    + "own a room or are in a room. Using the optional `filter-paid` you can filter out only people "
+                    + "with orders marked as paid. With `filter-no-membership-card` you can filter only people who "
+                    + "don't have a membership card for the current event; specifying "
+                    + "`filter-no-membership-card-for-year` will let you chose for which year. ")
     @GetMapping("/current-event")
     public SearchUsersResponse searchByFursonaNameInCurrentEvent(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -49,7 +51,15 @@ public class SearchUserController {
             @Valid
             @Nullable
             @RequestParam("filter-paid")
-            final Boolean filterPaid
+            final Boolean filterPaid,
+            @Valid
+            @Nullable
+            @RequestParam("filter-no-membership-card")
+            final Boolean filterNoMembershipCard,
+            @Valid
+            @Nullable
+            @RequestParam("filter-no-membership-card-for-year")
+            final Short filterNoMembershipCardForYear
     ) {
         return executor.execute(
                 SearchUserInEventUseCase.class,
@@ -57,7 +67,9 @@ public class SearchUserController {
                         fursonaName,
                         pretixInformation,
                         filterNotInRoom == null ? false : filterNotInRoom,
-                        filterPaid == null ? false : filterPaid
+                        filterPaid == null ? false : filterPaid,
+                        filterNoMembershipCard == null ? false : filterNoMembershipCard,
+                        filterNoMembershipCardForYear
                 )
         );
     }

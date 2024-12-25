@@ -19,7 +19,8 @@ public interface UserFinder {
             @NotNull String fursonaName,
             @NotNull Event event,
             boolean filterRoom,
-            boolean filterPaid
+            boolean filterPaid,
+            @Nullable Short filterMembershipCardForYear
     );
 
     @Nullable

@@ -14,9 +14,6 @@ import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 
 @Slf4j
@@ -30,16 +27,7 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
     @Override
     public synchronized void invoke(long userId, @NotNull Event event, @Nullable Order order) {
         Long orderId = order == null ? null : order.getId();
-
-        OffsetDateTime from;
-        from = event.getDateFrom();
-        if (from == null) {
-            log.error("From date was unavailable for event {}. Falling back to Date.now()", event.getSlug());
-            from = OffsetDateTime.now();
-        }
-
-        LocalDate date = from.toLocalDate();
-        short year = membershipYearUtils.getMembershipYear(date);
+        short year = event.getMembershipYear(membershipYearUtils);
 
         //We don't use sequence because we need to keep multiple active seqs at the same time
         //The choice has been between this couple of lines of code and multiple lines to
