@@ -134,6 +134,13 @@ public class CachedPretixInformation implements PretixInformation {
     @Override
     @PostConstruct
     public void reloadCacheAndOrders() {
+        userFinder.searchUserInCurrentEvent(
+            "asd",
+                new Event(0, "", ""),
+                false,
+                false,
+                null
+        );
         if (!pretixConfig.isEnableSync()) {
             log.warn("[PRETIX] Pretix synchronization has been disabled");
             return;

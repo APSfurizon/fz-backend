@@ -128,7 +128,7 @@ public class DefaultRoomLogic implements RoomLogic {
                         )
                     ));
             if (!force) {
-                condition = condition.and(ROOM_GUESTS.CONFIRMED.eq(true));
+                condition = condition.and(ROOM_GUESTS.CONFIRMED.isTrue());
             }
             //Delete previous confirmed invitations
             command.execute(
@@ -235,7 +235,7 @@ public class DefaultRoomLogic implements RoomLogic {
             PostgresDSL.deleteFrom(ROOM_GUESTS)
             .where(
                 ROOM_GUESTS.ROOM_ID.eq(roomId)
-                .and(ROOM_GUESTS.CONFIRMED.eq(false))
+                .and(ROOM_GUESTS.CONFIRMED.isFalse())
             )
         );
 

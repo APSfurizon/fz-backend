@@ -104,7 +104,7 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_ID.notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
                     .from(ROOM_GUESTS)
-                    .where(ROOM_GUESTS.CONFIRMED.eq(true))
+                    .where(ROOM_GUESTS.CONFIRMED.isTrue())
                 )
                 .and(
                     ORDERS.ORDER_ROOM_CAPACITY.isNull()
@@ -127,53 +127,49 @@ public class JooqUserFinder implements UserFinder {
             );
         }
 
+        Table<?> searchFursonaQuery = selectUser()
+            .where(
+                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
+                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
+                .or(
+                    //If someone doesn't want to be displayed in the nosecount,
+                    // find him only if it's a almost exact match
+                    USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
+                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
+                )
+            ).asTable("fursonaq");
         SelectJoinStep<?> query = PostgresDSL
             .selectDistinct(
-                USERS.USER_ID,
-                USERS.USER_FURSONA_NAME,
+                searchFursonaQuery.field(USERS.USER_ID),
+                searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
                 MEDIA.MEDIA_PATH
             )
-            .from(
-                PostgresDSL.select(
-                    USERS.USER_LOCALE,
-                    USERS.USER_ID,
-                    USERS.USER_FURSONA_NAME,
-                    USERS.MEDIA_ID_PROPIC,
-                    USERS.MEDIA_ID_PROPIC
-                )
-                .from(USERS)
-                .where(
-                    USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
-                    .and(USERS.SHOW_IN_NOSECOUNT.eq(true))
-                    .or(
-                        //If someone doesn't want to be displayed in the nosecount,
-                        // find him only if it's a almost exact match
-                        USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
-                        .and(USERS.SHOW_IN_NOSECOUNT.eq(false))
-                    )
-                )
-            )
+            .from(searchFursonaQuery)
             .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID));
+            .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
 
         if (joinOrders) {
             query = query
                     .leftJoin(ORDERS)
-                    .on(USERS.USER_ID.eq(ORDERS.USER_ID));
+                    .on(
+                        searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                    );
         }
 
         if (joinMembershipCards) {
             query = query
                     .leftJoin(MEMBERSHIP_CARDS)
-                    .on(USERS.USER_ID.eq(MEMBERSHIP_CARDS.USER_ID));
+                    .on(searchFursonaQuery.field(USERS.USER_ID).eq(MEMBERSHIP_CARDS.USER_ID));
         }
 
+        var finalQuery = query.where(condition).asTable("finalq");
         return sqlQuery.fetch(
-            query
-            .where(condition)
+            PostgresDSL.select(PostgresDSL.asterisk())
+            .from(finalQuery)
             .orderBy(
-                PostgresDSL.position(fursonaName, USERS.USER_FURSONA_NAME),
-                USERS.USER_FURSONA_NAME
+                PostgresDSL.position(fursonaName, finalQuery.field(USERS.USER_FURSONA_NAME)),
+                finalQuery.field(USERS.USER_FURSONA_NAME)
             )
         ).stream().map(JooqSearchUserMapper::map).toList();
     }

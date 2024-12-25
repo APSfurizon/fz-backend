@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
+import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
 import net.furizon.backend.feature.pretix.objects.order.action.yeetRefund.IssueRefundAction;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
@@ -14,6 +15,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
+import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -295,17 +297,21 @@ public class UserBuysFullRoom implements RoomLogic {
         // - Update userId answer
         // - changes in db
         // - reupdates db from pretix
-        Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUserId, event, pretixInformation);
-        if (order == null) {
+        Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUsrId, event, pretixInformation);
+        if (sourceOrder == null) {
             //TODO order not tound
             return false;
         }
 
         List<PretixPayment> payments =
-                pretixPaymentFinder.getPaymentsForOrder(event, order.getCode())
+                pretixPaymentFinder.getPaymentsForOrder(event, sourceOrder.getCode())
                 .stream().filter(p -> {
                     PretixPayment.PaymentState state = p.getState();
-                    return (state == CREATED || state == PENDING || state == CONFIRMED) && !p.getProvider().equals("manual");
+                    return (
+                            state == PretixPayment.PaymentState.CREATED
+                            || state == PretixPayment.PaymentState.PENDING
+                            || state == PretixPayment.PaymentState.CONFIRMED
+                        ) && !p.getProvider().equals("manual");
                 }).toList();
 
 

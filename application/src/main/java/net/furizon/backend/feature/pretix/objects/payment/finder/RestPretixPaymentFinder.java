@@ -2,10 +2,12 @@ package net.furizon.backend.feature.pretix.objects.payment.finder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
@@ -33,7 +36,7 @@ public class RestPretixPaymentFinder implements PretixPaymentFinder {
     public PretixPaging<PretixPayment> getPagedPayments(
             @NotNull String organizer,
             @NotNull String event,
-            @NotNull String orderCode
+            @NotNull String orderCode,
             int page
     ) {
         final var request = HttpRequest.<PretixPaging<PretixPayment>>create()
@@ -58,20 +61,17 @@ public class RestPretixPaymentFinder implements PretixPaymentFinder {
     }
 
     @Override
-    List<PretixPayment> getPaymentsForOrder(
+    public List<PretixPayment> getPaymentsForOrder(
         @NotNull Event event,
         @NotNull String orderCode
     ) {
         var pair = event.getOrganizerAndEventPair();
         String e = pair.getEvent();
-        Srring o = pair.getOrganizer();
+        String o = pair.getOrganizer();
         return PretixPagingUtil.fetchAll(
-           page -> getPagedPayments(
-               o, e, orderCode, page
-           )
-
-           
+            page -> getPagedPayments(
+                o, e, orderCode, page
+            )
         );
-
     }
 }

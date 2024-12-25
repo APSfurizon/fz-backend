@@ -49,7 +49,7 @@ public class JooqRoomFinder implements RoomFinder {
                 .on(
                     ROOM_GUESTS.USER_ID.eq(userId)
                     .and(ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID))
-                    .and(ROOM_GUESTS.CONFIRMED.eq(true))
+                    .and(ROOM_GUESTS.CONFIRMED.isTrue())
                 ).innerJoin(ORDERS)
                 .on(c)
                 .limit(1)
@@ -64,7 +64,7 @@ public class JooqRoomFinder implements RoomFinder {
                 .where(
                     ROOM_GUESTS.USER_ID.eq(userId)
                     .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
-                    .and(ROOM_GUESTS.CONFIRMED.eq(false))
+                    .and(ROOM_GUESTS.CONFIRMED.isFalse())
                 )
                 .limit(1)
         ).isPresent();
@@ -102,7 +102,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(
                 ROOMS.ROOM_ID.eq(ROOMS.ROOM_ID)
                 .and(ROOM_GUESTS.USER_ID.eq(userId))
-                .and(ROOM_GUESTS.CONFIRMED.eq(true))
+                .and(ROOM_GUESTS.CONFIRMED.isTrue())
             )
         );
     }
@@ -137,7 +137,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(
                 ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
                 .and(ROOM_GUESTS.USER_ID.eq(userId))
-                .and(ROOM_GUESTS.CONFIRMED.eq(true))
+                .and(ROOM_GUESTS.CONFIRMED.isTrue())
             )
             .innerJoin(USERS)
             .on(USERS.USER_ID.eq(ORDERS.USER_ID))
@@ -182,7 +182,7 @@ public class JooqRoomFinder implements RoomFinder {
     public List<RoomGuest> getRoomGuestsFromRoomId(long roomId, boolean onlyConfirmed) {
         var condition = ROOM_GUESTS.ROOM_ID.eq(roomId);
         if (onlyConfirmed) {
-            condition = condition.and(ROOM_GUESTS.CONFIRMED.eq(true));
+            condition = condition.and(ROOM_GUESTS.CONFIRMED.isTrue());
         }
         return query.fetch(
                 roomGuestSelect()
@@ -295,7 +295,7 @@ public class JooqRoomFinder implements RoomFinder {
                 .innerJoin(ROOMS)
                 .on(
                     ROOM_GUESTS.USER_ID.eq(userId)
-                    .and(ROOM_GUESTS.CONFIRMED.eq(false))
+                    .and(ROOM_GUESTS.CONFIRMED.isFalse())
                     .and(ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID))
                 )
                 .innerJoin(ORDERS)
@@ -331,7 +331,7 @@ public class JooqRoomFinder implements RoomFinder {
                 .on(
                         ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
                         .and(ROOM_GUESTS.USER_ID.eq(userId))
-                        .and(ROOM_GUESTS.CONFIRMED.eq(true))
+                        .and(ROOM_GUESTS.CONFIRMED.isTrue())
                 )
                 .innerJoin(ORDERS)
                 .on(
