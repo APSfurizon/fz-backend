@@ -4,14 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
+import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +27,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Input, Boolean> {
+    @NotNull private final PretixPositionFinder positionFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
@@ -39,28 +45,46 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         checks.assertOrderIsNotDaily(order, userId, event);
         checks.assertUserIsNotInRoom(userId, event, true);
 
-        Long roomId = null;
         long newRoomItemId = input.req.getRoomPretixItemId();
-        Long oldRoomItemId = order.getPretixRoomItemId();
-        if (oldRoomItemId != null) {
+        Long oldRoomPositionId = order.getRoomPositionId();
+        Long oldRoomId = null;
+        if (oldRoomPositionId != null) {
             //User may have NO_ROOM item so we have to do this double check
             if (order.hasRoom()) {
                 var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
                 if (r.isPresent()) {
-                    roomId = r.get();
-                    checks.assertRoomNotConfirmed(roomId);
+                    oldRoomId = r.get();
+                    checks.assertRoomNotConfirmed(oldRoomId);
                 }
             }
         }
 
-        //Fetch user's room price and guests
+        //Check room price
         Long newRoomPrice = pretixInformation.getRoomPriceByItemId(newRoomItemId, true);
-        Long currentRoomPrice = oldRoomItemId == null ? null : pretixInformation.getRoomPriceByItemId(oldRoomItemId, true); //TODO we should get positions!
-        List<RoomGuest> guests = roomId == null ? null : roomFinder.getRoomGuestsFromRoomId(roomId, true);
+        if (newRoomPrice == null) {
+            //TODO unable to find new room price
+            return false;
+        }
+        Optional<PretixPosition> oldRoomPosition = oldRoomPositionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, oldRoomPositionId);
+        long oldRoomPaid = oldRoomPosition.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
+        if (oldRoomPaid > newRoomPrice) {
+            log.error("");
+            throw new ApiException(""); //TODO new room costs less than what already paid
+        }
 
-        //TODO Check prices and room members
+        //Check room capacity
+        List<RoomGuest> guests = oldRoomId == null ? null : roomFinder.getRoomGuestsFromRoomId(oldRoomId, true);
+        HotelCapacityPair newRoomInfo = pretixInformation.getRoomInfoFromPretixItemId(newRoomItemId);
+        if (newRoomInfo == null) {
+            //TODO unable to get new room capacity
+            return false;
+        }
+        if (guests != null && guests.size() > newRoomInfo.capacity()) {
+            log.error("");
+            throw new ApiException(""); //TODO unable to fit all guests in new room
+        }
 
-        return null;
+        return roomLogic.buyOrUpgradeRoom();
     }
 
     public record Input(
