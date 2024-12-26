@@ -47,11 +47,17 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         boolean buyOrUpgradeSupported = editingTimeAllowed && roomLogic.isRoomBuyOrUpgradeSupported(event);
 
         //Fetch room price
-        RoomData currentRoomData = buyOrUpgradeSupported ? roomFinder.getRoomDataForUser(userId, event, pretixInformation) : null;
-        Long currentRoomPrice = currentRoomData == null ? null : pretixInformation.getRoomPriceByItemId(currentRoomData.getRoomPretixItemId(), false);
+        RoomData currentRoomData = buyOrUpgradeSupported
+                ? roomFinder.getRoomDataForUser(userId, event, pretixInformation)
+                : null;
+        Long currentRoomPrice = currentRoomData == null || currentRoomData.getRoomPretixItemId() == null
+                ? null
+                : pretixInformation.getRoomPriceByItemId(currentRoomData.getRoomPretixItemId(), false);
         //Fetch room guests
-        Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event) : Optional.empty();
-        List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, true)).orElse(null);
+        Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
+                : Optional.empty();
+        List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, true))
+                .orElse(null);
 
 
         Set<Long> roomIds = pretixInformation.getRoomPretixIds();

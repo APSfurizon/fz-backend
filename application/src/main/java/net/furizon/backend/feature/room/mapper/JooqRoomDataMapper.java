@@ -5,6 +5,8 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
+import java.util.Map;
+
 import static net.furizon.jooq.generated.tables.Orders.ORDERS;
 
 public class JooqRoomDataMapper {
@@ -14,7 +16,7 @@ public class JooqRoomDataMapper {
         return new RoomData(
                 record.get(ORDERS.ORDER_ROOM_CAPACITY),
                 roomItemId,
-                pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
+                roomItemId == null ? Map.of() : pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
         );
     }
 }

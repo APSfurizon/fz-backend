@@ -27,7 +27,7 @@ public interface PretixInformation {
     long getQuestionUserId();
 
     @NotNull
-    Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
+    Map<String, String> getRoomNamesFromRoomPretixItemId(Long roomPretixItemId);
     @Nullable
     Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache);
     @NotNull
