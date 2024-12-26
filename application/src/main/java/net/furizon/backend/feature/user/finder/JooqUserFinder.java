@@ -98,10 +98,22 @@ public class JooqUserFinder implements UserFinder {
         boolean joinOrders = false;
         boolean joinMembershipCards = false;
 
+        Table<?> searchFursonaQuery = selectUser()
+            .where(
+                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
+                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
+                .or(
+                    //If someone doesn't want to be displayed in the nosecount,
+                    // find him only if it's a almost exact match
+                    USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
+                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
+                )
+            ).asTable("fursonaq");
+
         if (filterRoom) {
             joinOrders = true;
             condition = condition.and(
-                USERS.USER_ID.notIn(
+                searchFursonaQuery.field(USERS.USER_ID).notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
                     .from(ROOM_GUESTS)
                     .where(ROOM_GUESTS.CONFIRMED.isTrue())
@@ -127,17 +139,6 @@ public class JooqUserFinder implements UserFinder {
             );
         }
 
-        Table<?> searchFursonaQuery = selectUser()
-            .where(
-                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
-                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
-                .or(
-                    //If someone doesn't want to be displayed in the nosecount,
-                    // find him only if it's a almost exact match
-                    USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
-                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
-                )
-            ).asTable("fursonaq");
         SelectJoinStep<?> query = PostgresDSL
             .selectDistinct(
                 searchFursonaQuery.field(USERS.USER_ID),
