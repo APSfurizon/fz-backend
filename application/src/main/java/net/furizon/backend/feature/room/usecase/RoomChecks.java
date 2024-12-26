@@ -3,12 +3,14 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -26,7 +28,6 @@ import java.util.Optional;
 public class RoomChecks {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
-
     @NotNull private final RoomConfig roomConfig;
 
     public void assertInTimeframeToEditRooms() {
@@ -37,6 +38,11 @@ public class RoomChecks {
         }
     }
 
+    @NotNull public Order getOrderAndAssertItExists(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        Order order = orderFinder.findOrderByUserIdEvent(userId, event, pretixInformation);
+        assertOrderFound(Optional.ofNullable(order), userId, event);
+        return order;
+    }
     public void assertUserHasOrder(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         assertOrderFound(isDaily, userId, event);
@@ -44,10 +50,10 @@ public class RoomChecks {
     public void assertUserHasOrderAndItsNotDaily(long userId, @NotNull Event event) {
         Optional<Boolean> isDaily = orderFinder.isOrderDaily(userId, event);
         assertOrderFound(isDaily, userId, event);
-        if (isDaily.get()) {
-            log.error("User is trying to manage a room, but has a daily ticket!");
-            throw new ApiException("User has a daily ticket", RoomErrorCodes.USER_HAS_DAILY_TICKET);
-        }
+        assertOrderIsNotDailyPrint(isDaily.get(), userId, event);
+    }
+    public void assertOrderIsNotDaily(@NotNull Order order, long userId, @NotNull Event event) {
+        assertOrderIsNotDailyPrint(order.isDaily(), userId, event);
     }
     public void assertUserHasNotAnOrder(long userId, @NotNull Event event) {
         var r = orderFinder.isOrderDaily(userId, event);
@@ -221,15 +227,13 @@ public class RoomChecks {
 
     public void assertOrderIsPaid(long userId, @NotNull Event event) {
         var r = orderFinder.getOrderStatus(userId, event);
-        if (!r.isPresent()) {
-            log.error("Order for user {} on event {} not found!", userId, event);
-            throw new ApiException("Order not found", RoomErrorCodes.ORDER_NOT_FOUND);
-        }
-        if (r.get() != OrderStatus.PAID) {
-            log.error("Order for user {} on event {} is not paid", userId, event);
-            throw new ApiException("Order is not paid", RoomErrorCodes.ORDER_NOT_PAID);
-        }
+        assertOrderFound(r, userId, event);
+        assertOrderStatusPaid(r.get(), userId, event);
     }
+    public void assertOrderIsPaid(@NotNull Order order, long userId, @NotNull Event event) {
+        assertOrderStatusPaid(order.getOrderStatus(), userId, event);
+    }
+
 
     public long getUserIdAndAssertPermission(@Nullable Long userId, @NotNull FurizonUser user) {
         long id = userId == null ? user.getUserId() : userId;
@@ -239,6 +243,20 @@ public class RoomChecks {
             throw new ApiException("User is not an admin", RoomErrorCodes.USER_IS_NOT_ADMIN);
         }
         return id;
+    }
+
+    private void assertOrderStatusPaid(@NotNull OrderStatus status, long userId, @NotNull Event event) {
+        if (status != OrderStatus.PAID) {
+            log.error("Order for user {} on event {} is not paid", userId, event);
+            throw new ApiException("Order is not paid", RoomErrorCodes.ORDER_NOT_PAID);
+        }
+    }
+
+    private void assertOrderIsNotDailyPrint(boolean isDaily, long userId, @NotNull Event event) {
+        if (isDaily) {
+            log.error("User {} is trying to manage a room on event {}, but has a daily ticket!", userId, event);
+            throw new ApiException("User has a daily ticket", RoomErrorCodes.USER_HAS_DAILY_TICKET);
+        }
     }
 
     private void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {

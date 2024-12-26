@@ -1,10 +1,12 @@
 package net.furizon.backend.feature.room.dto.request;
 
-import org.jetbrains.annotations.Nullable;
+import jakarta.annotation.Nullable;
+import lombok.Data;
 
+@Data
 public class BuyUpgradeRoomRequest {
     @Nullable
-    private Long userId;
+    private final Long userId;
 
-    private long roomPretixItemId;
+    private final long roomPretixItemId;
 }

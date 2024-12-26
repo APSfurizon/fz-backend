@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-
 public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCase.Input, Boolean> {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
