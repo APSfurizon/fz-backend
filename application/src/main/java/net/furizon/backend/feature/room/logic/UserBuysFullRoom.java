@@ -468,8 +468,11 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation) {
-        //TODO
+    public boolean buyOrUpgradeRoom(long newRoomItemId, long userId, @Nullable Long roomId, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        Long positionId = order.getRoomPositionId();
+
+        pretixInformation.getAvailabilityFromItemId(newRoomItemId);
+        
         return false;
     }
 

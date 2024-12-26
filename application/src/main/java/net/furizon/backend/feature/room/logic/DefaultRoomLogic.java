@@ -425,7 +425,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(long userId, long roomId, Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;
     }

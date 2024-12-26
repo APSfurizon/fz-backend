@@ -7,7 +7,6 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
-import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -84,7 +83,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             throw new ApiException(""); //TODO unable to fit all guests in new room
         }
 
-        return roomLogic.buyOrUpgradeRoom();
+        return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, order, event, pretixInformation);
     }
 
     public record Input(

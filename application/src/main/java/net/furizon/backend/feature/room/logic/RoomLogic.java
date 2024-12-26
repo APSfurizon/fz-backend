@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.room.logic;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,7 @@ public interface RoomLogic {
     boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     boolean isRoomBuyOrUpgradeSupported(@NotNull Event even);
-    boolean buyOrUpgradeRoom(@NotNull Event event, long userId, @NotNull PretixInformation pretixInformation);
+    boolean buyOrUpgradeRoom(long newRoomItemId, long userId, @Nullable Long roomId, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors);
 }
