@@ -123,7 +123,7 @@ public class CachedPretixInformation implements PretixInformation {
 
 
     //Quotas
-    private final Cache<Long, PretixQuota> itemIdToQuota = Caffeine.newBuilder().build();
+    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
 
     //Countries
     @NotNull
@@ -389,7 +389,7 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public @Nullable PretixQuota getQuotaFromItemId(long itemId) {
+    public @Nullable List<PretixQuota> getQuotaFromItemId(long itemId) {
         lock.readLock().lock();
         var v = itemIdToQuota.getIfPresent(itemId);
         lock.readLock().unlock();
@@ -398,13 +398,34 @@ public class CachedPretixInformation implements PretixInformation {
 
     //This is NOT cached!!
     @Override
-    public @NotNull Optional<PretixQuotaAvailability> getAvailabilityFromItemId(long itemId) {
-        PretixQuota quota = getQuotaFromItemId(itemId);
-        if (quota == null) {
+    public @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromItemId(long itemId) {
+        List<PretixQuota> quota = getQuotaFromItemId(itemId);
+        if (quota == null || quota.isEmpty()) {
             log.warn("Quota not found for item {}", itemId);
-            return Optional.of(new PretixQuotaAvailability(true, null, null));
+            return Optional.of(new PretixQuotaAvailability(
+                    true,
+                    null,
+                    null,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L));
         }
-        return quotaFinder.getAvailability(getCurrentEvent(), quota.getId());
+        //We return only the smallest availability
+        Event event = getCurrentEvent();
+        PretixQuotaAvailability availability = null;
+        for (PretixQuota q : quota) {
+            var a = quotaFinder.getAvailability(event, q.getId());
+            if (a.isPresent()) {
+                PretixQuotaAvailability av = a.get();
+                if (availability == null || av.calcEffectiveRemainig() < availability.calcEffectiveRemainig()) {
+                    availability = av;
+                }
+            }
+        }
+        return Optional.ofNullable(availability);
     }
 
     @Override
@@ -514,7 +535,15 @@ public class CachedPretixInformation implements PretixInformation {
 
     private void reloadQuotas(@NotNull Event event) {
         List<PretixQuota> quotas = useCaseExecutor.execute(ReloadQuotaUseCase.class, event);
-        quotas.forEach(quota -> quota.getItems().forEach(i -> itemIdToQuota.put(i, quota)));
+        quotas.forEach(quota -> quota.getItems().forEach(i -> {
+            List<PretixQuota> existingQuota = itemIdToQuota.getIfPresent(i);
+            //An item can be assigned to multiple quota
+            if (existingQuota == null) {
+                existingQuota = new LinkedList<>();
+                itemIdToQuota.put(i, existingQuota);
+            }
+            existingQuota.add(quota);
+        }));
     }
 
     @Override

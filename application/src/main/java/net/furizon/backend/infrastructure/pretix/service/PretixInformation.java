@@ -56,10 +56,9 @@ public interface PretixInformation {
     @NotNull
     Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event);
 
-    @Nullable
-    PretixQuota getQuotaFromItemId(long itemId);
+    @Nullable List<PretixQuota> getQuotaFromItemId(long itemId);
     @NotNull
-    Optional<PretixQuotaAvailability> getAvailabilityFromItemId(long itemId);
+    Optional<PretixQuotaAvailability> getSmallestAvailabilityFromItemId(long itemId);
 
     void resetCache();
 
