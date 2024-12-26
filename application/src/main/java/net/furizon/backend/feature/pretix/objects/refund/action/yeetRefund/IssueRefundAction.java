@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.objects.order.action.yeetRefund;
+package net.furizon.backend.feature.pretix.objects.refund.action.yeetRefund;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;

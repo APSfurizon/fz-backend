@@ -7,8 +7,10 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
+import net.furizon.backend.feature.pretix.objects.payment.action.manualCancelPayment.ManualCancelPaymentAction;
+import net.furizon.backend.feature.pretix.objects.payment.action.manualRefundPayment.ManualRefundPaymentAction;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
-import net.furizon.backend.feature.pretix.objects.order.action.yeetRefund.IssueRefundAction;
+import net.furizon.backend.feature.pretix.objects.refund.action.yeetRefund.IssueRefundAction;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
@@ -17,6 +19,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPosi
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
+import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.usecase.RoomChecks;
@@ -48,8 +51,13 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final RoomFinder roomFinder;
 
 
-    //Exchange related stuff
+    //Transfer full order related stuff
+    @NotNull private final PretixRefundFinder pretixRefundFinder;
     @NotNull private final PretixPaymentFinder pretixPaymentFinder;
+    @NotNull private final ManualRefundPaymentAction refundPaymentAction;
+    @NotNull private final ManualCancelPaymentAction cancelPaymentAction;
+
+    //Exchange room related stuff
     @NotNull private final PretixProductFinder pretixProductFinder;
     @NotNull private final PretixPositionFinder pretixPositionFinder;
     @NotNull private final PushPretixPositionAction pushPretixPositionAction;
@@ -302,9 +310,9 @@ public class UserBuysFullRoom implements RoomLogic {
             //TODO order not tound
             return false;
         }
+        String orderCode = sourceOrder.getCode();
 
-        List<PretixPayment> payments =
-                pretixPaymentFinder.getPaymentsForOrder(event, sourceOrder.getCode())
+        long total = pretixPaymentFinder.getPaymentsForOrder(event, sourceOrder.getCode())
                 .stream().filter(p -> {
                     PretixPayment.PaymentState state = p.getState();
                     return (
@@ -312,8 +320,17 @@ public class UserBuysFullRoom implements RoomLogic {
                             || state == PretixPayment.PaymentState.PENDING
                             || state == PretixPayment.PaymentState.CONFIRMED
                         ) && !p.getProvider().equals("manual");
-                }).toList();
+                }).mapToLong(p -> {
+                    boolean result;
+                    if (p.getState() == PretixPayment.PaymentState.CONFIRMED) {
+                        result = refundPaymentAction.invoke(event, orderCode, p.getId(), p.getAmount());
+                    } else {
+                        result = cancelPaymentAction.invoke(event, orderCode, p.getId());
+                    }
+                    return result ? PretixGenericUtils.fromStrPriceToLong(p.getAmount()) : 0L;
+                }).sum();
 
+        //TODO we should check if some of the payment amount was already refunded...
 
         return defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
     }

@@ -1,9 +1,9 @@
-package net.furizon.backend.feature.pretix.objects.order.action.yeetRefund;
+package net.furizon.backend.feature.pretix.objects.refund.action.yeetRefund;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.pretix.objects.order.dto.PretixRefundRequest;
+import net.furizon.backend.feature.pretix.objects.refund.dto.PretixRefundRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;

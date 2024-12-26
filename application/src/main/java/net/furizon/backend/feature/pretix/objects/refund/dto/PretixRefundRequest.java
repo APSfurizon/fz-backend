@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.objects.order.dto;
+package net.furizon.backend.feature.pretix.objects.refund.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
