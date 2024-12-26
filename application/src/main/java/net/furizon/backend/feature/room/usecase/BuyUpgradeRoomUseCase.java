@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -57,30 +58,34 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                 }
             }
         }
-
+        
         //Check room price
         Long newRoomPrice = pretixInformation.getRoomPriceByItemId(newRoomItemId, true);
         if (newRoomPrice == null) {
-            //TODO unable to find new room price
+            log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch price of new room",
+                    userId, newRoomItemId);
             return false;
         }
         Optional<PretixPosition> oldRoomPosition = oldRoomPositionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, oldRoomPositionId);
         long oldRoomPaid = oldRoomPosition.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
         if (oldRoomPaid > newRoomPrice) {
-            log.error("");
-            throw new ApiException(""); //TODO new room costs less than what already paid
+            log.error("[ROOM_BUY] User {} buying roomItemId {}: Selected room costs less than what was already paid ({} < {})",
+                    userId, newRoomItemId, newRoomPrice, oldRoomPaid);
+            throw new ApiException("New room costs less than what paid!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_COSTS_LESS);
         }
 
         //Check room capacity
         List<RoomGuest> guests = oldRoomId == null ? null : roomFinder.getRoomGuestsFromRoomId(oldRoomId, true);
         HotelCapacityPair newRoomInfo = pretixInformation.getRoomInfoFromPretixItemId(newRoomItemId);
         if (newRoomInfo == null) {
-            //TODO unable to get new room capacity
+            log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch capacity of new room",
+                    userId, newRoomItemId);
             return false;
         }
         if (guests != null && guests.size() > newRoomInfo.capacity()) {
-            log.error("");
-            throw new ApiException(""); //TODO unable to fit all guests in new room
+            log.error("[ROOM_BUY] User {} buying roomItemId {}: New room has capacity of {}, but {} were already present in the room",
+                    userId, newRoomItemId, newRoomInfo.capacity(), guests.size());
+            throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
         return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, order, event, pretixInformation);

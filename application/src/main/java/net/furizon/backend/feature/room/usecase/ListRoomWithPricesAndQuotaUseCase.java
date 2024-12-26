@@ -66,7 +66,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 if (price != null && (currentRoomPrice == null || price >= currentRoomPrice)) {
                     //Fetch availability
                     RoomData data = roomFinder.getRoomDataFromPretixItemId(id, pretixInformation);
-                    var r = pretixInformation.getAvailabilityFromItemId(id);
+                    var r = pretixInformation.getSmallestAvailabilityFromItemId(id);
 
                     if (r.isPresent() && data != null) {
                         return new RoomAvailabilityInfoResponse(

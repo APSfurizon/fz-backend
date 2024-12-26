@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.logic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -425,7 +426,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean buyOrUpgradeRoom(long userId, long roomId, Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(long newRoomItemId, long userId, @Nullable Long roomId, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;
     }

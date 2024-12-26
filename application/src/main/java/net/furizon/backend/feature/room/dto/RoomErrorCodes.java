@@ -16,7 +16,11 @@ public enum RoomErrorCodes {
     ORDER_PAYMENTS_STILL_PENDING, //An order is found with payments in CREATED or PENDING state. Only confirmed and canceled states are allowed
     ORDER_REFUNDS_STILL_PENDING, //An order is found with refunds in CREATED, TRANSIT or EXTERNAL states. Only confirmed and canceled states are allowed
     EDIT_TIMEFRAME_ENDED, //You tried editing a room, but the allowed editing time is passed
-    USER_IS_NOT_ADMIN, //TODO use the same error code as other admin checks!
+    BUY_ROOM_NEW_ROOM_COSTS_LESS, //An user has tried purchasing a room which costs less than what he originally paid
+    BUY_ROOM_NEW_ROOM_LOW_CAPACITY, //An user has tried purchasing a room which less capacity than the number members who are already in the room
+    BUY_ROOM_NEW_ROOM_QUOTA_ENDED, //An user has tried purchasing a room which quota has ended
+    BUY_ROOM_ERROR_UPDATING_POSITION, //An error occurred while actually adding the room to the user's order
+    USER_IS_NOT_ADMIN, //TODO use the same error code as other admin checks! [ADMIN_CHECK]
     USER_HAS_DAILY_TICKET, //An order is of the type daily, thus it cannot attend the event in a room
     USER_HAS_PURCHASED_A_ROOM, //The user was expected to NOT have purchased a room from pretix, but instead it has
     USER_HAS_NOT_PURCHASED_A_ROOM, //The user hasn't bought a room from pretix yet

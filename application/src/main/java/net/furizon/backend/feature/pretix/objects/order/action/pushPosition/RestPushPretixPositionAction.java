@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.order.action.pushPosition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
@@ -25,23 +26,24 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
     private final HttpClient pretixHttpClient;
 
     @Override
-    public boolean invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
+    public PretixPosition invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
         log.info("Pushing a new position ({}) to order {} on event {}", position.getItem(), position.getOrderCode(), event);
         final var pair = event.getOrganizerAndEventPair();
-        final var request = HttpRequest.<Void>create()
+        final var request = HttpRequest.<PretixPosition>create()
                 .method(HttpMethod.POST)
                 .path("/organizers/{organizer}/events/{event}/orderpositions/")
                 .uriVariable("organizer", pair.getOrganizer())
                 .uriVariable("event", pair.getEvent())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(position)
-                .responseType(Void.class)
+                .responseType(PretixPosition.class)
                 .build();
         try {
-            return pretixHttpClient.send(PretixConfig.class, request).getStatusCode() == HttpStatus.OK;
+            var req = pretixHttpClient.send(PretixConfig.class, request);
+            return req.getStatusCode() == HttpStatus.OK ? req.getBody() : null;
         } catch (final HttpClientErrorException ex) {
             log.error("Error while pushing a new position to an order", ex);
-            return false;
+            return null;
         }
     }
 }
