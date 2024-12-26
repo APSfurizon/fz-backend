@@ -25,7 +25,7 @@ public class RestManualRefundPaymentAction implements ManualRefundPaymentAction 
     private final HttpClient pretixHttpClient;
 
     @Override
-    public boolean invoke(@NotNull Event event, String orderCode, long paymentId, String amount) {
+    public boolean invoke(@NotNull Event event, String orderCode, long paymentId, long amount) {
         log.info("Issuing manual refund of payment {} to order {} of event {} of amount {}",
                 paymentId, orderCode, event, amount);
         final var pair = event.getOrganizerAndEventPair();
