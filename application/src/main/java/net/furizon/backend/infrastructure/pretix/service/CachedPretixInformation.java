@@ -147,7 +147,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Map<String, String> getRoomNamesFromRoomPretixItemId(Long roomPretixItemId) {
+    public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
         lock.readLock().lock();
         var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
