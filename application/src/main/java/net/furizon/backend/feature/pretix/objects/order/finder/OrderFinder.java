@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order.finder;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -27,4 +28,7 @@ public interface OrderFinder {
     Optional<Boolean> isOrderDaily(long userId, @NotNull Event event);
 
     Optional<OrderStatus> getOrderStatus(long userId, @NotNull Event event);
+
+    @NotNull
+    OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
 }

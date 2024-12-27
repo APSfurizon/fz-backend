@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -13,7 +15,10 @@ import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
@@ -108,6 +113,44 @@ public class JooqOrderFinder implements OrderFinder {
                 return capacity == null ? false : capacity > 0;
             })
         );
+    }
+
+    @Override
+    public @NotNull OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService) {
+        OrderDataResponse orderDataResponse = null;
+        Order order = findOrderByUserIdEvent(userId, event, pretixService);
+        if (order != null) {
+            boolean isDaily = order.isDaily();
+            var orderDataBuilder = OrderDataResponse.builder()
+                    .code(order.getCode())
+                    .orderStatus(order.getOrderStatus())
+                    .sponsorship(order.getSponsorship())
+                    .extraDays(order.getExtraDays())
+                    .isDailyTicket(isDaily);
+
+            OffsetDateTime from = event.getDateFrom();
+            if (isDaily && from != null) {
+                orderDataBuilder = orderDataBuilder.dailyDays(
+                        order.getDailyDays().stream().map(
+                                d -> from.plusDays(d).toLocalDate()
+                        ).collect(Collectors.toSet())
+                );
+            }
+            if (order.hasRoom()) {
+                short roomCapacity = order.getRoomCapacity();
+                long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
+                orderDataBuilder = orderDataBuilder.room(
+                        new RoomData(
+                                roomCapacity,
+                                roomItemId,
+                                pretixService.getRoomNamesFromRoomPretixItemId(roomItemId)
+                        )
+                );
+            }
+
+            orderDataResponse = orderDataBuilder.build();
+        }
+        return orderDataResponse;
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {

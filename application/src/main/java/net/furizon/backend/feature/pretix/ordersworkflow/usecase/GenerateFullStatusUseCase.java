@@ -40,45 +40,14 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
     public @NotNull FullInfoResponse executor(@NotNull Input input) {
         Event event = input.pretixInformation.getCurrentEvent();
         FurizonUser user = input.user;
+        long userId = user.getUserId();
 
-        int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
-        int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(user.getUserId(), event);
+        int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
+        int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
         List<OrderWorkflowErrorCode> errors = new LinkedList<>();
         sanityCheck.execute(ordersNo, membershipNo, errors);
 
-        OrderDataResponse orderDataResponse = null;
-        Order order = orderFinder.findOrderByUserIdEvent(user.getUserId(), event, input.pretixInformation);
-        if (order != null) {
-            boolean isDaily = order.isDaily();
-            var orderDataBuilder = OrderDataResponse.builder()
-                .code(order.getCode())
-                .orderStatus(order.getOrderStatus())
-                .sponsorship(order.getSponsorship())
-                .extraDays(order.getExtraDays())
-                .isDailyTicket(isDaily);
-
-            OffsetDateTime from = event.getDateFrom();
-            if (isDaily && from != null) {
-                orderDataBuilder = orderDataBuilder.dailyDays(
-                        order.getDailyDays().stream().map(
-                                d -> from.plusDays(d).toLocalDate()
-                        ).collect(Collectors.toSet())
-                );
-            }
-            if (order.hasRoom()) {
-                short roomCapacity = order.getRoomCapacity();
-                long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
-                orderDataBuilder = orderDataBuilder.room(
-                        new RoomData(
-                            roomCapacity,
-                            roomItemId,
-                            input.pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
-                        )
-                    );
-            }
-
-            orderDataResponse = orderDataBuilder.build();
-        }
+        OrderDataResponse orderDataResponse = orderFinder.getOrderDataResponseFromUserEvent(userId, event, input.pretixInformation);
 
         OffsetDateTime startBooking = pretixConfig.getEvent().getPublicBookingStartTime();
         boolean displayCountdown = true && OffsetDateTime.now().isBefore(startBooking); //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK]

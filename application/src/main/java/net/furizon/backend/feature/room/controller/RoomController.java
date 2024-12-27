@@ -13,6 +13,7 @@ import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.*;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
+import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.usecase.*;
@@ -352,6 +353,25 @@ public class RoomController {
         return executor.execute(
             GetRoomInfoUseCase.class,
             new GetRoomInfoUseCase.Input(user, pretixInformation.getCurrentEvent(), pretixInformation)
+        );
+    }
+
+    @Operation(summary = "Obtains information about the specified exchange", description =
+        "Obtains the information about the specific exchange. Used to display the confirmation page. "
+        + "It contains display information for both user, if the users have confirmed "
+        + "and ")
+    @GetMapping("/exchange/info")
+    public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final GetExchangeConfirmationStatusRequest req
+    ) {
+        return executor.execute(
+                GetExchangeConfirmationStatusInfoUseCase.class,
+                new GetExchangeConfirmationStatusInfoUseCase.Input(
+                        user,
+                        req,
+                        pretixInformation
+                )
         );
     }
 
