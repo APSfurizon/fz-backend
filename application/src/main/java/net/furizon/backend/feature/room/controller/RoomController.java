@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
+import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.*;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -351,5 +352,48 @@ public class RoomController {
             GetRoomInfoUseCase.class,
             new GetRoomInfoUseCase.Input(user, pretixInformation.getCurrentEvent(), pretixInformation)
         );
+    }
+
+    @Operation(summary = "Starts a room or full order transfer/exchange", description =
+        "This method, after verifying that all conditions for the exchange are met,"
+        + "will start the exchange flow by sending emails to both parties to confirm "
+        + "or refuse the exchange. Only after both have confirmed the actual transfer will happen")
+    @PostMapping("/init-exchange")
+    public void initTransferExchange(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final ExchangeRequest req
+    ) {
+        boolean success = switch (req.getAction()) {
+            case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
+                    ExchangeRoomUseCase.class,
+                    new ExchangeRoomUseCase.Input(
+                            user,
+                            req,
+                            pretixInformation,
+                            null,
+                            true
+                    )
+            );
+            case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
+                    ExchangeFullOrderUseCase.class,
+                    new ExchangeFullOrderUseCase.Input(
+                            user,
+                            req,
+                            pretixInformation,
+                            null,
+                            true
+                    )
+            );
+        };
+        if (success) {
+            executor.execute(
+                    InitializeExchangeFlowUseCase.class,
+                    new InitializeExchangeFlowUseCase.Input(
+                            user,
+                            req,
+                            pretixInformation.getCurrentEvent()
+                    )
+            );
+        }
     }
 }

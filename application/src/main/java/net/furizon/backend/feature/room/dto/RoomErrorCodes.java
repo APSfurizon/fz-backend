@@ -31,4 +31,5 @@ public enum RoomErrorCodes {
     USER_ALREADY_INVITED_TO_ROOM, //The user is already invited to the specified room
     EXCHANGE_NOT_FOUND, //Unable to find the exchange confirmation status from the gived exchangeId
     EXCHANGE_NOT_FULLY_CONFIRMED, //Tried confirming the exchange, but both users have not confirmed yet
+    EXCHANGE_STILL_PENDING, //The user has tried starting a new exchange, but he still has one active
 }

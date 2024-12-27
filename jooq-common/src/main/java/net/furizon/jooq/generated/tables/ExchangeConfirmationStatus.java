@@ -16,6 +16,7 @@ import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -35,6 +36,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -106,6 +108,11 @@ public class ExchangeConfirmationStatus extends TableImpl<Record> {
      * The column <code>public.exchange_confirmation_status.expires_on</code>.
      */
     public final TableField<Record, Long> EXPIRES_ON = createField(DSL.name("expires_on"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.exchange_confirmation_status.action_type</code>.
+     */
+    public final TableField<Record, Short> ACTION_TYPE = createField(DSL.name("action_type"), SQLDataType.SMALLINT.nullable(false), this, "");
 
     private ExchangeConfirmationStatus(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -233,6 +240,13 @@ public class ExchangeConfirmationStatus extends TableImpl<Record> {
             _exchangeConfirmationStatusTargetUserFk = new UsersPath(this, Keys.EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_TARGET_USER_FK, null);
 
         return _exchangeConfirmationStatusTargetUserFk;
+    }
+
+    @Override
+    public List<Check<Record>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("exchange_confirmation_status_action_check"), "(((action_type >= 0) AND (action_type <= 1)))", true)
+        );
     }
 
     @Override

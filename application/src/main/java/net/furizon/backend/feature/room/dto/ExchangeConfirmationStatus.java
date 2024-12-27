@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.room.action.confirmUserExchangeStatus.ConfirmUserExchangeStatusAction;
@@ -17,7 +18,7 @@ public class ExchangeConfirmationStatus {
 
     private final long eventId;
 
-
+    private final ExchangeAction action;
 
     public boolean confirmUser(boolean isSourceUser, @NotNull ConfirmUserExchangeStatusAction confirmUserExchangeStatusAction) {
         if (confirmUserExchangeStatusAction.invoke(isSourceUser, exchangeId)) {

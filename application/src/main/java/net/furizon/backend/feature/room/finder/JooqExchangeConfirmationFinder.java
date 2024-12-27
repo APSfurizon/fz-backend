@@ -7,7 +7,7 @@ import net.furizon.backend.feature.room.mapper.ExchangeConfirmationStatusMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Record6;
+import org.jooq.Record7;
 import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -41,14 +41,15 @@ public class JooqExchangeConfirmationFinder implements ExchangeConfirmationFinde
     }
 
     @NotNull
-    private SelectJoinStep<Record6<Long, Long, Long, Boolean, Boolean, Long>> select() {
+    private SelectJoinStep<Record7<Long, Long, Long, Boolean, Boolean, Long, Short>> select() {
         return PostgresDSL.select(
                         EXCHANGE_CONFIRMATION_STATUS.EXCHANGE_ID,
                         EXCHANGE_CONFIRMATION_STATUS.TARGET_USER_ID,
                         EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID,
                         EXCHANGE_CONFIRMATION_STATUS.TARGET_CONFIRMED,
                         EXCHANGE_CONFIRMATION_STATUS.SOURCE_CONFIRMED,
-                        EXCHANGE_CONFIRMATION_STATUS.EVENT_ID
+                        EXCHANGE_CONFIRMATION_STATUS.EVENT_ID,
+                        EXCHANGE_CONFIRMATION_STATUS.ACTION_TYPE
                 ).from(EXCHANGE_CONFIRMATION_STATUS);
     }
 }

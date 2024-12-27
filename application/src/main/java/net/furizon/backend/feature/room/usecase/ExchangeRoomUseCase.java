@@ -10,6 +10,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -48,12 +49,22 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         checks.assertOrderIsPaid(sourceUserId, event);
         checks.assertOrderIsPaid(destUserId, event);
 
+        if (input.runOnlyChecks) {
+            return true;
+        }
+
+        if (input.exchangeId != null) {
+            checks.assertBothUsersHasConfirmedExchange(input.exchangeId);
+        }
+
         return roomLogic.exchangeRoom(destUserId, sourceUserId, roomId, event, input.pretixInformation);
     }
 
     public record Input(
             @NotNull FurizonUser user,
             @NotNull ExchangeRequest req,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            @Nullable Long exchangeId,
+            boolean runOnlyChecks
     ) {}
 }

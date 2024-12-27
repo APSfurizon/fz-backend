@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.mapper;
 
+import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import org.jooq.Record;
 
@@ -14,6 +15,7 @@ public class ExchangeConfirmationStatusMapper {
                 .targetConfirmed(record.get(EXCHANGE_CONFIRMATION_STATUS.TARGET_CONFIRMED))
                 .sourceConfirmed(record.get(EXCHANGE_CONFIRMATION_STATUS.SOURCE_CONFIRMED))
                 .eventId(record.get(EXCHANGE_CONFIRMATION_STATUS.EVENT_ID))
+                .action(ExchangeAction.values()[record.get(EXCHANGE_CONFIRMATION_STATUS.ACTION_TYPE)])
                 .build();
     }
 }

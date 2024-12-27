@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
@@ -236,15 +237,25 @@ public class RoomChecks {
         assertOrderStatusPaid(order.getOrderStatus(), userId, event);
     }
 
-    public void assertBothUsersHasConfirmed(long exchangeStatusId) {
+    public void assertBothUsersHasConfirmedExchange(long exchangeStatusId) {
         var r = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeStatusId);
         if (r == null) {
             log.error("No confirmed exchange status found for exchangeId {}", exchangeStatusId);
             throw new ApiException("Exchange not found", RoomErrorCodes.EXCHANGE_NOT_FOUND);
         }
-        if (!r.isFullyConfirmed()) {
-            log.error("Exchange {} is not fully confirmed", exchangeStatusId);
+        assertBothUsersHasConfirmedExchange(r);
+    }
+    public void assertBothUsersHasConfirmedExchange(@NotNull ExchangeConfirmationStatus status) {
+        if (!status.isFullyConfirmed()) {
+            log.error("Exchange {} is not fully confirmed", status.getExchangeId());
             throw new ApiException("Exchange is not fully confirmed", RoomErrorCodes.EXCHANGE_NOT_FULLY_CONFIRMED);
+        }
+    }
+    public void assertSourceUserHasNotPendingExchanges(long userId, @NotNull Event event) {
+        var r = exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event);
+        if (r != null) {
+            log.error("User {} has still pending confirmations ({})", userId, r.getExchangeId());
+            throw new ApiException("User has still pending confirmations", RoomErrorCodes.EXCHANGE_STILL_PENDING);
         }
     }
 

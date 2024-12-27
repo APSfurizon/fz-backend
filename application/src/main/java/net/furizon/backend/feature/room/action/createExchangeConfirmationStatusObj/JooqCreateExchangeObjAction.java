@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.action.createExchangeConfirmationStatus
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -19,7 +20,7 @@ public class JooqCreateExchangeObjAction implements CreateExchangeObjAction {
     private long expireAfterMs;
 
     @Override
-    public long invoke(long targetUserId, long sourceUserId, @NotNull Event event) {
+    public long invoke(long targetUserId, long sourceUserId, @NotNull ExchangeAction action, @NotNull Event event) {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         EXCHANGE_CONFIRMATION_STATUS,

@@ -189,11 +189,13 @@ CREATE TABLE IF NOT EXISTS exchange_confirmation_status
     source_confirmed bool                                                                                                                     NOT NULL DEFAULT FALSE,
     event_id         int8                                                                                                                     NOT NULL,
     expires_on       int8                                                                                                                     NOT NULL,
+    action_type      int2                                                                                                                     NOT NULL,
     CONSTRAINT exchange_confirmation_status_pkey PRIMARY KEY (exchange_id),
     CONSTRAINT only_one_concurrent_exchange_per_event UNIQUE(source_user_id, event_id),
     CONSTRAINT exchange_confirmation_status_target_user_fk FOREIGN KEY (target_user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT exchange_confirmation_status_source_user_fk FOREIGN KEY (source_user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT exchange_confirmation_status_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT exchange_confirmation_status_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT exchange_confirmation_status_action_check CHECK (((action_type >= 0) AND (action_type <= 1)))
 );
 
 CREATE OR REPLACE FUNCTION deleteRoomGuests() RETURNS TRIGGER AS $_$
