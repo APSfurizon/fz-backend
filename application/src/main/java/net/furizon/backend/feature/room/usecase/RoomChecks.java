@@ -237,12 +237,15 @@ public class RoomChecks {
         assertOrderStatusPaid(order.getOrderStatus(), userId, event);
     }
 
-    public void assertBothUsersHasConfirmedExchange(long exchangeStatusId) {
-        var r = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeStatusId);
-        if (r == null) {
-            log.error("No confirmed exchange status found for exchangeId {}", exchangeStatusId);
+    public void assertExchangeExist(@Nullable ExchangeConfirmationStatus status, long exchangeId) {
+        if (status == null) {
+            log.error("No confirmed exchange status found for exchangeId {}", exchangeId);
             throw new ApiException("Exchange not found", RoomErrorCodes.EXCHANGE_NOT_FOUND);
         }
+    }
+    public void assertBothUsersHasConfirmedExchange(long exchangeId) {
+        var r = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeId);
+        assertExchangeExist(r, exchangeId);
         assertBothUsersHasConfirmedExchange(r);
     }
     public void assertBothUsersHasConfirmedExchange(@NotNull ExchangeConfirmationStatus status) {
@@ -256,6 +259,13 @@ public class RoomChecks {
         if (r != null) {
             log.error("User {} has still pending confirmations ({})", userId, r.getExchangeId());
             throw new ApiException("User has still pending confirmations", RoomErrorCodes.EXCHANGE_STILL_PENDING);
+        }
+    }
+    public void assertUserHasRightsOnExchange(long userId, @NotNull ExchangeConfirmationStatus status) {
+        //We don't allow admin confirmation, otherwise which side do we confirm? For the future: maybe both?
+        if (status.getSourceUserId() != userId && status.getTargetUserId() != userId) {
+            log.error("User {} is trying on operate on exchange {} but has no rights!", userId, status.getExchangeId());
+            throw new ApiException("User has no rights on exchange", RoomErrorCodes.USER_IS_NOT_ADMIN);
         }
     }
 

@@ -21,8 +21,10 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
 
+    //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
+        log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
         long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
@@ -53,10 +55,6 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
             return true;
         }
 
-        if (input.exchangeId != null) {
-            checks.assertBothUsersHasConfirmedExchange(input.exchangeId);
-        }
-
         return roomLogic.exchangeRoom(destUserId, sourceUserId, roomId, event, input.pretixInformation);
     }
 
@@ -64,7 +62,6 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
             @NotNull FurizonUser user,
             @NotNull ExchangeRequest req,
             @NotNull PretixInformation pretixInformation,
-            @Nullable Long exchangeId,
             boolean runOnlyChecks
     ) {}
 }

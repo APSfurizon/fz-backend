@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
+import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.*;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -357,8 +358,12 @@ public class RoomController {
     @Operation(summary = "Starts a room or full order transfer/exchange", description =
         "This method, after verifying that all conditions for the exchange are met,"
         + "will start the exchange flow by sending emails to both parties to confirm "
-        + "or refuse the exchange. Only after both have confirmed the actual transfer will happen")
-    @PostMapping("/init-exchange")
+        + "or refuse the exchange. Only after both have confirmed the actual transfer will happen. "
+        + "With the `action` paramether you can choose to run a full order transfer or a "
+        + "room transfer/exchange. If `sourceUserId` the current user is used, otherwise "
+        + "the one specified. Admin checks are done over the userId to check if the logged "
+        + "user can operate on it")
+    @PostMapping("/exchange/init")
     public void initTransferExchange(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final ExchangeRequest req
@@ -370,7 +375,6 @@ public class RoomController {
                             user,
                             req,
                             pretixInformation,
-                            null,
                             true
                     )
             );
@@ -380,7 +384,6 @@ public class RoomController {
                             user,
                             req,
                             pretixInformation,
-                            null,
                             true
                     )
             );
@@ -395,5 +398,53 @@ public class RoomController {
                     )
             );
         }
+    }
+
+    @Operation(summary = "Updates the exchange status, and if both parties have confirmed, actually run the exchange", description =
+        "It updates the exchange status. If `confirmed == false`, it deletes the exchange attempt, so everyone is free to retry it."
+        + "If both users have confirmed, it deletes the exchange attempt anyway, BUT it will also run the actual exchange specified "
+        + "in the `action` parameter of the original /init request")
+    @PostMapping("/exchange/update")
+    public boolean updateExchangeStatus(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final UpdateExchangeStatusRequest req
+    ) {
+        ExchangeConfirmationStatus status = executor.execute(
+                UpdateExchangeStatusUseCase.class,
+                new UpdateExchangeStatusUseCase.Input(
+                        user,
+                        req
+                )
+        );
+        boolean success = true;
+        if (status.isFullyConfirmed()) {
+            ExchangeRequest exchangeRequest = new ExchangeRequest(
+                status.getSourceUserId(),
+                status.getTargetUserId(),
+                status.getAction()
+            );
+
+            switch (status.getAction()) {
+                case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
+                        ExchangeRoomUseCase.class,
+                        new ExchangeRoomUseCase.Input(
+                                user,
+                                exchangeRequest,
+                                pretixInformation,
+                                false
+                        )
+                );
+                case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
+                        ExchangeFullOrderUseCase.class,
+                        new ExchangeFullOrderUseCase.Input(
+                                user,
+                                exchangeRequest,
+                                pretixInformation,
+                                false
+                        )
+                );
+            }
+        }
+        return success;
     }
 }

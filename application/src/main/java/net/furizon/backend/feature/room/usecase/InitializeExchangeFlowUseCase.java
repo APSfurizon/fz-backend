@@ -21,13 +21,15 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         Event event = input.event;
+        long destUsrId = input.req.getDestUserId();
+        ExchangeAction action = input.req.getAction();
+        log.info("{} is inizializing a {} exchange with target user {} ",
+                input.user.getUserId(), action, destUsrId);
 
         long sourceUsrId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
         checks.assertSourceUserHasNotPendingExchanges(sourceUsrId, input.event);
 
-        long destUsrId = input.req.getDestUserId();
-        ExchangeAction action = input.req.getAction();
-
+        log.info("Init {} exchange: {} -> {}", action, sourceUsrId, destUsrId);
         long exchangeId  = createExchangeObjAction.invoke(destUsrId, sourceUsrId, action, event);
 
         //TODO send email to both users
