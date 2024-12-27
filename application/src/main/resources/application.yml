@@ -52,6 +52,9 @@ room:
   logic: ${ROOM_LOGIC:roomLogic-default}
   sanity-check-cronjob: ${ROOM_SANITY_CHECKS_CRONJOB:0 30 5 * * *}
   room-changes-end-time: ${ROOM_CHANGES_END_TIME:}
+  exchanges:
+    delete-expired-cronjob: ${ROOM_EXCHANGE_DELETE_EXPIRED_CRONJOB:0 0 /1 * * *}
+    expire-after-ms: ${ROOM_EXCHANGE_EXPIRE_AFTER_MS:172800000}
 
 pretix:
   event:

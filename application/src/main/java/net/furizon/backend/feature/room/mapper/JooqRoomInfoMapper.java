@@ -6,7 +6,6 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
 import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
 
 public class JooqRoomInfoMapper {

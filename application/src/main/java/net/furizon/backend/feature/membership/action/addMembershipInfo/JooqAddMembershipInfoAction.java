@@ -13,7 +13,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @Component
 @RequiredArgsConstructor
 public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
-    private final SqlCommand sqlCommand;
+    @NotNull private final SqlCommand sqlCommand;
 
     @Override
     public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @NotNull Event event) {

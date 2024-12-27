@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
+import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class RoomChecks {
+    @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomConfig roomConfig;
@@ -234,6 +236,17 @@ public class RoomChecks {
         assertOrderStatusPaid(order.getOrderStatus(), userId, event);
     }
 
+    public void assertBothUsersHasConfirmed(long exchangeStatusId) {
+        var r = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeStatusId);
+        if (r == null) {
+            log.error("No confirmed exchange status found for exchangeId {}", exchangeStatusId);
+            throw new ApiException("Exchange not found", RoomErrorCodes.EXCHANGE_NOT_FOUND);
+        }
+        if (!r.isFullyConfirmed()) {
+            log.error("Exchange {} is not fully confirmed", exchangeStatusId);
+            throw new ApiException("Exchange is not fully confirmed", RoomErrorCodes.EXCHANGE_NOT_FULLY_CONFIRMED);
+        }
+    }
 
     public long getUserIdAndAssertPermission(@Nullable Long userId, @NotNull FurizonUser user) {
         long id = userId == null ? user.getUserId() : userId;

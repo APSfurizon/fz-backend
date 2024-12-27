@@ -11,6 +11,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
 import net.furizon.jooq.generated.tables.Events;
+import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
 import net.furizon.jooq.generated.tables.FursuitsEvents;
 import net.furizon.jooq.generated.tables.GroupPermissions;
@@ -60,6 +61,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.events</code>.
      */
     public final Events EVENTS = Events.EVENTS;
+
+    /**
+     * The table <code>public.exchange_confirmation_status</code>.
+     */
+    public final ExchangeConfirmationStatus EXCHANGE_CONFIRMATION_STATUS = ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS;
 
     /**
      * The table <code>public.fursuits</code>.
@@ -149,6 +155,7 @@ public class Public extends SchemaImpl {
         return Arrays.asList(
             Authentications.AUTHENTICATIONS,
             Events.EVENTS,
+            ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS,
             Fursuits.FURSUITS,
             FursuitsEvents.FURSUITS_EVENTS,
             GroupPermissions.GROUP_PERMISSIONS,

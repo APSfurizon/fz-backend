@@ -29,4 +29,6 @@ public enum RoomErrorCodes {
     USER_DOES_NOT_OWN_A_ROOM, //The user doesn't have created a room yet
     USER_ALREADY_IS_IN_A_ROOM, //The user is already part (and his guest entry is confirmed) of the specified room
     USER_ALREADY_INVITED_TO_ROOM, //The user is already invited to the specified room
+    EXCHANGE_NOT_FOUND, //Unable to find the exchange confirmation status from the gived exchangeId
+    EXCHANGE_NOT_FULLY_CONFIRMED, //Tried confirming the exchange, but both users have not confirmed yet
 }
