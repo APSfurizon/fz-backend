@@ -33,15 +33,25 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
             r -> {
                 PretixProduct product = r.getLeft();
                 String identifier = product.getIdentifier();
-                long productId = product.getId();
                 if (identifier == null) {
                     return;
                 }
+                long productId = product.getId();
+                result.itemIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
 
                 if (identifier.startsWith(Const.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
-                    ExtraDays ed = ExtraDays.get(Integer.parseInt(s));
+                    String[] sp = s.split("_");
+                    String hotelName = sp[0];
+                    short capacity = Short.parseShort(sp[1]);
+                    ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
                     result.extraDaysIdToDay().put(productId, ed);
+                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, capacity);
+                    if (ed == ExtraDays.EARLY) {
+                        result.earlyDaysItemId().put(hcPair, productId);
+                    } else if (ed == ExtraDays.LATE) {
+                        result.lateDaysItemId().put(hcPair, productId);
+                    }
 
                 } else if (identifier.startsWith(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
@@ -50,7 +60,6 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
 
                 } else if (identifier.startsWith(Const.METADATA_ROOM_TYPE_TAG_PREFIX)) {
                     result.roomItemIds().add(productId);
-                    result.roomIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
                     String s = identifier.substring(Const.METADATA_ROOM_TYPE_TAG_PREFIX.length());
                     if (s.equals(Const.METADATA_ROOM_NO_ROOM_ITEM)) {
                         result.noRoomItemIds().add(productId);

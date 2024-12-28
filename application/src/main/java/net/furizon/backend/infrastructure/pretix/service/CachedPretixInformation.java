@@ -115,11 +115,16 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
     //map id -> price * 100
     @NotNull
-    private final Cache<Long, Long> roomIdToPrice = Caffeine.newBuilder().build();
-    //map capacity/name -> room name
+    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
+    //map id -> room names
     @NotNull
-    private final Cache<Long, Map<String, String>> roomPretixItemIdToNames =
-        Caffeine.newBuilder().build();
+    private final Cache<Long, Map<String, String>> roomPretixItemIdToNames = Caffeine.newBuilder().build();
+    //map (capacity, hotelName) -> earlyExtraDays item id
+    @NotNull
+    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();    //map (capacity, hotelName) -> earlyExtraDays item id
+    //map (capacity, hotelName) -> lateExtraDays item id
+    @NotNull
+    private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
 
 
     //Quotas
@@ -145,6 +150,42 @@ public class CachedPretixInformation implements PretixInformation {
         log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
     }
 
+    @Override
+    public @NotNull Set<Long> getRoomPretixIds() {
+        lock.readLock().lock();
+        Set<Long> v = new HashSet<Long>(itemIdToPrice.asMap().keySet());
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @Override
+    public @Nullable Long getItemPrice(long itemId, boolean ignoreCache) {
+        if (ignoreCache) {
+            var v = pretixProductFinder.fetchProductById(getCurrentEvent(), itemId);
+            if (!v.isPresent()) {
+                return null;
+            }
+            long value = PretixGenericUtils.fromStrPriceToLong(v.get().getPrice());
+            lock.writeLock().lock();
+            itemIdToPrice.put(itemId, value);
+            lock.writeLock().unlock();
+            return value;
+        } else {
+            lock.readLock().lock();
+            Long value = itemIdToPrice.getIfPresent(itemId);
+            lock.readLock().unlock();
+            return value;
+        }
+    }
+
+    @Override
+    public @Nullable HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId) {
+        lock.readLock().lock();
+        var v = roomIdToInfo.getIfPresent(roomPretixItemId);
+        lock.readLock().unlock();
+        return v;
+    }
+
     @NotNull
     @Override
     public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
@@ -154,40 +195,27 @@ public class CachedPretixInformation implements PretixInformation {
         return v == null ? new HashMap<>() : v;
     }
 
+    @Nullable
     @Override
-    public @Nullable Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache) {
-        if (ignoreCache) {
-            var v = pretixProductFinder.fetchProductById(getCurrentEvent(), roomPretixItemId);
-            if (!v.isPresent()) {
-                return null;
-            }
-            long value = PretixGenericUtils.fromStrPriceToLong(v.get().getPrice());
-            lock.writeLock().lock();
-            roomIdToPrice.put(roomPretixItemId, value);
-            lock.writeLock().unlock();
-            return value;
-        } else {
-            lock.readLock().lock();
-            Long value = roomIdToPrice.getIfPresent(roomPretixItemId);
-            lock.readLock().unlock();
-            return value;
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day) {
+        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, capacity), day);
+    }
+    @Nullable
+    @Override<>
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day) {
+        Cache<HotelCapacityPair, Long> map = null;
+        if (day == ExtraDays.EARLY) {
+            map = roomIdToEarlyExtraDayItemId;
+        } else if (day == ExtraDays.LATE) {
+            map = roomIdToLateExtraDayItemId;
         }
-    }
-
-    @Override
-    public @NotNull Set<Long> getRoomPretixIds() {
+        if (map == null) {
+            return null;
+        }
         lock.readLock().lock();
-        Set<Long> v = new HashSet<Long>(roomIdToPrice.asMap().keySet());
+        Long ret = map.getIfPresent(pair);
         lock.readLock().unlock();
-        return v;
-    }
-
-    @Override
-    public @Nullable HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId) {
-        lock.readLock().lock();
-        var v = roomIdToInfo.getIfPresent(roomPretixItemId);
-        lock.readLock().unlock();
-        return v;
+        return ret;
     }
 
     @NotNull
@@ -455,6 +483,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //General
         itemIdsCache.invalidateAll();
+        itemIdToPrice.invalidateAll();
 
         //Questions
         questionUserId.set(-1L);
@@ -474,7 +503,8 @@ public class CachedPretixInformation implements PretixInformation {
         //Rooms
         roomIdToInfo.invalidateAll();
         roomPretixItemIdToNames.invalidateAll();
-        roomIdToPrice.invalidateAll();
+        roomIdToEarlyExtraDayItemId.invalidateAll();
+        roomIdToLateExtraDayItemId.invalidateAll();
 
         //Quotas
         itemIdToQuota.invalidateAll();
@@ -529,8 +559,10 @@ public class CachedPretixInformation implements PretixInformation {
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
-        roomIdToPrice.putAll(products.roomIdToPrice());
+        itemIdToPrice.putAll(products.itemIdToPrice());
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
+        roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
+        roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
     }
 
     private void reloadQuotas(@NotNull Event event) {

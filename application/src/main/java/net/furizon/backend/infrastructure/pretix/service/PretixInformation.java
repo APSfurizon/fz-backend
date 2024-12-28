@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,13 +28,17 @@ public interface PretixInformation {
     long getQuestionUserId();
 
     @NotNull
+    Set<Long> getRoomPretixIds();
+    @NotNull
     Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
     @Nullable
-    Long getRoomPriceByItemId(long roomPretixItemId, boolean ignoreCache);
-    @NotNull
-    Set<Long> getRoomPretixIds();
+    Long getItemPrice(long roomPretixItemId, boolean ignoreCache);
     @Nullable
     HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
+    @Nullable
+    Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day);
+    @Nullable
+    Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
 
     @NotNull
     List<PretixState> getStatesOfCountry(String countryIsoCode);

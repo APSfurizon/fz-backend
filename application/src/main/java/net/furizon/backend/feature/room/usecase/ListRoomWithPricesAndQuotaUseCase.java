@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -11,6 +12,7 @@ import net.furizon.backend.feature.room.dto.response.RoomAvailabilityInfoRespons
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -32,6 +34,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomConfig roomConfig;
+    @NotNull private final RoomChecks roomChecks;
 
     @Override
     public @NotNull ListRoomPricesAvailabilityResponse executor(
@@ -46,13 +49,28 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
         boolean buyOrUpgradeSupported = editingTimeAllowed && roomLogic.isRoomBuyOrUpgradeSupported(event);
 
+        // Fetch extraDays price
+        long currentExtraDaysPaid = 0L;
+        Order order = roomChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
+        Long pretixRoomItemId = order.getPretixRoomItemId();
+
+
+        //Fetch extra days price
+        ExtraDays extraDays = order.getExtraDays();
+        short capacity = order.getRoomCapacity();
+        String hotelInternalName = Objects.requireNonNull(order.getHotelInternalName());
+        if (extraDays.isEarly()) {
+            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.EARLY));
+            currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+        }
+        if (extraDays.isLate()) {
+            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.LATE));
+            currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+        }
         //Fetch room price
-        RoomData currentRoomData = buyOrUpgradeSupported
-                ? roomFinder.getRoomDataForUser(userId, event, pretixInformation)
-                : null;
-        Long currentRoomPrice = currentRoomData == null || currentRoomData.getRoomPretixItemId() == null
+        Long currentRoomPrice = pretixRoomItemId == null
                 ? null
-                : pretixInformation.getRoomPriceByItemId(currentRoomData.getRoomPretixItemId(), false);
+                : pretixInformation.getItemPrice(pretixRoomItemId, false);
         //Fetch room guests
         Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
                 : Optional.empty();
@@ -60,16 +78,28 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 .orElse(null);
 
 
+        long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid;
         Set<Long> roomIds = pretixInformation.getRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
         List<RoomAvailabilityInfoResponse> rooms = buyOrUpgradeSupported ? roomIds.stream().map(id -> {
             //Check for room capacity > number of people already in room
             HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(id);
-            if (guests == null || (roomInfo != null && roomInfo.capacity() >= guests.size())) {
-                //Check for roomPrice > old room price
+            if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
+                //Check for roomPrice > old room roomPrice
                 // (actual check against how much the user has paid is done on the actual action)
-                Long price = pretixInformation.getRoomPriceByItemId(id, false);
-                if (price != null && (currentRoomPrice == null || price >= currentRoomPrice)) {
+                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(id, false));
+                long extraDaysPrice = 0L;
+                if (extraDays.isEarly()) {
+                    long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.EARLY));
+                    extraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+                }
+                if (extraDays.isLate()) {
+                    long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.LATE));
+                    extraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+                }
+                long totalPrice = roomPrice + extraDaysPrice;
+
+                if (totalPrice >= totalPaid) {
                     //Fetch availability
                     RoomData data = roomFinder.getRoomDataFromPretixItemId(id, pretixInformation);
                     var r = pretixInformation.getSmallestAvailabilityFromItemId(id);
@@ -77,7 +107,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                     if (r.isPresent() && data != null) {
                         return new RoomAvailabilityInfoResponse(
                             data,
-                            PretixGenericUtils.fromPriceToString(price, '.'),
+                            PretixGenericUtils.fromPriceToString(roomPrice, '.'),
                             r.get()
                         );
                     }
@@ -87,7 +117,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         }).filter(Objects::nonNull).toList() : List.of();
 
         return new ListRoomPricesAvailabilityResponse(
-                currentRoomData,
+                order.getBoughtRoomData(pretixInformation),
                 currentRoomPrice == null ? null : PretixGenericUtils.fromPriceToString(currentRoomPrice, '.'),
                 rooms
         );

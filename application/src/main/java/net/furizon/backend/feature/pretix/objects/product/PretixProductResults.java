@@ -19,9 +19,11 @@ public record PretixProductResults(
     @NotNull Map<Long, ExtraDays> extraDaysIdToDay,
     @NotNull Set<Long> roomItemIds,
     @NotNull Map<Long, HotelCapacityPair> roomIdToInfo,
-    @NotNull Map<Long, Long> roomIdToPrice,
+    @NotNull Map<Long, Long> itemIdToPrice,
     @NotNull Map<Long, Map<String, String>> roomPretixItemIdToNames,
-    @NotNull Set<Long> noRoomItemIds
+    @NotNull Set<Long> noRoomItemIds,
+    @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
+    @NotNull Map<HotelCapacityPair, Long> lateDaysItemId
 ) {
     public PretixProductResults() {
         this(
@@ -35,7 +37,9 @@ public record PretixProductResults(
             new TreeMap<>(),
             new HashMap<>(),
             new HashMap<>(),
-            new TreeSet<>()
+            new TreeSet<>(),
+            new HashMap<>(),
+            new HashMap<>()
         );
     }
 }

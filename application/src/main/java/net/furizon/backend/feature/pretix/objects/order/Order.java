@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.Const;
@@ -164,6 +165,14 @@ public class Order {
             }
         }
         return orderEvent;
+    }
+
+    public @Nullable RoomData getBoughtRoomData(PretixInformation pretixInformation) {
+        return pretixRoomItemId == null ? null : new RoomData(
+                roomCapacity,
+                pretixRoomItemId,
+                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixRoomItemId)
+        );
     }
 
 

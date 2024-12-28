@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -199,7 +198,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     sourceUsrId, targetUsrId, event);
             return false;
         }
-        Long sourcePrice = pretixInformation.getRoomPriceByItemId(sourceRoomItemId, true);
+        Long sourcePrice = pretixInformation.getItemPrice(sourceRoomItemId, true);
         if (sourcePrice == null) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price",
                     sourceUsrId, targetUsrId, event);
@@ -226,7 +225,7 @@ public class UserBuysFullRoom implements RoomLogic {
             }
             targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
 
-            targetPrice = pretixInformation.getRoomPriceByItemId(targetRoomItemId, true);
+            targetPrice = pretixInformation.getItemPrice(targetRoomItemId, true);
             if (targetPrice == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target room price",
                         sourceUsrId, targetUsrId, event);
