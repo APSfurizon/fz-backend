@@ -358,8 +358,11 @@ public class RoomController {
 
     @Operation(summary = "Obtains information about the specified exchange", description =
         "Obtains the information about the specific exchange. Used to display the confirmation page. "
-        + "It contains display information for both user, if the users have confirmed "
-        + "and ")
+        + "It contains display information for both user, if the users have confirmed, the exchange action "
+        + "and: If the exchange is a full order exchange, it contains the order data of the source user "
+        + "which is going to be transferred to the target user. If the exchange is a room exchange, it "
+        + "contains for sure the roomData of the source user, and, if the target user has already "
+        + "confirmed or if the requester is the target user, the roomData of the target user.")
     @GetMapping("/exchange/info")
     public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,

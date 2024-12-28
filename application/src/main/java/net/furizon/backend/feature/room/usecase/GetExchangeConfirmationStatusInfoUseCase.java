@@ -38,14 +38,15 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-
         long exchangeId = input.req.getExchangeId();
         ExchangeConfirmationStatus status = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeId);
         checks.assertExchangeExist(status, exchangeId);
         checks.assertUserHasRightsOnExchange(input.user.getUserId(), status);
         ExchangeAction action = status.getAction();
+
         OrderDataResponse orderData = null;
-        RoomData roomData = null;
+        RoomData sourceRoomData = null;
+        RoomData targetRoomData = null;
 
         long sourceUserId = status.getSourceUserId();
         UserDisplayData sourceUser = userFinder.getDisplayUser(sourceUserId, event);
@@ -53,7 +54,12 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
 
         switch (action) {
             case TRASFER_EXCHANGE_ROOM: {
-                roomData = roomFinder.getRoomDataForUser(sourceUserId, event, pretixInformation);
+                sourceRoomData = roomFinder.getRoomDataForUser(sourceUserId, event, pretixInformation);
+
+                boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
+                if (status.isTargetConfirmed() || isSourceUser) {
+                    targetRoomData = roomFinder.getRoomDataForUser(sourceUserId, event, pretixInformation);
+                }
                 break;
             }
             case TRASFER_FULL_ORDER: {
@@ -70,7 +76,8 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 .targetConfirmed(status.isTargetConfirmed())
                 .action(action)
                 .fullOrderExchange(orderData)
-                .roomExchange(roomData)
+                .sourceRoomExchange(sourceRoomData)
+                .targetRoomExchange(targetRoomData)
                 .build();
     }
 
