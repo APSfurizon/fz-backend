@@ -80,6 +80,10 @@ public class Order {
     private long ticketPositionId = -1L;
     @Nullable
     private Long roomPositionId;
+    @Nullable
+    private Long earlyPositionId;
+    @Nullable
+    private Long latePositionId;
 
     @Nullable
     @Builder.Default

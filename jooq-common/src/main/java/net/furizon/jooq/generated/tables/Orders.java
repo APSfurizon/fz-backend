@@ -103,6 +103,16 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Long> ORDER_ROOM_POSITION_ID = createField(DSL.name("order_room_position_id"), SQLDataType.BIGINT, this, "");
 
     /**
+     * The column <code>public.orders.order_early_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_EARLY_POSITION_ID = createField(DSL.name("order_early_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_late_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_LATE_POSITION_ID = createField(DSL.name("order_late_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.orders.order_daily_days</code>.
      */
     public final TableField<Record, Long> ORDER_DAILY_DAYS = createField(DSL.name("order_daily_days"), SQLDataType.BIGINT.nullable(false), this, "");

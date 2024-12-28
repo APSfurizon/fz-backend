@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -48,6 +49,8 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         checks.assertUserIsNotInRoom(userId, event, true);
 
         long newRoomItemId = input.req.getRoomPretixItemId();
+        Long earlyPositionId = null;
+        Long latePositionId = null;
         Long oldRoomPositionId = order.getRoomPositionId();
         Long oldRoomId = null;
         if (oldRoomPositionId != null) {
@@ -58,6 +61,8 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                     oldRoomId = r.get();
                     checks.assertRoomNotConfirmed(oldRoomId);
                 }
+                earlyPositionId = order.getEarlyPositionId();
+                latePositionId = order.getLatePositionId();
             }
         }
 
@@ -87,11 +92,17 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         }
         long newRoomTotal = newRoomPrice + newRoomExtraDaysPrice;
 
+        Function<Long, Long> getPaid = positionId -> {
+            Optional<PretixPosition> position = positionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, positionId);
+            return position.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
+        };
         //Get old room paid
-        Optional<PretixPosition> oldRoomPosition = oldRoomPositionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, oldRoomPositionId);
-        long oldRoomPaid = oldRoomPosition.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
+        long oldRoomPaid = getPaid.apply(oldRoomPositionId);
+        long earlyPaid = getPaid.apply(earlyPositionId);
+        long latePaid = getPaid.apply(latePositionId);
+        long totalPaid = oldRoomPaid + earlyPaid + latePaid;
         //TODO find extra days positions
-        if (oldRoomPaid > newRoomTotal) {
+        if (totalPaid > newRoomTotal) {
             log.error("[ROOM_BUY] User {} buying roomItemId {}: Selected room costs less than what was already paid ({} < {})",
                     userId, newRoomItemId, newRoomPrice, oldRoomPaid);
             throw new ApiException("New room costs less than what paid!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_COSTS_LESS);

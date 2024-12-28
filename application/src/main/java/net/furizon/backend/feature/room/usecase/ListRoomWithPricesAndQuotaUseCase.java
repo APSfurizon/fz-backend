@@ -59,13 +59,15 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         ExtraDays extraDays = order.getExtraDays();
         short capacity = order.getRoomCapacity();
         String hotelInternalName = Objects.requireNonNull(order.getHotelInternalName());
-        if (extraDays.isEarly()) {
-            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.EARLY));
-            currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
-        }
-        if (extraDays.isLate()) {
-            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.LATE));
-            currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+        if (order.hasRoom()) {
+            if (extraDays.isEarly()) {
+                long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.EARLY));
+                currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+            }
+            if (extraDays.isLate()) {
+                long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(hotelInternalName, capacity, ExtraDays.LATE));
+                currentExtraDaysPaid += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+            }
         }
         //Fetch room price
         Long currentRoomPrice = pretixRoomItemId == null

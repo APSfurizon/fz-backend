@@ -201,7 +201,7 @@ public class CachedPretixInformation implements PretixInformation {
         return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, capacity), day);
     }
     @Nullable
-    @Override<>
+    @Override
     public Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day) {
         Cache<HotelCapacityPair, Long> map = null;
         if (day == ExtraDays.EARLY) {
@@ -312,6 +312,8 @@ public class CachedPretixInformation implements PretixInformation {
             Long pretixRoomItemId = null;
             long ticketPositionId = 0L;
             Long roomPositionId = null;
+            Long earlyPositionId = null;
+            Long latePositionId = null;
             boolean membership = false;
             short roomCapacity = 0;
             Long userId = null;
@@ -361,6 +363,11 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
+                    if (extraDays == ExtraDays.EARLY) {
+                        earlyPositionId = position.getPositionId();
+                    } else if (extraDays == ExtraDays.LATE) {
+                        latePositionId = position.getPositionId();
+                    }
                     if (extraDays != ExtraDays.BOTH) {
                         if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
                             extraDays = ExtraDays.BOTH;
@@ -404,6 +411,8 @@ public class CachedPretixInformation implements PretixInformation {
                     .hasMembership(membership)
                     .ticketPositionId(ticketPositionId)
                     .roomPositionId(roomPositionId)
+                    .earlyPositionId(earlyPositionId)
+                    .latePositionId(latePositionId)
                     .eventId(event.getId())
                     .orderOwnerUserId(userId)
                     .answers(answers, this)

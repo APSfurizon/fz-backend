@@ -117,6 +117,8 @@ CREATE TABLE IF NOT EXISTS orders
     order_status                   int2 DEFAULT 0               NOT NULL,
     order_ticket_position_id       int8                         NOT NULL,
     order_room_position_id         int8                         NULL,
+    order_early_position_id        int8                         NULL,
+    order_late_position_id         int8                         NULL,
     order_daily_days               int8                         NOT NULL,
     order_extra_days_type          int2                         NULL,
     order_room_pretix_item_id      int8                         NULL,

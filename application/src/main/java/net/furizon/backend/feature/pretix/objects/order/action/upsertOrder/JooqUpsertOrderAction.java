@@ -35,6 +35,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
         Long roomPositionId = order.getRoomPositionId();
+        Long earlyPositionId = order.getEarlyPositionId();
+        Long latePositionId = order.getLatePositionId();
         Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
         long eventId = order.getOrderEvent().getId();
         var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
@@ -56,6 +58,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_TICKET_POSITION_ID,
                     ORDERS.ORDER_ROOM_POSITION_ID,
+                    ORDERS.ORDER_EARLY_POSITION_ID,
+                    ORDERS.ORDER_LATE_POSITION_ID,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON
@@ -74,6 +78,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     membership,
                     ticketPositionId,
                     roomPositionId,
+                    earlyPositionId,
+                    latePositionId,
                     userId,
                     eventId,
                     answers
@@ -91,6 +97,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
                 .set(ORDERS.ORDER_TICKET_POSITION_ID, ticketPositionId)
                 .set(ORDERS.ORDER_ROOM_POSITION_ID, roomPositionId)
+                .set(ORDERS.ORDER_EARLY_POSITION_ID, earlyPositionId)
+                .set(ORDERS.ORDER_LATE_POSITION_ID, latePositionId)
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, eventId)
                 .set(ORDERS.ORDER_ANSWERS_JSON, answers)
