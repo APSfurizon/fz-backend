@@ -19,12 +19,12 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -92,16 +92,11 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         }
         long newRoomTotal = newRoomPrice + newRoomExtraDaysPrice;
 
-        Function<Long, Long> getPaid = positionId -> {
-            Optional<PretixPosition> position = positionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, positionId);
-            return position.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
-        };
         //Get old room paid
-        long oldRoomPaid = getPaid.apply(oldRoomPositionId);
-        long earlyPaid = getPaid.apply(earlyPositionId);
-        long latePaid = getPaid.apply(latePositionId);
+        long oldRoomPaid = getPaid(oldRoomPositionId, event);
+        long earlyPaid = getPaid(earlyPositionId, event);
+        long latePaid = getPaid(latePositionId, event);
         long totalPaid = oldRoomPaid + earlyPaid + latePaid;
-        //TODO find extra days positions
         if (totalPaid > newRoomTotal) {
             log.error("[ROOM_BUY] User {} buying roomItemId {}: Selected room costs less than what was already paid ({} < {})",
                     userId, newRoomItemId, newRoomPrice, oldRoomPaid);
@@ -117,6 +112,11 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         }
 
         return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, order, event, pretixInformation);
+    }
+
+    private long getPaid(@Nullable Long positionId, @NotNull Event event) {
+        Optional<PretixPosition> position = positionId == null ? Optional.empty() : positionFinder.fetchPositionById(event, positionId);
+        return position.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
     }
 
     public record Input(

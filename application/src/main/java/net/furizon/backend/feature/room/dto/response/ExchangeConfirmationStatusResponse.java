@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import org.jetbrains.annotations.Nullable;
 
 @Data
@@ -21,5 +22,7 @@ public class ExchangeConfirmationStatusResponse {
 
     @Nullable private final OrderDataResponse fullOrderExchange;
     @Nullable private final RoomData sourceRoomExchange;
+    @Nullable private final ExtraDays sourceExtraDays;
     @Nullable private final RoomData targetRoomExchange;
+    @Nullable private final ExtraDays targetExtraDays;
 }

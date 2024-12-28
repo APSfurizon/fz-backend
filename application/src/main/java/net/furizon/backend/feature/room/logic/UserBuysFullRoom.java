@@ -263,6 +263,8 @@ public class UserBuysFullRoom implements RoomLogic {
         ));
         defaultRoomLogic.logExchangeError(res, 102, targetUsrId, sourceUsrId, event);
 
+        //TODO we should also move early and lates
+
         //Calculate payment/refunds total. If balance > 0 we need to issue a refund, otherwise a payment
         long sourceBalance = sourcePaid - targetPrice;
         long targetBalance = targetPaid - sourcePrice;
@@ -272,6 +274,7 @@ public class UserBuysFullRoom implements RoomLogic {
         BiFunction<Long, String, Boolean> issuePaymentOrRefund = (balance, orderCode) -> {
             String amount = PretixGenericUtils.fromPriceToString(balance, '.');
             if (balance > 0L) {
+                //TODO we should do a min(refundAmount, availableForRefundInOrder)
                 return issueRefundAction.invoke(event, orderCode, "Refund" + comment, amount);
             } else if (balance < 0L) {
                 return issuePaymentAction.invoke(event, orderCode, "Payment" + comment, amount);
@@ -474,6 +477,8 @@ public class UserBuysFullRoom implements RoomLogic {
         long noRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
         Long positionId = order.getRoomPositionId();
         String orderCode = order.getCode();
+
+        //TODO we should check quota and change also early/late days
 
         var q = pretixInformation.getSmallestAvailabilityFromItemId(newRoomItemId);
         if (!q.isPresent()) {

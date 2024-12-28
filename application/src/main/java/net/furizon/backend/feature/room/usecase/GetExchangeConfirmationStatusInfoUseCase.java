@@ -8,13 +8,12 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomData;
-import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.request.GetExchangeConfirmationStatusRequest;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
-import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -28,7 +27,6 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         UseCase<GetExchangeConfirmationStatusInfoUseCase.Input, ExchangeConfirmationStatusResponse> {
     @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
     @NotNull private final OrderFinder orderFinder;
-    @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomChecks checks;
 
@@ -47,6 +45,8 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         OrderDataResponse orderData = null;
         RoomData sourceRoomData = null;
         RoomData targetRoomData = null;
+        ExtraDays sourceExtraDays = null;
+        ExtraDays targetExtraDays = null;
 
         long sourceUserId = status.getSourceUserId();
         UserDisplayData sourceUser = userFinder.getDisplayUser(sourceUserId, event);
@@ -54,11 +54,15 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
 
         switch (action) {
             case TRASFER_EXCHANGE_ROOM: {
-                sourceRoomData = roomFinder.getRoomDataForUser(sourceUserId, event, pretixInformation);
+                OrderDataResponse o = orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation);
+                sourceRoomData = o.getRoom();
+                sourceExtraDays = o.getExtraDays();
 
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
                 if (status.isTargetConfirmed() || isSourceUser) {
-                    targetRoomData = roomFinder.getRoomDataForUser(sourceUserId, event, pretixInformation);
+                    o = orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation);
+                    targetRoomData = o.getRoom();
+                    targetExtraDays = o.getExtraDays();
                 }
                 break;
             }
@@ -77,7 +81,9 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 .action(action)
                 .fullOrderExchange(orderData)
                 .sourceRoomExchange(sourceRoomData)
+                .sourceExtraDays(sourceExtraDays)
                 .targetRoomExchange(targetRoomData)
+                .targetExtraDays(targetExtraDays)
                 .build();
     }
 
