@@ -159,8 +159,6 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_STATUS,
                         ORDERS.ORDER_SPONSORSHIP_TYPE,
                         ORDERS.ORDER_EXTRA_DAYS_TYPE,
-                        ORDERS.ORDER_EARLY_POSITION_ID,
-                        ORDERS.ORDER_LATE_POSITION_ID,
                         ORDERS.ORDER_DAILY_DAYS,
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
@@ -169,6 +167,8 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_ROOM_POSITION_ID,
                         ORDERS.ORDER_TICKET_POSITION_ID,
+                        ORDERS.ORDER_EARLY_POSITION_ID,
+                        ORDERS.ORDER_LATE_POSITION_ID,
                         ORDERS.ORDER_ANSWERS_JSON,
                         ORDERS.USER_ID,
                         ORDERS.EVENT_ID

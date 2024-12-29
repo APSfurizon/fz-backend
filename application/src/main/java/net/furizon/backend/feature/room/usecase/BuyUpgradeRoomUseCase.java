@@ -82,13 +82,15 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             return false;
         }
         long newRoomExtraDaysPrice = 0L;
+        Long newEarlyItemId = null;
+        Long newLateItemId = null;
         if (extraDays.isEarly()) {
-            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.EARLY));
-            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+            newEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.EARLY));
+            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(newEarlyItemId, false));
         }
         if (extraDays.isLate()) {
-            long extraDayItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.LATE));
-            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(extraDayItemId, false));
+            newLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.LATE));
+            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(newLateItemId, false));
         }
         long newRoomTotal = newRoomPrice + newRoomExtraDaysPrice;
 

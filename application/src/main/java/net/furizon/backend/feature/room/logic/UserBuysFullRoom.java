@@ -11,6 +11,7 @@ import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.Up
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.action.manualRefundPayment.ManualRefundPaymentAction;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
 import net.furizon.backend.feature.pretix.objects.refund.action.yeetRefund.IssueRefundAction;
@@ -28,6 +29,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.usecase.RoomChecks;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -40,7 +42,10 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Slf4j
@@ -259,11 +264,13 @@ public class UserBuysFullRoom implements RoomLogic {
         //Update source position
         res = res && updatePretixPositionAction.invoke(event, sourceRoomPositionId, new UpdatePretixPositionRequest(
                 sourceOrderCode,
-                sourceRoomItemId
+                targetRoomItemId
         ));
         defaultRoomLogic.logExchangeError(res, 102, targetUsrId, sourceUsrId, event);
 
         //TODO we should also move early and lates
+        //TODO we should create a new position with the old room, so we can mantain it reserved while exchanging
+
 
         //Calculate payment/refunds total. If balance > 0 we need to issue a refund, otherwise a payment
         long sourceBalance = sourcePaid - targetPrice;
@@ -473,30 +480,89 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public synchronized boolean buyOrUpgradeRoom(long newRoomItemId, long userId, @Nullable Long roomId, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        long noRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
-        Long positionId = order.getRoomPositionId();
+    public synchronized boolean buyOrUpgradeRoom(long newRoomItemId, long userId, @Nullable Long roomId, @Nullable Long newEarlyItemId, @Nullable Long newLateItemId, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        Long roomPositionId = order.getRoomPositionId();
+        boolean originallyHadAroomPositionId = roomPositionId != null;
+        Long earlyPositionId = order.getEarlyPositionId();
+        Long latePositionId = order.getLatePositionId();
         String orderCode = order.getCode();
+        ExtraDays extraDays = order.getExtraDays();
 
-        //TODO we should check quota and change also early/late days
+        //Fetch the original item ids for rolling back
+        //Room
+        Long originalRoomItemId = order.getPretixRoomItemId();
+        if (originalRoomItemId == null) {
+            //If order has no room, we fall back to NO_ROOM item
+            originalRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
+        }
+        //Extra days
+        Long originalEarlyItemId = null;
+        Long originalLateItemId = null;
+        if (order.hasRoom()) {
+            HotelCapacityPair originalPair = new HotelCapacityPair(Objects.requireNonNull(order.getHotelInternalName()), order.getRoomCapacity());
+            if (extraDays.isEarly()) {
+                originalEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.EARLY));
+            }
+            if (extraDays.isLate()) {
+                originalLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.LATE));
+            }
+        }
 
-        var q = pretixInformation.getSmallestAvailabilityFromItemId(newRoomItemId);
-        if (!q.isPresent()) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch quota of new room",
-                    userId, newRoomItemId);
+        //Verify that we still have available quota
+        Function<Long, PretixQuotaAvailability> getQuota = itemId -> {
+            if (itemId == null) {
+                return null;
+            }
+            var q = pretixInformation.getSmallestAvailabilityFromItemId(itemId);
+            if (!q.isPresent()) {
+                log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch quota of item {}",
+                        userId, newRoomItemId, itemId);
+                return null;
+            }
+            PretixQuotaAvailability quota = q.get();
+            if (!quota.isAvailable()) {
+                log.error("[ROOM_BUY] User {} buying roomItemId {}: There's no available quota of item {}",
+                        userId, newRoomItemId, itemId);
+                throw new ApiException("New room quota has ended!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+            }
+            return quota;
+        };
+        //Room
+        PretixQuotaAvailability roomQuota = getQuota.apply(newRoomItemId);
+        if (roomQuota == null) {
             return false;
         }
-        PretixQuotaAvailability quota = q.get();
-        if (quota.isAvailable()) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: There's no available quota of new room",
-                    userId, newRoomItemId);
-            throw new ApiException("New room quota has ended!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+        //Early and late
+        PretixQuotaAvailability earlyQuota = null;
+        PretixQuotaAvailability lateQuota  = null;
+        if (order.hasRoom()) {
+            if (extraDays.isEarly()) {
+                earlyQuota = getQuota.apply(newEarlyItemId);
+                if (earlyQuota == null) {
+                    return false;
+                }
+            }
+            if (extraDays.isLate()) {
+                lateQuota = getQuota.apply(newLateItemId);
+                if (lateQuota == null) {
+                    return false;
+                }
+            }
         }
+
+        BiConsumer<Boolean, Long> printError = (res, positionId) -> {
+            if (!res) {
+                log.error("[ROOM_BUY] User {} buying roomItemId {}: An error occurred while pushing or updating order position {}",
+                    userId, newRoomItemId, positionId);
+                throw new ApiException("Error while adding room to order", RoomErrorCodes.BUY_ROOM_ERROR_UPDATING_POSITION);
+            }
+        };
 
         //If there's quota available, try get the item
         boolean res;
-        if (positionId != null) {
-            res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+        if (originallyHadAroomPositionId) {
+            //TODO we should create a new position with the old room, so we can mantain it reserved while rolling back
+            res = updatePretixPositionAction.invoke(event, roomPositionId, new UpdatePretixPositionRequest(
                     orderCode,
                     newRoomItemId
             ));
@@ -508,39 +574,100 @@ public class UserBuysFullRoom implements RoomLogic {
             ));
             res = pos != null;
             if (res) {
-                positionId = pos.getPositionId();
+                roomPositionId = pos.getPositionId();
+            }
+        }
+        printError.accept(res, roomPositionId);
+
+        if (order.hasRoom()) {
+            if (extraDays.isEarly()) {
+                if (originallyHadAroomPositionId) {
+                    res = updatePretixPositionAction.invoke(event, Objects.requireNonNull(earlyPositionId), new UpdatePretixPositionRequest(
+                            orderCode,
+                            Objects.requireNonNull(newEarlyItemId)
+                    ));
+                } else {
+                    PretixPosition pos = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                            orderCode,
+                            Objects.requireNonNull(roomPositionId),
+                            Objects.requireNonNull(newEarlyItemId)
+                    ));
+                    res = pos != null;
+                    if (res) {
+                        earlyPositionId = pos.getPositionId();
+                    }
+                }
+            }
+            if (extraDays.isLate()) {
+                if (originallyHadAroomPositionId) {
+                    res = updatePretixPositionAction.invoke(event, Objects.requireNonNull(latePositionId), new UpdatePretixPositionRequest(
+                            orderCode,
+                            Objects.requireNonNull(newLateItemId)
+                    ));
+                } else {
+                    PretixPosition pos = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                            orderCode,
+                            Objects.requireNonNull(roomPositionId),
+                            Objects.requireNonNull(newLateItemId)
+                    ));
+                    res = pos != null;
+                    if (res) {
+                        latePositionId = pos.getPositionId();
+                    }
+                }
             }
         }
 
-        if (res) {
-            //Try to fetch again if quota has a negative value.
-            // If yes, cancel the just added position by updating it to NO_ROOM
-            q = pretixInformation.getSmallestAvailabilityFromItemId(newRoomItemId);
+        //Try to fetch again if quota has a negative value.
+        Function<Long, Long> calcRemaining = itemId -> {
+            if (itemId == null) {
+                return null;
+            }
+            var q = pretixInformation.getSmallestAvailabilityFromItemId(itemId);
             if (!q.isPresent()) {
-                log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to (re)fetch quota of new room",
-                        userId, newRoomItemId);
-                return false;
+                log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to (re)fetch quota of item {}",
+                        userId, newRoomItemId, itemId);
+                return null;
             }
-            quota = q.get();
-            long remaining = quota.calcEffectiveRemainig();
-            if (remaining <= 0L) {
-                res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
-                        orderCode,
-                        noRoomItemId
-                ));
-                if (!res) {
-                    log.error("[ROOM_BUY] User {} buying roomItemId {}: An error occurred while trying to removing room after a race condition was detected",
-                        userId, newRoomItemId);
+            return q.get().calcEffectiveRemainig();
+        };
+        //Room
+        Long roomRemaining = calcRemaining.apply(newRoomItemId);
+        if (roomRemaining == null) {
+            return false;
+        }
+        //Early and late
+        Long earlyRemaining = Long.MAX_VALUE;
+        Long lateRemaining = Long.MAX_VALUE;
+        if (order.hasRoom()) {
+            if (extraDays.isEarly()) {
+                earlyRemaining = calcRemaining.apply(newEarlyItemId);
+                if (earlyRemaining == null) {
+                    return false;
                 }
-
-                log.error("[ROOM_BUY] User {} buying roomItemId {}: (RACE CONDITION DETECTED) Quota was available before updating the position, but it was found negative ({}) negative after",
-                        userId, newRoomItemId, remaining);
-                throw new ApiException("New room quota has ended (RACE CONDITION DETECTED)", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
             }
-        } else {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: An error occurred while pushing or updating order position {}",
-                    userId, newRoomItemId, positionId);
-            throw new ApiException("Error while adding room to order", RoomErrorCodes.BUY_ROOM_ERROR_UPDATING_POSITION);
+            if (extraDays.isLate()) {
+                lateRemaining = calcRemaining.apply(newLateItemId);
+                if (lateRemaining == null) {
+                    return false;
+                }
+            }
+        }
+        //If one of the quota has a negative value, revert back
+        if (roomRemaining <= 0L || earlyRemaining <= 0L || lateRemaining <= 0L) {
+            res = updatePretixPositionAction.invoke(event, roomPositionId, new UpdatePretixPositionRequest(
+                    orderCode,
+                    originalRoomItemId
+            ));
+            //TODO revert early and late positions
+            if (!res) {
+                log.error("[ROOM_BUY] User {} buying roomItemId {}: An error occurred while trying to removing room after a race condition was detected",
+                    userId, newRoomItemId);
+            }
+
+            log.error("[ROOM_BUY] User {} buying roomItemId {}: (RACE CONDITION DETECTED) Quota was available before updating the position, but it was found negative (r{}; e{}; l{}) negative after",
+                    userId, newRoomItemId, roomRemaining, earlyRemaining, lateRemaining);
+            throw new ApiException("New room quota has ended (RACE CONDITION DETECTED)", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
         return true;
