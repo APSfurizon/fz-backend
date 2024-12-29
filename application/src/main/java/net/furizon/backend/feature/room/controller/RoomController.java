@@ -320,7 +320,14 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final BuyUpgradeRoomRequest req
     ) {
-        boolean success = true; //TODO
+        boolean success = executor.execute(
+                BuyUpgradeRoomUseCase.class,
+                new BuyUpgradeRoomUseCase.Input(
+                        user,
+                        req,
+                        pretixInformation
+                )
+        );
         return success ? executor.execute(GetPayOrderLink.class,
                 new GetPayOrderLink.Input(
                         user,
@@ -466,6 +473,7 @@ public class RoomController {
                                 false
                         )
                 );
+                default -> throw new IllegalStateException("Unexpected value: " + status.getAction());
             }
         }
         return success;
