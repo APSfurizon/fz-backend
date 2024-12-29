@@ -42,9 +42,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 if (identifier.startsWith(Const.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(Const.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
                     String[] sp = s.split("_");
-                    String hotelName = sp[0];
-                    short capacity = Short.parseShort(sp[1]);
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
+                    String hotelName = sp[1];
+                    short capacity = Short.parseShort(sp[2]);
                     result.extraDaysIdToDay().put(productId, ed);
                     HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, capacity);
                     if (ed == ExtraDays.EARLY) {
