@@ -29,6 +29,6 @@ public interface OrderFinder {
 
     Optional<OrderStatus> getOrderStatus(long userId, @NotNull Event event);
 
-    @NotNull
+    @Nullable
     OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
 }

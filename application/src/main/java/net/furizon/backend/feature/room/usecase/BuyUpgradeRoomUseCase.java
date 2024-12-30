@@ -69,16 +69,16 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         ExtraDays extraDays = order.getExtraDays();
         HotelCapacityPair newRoomInfo = pretixInformation.getRoomInfoFromPretixItemId(newRoomItemId);
         if (newRoomInfo == null) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch capacity of new room",
-                    userId, newRoomItemId);
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to fetch capacity of new room",
+                    userId, newRoomItemId, event);
             return false;
         }
 
         //Get new room price
         Long newRoomPrice = pretixInformation.getItemPrice(newRoomItemId, true);
         if (newRoomPrice == null) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: Unable to fetch price of new room",
-                    userId, newRoomItemId);
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to fetch price of new room",
+                    userId, newRoomItemId, event);
             return false;
         }
         long newRoomExtraDaysPrice = 0L;
@@ -100,20 +100,20 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         long latePaid = getPaid(latePositionId, event);
         long totalPaid = oldRoomPaid + earlyPaid + latePaid;
         if (totalPaid > newRoomTotal) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: Selected room costs less than what was already paid ({} < {})",
-                    userId, newRoomItemId, newRoomPrice, oldRoomPaid);
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Selected room costs less than what was already paid ({} < {})",
+                    userId, newRoomItemId, event, newRoomPrice, oldRoomPaid);
             throw new ApiException("New room costs less than what paid!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_COSTS_LESS);
         }
 
         //Check room capacity
         List<RoomGuest> guests = oldRoomId == null ? null : roomFinder.getRoomGuestsFromRoomId(oldRoomId, true);
         if (guests != null && guests.size() > newRoomInfo.capacity()) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {}: New room has capacity of {}, but {} were already present in the room",
-                    userId, newRoomItemId, newRoomInfo.capacity(), guests.size());
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: New room has capacity of {}, but {} were already present in the room",
+                    userId, newRoomItemId, event, newRoomInfo.capacity(), guests.size());
             throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
-        return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, order, event, pretixInformation);
+        return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, newEarlyItemId, newLateItemId, order, event, pretixInformation);
     }
 
     private long getPaid(@Nullable Long positionId, @NotNull Event event) {

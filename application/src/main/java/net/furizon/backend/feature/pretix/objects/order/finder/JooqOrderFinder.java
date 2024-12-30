@@ -116,7 +116,7 @@ public class JooqOrderFinder implements OrderFinder {
     }
 
     @Override
-    public @NotNull OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService) {
+    public @Nullable OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService) {
         OrderDataResponse orderDataResponse = null;
         Order order = findOrderByUserIdEvent(userId, event, pretixService);
         if (order != null) {
