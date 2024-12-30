@@ -226,12 +226,10 @@ public class UserBuysFullRoom implements RoomLogic {
             @Nullable Long sourcePositionId,
             @Nullable Long targetItemId,
             @Nullable Long targetPositionId,
-            //boolean targetHasRoomPosition,
             @Nullable Long sourceAddonToPositionId,
             @Nullable Long targetAddonToPositionId,
             long sourceUsrId,
             long targetUsrId,
-            //long roomId,
             @NotNull String sourceOrderCode,
             @NotNull String targetOrderCode,
             @NotNull Event event,
@@ -286,10 +284,22 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //We don't check for hasPosition but for the itemId != null, because NO_ROOM has an itemId but no positionId
         //Update target
-        //TODO we should create and mantain a new position until we finish updating source as well, to prevent people from stealing our quota
+        Long toDeletePositionId = null; //used for keeping quota reserved while performing the exchange
         boolean res = true;
         if (sourceItemId != null) {
             if (targetHasPosition) {
+                //Creates a temporary position with target's item to keep quota reserved while performming the exchange
+                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                        targetOrderCode,
+                        Objects.requireNonNull(targetAddonToPositionId),
+                        targetItemId
+                ));
+                if (pp == null) {
+                    log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after create temporary position with item {}",
+                            sourceUsrId, targetUsrId, event, targetItemId);
+                    return null;
+                }
+                toDeletePositionId = pp.getPositionId();
                 res = updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
                         targetOrderCode,
                         sourceItemId
@@ -307,7 +317,9 @@ public class UserBuysFullRoom implements RoomLogic {
             }
         } else {
             if (targetHasPosition) {
-                res = deletePretixPositionAction.invoke(event, targetPositionId);
+                //res = deletePretixPositionAction.invoke(event, targetPositionId);
+                //If we have to delete a position, we delay the deletion after the exchange is done to mantain quota
+                toDeletePositionId = targetPositionId;
             }
         }
         if (!res) {
@@ -331,7 +343,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 ));
                 res = pp != null;
                 if (res) {
-                    targetPositionId = pp.getPositionId();
+                    sourcePositionId = pp.getPositionId();
                 }
             }
         } else {
@@ -343,6 +355,15 @@ public class UserBuysFullRoom implements RoomLogic {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after C/U/D source",
                     sourceUsrId, targetUsrId, event);
             return null;
+        }
+
+        if (toDeletePositionId != null) {
+            res = deletePretixPositionAction.invoke(event, toDeletePositionId);
+            if (!res) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after deleting toDeletePositionId={}",
+                        sourceUsrId, targetUsrId, event, toDeletePositionId);
+                return null;
+            }
         }
 
         long sourceBalance = sourcePaid - targetPrice;
@@ -463,6 +484,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 var balanceForProvider = getBalanceForProvider(orderCode, event);
                 long total = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
                 balance = Math.min(balance, total);
+                if (balance <= 0L) { //Nothing to be refunded
+                    return true;
+                }
                 String amount = PretixGenericUtils.fromPriceToString(balance, '.');
                 return issueRefundAction.invoke(event, orderCode, "Refund" + comment, amount);
             } else if (balance < 0L) {
@@ -668,6 +692,11 @@ public class UserBuysFullRoom implements RoomLogic {
                         addonToPositionId,
                         originalItemId
                 ));
+                if (tempPosition == null) {
+                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to create temporary position for rollback with item {}",
+                            userId, newRoomItemId, event, originalItemId);
+                    return null;
+                }
             }
             res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                     orderCode,
