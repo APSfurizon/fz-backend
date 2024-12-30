@@ -621,7 +621,14 @@ public class UserBuysFullRoom implements RoomLogic {
         return true;
     }
 
-    private @Nullable Pair<Long, Long> buyOrUpgradeItem(
+    private record BuyOrUpgradeResult(
+            long effectiveRemaining,
+            long positionId,
+            PretixPosition tempPosition
+    ) {}
+
+    private @Nullable BuyOrUpgradeResult buyOrUpgradeItem(
+            @Nullable Long originalItemId,
             @Nullable Long newItemId,
             boolean originallyHadAroomPosition,
             @Nullable Long positionId,
@@ -651,9 +658,17 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         //If quota is available, try getting the item
+        PretixPosition tempPosition = null;
         boolean res;
         if (originallyHadAroomPosition && positionId != null) {
-            //TODO we should create a new position with the old room, so we can mantain it reserved while rolling back
+            //Create a temporary position to mantain our quota in case of rollback
+            if (originalItemId != null) {
+                tempPosition = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                        orderCode,
+                        addonToPositionId,
+                        originalItemId
+                ));
+            }
             res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                     orderCode,
                     newItemId
@@ -682,7 +697,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     userId, newRoomItemId, event, newItemId);
             return null;
         }
-        return Pair.of(r.get().calcEffectiveRemainig(), positionId);
+        return new BuyOrUpgradeResult(r.get().calcEffectiveRemainig(), positionId, tempPosition);
     }
     private void rollbackBuyOrUpgrade(
         @Nullable Long rollbackItemId,
@@ -711,6 +726,18 @@ public class UserBuysFullRoom implements RoomLogic {
         if (!res) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while trying to removing room after a race condition was detected",
                     userId, newRoomItemId, event);
+        }
+    }
+    private void finalizeBuyOrUpgrade(@NotNull Event event, long userId, long newRoomItemId, BuyOrUpgradeResult... results) {
+        //Delete the temporary positions created for mantain our quota
+        for (BuyOrUpgradeResult result : results) {
+            if (result != null) {
+                boolean res = deletePretixPositionAction.invoke(event, result.positionId);
+                if (!res) {
+                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while finalizing position {}",
+                            userId, newRoomItemId, event, result.positionId);
+                }
+            }
         }
     }
     @Override
@@ -754,32 +781,32 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         //Perform the upgrades
-        Pair<Long, Long> roomPair = buyOrUpgradeItem(newRoomItemId, originallyHadAroomPosition, roomPositionId, order.getTicketPositionId(), userId, newRoomItemId, orderCode, event, pretixInformation);
-        if (roomPair == null) {
+        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, originallyHadAroomPosition, roomPositionId, order.getTicketPositionId(), userId, newRoomItemId, orderCode, event, pretixInformation);
+        if (roomRes == null) {
             return false;
         }
-        roomPositionId = roomPair.getRight();
-        long roomRemaining = roomPair.getLeft();
+        roomPositionId = roomRes.positionId;
+        long roomRemaining = roomRes.effectiveRemaining;
         long earlyRemaining = Long.MAX_VALUE;
         long lateRemaining = Long.MAX_VALUE;
-        Pair<Long, Long> earlyPair = null;
-        Pair<Long, Long> latePair = null;
+        BuyOrUpgradeResult earlyRes = null;
+        BuyOrUpgradeResult lateRes = null;
         if (order.hasRoom()) {
             if (extraDays.isEarly()) {
-                earlyPair = buyOrUpgradeItem(newEarlyItemId, originallyHadAroomPosition, earlyPositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
-                if (earlyPair == null) {
+                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, originallyHadAroomPosition, earlyPositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
+                if (earlyRes == null) {
                     return false;
                 }
-                earlyPositionId = earlyPair.getRight();
-                earlyRemaining = earlyPair.getLeft();
+                earlyPositionId = earlyRes.positionId;
+                earlyRemaining = earlyRes.effectiveRemaining;
             }
             if (extraDays.isLate()) {
-                latePair = buyOrUpgradeItem(newLateItemId, originallyHadAroomPosition, latePositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
-                if (latePair == null) {
+                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, originallyHadAroomPosition, latePositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
+                if (lateRes == null) {
                     return false;
                 }
-                latePositionId = latePair.getRight();
-                lateRemaining = latePair.getLeft();
+                latePositionId = lateRes.positionId;
+                lateRemaining = lateRes.effectiveRemaining;
             }
         }
 
@@ -798,8 +825,10 @@ public class UserBuysFullRoom implements RoomLogic {
             rollbackBuyOrUpgrade(originalRoomItemId, roomPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: (RACE CONDITION DETECTED) Quota was available before updating the position, but it was found negative (r{}; e{}; l{}) negative after",
                     userId, newRoomItemId, event, roomRemaining, earlyRemaining, lateRemaining);
+            finalizeBuyOrUpgrade(event, userId, newRoomItemId, roomRes, earlyRes, lateRes);
             throw new ApiException("New room quota has ended (RACE CONDITION DETECTED)", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
+        finalizeBuyOrUpgrade(event, userId, newRoomItemId, roomRes, earlyRes, lateRes);
 
         //If everything's ok, refetch updated order from pretix
         var pair = event.getOrganizerAndEventPair();
