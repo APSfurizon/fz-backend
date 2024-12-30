@@ -163,11 +163,62 @@ public class UserBuysFullRoom implements RoomLogic {
         return false;
     }
 
+    private @NotNull Map<String, Long> getBalanceForProvider(@NotNull String orderCode, @NotNull Event event) {
+        List<PretixPayment> payments = pretixPaymentFinder.getPaymentsForOrder(event, orderCode);
+        List<PretixRefund> refunds = pretixRefundFinder.getRefundsForOrder(event, orderCode);
+        return getBalanceForProvider(payments, refunds, orderCode, event);
+    }
+    private @NotNull Map<String, Long> getBalanceForProvider(@NotNull List<PretixPayment> payments, @NotNull List<PretixRefund> refunds, @NotNull String orderCode, @NotNull Event event) {
+        Map<String, Long> balanceForProvider = new HashMap<>();
+
+        //For each payment provider, calc how much the user has paid with them
+        for (PretixPayment payment : payments) {
+            PretixPayment.PaymentState state = payment.getState();
+            if (state == PretixPayment.PaymentState.CONFIRMED) {
+                String provider = payment.getProvider();
+                Long balance = balanceForProvider.get(provider);
+                if (balance == null) {
+                    balance = 0L;
+                }
+
+                balance += PretixGenericUtils.fromStrPriceToLong(payment.getAmount());
+                balanceForProvider.put(provider, balance);
+
+            } else if (state == PretixPayment.PaymentState.PENDING || state == PretixPayment.PaymentState.CREATED) {
+                log.error("No payments for order {} on event {} can be in status PENDING or CREATED. Failed payment: {} {}",
+                        orderCode, event, payment.getId(), state);
+                throw new ApiException("Payment found in illegal state", RoomErrorCodes.ORDER_PAYMENTS_STILL_PENDING);
+            }
+        }
+
+        //For each payment provider, subtract how much it was already refunded from it
+        for (PretixRefund refund : refunds) {
+            PretixRefund.RefundState state = refund.getState();
+            if (state == PretixRefund.RefundState.DONE) {
+                String provider = refund.getProvider();
+                long balance = balanceForProvider.get(provider);
+                balance -= PretixGenericUtils.fromStrPriceToLong(refund.getAmount());
+                balanceForProvider.put(provider, balance);
+
+            } else if (
+                    state == PretixRefund.RefundState.CREATED
+                            || state == PretixRefund.RefundState.TRANSIT
+                            || state == PretixRefund.RefundState.EXTERNAL
+            ) {
+                log.error("No refunds for order {} on event {} can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
+                        orderCode, event, refund.getId(), state);
+                throw new ApiException("Refund found in illegal state", RoomErrorCodes.ORDER_REFUNDS_STILL_PENDING);
+            }
+        }
+
+        return balanceForProvider;
+    }
+
     private record ExchangeResult(
             long sourceBalance,
             long targetBalance,
-            long sourcePositionId,
-            long targetPositionId
+            @Nullable Long sourcePositionId,
+            @Nullable Long targetPositionId
     ) {}
 
     private ExchangeResult exchangeSingleItem(
@@ -176,8 +227,8 @@ public class UserBuysFullRoom implements RoomLogic {
             @Nullable Long targetItemId,
             @Nullable Long targetPositionId,
             //boolean targetHasRoomPosition,
-            long sourceAddonToPositionId,
-            long targetAddonToPositionId,
+            @Nullable Long sourceAddonToPositionId,
+            @Nullable Long targetAddonToPositionId,
             long sourceUsrId,
             long targetUsrId,
             //long roomId,
@@ -186,6 +237,8 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {
+        log.info("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Exchanging i{} p{} a{} -> i{} p{} a{}",
+                sourceUsrId, targetUsrId, event, sourceItemId, sourcePositionId, sourceAddonToPositionId, targetItemId, targetPositionId, targetAddonToPositionId);
         //Fetch source paid and price
         long sourcePaid = 0L;
         Long sourcePrice = 0L;
@@ -233,39 +286,63 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //We don't check for hasPosition but for the itemId != null, because NO_ROOM has an itemId but no positionId
         //Update target
+        //TODO we should create and mantain a new position until we finish updating source as well, to prevent people from stealing our quota
+        boolean res = true;
         if (sourceItemId != null) {
             if (targetHasPosition) {
-                updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
+                res = updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
                         targetOrderCode,
                         sourceItemId
                 ));
             } else {
-                targetPositionId = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                         targetOrderCode,
-                        targetAddonToPositionId,
+                        Objects.requireNonNull(targetAddonToPositionId),
                         sourceItemId
-                )).getPositionId();
+                ));
+                res = pp != null;
+                if (res) {
+                    targetPositionId = pp.getPositionId();
+                }
             }
         } else {
-            deletePretixPositionAction.invoke(event, Objects.requireNonNull(targetPositionId));
+            if (targetHasPosition) {
+                res = deletePretixPositionAction.invoke(event, targetPositionId);
+            }
+        }
+        if (!res) {
+            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after C/U/D target",
+                    sourceUsrId, targetUsrId, event);
+            return null;
         }
 
         //Update source
         if (targetItemId != null) {
             if (sourceHasPosition) {
-                updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
+                res = updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
                         sourceOrderCode,
                         targetItemId
                 ));
             } else {
-                sourcePositionId = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                         sourceOrderCode,
-                        sourceAddonToPositionId,
+                        Objects.requireNonNull(sourceAddonToPositionId),
                         targetItemId
-                )).getPositionId();
+                ));
+                res = pp != null;
+                if (res) {
+                    targetPositionId = pp.getPositionId();
+                }
             }
         } else {
-            deletePretixPositionAction.invoke(event, Objects.requireNonNull(sourcePositionId));
+            if (sourceHasPosition) {
+                res = deletePretixPositionAction.invoke(event, sourcePositionId);
+            }
+        }
+        if (!res) {
+            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after C/U/D source",
+                    sourceUsrId, targetUsrId, event);
+            return null;
         }
 
         long sourceBalance = sourcePaid - targetPrice;
@@ -382,11 +459,14 @@ public class UserBuysFullRoom implements RoomLogic {
         String comment = " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
                 + " happened on timestamp " + System.currentTimeMillis();
         BiFunction<Long, String, Boolean> issuePaymentOrRefund = (balance, orderCode) -> {
-            String amount = PretixGenericUtils.fromPriceToString(balance, '.');
             if (balance > 0L) {
-                //TODO we should do a min(refundAmount, availableForRefundInOrder)
+                var balanceForProvider = getBalanceForProvider(orderCode, event);
+                long total = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
+                balance = Math.min(balance, total);
+                String amount = PretixGenericUtils.fromPriceToString(balance, '.');
                 return issueRefundAction.invoke(event, orderCode, "Refund" + comment, amount);
             } else if (balance < 0L) {
+                String amount = PretixGenericUtils.fromPriceToString(balance, '.');
                 return issuePaymentAction.invoke(event, orderCode, "Payment" + comment, amount);
             } //Else balance == 0: do nothing, we're done
             return false;
@@ -447,51 +527,9 @@ public class UserBuysFullRoom implements RoomLogic {
         // instead of the new owner
 
         //Fetch payments and refunds of source order
-        List<PretixPayment> payments = pretixPaymentFinder.getPaymentsForOrder(event, sourceOrder.getCode());
-        List<PretixRefund> refunds = pretixRefundFinder.getRefundsForOrder(event, sourceOrder.getCode());
-        Map<String, Long> balanceForProvider = new HashMap<>();
-
-        //For each payment provider, calc how much the user has paid with them
-        for (PretixPayment payment : payments) {
-            PretixPayment.PaymentState state = payment.getState();
-            if (state == PretixPayment.PaymentState.CONFIRMED) {
-                String provider = payment.getProvider();
-                Long balance = balanceForProvider.get(provider);
-                if (balance == null) {
-                    balance = 0L;
-                }
-
-                balance += PretixGenericUtils.fromStrPriceToLong(payment.getAmount());
-                balanceForProvider.put(provider, balance);
-
-            } else if (state == PretixPayment.PaymentState.PENDING || state == PretixPayment.PaymentState.CREATED) {
-                log.error("[ORDER_TRANSFER] {} -> {} on event {}: "
-                        + "No payments for order {} can be in status PENDING or CREATED. Failed payment: {} {}",
-                        sourceUsrId, targetUsrId, event, orderCode, payment.getId(), state);
-                throw new ApiException("Payment found in illegal state", RoomErrorCodes.ORDER_PAYMENTS_STILL_PENDING);
-            }
-        }
-
-        //For each payment provider, subtract how much it was already refunded from it
-        for (PretixRefund refund : refunds) {
-            PretixRefund.RefundState state = refund.getState();
-            if (state == PretixRefund.RefundState.DONE) {
-                String provider = refund.getProvider();
-                long balance = balanceForProvider.get(provider);
-                balance -= PretixGenericUtils.fromStrPriceToLong(refund.getAmount());
-                balanceForProvider.put(provider, balance);
-
-            } else if (
-                    state == PretixRefund.RefundState.CREATED
-                    || state == PretixRefund.RefundState.TRANSIT
-                    || state == PretixRefund.RefundState.EXTERNAL
-            ) {
-                log.error("[ORDER_TRANSFER] {} -> {} on event {}: "
-                        + "No refunds for order {} can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
-                        sourceUsrId, targetUsrId, event, orderCode, refund.getId(), state);
-                throw new ApiException("Refund found in illegal state", RoomErrorCodes.ORDER_REFUNDS_STILL_PENDING);
-            }
-        }
+        List<PretixPayment> payments = pretixPaymentFinder.getPaymentsForOrder(event, orderCode);
+        List<PretixRefund> refunds = pretixRefundFinder.getRefundsForOrder(event, orderCode);
+        Map<String, Long> balanceForProvider = getBalanceForProvider(payments, refunds, orderCode, event);
 
         //Get total to refund
         long total = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
@@ -686,6 +724,8 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {
+        log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}: User is buying or upgrading his room to r{} e{} l{}",
+                userId, newRoomItemId, event, newRoomItemId, newEarlyItemId, newLateItemId);
         Long roomPositionId = order.getRoomPositionId();
         boolean originallyHadAroomPosition = roomPositionId != null;
         Long earlyPositionId = order.getEarlyPositionId();
