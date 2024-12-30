@@ -163,6 +163,116 @@ public class UserBuysFullRoom implements RoomLogic {
         return false;
     }
 
+    private record ExchangeResult(
+            long sourceBalance,
+            long targetBalance,
+            long sourcePositionId,
+            long targetPositionId
+    ) {}
+
+    private ExchangeResult exchangeSingleItem(
+            @Nullable Long sourceItemId,
+            @Nullable Long sourcePositionId,
+            @Nullable Long targetItemId,
+            @Nullable Long targetPositionId,
+            //boolean targetHasRoomPosition,
+            long sourceAddonToPositionId,
+            long targetAddonToPositionId,
+            long sourceUsrId,
+            long targetUsrId,
+            //long roomId,
+            @NotNull String sourceOrderCode,
+            @NotNull String targetOrderCode,
+            @NotNull Event event,
+            @NotNull PretixInformation pretixInformation
+    ) {
+        //Fetch source paid and price
+        long sourcePaid = 0L;
+        Long sourcePrice = 0L;
+        boolean sourceHasPosition = sourcePositionId != null && sourceItemId != null;
+        if (sourceHasPosition) {
+            //Fetch how much source has paid the product
+            var sp = pretixPositionFinder.fetchPositionById(event, sourcePositionId);
+            if (!sp.isPresent()) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source position for id {}",
+                        sourceUsrId, targetUsrId, event, sourceItemId);
+                return null;
+            }
+            sourcePaid = PretixGenericUtils.fromStrPriceToLong(sp.get().getPrice());
+            //Fetch how much source item costs (It can be different from how much user has paid!)
+            sourcePrice = pretixInformation.getItemPrice(sourceItemId, true);
+            if (sourcePrice == null) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price for item {}",
+                        sourceUsrId, targetUsrId, event, sourceItemId);
+                return null;
+            }
+        }
+
+        //Fetch target paid and price
+        long targetPaid = 0L;
+        Long targetPrice = 0L;
+        boolean targetHasPosition = targetPositionId != null && targetItemId != null;
+        if (targetHasPosition) {
+            //Get how much the target user has paid for his room and how much does it costs now
+            //This works also if the target user has a NO_ROOM
+            var tp = pretixPositionFinder.fetchPositionById(event, targetPositionId);
+            if (!tp.isPresent()) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target position for id {}",
+                        sourceUsrId, targetUsrId, event, sourceItemId);
+                return null;
+            }
+            targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
+
+            targetPrice = pretixInformation.getItemPrice(targetItemId, true);
+            if (targetPrice == null) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target price for item {}",
+                        sourceUsrId, targetUsrId, event, targetItemId);
+                return null;
+            }
+        }
+
+        //We don't check for hasPosition but for the itemId != null, because NO_ROOM has an itemId but no positionId
+        //Update target
+        if (sourceItemId != null) {
+            if (targetHasPosition) {
+                updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
+                        targetOrderCode,
+                        sourceItemId
+                ));
+            } else {
+                targetPositionId = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                        targetOrderCode,
+                        targetAddonToPositionId,
+                        sourceItemId
+                )).getPositionId();
+            }
+        } else {
+            deletePretixPositionAction.invoke(event, Objects.requireNonNull(targetPositionId));
+        }
+
+        //Update source
+        if (targetItemId != null) {
+            if (sourceHasPosition) {
+                updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
+                        sourceOrderCode,
+                        targetItemId
+                ));
+            } else {
+                sourcePositionId = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                        sourceOrderCode,
+                        sourceAddonToPositionId,
+                        targetItemId
+                )).getPositionId();
+            }
+        } else {
+            deletePretixPositionAction.invoke(event, Objects.requireNonNull(sourcePositionId));
+        }
+
+        long sourceBalance = sourcePaid - targetPrice;
+        long targetBalance = targetPaid - sourcePrice;
+
+        return new ExchangeResult(sourceBalance, targetBalance, sourcePositionId, targetPositionId);
+    }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("[ROOM_EXCHANGE] UserBuysFullRoom: Exchange between users: {} -> {} on event {}",
@@ -182,101 +292,93 @@ public class UserBuysFullRoom implements RoomLogic {
         }
         String sourceOrderCode = sourceOrder.getCode();
         String targetOrderCode = targetOrder.getCode();
+        ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
+        ExtraDays targetExtraDays = targetOrder.getExtraDays();
 
-        //Get how much source user has paid for his room and how much does it costs now
+        //Get various items and positions
+        long sourceTicketPositionId = sourceOrder.getTicketPositionId();
         Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
+        Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
+        Long sourceEarlyPositionId = null;
+        Long sourceLatePositionId = null;
+        Long sourceEarlyItemId = null;
+        Long sourceLateItemId = null;
+        long targetTicketPositionId = targetOrder.getTicketPositionId();
+        Long targetRoomPositionId = targetOrder.getRoomPositionId();
+        Long targetRoomItemId = targetOrder.getPretixRoomItemId();
+        Long targetEarlyPositionId = null;
+        Long targetLatePositionId = null;
+        Long targetEarlyItemId = null;
+        Long targetLateItemId = null;
+
+        //Get early and late data
+        if (sourceOrder.hasRoom()) {
+            HotelCapacityPair sourcePair = new HotelCapacityPair(Objects.requireNonNull(sourceOrder.getHotelInternalName()), sourceOrder.getRoomCapacity());
+            if (sourceExtraDays.isEarly()) {
+                sourceEarlyPositionId = sourceOrder.getEarlyPositionId();
+                sourceEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.EARLY));
+            }
+            if (sourceExtraDays.isLate()) {
+                sourceLatePositionId = sourceOrder.getLatePositionId();
+                sourceLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.LATE));
+            }
+        }
+        if (targetOrder.hasRoom()) {
+            HotelCapacityPair targetPair = new HotelCapacityPair(Objects.requireNonNull(targetOrder.getHotelInternalName()), targetOrder.getRoomCapacity());
+            if (targetExtraDays.isEarly()) {
+                targetEarlyPositionId = targetOrder.getEarlyPositionId();
+                targetEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.EARLY));
+            }
+            if (targetExtraDays.isLate()) {
+                targetLatePositionId = targetOrder.getLatePositionId();
+                targetLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.LATE));
+            }
+        }
+
+        //Run checks on items and positions
+        if (targetRoomItemId != null && targetRoomPositionId != null) {
+            //If the target user doesn't have a room in his order, default it with NO_ROOM item
+            targetRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
+        }
+        //Source user MUST have a room (we also assume caller has already checked it's not a NO_ROOM)
         if (sourceRoomPositionId == null) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomPositionId",
                     sourceUsrId, targetUsrId, event);
             return false;
         }
-        var sp = pretixPositionFinder.fetchPositionById(event, sourceRoomPositionId);
-        if (!sp.isPresent()) {
-            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room position",
-                    sourceUsrId, targetUsrId, event);
-            return false;
-        }
-        long sourcePaid = PretixGenericUtils.fromStrPriceToLong(sp.get().getPrice());
-
-        Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
         if (sourceRoomItemId == null) {
             log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomItemId",
                     sourceUsrId, targetUsrId, event);
             return false;
         }
-        Long sourcePrice = pretixInformation.getItemPrice(sourceRoomItemId, true);
-        if (sourcePrice == null) {
-            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price",
-                    sourceUsrId, targetUsrId, event);
+
+        long sourceBalance = 0L;
+        long targetBalance = 0L;
+
+        //Now that we have everything, update pretix and calc balances
+        ExchangeResult exchange;
+        exchange = exchangeSingleItem(sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId, sourceTicketPositionId, targetTicketPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        if (exchange == null) {
             return false;
         }
-
-        boolean targetHasRoomItem = false;
-        long targetPaid = 0L;
-        Long targetPrice = 0L;
-
-        Long targetRoomItemId = targetOrder.getPretixRoomItemId();
-        Long targetRoomPositionId = targetOrder.getRoomPositionId();
-        if (targetRoomItemId != null && targetRoomPositionId != null) {
-            //We should not create a new position on targetUser but change the existing one
-            targetHasRoomItem = true;
-
-            //Get how much the target user has paid for his room and how much does it costs now
-            //This works also if the target user has a NO_ROOM
-            var tp = pretixPositionFinder.fetchPositionById(event, targetRoomPositionId);
-            if (!tp.isPresent()) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target room position",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
-            targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
-
-            targetPrice = pretixInformation.getItemPrice(targetRoomItemId, true);
-            if (targetPrice == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target room price",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
-
-        } else {
-            //If the target user doesn't have a room in his order, default it with NO_ROOM item
-            targetRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
+        sourceRoomPositionId = exchange.sourcePositionId;
+        targetRoomPositionId = exchange.targetPositionId;
+        sourceBalance += exchange.sourceBalance;
+        targetBalance += exchange.targetBalance;
+        exchange = exchangeSingleItem(sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId, sourceRoomPositionId, targetRoomPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        if (exchange == null) {
+            return false;
         }
-
-        //Now that we have everything, update pretix
-        boolean res = true;
-
-        //Update target position
-        if (targetHasRoomItem) {
-            res = res && updatePretixPositionAction.invoke(event, targetRoomPositionId, new UpdatePretixPositionRequest(
-                targetOrderCode,
-                sourceRoomItemId
-            ));
-            defaultRoomLogic.logExchangeError(res, 100, targetUsrId, sourceUsrId, event);
-        } else {
-            res = res && pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
-                targetOrderCode,
-                targetOrder.getTicketPositionId(),
-                sourceRoomItemId
-            )) != null;
-            defaultRoomLogic.logExchangeError(res, 101, targetUsrId, sourceUsrId, event);
+        sourceBalance += exchange.sourceBalance;
+        targetBalance += exchange.targetBalance;
+        exchange = exchangeSingleItem(sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId, sourceRoomPositionId, targetRoomPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        if (exchange == null) {
+            return false;
         }
+        sourceBalance += exchange.sourceBalance;
+        targetBalance += exchange.targetBalance;
 
-        //Update source position
-        res = res && updatePretixPositionAction.invoke(event, sourceRoomPositionId, new UpdatePretixPositionRequest(
-                sourceOrderCode,
-                targetRoomItemId
-        ));
-        defaultRoomLogic.logExchangeError(res, 102, targetUsrId, sourceUsrId, event);
-
-        //TODO we should also move early and lates
-        //TODO we should create a new position with the old room, so we can mantain it reserved while exchanging
-
-
-        //Calculate payment/refunds total. If balance > 0 we need to issue a refund, otherwise a payment
-        long sourceBalance = sourcePaid - targetPrice;
-        long targetBalance = targetPaid - sourcePrice;
-
+        //If balance > 0 we need to issue a refund, otherwise a payment
         String comment = " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
                 + " happened on timestamp " + System.currentTimeMillis();
         BiFunction<Long, String, Boolean> issuePaymentOrRefund = (balance, orderCode) -> {
@@ -289,6 +391,7 @@ public class UserBuysFullRoom implements RoomLogic {
             } //Else balance == 0: do nothing, we're done
             return false;
         };
+        boolean res = true;
         //Issue payments or refunds
         res = res && issuePaymentOrRefund.apply(targetBalance, targetOrderCode);
         defaultRoomLogic.logExchangeError(res, 103, targetUsrId, sourceUsrId, event);
@@ -658,7 +761,7 @@ public class UserBuysFullRoom implements RoomLogic {
             throw new ApiException("New room quota has ended (RACE CONDITION DETECTED)", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
-        //If everything's ok, reefetch updated order from pretix
+        //If everything's ok, refetch updated order from pretix
         var pair = event.getOrganizerAndEventPair();
         var refetchedOrder = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
         if (!refetchedOrder.isPresent()) {

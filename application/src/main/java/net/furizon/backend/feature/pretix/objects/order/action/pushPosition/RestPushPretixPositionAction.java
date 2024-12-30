@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
     private final HttpClient pretixHttpClient;
 
     @Override
+    @Nullable
     public PretixPosition invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
         log.info("Pushing a new position ({}) to order {} on event {}", position.getItem(), position.getOrderCode(), event);
         final var pair = event.getOrganizerAndEventPair();
