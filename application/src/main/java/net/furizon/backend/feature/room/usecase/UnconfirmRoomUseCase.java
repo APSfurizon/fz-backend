@@ -32,6 +32,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         checks.assertRoomConfirmed(roomId);
         checks.assertRoomCanBeUnconfirmed(roomId, roomLogic);
 
+        //TODO EMAIL send email to everyone that room has been unconfirmed
         return roomLogic.unconfirmRoom(roomId);
     }
 

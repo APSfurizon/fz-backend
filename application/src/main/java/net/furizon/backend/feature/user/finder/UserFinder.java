@@ -3,6 +3,7 @@ package net.furizon.backend.feature.user.finder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.objects.SearchUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,9 @@ public interface UserFinder {
             boolean filterPaid,
             @Nullable Short filterMembershipCardForYear
     );
+
+    @Nullable
+    UserEmailData getMailDataForUser(long userId);
 
     @Nullable
     UserDisplayData getDisplayUser(long userId, @NotNull Event event);

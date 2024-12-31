@@ -113,6 +113,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
+        //TODO EMAIL send email to everyone that room has been upgraded
         return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, newEarlyItemId, newLateItemId, order, event, pretixInformation);
     }
 

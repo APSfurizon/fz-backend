@@ -32,7 +32,7 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
         log.info("Init {} exchange: {} -> {}", action, sourceUsrId, destUsrId);
         long exchangeId  = createExchangeObjAction.invoke(destUsrId, sourceUsrId, action, event);
 
-        //TODO send email to both users
+        //TODO EMAIL send email to both users
 
         return true;
     }

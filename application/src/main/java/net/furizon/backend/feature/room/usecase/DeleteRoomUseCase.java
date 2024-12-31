@@ -31,6 +31,7 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
         );
         checks.assertRoomNotConfirmed(roomId);
 
+        //TODO EMAIL send an email to everyone that room has been deleted
         return roomLogic.deleteRoom(roomId);
     }
 

@@ -34,6 +34,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
 
+        //TODO EMAIL alert room owner that you have left the room
         return roomLogic.leaveRoom(guest.getGuestId());
     }
 

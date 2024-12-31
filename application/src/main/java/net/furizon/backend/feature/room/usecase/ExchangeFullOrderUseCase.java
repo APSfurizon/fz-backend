@@ -48,6 +48,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
             return true;
         }
 
+        //TODO EMAIL alert everyone that the room has changed owner
         return roomLogic.exchangeFullOrder(destUserId, sourceUserId, roomId, event, input.pretixInformation);
     }
 

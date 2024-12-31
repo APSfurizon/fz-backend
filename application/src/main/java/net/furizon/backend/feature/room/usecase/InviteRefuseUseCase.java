@@ -32,6 +32,7 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
         checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
 
+        //TODO EMAIL alert room owner that you have refused the invitation
         return roomLogic.inviteRefuse(guestId);
     }
 

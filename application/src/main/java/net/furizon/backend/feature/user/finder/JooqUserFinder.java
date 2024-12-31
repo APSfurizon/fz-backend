@@ -5,8 +5,10 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
+import net.furizon.backend.feature.user.mapper.JooqUserEmailDataMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.backend.feature.user.objects.SearchUser;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -83,6 +85,24 @@ public class JooqUserFinder implements UserFinder {
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             ).where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqDisplayUserMapper::map);
+    }
+
+    @Nullable
+    @Override
+    public UserEmailData getMailDataForUser(long userId) {
+        return sqlQuery.fetchFirst(
+                PostgresDSL
+                .select(
+                        USERS.USER_FURSONA_NAME,
+                        AUTHENTICATIONS.AUTHENTICATION_EMAIL
+                )
+                .from(USERS)
+                .innerJoin(AUTHENTICATIONS)
+                .on(
+                        USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID)
+                        .and(USERS.USER_ID.eq(userId))
+                )
+        ).mapOrNull(JooqUserEmailDataMapper::map);
     }
 
     @NotNull

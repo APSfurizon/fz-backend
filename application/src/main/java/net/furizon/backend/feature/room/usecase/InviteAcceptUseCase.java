@@ -39,6 +39,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
         checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
+        //TODO EMAIL alert room owner that you have accepted the invitation
         return roomLogic.inviteAccept(guestId, targetUserId, roomId, event);
     }
 

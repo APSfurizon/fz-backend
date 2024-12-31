@@ -904,6 +904,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, no owner found
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                     + "No owner found in room {}. Deleting the room", roomId);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }
@@ -913,6 +914,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, owner has no order
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                     + "Owner {} of room {} has no order. Deleting the room", ownerId, roomId);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }
@@ -920,6 +922,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, owner has no room
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                     + "Owner {} of room {} hasn't bought a room. Deleting the room", ownerId, roomId);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }
@@ -927,6 +930,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, owner has daily ticket
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                     + "Owner {} of room {} has a daily ticket. Deleting the room", ownerId, roomId);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }
@@ -937,6 +941,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, too many members!
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                     + "Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }
@@ -953,6 +958,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     //delete room, owner is in too many rooms
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Owner {} of room {} is in too many rooms ({})!. Deleting the room", usrId, roomId, roomNo);
+                    //TODO EMAIL alert everyone room is deleted
                     this.deleteRoom(roomId);
                     return;
                 } else {
@@ -960,6 +966,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} is in too many rooms ({})!. Kicking the user",
                         usrId, guestId, roomId, roomNo);
+                    //TODO EMAIL alert user he has been kicked
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -971,12 +978,14 @@ public class UserBuysFullRoom implements RoomLogic {
                     //delete room, owner's order is canceled
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
+                    //TODO EMAIL alert everyone room is deleted
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, his order is canceled
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
+                    //TODO EMAIL alert user he has been kicked
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -988,12 +997,14 @@ public class UserBuysFullRoom implements RoomLogic {
                     //delete room, owner has no order
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Owner {} of room {} has no order. Deleting the room", usrId, roomId);
+                    //TODO EMAIL alert everyone room is deleted
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, user has no order
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
+                    //TODO EMAIL alert user he has been kicked
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -1003,12 +1014,14 @@ public class UserBuysFullRoom implements RoomLogic {
                     //delete room, owner has a daily ticket
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Owner {} of room {} has a daily ticket. Deleting the room", usrId, roomId);
+                    //TODO EMAIL alert everyone room is deleted
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, he has a daily ticket
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
+                    //TODO EMAIL alert user he has been kicked
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -1023,6 +1036,7 @@ public class UserBuysFullRoom implements RoomLogic {
             //delete room, owner is not in room!
             sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                 + "Owner {} of room {} was not found in the room's guest. Deleting the room", ownerId, roomId);
+            //TODO EMAIL alert everyone room is deleted
             this.deleteRoom(roomId);
             return;
         }

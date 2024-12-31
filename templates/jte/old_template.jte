@@ -1,5 +1,6 @@
 @param String body
 @param String title
+@param String fursonaName
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +25,7 @@
         <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">${title}</h2>
+            <p class="main-content">Dear ${fursonaName},</p>
             <p class="main-content">${body}</p>
         </div>
     </div>

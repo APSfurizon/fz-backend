@@ -34,6 +34,7 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         checks.assertRoomNotConfirmed(roomId);
         checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
 
+        //TODO EMAIL alert user he has been kicked from the room
         return roomLogic.kickFromRoom(guestId);
     }
 

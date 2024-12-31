@@ -54,6 +54,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
             return true;
         }
 
+        //TODO EMAIL alert everyone that the room has changed owner
         return roomLogic.exchangeRoom(destUserId, sourceUserId, roomId, event, input.pretixInformation);
     }
 
