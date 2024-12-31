@@ -83,6 +83,11 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Event Struct
 
+    //map id -> price * 100
+    @NotNull
+    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
+
+
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
     private final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
@@ -113,9 +118,6 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> (capacity, hotelName)
     @NotNull
     private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
-    //map id -> price * 100
-    @NotNull
-    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
     //map id -> room names
     @NotNull
     private final Cache<Long, Map<String, String>> roomPretixItemIdToNames = Caffeine.newBuilder().build();
@@ -151,14 +153,6 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public @NotNull Set<Long> getRoomPretixIds() {
-        lock.readLock().lock();
-        Set<Long> v = new HashSet<Long>(itemIdToPrice.asMap().keySet());
-        lock.readLock().unlock();
-        return v;
-    }
-
-    @Override
     public @Nullable Long getItemPrice(long itemId, boolean ignoreCache) {
         if (ignoreCache) {
             var v = pretixProductFinder.fetchProductById(getCurrentEvent(), itemId);
@@ -176,6 +170,14 @@ public class CachedPretixInformation implements PretixInformation {
             lock.readLock().unlock();
             return value;
         }
+    }
+
+    @Override
+    public @NotNull Set<Long> getRoomPretixIds() {
+        lock.readLock().lock();
+        Set<Long> v = new HashSet<Long>(roomIdToInfo.asMap().keySet());
+        lock.readLock().unlock();
+        return v;
     }
 
     @Override

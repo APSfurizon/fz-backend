@@ -27,12 +27,12 @@ public interface PretixInformation {
 
     long getQuestionUserId();
 
+    @Nullable
+    Long getItemPrice(long roomPretixItemId, boolean ignoreCache);
     @NotNull
     Set<Long> getRoomPretixIds();
     @NotNull
     Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
-    @Nullable
-    Long getItemPrice(long roomPretixItemId, boolean ignoreCache);
     @Nullable
     HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
     @Nullable

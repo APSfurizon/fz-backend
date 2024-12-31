@@ -54,7 +54,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
         Order order = roomChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
-        Long pretixRoomItemId = order.getPretixRoomItemId();
+        Long pretixRoomItemId = order.hasRoom() ? order.getPretixRoomItemId() : null;
 
 
         //Fetch extra days price
