@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -23,13 +24,13 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
-    private final PretixInformation pretixInformation;
 
     @Override
     public @NotNull Boolean executor(@NotNull ConfirmRoomUseCase.Input input) {
         long requesterUserId = input.user.getUserId();
         log.info("User {} is confirming a room", requesterUserId);
-        Event event = input.event;
+        PretixInformation pretixInformation = input.pretixInformation;
+        Event event = pretixInformation.getCurrentEvent();
 
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
@@ -54,6 +55,6 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
     public record Input(
             @NotNull FurizonUser user,
             @Nullable RoomIdRequest roomReq,
-            @NotNull Event event
+            @NotNull PretixInformation pretixInformation
     ) {}
 }

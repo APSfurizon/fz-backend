@@ -263,7 +263,7 @@ public class RoomController {
                 new ConfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation
                 )
         );
     }
