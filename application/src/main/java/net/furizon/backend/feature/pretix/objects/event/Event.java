@@ -20,7 +20,7 @@ import java.util.Map;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Event {
-    private final long id;
+    private long id;
 
     @NotNull
     private String slug;

@@ -4,5 +4,5 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;
 
 public interface InsertNewEventAction {
-    void invoke(@NotNull Event event);
+    long invoke(@NotNull Event event);
 }
