@@ -65,6 +65,7 @@ membership:
 frontend:
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
+  transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}

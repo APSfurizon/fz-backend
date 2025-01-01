@@ -1,19 +1,21 @@
 package net.furizon.backend.infrastructure.rooms;
 
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.EXCHANGE_ACTION_TEXT;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.EXCHANGE_LINK;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.OWNER_FURSONA_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.ROOM_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.ROOM_TYPE_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailVars.SANITY_CHECK_REASON;
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
+import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
 
 public class RoomEmailTexts {
     public static final String SUBJECT_ROOM_PROBLEM = "There's a problem with your room reservation";
     public static final String SUBJECT_ROOM_UPDATE = "There's an update regarding your room reservation";
 
 
+    public static final String TITLE_RESERVATION_UPDATED = "Your accommodation got an update!";
     public static final String TITLE_ROOM_UPDATED = "Your room got an update!";
+    public static final String TITLE_ROOM_FAILED_SC = "Your accommodation has failed our sanity checks.";
 
 
     public static final String BODY_ROOM_HAS_NEW_OWNER = "You're receiving this email because the <b>owner of the room</b> you're into for the upcoming event <b>has changed</b>! The new owner is " + OWNER_FURSONA_NAME + "!";
@@ -43,4 +45,13 @@ public class RoomEmailTexts {
     public static final String SC_USER_IN_TOO_MANY_ROOMS = "User is in too many rooms!";
     public static final String SC_USER_HAS_DAILY_TICKET = "User has daily ticket!";
     public static final String SC_USER_HAS_NO_ORDER = "User has no registered order!";
+
+
+    public static final String TRANSFER_FULL_ORDER = "full order transfer";
+    public static final String TRANSFER_ROOM = "room transfer";
+    public static final String EXCHANGE_ROOM = "room exchange";
+
+
+
+    public static final String LANG_PRETIX = "en";
 }

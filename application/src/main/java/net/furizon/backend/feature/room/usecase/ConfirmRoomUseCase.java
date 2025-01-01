@@ -7,7 +7,9 @@ import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +18,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
 @Slf4j
 @Component
@@ -24,6 +31,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
+    @NotNull private final MailRoomService mailService;
 
     @Override
     public @NotNull Boolean executor(@NotNull ConfirmRoomUseCase.Input input) {
@@ -48,8 +56,14 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
             return false;
         }
 
-        //TODO EMAIL send email to everyone that room has been confirmed
-        return roomLogic.confirmRoom(roomId);
+        boolean res = roomLogic.confirmRoom(roomId);
+        if (res) {
+            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomId);
+            if (names != null) {
+                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_CONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+            }
+        }
+        return res;
     }
 
     public record Input(

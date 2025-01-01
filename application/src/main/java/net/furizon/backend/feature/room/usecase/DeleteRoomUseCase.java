@@ -5,11 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
 @Slf4j
 @Component
@@ -17,11 +25,13 @@ import org.springframework.stereotype.Component;
 public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boolean> {
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
+    @NotNull private final MailRoomService mailService;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         long requesterUserId = input.user.getUserId();
-        Event event = input.event;
+        PretixInformation pretixInformation = input.pretixInformation;
+        Event event = pretixInformation.getCurrentEvent();
 
         checks.assertInTimeframeToEditRooms();
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
@@ -31,13 +41,19 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
         );
         checks.assertRoomNotConfirmed(roomId);
 
-        //TODO EMAIL send an email to everyone that room has been deleted
-        return roomLogic.deleteRoom(roomId);
+        boolean res = roomLogic.deleteRoom(roomId);
+        if (res) {
+            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomId);
+            if (names != null) {
+                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_DELETED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+            }
+        }
+        return res;
     }
 
     public record Input(
             @NotNull FurizonUser user,
             @Nullable RoomIdRequest roomReq,
-            @NotNull Event event
+            @NotNull PretixInformation pretixInformation
     ) {}
 }

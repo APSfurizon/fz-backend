@@ -1,8 +1,8 @@
-package net.furizon.backend.infrastructure.rooms;
+package net.furizon.backend.infrastructure.email;
 
 import lombok.Getter;
 
-public enum RoomEmailVars {
+public enum EmailVars {
     OWNER_FURSONA_NAME(Format.ITALICS),
     FURSONA_NAME(Format.ITALICS),
     ROOM_NAME(Format.ITALICS),
@@ -15,7 +15,7 @@ public enum RoomEmailVars {
     @Getter
     private Format[] formats;
 
-    RoomEmailVars(Format ... format) {
+    EmailVars(Format ... format) {
         formats = format;
     }
 

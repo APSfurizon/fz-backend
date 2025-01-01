@@ -12,9 +12,12 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -23,8 +26,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
 @Slf4j
 @Component
@@ -34,6 +42,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
+    @NotNull private final MailRoomService mailService;
 
     @Override
     public @NotNull Boolean executor(@NotNull BuyUpgradeRoomUseCase.Input input) {
@@ -113,8 +122,14 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
-        //TODO EMAIL send email to everyone that room has been upgraded
-        return roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, newEarlyItemId, newLateItemId, order, event, pretixInformation);
+        boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, newEarlyItemId, newLateItemId, order, event, pretixInformation);
+        if (res && oldRoomId != null) {
+            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
+            if (names != null) {
+                mailService.broadcastUpdate(oldRoomId, TITLE_ROOM_UPDATED, BODY_ROOM_WAS_UPGRADED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+            }
+        }
+        return res;
     }
 
     private long getPaid(@Nullable Long positionId, @NotNull Event event) {

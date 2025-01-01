@@ -7,7 +7,11 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.email.model.TemplateMessage;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.mail.MailException;
@@ -19,14 +23,38 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class EmailSenderService implements EmailSender {
-    private final JavaMailSender mailSender;
+    @NotNull private final UserFinder userFinder;
 
-    private final TemplateEngine templateEngine;
-
-    private final AsyncTaskExecutor asyncTaskExecutor;
+    @NotNull private final JavaMailSender mailSender;
+    @NotNull private final AsyncTaskExecutor asyncTaskExecutor;
+    @NotNull private final TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String from;
+
+    @Override
+    public void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody) {
+        UserEmailData data = userFinder.getMailDataForUser(userId);
+        if (data == null) {
+            log.error("Could not find mail data for user {}", userId);
+            return;
+        }
+
+        String mail = data.getEmail();
+        log.info("Sending email to user {} ({}) with subject '{}' and title '{}'", userId, mail, subject, title);
+        fireAndForget(
+            MailRequest.builder()
+                .to(mail)
+                .subject(subject)
+                .templateMessage(
+                    TemplateMessage.of("old_template.jte")
+                        .addParam("fursonaName", data.getFursonaName())
+                        .addParam("title", title)
+                        .addParam("body", mailBody)
+                )
+                .build()
+        );
+    }
 
     @Override
     public void send(MailRequest request) throws MessagingException, MailException {
