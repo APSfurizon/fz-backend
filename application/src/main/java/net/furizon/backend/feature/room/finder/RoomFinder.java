@@ -23,6 +23,9 @@ public interface RoomFinder {
     int countRoomsWithUser(long userId, long eventId);
 
     @Nullable
+    String getRoomName(long roomId);
+
+    @Nullable
     RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     @Nullable

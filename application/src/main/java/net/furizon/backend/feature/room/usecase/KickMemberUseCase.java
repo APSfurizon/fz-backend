@@ -16,8 +16,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.*;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
 @Slf4j
@@ -49,8 +48,10 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         boolean res = roomLogic.kickFromRoom(guestId);
         if (res) {
             UserEmailData data = userFinder.getMailDataForUser(requesterUserId);
-            if (data != null) {
-                mailService.sendUpdate(targetUserId, TITLE_ROOM_UPDATED, BODY_KICKED_FROM_ROOM, new MailVarPair(OWNER_FURSONA_NAME, data.getFursonaName()));
+            String roomName = roomFinder.getRoomName(roomId);
+            if (data != null && roomName != null) {
+                roomName = roomName.replaceAll("[^a-zA-Z0-9 \\\\/+\\-!?$()=]", "");
+                mailService.sendUpdate(targetUserId, TITLE_RESERVATION_UPDATED, BODY_KICKED_FROM_ROOM, new MailVarPair(OWNER_FURSONA_NAME, data.getFursonaName()), new MailVarPair(ROOM_NAME, roomName));
             }
         }
         return res;

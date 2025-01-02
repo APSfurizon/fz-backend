@@ -1,3 +1,8 @@
 package net.furizon.backend.infrastructure.email;
 
-public record MailVarPair(EmailVars var, String value) {}
+import org.jetbrains.annotations.NotNull;
+
+public record MailVarPair(
+        @NotNull EmailVars var,
+        @NotNull String value
+) {}

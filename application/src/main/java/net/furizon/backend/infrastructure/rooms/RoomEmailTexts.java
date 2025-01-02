@@ -15,7 +15,8 @@ public class RoomEmailTexts {
 
     public static final String TITLE_RESERVATION_UPDATED = "Your accommodation got an update!";
     public static final String TITLE_ROOM_UPDATED = "Your room got an update!";
-    public static final String TITLE_ROOM_FAILED_SC = "Your accommodation has failed our sanity checks.";
+    public static final String TITLE_ROOM_FAILED_SC = "Your room has failed our sanity checks.";
+    public static final String TITLE_ACCOMMODATION_FAILED_SC = "Your accommodation has failed our sanity checks.";
 
 
     public static final String BODY_ROOM_HAS_NEW_OWNER = "You're receiving this email because the <b>owner of the room</b> you're into for the upcoming event <b>has changed</b>! The new owner is " + OWNER_FURSONA_NAME + "!";
@@ -39,9 +40,9 @@ public class RoomEmailTexts {
     public static final String SC_OWNER_HAS_NOT_BOUGHT_ROOM = "Room's owner has not bought a room!";
     public static final String SC_OWNER_HAS_DAILY_TICKET = "Room's owner has daily ticket!";
     public static final String SC_OWNER_IN_TOO_MANY_ROOMS = "Room's owner is in too many rooms!";
-    public static final String SC_OWNER_ORDER_INVALID_ORDER_STATUS = "Room's owner order is not in 'Paid' or 'Pending' status!";
+    public static final String SC_OWNER_ORDER_INVALID_ORDER_STATUS = "Room's owner order is not in <i>Paid</i> or <i>Pending</i> status!";
     public static final String SC_OWNER_NOT_IN_ROOM = "Room's owner is not a room member!";
-    public static final String SC_USER_ORDER_INVALID_ORDER_STATUS = "User order is not in 'Paid' or 'Pending' status!";
+    public static final String SC_USER_ORDER_INVALID_ORDER_STATUS = "User order is not in <i>Paid</i> or <i>Pending</i> status!";
     public static final String SC_USER_IN_TOO_MANY_ROOMS = "User is in too many rooms!";
     public static final String SC_USER_HAS_DAILY_TICKET = "User has daily ticket!";
     public static final String SC_USER_HAS_NO_ORDER = "User has no registered order!";

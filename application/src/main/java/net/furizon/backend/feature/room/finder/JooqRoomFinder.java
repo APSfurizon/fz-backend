@@ -107,6 +107,15 @@ public class JooqRoomFinder implements RoomFinder {
         );
     }
 
+    @Override
+    public @Nullable String getRoomName(long roomId) {
+        return query.fetchFirst(
+                PostgresDSL.select(ROOMS.ROOM_NAME)
+                .from(ROOMS)
+                .where(ROOMS.ROOM_ID.eq(roomId))
+        ).mapOrNull(r -> r.get(ROOMS.ROOM_NAME));
+    }
+
     @Nullable
     @Override
     public RoomInfo getRoomInfoForUser(
