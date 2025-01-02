@@ -116,7 +116,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                     if (quota != null && data != null) {
                         return new RoomAvailabilityInfoResponse(
                             data,
-                            PretixGenericUtils.fromPriceToString(roomPrice, '.'),
+                            PretixGenericUtils.fromPriceToString(totalPrice, '.'),
                             quota
                         );
                     }
