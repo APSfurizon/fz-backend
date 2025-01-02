@@ -74,7 +74,7 @@ public class RoomController {
                 new DeleteRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation
                 )
         );
     }
@@ -282,7 +282,7 @@ public class RoomController {
                 new UnconfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation
                 )
         );
     }
