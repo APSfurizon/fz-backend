@@ -33,11 +33,39 @@ public class EmailSenderService implements EmailSender {
     private String from;
 
     @Override
-    public void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody) {
+    public void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
         UserEmailData data = userFinder.getMailDataForUser(userId);
         if (data == null) {
             log.error("Could not find mail data for user {}", userId);
             return;
+        }
+
+        for (MailVarPair pair : vars) {
+            if (pair != null) {
+                EmailVars var = pair.var();
+                StringBuilder pre = new StringBuilder();
+                StringBuilder post = new StringBuilder();
+                for (EmailVars.Format format : var.getFormats()) {
+                    switch (format) {
+                        case ITALICS: {
+                            pre.append("<i>");
+                            post.insert(0, "</i>");
+                            break;
+                        }
+                        case BOLD: {
+                            pre.append("<b>");
+                            post.insert(0, "</b>");
+                            break;
+                        }
+                        case LINK: {
+                            //Purposely do nothing
+                            break;
+                        }
+                        default: throw new IllegalStateException("Unexpected value: " + format);
+                    }
+                }
+                mailBody.replace(var.toString(), pre.toString() + pair.value() + post.toString());
+            }
         }
 
         String mail = data.getEmail();

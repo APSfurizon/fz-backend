@@ -9,7 +9,7 @@ import org.springframework.mail.MailException;
 
 public interface EmailSender {
     @NonBlocking
-    void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody);
+    void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars);
 
     @Blocking
     void send(MailRequest request) throws MessagingException, MailException;
