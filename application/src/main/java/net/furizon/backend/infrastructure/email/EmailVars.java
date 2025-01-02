@@ -9,7 +9,10 @@ public enum EmailVars {
     ROOM_TYPE_NAME(Format.ITALICS),
     EXCHANGE_ACTION_TEXT(Format.BOLD),
     EXCHANGE_LINK(Format.LINK),
-    SANITY_CHECK_REASON(Format.BOLD)
+    SANITY_CHECK_REASON(Format.BOLD),
+    EVENT_NAME(Format.ITALICS),
+    ORDER_CODE(Format.BOLD),
+    DUPLICATE_ORDER_CODE(Format.BOLD),
     ;
 
     @Getter

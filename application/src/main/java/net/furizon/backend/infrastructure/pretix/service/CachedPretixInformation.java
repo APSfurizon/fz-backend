@@ -26,7 +26,7 @@ import net.furizon.backend.feature.pretix.objects.quota.usecase.ReloadQuotaUseCa
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
@@ -55,7 +55,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
-import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_USERID;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_ACCOUNT_USERID;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +96,8 @@ public class CachedPretixInformation implements PretixInformation {
     //Questions
     @NotNull
     private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
+    @NotNull
+    private final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
     @NotNull
     private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
@@ -257,6 +260,13 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    public long getQuestionDuplicateData() {
+        lock.readLock().lock();
+        var v = questionDuplicateData.get();
+        lock.readLock().unlock();
+        return v;
+    }
+
     @NotNull
     @Override
     public Optional<QuestionType> getQuestionTypeFromId(long id) {
@@ -303,7 +313,11 @@ public class CachedPretixInformation implements PretixInformation {
             BiFunction<CacheItemTypes, @NotNull Long, @NotNull Boolean> checkItemId = (type, item) ->
                     Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
 
+            long questionUserId = this.getQuestionUserId();
+            long questionDuplicateData = this.getQuestionDuplicateData();
+
             boolean hasTicket = false; //If no ticket is found, we don't store the order at all
+            boolean foundDuplicate = false;
             OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
 
             Set<Integer> days = new HashSet<>();
@@ -325,6 +339,7 @@ public class CachedPretixInformation implements PretixInformation {
                 status = OrderStatus.CANCELED;
             }
 
+            positionLoop:
             for (PretixPosition position : positions) {
                 if (position.isCanceled()) {
                     continue;
@@ -341,12 +356,20 @@ public class CachedPretixInformation implements PretixInformation {
                         var questionType = getQuestionTypeFromId(questionId);
                         if (questionType.isPresent()) {
                             if (questionType.get() == QuestionType.FILE) {
-                                answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
+                                answer.setAnswer(PretixConst.QUESTIONS_FILE_KEEP);
                             }
-                            if (questionId == this.getQuestionUserId()) {
+                            if (questionId == questionUserId) {
                                 String s = answer.getAnswer();
                                 if (s != null && !s.isBlank()) {
                                     userId = Long.parseLong(s);
+                                }
+                            } else if (questionId == questionDuplicateData) {
+                                String s = answer.getAnswer();
+                                if (s == null || s.isBlank()) {
+                                    log.warn("Order was already marked as duplicate. "
+                                            + "Skipping it. Duplicate data: {}", s);
+                                    foundDuplicate = true;
+                                    break positionLoop;
                                 }
                             }
                         }
@@ -395,7 +418,7 @@ public class CachedPretixInformation implements PretixInformation {
                 }
             }
 
-            if (!hasTicket) {
+            if (!hasTicket || foundDuplicate) {
                 return Optional.empty();
             }
 
@@ -498,6 +521,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Questions
         questionUserId.set(-1L);
+        questionDuplicateData.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
@@ -554,6 +578,15 @@ public class CachedPretixInformation implements PretixInformation {
         if (accountUserId != null) {
             log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
             questionUserId.set(accountUserId);
+        } else {
+            log.warn("[PRETIX] Question account user id not found");
+        }
+        Long duplicateData = questionIdentifierToId.getIfPresent(QUESTIONS_DUPLICATE_DATA);
+        if (duplicateData != null) {
+            log.info("[PRETIX] Question duplicate data found, setup it on value = '{}'", duplicateData);
+            questionDuplicateData.set(duplicateData);
+        } else {
+            log.warn("[PRETIX] Question duplicate data not found");
         }
     }
 

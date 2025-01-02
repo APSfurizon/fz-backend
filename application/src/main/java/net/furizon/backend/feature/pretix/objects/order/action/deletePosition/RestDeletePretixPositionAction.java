@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
-import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
 @Slf4j
 @Component

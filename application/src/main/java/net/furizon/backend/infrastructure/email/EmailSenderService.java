@@ -32,14 +32,17 @@ public class EmailSenderService implements EmailSender {
     @Value("${spring.mail.username}")
     private String from;
 
-    @Override
     public void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
         UserEmailData data = userFinder.getMailDataForUser(userId);
         if (data == null) {
             log.error("Could not find mail data for user {}", userId);
             return;
         }
+        send(data, subject, title, mailBody, vars);
+    }
 
+    @Override
+    public void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
         for (MailVarPair pair : vars) {
             if (pair != null) {
                 EmailVars var = pair.var();
@@ -68,15 +71,16 @@ public class EmailSenderService implements EmailSender {
             }
         }
 
-        String mail = data.getEmail();
-        log.info("Sending email to user {} ({}) with subject '{}' and title '{}'", userId, mail, subject, title);
+        String mail = emailData.getEmail();
+        log.info("Sending email to user {} ({}) with subject '{}' and title '{}'",
+                emailData.getUserId(), mail, subject, title);
         fireAndForget(
             MailRequest.builder()
                 .to(mail)
                 .subject(subject)
                 .templateMessage(
                     TemplateMessage.of("old_template.jte")
-                        .addParam("fursonaName", data.getFursonaName())
+                        .addParam("fursonaName", emailData.getFursonaName())
                         .addParam("title", title)
                         .addParam("body", mailBody)
                 )

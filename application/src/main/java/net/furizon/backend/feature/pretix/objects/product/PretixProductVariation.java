@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.objects.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +25,6 @@ public class PretixProductVariation {
 
     @Nullable
     public String getIdentifier() {
-        return metadata.get(Const.METADATA_IDENTIFIER_ITEM);
+        return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
     }
 }

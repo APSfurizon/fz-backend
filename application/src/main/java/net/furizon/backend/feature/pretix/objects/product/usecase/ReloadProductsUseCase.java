@@ -7,7 +7,7 @@ import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -39,8 +39,8 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 long productId = product.getId();
                 result.itemIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
 
-                if (identifier.startsWith(Const.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
-                    String s = identifier.substring(Const.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
+                if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
+                    String s = identifier.substring(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
                     String[] sp = s.split("_");
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
                     String hotelName = sp[1];
@@ -53,15 +53,15 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         result.lateDaysItemId().put(hcPair, productId);
                     }
 
-                } else if (identifier.startsWith(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
-                    String s = identifier.substring(Const.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
+                } else if (identifier.startsWith(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
+                    String s = identifier.substring(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
                     int day = Integer.parseInt(s);
                     result.dailyIdToDay().put(productId, day);
 
-                } else if (identifier.startsWith(Const.METADATA_ROOM_TYPE_TAG_PREFIX)) {
+                } else if (identifier.startsWith(PretixConst.METADATA_ROOM_TYPE_TAG_PREFIX)) {
                     result.roomItemIds().add(productId);
-                    String s = identifier.substring(Const.METADATA_ROOM_TYPE_TAG_PREFIX.length());
-                    if (s.equals(Const.METADATA_ROOM_NO_ROOM_ITEM)) {
+                    String s = identifier.substring(PretixConst.METADATA_ROOM_TYPE_TAG_PREFIX.length());
+                    if (s.equals(PretixConst.METADATA_ROOM_NO_ROOM_ITEM)) {
                         result.noRoomItemIds().add(productId);
                     } else {
                         String[] sp = s.split("_");
@@ -74,18 +74,18 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
 
                 } else {
                     switch (identifier) {
-                        case Const.METADATA_EVENT_TICKET: {
+                        case PretixConst.METADATA_EVENT_TICKET: {
                             result.ticketItemIds().add(productId);
                             break;
                         }
-                        case Const.METADATA_MEMBERSHIP_CARD: {
+                        case PretixConst.METADATA_MEMBERSHIP_CARD: {
                             result.membershipCardItemIds().add(productId);
                             break;
                         }
-                        case Const.METADATA_SPONSORSHIP: {
+                        case PretixConst.METADATA_SPONSORSHIP: {
                             result.sponsorshipItemIds().add(productId);
                             product.forEachVariationByIdentifierPrefix(
-                                Const.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
+                                PretixConst.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
                                 (variation, strippedIdentifier) -> {
                                     Sponsorship ss = Sponsorship.get(Integer.parseInt(strippedIdentifier));
                                     result.sponsorshipIdToType().put(variation.getId(), ss);

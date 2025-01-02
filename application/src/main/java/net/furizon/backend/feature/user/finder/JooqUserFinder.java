@@ -93,6 +93,7 @@ public class JooqUserFinder implements UserFinder {
         return sqlQuery.fetchFirst(
                 PostgresDSL
                 .select(
+                        USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         AUTHENTICATIONS.AUTHENTICATION_EMAIL
                 )

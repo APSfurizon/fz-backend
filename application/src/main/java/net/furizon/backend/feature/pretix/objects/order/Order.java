@@ -14,7 +14,7 @@ import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -147,12 +147,12 @@ public class Order {
     public void setOrderOwnerUserId(long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
-        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
         orderOwnerUserId = orderOwner.getId();
-        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public @Nullable User getOrderOwner() {
         if (orderOwner == null && orderOwnerUserId != null && orderOwnerUserId >= 0L) {
@@ -284,7 +284,7 @@ public class Order {
                         case BOOLEAN -> value.equalsIgnoreCase("true")
                             || value.equalsIgnoreCase("yes");
                         case LIST_MULTIPLE_CHOICE -> value.split(", ");
-                        case FILE -> Const.QUESTIONS_FILE_KEEP;
+                        case FILE -> PretixConst.QUESTIONS_FILE_KEEP;
                         case DATE -> LocalDate.parse(value);
                         case TIME -> LocalTime.parse(value);
                         case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);
