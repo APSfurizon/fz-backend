@@ -1,7 +1,9 @@
 package net.furizon.backend.feature.pretix.objects.order.action.upsertOrder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -11,12 +13,15 @@ import org.springframework.stereotype.Component;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JooqUpsertOrderAction implements UpsertOrderAction {
-    private final SqlCommand command;
+    @NotNull private final SqlCommand command;
 
-    private final JsonSerializer jsonSerializer;
+    @NotNull private final UserFinder userFinder;
+
+    @NotNull private final JsonSerializer jsonSerializer;
 
     @Override
     public void invoke(
@@ -40,6 +45,15 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
         long eventId = order.getOrderEvent().getId();
         var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
+
+        if (userId != null) {
+            var r = userFinder.getMailDataForUser(userId);
+            if (r == null) {
+                log.warn("[PRETIX] User with id {} not found while upserting order in DB. Setting it to null", userId);
+                order.setOrderOwnerUserId(null);
+                userId = null;
+            }
+        }
 
         command.execute(
             PostgresDSL

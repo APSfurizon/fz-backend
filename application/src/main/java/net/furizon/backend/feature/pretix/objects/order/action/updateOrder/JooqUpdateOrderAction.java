@@ -1,8 +1,10 @@
 package net.furizon.backend.feature.pretix.objects.order.action.updateOrder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.user.User;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -14,19 +16,30 @@ import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JooqUpdateOrderAction implements UpdateOrderAction {
-    private final SqlCommand command;
+    @NotNull private final SqlCommand command;
 
-    private final JsonSerializer serializer;
+    @NotNull private final UserFinder userFinder;
+
+    @NotNull private final JsonSerializer serializer;
 
     @Override
     public void invoke(
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
-        final var userId = Optional.ofNullable(order.getOrderOwner()).map(User::getId).orElse(null);
+        Long userId = Optional.ofNullable(order.getOrderOwner()).map(User::getId).orElse(null);
+        if (userId != null) {
+            var r = userFinder.getMailDataForUser(userId);
+            if (r == null) {
+                log.warn("[PRETIX] User with id {} not found while updating order in DB. Setting it to null", userId);
+                order.setOrderOwnerUserId(null);
+                userId = null;
+            }
+        }
 
         command.execute(
             PostgresDSL

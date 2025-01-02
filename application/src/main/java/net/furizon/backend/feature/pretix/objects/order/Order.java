@@ -144,7 +144,7 @@ public class Order {
         this.hasMembership = membership;
     }
 
-    public void setOrderOwnerUserId(long userId) {
+    public void setOrderOwnerUserId(@Nullable Long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
         setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
@@ -191,6 +191,10 @@ public class Order {
         return answers.remove(questionIdentifier) != null;
     }
     public void setAnswer(String questionIdentifier, Object answer) {
+        if (answer == null) {
+            deleteAnswer(questionIdentifier);
+            return;
+        }
         if (answer instanceof String
             || answer instanceof Float
             || answer instanceof Boolean
