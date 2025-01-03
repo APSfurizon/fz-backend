@@ -394,7 +394,7 @@ public class RoomController {
         + "the one specified. Admin checks are done over the userId to check if the logged "
         + "user can operate on it")
     @PostMapping("/exchange/init")
-    public void initTransferExchange(
+    public boolean initTransferExchange(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final ExchangeRequest req
     ) {
@@ -419,7 +419,7 @@ public class RoomController {
             );
         };
         if (success) {
-            executor.execute(
+            success = executor.execute(
                     InitializeExchangeFlowUseCase.class,
                     new InitializeExchangeFlowUseCase.Input(
                             user,
@@ -428,6 +428,7 @@ public class RoomController {
                     )
             );
         }
+        return success;
     }
 
     @Operation(summary = "Updates the exchange status, and if both parties have confirmed, actually run the exchange", description =
