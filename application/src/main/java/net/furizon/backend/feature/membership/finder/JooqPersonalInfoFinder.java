@@ -36,6 +36,7 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
                             MEMBERSHIP_INFO.INFO_CITY,
                             MEMBERSHIP_INFO.INFO_REGION,
                             MEMBERSHIP_INFO.INFO_COUNTRY,
+                            MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                             MEMBERSHIP_INFO.INFO_PHONE,
                             MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                             MEMBERSHIP_INFO.USER_ID

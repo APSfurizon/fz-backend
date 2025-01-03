@@ -14,11 +14,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 
+import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.tables.MembershipInfo.MEMBERSHIP_INFO;
 
@@ -31,14 +31,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
 
     @Override
     public int countCardsPerUserPerEvent(long userId, @NotNull Event event) {
-        OffsetDateTime from = event.getDateFrom();
-        if (from == null) {
-            log.error("From date was unavailable for event {}. Falling back to Date.now()", event.getSlug());
-            from = OffsetDateTime.now();
-        }
-
-        LocalDate date = from.toLocalDate();
-        short year = membershipYearUtils.getMembershipYear(date);
+        short year = event.getMembershipYear(membershipYearUtils);
 
         return sqlQuery.count(
                 PostgresDSL
@@ -102,7 +95,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
-                        USERS.MEDIA_ID_PROPIC
+                        MEDIA.MEDIA_PATH,
+                        ORDERS.ORDER_SPONSORSHIP_TYPE //We always will return this equal to null
                 )
                 .from(MEMBERSHIP_CARDS)
                 .innerJoin(USERS)
@@ -112,6 +106,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 )
                 .innerJoin(MEMBERSHIP_INFO)
                 .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+                .leftJoin(MEDIA)
+                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(r -> r.map(FullInfoMembershipMapper::map)).toList();
     }
 }

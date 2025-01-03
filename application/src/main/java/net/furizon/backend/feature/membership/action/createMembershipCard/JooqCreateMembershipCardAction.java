@@ -8,13 +8,11 @@ import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.jooq.infrastructure.JooqOptional;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 
@@ -27,23 +25,9 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
     private final SqlQuery sqlQuery;
 
     @Override
-    public synchronized void invoke(long userId, @Nullable Event event, @Nullable Order order) {
+    public synchronized void invoke(long userId, @NotNull Event event, @Nullable Order order) {
         Long orderId = order == null ? null : order.getId();
-
-        OffsetDateTime from;
-        if (event != null) {
-            from = event.getDateFrom();
-            if (from == null) {
-                log.error("From date was unavailable for event {}. Falling back to Date.now()", event.getSlug());
-                from = OffsetDateTime.now();
-            }
-        } else {
-            log.error("Event object was not provided. Falling back to Date.now()");
-            from = OffsetDateTime.now();
-        }
-
-        LocalDate date = from.toLocalDate();
-        short year = membershipYearUtils.getMembershipYear(date);
+        short year = event.getMembershipYear(membershipYearUtils);
 
         //We don't use sequence because we need to keep multiple active seqs at the same time
         //The choice has been between this couple of lines of code and multiple lines to
@@ -52,9 +36,15 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
         JooqOptional<Record1<Integer>> r = sqlQuery.fetchFirst(
             PostgresDSL.select(
                 PostgresDSL.max(MEMBERSHIP_CARDS.ID_IN_YEAR)
-            ).where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+            )
+            .from(MEMBERSHIP_CARDS)
+            .where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
         );
-        int id = r.isPresent() ? r.get().get(1, Integer.class) + 1 : 1;
+        int id = 1;
+        if (r.isPresent()) {
+            var res = r.get().get(0);
+            id = res == null ? 1 : ((int) res) + 1;
+        }
 
         sqlCommand.execute(
                 PostgresDSL.insertInto(

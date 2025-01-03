@@ -82,6 +82,11 @@ public class RoomGuests extends TableImpl<Record> {
      */
     public final TableField<Record, Long> ROOM_ID = createField(DSL.name("room_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
+    /**
+     * The column <code>public.room_guests.confirmed</code>.
+     */
+    public final TableField<Record, Boolean> CONFIRMED = createField(DSL.name("confirmed"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
     private RoomGuests(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

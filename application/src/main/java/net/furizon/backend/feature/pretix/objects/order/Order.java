@@ -11,9 +11,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -41,7 +42,6 @@ import java.util.TreeSet;
 @Slf4j
 public class Order {
     @NotNull
-    @Setter(AccessLevel.NONE)
     private final String code;
 
     @NotNull
@@ -58,11 +58,14 @@ public class Order {
     @NotNull
     private final Set<Integer> dailyDays;
 
+    @Nullable
+    @Builder.Default
+    private Long pretixRoomItemId = -1L;
     @Builder.Default
     private short roomCapacity = 0; // 0 = has no room
-
     @Nullable
-    private String hotelLocation;
+    private String hotelInternalName;
+
 
     @NotNull
     private String pretixOrderSecret;
@@ -74,7 +77,17 @@ public class Order {
     private boolean hasMembership = false;
 
     @Builder.Default
-    private int answersMainPositionId = -1;
+    private long ticketPositionId = -1L;
+    @Builder.Default
+    private long ticketPositionPosid = -1L;
+    @Nullable
+    private Long roomPositionId;
+    @Nullable
+    private Long roomPositionPosid;
+    @Nullable
+    private Long earlyPositionId;
+    @Nullable
+    private Long latePositionId;
 
     @Nullable
     @Builder.Default
@@ -123,6 +136,11 @@ public class Order {
         return ret;
     }
 
+    //we can't use roomPositionId to validate, since it IS set even when we have a NO_ROOM item
+    public boolean hasRoom() {
+        return roomCapacity > 0;
+    }
+
     public boolean hasMembership() {
         return hasMembership;
     }
@@ -130,15 +148,15 @@ public class Order {
         this.hasMembership = membership;
     }
 
-    public void setOrderOwnerUserId(long userId) {
+    public void setOrderOwnerUserId(@Nullable Long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
-        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
         orderOwnerUserId = orderOwner.getId();
-        setAnswer(Const.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
     }
     public @Nullable User getOrderOwner() {
         if (orderOwner == null && orderOwnerUserId != null && orderOwnerUserId >= 0L) {
@@ -157,6 +175,14 @@ public class Order {
         return orderEvent;
     }
 
+    public @Nullable RoomData getBoughtRoomData(PretixInformation pretixInformation) {
+        return pretixRoomItemId == null ? null : new RoomData(
+                roomCapacity,
+                pretixRoomItemId,
+                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixRoomItemId)
+        );
+    }
+
 
     @NotNull
     public Optional<Object> getAnswer(String questionIdentifier) {
@@ -169,6 +195,10 @@ public class Order {
         return answers.remove(questionIdentifier) != null;
     }
     public void setAnswer(String questionIdentifier, Object answer) {
+        if (answer == null) {
+            deleteAnswer(questionIdentifier);
+            return;
+        }
         if (answer instanceof String
             || answer instanceof Float
             || answer instanceof Boolean
@@ -197,7 +227,7 @@ public class Order {
                 continue;
             }
 
-            int id = questionId.get();
+            long id = questionId.get();
             var type = pretixInformation.getQuestionTypeFromId(id);
             if (type.isEmpty()) {
                 continue;
@@ -241,7 +271,7 @@ public class Order {
         public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
             this.answers = new HashMap<>();
             for (PretixAnswer answer : answers) {
-                int questionId = answer.getQuestionId();
+                long questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);
                 if (identifier.isEmpty()) {
                     throw new IllegalArgumentException("Answer identifier is empty");
@@ -262,7 +292,7 @@ public class Order {
                         case BOOLEAN -> value.equalsIgnoreCase("true")
                             || value.equalsIgnoreCase("yes");
                         case LIST_MULTIPLE_CHOICE -> value.split(", ");
-                        case FILE -> Const.QUESTIONS_FILE_KEEP;
+                        case FILE -> PretixConst.QUESTIONS_FILE_KEEP;
                         case DATE -> LocalDate.parse(value);
                         case TIME -> LocalTime.parse(value);
                         case DATE_TIME -> ZonedDateTime.parse(value, PretixGenericUtils.PRETIX_DATETIME_FORMAT);

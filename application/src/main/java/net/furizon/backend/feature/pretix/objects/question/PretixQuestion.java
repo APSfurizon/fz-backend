@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Data
 public class PretixQuestion {
-    private final int id;
+    private final long id;
 
     @NotNull
     private final QuestionType type;

@@ -9,16 +9,28 @@ import java.util.List;
 @Data
 public class PretixPosition {
     @JsonProperty("item")
-    private final int itemId;
+    private final long itemId;
 
     @JsonProperty("id")
-    private final int positionId;
+    private final long positionId;
+
+    @JsonProperty("positionid")
+    private final long positionPosid;
 
     @JsonProperty("variation")
-    private final int variationId;
+    private final long variationId;
 
     @NotNull
     private final List<PretixAnswer> answers;
+
+    @NotNull //Price ALWAYS include taxes
+    private final String price;
+    @NotNull
+    @JsonProperty("tax_rate")
+    private final String taxRate;
+    @NotNull
+    @JsonProperty("tax_value")
+    private final String taxValue;
 
     private final boolean canceled;
 }

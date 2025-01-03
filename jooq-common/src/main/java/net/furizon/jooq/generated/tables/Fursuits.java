@@ -94,6 +94,11 @@ public class Fursuits extends TableImpl<Record> {
      */
     public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
 
+    /**
+     * The column <code>public.fursuits.show_in_fursuitcount</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_IN_FURSUITCOUNT = createField(DSL.name("show_in_fursuitcount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
+
     private Fursuits(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

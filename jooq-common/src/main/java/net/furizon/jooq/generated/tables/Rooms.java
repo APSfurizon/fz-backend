@@ -85,7 +85,7 @@ public class Rooms extends TableImpl<Record> {
     /**
      * The column <code>public.rooms.order_id</code>.
      */
-    public final TableField<Record, Integer> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private Rooms(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -163,6 +163,11 @@ public class Rooms extends TableImpl<Record> {
     @Override
     public UniqueKey<Record> getPrimaryKey() {
         return Keys.ROOMS_PKEY;
+    }
+
+    @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.ROOMS_ONLY_ONE_ORDER);
     }
 
     @Override

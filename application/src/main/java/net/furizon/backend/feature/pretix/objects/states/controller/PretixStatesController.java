@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixCountryResponse;
 import net.furizon.backend.feature.pretix.objects.states.dto.PretixStateResponse;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +41,7 @@ public class PretixStatesController {
         "Chosen country should be sent back to the backend as ISO 3166-1 A-2")
     @GetMapping("/get-countries")
     public PretixCountryResponse getCountries() {
-        var countries = pretixInformation.getStatesOfCountry(Const.ALL_COUNTRIES_STATE_KEY);
+        var countries = pretixInformation.getStatesOfCountry(PretixConst.ALL_COUNTRIES_STATE_KEY);
         return new PretixCountryResponse(countries);
     }
 }

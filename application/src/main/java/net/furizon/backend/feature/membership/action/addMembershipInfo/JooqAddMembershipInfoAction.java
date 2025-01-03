@@ -5,7 +5,6 @@ import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +13,10 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @Component
 @RequiredArgsConstructor
 public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
-    private final SqlCommand sqlCommand;
+    @NotNull private final SqlCommand sqlCommand;
 
     @Override
-    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @Nullable Event event) {
-        Long eventId = event == null ? null : event.getId();
-
+    public void invoke(long userId, @NotNull PersonalUserInformation personalUserInformation, @NotNull Event event) {
         sqlCommand.execute(
             PostgresDSL
                 .insertInto(
@@ -36,6 +33,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     MEMBERSHIP_INFO.INFO_CITY,
                     MEMBERSHIP_INFO.INFO_REGION,
                     MEMBERSHIP_INFO.INFO_COUNTRY,
+                    MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                     MEMBERSHIP_INFO.INFO_PHONE,
                     MEMBERSHIP_INFO.USER_ID,
                     MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID
@@ -53,9 +51,10 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getResidenceCity(),
                     personalUserInformation.getResidenceRegion(),
                     personalUserInformation.getResidenceCountry(),
+                    personalUserInformation.getPrefixPhoneNumber(),
                     personalUserInformation.getPhoneNumber(),
                     userId,
-                    eventId
+                    event.getId()
                 )
         );
     }

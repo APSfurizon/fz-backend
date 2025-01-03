@@ -81,6 +81,11 @@ public class PersonalUserInformation {
     @Size(min = 2)
     private final String phoneNumber;
 
+    @NotNull
+    @NotEmpty
+    @Size(min = 2)
+    private final String prefixPhoneNumber;
+
     private final long lastUpdatedEventId;
 
     private final long userId;

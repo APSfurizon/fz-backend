@@ -20,4 +20,6 @@ public class User {
 
     @Nullable
     private final Long propicId;
+
+    private final boolean showInNoseCount;
 }

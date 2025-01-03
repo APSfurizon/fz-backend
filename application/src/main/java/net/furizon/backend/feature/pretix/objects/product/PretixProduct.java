@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.objects.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,11 @@ import java.util.function.BiConsumer;
 
 @Data
 public class PretixProduct {
-    private final int id;
+    private final long id;
+
+    @NotNull
+    @JsonProperty("default_price")
+    private final String price;
 
     @NotNull
     @JsonProperty("meta_data")
@@ -27,7 +31,7 @@ public class PretixProduct {
 
     @Nullable
     public String getIdentifier() {
-        return metadata.get(Const.METADATA_IDENTIFIER_ITEM);
+        return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
     }
 
     public void forEachVariationByIdentifierPrefix(
