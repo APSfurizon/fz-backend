@@ -58,9 +58,12 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
 
         boolean res = roomLogic.confirmRoom(roomId);
         if (res) {
-            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomId);
-            if (names != null) {
-                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_CONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+            Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
+            if (roomItemId != null) {
+                Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
+                if (names != null && !names.isEmpty()) {
+                    mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_CONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                }
             }
         }
         return res;

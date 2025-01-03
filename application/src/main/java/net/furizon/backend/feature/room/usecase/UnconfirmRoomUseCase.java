@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
+import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -23,6 +24,7 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 @Component
 @RequiredArgsConstructor
 public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input, Boolean> {
+    @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
@@ -44,9 +46,12 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
 
         boolean res = roomLogic.unconfirmRoom(roomId);
         if (res) {
-            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomId);
-            if (names != null) {
-                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_UNCONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+            Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
+            if (roomItemId != null) {
+                Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
+                if (names != null) {
+                    mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_UNCONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                }
             }
         }
         return res;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.finder;
 
+import jakarta.validation.constraints.Null;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.RoomData;
@@ -65,4 +66,7 @@ public interface RoomFinder {
 
     @NotNull
     Optional<Short> getRoomCapacity(long roomId);
+
+    @Nullable
+    Long getRoomItemIdFromRoomId(long roomId);
 }
