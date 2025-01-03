@@ -39,7 +39,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String orderSecret = order.getPretixOrderSecret();
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
+        long ticketPosid = order.getTicketPositionPosid();
         Long roomPositionId = order.getRoomPositionId();
+        Long roomPosid = order.getRoomPositionPosid();
         Long earlyPositionId = order.getEarlyPositionId();
         Long latePositionId = order.getLatePositionId();
         Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
@@ -71,7 +73,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_TICKET_POSITION_ID,
+                    ORDERS.ORDER_TICKET_POSITION_POSITIONID,
                     ORDERS.ORDER_ROOM_POSITION_ID,
+                    ORDERS.ORDER_ROOM_POSITION_POSITIONID,
                     ORDERS.ORDER_EARLY_POSITION_ID,
                     ORDERS.ORDER_LATE_POSITION_ID,
                     ORDERS.USER_ID,
@@ -91,7 +95,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     orderSecret,
                     membership,
                     ticketPositionId,
+                    ticketPosid,
                     roomPositionId,
+                    roomPosid,
                     earlyPositionId,
                     latePositionId,
                     userId,
@@ -110,7 +116,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_SECRET, orderSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
                 .set(ORDERS.ORDER_TICKET_POSITION_ID, ticketPositionId)
+                .set(ORDERS.ORDER_TICKET_POSITION_POSITIONID, ticketPosid)
                 .set(ORDERS.ORDER_ROOM_POSITION_ID, roomPositionId)
+                .set(ORDERS.ORDER_ROOM_POSITION_POSITIONID, roomPosid)
                 .set(ORDERS.ORDER_EARLY_POSITION_ID, earlyPositionId)
                 .set(ORDERS.ORDER_LATE_POSITION_ID, latePositionId)
                 .set(ORDERS.USER_ID, userId)

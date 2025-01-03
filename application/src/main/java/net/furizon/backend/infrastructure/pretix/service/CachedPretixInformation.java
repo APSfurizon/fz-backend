@@ -326,8 +326,10 @@ public class CachedPretixInformation implements PretixInformation {
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
             Long pretixRoomItemId = null;
-            long ticketPositionId = 0L;
+            long ticketPositionId = -1L;
+            long ticketPosid = -1L;
             Long roomPositionId = null;
+            Long roomPosid = null;
             Long earlyPositionId = null;
             Long latePositionId = null;
             boolean membership = false;
@@ -350,6 +352,7 @@ public class CachedPretixInformation implements PretixInformation {
                 if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
                     ticketPositionId = position.getPositionId();
+                    ticketPosid = position.getPositionPosid();
                     answers = position.getAnswers();
                     for (PretixAnswer answer : answers) {
                         long questionId = answer.getQuestionId();
@@ -404,6 +407,7 @@ public class CachedPretixInformation implements PretixInformation {
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, itemId)) {
                     //Set the room position and item id anyway, even if we have a NO_ROOM item
                     roomPositionId = position.getPositionId();
+                    roomPosid = position.getPositionPosid();
                     pretixRoomItemId = itemId;
                     if (checkItemId.apply(CacheItemTypes.NO_ROOM_ITEM, itemId)) {
                         roomCapacity = 0;
@@ -435,7 +439,9 @@ public class CachedPretixInformation implements PretixInformation {
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .ticketPositionId(ticketPositionId)
+                    .ticketPositionPosid(ticketPosid)
                     .roomPositionId(roomPositionId)
+                    .roomPositionPosid(roomPosid)
                     .earlyPositionId(earlyPositionId)
                     .latePositionId(latePositionId)
                     .eventId(event.getId())

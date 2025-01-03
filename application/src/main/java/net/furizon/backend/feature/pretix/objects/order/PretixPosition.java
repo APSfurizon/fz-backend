@@ -14,6 +14,9 @@ public class PretixPosition {
     @JsonProperty("id")
     private final long positionId;
 
+    @JsonProperty("positionid")
+    private final long positionPosid;
+
     @JsonProperty("variation")
     private final long variationId;
 

@@ -98,9 +98,29 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Long> ORDER_TICKET_POSITION_ID = createField(DSL.name("order_ticket_position_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
+     * The column <code>public.orders.order_ticket_position_positionid</code>.
+     */
+    public final TableField<Record, Long> ORDER_TICKET_POSITION_POSITIONID = createField(DSL.name("order_ticket_position_positionid"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
      * The column <code>public.orders.order_room_position_id</code>.
      */
     public final TableField<Record, Long> ORDER_ROOM_POSITION_ID = createField(DSL.name("order_room_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_room_position_positionid</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_POSITION_POSITIONID = createField(DSL.name("order_room_position_positionid"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_early_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_EARLY_POSITION_ID = createField(DSL.name("order_early_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_late_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_LATE_POSITION_ID = createField(DSL.name("order_late_position_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.orders.order_daily_days</code>.
@@ -156,16 +176,6 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.creation_ts</code>.
      */
     public final TableField<Record, LocalDateTime> CREATION_TS = createField(DSL.name("creation_ts"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
-
-    /**
-     * The column <code>public.orders.order_early_position_id</code>.
-     */
-    public final TableField<Record, Long> ORDER_EARLY_POSITION_ID = createField(DSL.name("order_early_position_id"), SQLDataType.BIGINT, this, "");
-
-    /**
-     * The column <code>public.orders.order_late_position_id</code>.
-     */
-    public final TableField<Record, Long> ORDER_LATE_POSITION_ID = createField(DSL.name("order_late_position_id"), SQLDataType.BIGINT, this, "");
 
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

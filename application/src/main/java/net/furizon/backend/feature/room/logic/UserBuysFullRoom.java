@@ -226,7 +226,9 @@ public class UserBuysFullRoom implements RoomLogic {
             long sourceBalance,
             long targetBalance,
             @Nullable Long sourcePositionId,
-            @Nullable Long targetPositionId
+            @Nullable Long targetPositionId,
+            @Nullable Long sourcePosid,
+            @Nullable Long targetPosid
     ) {}
 
     private ExchangeResult exchangeSingleItem(
@@ -293,6 +295,7 @@ public class UserBuysFullRoom implements RoomLogic {
         //We don't check for hasPosition but for the itemId != null, because NO_ROOM has an itemId but no positionId
         //Update target
         Long toDeletePositionId = null; //used for keeping quota reserved while performing the exchange
+        Long sourcePosid = null;
         boolean res = true;
         if (sourceItemId != null) {
             if (targetHasPosition) {
@@ -321,6 +324,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 res = pp != null;
                 if (res) {
                     targetPositionId = pp.getPositionId();
+                    sourcePosid = pp.getPositionPosid();
                 }
             }
         } else {
@@ -337,6 +341,7 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         //Update source
+        Long targetPosid = null;
         if (targetItemId != null) {
             if (sourceHasPosition) {
                 res = updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
@@ -352,6 +357,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 res = pp != null;
                 if (res) {
                     sourcePositionId = pp.getPositionId();
+                    targetPosid = pp.getPositionPosid();
                 }
             }
         } else {
@@ -377,7 +383,7 @@ public class UserBuysFullRoom implements RoomLogic {
         long sourceBalance = sourcePaid - targetPrice;
         long targetBalance = targetPaid - sourcePrice;
 
-        return new ExchangeResult(sourceBalance, targetBalance, sourcePositionId, targetPositionId);
+        return new ExchangeResult(sourceBalance, targetBalance, sourcePositionId, targetPositionId, sourcePosid, targetPosid);
     }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
@@ -402,15 +408,17 @@ public class UserBuysFullRoom implements RoomLogic {
         ExtraDays targetExtraDays = targetOrder.getExtraDays();
 
         //Get various items and positions
-        long sourceTicketPositionId = sourceOrder.getTicketPositionId();
+        long sourceTicketPosid = sourceOrder.getTicketPositionPosid();
         Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
+        Long sourceRoomPosid = sourceOrder.getRoomPositionPosid();
         Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
         Long sourceEarlyPositionId = null;
         Long sourceLatePositionId = null;
         Long sourceEarlyItemId = null;
         Long sourceLateItemId = null;
-        long targetTicketPositionId = targetOrder.getTicketPositionId();
+        long targetTicketPosid = targetOrder.getTicketPositionPosid();
         Long targetRoomPositionId = targetOrder.getRoomPositionId();
+        Long targetRoomPosid = targetOrder.getRoomPositionPosid();
         Long targetRoomItemId = targetOrder.getPretixRoomItemId();
         Long targetEarlyPositionId = null;
         Long targetLatePositionId = null;
@@ -463,21 +471,23 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //Now that we have everything, update pretix and calc balances
         ExchangeResult exchange;
-        exchange = exchangeSingleItem(sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId, sourceTicketPositionId, targetTicketPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId, sourceTicketPosid, targetTicketPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
         sourceRoomPositionId = exchange.sourcePositionId;
         targetRoomPositionId = exchange.targetPositionId;
+        sourceRoomPosid = exchange.sourcePosid == null ? sourceRoomPosid : exchange.sourcePosid;
+        targetRoomPosid = exchange.targetPosid == null ? targetRoomPosid : exchange.targetPosid;
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
-        exchange = exchangeSingleItem(sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId, sourceRoomPositionId, targetRoomPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId, sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
-        exchange = exchangeSingleItem(sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId, sourceRoomPositionId, targetRoomPositionId, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId, sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
@@ -656,7 +666,8 @@ public class UserBuysFullRoom implements RoomLogic {
     private record BuyOrUpgradeResult(
             long effectiveRemaining,
             long positionId,
-            PretixPosition tempPosition
+            @Nullable Long posid,
+            @Nullable PretixPosition tempPosition
     ) {}
 
     private @Nullable BuyOrUpgradeResult buyOrUpgradeItem(
@@ -691,6 +702,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //If quota is available, try getting the item
         PretixPosition tempPosition = null;
+        Long posid = null;
         boolean res;
         if (originallyHadAroomPosition && positionId != null) {
             //Create a temporary position to mantain our quota in case of rollback
@@ -719,6 +731,7 @@ public class UserBuysFullRoom implements RoomLogic {
             res = pos != null;
             if (res) {
                 positionId = pos.getPositionId();
+                posid = pos.getPositionPosid();
             }
         }
         if (!res) {
@@ -734,7 +747,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     userId, newRoomItemId, event, newItemId);
             return null;
         }
-        return new BuyOrUpgradeResult(r.get().calcEffectiveRemainig(), positionId, tempPosition);
+        return new BuyOrUpgradeResult(r.get().calcEffectiveRemainig(), positionId, posid, tempPosition);
     }
     private void rollbackBuyOrUpgrade(
         @Nullable Long rollbackItemId,
@@ -818,11 +831,12 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         //Perform the upgrades
-        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, originallyHadAroomPosition, roomPositionId, order.getTicketPositionId(), userId, newRoomItemId, orderCode, event, pretixInformation);
+        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, originallyHadAroomPosition, roomPositionId, order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
         if (roomRes == null) {
             return false;
         }
         roomPositionId = roomRes.positionId;
+        long roomPosid = roomRes.posid == null ? Objects.requireNonNull(order.getRoomPositionPosid()) : roomRes.posid;
         long roomRemaining = roomRes.effectiveRemaining;
         long earlyRemaining = Long.MAX_VALUE;
         long lateRemaining = Long.MAX_VALUE;
@@ -830,7 +844,7 @@ public class UserBuysFullRoom implements RoomLogic {
         BuyOrUpgradeResult lateRes = null;
         if (order.hasRoom()) {
             if (extraDays.isEarly()) {
-                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, originallyHadAroomPosition, earlyPositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
+                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, originallyHadAroomPosition, earlyPositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (earlyRes == null) {
                     return false;
                 }
@@ -838,7 +852,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 earlyRemaining = earlyRes.effectiveRemaining;
             }
             if (extraDays.isLate()) {
-                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, originallyHadAroomPosition, latePositionId, roomPositionId, userId, newRoomItemId, orderCode, event, pretixInformation);
+                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, originallyHadAroomPosition, latePositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (lateRes == null) {
                     return false;
                 }

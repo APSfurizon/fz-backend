@@ -88,7 +88,7 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_locale</code>.
      */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'it'::character varying"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
