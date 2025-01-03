@@ -28,10 +28,6 @@ public class FurizonUser implements UserDetails {
     @NotNull
     private final Authentication authentication;
 
-    private final Set<Permission> permissions;
-
-    private final List<Role> roles;
-
     @JsonIgnore
     @NotNull
     @Builder.Default
@@ -79,26 +75,5 @@ public class FurizonUser implements UserDetails {
 
     public boolean isTwoFactorEnabled() {
         return authentication.isTwoFactorEnabled();
-    }
-
-    public boolean hasPermission(@NotNull Permission permission) {
-        return permissions.contains(permission);
-    }
-
-    public boolean hasRole(long roleId) {
-        for (Role role : roles) {
-            if (role != null && role.getRoleId() == roleId) {
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean hasRole(@NotNull String roleInternalName) {
-        for (Role role : roles) {
-            if (role != null && role.getInternalName().equals(roleInternalName)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
