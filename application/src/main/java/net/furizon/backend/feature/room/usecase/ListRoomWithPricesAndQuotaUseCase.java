@@ -84,15 +84,19 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
 
         long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid;
-        Set<Long> roomIds = pretixInformation.getRoomPretixIds();
+        Set<Long> roomItemIds = pretixInformation.getRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
-        List<RoomAvailabilityInfoResponse> rooms = buyOrUpgradeSupported ? roomIds.stream().map(id -> {
+        List<RoomAvailabilityInfoResponse> rooms = buyOrUpgradeSupported ? roomItemIds.stream().map(itemId -> {
+            //We exclude the current room
+            if (Objects.equals(itemId, pretixRoomItemId)) {
+                return null;
+            }
             //Check for room capacity > number of people already in room
-            HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(id);
+            HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(itemId);
             if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
                 // (actual check against how much the user has paid is done on the actual action)
-                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(id, false));
+                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false));
                 long extraDaysPrice = 0L;
                 Long earlyItemId = null;
                 Long lateItemId = null;
@@ -110,9 +114,9 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
                 if (totalPrice >= totalPaid) {
                     //Fetch availability
-                    PretixQuotaAvailability quota = getSmallestQuota(pretixInformation, id, earlyItemId, lateItemId);
+                    PretixQuotaAvailability quota = getSmallestQuota(pretixInformation, itemId, earlyItemId, lateItemId);
 
-                    RoomData data = roomFinder.getRoomDataFromPretixItemId(id, pretixInformation);
+                    RoomData data = roomFinder.getRoomDataFromPretixItemId(itemId, pretixInformation);
                     if (quota != null && data != null) {
                         return new RoomAvailabilityInfoResponse(
                             data,

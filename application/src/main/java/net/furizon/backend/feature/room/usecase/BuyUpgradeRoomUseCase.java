@@ -60,8 +60,14 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         long newRoomItemId = input.req.getRoomPretixItemId();
         Long earlyPositionId = null;
         Long latePositionId = null;
+        Long oldRoomItemId = order.getPretixRoomItemId();
         Long oldRoomPositionId = order.getRoomPositionId();
         Long oldRoomId = null;
+        if (Objects.equals(oldRoomItemId, newRoomItemId)) {
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Selected room is the one he already owned!",
+                    userId, newRoomItemId, event);
+            throw new ApiException("User tried upgrading to same room!", RoomErrorCodes.BUY_ROOM_SAME_ROOM);
+        }
         if (oldRoomPositionId != null) {
             //User may have NO_ROOM item so we have to do this double check
             if (order.hasRoom()) {
