@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import net.furizon.backend.feature.authentication.Authentication;
+import net.furizon.backend.feature.user.permissions.Role;
 import net.minidev.json.annotate.JsonIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -25,6 +27,10 @@ public class FurizonUser implements UserDetails {
     @Getter(AccessLevel.NONE)
     @NotNull
     private final Authentication authentication;
+
+    private final Set<Permission> permissions;
+
+    private final List<Role> roles;
 
     @JsonIgnore
     @NotNull
@@ -73,5 +79,26 @@ public class FurizonUser implements UserDetails {
 
     public boolean isTwoFactorEnabled() {
         return authentication.isTwoFactorEnabled();
+    }
+
+    public boolean hasPermission(@NotNull Permission permission) {
+        return permissions.contains(permission);
+    }
+
+    public boolean hasRole(long roleId) {
+        for (Role role : roles) {
+            if (role != null && role.getRoleId() == roleId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean hasRole(@NotNull String roleInternalName) {
+        for (Role role : roles) {
+            if (role != null && role.getInternalName().equals(roleInternalName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
