@@ -313,7 +313,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 toDeletePositionId = pp.getPositionId();
                 res = updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
                         targetOrderCode,
-                        sourceItemId
+                        sourceItemId,
+                        sourcePrice
                 ));
             } else {
                 PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
@@ -346,7 +347,8 @@ public class UserBuysFullRoom implements RoomLogic {
             if (sourceHasPosition) {
                 res = updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
                         sourceOrderCode,
-                        targetItemId
+                        targetItemId,
+                        targetPrice
                 ));
             } else {
                 PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
@@ -673,6 +675,7 @@ public class UserBuysFullRoom implements RoomLogic {
     private @Nullable BuyOrUpgradeResult buyOrUpgradeItem(
             @Nullable Long originalItemId,
             @Nullable Long newItemId,
+            @Nullable Long newItemPrice,
             boolean originallyHadAroomPosition,
             @Nullable Long positionId,
             long addonToPositionId,
@@ -682,7 +685,7 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {
-        if (newItemId == null) {
+        if (newItemId == null || newItemPrice == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: newItemId was null",
                     userId, newRoomItemId, event);
             return null;
@@ -720,7 +723,8 @@ public class UserBuysFullRoom implements RoomLogic {
             }
             res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                     orderCode,
-                    newItemId
+                    newItemId,
+                    newItemPrice
             ));
         } else {
             PretixPosition pos = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
@@ -751,6 +755,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
     private void rollbackBuyOrUpgrade(
         @Nullable Long rollbackItemId,
+        @Nullable Long rollbackPrice,
         long positionId,
         @NotNull String orderCode,
         boolean originallyHadAroomPosition,
@@ -758,7 +763,7 @@ public class UserBuysFullRoom implements RoomLogic {
         long newRoomItemId,
         @NotNull Event event
     ) {
-        if (rollbackItemId == null) {
+        if (rollbackItemId == null || rollbackPrice == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: rollbackItemId was null",
                     userId, newRoomItemId, event);
             return;
@@ -768,7 +773,8 @@ public class UserBuysFullRoom implements RoomLogic {
         if (originallyHadAroomPosition) {
             res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                     orderCode,
-                    rollbackItemId
+                    rollbackItemId,
+                    rollbackPrice
             ));
         } else {
             res = deletePretixPositionAction.invoke(event, positionId);
@@ -792,11 +798,11 @@ public class UserBuysFullRoom implements RoomLogic {
     }
     @Override
     public synchronized boolean buyOrUpgradeRoom(
-            long newRoomItemId,
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
             long userId,
             @Nullable Long roomId,
-            @Nullable Long newEarlyItemId,
-            @Nullable Long newLateItemId,
+            @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+            @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
             @NotNull Order order,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
@@ -831,7 +837,7 @@ public class UserBuysFullRoom implements RoomLogic {
         }
 
         //Perform the upgrades
-        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, originallyHadAroomPosition, roomPositionId, order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
+        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, newRoomPrice, originallyHadAroomPosition, roomPositionId, order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
         if (roomRes == null) {
             return false;
         }
@@ -844,7 +850,7 @@ public class UserBuysFullRoom implements RoomLogic {
         BuyOrUpgradeResult lateRes = null;
         if (order.hasRoom()) {
             if (extraDays.isEarly()) {
-                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, originallyHadAroomPosition, earlyPositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, newEarlyPrice, originallyHadAroomPosition, earlyPositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (earlyRes == null) {
                     return false;
                 }
@@ -852,7 +858,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 earlyRemaining = earlyRes.effectiveRemaining;
             }
             if (extraDays.isLate()) {
-                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, originallyHadAroomPosition, latePositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, newLatePrice, originallyHadAroomPosition, latePositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (lateRes == null) {
                     return false;
                 }
@@ -867,13 +873,13 @@ public class UserBuysFullRoom implements RoomLogic {
             //Rollback in reverse order because we need to delete addon firsts
             if (order.hasRoom()) {
                 if (extraDays.isEarly() && earlyPositionId != null) {
-                    rollbackBuyOrUpgrade(originalEarlyItemId, earlyPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+                    rollbackBuyOrUpgrade(originalEarlyItemId, oldEarlyPaid, earlyPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
                 }
                 if (extraDays.isLate() && latePositionId != null) {
-                    rollbackBuyOrUpgrade(originalLateItemId, latePositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+                    rollbackBuyOrUpgrade(originalLateItemId, oldLatePaid, latePositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
                 }
             }
-            rollbackBuyOrUpgrade(originalRoomItemId, roomPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+            rollbackBuyOrUpgrade(originalRoomItemId, oldRoomPaid, roomPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: (RACE CONDITION DETECTED) Quota was available before updating the position, but it was found negative (r{}; e{}; l{}) negative after",
                     userId, newRoomItemId, event, roomRemaining, earlyRemaining, lateRemaining);
             finalizeBuyOrUpgrade(event, userId, newRoomItemId, roomRes, earlyRes, lateRes);

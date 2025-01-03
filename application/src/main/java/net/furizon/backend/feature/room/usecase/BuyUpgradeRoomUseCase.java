@@ -12,7 +12,6 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
-import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
@@ -96,18 +94,19 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                     userId, newRoomItemId, event);
             return false;
         }
-        long newRoomExtraDaysPrice = 0L;
+        long newRoomEarlyPrice = 0L;
+        long newRoomLatePrice = 0L;
         Long newEarlyItemId = null;
         Long newLateItemId = null;
         if (extraDays.isEarly()) {
             newEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.EARLY));
-            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(newEarlyItemId, false));
+            newRoomEarlyPrice = Objects.requireNonNull(pretixInformation.getItemPrice(newEarlyItemId, false));
         }
         if (extraDays.isLate()) {
             newLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.LATE));
-            newRoomExtraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(newLateItemId, false));
+            newRoomLatePrice = Objects.requireNonNull(pretixInformation.getItemPrice(newLateItemId, false));
         }
-        long newRoomTotal = newRoomPrice + newRoomExtraDaysPrice;
+        long newRoomTotal = newRoomPrice + newRoomEarlyPrice + newRoomLatePrice;
 
         //Get old room paid
         long oldRoomPaid = getPaid(oldRoomPositionId, event);
@@ -128,7 +127,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
-        boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, userId, oldRoomId, newEarlyItemId, newLateItemId, order, event, pretixInformation);
+        boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, newRoomPrice, oldRoomPaid, userId, oldRoomId, newEarlyItemId, newRoomEarlyPrice, earlyPaid, newLateItemId, newRoomLatePrice, latePaid, order, event, pretixInformation);
         if (res && oldRoomId != null) {
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {

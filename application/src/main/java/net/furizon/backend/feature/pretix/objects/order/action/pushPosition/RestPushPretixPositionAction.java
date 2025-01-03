@@ -40,6 +40,8 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
                 .body(position)
                 .responseType(PretixPosition.class)
                 .build();
+
+        //TODO: Update invoice
         try {
             var req = pretixHttpClient.send(PretixConfig.class, request);
             return req.getStatusCode().is2xxSuccessful() ? req.getBody() : null;
