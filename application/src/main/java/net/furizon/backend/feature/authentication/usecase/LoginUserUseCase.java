@@ -2,12 +2,10 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.infrastructure.security.session.action.createSession.CreateSessionAction;
 import net.furizon.backend.feature.authentication.dto.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
-import net.furizon.backend.infrastructure.security.session.action.clearNewestUserSessions.ClearNewestUserSessionsAction;
-import net.furizon.backend.infrastructure.security.session.finder.SessionFinder;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.security.token.TokenMetadata;
 import net.furizon.backend.infrastructure.security.token.encoder.TokenEncoder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -22,13 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginResponse> {
     private final CreateLoginSessionValidation validation;
 
-    private final CreateSessionAction createSessionAction;
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
     private final TokenEncoder tokenEncoder;
-
-    private final SessionFinder sessionFinder;
-
-    private final ClearNewestUserSessionsAction clearNewestUserSessionsAction;
 
     private final SecurityConfig securityConfig;
 
@@ -36,17 +30,17 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
     @Override
     public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
         final var userId = validation.validateAndGetUserId(input);
-        int sessionsCount = sessionFinder.getUserSessionsCount(userId);
+        int sessionsCount = sessionAuthenticationManager.getUserSessionsCount(userId);
         if (sessionsCount >= securityConfig.getSession().getMaxAllowedSessionsSize()) {
             log.warn(
                 "Maximum allowed sessions size reached. Sessions count = '{}', userId = '{}'; Running the cleaning",
                 sessionsCount,
                 userId
             );
-            clearNewestUserSessionsAction.invoke(userId);
+            sessionAuthenticationManager.clearOldestSessions(userId);
         }
 
-        final var sessionId = createSessionAction.invoke(
+        final var sessionId = sessionAuthenticationManager.createSession(
             userId,
             input.clientIp,
             input.userAgent

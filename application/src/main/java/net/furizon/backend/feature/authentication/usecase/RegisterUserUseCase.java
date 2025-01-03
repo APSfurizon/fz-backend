@@ -1,13 +1,13 @@
 package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.action.createAuthentication.CreateAuthenticationAction;
 import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.action.createUser.CreateUserAction;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
     private final RegisterUserValidation validation;
 
     private final CreateUserAction createUserAction;
-    private final CreateAuthenticationAction createAuthenticationAction;
+    private final SessionAuthenticationManager sessionAuthenticationManager;
     private final AddMembershipInfoAction addMembershipInfoAction;
     
     @Transactional
@@ -30,7 +30,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName());
-        createAuthenticationAction.invoke(
+        sessionAuthenticationManager.createAuthentication(
             user.getId(),
             regUserReq.getEmail(),
             regUserReq.getPassword()

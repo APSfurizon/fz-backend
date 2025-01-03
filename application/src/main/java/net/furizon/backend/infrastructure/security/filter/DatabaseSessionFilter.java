@@ -7,10 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.security.FurizonUser;
-import net.furizon.backend.infrastructure.security.session.action.deleteSession.DeleteSessionAction;
-import net.furizon.backend.infrastructure.security.session.action.updateSession.UpdateSessionAction;
 import net.furizon.backend.infrastructure.security.session.exception.SessionExpiredException;
-import net.furizon.backend.infrastructure.security.session.finder.SessionFinder;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.security.token.decoder.TokenDecoder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,11 +37,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
     @Qualifier(SESSION_THREAD_POOL_TASK_EXECUTOR)
     private final Executor sessionExecutor;
 
-    private final SessionFinder sessionFinder;
-
-    private final DeleteSessionAction deleteSessionAction;
-
-    private final UpdateSessionAction updateSessionAction;
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
@@ -63,7 +57,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var tokenMetadata = tokenDecoder.decode(
                 authHeader.replaceFirst("(?i)^Bearer ", "")
             );
-            final var pair = sessionFinder.findSessionWithAuthenticationById(tokenMetadata.getSessionId());
+            final var pair = sessionAuthenticationManager.findSessionWithAuthenticationById(tokenMetadata.getSessionId());
             if (pair == null) {
                 throw new SessionAuthenticationException("Session not found");
             }
@@ -74,7 +68,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             if (expiresAt.isBefore(OffsetDateTime.now())) {
                 sessionExecutor.execute(() -> {
                     log.debug("Session '{}' expired, deleting", sessionId);
-                    deleteSessionAction.invoke(sessionId);
+                    sessionAuthenticationManager.deleteSession(sessionId);
                 });
                 throw new SessionExpiredException("The session has expired.");
             }
@@ -94,7 +88,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                 );
 
             final var clientIp = request.getRemoteAddr();
-            sessionExecutor.execute(() -> updateSessionAction.invoke(sessionId, clientIp));
+            sessionExecutor.execute(() -> sessionAuthenticationManager.updateSession(sessionId, clientIp));
         } catch (AuthenticationException ex) {
             log.error("Authentication failed", ex);
             SecurityContextHolder.clearContext();
