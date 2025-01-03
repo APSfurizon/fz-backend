@@ -7,6 +7,7 @@ import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
+import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -23,6 +24,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, RoomInfoResponse> {
+    @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomConfig roomConfig;
@@ -62,9 +64,11 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         }
 
         boolean canCreateRoom = editingTimeAllowed && info == null && roomLogic.canCreateRoom(userId, input.event);
-        boolean buyOrUpgradeSupported = editingTimeAllowed && roomLogic.isRoomBuyOrUpgradeSupported(input.event);
+        boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(input.event);
 
-        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported, endRoomEditingTime, invitations);
+        boolean canBuyOrUpgrade = editingTimeAllowed && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
+
+        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported, canBuyOrUpgrade, endRoomEditingTime, invitations);
     }
 
     public record Input(

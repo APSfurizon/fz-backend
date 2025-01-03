@@ -16,6 +16,7 @@ public class RoomInfoResponse {
 
     private final boolean canCreateRoom;
 
+    private final boolean buyOrUpgradeRoomSupported;
     private final boolean canBuyOrUpgradeRoom;
 
     @Nullable
