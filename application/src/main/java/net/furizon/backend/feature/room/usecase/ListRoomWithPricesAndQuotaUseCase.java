@@ -79,7 +79,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         //Fetch room guests
         Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
                 : Optional.empty();
-        List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, true))
+        List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, false))
                 .orElse(null);
 
 
