@@ -64,11 +64,6 @@ public class SecurityConfiguration {
             .build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     private CorsConfigurationSource corsConfigurationSource() {
         final var corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(securityConfig.getAllowedOrigins());
