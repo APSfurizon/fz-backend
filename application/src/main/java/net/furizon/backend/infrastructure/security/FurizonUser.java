@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import net.furizon.backend.feature.authentication.Authentication;
-import net.furizon.backend.feature.user.permissions.Role;
 import net.minidev.json.annotate.JsonIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Builder

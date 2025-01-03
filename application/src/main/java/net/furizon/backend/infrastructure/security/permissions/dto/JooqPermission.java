@@ -1,7 +1,7 @@
-package net.furizon.backend.feature.user.permissions.dto;
+package net.furizon.backend.infrastructure.security.permissions.dto;
 
 import lombok.Data;
-import net.furizon.backend.feature.user.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
 @Data

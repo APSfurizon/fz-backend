@@ -1,8 +1,8 @@
-package net.furizon.backend.feature.user.permissions.finder;
+package net.furizon.backend.infrastructure.security.permissions.finder;
 
-import net.furizon.backend.feature.user.permissions.Permission;
-import net.furizon.backend.feature.user.permissions.Role;
-import net.furizon.backend.feature.user.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.Role;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

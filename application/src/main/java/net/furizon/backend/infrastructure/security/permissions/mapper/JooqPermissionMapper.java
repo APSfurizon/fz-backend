@@ -1,8 +1,8 @@
-package net.furizon.backend.feature.user.permissions.mapper;
+package net.furizon.backend.infrastructure.security.permissions.mapper;
 
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.user.permissions.Permission;
-import net.furizon.backend.feature.user.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 

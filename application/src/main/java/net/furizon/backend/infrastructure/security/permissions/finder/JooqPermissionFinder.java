@@ -1,11 +1,11 @@
-package net.furizon.backend.feature.user.permissions.finder;
+package net.furizon.backend.infrastructure.security.permissions.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.user.permissions.Permission;
-import net.furizon.backend.feature.user.permissions.Role;
-import net.furizon.backend.feature.user.permissions.dto.JooqPermission;
-import net.furizon.backend.feature.user.permissions.mapper.JooqPermissionMapper;
-import net.furizon.backend.feature.user.permissions.mapper.JooqRoleMapper;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.Role;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.mapper.JooqPermissionMapper;
+import net.furizon.backend.infrastructure.security.permissions.mapper.JooqRoleMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

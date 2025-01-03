@@ -1,6 +1,6 @@
-package net.furizon.backend.feature.user.permissions.mapper;
+package net.furizon.backend.infrastructure.security.permissions.mapper;
 
-import net.furizon.backend.feature.user.permissions.Role;
+import net.furizon.backend.infrastructure.security.permissions.Role;
 import org.jooq.Record;
 
 import static net.furizon.jooq.generated.Tables.ROLE;

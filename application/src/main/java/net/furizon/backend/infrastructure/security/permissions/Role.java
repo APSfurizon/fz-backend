@@ -1,10 +1,10 @@
-package net.furizon.backend.feature.user.permissions;
+package net.furizon.backend.infrastructure.security.permissions;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
-import net.furizon.backend.feature.user.permissions.dto.JooqPermission;
-import net.furizon.backend.feature.user.permissions.finder.PermissionFinder;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
