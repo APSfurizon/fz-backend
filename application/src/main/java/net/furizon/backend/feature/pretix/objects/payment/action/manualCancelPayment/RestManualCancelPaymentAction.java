@@ -37,7 +37,7 @@ public class RestManualCancelPaymentAction implements ManualCancelPaymentAction 
                 .responseType(Void.class)
                 .build();
         try {
-            return pretixHttpClient.send(PretixConfig.class, request).getStatusCode() == HttpStatus.OK;
+            return pretixHttpClient.send(PretixConfig.class, request).getStatusCode().is2xxSuccessful();
         } catch (final HttpClientErrorException ex) {
             log.error("Error while cancelling a payment", ex);
             return false;
