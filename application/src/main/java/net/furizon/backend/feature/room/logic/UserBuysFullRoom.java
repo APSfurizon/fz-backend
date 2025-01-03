@@ -231,7 +231,7 @@ public class UserBuysFullRoom implements RoomLogic {
             @Nullable Long targetPosid
     ) {}
 
-    private ExchangeResult exchangeSingleItem(
+    private @Nullable ExchangeResult exchangeSingleItem(
             @Nullable Long sourceItemId,
             @Nullable Long sourcePositionId,
             @Nullable Long targetItemId,
@@ -781,11 +781,11 @@ public class UserBuysFullRoom implements RoomLogic {
     private void finalizeBuyOrUpgrade(@NotNull Event event, long userId, long newRoomItemId, BuyOrUpgradeResult... results) {
         //Delete the temporary positions created for mantain our quota
         for (BuyOrUpgradeResult result : results) {
-            if (result != null) {
-                boolean res = deletePretixPositionAction.invoke(event, result.positionId);
+            if (result != null && result.tempPosition != null) {
+                boolean res = deletePretixPositionAction.invoke(event, result.tempPosition.getPositionId());
                 if (!res) {
-                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while finalizing position {}",
-                            userId, newRoomItemId, event, result.positionId);
+                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while finalizing position p{} t{}",
+                            userId, newRoomItemId, event, result.positionId, result.tempPosition.getPositionId());
                 }
             }
         }
