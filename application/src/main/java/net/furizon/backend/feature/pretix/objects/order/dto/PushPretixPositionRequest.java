@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class PushPretixPositionRequest {
 
+    @JsonProperty("order")
     private final String orderCode;
 
     @JsonProperty("addon_to")

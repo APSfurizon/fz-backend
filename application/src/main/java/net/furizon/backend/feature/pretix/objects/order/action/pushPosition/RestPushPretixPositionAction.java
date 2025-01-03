@@ -42,7 +42,7 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
                 .build();
         try {
             var req = pretixHttpClient.send(PretixConfig.class, request);
-            return req.getStatusCode() == HttpStatus.OK ? req.getBody() : null;
+            return req.getStatusCode().is2xxSuccessful() ? req.getBody() : null;
         } catch (final HttpClientErrorException ex) {
             log.error("Error while pushing a new position to an order", ex);
             return null;
