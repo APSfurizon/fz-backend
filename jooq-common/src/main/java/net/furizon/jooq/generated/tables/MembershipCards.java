@@ -95,7 +95,7 @@ public class MembershipCards extends TableImpl<Record> {
     /**
      * The column <code>public.membership_cards.created_for_order</code>.
      */
-    public final TableField<Record, Long> CREATED_FOR_ORDER = createField(DSL.name("created_for_order"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> CREATED_FOR_ORDER = createField(DSL.name("created_for_order"), SQLDataType.BIGINT, this, "");
 
     private MembershipCards(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectJoinStep;
 import org.jooq.impl.DSL;
@@ -14,7 +15,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 @Component
 @RequiredArgsConstructor
 public class JooqUserFinder implements UserFinder {
-    private final SqlQuery sqlQuery;
+    @NotNull private final SqlQuery sqlQuery;
 
     @Nullable
     @Override
