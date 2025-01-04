@@ -30,9 +30,9 @@ public interface SessionAuthenticationManager {
 
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
 
-    void createAuthentication(long userId, @NotNull String email, @NotNull String password);
+    UUID createAuthentication(long userId, @NotNull String email, @NotNull String password);
 
-    void markEmailAsVerified(long userId);
+    boolean markEmailAsVerified(@NotNull UUID reqId);
 
     void changePassword(long userId, @NotNull String password);
 

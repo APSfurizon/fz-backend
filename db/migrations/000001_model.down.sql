@@ -8,6 +8,8 @@ DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS fursuits_events;
 DROP TABLE IF EXISTS fursuits;
 DROP TABLE IF EXISTS membership_info;
+DROP TABLE IF EXISTS email_confirmation_request;
+DROP TABLE IF EXISTS reset_password_requests;
 DROP TABLE IF EXISTS authentications;
 DROP TABLE IF EXISTS user_has_role;
 DROP TABLE IF EXISTS users;

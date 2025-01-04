@@ -7,6 +7,7 @@ package net.furizon.jooq.generated;
 import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.Fursuits;
 import net.furizon.jooq.generated.tables.FursuitsEvents;
@@ -42,6 +43,11 @@ public class Tables {
      * The table <code>public.authentications</code>.
      */
     public static final Authentications AUTHENTICATIONS = Authentications.AUTHENTICATIONS;
+
+    /**
+     * The table <code>public.email_confirmation_request</code>.
+     */
+    public static final EmailConfirmationRequest EMAIL_CONFIRMATION_REQUEST = EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST;
 
     /**
      * The table <code>public.events</code>.

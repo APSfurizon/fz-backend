@@ -14,6 +14,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Indexes;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest.EmailConfirmationRequestPath;
 import net.furizon.jooq.generated.tables.ResetPasswordRequests.ResetPasswordRequestsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -210,6 +211,19 @@ public class Authentications extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK, null);
 
         return _users;
+    }
+
+    private transient EmailConfirmationRequestPath _emailConfirmationRequest;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.email_confirmation_request</code> table
+     */
+    public EmailConfirmationRequestPath emailConfirmationRequest() {
+        if (_emailConfirmationRequest == null)
+            _emailConfirmationRequest = new EmailConfirmationRequestPath(this, null, Keys.EMAIL_CONFIRMATION_REQUEST__MAIL_CONFIRM_AUTH_FK.getInverseKey());
+
+        return _emailConfirmationRequest;
     }
 
     private transient ResetPasswordRequestsPath _resetPasswordRequests;

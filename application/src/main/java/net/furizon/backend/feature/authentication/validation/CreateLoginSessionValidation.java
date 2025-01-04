@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.authentication.validation;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.AuthenticationErrorCode;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
@@ -29,7 +29,7 @@ public class CreateLoginSessionValidation {
         if (authentication.isDisabled()) {
             throw new ApiException(
                 "Not possible to login",
-                AuthenticationErrorCode.AUTHENTICATION_IS_DISABLED.name()
+                AuthenticationCodes.AUTHENTICATION_IS_DISABLED.name()
             );
         }
 
@@ -47,7 +47,7 @@ public class CreateLoginSessionValidation {
     private final ApiException createInvalidCredentialsException() {
         return new ApiException(
                 "Invalid Credentials",
-                AuthenticationErrorCode.INVALID_CREDENTIALS.name()
+                AuthenticationCodes.INVALID_CREDENTIALS.name()
         );
     }
 }

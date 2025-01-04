@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -219,8 +220,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     }
 
     @Override
-    public void createAuthentication(long userId, @NotNull String email, @NotNull String password) {
-        sqlCommand.execute(
+    public UUID createAuthentication(long userId, @NotNull String email, @NotNull String password) {
+        long authId = sqlCommand.executeResult(
             PostgresDSL.insertInto(
                 AUTHENTICATIONS,
                 AUTHENTICATIONS.USER_ID,
@@ -232,16 +233,46 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 email,
                 encoder.encode(securityConfig.getPasswordSalt() + password)
             )
+            .returning(AUTHENTICATIONS.AUTHENTICATION_ID)
+        ).getFirst().get(AUTHENTICATIONS.AUTHENTICATION_ID);
+        UUID reqId = UuidCreator.getTimeOrderedEpoch();
+        sqlCommand.execute(
+            PostgresDSL.insertInto(
+                EMAIL_CONFIRMATION_REQUEST,
+                EMAIL_CONFIRMATION_REQUEST.MAIL_CONFIRM_REQ_ID,
+                EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID
+            )
+            .values(
+                reqId,
+                authId
+            )
         );
+        return reqId;
     }
 
     @Override
-    public void markEmailAsVerified(long userId) {
-        sqlCommand.execute(
+    public boolean markEmailAsVerified(@NotNull UUID reqId) {
+        Optional<Long> authId = sqlCommand.executeResult(
+            PostgresDSL.deleteFrom(EMAIL_CONFIRMATION_REQUEST)
+            .where(EMAIL_CONFIRMATION_REQUEST.MAIL_CONFIRM_REQ_ID.eq(reqId))
+            .returning(EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID)
+        ).stream().map(r -> r.get(EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID)).findFirst();
+        if (authId.isEmpty()) {
+            return false;
+        }
+
+        Optional<Long> usrId = sqlCommand.executeResult(
                 PostgresDSL.update(AUTHENTICATIONS)
                 .setNull(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION)
-        );
-        invalidateCache(userId);
+                .where(AUTHENTICATIONS.AUTHENTICATION_ID.eq(authId.get()))
+                .returning(AUTHENTICATIONS.USER_ID)
+        ).stream().map(r -> r.get(AUTHENTICATIONS.USER_ID)).findFirst();
+        if (usrId.isEmpty()) {
+            return false;
+        }
+
+        invalidateCache(usrId.get());
+        return true;
     }
 
     @Override

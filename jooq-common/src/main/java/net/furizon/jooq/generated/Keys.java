@@ -7,6 +7,7 @@ package net.furizon.jooq.generated;
 import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.Fursuits;
 import net.furizon.jooq.generated.tables.FursuitsEvents;
@@ -52,6 +53,8 @@ public class Keys {
 
     public static final UniqueKey<Record> AUTHENTICATIONS_PKEY = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_pkey"), new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
     public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_USER_ID = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_user_id"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, true);
+    public static final UniqueKey<Record> MAIL_CONFIRM_PKEY = Internal.createUniqueKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_pkey"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.MAIL_CONFIRM_REQ_ID }, true);
+    public static final UniqueKey<Record> MAIL_CONFIRM_UNIQUE_AUTH = Internal.createUniqueKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_unique_auth"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID }, true);
     public static final UniqueKey<Record> EVENT_PKEY = Internal.createUniqueKey(Events.EVENTS, DSL.name("event_pkey"), new TableField[] { Events.EVENTS.ID }, true);
     public static final UniqueKey<Record> FURSUITS_PKEY = Internal.createUniqueKey(Fursuits.FURSUITS, DSL.name("fursuits_pkey"), new TableField[] { Fursuits.FURSUITS.FURSUIT_ID }, true);
     public static final UniqueKey<Record> FURSUITS_EVENTS_PK = Internal.createUniqueKey(FursuitsEvents.FURSUITS_EVENTS, DSL.name("fursuits_events_pk"), new TableField[] { FursuitsEvents.FURSUITS_EVENTS.EVENT_ID, FursuitsEvents.FURSUITS_EVENTS.FURSUIT_ID }, true);
@@ -76,6 +79,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final ForeignKey<Record, Record> AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK = Internal.createForeignKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_users_fk"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
+    public static final ForeignKey<Record, Record> EMAIL_CONFIRMATION_REQUEST__MAIL_CONFIRM_AUTH_FK = Internal.createForeignKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_auth_fk"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID }, Keys.AUTHENTICATIONS_PKEY, new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS__FURSUITS_MEDIA_FK = Internal.createForeignKey(Fursuits.FURSUITS, DSL.name("fursuits_media_fk"), new TableField[] { Fursuits.FURSUITS.MEDIA_ID_PROPIC }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS__FURSUITS_USERS_FK = Internal.createForeignKey(Fursuits.FURSUITS, DSL.name("fursuits_users_fk"), new TableField[] { Fursuits.FURSUITS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK = Internal.createForeignKey(FursuitsEvents.FURSUITS_EVENTS, DSL.name("fursuits_events_event_fk"), new TableField[] { FursuitsEvents.FURSUITS_EVENTS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);

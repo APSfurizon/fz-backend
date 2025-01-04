@@ -1,10 +1,12 @@
 package net.furizon.backend.feature.authentication;
 
-public enum AuthenticationErrorCode {
+public enum AuthenticationCodes {
     EMAIL_ALREADY_REGISTERED,
     EMAIL_NOT_REGISTERED,
     EMAIL_INVALID,
     INVALID_CREDENTIALS,
     AUTHENTICATION_IS_DISABLED,
-    REGION_NOT_PROVIDED
+    REGION_NOT_PROVIDED,
+    CONFIRMATION_NOT_FOUND,
+    CONFIRMATION_SUCCESSFULL
 }

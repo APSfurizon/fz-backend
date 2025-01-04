@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.authentication.validation;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.AuthenticationErrorCode;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
@@ -22,7 +22,7 @@ public class RegisterUserValidation {
         if (authentication != null) {
             throw new ApiException(
                 "User already exists with email: %s".formatted(input.getEmail()),
-                AuthenticationErrorCode.EMAIL_ALREADY_REGISTERED.name()
+                AuthenticationCodes.EMAIL_ALREADY_REGISTERED.name()
             );
         }
 
@@ -31,7 +31,7 @@ public class RegisterUserValidation {
                 && pretixInformation.getStatesOfCountry(birthCountryCode).size() > 0) {
             throw new ApiException(
                 "Region not provided for: %s".formatted(birthCountryCode),
-                AuthenticationErrorCode.REGION_NOT_PROVIDED.name()
+                AuthenticationCodes.REGION_NOT_PROVIDED.name()
             );
         }
 
@@ -40,7 +40,7 @@ public class RegisterUserValidation {
                 && pretixInformation.getStatesOfCountry(residenceCountryCode).size() > 0) {
             throw new ApiException(
                     "Region not provided for: %s".formatted(residenceCountryCode),
-                    AuthenticationErrorCode.REGION_NOT_PROVIDED.name()
+                    AuthenticationCodes.REGION_NOT_PROVIDED.name()
             );
         }
     }

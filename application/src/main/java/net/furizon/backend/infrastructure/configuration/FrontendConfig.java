@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.configuration;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 @Data
 @ConfigurationProperties(prefix = "frontend")
 public class FrontendConfig {
+    @Getter(AccessLevel.NONE)
+    @NotNull private String loginUrl;
+
     @Getter(AccessLevel.NONE)
     @NotNull private String loginRedirectUrl;
 
@@ -33,5 +37,15 @@ public class FrontendConfig {
     @NotNull
     public String getOrderHomepageUrl(@Nullable OrderWorkflowErrorCode errorCode) {
         return errorCode == null ? orderHomepageUrl : orderHomepageUrl + "?error=" + errorCode;
+    }
+
+    @NotNull
+    public String getLoginUrl() {
+        return getLoginUrl(null);
+    }
+
+    @NotNull
+    public String getLoginUrl(@Nullable AuthenticationCodes code) {
+        return code == null ? loginUrl : loginUrl + "?status=" + code;
     }
 }

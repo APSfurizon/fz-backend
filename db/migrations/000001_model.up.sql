@@ -70,6 +70,9 @@ CREATE TABLE IF NOT EXISTS authentications
     CONSTRAINT authentications_users_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS authentications_email_idx ON authentications USING HASH (authentication_email);
+CREATE INDEX IF NOT EXISTS authentication_hashed_password ON authentications USING HASH (authentication_hashed_password);
+
 CREATE TABLE IF NOT EXISTS reset_password_requests
 (
     resetpw_req_id    uuid        NOT NULL,
@@ -80,8 +83,14 @@ CREATE TABLE IF NOT EXISTS reset_password_requests
     CONSTRAINT reset_pw_auth_fk FOREIGN KEY (authentication_id) REFERENCES authentications (authentication_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS authentications_email_idx ON authentications USING HASH (authentication_email);
-CREATE INDEX IF NOT EXISTS authentication_hashed_password ON authentications USING HASH (authentication_hashed_password);
+CREATE TABLE IF NOT EXISTS email_confirmation_request
+(
+    mail_confirm_req_id    uuid        NOT NULL,
+    authentication_id      int8        NOT NULL,
+    CONSTRAINT mail_confirm_pkey PRIMARY KEY (mail_confirm_req_id),
+    CONSTRAINT mail_confirm_unique_auth UNIQUE (authentication_id),
+    CONSTRAINT mail_confirm_auth_fk FOREIGN KEY (authentication_id) REFERENCES authentications (authentication_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS membership_info
 (

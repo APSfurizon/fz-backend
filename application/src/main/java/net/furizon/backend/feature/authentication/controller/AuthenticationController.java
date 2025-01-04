@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.dto.*;
+import net.furizon.backend.feature.authentication.usecase.ConfirmEmailUseCase;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
@@ -15,12 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/authentication")
@@ -80,12 +79,28 @@ public class AuthenticationController {
         return RegisterUserResponse.SUCCESS;
     }
 
+    @PostMapping("/pw/change")
+    public void changePw() {
+
+    }
+
+    @PostMapping("/pw/reset")
+    public void resetPw() {
+
+    }
+
     @Operation(summary = "Confirms an email and enables an account", description =
-        "This endpoint SHOULD NOT User will open a link directly to this page")
+        "This endpoint SHOULD NOT be implemented in the frontend. Users will open a link directly to this page "
+        + "and, on success, this page should redirect back to the login page with a code in the "
+        + "url's `status` param with the result")
     @GetMapping("/confirm-mail")
     public RedirectView confirmEmail(
-        @Valid @RequestBody final ConfirmEmailRequest req
+        @Valid @RequestParam("id") @jakarta.validation.constraints.NotNull
+        final UUID id
     ) {
-
+        return executor.execute(
+                ConfirmEmailUseCase.class,
+                id
+        );
     }
 }
