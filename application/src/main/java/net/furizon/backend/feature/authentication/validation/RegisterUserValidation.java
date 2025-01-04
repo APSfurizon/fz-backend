@@ -3,8 +3,8 @@ package net.furizon.backend.feature.authentication.validation;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.AuthenticationErrorCode;
 import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
-import net.furizon.backend.feature.authentication.finder.AuthenticationFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RegisterUserValidation {
-    private final AuthenticationFinder authenticationFinder;
+    private final SessionAuthenticationManager sessionAuthenticationManager;
     @Lazy
     private final PretixInformation pretixInformation;
 
     public void validate(@NotNull RegisterUserRequest input) {
-        final var authentication = authenticationFinder.findByEmail(input.getEmail());
+        final var authentication = sessionAuthenticationManager.findAuthenticationByEmail(input.getEmail());
         if (authentication != null) {
             throw new ApiException(
                 "User already exists with email: %s".formatted(input.getEmail()),

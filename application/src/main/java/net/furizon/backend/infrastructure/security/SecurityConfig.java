@@ -10,6 +10,8 @@ import java.util.List;
 @Data
 @ConfigurationProperties("security")
 public class SecurityConfig {
+    private final long unverifiedEmailExpireHours;
+
     @NotNull
     private final String passwordSalt;
 

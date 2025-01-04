@@ -23,5 +23,9 @@ public interface SessionAuthenticationManager {
     int getUserSessionsCount(long userId);
     @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId);
 
+    @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
+
     void createAuthentication(long userId, @NotNull String email, @NotNull String password);
+
+    void markEmailAsVerified(long userId);
 }

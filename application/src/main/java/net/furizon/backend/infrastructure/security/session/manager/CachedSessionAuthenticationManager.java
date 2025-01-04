@@ -10,11 +10,13 @@ import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMappe
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMapper;
+import net.furizon.jooq.generated.tables.Authentications;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @Override
     public void updateSession(@NotNull UUID sessionId, @NotNull String clientIp) {
-        sessionAuthenticationPairCache.invalidate(sessionId);
         final var now = OffsetDateTime.now();
         final var expireAt = now.plusSeconds(securityConfig.getSession().getExpiration().getSeconds());
         sqlCommand.execute(
@@ -55,15 +56,16 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .set(SESSIONS.EXPIRES_AT, expireAt)
             .where(SESSIONS.ID.eq(sessionId))
         );
+        sessionAuthenticationPairCache.invalidate(sessionId);
     }
 
     @Override
     public void deleteSession(@NotNull UUID sessionId) {
-        sessionAuthenticationPairCache.invalidate(sessionId);
         sqlCommand.execute(
             PostgresDSL.deleteFrom(SESSIONS)
             .where(SESSIONS.ID.eq(sessionId))
         );
+        sessionAuthenticationPairCache.invalidate(sessionId);
     }
 
     @Override
@@ -154,11 +156,10 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     SESSIONS.EXPIRES_AT,
                     AUTHENTICATIONS.AUTHENTICATION_ID,
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                    AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED,
-                    AUTHENTICATIONS.AUTHENTICATION_2FA_ENABLED,
+                    AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS,
                     AUTHENTICATIONS.AUTHENTICATION_DISABLED,
-                    AUTHENTICATIONS.AUTHENTICATION_FROM_OAUTH,
                     AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                    AUTHENTICATIONS.AUTHENTICATION_TOKEN,
                     AUTHENTICATIONS.USER_ID
                 )
                 .from(SESSIONS)
@@ -166,7 +167,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 .on(
                     AUTHENTICATIONS.USER_ID.eq(SESSIONS.USER_ID)
                     .and(SESSIONS.ID.eq(sessionId))
-                    .and(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED.isNull())
+                    .and(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS.isNull())
                     .and(AUTHENTICATIONS.AUTHENTICATION_DISABLED.isFalse())
                 )
             )
@@ -181,7 +182,27 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             }
         }
         return res;
+    }
 
+    @Override
+    public @Nullable Authentication findAuthenticationByEmail(@NotNull String email) {
+        try {
+            return sqlQuery.fetchSingle(
+                PostgresDSL.select(
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_ID,
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS,
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_DISABLED,
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                    Authentications.AUTHENTICATIONS.AUTHENTICATION_TOKEN,
+                    Authentications.AUTHENTICATIONS.USER_ID
+                )
+                .from(Authentications.AUTHENTICATIONS)
+                .where(Authentications.AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+            ).map(JooqAuthenticationMapper::map);
+        } catch (NoDataFoundException e) {
+            return null;
+        }
     }
 
     @Override
@@ -199,5 +220,19 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 encoder.encode(securityConfig.getPasswordSalt() + password)
             )
         );
+    }
+
+    @Override
+    public void markEmailAsVerified(long userId) {
+        sqlCommand.execute(
+                PostgresDSL.update(
+                    AUTHENTICATIONS
+                )
+                .setNull(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS)
+        );
+        List<Session> sessions = getUserSessions(userId);
+        for (Session session : sessions) {
+            deleteSession(session.getId());
+        }
     }
 }
