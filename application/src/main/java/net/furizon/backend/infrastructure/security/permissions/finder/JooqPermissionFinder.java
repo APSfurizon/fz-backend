@@ -35,10 +35,10 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @NotNull List<JooqPermission> getPermissionsFromRoleInternalName(@NotNull String roleInternalName) {
         return sqlQuery.fetch(
                 selectPermission()
-                .innerJoin(ROLE)
+                .innerJoin(ROLES)
                 .on(
-                    ROLE.ROLE_ID.eq(PERMISSION.ROLE_ID)
-                    .and(ROLE.INTERNAL_NAME.eq(roleInternalName))
+                    ROLES.ROLE_ID.eq(PERMISSION.ROLE_ID)
+                    .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
                 )
         ).stream().map(JooqPermissionMapper::map).toList();
     }
@@ -47,14 +47,14 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @Nullable Role getRoleFromId(long roleId) {
         return sqlQuery.fetchFirst(
                 selectRole()
-                .where(ROLE.ROLE_ID.eq(roleId))
+                .where(ROLES.ROLE_ID.eq(roleId))
         ).mapOrNull(JooqRoleMapper::map);
     }
     @Override
     public @Nullable Role getRoleFromInternalName(@NotNull String roleInternalName) {
         return sqlQuery.fetchFirst(
                 selectRole()
-                .where(ROLE.INTERNAL_NAME.eq(roleInternalName))
+                .where(ROLES.INTERNAL_NAME.eq(roleInternalName))
         ).mapOrNull(JooqRoleMapper::map);
     }
 
@@ -77,11 +77,11 @@ public class JooqPermissionFinder implements PermissionFinder {
                 USER_HAS_ROLE.USER_ID
             )
             .from(USER_HAS_ROLE)
-            .innerJoin(ROLE)
+            .innerJoin(ROLES)
             .on(
-                ROLE.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                ROLES.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
                 .and(USER_HAS_ROLE.USER_ID.eq(userId))
-                .and(ROLE.INTERNAL_NAME.eq(roleInternalName))
+                .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
             )
         ).isPresent();
     }
@@ -111,9 +111,9 @@ public class JooqPermissionFinder implements PermissionFinder {
     }
     private @NotNull SelectJoinStep<Record3<Long, String, String>> selectRole() {
         return PostgresDSL.select(
-                ROLE.ROLE_ID,
-                ROLE.DISPLAY_NAME,
-                ROLE.INTERNAL_NAME
-        ).from(ROLE);
+                ROLES.ROLE_ID,
+                ROLES.DISPLAY_NAME,
+                ROLES.INTERNAL_NAME
+        ).from(ROLES);
     }
 }

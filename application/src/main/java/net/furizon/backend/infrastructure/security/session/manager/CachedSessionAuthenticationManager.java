@@ -163,7 +163,9 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 )
                 .from(SESSIONS)
                 .leftOuterJoin(AUTHENTICATIONS)
-                .on(AUTHENTICATIONS.USER_ID.eq(SESSIONS.USER_ID))
+                .on(
+                    AUTHENTICATIONS.USER_ID.eq(SESSIONS.USER_ID)
+                )
                 .where(SESSIONS.ID.eq(sessionId))
             )
             .mapOrNull(record ->
