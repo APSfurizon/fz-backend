@@ -15,7 +15,7 @@ import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
-import net.furizon.jooq.generated.tables.Role;
+import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
@@ -59,8 +59,8 @@ public class Keys {
     public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.ID }, true);
     public static final UniqueKey<Record> ORDERS_PKEY = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_pkey"), new TableField[] { Orders.ORDERS.ID }, true);
     public static final UniqueKey<Record> PERMISSION_PK = Internal.createUniqueKey(Permission.PERMISSION, DSL.name("permission_pk"), new TableField[] { Permission.PERMISSION.ROLE_ID, Permission.PERMISSION.PERMISSION_VALUE }, true);
-    public static final UniqueKey<Record> ROLE_PK = Internal.createUniqueKey(Role.ROLE, DSL.name("role_pk"), new TableField[] { Role.ROLE.ROLE_ID }, true);
-    public static final UniqueKey<Record> ROLE_UNIQUE_INTERNAL_NAME = Internal.createUniqueKey(Role.ROLE, DSL.name("role_unique_internal_name"), new TableField[] { Role.ROLE.INTERNAL_NAME }, true);
+    public static final UniqueKey<Record> ROLES_PK = Internal.createUniqueKey(Roles.ROLES, DSL.name("roles_pk"), new TableField[] { Roles.ROLES.ROLE_ID }, true);
+    public static final UniqueKey<Record> ROLES_UNIQUE_INTERNAL_NAME = Internal.createUniqueKey(Roles.ROLES, DSL.name("roles_unique_internal_name"), new TableField[] { Roles.ROLES.INTERNAL_NAME }, true);
     public static final UniqueKey<Record> ROOM_GUESTS_PKEY = Internal.createUniqueKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_pkey"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_GUEST_ID }, true);
     public static final UniqueKey<Record> ROOMS_PKEY = Internal.createUniqueKey(Rooms.ROOMS, DSL.name("rooms_pkey"), new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
@@ -83,11 +83,12 @@ public class Keys {
     public static final ForeignKey<Record, Record> MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK = Internal.createForeignKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_users_fk"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_EVENTS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_events_id"), new TableField[] { Orders.ORDERS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_USERS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_users_id"), new TableField[] { Orders.ORDERS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
-    public static final ForeignKey<Record, Record> PERMISSION__PERMISSION_ROLE_FK = Internal.createForeignKey(Permission.PERMISSION, DSL.name("permission_role_fk"), new TableField[] { Permission.PERMISSION.ROLE_ID }, Keys.ROLE_PK, new TableField[] { Role.ROLE.ROLE_ID }, true);
+    public static final ForeignKey<Record, Record> PERMISSION__PERMISSION_ROLE_FK = Internal.createForeignKey(Permission.PERMISSION, DSL.name("permission_role_fk"), new TableField[] { Permission.PERMISSION.ROLE_ID }, Keys.ROLES_PK, new TableField[] { Roles.ROLES.ROLE_ID }, true);
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_rooms_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_ID }, Keys.ROOMS_PKEY, new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_USERS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_users_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> ROOMS__ROOMS_ORDERS_ID = Internal.createForeignKey(Rooms.ROOMS, DSL.name("rooms_orders_id"), new TableField[] { Rooms.ROOMS.ORDER_ID }, Keys.ORDERS_PKEY, new TableField[] { Orders.ORDERS.ID }, true);
-    public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_role_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.ROLE_ID }, Keys.ROLE_PK, new TableField[] { Role.ROLE.ROLE_ID }, true);
+    public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_EVENT_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_event_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.TEMP_EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);
+    public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_role_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.ROLE_ID }, Keys.ROLES_PK, new TableField[] { Roles.ROLES.ROLE_ID }, true);
     public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_USER_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_user_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> USERS__USER_MEDIA_FK = Internal.createForeignKey(Users.USERS, DSL.name("user_media_fk"), new TableField[] { Users.USERS.MEDIA_ID_PROPIC }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true);
 }

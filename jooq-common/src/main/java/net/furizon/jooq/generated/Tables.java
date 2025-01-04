@@ -15,7 +15,7 @@ import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
-import net.furizon.jooq.generated.tables.Role;
+import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
@@ -83,9 +83,9 @@ public class Tables {
     public static final Permission PERMISSION = Permission.PERMISSION;
 
     /**
-     * The table <code>public.role</code>.
+     * The table <code>public.roles</code>.
      */
-    public static final Role ROLE = Role.ROLE;
+    public static final Roles ROLES = Roles.ROLES;
 
     /**
      * The table <code>public.room_guests</code>.

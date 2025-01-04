@@ -12,7 +12,8 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
-import net.furizon.jooq.generated.tables.Role.RolePath;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
+import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -75,6 +76,11 @@ public class UserHasRole extends TableImpl<Record> {
      * The column <code>public.user_has_role.role_id</code>.
      */
     public final TableField<Record, Long> ROLE_ID = createField(DSL.name("role_id"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.user_has_role.temp_event_id</code>.
+     */
+    public final TableField<Record, Long> TEMP_EVENT_ID = createField(DSL.name("temp_event_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private UserHasRole(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -151,19 +157,31 @@ public class UserHasRole extends TableImpl<Record> {
 
     @Override
     public List<ForeignKey<Record, ?>> getReferences() {
-        return Arrays.asList(Keys.USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK, Keys.USER_HAS_ROLE__USER_HAS_ROLE_USER_FK);
+        return Arrays.asList(Keys.USER_HAS_ROLE__USER_HAS_ROLE_EVENT_FK, Keys.USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK, Keys.USER_HAS_ROLE__USER_HAS_ROLE_USER_FK);
     }
 
-    private transient RolePath _role;
+    private transient EventsPath _events;
 
     /**
-     * Get the implicit join path to the <code>public.role</code> table.
+     * Get the implicit join path to the <code>public.events</code> table.
      */
-    public RolePath role() {
-        if (_role == null)
-            _role = new RolePath(this, Keys.USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK, null);
+    public EventsPath events() {
+        if (_events == null)
+            _events = new EventsPath(this, Keys.USER_HAS_ROLE__USER_HAS_ROLE_EVENT_FK, null);
 
-        return _role;
+        return _events;
+    }
+
+    private transient RolesPath _roles;
+
+    /**
+     * Get the implicit join path to the <code>public.roles</code> table.
+     */
+    public RolesPath roles() {
+        if (_roles == null)
+            _roles = new RolesPath(this, Keys.USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK, null);
+
+        return _roles;
     }
 
     private transient UsersPath _users;

@@ -12,7 +12,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
-import net.furizon.jooq.generated.tables.Role.RolePath;
+import net.furizon.jooq.generated.tables.Roles.RolesPath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -153,16 +153,16 @@ public class Permission extends TableImpl<Record> {
         return Arrays.asList(Keys.PERMISSION__PERMISSION_ROLE_FK);
     }
 
-    private transient RolePath _role;
+    private transient RolesPath _roles;
 
     /**
-     * Get the implicit join path to the <code>public.role</code> table.
+     * Get the implicit join path to the <code>public.roles</code> table.
      */
-    public RolePath role() {
-        if (_role == null)
-            _role = new RolePath(this, Keys.PERMISSION__PERMISSION_ROLE_FK, null);
+    public RolesPath roles() {
+        if (_roles == null)
+            _roles = new RolesPath(this, Keys.PERMISSION__PERMISSION_ROLE_FK, null);
 
-        return _role;
+        return _roles;
     }
 
     @Override

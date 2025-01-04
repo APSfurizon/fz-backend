@@ -18,7 +18,7 @@ import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
-import net.furizon.jooq.generated.tables.Role.RolePath;
+import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
 import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 
@@ -281,11 +281,11 @@ public class Users extends TableImpl<Record> {
     }
 
     /**
-     * Get the implicit many-to-many join path to the <code>public.role</code>
+     * Get the implicit many-to-many join path to the <code>public.roles</code>
      * table
      */
-    public RolePath role() {
-        return userHasRole().role();
+    public RolesPath roles() {
+        return userHasRole().roles();
     }
 
     @Override
