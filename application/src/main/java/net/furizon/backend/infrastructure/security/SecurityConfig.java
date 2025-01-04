@@ -11,6 +11,7 @@ import java.util.List;
 @ConfigurationProperties("security")
 public class SecurityConfig {
     private final long unverifiedEmailExpireHours;
+    private final long unverifiedPasswordResetExpireHours;
 
     @NotNull
     private final String passwordSalt;

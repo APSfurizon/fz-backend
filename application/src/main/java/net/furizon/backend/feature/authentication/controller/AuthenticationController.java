@@ -4,11 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.LoginRequest;
-import net.furizon.backend.feature.authentication.dto.LoginResponse;
-import net.furizon.backend.feature.authentication.dto.LogoutUserResponse;
-import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
-import net.furizon.backend.feature.authentication.dto.RegisterUserResponse;
+import net.furizon.backend.feature.authentication.dto.*;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
@@ -24,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("/api/v1/authentication")
@@ -81,5 +78,14 @@ public class AuthenticationController {
         );
 
         return RegisterUserResponse.SUCCESS;
+    }
+
+    @Operation(summary = "Confirms an email and enables an account", description =
+        "This endpoint SHOULD NOT User will open a link directly to this page")
+    @GetMapping("/confirm-mail")
+    public RedirectView confirmEmail(
+        @Valid @RequestBody final ConfirmEmailRequest req
+    ) {
+
     }
 }

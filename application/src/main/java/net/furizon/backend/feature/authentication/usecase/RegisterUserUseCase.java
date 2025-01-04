@@ -41,6 +41,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
             input.event
         );
 
+        //TODO send registration link confirmation email
+
         return user;
     }
 

@@ -28,4 +28,10 @@ public interface SessionAuthenticationManager {
     void createAuthentication(long userId, @NotNull String email, @NotNull String password);
 
     void markEmailAsVerified(long userId);
+
+    void changePassword(long userId, @NotNull String password);
+
+    int deleteUnverifiedEmailAccounts();
+
+    int deleteExpiredPasswordResets();
 }

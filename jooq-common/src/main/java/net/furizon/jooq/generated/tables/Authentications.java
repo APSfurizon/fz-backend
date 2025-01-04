@@ -14,6 +14,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Indexes;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests.ResetPasswordRequestsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -81,9 +82,9 @@ public class Authentications extends TableImpl<Record> {
 
     /**
      * The column
-     * <code>public.authentications.authentication_email_verification_creation_ms</code>.
+     * <code>public.authentications.authentication_email_verification_creation</code>.
      */
-    public final TableField<Record, OffsetDateTime> AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS = createField(DSL.name("authentication_email_verification_creation_ms"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<Record, OffsetDateTime> AUTHENTICATION_EMAIL_VERIFICATION_CREATION = createField(DSL.name("authentication_email_verification_creation"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_disabled</code>.
@@ -209,6 +210,19 @@ public class Authentications extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK, null);
 
         return _users;
+    }
+
+    private transient ResetPasswordRequestsPath _resetPasswordRequests;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.reset_password_requests</code> table
+     */
+    public ResetPasswordRequestsPath resetPasswordRequests() {
+        if (_resetPasswordRequests == null)
+            _resetPasswordRequests = new ResetPasswordRequestsPath(this, null, Keys.RESET_PASSWORD_REQUESTS__RESET_PW_AUTH_FK.getInverseKey());
+
+        return _resetPasswordRequests;
     }
 
     @Override

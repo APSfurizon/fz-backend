@@ -15,6 +15,7 @@ import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests;
 import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
@@ -59,6 +60,8 @@ public class Keys {
     public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.ID }, true);
     public static final UniqueKey<Record> ORDERS_PKEY = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_pkey"), new TableField[] { Orders.ORDERS.ID }, true);
     public static final UniqueKey<Record> PERMISSION_PK = Internal.createUniqueKey(Permission.PERMISSION, DSL.name("permission_pk"), new TableField[] { Permission.PERMISSION.ROLE_ID, Permission.PERMISSION.PERMISSION_VALUE }, true);
+    public static final UniqueKey<Record> RESET_PW_REQUESTS_PKEY = Internal.createUniqueKey(ResetPasswordRequests.RESET_PASSWORD_REQUESTS, DSL.name("reset_pw_requests_pkey"), new TableField[] { ResetPasswordRequests.RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID }, true);
+    public static final UniqueKey<Record> RESET_PW_UNIQUE_AUTH = Internal.createUniqueKey(ResetPasswordRequests.RESET_PASSWORD_REQUESTS, DSL.name("reset_pw_unique_auth"), new TableField[] { ResetPasswordRequests.RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID }, true);
     public static final UniqueKey<Record> ROLES_PK = Internal.createUniqueKey(Roles.ROLES, DSL.name("roles_pk"), new TableField[] { Roles.ROLES.ROLE_ID }, true);
     public static final UniqueKey<Record> ROLES_UNIQUE_INTERNAL_NAME = Internal.createUniqueKey(Roles.ROLES, DSL.name("roles_unique_internal_name"), new TableField[] { Roles.ROLES.INTERNAL_NAME }, true);
     public static final UniqueKey<Record> ROOM_GUESTS_PKEY = Internal.createUniqueKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_pkey"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_GUEST_ID }, true);
@@ -84,6 +87,7 @@ public class Keys {
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_EVENTS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_events_id"), new TableField[] { Orders.ORDERS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_USERS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_users_id"), new TableField[] { Orders.ORDERS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> PERMISSION__PERMISSION_ROLE_FK = Internal.createForeignKey(Permission.PERMISSION, DSL.name("permission_role_fk"), new TableField[] { Permission.PERMISSION.ROLE_ID }, Keys.ROLES_PK, new TableField[] { Roles.ROLES.ROLE_ID }, true);
+    public static final ForeignKey<Record, Record> RESET_PASSWORD_REQUESTS__RESET_PW_AUTH_FK = Internal.createForeignKey(ResetPasswordRequests.RESET_PASSWORD_REQUESTS, DSL.name("reset_pw_auth_fk"), new TableField[] { ResetPasswordRequests.RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID }, Keys.AUTHENTICATIONS_PKEY, new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_rooms_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_ID }, Keys.ROOMS_PKEY, new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_USERS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_users_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> ROOMS__ROOMS_ORDERS_ID = Internal.createForeignKey(Rooms.ROOMS, DSL.name("rooms_orders_id"), new TableField[] { Rooms.ROOMS.ORDER_ID }, Keys.ORDERS_PKEY, new TableField[] { Orders.ORDERS.ID }, true);

@@ -15,6 +15,7 @@ import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests;
 import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
@@ -81,6 +82,11 @@ public class Tables {
      * The table <code>public.permission</code>.
      */
     public static final Permission PERMISSION = Permission.PERMISSION;
+
+    /**
+     * The table <code>public.reset_password_requests</code>.
+     */
+    public static final ResetPasswordRequests RESET_PASSWORD_REQUESTS = ResetPasswordRequests.RESET_PASSWORD_REQUESTS;
 
     /**
      * The table <code>public.roles</code>.
