@@ -60,6 +60,9 @@ security:
     expiration: ${SECURITY_SESSION_EXPIRATION_DURATION:1d}
     core-pool-update-size: ${SECURITY_SESSION_CORE_POOL_UPDATE_SIZE:6}
     max-allowed-sessions-size: ${SECURITY_SESSION_MAX_ALLOWED_SESSIONS_SIZE:4}
+  internal:
+    username: ${SECURITY_INTERNAL_USERNAME:furizon}
+    password: ${SECURITY_INTERNAL_PASSWORD:changit}
 
 membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}

@@ -16,6 +16,7 @@ public class Authentication {
 
     @NotNull
     private final String email;
+
     @Nullable
     private final OffsetDateTime mailVerificationCreationMs;
 

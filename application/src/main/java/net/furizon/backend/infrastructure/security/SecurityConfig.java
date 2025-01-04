@@ -25,6 +25,9 @@ public class SecurityConfig {
     @NotNull
     private final Session session;
 
+    @NotNull
+    private final Internal internal;
+
     @Data
     public static class Session {
         @NotNull
@@ -33,5 +36,14 @@ public class SecurityConfig {
         private final int maxAllowedSessionsSize;
 
         private final int corePoolUpdateSize;
+    }
+
+    @Data
+    public static class Internal {
+        @NotNull
+        private final String username;
+
+        @NotNull
+        private final String password;
     }
 }

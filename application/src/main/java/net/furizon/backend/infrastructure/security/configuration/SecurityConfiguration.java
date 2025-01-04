@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
+import net.furizon.backend.infrastructure.security.filter.InternalBasicFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -26,9 +28,24 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfiguration {
     private final DatabaseSessionFilter databaseSessionFilter;
 
+    private final InternalBasicFilter internalBasicFilter;
+
     private final SecurityConfig securityConfig;
 
     private final PretixConfig pretixConfig;
+
+    @Bean
+    public SecurityFilterChain internalFilterChain(HttpSecurity http) throws Exception {
+        return http
+            .securityMatcher("/internal/**")
+            .cors(AbstractHttpConfigurer::disable)
+            .csrf(CsrfConfigurer::disable)
+            .addFilterAt(
+                internalBasicFilter,
+                BasicAuthenticationFilter.class
+            )
+            .build();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,6 +57,7 @@ public class SecurityConfiguration {
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
+                    antMatcher(HttpMethod.GET, "/internal/**"),
                     antMatcher(HttpMethod.GET, "/docs/**"),
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
@@ -50,9 +68,6 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
                     antMatcher(HttpMethod.GET, pretixConfig.getShop().getPath() + "order/**")
                 )
-                .permitAll()
-                // TODO -> Remove it later (just for testing)
-                .requestMatchers("/internal/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

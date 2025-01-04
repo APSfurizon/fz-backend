@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.order.dto.OrderWebhookRequest;
 import net.furizon.backend.feature.pretix.objects.order.usecase.FetchSingleOrderUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -24,16 +25,18 @@ public class OrderController {
     @NotNull
     private final PretixInformation pretixService;
 
-    @Operation(summary = "A pretix order has changed", description =
-            "Each time a pretix order changes, pretix will hit this webhook with the information "
+    @Operation(
+        summary = "A pretix order has changed",
+        description = "Each time a pretix order changes, pretix will hit this webhook with the information "
             + "about the order we need to update in db. This method must be used ONLY by pretix, it's not meant "
             + "to be exposed to public API"
     )
     @PostMapping("/webhook")
+    @InternalAuthorize
     public ResponseEntity<Void> pretixWebhook(OrderWebhookRequest request) {
         log.info("[PRETIX WEBHOOK] Fetching order {}", request);
         var e = pretixService.getCurrentEvent();
-        if (!e.isPresent()) {
+        if (e.isEmpty()) {
             log.error("[PRETIX WEBHOOK] No current event set!");
             return ResponseEntity.internalServerError().build();
         }

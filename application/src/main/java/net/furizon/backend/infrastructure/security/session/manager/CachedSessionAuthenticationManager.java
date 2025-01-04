@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.EMAIL_CONFIRMATION_REQUEST;
 import static net.furizon.jooq.generated.Tables.RESET_PASSWORD_REQUESTS;
 import static net.furizon.jooq.generated.Tables.SESSIONS;
 import static net.furizon.jooq.generated.Tables.USERS;
