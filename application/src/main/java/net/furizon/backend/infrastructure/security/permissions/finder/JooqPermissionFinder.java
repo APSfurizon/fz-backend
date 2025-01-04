@@ -17,7 +17,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.PERMISSION;
+import static net.furizon.jooq.generated.Tables.ROLES;
+import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
