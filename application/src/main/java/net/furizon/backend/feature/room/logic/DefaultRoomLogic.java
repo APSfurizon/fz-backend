@@ -219,6 +219,9 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean canConfirmRoom(long roomId, @NotNull Event event) {
+        if (!isConfirmationSupported()) {
+            return false;
+        }
         boolean everyonePaid = true;
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
@@ -254,8 +257,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean canUnconfirmRoom(long roomId) {
-        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `true` value is returned");
-        return true;
+        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `false` value is returned");
+        return isUnconfirmationSupported();
     }
 
     @Override

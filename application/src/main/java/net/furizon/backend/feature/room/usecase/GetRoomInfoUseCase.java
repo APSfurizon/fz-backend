@@ -37,8 +37,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
 
+        boolean isOwner = true; //By defaulting it on true, we can upgrade room also if we don't have a room
         if (info != null) {
-            boolean isOwner = info.getRoomOwner().getUserId() == userId;
+            isOwner = info.getRoomOwner().getUserId() == userId;
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
             info.setCanConfirm(isOwner && editingTimeAllowed && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
@@ -66,7 +67,8 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         boolean canCreateRoom = editingTimeAllowed && info == null && roomLogic.canCreateRoom(userId, input.event);
         boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(input.event);
 
-        boolean canBuyOrUpgrade = editingTimeAllowed && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
+        boolean canBuyOrUpgrade = buyOrUpgradeSupported && editingTimeAllowed && isOwner
+                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
 
         return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported, canBuyOrUpgrade, endRoomEditingTime, invitations);
     }
