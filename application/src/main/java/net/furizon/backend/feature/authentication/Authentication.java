@@ -4,6 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.time.OffsetDateTime;
 
 @Builder
 @Data
@@ -13,17 +16,20 @@ public class Authentication {
 
     @NotNull
     private final String email;
-
-    private final boolean isVerified;
-
-    private final boolean isTwoFactorEnabled;
+    @Nullable
+    private final OffsetDateTime mailVerificationCreationMs;
 
     private final boolean isDisabled;
 
-    private final boolean isFrom0Auth;
-
     @NotNull
     private final String hashedPassword;
+
+    @Nullable
+    private final String authToken;
+
+    public boolean is2FaEnabled() {
+        return authToken != null;
+    }
 
     private final long userId;
 }

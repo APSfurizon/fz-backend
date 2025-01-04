@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -80,30 +81,14 @@ public class Authentications extends TableImpl<Record> {
 
     /**
      * The column
-     * <code>public.authentications.authentication_email_verified</code>.
+     * <code>public.authentications.authentication_email_verification_creation_ms</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_EMAIL_VERIFIED = createField(DSL.name("authentication_email_verified"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
-
-    /**
-     * The column
-     * <code>public.authentications.authentication_2fa_enabled</code>.
-     */
-    public final TableField<Record, Boolean> AUTHENTICATION_2FA_ENABLED = createField(DSL.name("authentication_2fa_enabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<Record, OffsetDateTime> AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS = createField(DSL.name("authentication_email_verification_creation_ms"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_disabled</code>.
      */
     public final TableField<Record, Boolean> AUTHENTICATION_DISABLED = createField(DSL.name("authentication_disabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
-
-    /**
-     * The column <code>public.authentications.authentication_expired</code>.
-     */
-    public final TableField<Record, Boolean> AUTHENTICATION_EXPIRED = createField(DSL.name("authentication_expired"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
-
-    /**
-     * The column <code>public.authentications.authentication_from_oauth</code>.
-     */
-    public final TableField<Record, Boolean> AUTHENTICATION_FROM_OAUTH = createField(DSL.name("authentication_from_oauth"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column

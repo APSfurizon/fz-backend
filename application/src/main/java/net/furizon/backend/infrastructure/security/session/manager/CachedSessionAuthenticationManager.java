@@ -162,11 +162,13 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     AUTHENTICATIONS.USER_ID
                 )
                 .from(SESSIONS)
-                .leftOuterJoin(AUTHENTICATIONS)
+                .innerJoin(AUTHENTICATIONS)
                 .on(
                     AUTHENTICATIONS.USER_ID.eq(SESSIONS.USER_ID)
+                    .and(SESSIONS.ID.eq(sessionId))
+                    .and(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED.isNull())
+                    .and(AUTHENTICATIONS.AUTHENTICATION_DISABLED.isFalse())
                 )
-                .where(SESSIONS.ID.eq(sessionId))
             )
             .mapOrNull(record ->
                 Pair.of(

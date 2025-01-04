@@ -26,11 +26,10 @@ public class JooqAuthenticationFinder implements AuthenticationFinder {
                         .select(
                             AUTHENTICATIONS.AUTHENTICATION_ID,
                             AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                            AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFIED,
-                            AUTHENTICATIONS.AUTHENTICATION_2FA_ENABLED,
+                            AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION_MS,
                             AUTHENTICATIONS.AUTHENTICATION_DISABLED,
-                            AUTHENTICATIONS.AUTHENTICATION_FROM_OAUTH,
                             AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                            AUTHENTICATIONS.AUTHENTICATION_TOKEN,
                             AUTHENTICATIONS.USER_ID
                         )
                         .from(AUTHENTICATIONS)
