@@ -101,19 +101,34 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     @Override
     public void clearOldestSessions(long userId) {
         List<Session> sessions = getUserSessions(userId);
-        sessions.stream()
-                .sorted(Comparator.comparing(Session::getExpiresAt).reversed())
-                // -1 because we are planning to insert one more session after the clean
-                .skip((long) (securityConfig.getSession().getMaxAllowedSessionsSize() - 1))
-                .forEach(session -> this.deleteSession(session.getId()));
+        final var oldestSessionIds = sessions.stream()
+            .sorted(Comparator.comparing(Session::getExpiresAt).reversed())
+            // -1 because we are planning to insert one more session after the clean
+            .skip((long) (securityConfig.getSession().getMaxAllowedSessionsSize() - 1))
+            .map(Session::getId)
+            .toList();
+
+        sqlCommand.execute(
+            PostgresDSL.deleteFrom(SESSIONS)
+                .where(SESSIONS.ID.in(oldestSessionIds))
+        );
+
+        sessionAuthenticationPairCache.invalidateAll(oldestSessionIds);
     }
 
     @Override
     public void clearAllSession(long userId) {
-        List<Session> sessions = getUserSessions(userId);
-        for (Session session : sessions) {
-            deleteSession(session.getId());
-        }
+        final var oldSessions = sqlCommand
+            .executeResult(
+                PostgresDSL.deleteFrom(SESSIONS)
+                    .where(SESSIONS.USER_ID.eq(userId))
+                    .returning(SESSIONS.ID)
+            )
+            .stream()
+            .map((it) -> it.get(SESSIONS.ID))
+            .toList();
+
+        sessionAuthenticationPairCache.invalidateAll(oldSessions);
     }
 
     @Override
@@ -277,9 +292,11 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     }
 
     private void invalidateCache(long userId) {
-        List<Session> sessions = getUserSessions(userId);
-        for (Session session : sessions) {
-            sessionAuthenticationPairCache.invalidate(session.getId());
-        }
+        List<UUID> sessions = sqlQuery.fetch(
+            PostgresDSL.select(SESSIONS.ID)
+            .from(SESSIONS)
+            .where(SESSIONS.USER_ID.eq(userId))
+        ).stream().map(q -> q.get(SESSIONS.ID)).toList();
+        sessionAuthenticationPairCache.invalidateAll(sessions);
     }
 }

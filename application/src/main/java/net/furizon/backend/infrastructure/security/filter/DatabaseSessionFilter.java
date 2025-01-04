@@ -57,7 +57,9 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var tokenMetadata = tokenDecoder.decode(
                 authHeader.replaceFirst("(?i)^Bearer ", "")
             );
-            final var pair = sessionAuthenticationManager.findSessionWithAuthenticationById(tokenMetadata.getSessionId());
+            final var pair = sessionAuthenticationManager.findSessionWithAuthenticationById(
+                tokenMetadata.getSessionId()
+            );
             if (pair == null) {
                 throw new SessionAuthenticationException("Session not found");
             }

@@ -12,15 +12,20 @@ import java.util.UUID;
 public interface SessionAuthenticationManager {
     //Write
     void updateSession(@NotNull UUID sessionId, @NotNull String clientIp);
+
     void deleteSession(@NotNull UUID sessionId);
+
     @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent);
+
     void clearOldestSessions(long userId);
 
     void clearAllSession(long userId);
 
     //Read
     @NotNull List<Session> getUserSessions(long userId);
+
     int getUserSessionsCount(long userId);
+
     @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId);
 
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
