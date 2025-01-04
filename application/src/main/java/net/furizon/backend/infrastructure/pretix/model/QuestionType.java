@@ -35,5 +35,4 @@ public enum QuestionType {
     public static QuestionType get(String code) {
         return MAP.get(code);
     }
-
 }
