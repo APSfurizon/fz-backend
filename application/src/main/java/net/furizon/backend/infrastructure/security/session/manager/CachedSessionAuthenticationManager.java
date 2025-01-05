@@ -61,7 +61,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         );
         sessionAuthenticationPairCache.invalidate(sessionId);
     }
-
     @Override
     public void deleteSession(@NotNull UUID sessionId) {
         sqlCommand.execute(
@@ -70,7 +69,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         );
         sessionAuthenticationPairCache.invalidate(sessionId);
     }
-
     @Override
     public @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent) {
         final var sessionId = UuidCreator.getTimeOrderedEpoch();
@@ -115,19 +113,18 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
         sqlCommand.execute(
             PostgresDSL.deleteFrom(SESSIONS)
-                .where(SESSIONS.ID.in(oldestSessionIds))
+            .where(SESSIONS.ID.in(oldestSessionIds))
         );
 
         sessionAuthenticationPairCache.invalidateAll(oldestSessionIds);
     }
-
     @Override
     public void clearAllSession(long userId) {
         final var oldSessions = sqlCommand
             .executeResult(
                 PostgresDSL.deleteFrom(SESSIONS)
-                    .where(SESSIONS.USER_ID.eq(userId))
-                    .returning(SESSIONS.ID)
+                .where(SESSIONS.USER_ID.eq(userId))
+                .returning(SESSIONS.ID)
             )
             .stream()
             .map((it) -> it.get(SESSIONS.ID))
@@ -151,7 +148,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .orderBy(SESSIONS.CREATED_AT.desc())
         ).stream().map(JooqSessionMapper::map).toList();
     }
-
     @Override
     public int getUserSessionsCount(long userId) {
         return sqlQuery.count(
@@ -201,7 +197,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         }
         return res;
     }
-
     @Override
     public @Nullable Authentication findAuthenticationByEmail(@NotNull String email) {
         try {
@@ -287,17 +282,70 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
                 encoder.encode(securityConfig.getPasswordSalt() + password)
             )
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
         );
         invalidateCache(userId);
-        sqlCommand.execute(
+    }
+    @Override
+    public @Nullable Long getUserIdFromPasswordResetReqId(@Nullable UUID pwResetId) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(AUTHENTICATIONS.USER_ID)
+            .from(AUTHENTICATIONS)
+            .innerJoin(RESET_PASSWORD_REQUESTS)
+            .on(
+                RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID.eq(AUTHENTICATIONS.AUTHENTICATION_ID)
+                .and(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID.eq(pwResetId))
+            )
+        ).mapOrNull(r -> r.get(AUTHENTICATIONS.USER_ID));
+    }
+    @Override
+    public boolean deletePasswordResetAttempt(@NotNull UUID pwResetId) {
+        return sqlCommand.execute(
             PostgresDSL.deleteFrom(RESET_PASSWORD_REQUESTS)
-            .where(RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID.eq(
-                    PostgresDSL.select(AUTHENTICATIONS.AUTHENTICATION_ID)
-                    .from(AUTHENTICATIONS)
-                    .where(AUTHENTICATIONS.USER_ID.eq(userId))
-                    .limit(1)
-            ))
+            .where(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID.eq(pwResetId))
+        ) > 0;
+    }
+    @Override
+    public boolean isResetPwRequestPending(@NotNull UUID pwResetId) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID)
+            .from(RESET_PASSWORD_REQUESTS)
+            .where(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID.eq(pwResetId))
+            .limit(1)
+        ).isPresent();
+    }
+    @Override
+    public @Nullable UUID initResetPassword(@NotNull String email) {
+        Long authId = sqlQuery.fetchFirst(
+            PostgresDSL.select(AUTHENTICATIONS.AUTHENTICATION_ID)
+            .from(AUTHENTICATIONS)
+            .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+        ).mapOrNull(r -> r.get(AUTHENTICATIONS.AUTHENTICATION_ID));
+        if (authId == null) {
+            return null;
+        }
+
+        boolean alreadyResettingPw = sqlQuery.fetchFirst(
+            PostgresDSL.select(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID)
+            .from(RESET_PASSWORD_REQUESTS)
+            .where(AUTHENTICATIONS.AUTHENTICATION_ID.eq(authId))
+        ).isPresent();
+        if (alreadyResettingPw) {
+            return null;
+        }
+
+        UUID resetPwId = UuidCreator.getTimeOrderedEpoch();
+        sqlCommand.execute(
+            PostgresDSL.insertInto(
+                RESET_PASSWORD_REQUESTS,
+                RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID,
+                RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID
+            ).values(
+                resetPwId,
+                authId
+            )
         );
+        return resetPwId;
     }
 
     @Override
@@ -315,7 +363,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             ))
         );
     }
-
     @Override
     public int deleteExpiredPasswordResets() {
         OffsetDateTime deleteFrom =

@@ -76,6 +76,7 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/confirm-mail"),
+                    antMatcher(HttpMethod.GET, "/api/v1/authentication/pw/status"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/reset"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),

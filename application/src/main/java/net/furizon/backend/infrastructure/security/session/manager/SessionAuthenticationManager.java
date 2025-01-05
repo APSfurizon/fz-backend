@@ -39,6 +39,17 @@ public interface SessionAuthenticationManager {
 
     void changePassword(long userId, @NotNull String password);
 
+    @Nullable Long getUserIdFromPasswordResetReqId(@Nullable UUID pwResetId);
+
+    boolean deletePasswordResetAttempt(@NotNull UUID pwResetId);
+
+    boolean isResetPwRequestPending(@NotNull UUID pwResetId);
+
+    /**
+     @return UUID the id which needs to be opened to reset the password
+     */
+    UUID initResetPassword(@NotNull String email);
+
     int deleteUnverifiedEmailAccounts();
 
     int deleteExpiredPasswordResets();

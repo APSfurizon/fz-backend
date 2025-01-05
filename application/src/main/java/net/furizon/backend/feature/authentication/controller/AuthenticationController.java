@@ -126,8 +126,9 @@ public class AuthenticationController {
 
     @Operation(summary = "Initialize a password reset flow", description =
         "By calling this method the user will receive an email with a link to "
-        + "reset its password. An user can instantiate only one flow per time, expect a "
-        + "`PW_RESET_STILL_PENDING` if this is the case.")
+        + "reset its password. An user can instantiate only one flow per time, "
+        + "but no error is returned both if a flow is already active and both "
+        + "if the email doesn't exists, to not leak users email")
     @PostMapping("/pw/reset")
     public boolean resetPw(
             @Valid @NotNull @RequestBody final EmailRequest req
