@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/internal/cache/pretix")
+@RequestMapping("/cache/pretix")
 @RequiredArgsConstructor
 public class PretixCacheController {
     @NotNull
@@ -26,7 +26,7 @@ public class PretixCacheController {
             + "to be launched ONLY by the backend admins"
     )
     @PostMapping("/reload-struct")
-    @InternalAuthorize
+    //TODO [ADMIN_CHECK]
     public void reloadCache() {
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
@@ -38,7 +38,7 @@ public class PretixCacheController {
         "This method is meant to be launched ONLY by the backend admins"
     )
     @PostMapping("/reload-orders")
-    @InternalAuthorize
+    //TODO [ADMIN_CHECK]
     public void reloadOrders() {
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();

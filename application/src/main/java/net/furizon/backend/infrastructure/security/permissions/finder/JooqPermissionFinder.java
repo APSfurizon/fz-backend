@@ -32,10 +32,12 @@ public class JooqPermissionFinder implements PermissionFinder {
         return sqlQuery
             .fetch(
                 PostgresDSL.select(PERMISSION.PERMISSION_VALUE)
-                    .from(USER_HAS_ROLE)
-                    .innerJoin(PERMISSION)
-                    .on(PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID).and(USER_HAS_ROLE.USER_ID.eq(userId)))
-                    .where(USER_HAS_ROLE.USER_ID.eq(userId))
+                .from(USER_HAS_ROLE)
+                .innerJoin(PERMISSION)
+                .on(
+                    PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                    .and(USER_HAS_ROLE.USER_ID.eq(userId))
+                )
             )
             .stream()
             .map((it) -> Permission.get(it.get(PERMISSION.PERMISSION_VALUE)))
@@ -54,11 +56,11 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @NotNull List<JooqPermission> getPermissionsFromRoleInternalName(@NotNull String roleInternalName) {
         return sqlQuery.fetch(
             selectPermission()
-                .innerJoin(ROLES)
-                .on(
-                    ROLES.ROLE_ID.eq(PERMISSION.ROLE_ID)
-                        .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
-                )
+            .innerJoin(ROLES)
+            .on(
+                ROLES.ROLE_ID.eq(PERMISSION.ROLE_ID)
+                .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
+            )
         ).stream().map(JooqPermissionMapper::map).toList();
     }
 
@@ -66,7 +68,7 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @Nullable Role getRoleFromId(long roleId) {
         return sqlQuery.fetchFirst(
             selectRole()
-                .where(ROLES.ROLE_ID.eq(roleId))
+            .where(ROLES.ROLE_ID.eq(roleId))
         ).mapOrNull(JooqRoleMapper::map);
     }
 
@@ -74,7 +76,7 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @Nullable Role getRoleFromInternalName(@NotNull String roleInternalName) {
         return sqlQuery.fetchFirst(
             selectRole()
-                .where(ROLES.INTERNAL_NAME.eq(roleInternalName))
+            .where(ROLES.INTERNAL_NAME.eq(roleInternalName))
         ).mapOrNull(JooqRoleMapper::map);
     }
 
@@ -82,12 +84,12 @@ public class JooqPermissionFinder implements PermissionFinder {
     public boolean userHasRole(long userId, long roleId) {
         return sqlQuery.fetchFirst(
             PostgresDSL.select(
-                    USER_HAS_ROLE.USER_ID
-                ).from(USER_HAS_ROLE)
-                .where(
-                    USER_HAS_ROLE.USER_ID.eq(userId)
-                        .and(USER_HAS_ROLE.ROLE_ID.eq(roleId))
-                )
+                USER_HAS_ROLE.USER_ID
+            ).from(USER_HAS_ROLE)
+            .where(
+                USER_HAS_ROLE.USER_ID.eq(userId)
+                .and(USER_HAS_ROLE.ROLE_ID.eq(roleId))
+            )
         ).isPresent();
     }
 
@@ -95,15 +97,15 @@ public class JooqPermissionFinder implements PermissionFinder {
     public boolean userHasRole(long userId, @NotNull String roleInternalName) {
         return sqlQuery.fetchFirst(
             PostgresDSL.select(
-                    USER_HAS_ROLE.USER_ID
-                )
-                .from(USER_HAS_ROLE)
-                .innerJoin(ROLES)
-                .on(
-                    ROLES.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
-                        .and(USER_HAS_ROLE.USER_ID.eq(userId))
-                        .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
-                )
+                USER_HAS_ROLE.USER_ID
+            )
+            .from(USER_HAS_ROLE)
+            .innerJoin(ROLES)
+            .on(
+                ROLES.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                .and(USER_HAS_ROLE.USER_ID.eq(userId))
+                .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
+            )
         ).isPresent();
     }
 
@@ -111,15 +113,15 @@ public class JooqPermissionFinder implements PermissionFinder {
     public boolean userHasPermission(long userId, @NotNull Permission permission) {
         return sqlQuery.fetchFirst(
             PostgresDSL.select(
-                    USER_HAS_ROLE.USER_ID
-                )
-                .from(USER_HAS_ROLE)
-                .innerJoin(PERMISSION)
-                .on(
-                    PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
-                        .and(USER_HAS_ROLE.USER_ID.eq(userId))
-                        .and(PERMISSION.PERMISSION_VALUE.eq(permission.getValue()))
-                )
+                USER_HAS_ROLE.USER_ID
+            )
+            .from(USER_HAS_ROLE)
+            .innerJoin(PERMISSION)
+            .on(
+                PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                .and(USER_HAS_ROLE.USER_ID.eq(userId))
+                .and(PERMISSION.PERMISSION_VALUE.eq(permission.getValue()))
+            )
         ).isPresent();
     }
 
