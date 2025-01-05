@@ -36,37 +36,37 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         Event event = input.event;
-        long destUsrId = input.req.getDestUserId();
+        long recipientUserId = input.req.getRecipientUserId();
         ExchangeAction action = input.req.getAction();
-        log.info("{} is inizializing a {} exchange with target user {} ",
-                input.user.getUserId(), action, destUsrId);
+        log.info("{} is initializing a {} exchange with target user {} ",
+                input.user.getUserId(), action, recipientUserId);
 
-        long sourceUsrId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
-        checks.assertSourceUserHasNotPendingExchanges(sourceUsrId, input.event);
+        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        checks.assertSourceUserHasNotPendingExchanges(sourceUserId, input.event);
 
-        log.info("Init {} exchange: {} -> {}", action, sourceUsrId, destUsrId);
-        long exchangeId  = createExchangeObjAction.invoke(destUsrId, sourceUsrId, action, event);
+        log.info("Init {} exchange: {} -> {}", action, sourceUserId, recipientUserId);
+        long exchangeId  = createExchangeObjAction.invoke(recipientUserId, sourceUserId, action, event);
 
-        UserEmailData destData = userFinder.getMailDataForUser(destUsrId);
-        UserEmailData sourceData = userFinder.getMailDataForUser(sourceUsrId);
-        if (destData != null && sourceData != null) {
-            boolean destHasRoom = false;
+        UserEmailData recipientData = userFinder.getMailDataForUser(recipientUserId);
+        UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
+        if (recipientData != null && sourceData != null) {
+            boolean recipientHasRoom = false;
             if (action == ExchangeAction.TRASFER_EXCHANGE_ROOM) {
-                var r = orderFinder.userHasBoughtAroom(destUsrId, event);
-                destHasRoom = r.isPresent() && r.get();
+                var r = orderFinder.userHasBoughtAroom(recipientUserId, event);
+                recipientHasRoom = r.isPresent() && r.get();
             }
             String actionText = switch (action) {
                 case TRASFER_EXCHANGE_ROOM -> TRANSFER_FULL_ORDER;
-                case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
+                case TRASFER_FULL_ORDER -> recipientHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
             };
             MailVarPair[] vars = {
                 new MailVarPair(EXCHANGE_ACTION_TEXT, actionText),
                 new MailVarPair(OWNER_FURSONA_NAME, sourceData.getFursonaName()),
-                new MailVarPair(FURSONA_NAME, destData.getFursonaName()),
+                new MailVarPair(FURSONA_NAME, recipientData.getFursonaName()),
                 new MailVarPair(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
             };
-            mailService.sendUpdate(destUsrId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
-            mailService.sendUpdate(sourceUsrId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
+            mailService.sendUpdate(recipientUserId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
+            mailService.sendUpdate(sourceUserId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
             return true;
         }
         return false;

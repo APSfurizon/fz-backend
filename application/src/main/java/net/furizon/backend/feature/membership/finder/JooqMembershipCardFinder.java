@@ -89,6 +89,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         MEMBERSHIP_INFO.INFO_CITY,
                         MEMBERSHIP_INFO.INFO_REGION,
                         MEMBERSHIP_INFO.INFO_COUNTRY,
+                        MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                         MEMBERSHIP_INFO.INFO_PHONE,
                         MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                         MEMBERSHIP_INFO.USER_ID,
@@ -108,6 +109,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
                 .leftJoin(MEDIA)
                 .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+                .leftJoin(ORDERS)
+                .on(ORDERS.USER_ID.eq(USERS.USER_ID))
         ).stream().map(r -> r.map(FullInfoMembershipMapper::map)).toList();
     }
 }

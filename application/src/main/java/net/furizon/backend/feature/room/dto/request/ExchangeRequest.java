@@ -1,16 +1,17 @@
 package net.furizon.backend.feature.room.dto.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import lombok.Data;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 
 @Data
 public class ExchangeRequest {
-    @Null
+    @Nullable
     private final Long sourceUserId;
 
-    private final long destUserId;
+    private final long recipientUserId;
+
     @NotNull
     private final ExchangeAction action;
 }

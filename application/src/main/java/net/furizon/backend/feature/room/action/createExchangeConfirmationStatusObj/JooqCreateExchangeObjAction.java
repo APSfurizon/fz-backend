@@ -24,11 +24,13 @@ public class JooqCreateExchangeObjAction implements CreateExchangeObjAction {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         EXCHANGE_CONFIRMATION_STATUS,
+                        EXCHANGE_CONFIRMATION_STATUS.ACTION_TYPE,
                         EXCHANGE_CONFIRMATION_STATUS.TARGET_USER_ID,
                         EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID,
                         EXCHANGE_CONFIRMATION_STATUS.EVENT_ID,
                         EXCHANGE_CONFIRMATION_STATUS.EXPIRES_ON
                 ).values(
+                        (short) action.ordinal(),
                         targetUserId,
                         sourceUserId,
                         event.getId(),

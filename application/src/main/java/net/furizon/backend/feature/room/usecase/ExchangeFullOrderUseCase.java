@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.room.usecase;
 
-import com.nimbusds.jose.util.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -35,7 +34,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     public @NotNull Boolean executor(@NotNull ExchangeFullOrderUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.user.getUserId());
         long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
-        long destUserId = input.req.getDestUserId();
+        long destUserId = input.req.getRecipientUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
 
