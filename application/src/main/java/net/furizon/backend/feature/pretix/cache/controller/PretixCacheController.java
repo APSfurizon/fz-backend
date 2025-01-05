@@ -32,8 +32,11 @@ public class PretixCacheController {
         pretixService.resetCache();
     }
 
-    @Operation(summary = "Refetches the full order list and updates them in the db", description =
-        "This method is meant to be launched ONLY by the backend admins")
+    @Operation(
+        summary = "Refetches the full order list and updates them in the db",
+        description =
+        "This method is meant to be launched ONLY by the backend admins"
+    )
     @PostMapping("/reload-orders")
     @InternalAuthorize
     public void reloadOrders() {

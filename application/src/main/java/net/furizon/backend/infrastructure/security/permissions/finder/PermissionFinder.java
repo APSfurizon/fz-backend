@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface PermissionFinder {
+    @NotNull List<Permission> getUserPermissions(long userId);
 
     @NotNull List<JooqPermission> getPermissionsFromRoleId(long roleId);
 

@@ -3,11 +3,17 @@ package net.furizon.backend.infrastructure.security.configuration;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredManager;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
 import net.furizon.backend.infrastructure.security.filter.InternalBasicFilter;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
+import org.springframework.aop.Advisor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -48,8 +54,15 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor permissionsAdvisor(PermissionFinder permissionFinder) {
+        return AuthorizationManagerBeforeMethodInterceptor.preAuthorize(
+            new PermissionRequiredManager(permissionFinder)
+        );
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // Map the allowed endpoints
         return http
             .cors(customizer ->
                 customizer.configurationSource(corsConfigurationSource())
