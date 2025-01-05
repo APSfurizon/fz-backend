@@ -75,11 +75,13 @@ public class AuthenticationController {
         + "should be prompted with a normal text field which can be normally submitted as state")
     @PostMapping("/register")
     public RegisterUserResponse registerUser(
-        @Valid @NotNull @RequestBody final RegisterUserRequest registerUserRequest
+            HttpServletRequest request,
+            @Valid @NotNull @RequestBody final RegisterUserRequest registerUserRequest
     ) {
         executor.execute(
             RegisterUserUseCase.class,
             new RegisterUserUseCase.Input(
+                request,
                 registerUserRequest,
                 pretixService.getCurrentEvent().orElse(null)
             )

@@ -28,6 +28,9 @@ public class FrontendConfig {
     @Getter(AccessLevel.NONE)
     @NotNull private String passwordResetUrl;
 
+    @Getter(AccessLevel.NONE)
+    @NotNull private String confirmEmailUrl;
+
 
     @NotNull
     public String getLoginUrl() {
@@ -53,7 +56,12 @@ public class FrontendConfig {
     }
 
     @NotNull
-    public String getPasswordResetUrl(UUID pwResetId) {
+    public String getPasswordResetUrl(@NotNull UUID pwResetId) {
         return passwordResetUrl + pwResetId;
+    }
+
+    @NotNull
+    public String getConfirmEmailUrl(@NotNull UUID confirmUrlId) {
+        return confirmEmailUrl + confirmUrlId;
     }
 }

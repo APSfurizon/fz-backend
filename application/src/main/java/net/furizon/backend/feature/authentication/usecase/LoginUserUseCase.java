@@ -33,7 +33,8 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
     @Override
     public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
         if (input.user != null) {
-            throw new ApiException("User is already logged in", AuthenticationCodes.ALREADY_LOGGED_IN);
+            //TODO error fix
+            //throw new ApiException("User is already logged in", AuthenticationCodes.ALREADY_LOGGED_IN);
         }
 
         final var userId = validation.validateAndGetUserId(input);

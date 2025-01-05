@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
+import net.furizon.backend.infrastructure.email.EmailSender;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -14,11 +17,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Input, Boolean> {
+
     @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
+    @NotNull private final EmailSender sender;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -32,12 +40,15 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
             userId = sessionAuthenticationManager.getUserIdFromPasswordResetReqId(resetPwId);
             if (userId == null) {
-                throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
+                //TODO error fix
+                //throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
             }
         }
 
         log.info("Changing password for user {}", userId);
         sessionAuthenticationManager.changePassword(userId, input.req.getNewPassword());
+
+        //TODO EMAIL notify user that his account has changed password
 
         return true;
     }
