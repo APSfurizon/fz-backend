@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.authentication.dto;
+package net.furizon.backend.feature.authentication.dto.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.authentication.dto;
+package net.furizon.backend.feature.authentication.dto.responses;
 
 import lombok.Data;
 

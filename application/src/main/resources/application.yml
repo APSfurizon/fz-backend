@@ -69,8 +69,10 @@ membership:
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
 
 frontend:
+  login-url: ${FRONTEND_LOGIN_URL:}
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
+  password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
 
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}

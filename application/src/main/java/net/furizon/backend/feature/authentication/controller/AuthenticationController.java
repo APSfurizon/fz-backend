@@ -1,23 +1,20 @@
 package net.furizon.backend.feature.authentication.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.LoginRequest;
-import net.furizon.backend.feature.authentication.dto.LoginResponse;
-import net.furizon.backend.feature.authentication.dto.LogoutUserResponse;
-import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
-import net.furizon.backend.feature.authentication.dto.RegisterUserResponse;
-import net.furizon.backend.feature.authentication.usecase.ConfirmEmailUseCase;
-import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
+import net.furizon.backend.feature.authentication.dto.requests.*;
+import net.furizon.backend.feature.authentication.dto.responses.AuthenticationCodeResponse;
+import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
+import net.furizon.backend.feature.authentication.dto.responses.LogoutUserResponse;
+import net.furizon.backend.feature.authentication.dto.responses.RegisterUserResponse;
+import net.furizon.backend.feature.authentication.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,13 +37,15 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public LoginResponse loginUser(
-        @Valid @RequestBody final LoginRequest loginRequest,
+        @AuthenticationPrincipal @Nullable final FurizonUser user,
+        @Valid @NotNull @RequestBody final LoginRequest loginRequest,
         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) @Nullable String userAgent,
         HttpServletRequest httpServletRequest
     ) {
         return executor.execute(
             LoginUserUseCase.class,
             new LoginUserUseCase.Input(
+                user,
                 loginRequest.getEmail(),
                 loginRequest.getPassword(),
                 httpServletRequest.getRemoteAddr(),
@@ -76,7 +75,7 @@ public class AuthenticationController {
         + "should be prompted with a normal text field which can be normally submitted as state")
     @PostMapping("/register")
     public RegisterUserResponse registerUser(
-        @Valid @RequestBody final RegisterUserRequest registerUserRequest
+        @Valid @NotNull @RequestBody final RegisterUserRequest registerUserRequest
     ) {
         executor.execute(
             RegisterUserUseCase.class,
@@ -89,14 +88,54 @@ public class AuthenticationController {
         return RegisterUserResponse.SUCCESS;
     }
 
+    @Operation(summary = "Changes the user's password", description =
+        "This method can be used both for changing the password of an already "
+        + "logged in user and both for resetting the password after a password "
+        + "reset flow. If the user is already logged in, you MUST omit the "
+        + "`resetPwId` parameter of the body, if instead the user is resetting "
+        + "his password (so he's not logged in) that parameter is *mandatory*")
     @PostMapping("/pw/change")
-    public void changePw() {
-
+    public void changePw(
+            @AuthenticationPrincipal @Nullable final FurizonUser user,
+            @Valid @NotNull @RequestBody final ChangePasswordRequest req
+    ) {
+        executor.execute(
+                ChangePasswordUseCase.class,
+                new ChangePasswordUseCase.Input(user, req)
+        );
     }
 
-    @PostMapping("/pw/reset")
-    public void resetPw() {
+    @Operation(summary = "Checks the status of a password reset flow", description =
+        "This method is meant to be used by the frontend after an user has loaded "
+        + "the page of the password reset, so it can check if the request is still "
+        + "valid and let the user proceed. We return `PW_RESET_STILL_PENDING` if "
+        + "the reset flow is still valid and the user *can* change its password "
+        + "from the reset link, `PW_RESET_NOT_FOUND` otherwise. We return "
+        + "a `ALREADY_LOGGED_IN` if the user is already logged and he doesn't "
+        + "need to reset its password")
+    @GetMapping("/pw/reset/status")
+    public AuthenticationCodeResponse getPwResetStatus(
+            @AuthenticationPrincipal @Nullable final FurizonUser user,
+            @Valid @NotNull @RequestParam("id") final UUID id
+    ) {
+        return executor.execute(
+                GetResetPwStatusUseCase.class,
+                new GetResetPwStatusUseCase.Input(user, id)
+        );
+    }
 
+    @Operation(summary = "Initialize a password reset flow", description =
+        "By calling this method the user will receive an email with a link to "
+        + "reset its password. An user can instantiate only one flow per time, expect a "
+        + "`PW_RESET_STILL_PENDING` if this is the case.")
+    @PostMapping("/pw/reset")
+    public boolean resetPw(
+            @Valid @NotNull @RequestBody final EmailRequest req
+    ) {
+        return executor.execute(
+                ResetPasswordUseCase.class,
+                req
+        );
     }
 
     @Operation(summary = "Confirms an email and enables an account", description =
@@ -105,8 +144,7 @@ public class AuthenticationController {
         + "url's `status` param with the result")
     @GetMapping("/confirm-mail")
     public RedirectView confirmEmail(
-        @Valid @RequestParam("id") @jakarta.validation.constraints.NotNull
-        final UUID id
+        @Valid @RequestParam("id") @NotNull final UUID id
     ) {
         return executor.execute(
                 ConfirmEmailUseCase.class,

@@ -2,7 +2,7 @@ package net.furizon.backend.feature.authentication.validation;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
-import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
+import net.furizon.backend.feature.authentication.dto.requests.RegisterUserRequest;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;

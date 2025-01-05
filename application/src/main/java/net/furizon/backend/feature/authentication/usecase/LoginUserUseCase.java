@@ -2,13 +2,16 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.authentication.dto.LoginResponse;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
+import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.security.token.TokenMetadata;
 import net.furizon.backend.infrastructure.security.token.encoder.TokenEncoder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -29,6 +32,10 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
     @Transactional
     @Override
     public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
+        if (input.user != null) {
+            throw new ApiException("User is already logged in", AuthenticationCodes.ALREADY_LOGGED_IN);
+        }
+
         final var userId = validation.validateAndGetUserId(input);
         int sessionsCount = sessionAuthenticationManager.getUserSessionsCount(userId);
         if (sessionsCount >= securityConfig.getSession().getMaxAllowedSessionsSize()) {
@@ -58,6 +65,7 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
     }
 
     public record Input(
+        @Nullable FurizonUser user,
         @NotNull String email,
         @NotNull String password,
         @NotNull String clientIp,

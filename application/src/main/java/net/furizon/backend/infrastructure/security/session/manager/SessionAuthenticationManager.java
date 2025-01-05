@@ -30,6 +30,9 @@ public interface SessionAuthenticationManager {
 
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
 
+    /**
+    @return UUID the id which needs to be opened to confirm the email
+     */
     UUID createAuthentication(long userId, @NotNull String email, @NotNull String password);
 
     boolean markEmailAsVerified(@NotNull UUID reqId);

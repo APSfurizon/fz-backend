@@ -77,6 +77,7 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/confirm-mail"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/reset"),
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
                     antMatcher(HttpMethod.GET, pretixConfig.getShop().getPath() + "order/**")

@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.RegisterUserRequest;
+import net.furizon.backend.feature.authentication.dto.requests.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName());
-        sessionAuthenticationManager.createAuthentication(
+        UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
             regUserReq.getEmail(),
             regUserReq.getPassword()
