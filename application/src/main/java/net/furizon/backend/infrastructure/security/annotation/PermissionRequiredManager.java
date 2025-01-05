@@ -44,7 +44,11 @@ public class PermissionRequiredManager implements AuthorizationManager<MethodInv
             }
             case ANY -> {
                 if (Arrays.stream(requiredPermissions).noneMatch(userPermissions::contains)) {
-                    throw new AccessDeniedException("");
+                    throw new AccessDeniedException(
+                        "User must have at least one permission: %s".formatted(
+                            StringUtils.join(annotation.permissions(), ',')
+                        )
+                    );
                 }
 
                 yield SUCCESS_AUTHORIZATION_DECISION;
