@@ -34,7 +34,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     public @NotNull Boolean executor(@NotNull ExchangeFullOrderUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.user.getUserId());
         long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
-        long destUserId = input.req.getRecipientUserId();
+        long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
 

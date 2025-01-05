@@ -10,7 +10,7 @@ public class ExchangeRequest {
     @Nullable
     private final Long sourceUserId;
 
-    private final long recipientUserId;
+    private final long destUserId;
 
     @NotNull
     private final ExchangeAction action;
