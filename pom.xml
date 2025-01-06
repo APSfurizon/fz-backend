@@ -8,6 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <description>Furizon&apos;s backend project</description>
     <packaging>pom</packaging> <!-- Specifies that it's a parent POM -->
+
     <url/>
     <licenses>
         <license/>
@@ -67,7 +68,29 @@
         </dependency>
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>net.furizon.backend.BackendApplication</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
