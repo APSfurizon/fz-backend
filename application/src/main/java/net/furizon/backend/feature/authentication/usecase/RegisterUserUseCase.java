@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.UUID;
 

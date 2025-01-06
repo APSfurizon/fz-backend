@@ -2,7 +2,6 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -11,7 +10,6 @@ import net.furizon.backend.infrastructure.security.session.manager.SessionAuthen
 import net.furizon.backend.infrastructure.security.token.TokenMetadata;
 import net.furizon.backend.infrastructure.security.token.encoder.TokenEncoder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
-import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;

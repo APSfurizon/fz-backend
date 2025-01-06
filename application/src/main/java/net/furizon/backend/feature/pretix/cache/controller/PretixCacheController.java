@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

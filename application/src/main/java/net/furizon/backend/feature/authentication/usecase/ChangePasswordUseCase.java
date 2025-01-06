@@ -2,11 +2,8 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
 import net.furizon.backend.infrastructure.email.EmailSender;
-import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -16,9 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
 
 @Slf4j
 @Component

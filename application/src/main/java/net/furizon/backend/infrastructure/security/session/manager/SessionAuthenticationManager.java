@@ -31,7 +31,7 @@ public interface SessionAuthenticationManager {
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
 
     /**
-    @return UUID the id which needs to be opened to confirm the email
+     * @return UUID the id which needs to be opened to confirm the email
      */
     UUID createAuthentication(long userId, @NotNull String email, @NotNull String password);
 
@@ -46,7 +46,7 @@ public interface SessionAuthenticationManager {
     boolean isResetPwRequestPending(@NotNull UUID pwResetId);
 
     /**
-     @return UUID the id which needs to be opened to reset the password
+     * @return UUID the id which needs to be opened to reset the password
      */
     UUID initResetPassword(@NotNull String email);
 
