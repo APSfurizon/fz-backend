@@ -1,35 +1,22 @@
 package net.furizon.backend.infrastructure.email;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public enum EmailVars {
-    OWNER_FURSONA_NAME(Format.ITALICS),
-    FURSONA_NAME(Format.ITALICS),
-    ROOM_NAME(Format.ITALICS),
-    ROOM_TYPE_NAME(Format.ITALICS),
-    EXCHANGE_ACTION_TEXT(Format.BOLD),
-    EXCHANGE_LINK(Format.LINK),
-    SANITY_CHECK_REASON(Format.BOLD),
-    EVENT_NAME(Format.ITALICS),
-    ORDER_CODE(Format.BOLD),
-    DUPLICATE_ORDER_CODE(Format.BOLD),
+    OWNER_FURSONA_NAME("ownerFursonaName"),
+    FURSONA_NAME("otherfursonaName"),
+    ROOM_NAME("roomName"),
+    ROOM_TYPE_NAME("roomTypeName"),
+    EXCHANGE_ACTION_TEXT("exchangeActionText"),
+    EXCHANGE_LINK("exchangeLink"),
+    SANITY_CHECK_REASON("sanityCheckReason"),
+    EVENT_NAME("eventName"),
+    ORDER_CODE("orderCode"),
+    DUPLICATE_ORDER_CODE("duplicateOrderCode"),
     ;
 
     @Getter
-    private Format[] formats;
-
-    EmailVars(Format ... format) {
-        formats = format;
-    }
-
-    @Override
-    public String toString() {
-        return "%" + this.name() + "%";
-    }
-
-    public enum Format {
-        ITALICS,
-        BOLD,
-        LINK
-    }
+    private final String name;
 }

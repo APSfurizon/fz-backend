@@ -62,7 +62,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null && !names.isEmpty()) {
-                    mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_CONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                    mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_CONFIRMED, MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
                 }
             }
         }

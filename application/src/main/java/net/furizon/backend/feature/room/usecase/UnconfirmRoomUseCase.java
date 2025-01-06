@@ -50,7 +50,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null) {
-                    mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_UNCONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                    mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_UNCONFIRMED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
                 }
             }
         }

@@ -32,58 +32,37 @@ public class EmailSenderService implements EmailSender {
     @Value("${spring.mail.username}")
     private String from;
 
-    public void send(long userId, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
+    @Override
+    public void send(long userId, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) {
         UserEmailData data = userFinder.getMailDataForUser(userId);
         if (data == null) {
             log.error("Could not find mail data for user {}", userId);
             return;
         }
-        send(data, subject, title, mailBody, vars);
+        send(data, subject, templateName, vars);
     }
 
     @Override
-    public void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
-        for (MailVarPair pair : vars) {
-            if (pair != null) {
-                EmailVars var = pair.var();
-                StringBuilder pre = new StringBuilder();
-                StringBuilder post = new StringBuilder();
-                for (EmailVars.Format format : var.getFormats()) {
-                    switch (format) {
-                        case ITALICS: {
-                            pre.append("<i>");
-                            post.insert(0, "</i>");
-                            break;
-                        }
-                        case BOLD: {
-                            pre.append("<b>");
-                            post.insert(0, "</b>");
-                            break;
-                        }
-                        case LINK: {
-                            //Purposely do nothing
-                            break;
-                        }
-                        default: throw new IllegalStateException("Unexpected value: " + format);
-                    }
-                }
-                mailBody.replace(var.toString(), pre.toString() + pair.value() + post.toString());
+    public void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) {
+        String mail = emailData.getEmail();
+        log.info("Sending email to user {} ({}) with subject '{}'",
+                emailData.getUserId(), mail, subject);
+
+
+        TemplateMessage msg = TemplateMessage.of("old_template.jte")
+                .addParam("fursonaName", emailData.getFursonaName());
+
+        for (MailVarPair var : vars) {
+            if (var != null) {
+                msg = msg.addParam(var.var().getName(), var.value());
             }
         }
 
-        String mail = emailData.getEmail();
-        log.info("Sending email to user {} ({}) with subject '{}' and title '{}'",
-                emailData.getUserId(), mail, subject, title);
         fireAndForget(
             MailRequest.builder()
                 .to(mail)
                 .subject(subject)
-                .templateMessage(
-                    TemplateMessage.of("old_template.jte")
-                        .addParam("fursonaName", emailData.getFursonaName())
-                        .addParam("title", title)
-                        .addParam("body", mailBody)
-                )
+                .templateMessage(msg)
                 .build()
         );
     }

@@ -49,7 +49,7 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.sendUpdate(r.get(), TITLE_ROOM_UPDATED, BODY_INVITE_REFUSE, new MailVarPair(FURSONA_NAME, data.getFursonaName()));
+                mailService.sendUpdate(r.get(), TEMPLATE_INVITE_REFUSE, new MailVarPair(FURSONA_NAME, data.getFursonaName()));
             }
         }
         return res;

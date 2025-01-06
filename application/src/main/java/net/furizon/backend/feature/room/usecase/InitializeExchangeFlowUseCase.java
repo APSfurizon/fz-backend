@@ -65,8 +65,8 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 new MailVarPair(FURSONA_NAME, destData.getFursonaName()),
                 new MailVarPair(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
             };
-            mailService.sendUpdate(destUserId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
-            mailService.sendUpdate(sourceUserId, TITLE_RESERVATION_UPDATED, BODY_EXCHANGE_INITIALIZED, vars);
+            mailService.sendUpdate(destUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
+            mailService.sendUpdate(sourceUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
             return true;
         }
         return false;

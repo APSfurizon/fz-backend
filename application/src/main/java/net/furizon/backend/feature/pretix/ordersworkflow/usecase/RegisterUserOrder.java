@@ -133,7 +133,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
 
             //We send an email to alert the user
             var eventNames = event.getEventNames();
-            mailService.send(mail, SUBJECT_ORDER_PROBLEM, TITLE_DUPLICATE_ORDER, BODY_DUPLICATE_ORDER,
+            mailService.send(mail, SUBJECT_ORDER_PROBLEM, TEMPLATE_DUPLICATE_ORDER,
                 new MailVarPair(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
                 new MailVarPair(EmailVars.ORDER_CODE, prevOrderCode),
                 new MailVarPair(EmailVars.DUPLICATE_ORDER_CODE, order.getCode())

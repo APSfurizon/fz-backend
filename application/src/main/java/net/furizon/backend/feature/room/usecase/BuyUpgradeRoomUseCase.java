@@ -131,7 +131,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         if (res && oldRoomId != null) {
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {
-                mailService.broadcastUpdate(oldRoomId, TITLE_ROOM_UPDATED, BODY_ROOM_WAS_UPGRADED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                mailService.broadcastUpdate(oldRoomId, TEMPLATE_ROOM_WAS_UPGRADED, MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
             }
         }
         return res;

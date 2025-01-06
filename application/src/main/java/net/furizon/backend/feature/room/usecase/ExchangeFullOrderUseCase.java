@@ -60,7 +60,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
         if (res) {
             UserEmailData data = userFinder.getMailDataForUser(destUserId);
             if (data != null) {
-                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_HAS_NEW_OWNER, new MailVarPair(OWNER_FURSONA_NAME, data.getFursonaName()));
+                mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_HAS_NEW_OWNER, MailVarPair.of(OWNER_FURSONA_NAME, data.getFursonaName()));
             }
         }
         return res;

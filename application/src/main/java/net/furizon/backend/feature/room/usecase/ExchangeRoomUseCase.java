@@ -17,8 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.BODY_ROOM_HAS_NEW_OWNER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TITLE_ROOM_UPDATED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
 
 @Slf4j
 @Component
@@ -68,7 +67,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         if (res) {
             UserEmailData data = userFinder.getMailDataForUser(destUserId);
             if (data != null) {
-                mailService.broadcastUpdate(roomId, TITLE_ROOM_UPDATED, BODY_ROOM_HAS_NEW_OWNER, new MailVarPair(OWNER_FURSONA_NAME, data.getFursonaName()));
+                mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_HAS_NEW_OWNER, MailVarPair.of(OWNER_FURSONA_NAME, data.getFursonaName()));
             }
         }
         return res;

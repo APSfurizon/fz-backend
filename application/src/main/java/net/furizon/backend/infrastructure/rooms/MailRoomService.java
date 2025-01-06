@@ -18,27 +18,27 @@ public class MailRoomService {
     @NotNull private final EmailSender emailSender;
     @NotNull private final RoomFinder roomFinder;
 
-    public void sendProblem(long userId, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
-        emailSender.send(userId, RoomEmailTexts.SUBJECT_ROOM_PROBLEM, title, mailBody, vars);
+    public void sendProblem(long userId, @NotNull String templateName, MailVarPair... vars) {
+        emailSender.send(userId, RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
     }
 
-    public void sendUpdate(long userId, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
-        emailSender.send(userId, RoomEmailTexts.SUBJECT_ROOM_UPDATE, title, mailBody, vars);
+    public void sendUpdate(long userId, @NotNull String templateName, MailVarPair... vars) {
+        emailSender.send(userId, RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
     }
 
-    public void broadcastProblem(long roomId, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
+    public void broadcastProblem(long roomId, @NotNull String templateName, MailVarPair... vars) {
         log.info("Sending broadcast problem to room: {}", roomId);
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
-            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_PROBLEM, title, mailBody, vars);
+            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
         }
     }
 
-    public void broadcastUpdate(long roomId, @NotNull String title, @NotNull String mailBody, MailVarPair... vars) {
+    public void broadcastUpdate(long roomId, @NotNull String templateName, MailVarPair... vars) {
         log.info("Sending broadcast update to room: {}", roomId);
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
-            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_UPDATE, title, mailBody, vars);
+            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
         }
     }
 }

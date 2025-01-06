@@ -906,11 +906,11 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     private void sendSanityCheckMailRoomDeleted(long roomId, @NotNull String roomName, @NotNull String reason) {
-        mailService.broadcastProblem(roomId, TITLE_ROOM_FAILED_SC, BODY_SANITY_CHECK_DELETED, new MailVarPair(ROOM_NAME, roomName),  new MailVarPair(SANITY_CHECK_REASON, reason));
+        mailService.broadcastProblem(roomId, TEMPLATE_SANITY_CHECK_DELETED, new MailVarPair(ROOM_NAME, roomName),  new MailVarPair(SANITY_CHECK_REASON, reason));
     }
     private void sendSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName, @NotNull String roomName, @NotNull String reason) {
-        mailService.sendProblem(ownerId, TITLE_ROOM_FAILED_SC, BODY_SANITY_CHECK_KICK_OWNER, new MailVarPair(FURSONA_NAME, fursonaName), new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
-        mailService.sendProblem(userId, TITLE_ACCOMMODATION_FAILED_SC, BODY_SANITY_CHECK_KICK_USER, new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
+        mailService.sendProblem(ownerId, TEMPLATE_SANITY_CHECK_KICK_OWNER, new MailVarPair(FURSONA_NAME, fursonaName), new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
+        mailService.sendProblem(userId, TEMPLATE_SANITY_CHECK_KICK_USER, new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
     }
     @Override
     public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,

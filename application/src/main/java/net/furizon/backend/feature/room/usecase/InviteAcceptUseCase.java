@@ -56,7 +56,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.sendUpdate(r.get(), TITLE_ROOM_UPDATED, BODY_INVITE_ACCEPTED, new MailVarPair(FURSONA_NAME, data.getFursonaName()));
+                mailService.sendUpdate(r.get(), TEMPLATE_INVITE_ACCEPTED, new MailVarPair(FURSONA_NAME, data.getFursonaName()));
             }
         }
         return res;
