@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -93,6 +94,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         MEMBERSHIP_INFO.INFO_PHONE,
                         MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                         MEMBERSHIP_INFO.USER_ID,
+                        AUTHENTICATIONS.AUTHENTICATION_EMAIL,
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
@@ -107,6 +109,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 )
                 .innerJoin(MEMBERSHIP_INFO)
                 .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+                .innerJoin(AUTHENTICATIONS)
+                .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
                 .leftJoin(MEDIA)
                 .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
                 .leftJoin(ORDERS)

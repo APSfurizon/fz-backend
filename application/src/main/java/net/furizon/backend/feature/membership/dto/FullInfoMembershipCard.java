@@ -15,5 +15,8 @@ public class FullInfoMembershipCard {
     private final PersonalUserInformation userInfo;
 
     @NotNull
+    private final String email;
+
+    @NotNull
     private final UserDisplayData user;
 }

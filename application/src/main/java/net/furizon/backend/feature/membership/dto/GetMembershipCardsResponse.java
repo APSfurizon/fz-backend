@@ -12,6 +12,5 @@ public class GetMembershipCardsResponse {
     @NotNull
     private List<FullInfoMembershipCard> response;
 
-    @NotNull
-    private Boolean canAddCards;
+    private boolean canAddCards;
 }

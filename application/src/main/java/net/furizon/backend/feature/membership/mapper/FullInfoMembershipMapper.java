@@ -6,6 +6,8 @@ import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+
 public class FullInfoMembershipMapper {
     @NotNull
     public static FullInfoMembershipCard map(Record record) {
@@ -13,6 +15,7 @@ public class FullInfoMembershipMapper {
             .membershipCard(MembershipCardMapper.map(record))
             .userInfo(MembershipInfoMapper.map(record))
             .user(JooqDisplayUserMapper.map(record))
+            .email(record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL))
             .build();
     }
 }
