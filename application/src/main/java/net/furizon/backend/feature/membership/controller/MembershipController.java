@@ -125,7 +125,10 @@ public class MembershipController {
         //TODO [ADMIN_CHECK]
         return executor.execute(
             LoadAllMembershipInfosUseCase.class,
-            year
+            new LoadAllMembershipInfosUseCase.Input(
+                    year,
+                    pretixInformation.getCurrentEvent()
+            )
         );
     }
 
