@@ -52,6 +52,8 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
             input.userAgent
         );
 
+        log.info("Logged in user {}", userId);
+
         return new LoginResponse(
             userId,
             tokenEncoder.encode(

@@ -2,6 +2,7 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.dto.requests.RegisterUserRequest;
 import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_EMAIL_CONFIRM;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
@@ -42,6 +44,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
     public @NotNull User executor(@NotNull RegisterUserUseCase.Input input) {
         RegisterUserRequest regUserReq = input.user;
         String email = regUserReq.getEmail();
+        log.info("Registering account with email {}", email);
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName());
@@ -55,6 +58,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
             regUserReq.getPersonalUserInformation(),
             input.event
         );
+
+        log.debug("Account registration of {}: Sent confirmation uuid {}", email, confirmationId);
 
         //TODO automatically generate the confirmation url from the current request and the
         // path to the /confirm-url endpoint

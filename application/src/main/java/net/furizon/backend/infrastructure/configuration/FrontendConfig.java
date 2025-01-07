@@ -41,7 +41,9 @@ public class FrontendConfig {
     public String getLoginUrl(@Nullable AuthenticationCodes code) {
         try {
             URIBuilder ucb = new URIBuilder(loginUrl);
-            if (code != null) ucb.addParameter("status", String.valueOf(code.ordinal()));
+            if (code != null) {
+                ucb.addParameter("status", code.name());
+            }
             return ucb.build().toString();
         } catch (URISyntaxException use) {
             return loginUrl;
