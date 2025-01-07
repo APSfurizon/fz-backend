@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_EMAIL_CONFIRM;
 
 @Component
 @RequiredArgsConstructor
@@ -64,9 +64,9 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         sender.fireAndForget(
             MailRequest.builder()
                 .to(email)
-                .subject(SUBJECT_PW_RESET)
+                .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
-                    TemplateMessage.of(TEMPLATE_PW_RESET)
+                    TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)
                     .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
                 )
             .build()
