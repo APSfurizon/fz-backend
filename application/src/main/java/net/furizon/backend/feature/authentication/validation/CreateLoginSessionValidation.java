@@ -33,6 +33,13 @@ public class CreateLoginSessionValidation {
             );
         }
 
+        if (authentication.getMailVerificationCreationMs() != null) {
+            throw new ApiException(
+                    "Email confirmation is still pending",
+                    AuthenticationCodes.CONFIRMATION_STILL_PENDING.name()
+            );
+        }
+
         final var passwordMatches = passwordEncoder.matches(
             securityConfig.getPasswordSalt() + input.password(),
             authentication.getHashedPassword()
