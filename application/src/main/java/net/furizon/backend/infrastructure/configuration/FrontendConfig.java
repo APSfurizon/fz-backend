@@ -5,10 +5,11 @@ import lombok.Data;
 import lombok.Getter;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
+import org.apache.hc.core5.net.URIBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -38,7 +39,13 @@ public class FrontendConfig {
     }
     @NotNull
     public String getLoginUrl(@Nullable AuthenticationCodes code) {
-        return code == null ? loginUrl : loginUrl + "?status=" + code;
+        try {
+            URIBuilder ucb = new URIBuilder(loginUrl);
+            if (code != null) ucb.addParameter("status", String.valueOf(code.ordinal()));
+            return ucb.build().toString();
+        } catch (URISyntaxException use) {
+            return loginUrl;
+        }
     }
 
     @NotNull

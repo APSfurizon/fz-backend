@@ -73,7 +73,7 @@ frontend:
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
   password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
-  confirm-email-url: ${FRONTEND_CONFIRM_EMAIL_URL:}
+  confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
 
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}

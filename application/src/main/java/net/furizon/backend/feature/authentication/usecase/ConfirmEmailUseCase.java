@@ -28,7 +28,7 @@ public class ConfirmEmailUseCase implements UseCase<UUID, RedirectView> {
         boolean success = sessionAuthenticationManager.markEmailAsVerified(input);
         return new RedirectView(
             frontendConfig.getLoginUrl(
-                success ? AuthenticationCodes.CONFIRMATION_SUCCESSFULL : AuthenticationCodes.CONFIRMATION_NOT_FOUND
+                success ? AuthenticationCodes.CONFIRMATION_SUCCESSFUL : AuthenticationCodes.CONFIRMATION_NOT_FOUND
             )
         );
     }
