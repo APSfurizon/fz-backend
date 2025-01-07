@@ -12,8 +12,6 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.ExchangeConfirmationStatusPath;
-import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
-import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
@@ -197,19 +195,6 @@ public class Events extends TableImpl<Record> {
         return _exchangeConfirmationStatus;
     }
 
-    private transient FursuitsEventsPath _fursuitsEvents;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>public.fursuits_events</code> table
-     */
-    public FursuitsEventsPath fursuitsEvents() {
-        if (_fursuitsEvents == null)
-            _fursuitsEvents = new FursuitsEventsPath(this, null, Keys.FURSUITS_EVENTS__FURSUITS_EVENTS_EVENT_FK.getInverseKey());
-
-        return _fursuitsEvents;
-    }
-
     private transient MembershipInfoPath _membershipInfo;
 
     /**
@@ -243,14 +228,6 @@ public class Events extends TableImpl<Record> {
      */
     public UsersPath exchangeConfirmationStatusSourceUserFk() {
         return exchangeConfirmationStatus().exchangeConfirmationStatusSourceUserFk();
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>public.fursuits</code> table
-     */
-    public FursuitsPath fursuits() {
-        return fursuitsEvents().fursuits();
     }
 
     /**

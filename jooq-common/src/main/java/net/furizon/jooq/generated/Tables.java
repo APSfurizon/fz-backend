@@ -10,7 +10,7 @@ import net.furizon.jooq.generated.tables.Authentications;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
-import net.furizon.jooq.generated.tables.FursuitsEvents;
+import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.GroupPermissions;
 import net.furizon.jooq.generated.tables.Groups;
 import net.furizon.jooq.generated.tables.Media;
@@ -59,9 +59,9 @@ public class Tables {
     public static final Fursuits FURSUITS = Fursuits.FURSUITS;
 
     /**
-     * The table <code>public.fursuits_events</code>.
+     * The table <code>public.fursuits_orders</code>.
      */
-    public static final FursuitsEvents FURSUITS_EVENTS = FursuitsEvents.FURSUITS_EVENTS;
+    public static final FursuitsOrders FURSUITS_ORDERS = FursuitsOrders.FURSUITS_ORDERS;
 
     /**
      * The table <code>public.group_permissions</code>.

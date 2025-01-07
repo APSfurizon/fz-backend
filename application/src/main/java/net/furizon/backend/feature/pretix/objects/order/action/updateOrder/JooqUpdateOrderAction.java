@@ -59,6 +59,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_ROOM_POSITION_POSITIONID, order.getRoomPositionPosid())
                 .set(ORDERS.ORDER_EARLY_POSITION_ID, order.getEarlyPositionId())
                 .set(ORDERS.ORDER_LATE_POSITION_ID, order.getLatePositionId())
+                .set(ORDERS.ORDER_EXTRA_FURSUITS, order.getExtraFursuits())
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, order.getOrderEvent().getId())
                 .set(ORDERS.ORDER_ANSWERS_JSON, serializer.serializeAsJson(order.getAllAnswers(pretixInformation)))
