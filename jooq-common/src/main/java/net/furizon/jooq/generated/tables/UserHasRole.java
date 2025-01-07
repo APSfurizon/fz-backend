@@ -80,7 +80,7 @@ public class UserHasRole extends TableImpl<Record> {
     /**
      * The column <code>public.user_has_role.temp_event_id</code>.
      */
-    public final TableField<Record, Long> TEMP_EVENT_ID = createField(DSL.name("temp_event_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> TEMP_EVENT_ID = createField(DSL.name("temp_event_id"), SQLDataType.BIGINT, this, "");
 
     private UserHasRole(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

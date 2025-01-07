@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS user_has_role
 (
     user_id       int8 NOT NULL,
     role_id       int8 NOT NULL,
-    temp_event_id int8 NOT NULL, -- Used for temp roles (EG dealers den, panel host, meeting host, etc) --
+    temp_event_id int8 NULL, -- Used for temp roles (EG dealers den, panel host, meeting host, etc) --
     CONSTRAINT user_has_role_pk PRIMARY KEY (user_id, role_id),
     CONSTRAINT user_has_role_user_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT user_has_role_role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id) ON DELETE CASCADE ON UPDATE CASCADE,
