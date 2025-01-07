@@ -29,7 +29,7 @@ session = requests.session()
 def doPost(url, json=None, data=None) -> Response:
     global session
     global HEADERS
-    response = session.post(url, headers=HEADERS, json=json, data=data)
+    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False)
     print(f"\n-------- POST {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -39,7 +39,7 @@ def doPost(url, json=None, data=None) -> Response:
 def doGet(url) -> Response:
     global session
     global HEADERS
-    response = session.get(url, headers=HEADERS)
+    response = session.get(url, headers=HEADERS, allow_redirects=False)
     print(f"\n-------- GET {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -70,6 +70,10 @@ def register() -> Response:
     }
     return doPost(f'{BASE_URL}authentication/register', json=json)
 
+def confirmEmail() -> Response:
+    uuid = input("Confirmation uuid: ")
+    return doGet(f'{BASE_URL}authentication/confirm-mail?id={uuid}')
+
 def login() -> Response:
     global HEADERS
     json = {
@@ -90,5 +94,6 @@ def getMe() -> Response:
     doGet(f'{BASE_URL}users/me')
 
 register()
+confirmEmail()
 login()
 getMe()
