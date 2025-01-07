@@ -22,7 +22,7 @@ spring:
     port: ${MAIL_SENDER_PROVIDER_PORT:465}
     username: ${MAIL_SENDER_PROVIDER_USERNAME:test@example.com}
     password: ${MAIL_SENDER_PROVIDER_PASSWORD:changeme}
-    protocol: smtps
+    protocol: ${MAIL_SENDER_PROTOCOL:smtps}
     properties:
       "mail.smtp.auth": true
       "mail.smtp.starttls.enable": true
