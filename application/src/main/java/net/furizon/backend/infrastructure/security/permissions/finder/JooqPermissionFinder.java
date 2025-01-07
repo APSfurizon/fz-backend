@@ -81,6 +81,18 @@ public class JooqPermissionFinder implements PermissionFinder {
     }
 
     @Override
+    public @NotNull List<Role> getRolesFromUserId(long userId) {
+        return sqlQuery.fetch(
+            selectRole()
+            .innerJoin(USER_HAS_ROLE)
+            .on(
+                USER_HAS_ROLE.ROLE_ID.eq(ROLES.ROLE_ID)
+                .and(USER_HAS_ROLE.USER_ID.eq(userId))
+            )
+        ).stream().map(JooqRoleMapper::map).toList();
+    }
+
+    @Override
     public boolean userHasRole(long userId, long roleId) {
         return sqlQuery.fetchFirst(
             PostgresDSL.select(
