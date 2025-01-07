@@ -39,7 +39,7 @@ public class UserController {
         return user;
     }
 
-    @GetMapping("/display/me")
+    @GetMapping("/me/display")
     public Optional<UserDisplayData> getMeDisplay(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
