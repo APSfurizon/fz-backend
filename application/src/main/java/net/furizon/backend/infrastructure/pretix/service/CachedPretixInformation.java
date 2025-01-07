@@ -146,6 +146,7 @@ public class CachedPretixInformation implements PretixInformation {
     public void reloadCacheAndOrders() {
         if (!pretixConfig.isEnableSync()) {
             log.warn("[PRETIX] Pretix synchronization has been disabled");
+            loadCurrentEventFromDb();
             return;
         }
         log.info("[PRETIX] Syncing pretix information and cache it");
@@ -559,6 +560,17 @@ public class CachedPretixInformation implements PretixInformation {
                 log.info("[PRETIX] Setting an event as current = '{}'", event);
                 currentEvent.set(event);
             });
+    }
+
+    private void loadCurrentEventFromDb() {
+        String slug = PretixGenericUtils.buildOrgEventSlug(pretixConfig.getDefaultEvent(), pretixConfig.getDefaultOrganizer());
+        Event evt = eventFinder.findEventBySlug(slug);
+        if (evt != null) {
+            log.info("[PRETIX] Loaded current event from db: '{}'", evt);
+            currentEvent.set(evt);
+        } else {
+            log.error("[PRETIX] Unable to load current event from db. CURRENT EVENT NOT SET!!");
+        }
     }
 
     private void reloadEventStructure() {
