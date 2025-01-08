@@ -89,7 +89,7 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_locale</code>.
      */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'it'::character varying"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
@@ -316,14 +316,6 @@ public class Users extends TableImpl<Record> {
     }
 
     /**
-     * Get the implicit many-to-many join path to the <code>public.roles</code>
-     * table
-     */
-    public RolesPath roles() {
-        return userHasRole().roles();
-    }
-
-    /**
      * Get the implicit many-to-many join path to the <code>public.events</code>
      * table, via the <code>exchange_confirmation_status_event_fk</code> key
      */
@@ -337,6 +329,14 @@ public class Users extends TableImpl<Record> {
      */
     public EventsPath ordersEventsId() {
         return orders().events();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.roles</code>
+     * table
+     */
+    public RolesPath roles() {
+        return userHasRole().roles();
     }
 
     @Override

@@ -47,7 +47,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         log.info("Registering account with email {}", email);
 
         validation.validate(regUserReq);
-        final var user = createUserAction.invoke(regUserReq.getFursonaName());
+        final var user = createUserAction.invoke(regUserReq.getFursonaName(),
+                regUserReq.getPersonalUserInformation().getBirthCountry());
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
             email,
@@ -83,6 +84,6 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
     public record Input(
             @NotNull HttpServletRequest request,
             @NotNull RegisterUserRequest user,
-            @Nullable Event event
+            @NotNull Event event
     ){}
 }
