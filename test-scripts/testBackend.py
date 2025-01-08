@@ -1,7 +1,9 @@
 import requests
 from requests import Response
+from requests.auth import HTTPBasicAuth
 
-BASE_URL = "http://localhost:8081/api/v1/"
+BASE_URL = "http://localhost:8081/"
+BASE_URL_API = f"{BASE_URL}api/v1/"
 
 import random
 import string
@@ -13,6 +15,13 @@ def generate_random_string(length):
 RANDOM_MAIL = True
 ACCOUNT_EMAIL = (generate_random_string(10) if RANDOM_MAIL else "dkopasdkopsadosa") + "@keysmasher.femboyyyyy.it"
 ACCOUNT_PWD = "A1b2C3d5!"
+
+print(f"ACCOUNT_EMAIL = '{ACCOUNT_EMAIL}'")
+print(f"ACCOUNT_PWD = '{ACCOUNT_PWD}'")
+print()
+
+ACCOUNT_EMAIL = 'zXWsqWIoLS@keysmasher.femboyyyyy.it'
+ACCOUNT_PWD = 'A1b2C3d5!'
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
@@ -26,20 +35,20 @@ HEADERS = {
 
 session = requests.session()
 
-def doPost(url, json=None, data=None) -> Response:
+def doPost(url, json=None, data=None, auth=None) -> Response:
     global session
     global HEADERS
-    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False)
+    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
     print(f"\n-------- POST {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
     print(response.text)
     return response
-def doGet(url) -> Response:
+def doGet(url, auth=None) -> Response:
     global session
     global HEADERS
-    response = session.get(url, headers=HEADERS, allow_redirects=False)
+    response = session.get(url, headers=HEADERS, allow_redirects=False, auth=auth)
     print(f"\n-------- GET {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -68,11 +77,11 @@ def register() -> Response:
             "phoneNumber": "3331234567"
         }   
     }
-    return doPost(f'{BASE_URL}authentication/register', json=json)
+    return doPost(f'{BASE_URL_API}authentication/register', json=json)
 
 def confirmEmail() -> Response:
     uuid = input("Confirmation uuid: ")
-    return doGet(f'{BASE_URL}authentication/confirm-mail?id={uuid}')
+    return doGet(f'{BASE_URL_API}authentication/confirm-mail?id={uuid}')
 
 def login() -> Response:
     global HEADERS
@@ -80,7 +89,7 @@ def login() -> Response:
         "email": ACCOUNT_EMAIL,
         "password": ACCOUNT_PWD
     }
-    req = doPost(f'{BASE_URL}authentication/login', json=json)
+    req = doPost(f'{BASE_URL_API}authentication/login', json=json)
     if (req.status_code == 200):
         token = req.json()["accessToken"]
         val = f"Bearer {token}"
@@ -91,9 +100,18 @@ def login() -> Response:
     return req
 
 def getMe() -> Response:
-    doGet(f'{BASE_URL}users/me')
+    doGet(f'{BASE_URL_API}users/me/display')
 
-register()
-confirmEmail()
+def testPermission() -> Response:
+    doGet(f'{BASE_URL_API}authentication/test')
+
+def testInternalAuthorize() -> Response:
+    doGet(f'{BASE_URL}internal/orders/ping')
+    doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
+
+#register()
+#confirmEmail()
 login()
 getMe()
+#testPermission()
+#testInternalAuthorize()
