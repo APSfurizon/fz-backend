@@ -11,6 +11,7 @@ import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
+import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;

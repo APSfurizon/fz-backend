@@ -11,6 +11,7 @@ import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
+import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
@@ -59,6 +60,7 @@ public class Keys {
     public static final UniqueKey<Record> EXCHANGE_CONFIRMATION_STATUS_PKEY = Internal.createUniqueKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("exchange_confirmation_status_pkey"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.EXCHANGE_ID }, true);
     public static final UniqueKey<Record> ONLY_ONE_CONCURRENT_EXCHANGE_PER_EVENT = Internal.createUniqueKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("only_one_concurrent_exchange_per_event"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID, ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.EVENT_ID }, true);
     public static final UniqueKey<Record> FURSUITS_PKEY = Internal.createUniqueKey(Fursuits.FURSUITS, DSL.name("fursuits_pkey"), new TableField[] { Fursuits.FURSUITS.FURSUIT_ID }, true);
+    public static final UniqueKey<Record> FURSUITS_ORDERS_PK = Internal.createUniqueKey(FursuitsOrders.FURSUITS_ORDERS, DSL.name("fursuits_orders_pk"), new TableField[] { FursuitsOrders.FURSUITS_ORDERS.ORDER_ID, FursuitsOrders.FURSUITS_ORDERS.FURSUIT_ID }, true);
     public static final UniqueKey<Record> MEDIA_PKEY = Internal.createUniqueKey(Media.MEDIA, DSL.name("media_pkey"), new TableField[] { Media.MEDIA.MEDIA_ID }, true);
     public static final UniqueKey<Record> CARDS_PKEY = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("cards_pkey"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.CARD_DB_ID }, true);
     public static final UniqueKey<Record> ONLY_ONE_CARD_PER_YEAR = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("only_one_card_per_year"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.ISSUE_YEAR, MembershipCards.MEMBERSHIP_CARDS.USER_ID }, true);
