@@ -1,10 +1,8 @@
-@param String fursonaName
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The password of your account has been changed</title>
+    <title>Your account was disabled</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="supported-color-schemes" content="light dark">
@@ -22,9 +20,8 @@
     <div class="container">
         <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
-            <h2 class="title">The password of your account has been changed</h2>
-            <p class="main-content">Dear ${fursonaName},</p>
-            <p class="main-content">If you haven't changed your password, please, contact us and use the <i>reset password</i> form to get your account back.</p>
+            <h2 class="title">Your account was disabled</h2>
+            <p class="main-content">Your Furizon account was disabled after too many failed login attempts. Please contact an administrator to re-enable the login.</p>
         </div>
     </div>
 </div>

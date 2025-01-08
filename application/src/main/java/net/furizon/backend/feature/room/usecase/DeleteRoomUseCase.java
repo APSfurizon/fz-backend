@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_DELETED;
 
 @Slf4j
 @Component
@@ -49,7 +50,9 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null) {
-                    mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_DELETED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                    mailService.broadcastUpdate(
+                            roomId, TEMPLATE_ROOM_DELETED, new MailVarPair(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                    );
                 }
             }
         }

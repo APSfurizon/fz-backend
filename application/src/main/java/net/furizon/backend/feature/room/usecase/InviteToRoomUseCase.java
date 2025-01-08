@@ -8,6 +8,8 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 
 public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, InviteToRoomResponse> {
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
 
@@ -34,12 +37,12 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
         Event event = input.event;
 
         checks.assertInTimeframeToEditRooms();
-        boolean isAdmin = true; //TODO [ADMIN_CHECK}
-
+        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
-                input.req.getRoomId()
+                input.req.getRoomId(),
+                isAdmin
         );
 
         checks.assertRoomNotConfirmed(roomId);

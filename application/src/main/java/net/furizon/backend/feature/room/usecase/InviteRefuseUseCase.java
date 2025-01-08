@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_INVITE_REFUSE;
 
 @Slf4j
 @Component
@@ -49,7 +49,9 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.sendUpdate(r.get(), TEMPLATE_INVITE_REFUSE, new MailVarPair(FURSONA_NAME, data.getFursonaName()));
+                mailService.sendUpdate(
+                        r.get(), TEMPLATE_INVITE_REFUSE, new MailVarPair(FURSONA_NAME, data.getFursonaName())
+                );
             }
         }
         return res;

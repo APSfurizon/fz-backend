@@ -14,12 +14,10 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
-import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.EmailSender;
-import net.furizon.backend.infrastructure.email.EmailSenderService;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
@@ -33,7 +31,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Optional;
 
-import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.*;
+import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.LANG_PRETIX;
+import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.SUBJECT_ORDER_PROBLEM;
+import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.TEMPLATE_DUPLICATE_ORDER;
 
 @Data
 @Slf4j
@@ -57,14 +57,14 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
 
     @Override
     public @NotNull RedirectView executor(@NotNull RegisterUserOrder.Input input) {
-        PretixInformation pretixService = input.pretixService;
-        FurizonUser user = input.user;
+        final PretixInformation pretixService = input.pretixService;
+        final FurizonUser user = input.user;
         if (user == null) {
             log.error("[PRETIX] Registration of order {} failed: User is not logged in", input.code);
             return new RedirectView(config.getLoginRedirectUrl(input.request.getRequestURL().toString()));
         }
-        long userId = user.getUserId();
-        Event event = pretixService.getCurrentEvent();
+        final long userId = user.getUserId();
+        final Event event = pretixService.getCurrentEvent();
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
                 user.getUserId(), input.code, input.secret);
 

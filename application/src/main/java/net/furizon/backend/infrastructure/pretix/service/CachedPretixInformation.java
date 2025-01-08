@@ -126,7 +126,7 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<Long, Map<String, String>> roomPretixItemIdToNames = Caffeine.newBuilder().build();
     //map (capacity, hotelName) -> earlyExtraDays item id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();    //map (capacity, hotelName) -> earlyExtraDays item id
+    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();
     //map (capacity, hotelName) -> lateExtraDays item id
     @NotNull
     private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
@@ -563,7 +563,10 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     private void loadCurrentEventFromDb() {
-        String slug = PretixGenericUtils.buildOrgEventSlug(pretixConfig.getDefaultEvent(), pretixConfig.getDefaultOrganizer());
+        String slug = PretixGenericUtils.buildOrgEventSlug(
+                pretixConfig.getDefaultEvent(),
+                pretixConfig.getDefaultOrganizer()
+        );
         Event evt = eventFinder.findEventBySlug(slug);
         if (evt != null) {
             log.info("[PRETIX] Loaded current event from db: '{}'", evt);

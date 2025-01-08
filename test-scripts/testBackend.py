@@ -113,5 +113,5 @@ def testInternalAuthorize() -> Response:
 #confirmEmail()
 login()
 getMe()
-#testPermission()
+testPermission()
 #testInternalAuthorize()

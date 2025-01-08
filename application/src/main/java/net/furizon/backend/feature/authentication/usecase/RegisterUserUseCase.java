@@ -16,7 +16,6 @@ import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +47,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName(),
-                regUserReq.getPersonalUserInformation().getBirthCountry());
+                regUserReq.getPersonalUserInformation().getResidenceCountry());
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
             email,

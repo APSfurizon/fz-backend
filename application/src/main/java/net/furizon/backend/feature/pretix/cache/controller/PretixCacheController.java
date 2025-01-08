@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +26,8 @@ public class PretixCacheController {
             + "by compiling again the list of \"backend\" products. This method is meant "
             + "to be launched ONLY by the backend admins"
     )
+    @PermissionRequired(permissions = {Permission.CAN_REFRESH_PRETIX_CACHE})
     @PostMapping("/reload-struct")
-    //TODO [ADMIN_CHECK]
     public void reloadCache() {
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
@@ -36,8 +38,8 @@ public class PretixCacheController {
         description =
         "This method is meant to be launched ONLY by the backend admins"
     )
+    @PermissionRequired(permissions = {Permission.CAN_REFRESH_PRETIX_CACHE})
     @PostMapping("/reload-orders")
-    //TODO [ADMIN_CHECK]
     public void reloadOrders() {
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();

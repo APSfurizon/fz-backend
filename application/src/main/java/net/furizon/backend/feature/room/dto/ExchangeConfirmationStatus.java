@@ -27,7 +27,8 @@ public class ExchangeConfirmationStatus {
         }
         return isFullyConfirmed();
     }
-    public boolean confirmUser(boolean isSourceUser, @NotNull ConfirmUserExchangeStatusAction confirmUserExchangeStatusAction) {
+    public boolean confirmUser(boolean isSourceUser,
+                               @NotNull ConfirmUserExchangeStatusAction confirmUserExchangeStatusAction) {
         if (confirmUserExchangeStatusAction.invoke(isSourceUser, exchangeId)) {
             return confirmUser(isSourceUser);
         }

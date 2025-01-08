@@ -273,12 +273,14 @@ public class DefaultRoomLogic implements RoomLogic {
 
     public void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
         if (!result) {
-            log.error("[ROOM_EXCHANGE] result was false after executing step {} while exchanging between users {} -> {} on event {}", step, sourceUserId, destUserId, event);
+            log.error("[ROOM_EXCHANGE] result was false after executing step {} "
+                    + "while exchanging between users {} -> {} on event {}", step, sourceUserId, destUserId, event);
         }
     }
 
     @Override
-    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) -> {
             boolean result = true;
 
@@ -286,7 +288,7 @@ public class DefaultRoomLogic implements RoomLogic {
             if (targetGuest != null && targetGuest.isConfirmed()) {
                 var r = roomFinder.getRoomIdFromOwnerUserId(targetUsrId, event);
                 if (r.isPresent()) { //If found it means that the target user is owner of a room
-                    long targetRoomId = r.get();
+                    final long targetRoomId = r.get();
                     //Target is the owner of another room
 
                     //Swap the rooms between the two people
@@ -347,7 +349,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId,
+                                     @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return exchange(targetUsrId, sourceUsrId, roomId, event, pretixInformation, (targetGuest, sourceGuest) -> {
             boolean result = command.execute(
                 PostgresDSL.update(ORDERS)
@@ -362,8 +365,11 @@ public class DefaultRoomLogic implements RoomLogic {
         });
     }
 
-    private boolean exchange(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
-        log.info("[ROOM_EXCHANGE] DefaultRoomLogic: Exchange between users: {} -> {} on event {}", sourceUsrId, targetUsrId, event);
+    private boolean exchange(long targetUsrId, long sourceUsrId, long roomId,
+                             @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                             BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
+        log.info("[ROOM_EXCHANGE] DefaultRoomLogic: Exchange between users: {} -> {} on event {}",
+                sourceUsrId, targetUsrId, event);
         boolean result = true;
         RoomGuest targetGuest = null;
         RoomGuest sourceGuest = null;
@@ -404,10 +410,16 @@ public class DefaultRoomLogic implements RoomLogic {
         if (result) {
             result = updateDbFnc.apply(targetGuest, sourceGuest);
             if (!result) {
-                log.error("[ROOM_EXCHANGE] Unable to update db in an exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}", sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
+                log.error("[ROOM_EXCHANGE] Unable to update db in an exchange. "
+                        + "srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}",
+                        sourceUsrId, targetUsrId, sourceGuest.getGuestId(),
+                        targetGuest == null ? -1L : targetGuest.getGuestId(), event);
             }
         } else {
-            log.error("[ROOM_EXCHANGE] Unable to modify room members in a exchange. srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}", sourceUsrId, targetUsrId, sourceGuest.getGuestId(), targetGuest == null ? -1L : targetGuest.getGuestId(), event);
+            log.error("[ROOM_EXCHANGE] Unable to modify room members in a exchange. "
+                    + "srcUsr {}; dstUsr {}; srcGuest {}; dstGuest {}; event {}",
+                    sourceUsrId, targetUsrId, sourceGuest.getGuestId(),
+                    targetGuest == null ? -1L : targetGuest.getGuestId(), event);
         }
 
         return result;
@@ -429,7 +441,11 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId, @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid, @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
+            @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+            @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;
     }
@@ -444,7 +460,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
+    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
+                               @Nullable List<String> detectedErrors) {
         log.warn("DefaultRoomLogic does not implement any sanity check!");
     }
 }

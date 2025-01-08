@@ -28,6 +28,8 @@ public class SecurityConfig {
     @NotNull
     private final Internal internal;
 
+    private final short maxFailedLoginAttempts;
+
     @Data
     public static class Session {
         @NotNull

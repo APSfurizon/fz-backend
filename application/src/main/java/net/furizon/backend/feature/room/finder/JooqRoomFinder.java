@@ -18,7 +18,11 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.Record1;
+import org.jooq.Record4;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectOnConditionStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -157,7 +161,8 @@ public class JooqRoomFinder implements RoomFinder {
     }
 
     @Override
-    public @Nullable RoomData getRoomDataFromPretixItemId(long pretixItemId, @NotNull PretixInformation pretixInformation) {
+    public @Nullable RoomData getRoomDataFromPretixItemId(long pretixItemId,
+                                                          @NotNull PretixInformation pretixInformation) {
         HotelCapacityPair pair = pretixInformation.getRoomInfoFromPretixItemId(pretixItemId);
         return new RoomData(
                 pair == null ? 0 : pair.capacity(),

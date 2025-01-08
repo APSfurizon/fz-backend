@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -29,7 +28,8 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
     @Override
     @Nullable
     public PretixPosition invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
-        log.info("Pushing a new position ({}) to order {} on event {}", position.getItem(), position.getOrderCode(), event);
+        log.info("Pushing a new position ({}) to order {} on event {}",
+                position.getItem(), position.getOrderCode(), event);
         final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<PretixPosition>create()
                 .method(HttpMethod.POST)

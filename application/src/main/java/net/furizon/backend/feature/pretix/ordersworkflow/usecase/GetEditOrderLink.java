@@ -35,7 +35,7 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
         OffsetDateTime editEnd = pretixConfig.getEvent().getEditBookingEndTime();
         if (editEnd != null && (editEnd.isBefore(OffsetDateTime.now()))) {
             log.error("User requested the link to edit his order after the editing period is over!");
-            throw new ApiException("Order editing is closed!", OrderWorkflowErrorCode.ORDER_EDITS_CLOSED.name());
+            throw new ApiException("Order editing is closed!", OrderWorkflowErrorCode.ORDER_EDITS_CLOSED);
         }
 
         int orderNo = orderFinder.countOrdersOfUserOnEvent(input.user.getUserId(), event);

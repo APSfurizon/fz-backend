@@ -2,6 +2,7 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -13,6 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
+
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_CHANGED;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_CHANGED;
 
 @Slf4j
 @Component
@@ -34,15 +38,14 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
             userId = sessionAuthenticationManager.getUserIdFromPasswordResetReqId(resetPwId);
             if (userId == null) {
-                //TODO error fix
-                //throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
+                throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
             }
         }
 
         log.info("Changing password for user {}", userId);
         sessionAuthenticationManager.changePassword(userId, input.req.getNewPassword());
 
-        //TODO EMAIL notify user that his account has changed password
+        sender.send(userId, SUBJECT_PW_CHANGED, TEMPLATE_PW_CHANGED);
 
         return true;
     }

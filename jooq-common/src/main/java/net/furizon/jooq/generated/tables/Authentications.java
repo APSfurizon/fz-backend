@@ -88,6 +88,12 @@ public class Authentications extends TableImpl<Record> {
     public final TableField<Record, OffsetDateTime> AUTHENTICATION_EMAIL_VERIFICATION_CREATION = createField(DSL.name("authentication_email_verification_creation"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
+     * The column
+     * <code>public.authentications.authentication_failed_attempts</code>.
+     */
+    public final TableField<Record, Short> AUTHENTICATION_FAILED_ATTEMPTS = createField(DSL.name("authentication_failed_attempts"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
+
+    /**
      * The column <code>public.authentications.authentication_disabled</code>.
      */
     public final TableField<Record, Boolean> AUTHENTICATION_DISABLED = createField(DSL.name("authentication_disabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");

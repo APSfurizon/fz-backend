@@ -50,8 +50,24 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.*;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_NO_OWNER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_DAILY_TICKET;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NOT_BOUGHT_ROOM;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NO_ORDER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_IN_TOO_MANY_ROOMS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_NOT_IN_ROOM;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_ORDER_INVALID_STATUS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_TOO_MANY_MEMBERS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_DAILY_TICKET;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_NO_ORDER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_IN_TOO_MANY_ROOMS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_ORDER_INVALID_ORDER_STATUS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_DELETED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_OWNER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_USER;
 
 @Slf4j
 @Primary
@@ -176,7 +192,9 @@ public class UserBuysFullRoom implements RoomLogic {
         List<PretixRefund> refunds = pretixRefundFinder.getRefundsForOrder(event, orderCode);
         return getBalanceForProvider(payments, refunds, orderCode, event);
     }
-    private @NotNull Map<String, Long> getBalanceForProvider(@NotNull List<PretixPayment> payments, @NotNull List<PretixRefund> refunds, @NotNull String orderCode, @NotNull Event event) {
+    private @NotNull Map<String, Long> getBalanceForProvider(@NotNull List<PretixPayment> payments,
+                                                             @NotNull List<PretixRefund> refunds,
+                                                             @NotNull String orderCode, @NotNull Event event) {
         Map<String, Long> balanceForProvider = new HashMap<>();
 
         //For each payment provider, calc how much the user has paid with them
@@ -193,7 +211,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 balanceForProvider.put(provider, balance);
 
             } else if (state == PretixPayment.PaymentState.PENDING || state == PretixPayment.PaymentState.CREATED) {
-                log.error("No payments for order {} on event {} can be in status PENDING or CREATED. Failed payment: {} {}",
+                log.error("No payments for order {} on event {} "
+                        + "can be in status PENDING or CREATED. Failed payment: {} {}",
                         orderCode, event, payment.getId(), state);
                 throw new ApiException("Payment found in illegal state", RoomErrorCodes.ORDER_PAYMENTS_STILL_PENDING);
             }
@@ -213,7 +232,8 @@ public class UserBuysFullRoom implements RoomLogic {
                             || state == PretixRefund.RefundState.TRANSIT
                             || state == PretixRefund.RefundState.EXTERNAL
             ) {
-                log.error("No refunds for order {} on event {} can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
+                log.error("No refunds for order {} on event {} "
+                        + "can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
                         orderCode, event, refund.getId(), state);
                 throw new ApiException("Refund found in illegal state", RoomErrorCodes.ORDER_REFUNDS_STILL_PENDING);
             }
@@ -246,7 +266,8 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull PretixInformation pretixInformation
     ) {
         log.info("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Exchanging i{} p{} a{} -> i{} p{} a{}",
-                sourceUsrId, targetUsrId, event, sourceItemId, sourcePositionId, sourceAddonToPositionId, targetItemId, targetPositionId, targetAddonToPositionId);
+                sourceUsrId, targetUsrId, event, sourceItemId, sourcePositionId, sourceAddonToPositionId,
+                targetItemId, targetPositionId, targetAddonToPositionId);
         //Fetch source paid and price
         long sourcePaid = 0L;
         Long sourcePrice = 0L;
@@ -306,7 +327,8 @@ public class UserBuysFullRoom implements RoomLogic {
                         targetItemId
                 ));
                 if (pp == null) {
-                    log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after create temporary position with item {}",
+                    log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
+                            + "res was false after create temporary position with item {}",
                             sourceUsrId, targetUsrId, event, targetItemId);
                     return null;
                 }
@@ -376,7 +398,8 @@ public class UserBuysFullRoom implements RoomLogic {
         if (toDeletePositionId != null) {
             res = deletePretixPositionAction.invoke(event, toDeletePositionId);
             if (!res) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after deleting toDeletePositionId={}",
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
+                        + "res was false after deleting toDeletePositionId={}",
                         sourceUsrId, targetUsrId, event, toDeletePositionId);
                 return null;
             }
@@ -385,10 +408,13 @@ public class UserBuysFullRoom implements RoomLogic {
         long sourceBalance = sourcePaid - targetPrice;
         long targetBalance = targetPaid - sourcePrice;
 
-        return new ExchangeResult(sourceBalance, targetBalance, sourcePositionId, targetPositionId, sourcePosid, targetPosid);
+        return new ExchangeResult(
+                sourceBalance, targetBalance, sourcePositionId, targetPositionId, sourcePosid, targetPosid
+        );
     }
     @Override
-    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event,
+                                @NotNull PretixInformation pretixInformation) {
         log.info("[ROOM_EXCHANGE] UserBuysFullRoom: Exchange between users: {} -> {} on event {}",
                 sourceUsrId, targetUsrId, event);
         //get orders
@@ -404,13 +430,13 @@ public class UserBuysFullRoom implements RoomLogic {
                     sourceUsrId, targetUsrId, event);
             return false;
         }
-        String sourceOrderCode = sourceOrder.getCode();
-        String targetOrderCode = targetOrder.getCode();
-        ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
-        ExtraDays targetExtraDays = targetOrder.getExtraDays();
+        final String sourceOrderCode = sourceOrder.getCode();
+        final String targetOrderCode = targetOrder.getCode();
+        final ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
+        final ExtraDays targetExtraDays = targetOrder.getExtraDays();
 
         //Get various items and positions
-        long sourceTicketPosid = sourceOrder.getTicketPositionPosid();
+        final long sourceTicketPosid = sourceOrder.getTicketPositionPosid();
         Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
         Long sourceRoomPosid = sourceOrder.getRoomPositionPosid();
         Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
@@ -418,7 +444,7 @@ public class UserBuysFullRoom implements RoomLogic {
         Long sourceLatePositionId = null;
         Long sourceEarlyItemId = null;
         Long sourceLateItemId = null;
-        long targetTicketPosid = targetOrder.getTicketPositionPosid();
+        final long targetTicketPosid = targetOrder.getTicketPositionPosid();
         Long targetRoomPositionId = targetOrder.getRoomPositionId();
         Long targetRoomPosid = targetOrder.getRoomPositionPosid();
         Long targetRoomItemId = targetOrder.getPretixRoomItemId();
@@ -429,25 +455,37 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //Get early and late data
         if (sourceOrder.hasRoom()) {
-            HotelCapacityPair sourcePair = new HotelCapacityPair(Objects.requireNonNull(sourceOrder.getHotelInternalName()), sourceOrder.getRoomCapacity());
+            HotelCapacityPair sourcePair = new HotelCapacityPair(
+                    Objects.requireNonNull(sourceOrder.getHotelInternalName()), sourceOrder.getRoomCapacity()
+            );
             if (sourceExtraDays.isEarly()) {
                 sourceEarlyPositionId = sourceOrder.getEarlyPositionId();
-                sourceEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.EARLY));
+                sourceEarlyItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.EARLY)
+                );
             }
             if (sourceExtraDays.isLate()) {
                 sourceLatePositionId = sourceOrder.getLatePositionId();
-                sourceLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.LATE));
+                sourceLateItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.LATE)
+                );
             }
         }
         if (targetOrder.hasRoom()) {
-            HotelCapacityPair targetPair = new HotelCapacityPair(Objects.requireNonNull(targetOrder.getHotelInternalName()), targetOrder.getRoomCapacity());
+            HotelCapacityPair targetPair = new HotelCapacityPair(
+                    Objects.requireNonNull(targetOrder.getHotelInternalName()), targetOrder.getRoomCapacity()
+            );
             if (targetExtraDays.isEarly()) {
                 targetEarlyPositionId = targetOrder.getEarlyPositionId();
-                targetEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.EARLY));
+                targetEarlyItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.EARLY)
+                );
             }
             if (targetExtraDays.isLate()) {
                 targetLatePositionId = targetOrder.getLatePositionId();
-                targetLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.LATE));
+                targetLateItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.LATE)
+                );
             }
         }
 
@@ -473,7 +511,10 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //Now that we have everything, update pretix and calc balances
         ExchangeResult exchange;
-        exchange = exchangeSingleItem(sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId, sourceTicketPosid, targetTicketPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(
+                sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId,
+                sourceTicketPosid, targetTicketPosid, sourceUsrId, targetUsrId,
+                sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
@@ -483,13 +524,19 @@ public class UserBuysFullRoom implements RoomLogic {
         targetRoomPosid = exchange.targetPosid == null ? targetRoomPosid : exchange.targetPosid;
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
-        exchange = exchangeSingleItem(sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId, sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(
+                sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId,
+                sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
+                sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
-        exchange = exchangeSingleItem(sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId, sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode, event, pretixInformation);
+        exchange = exchangeSingleItem(
+                sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId,
+                sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
+                sourceOrderCode, targetOrderCode, event, pretixInformation);
         if (exchange == null) {
             return false;
         }
@@ -716,7 +763,8 @@ public class UserBuysFullRoom implements RoomLogic {
                         originalItemId
                 ));
                 if (tempPosition == null) {
-                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to create temporary position for rollback with item {}",
+                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
+                            + "Unable to create temporary position for rollback with item {}",
                             userId, newRoomItemId, event, originalItemId);
                     return null;
                 }
@@ -739,7 +787,8 @@ public class UserBuysFullRoom implements RoomLogic {
             }
         }
         if (!res) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while pushing or updating order position {}",
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
+                    + "An error occurred while pushing or updating order position {}",
                     userId, newRoomItemId, event, positionId);
             throw new ApiException("Error while adding room to order", RoomErrorCodes.BUY_ROOM_ERROR_UPDATING_POSITION);
         }
@@ -780,17 +829,20 @@ public class UserBuysFullRoom implements RoomLogic {
             res = deletePretixPositionAction.invoke(event, positionId);
         }
         if (!res) {
-            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while trying to removing room after a race condition was detected",
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
+                    + "An error occurred while trying to removing room after a race condition was detected",
                     userId, newRoomItemId, event);
         }
     }
-    private void finalizeBuyOrUpgrade(@NotNull Event event, long userId, long newRoomItemId, BuyOrUpgradeResult... results) {
+    private void finalizeBuyOrUpgrade(@NotNull Event event, long userId, long newRoomItemId,
+                                      BuyOrUpgradeResult... results) {
         //Delete the temporary positions created for mantain our quota
         for (BuyOrUpgradeResult result : results) {
             if (result != null && result.tempPosition != null) {
                 boolean res = deletePretixPositionAction.invoke(event, result.tempPosition.getPositionId());
                 if (!res) {
-                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: An error occurred while finalizing position p{} t{}",
+                    log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
+                            + "An error occurred while finalizing position p{} t{}",
                             userId, newRoomItemId, event, result.positionId, result.tempPosition.getPositionId());
                 }
             }
@@ -807,14 +859,15 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {
-        log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}: User is buying or upgrading his room to r{} e{} l{}",
+        log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
+                + "User is buying or upgrading his room to r{} e{} l{}",
                 userId, newRoomItemId, event, newRoomItemId, newEarlyItemId, newLateItemId);
         Long roomPositionId = order.getRoomPositionId();
-        boolean originallyHadAroomPosition = roomPositionId != null;
+        final boolean originallyHadAroomPosition = roomPositionId != null;
         Long earlyPositionId = order.getEarlyPositionId();
         Long latePositionId = order.getLatePositionId();
-        String orderCode = order.getCode();
-        ExtraDays extraDays = order.getExtraDays();
+        final String orderCode = order.getCode();
+        final ExtraDays extraDays = order.getExtraDays();
 
         //Fetch the original item ids for rolling back
         //Room
@@ -827,17 +880,25 @@ public class UserBuysFullRoom implements RoomLogic {
         Long originalEarlyItemId = null;
         Long originalLateItemId = null;
         if (order.hasRoom()) {
-            HotelCapacityPair originalPair = new HotelCapacityPair(Objects.requireNonNull(order.getHotelInternalName()), order.getRoomCapacity());
+            HotelCapacityPair originalPair = new HotelCapacityPair(
+                    Objects.requireNonNull(order.getHotelInternalName()), order.getRoomCapacity()
+            );
             if (extraDays.isEarly()) {
-                originalEarlyItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.EARLY));
+                originalEarlyItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.EARLY)
+                );
             }
             if (extraDays.isLate()) {
-                originalLateItemId = Objects.requireNonNull(pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.LATE));
+                originalLateItemId = Objects.requireNonNull(
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(originalPair, ExtraDays.LATE)
+                );
             }
         }
 
         //Perform the upgrades
-        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, newRoomPrice, originallyHadAroomPosition, roomPositionId, order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
+        BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, newRoomPrice,
+                originallyHadAroomPosition, roomPositionId,
+                order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
         if (roomRes == null) {
             return false;
         }
@@ -850,7 +911,9 @@ public class UserBuysFullRoom implements RoomLogic {
         BuyOrUpgradeResult lateRes = null;
         if (order.hasRoom()) {
             if (extraDays.isEarly()) {
-                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, newEarlyPrice, originallyHadAroomPosition, earlyPositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, newEarlyPrice,
+                        originallyHadAroomPosition, earlyPositionId,
+                        roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (earlyRes == null) {
                     return false;
                 }
@@ -858,7 +921,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 earlyRemaining = earlyRes.effectiveRemaining;
             }
             if (extraDays.isLate()) {
-                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, newLatePrice, originallyHadAroomPosition, latePositionId, roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, newLatePrice,
+                        originallyHadAroomPosition, latePositionId,
+                        roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
                 if (lateRes == null) {
                     return false;
                 }
@@ -873,17 +938,25 @@ public class UserBuysFullRoom implements RoomLogic {
             //Rollback in reverse order because we need to delete addon firsts
             if (order.hasRoom()) {
                 if (extraDays.isEarly() && earlyPositionId != null) {
-                    rollbackBuyOrUpgrade(originalEarlyItemId, oldEarlyPaid, earlyPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+                    rollbackBuyOrUpgrade(originalEarlyItemId, oldEarlyPaid, earlyPositionId,
+                            orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
                 }
                 if (extraDays.isLate() && latePositionId != null) {
-                    rollbackBuyOrUpgrade(originalLateItemId, oldLatePaid, latePositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+                    rollbackBuyOrUpgrade(originalLateItemId, oldLatePaid, latePositionId,
+                            orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
                 }
             }
-            rollbackBuyOrUpgrade(originalRoomItemId, oldRoomPaid, roomPositionId, orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
-            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: (RACE CONDITION DETECTED) Quota was available before updating the position, but it was found negative (r{}; e{}; l{}) negative after",
+            rollbackBuyOrUpgrade(originalRoomItemId, oldRoomPaid, roomPositionId,
+                    orderCode, originallyHadAroomPosition, userId, newRoomItemId, event);
+            log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
+                    + "(RACE CONDITION DETECTED) Quota was available before updating the position, "
+                    + "but it was found negative (r{}; e{}; l{}) negative after",
                     userId, newRoomItemId, event, roomRemaining, earlyRemaining, lateRemaining);
             finalizeBuyOrUpgrade(event, userId, newRoomItemId, roomRes, earlyRes, lateRes);
-            throw new ApiException("New room quota has ended (RACE CONDITION DETECTED)", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+            throw new ApiException(
+                    "New room quota has ended (RACE CONDITION DETECTED)",
+                    RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED
+            );
         }
         finalizeBuyOrUpgrade(event, userId, newRoomItemId, roomRes, earlyRes, lateRes);
 
@@ -906,18 +979,32 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     private void sendSanityCheckMailRoomDeleted(long roomId, @NotNull String roomName, @NotNull String reason) {
-        mailService.broadcastProblem(roomId, TEMPLATE_SANITY_CHECK_DELETED, new MailVarPair(ROOM_NAME, roomName),  new MailVarPair(SANITY_CHECK_REASON, reason));
+        mailService.broadcastProblem(
+                roomId, TEMPLATE_SANITY_CHECK_DELETED,
+                MailVarPair.of(ROOM_NAME, roomName),
+                MailVarPair.of(SANITY_CHECK_REASON, reason)
+        );
     }
-    private void sendSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName, @NotNull String roomName, @NotNull String reason) {
-        mailService.sendProblem(ownerId, TEMPLATE_SANITY_CHECK_KICK_OWNER, new MailVarPair(FURSONA_NAME, fursonaName), new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
-        mailService.sendProblem(userId, TEMPLATE_SANITY_CHECK_KICK_USER, new MailVarPair(ROOM_NAME, roomName), new MailVarPair(SANITY_CHECK_REASON, reason));
+    private void sendSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
+                                               @NotNull String roomName, @NotNull String reason) {
+        mailService.sendProblem(
+                ownerId, TEMPLATE_SANITY_CHECK_KICK_OWNER,
+                MailVarPair.of(FURSONA_NAME, fursonaName),
+                MailVarPair.of(ROOM_NAME, roomName),
+                MailVarPair.of(SANITY_CHECK_REASON, reason)
+        );
+        mailService.sendProblem(
+                userId, TEMPLATE_SANITY_CHECK_KICK_USER,
+                MailVarPair.of(ROOM_NAME, roomName),
+                MailVarPair.of(SANITY_CHECK_REASON, reason)
+        );
     }
     @Override
     public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
                                @Nullable List<String> detectedErrors) {
         log.info("[ROOM SANITY CHECKS] Running room sanity check on room {}", roomId);
-        Event event = pretixInformation.getCurrentEvent();
-        long eventId = event.getId();
+        final Event event = pretixInformation.getCurrentEvent();
+        final long eventId = event.getId();
         //The following checks are done:
         //- User in multiple rooms
         //- Members exceed room maximum
@@ -930,8 +1017,9 @@ public class UserBuysFullRoom implements RoomLogic {
         //- User order is daily
 
         //RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
-        List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
-        List<RoomGuestResponse> confirmedGuests = guests.stream().filter(k -> k.getRoomGuest().isConfirmed()).toList();
+        final List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
+        final List<RoomGuestResponse> confirmedGuests =
+                guests.stream().filter(k -> k.getRoomGuest().isConfirmed()).toList();
 
         String roomName = roomFinder.getRoomName(roomId);
         roomName = roomName == null ? "" : roomName;
@@ -1019,14 +1107,15 @@ public class UserBuysFullRoom implements RoomLogic {
                     //delete room, owner's order is canceled
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
-                    sendSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_ORDER_INVALID_ORDER_STATUS);
+                    sendSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_ORDER_INVALID_STATUS);
                     this.deleteRoom(roomId);
                     return;
                 } else {
                     //kick user, his order is canceled
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
-                    sendSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_ORDER_INVALID_ORDER_STATUS);
+                    sendSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName,
+                            SC_USER_ORDER_INVALID_ORDER_STATUS);
                     this.kickFromRoom(guestId);
                     continue;
                 }
