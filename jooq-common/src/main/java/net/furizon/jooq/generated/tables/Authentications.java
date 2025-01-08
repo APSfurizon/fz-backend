@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,8 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Indexes;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest.EmailConfirmationRequestPath;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests.ResetPasswordRequestsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -80,30 +83,20 @@ public class Authentications extends TableImpl<Record> {
 
     /**
      * The column
-     * <code>public.authentications.authentication_email_verified</code>.
+     * <code>public.authentications.authentication_email_verification_creation</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_EMAIL_VERIFIED = createField(DSL.name("authentication_email_verified"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<Record, OffsetDateTime> AUTHENTICATION_EMAIL_VERIFICATION_CREATION = createField(DSL.name("authentication_email_verification_creation"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column
-     * <code>public.authentications.authentication_2fa_enabled</code>.
+     * <code>public.authentications.authentication_failed_attempts</code>.
      */
-    public final TableField<Record, Boolean> AUTHENTICATION_2FA_ENABLED = createField(DSL.name("authentication_2fa_enabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<Record, Short> AUTHENTICATION_FAILED_ATTEMPTS = createField(DSL.name("authentication_failed_attempts"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>public.authentications.authentication_disabled</code>.
      */
     public final TableField<Record, Boolean> AUTHENTICATION_DISABLED = createField(DSL.name("authentication_disabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
-
-    /**
-     * The column <code>public.authentications.authentication_expired</code>.
-     */
-    public final TableField<Record, Boolean> AUTHENTICATION_EXPIRED = createField(DSL.name("authentication_expired"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
-
-    /**
-     * The column <code>public.authentications.authentication_from_oauth</code>.
-     */
-    public final TableField<Record, Boolean> AUTHENTICATION_FROM_OAUTH = createField(DSL.name("authentication_from_oauth"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column
@@ -224,6 +217,32 @@ public class Authentications extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK, null);
 
         return _users;
+    }
+
+    private transient EmailConfirmationRequestPath _emailConfirmationRequest;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.email_confirmation_request</code> table
+     */
+    public EmailConfirmationRequestPath emailConfirmationRequest() {
+        if (_emailConfirmationRequest == null)
+            _emailConfirmationRequest = new EmailConfirmationRequestPath(this, null, Keys.EMAIL_CONFIRMATION_REQUEST__MAIL_CONFIRM_AUTH_FK.getInverseKey());
+
+        return _emailConfirmationRequest;
+    }
+
+    private transient ResetPasswordRequestsPath _resetPasswordRequests;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.reset_password_requests</code> table
+     */
+    public ResetPasswordRequestsPath resetPasswordRequests() {
+        if (_resetPasswordRequests == null)
+            _resetPasswordRequests = new ResetPasswordRequestsPath(this, null, Keys.RESET_PASSWORD_REQUESTS__RESET_PW_AUTH_FK.getInverseKey());
+
+        return _resetPasswordRequests;
     }
 
     @Override

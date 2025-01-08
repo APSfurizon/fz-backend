@@ -42,8 +42,10 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             isOwner = info.getRoomOwner().getUserId() == userId;
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
-            info.setCanConfirm(isOwner && editingTimeAllowed && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
-            info.setCanUnconfirm(isOwner && editingTimeAllowed && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
+            info.setCanConfirm(isOwner && editingTimeAllowed
+                               && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
+            info.setCanUnconfirm(isOwner && editingTimeAllowed
+                               && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
             info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
             info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
 
@@ -70,7 +72,8 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         boolean canBuyOrUpgrade = buyOrUpgradeSupported && editingTimeAllowed && isOwner
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
 
-        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported, canBuyOrUpgrade, endRoomEditingTime, invitations);
+        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported,
+                canBuyOrUpgrade, endRoomEditingTime, invitations);
     }
 
     public record Input(

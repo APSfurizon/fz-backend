@@ -3,7 +3,6 @@ package net.furizon.backend.feature.user.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
-import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
@@ -15,19 +14,26 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.SelectJoinStep;
+import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
 public class JooqUserFinder implements UserFinder {
-    private final SqlQuery sqlQuery;
+    @NotNull private final SqlQuery sqlQuery;
 
     @Nullable
     @Override
@@ -155,7 +161,8 @@ public class JooqUserFinder implements UserFinder {
 
         if (filterMembershipCardForYear != null) {
             joinMembershipCards = true;
-            condition = condition.and( //TODO test, it might be broken
+            //TODO test, it might be broken
+            condition = condition.and(
                 MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear)
             );
         }

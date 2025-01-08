@@ -56,20 +56,26 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
 
         switch (action) {
             case TRASFER_EXCHANGE_ROOM: {
-                OrderDataResponse o = Objects.requireNonNull(orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation));
+                OrderDataResponse o = Objects.requireNonNull(
+                        orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
+                );
                 sourceRoomData = o.getRoom();
                 sourceExtraDays = o.getExtraDays();
 
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
                 if (status.isTargetConfirmed() || isSourceUser) {
-                    o = Objects.requireNonNull(orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation));
+                    o = Objects.requireNonNull(
+                            orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
+                    );
                     targetRoomData = o.getRoom();
                     targetExtraDays = o.getExtraDays();
                 }
                 break;
             }
             case TRASFER_FULL_ORDER: {
-                orderData = Objects.requireNonNull(orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation));
+                orderData = Objects.requireNonNull(
+                        orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
+                );
                 break;
             }
             default: break;

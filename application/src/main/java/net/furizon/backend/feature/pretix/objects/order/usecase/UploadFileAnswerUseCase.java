@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
-// TODO -> Why do we need this class if we don't use it?
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -36,7 +35,6 @@ public class UploadFileAnswerUseCase implements UseCase<UploadFileAnswerUseCase.
     @NotNull
     @Override
     public Optional<String> executor(@NotNull UploadFileAnswerUseCase.Input file) {
-        // TODO -> Action
         final var request = HttpRequest.<PretixFileUploadResponse>create()
             .method(HttpMethod.POST)
             .path("/upload")

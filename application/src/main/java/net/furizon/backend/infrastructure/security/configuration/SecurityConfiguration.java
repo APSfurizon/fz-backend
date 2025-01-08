@@ -3,15 +3,21 @@ package net.furizon.backend.infrastructure.security.configuration;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredManager;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
+import net.furizon.backend.infrastructure.security.filter.InternalBasicFilter;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
+import org.springframework.aop.Advisor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,9 +34,32 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfiguration {
     private final DatabaseSessionFilter databaseSessionFilter;
 
+    private final InternalBasicFilter internalBasicFilter;
+
     private final SecurityConfig securityConfig;
 
     private final PretixConfig pretixConfig;
+
+    @Bean
+    public SecurityFilterChain internalFilterChain(HttpSecurity http) throws Exception {
+        return http
+            .securityMatcher("/internal/**")
+            .cors(AbstractHttpConfigurer::disable)
+            .csrf(CsrfConfigurer::disable)
+            .addFilterAt(
+                internalBasicFilter,
+                BasicAuthenticationFilter.class
+            )
+            .build();
+    }
+
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor permissionsAdvisor(PermissionFinder permissionFinder) {
+        return AuthorizationManagerBeforeMethodInterceptor.preAuthorize(
+            new PermissionRequiredManager(permissionFinder)
+        );
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -42,17 +71,19 @@ public class SecurityConfiguration {
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
+                    antMatcher(HttpMethod.GET, "/internal/**"), //TODO is this needed?
                     antMatcher(HttpMethod.GET, "/docs/**"),
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
+                    antMatcher(HttpMethod.GET, "/api/v1/authentication/confirm-mail"),
+                    antMatcher(HttpMethod.GET, "/api/v1/authentication/pw/status"),
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/reset"),
+                    antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
                     antMatcher(HttpMethod.GET, pretixConfig.getShop().getPath() + "order/**")
                 )
-                .permitAll()
-                // TODO -> Remove it later (just for testing)
-                .requestMatchers("/internal/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -62,11 +93,6 @@ public class SecurityConfiguration {
                 BasicAuthenticationFilter.class
             )
             .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {

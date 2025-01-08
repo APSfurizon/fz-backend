@@ -1,15 +1,15 @@
 package net.furizon.backend.feature.membership.dto;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
 
-@Data
-@Builder
+@Getter
+@ToString
+@EqualsAndHashCode
 public class MembershipCard {
     @Min(0L)
     private final long cardId;
@@ -17,9 +17,8 @@ public class MembershipCard {
     private final int idInYear;
 
     @Nullable
-    @Builder.Default
     //This respects Furizon's card numbering. You may want to change the constructor with your impl
-    private final String cardNo = null;
+    private final String cardNo;
 
     @Min(1970L)
     private final short issueYear;

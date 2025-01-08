@@ -1,17 +1,14 @@
 package net.furizon.backend.feature.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.UserSession;
-import net.furizon.backend.feature.user.dto.SearchUsersResponse;
-import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
+import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
-import net.furizon.backend.feature.user.usecase.SearchUserInEventUseCase;
 import net.furizon.backend.feature.user.usecase.SearchUsersByIdsUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -40,14 +37,14 @@ public class UserController {
     }
 
     @GetMapping("/display/me")
-    public Optional<UserDisplayData> getMeDisplay(
+    public Optional<UserDisplayDataResponse> getMeDisplay(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
                 GetUserDisplayDataUseCase.class,
                 new GetUserDisplayDataUseCase.Input(
-                    user.getUserId(),
-                    pretixInformation.getCurrentEvent()
+                        user.getUserId(),
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }

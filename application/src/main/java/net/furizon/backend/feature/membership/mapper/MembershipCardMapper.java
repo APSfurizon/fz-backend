@@ -9,13 +9,13 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 public class MembershipCardMapper {
     @NotNull
     public static MembershipCard map(Record record) {
-        return MembershipCard.builder()
-                .cardId(record.get(MEMBERSHIP_CARDS.CARD_DB_ID))
-                .idInYear(record.get(MEMBERSHIP_CARDS.ID_IN_YEAR))
-                .userOwnerId(record.get(MEMBERSHIP_CARDS.USER_ID))
-                .issueYear(record.get(MEMBERSHIP_CARDS.ISSUE_YEAR))
-                .isRegistered(record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED))
-                .createdForOrderId(record.get(MEMBERSHIP_CARDS.CREATED_FOR_ORDER))
-            .build();
+        return new MembershipCard(
+                record.get(MEMBERSHIP_CARDS.CARD_DB_ID),
+                record.get(MEMBERSHIP_CARDS.ID_IN_YEAR),
+                record.get(MEMBERSHIP_CARDS.ISSUE_YEAR),
+                record.get(MEMBERSHIP_CARDS.USER_ID),
+                record.get(MEMBERSHIP_CARDS.CREATED_FOR_ORDER),
+                record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED)
+        );
     }
 }

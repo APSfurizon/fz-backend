@@ -10,21 +10,22 @@ import java.util.List;
 import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
-import net.furizon.jooq.generated.tables.FursuitsOrders;
-import net.furizon.jooq.generated.tables.GroupPermissions;
-import net.furizon.jooq.generated.tables.Groups;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
+import net.furizon.jooq.generated.tables.Permission;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests;
+import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Sessions;
-import net.furizon.jooq.generated.tables.UserGroup;
+import net.furizon.jooq.generated.tables.UserHasRole;
 import net.furizon.jooq.generated.tables.Users;
 
 import org.jooq.Catalog;
@@ -58,6 +59,11 @@ public class Public extends SchemaImpl {
     public final Authentications AUTHENTICATIONS = Authentications.AUTHENTICATIONS;
 
     /**
+     * The table <code>public.email_confirmation_request</code>.
+     */
+    public final EmailConfirmationRequest EMAIL_CONFIRMATION_REQUEST = EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST;
+
+    /**
      * The table <code>public.events</code>.
      */
     public final Events EVENTS = Events.EVENTS;
@@ -76,16 +82,6 @@ public class Public extends SchemaImpl {
      * The table <code>public.fursuits_orders</code>.
      */
     public final FursuitsOrders FURSUITS_ORDERS = FursuitsOrders.FURSUITS_ORDERS;
-
-    /**
-     * The table <code>public.group_permissions</code>.
-     */
-    public final GroupPermissions GROUP_PERMISSIONS = GroupPermissions.GROUP_PERMISSIONS;
-
-    /**
-     * The table <code>public.groups</code>.
-     */
-    public final Groups GROUPS = Groups.GROUPS;
 
     /**
      * The table <code>public.media</code>.
@@ -108,6 +104,21 @@ public class Public extends SchemaImpl {
     public final Orders ORDERS = Orders.ORDERS;
 
     /**
+     * The table <code>public.permission</code>.
+     */
+    public final Permission PERMISSION = Permission.PERMISSION;
+
+    /**
+     * The table <code>public.reset_password_requests</code>.
+     */
+    public final ResetPasswordRequests RESET_PASSWORD_REQUESTS = ResetPasswordRequests.RESET_PASSWORD_REQUESTS;
+
+    /**
+     * The table <code>public.roles</code>.
+     */
+    public final Roles ROLES = Roles.ROLES;
+
+    /**
      * The table <code>public.room_guests</code>.
      */
     public final RoomGuests ROOM_GUESTS = RoomGuests.ROOM_GUESTS;
@@ -128,9 +139,9 @@ public class Public extends SchemaImpl {
     public final Sessions SESSIONS = Sessions.SESSIONS;
 
     /**
-     * The table <code>public.user_group</code>.
+     * The table <code>public.user_has_role</code>.
      */
-    public final UserGroup USER_GROUP = UserGroup.USER_GROUP;
+    public final UserHasRole USER_HAS_ROLE = UserHasRole.USER_HAS_ROLE;
 
     /**
      * The table <code>public.users</code>.
@@ -154,21 +165,22 @@ public class Public extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             Authentications.AUTHENTICATIONS,
+            EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST,
             Events.EVENTS,
             ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS,
             Fursuits.FURSUITS,
-            FursuitsOrders.FURSUITS_ORDERS,
-            GroupPermissions.GROUP_PERMISSIONS,
-            Groups.GROUPS,
             Media.MEDIA,
             MembershipCards.MEMBERSHIP_CARDS,
             MembershipInfo.MEMBERSHIP_INFO,
             Orders.ORDERS,
+            Permission.PERMISSION,
+            ResetPasswordRequests.RESET_PASSWORD_REQUESTS,
+            Roles.ROLES,
             RoomGuests.ROOM_GUESTS,
             Rooms.ROOMS,
             SchemaMigrations.SCHEMA_MIGRATIONS,
             Sessions.SESSIONS,
-            UserGroup.USER_GROUP,
+            UserHasRole.USER_HAS_ROLE,
             Users.USERS
         );
     }

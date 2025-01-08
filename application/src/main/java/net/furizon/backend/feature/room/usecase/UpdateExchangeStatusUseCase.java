@@ -2,7 +2,6 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.action.confirmUserExchangeStatus.ConfirmUserExchangeStatusAction;
 import net.furizon.backend.feature.room.action.deleteExchangeStatusObjAction.DeleteExchangeStatusObjAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
@@ -16,7 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UpdateExchangeStatusUseCase implements UseCase<UpdateExchangeStatusUseCase.Input, ExchangeConfirmationStatus> {
+public class UpdateExchangeStatusUseCase implements
+        UseCase<UpdateExchangeStatusUseCase.Input, ExchangeConfirmationStatus> {
     @NotNull private final ConfirmUserExchangeStatusAction confirm;
     @NotNull private final DeleteExchangeStatusObjAction delete;
     @NotNull private final ExchangeConfirmationFinder finder;
@@ -38,7 +38,7 @@ public class UpdateExchangeStatusUseCase implements UseCase<UpdateExchangeStatus
             boolean isSourceUser = userId == status.getSourceUserId();
             boolean otherSideAlreadyConfirmed = isSourceUser ? status.isTargetConfirmed() : status.isSourceConfirmed();
 
-            if(otherSideAlreadyConfirmed) {
+            if (otherSideAlreadyConfirmed) {
                 //If the other side has already confirmed, the flow is done:
                 // we delete the confirmation entry and we return true
                 // to say to the caller we can continue with the operation

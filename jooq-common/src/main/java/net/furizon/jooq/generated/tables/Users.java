@@ -20,8 +20,9 @@ import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
+import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
-import net.furizon.jooq.generated.tables.UserGroup.UserGroupPath;
+import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -88,7 +89,7 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_locale</code>.
      */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'it'::character varying"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
@@ -301,17 +302,17 @@ public class Users extends TableImpl<Record> {
         return _roomGuests;
     }
 
-    private transient UserGroupPath _userGroup;
+    private transient UserHasRolePath _userHasRole;
 
     /**
-     * Get the implicit to-many join path to the <code>public.user_group</code>
-     * table
+     * Get the implicit to-many join path to the
+     * <code>public.user_has_role</code> table
      */
-    public UserGroupPath userGroup() {
-        if (_userGroup == null)
-            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__USER_GROUP_USERS_FK.getInverseKey());
+    public UserHasRolePath userHasRole() {
+        if (_userHasRole == null)
+            _userHasRole = new UserHasRolePath(this, null, Keys.USER_HAS_ROLE__USER_HAS_ROLE_USER_FK.getInverseKey());
 
-        return _userGroup;
+        return _userHasRole;
     }
 
     /**
@@ -328,6 +329,14 @@ public class Users extends TableImpl<Record> {
      */
     public EventsPath ordersEventsId() {
         return orders().events();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.roles</code>
+     * table
+     */
+    public RolesPath roles() {
+        return userHasRole().roles();
     }
 
     @Override
