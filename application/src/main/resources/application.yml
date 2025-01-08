@@ -50,6 +50,9 @@ springdoc:
     enabled: ${DOCS_ENABLED:false}
 
 security:
+  unverified-email-expire-hours: ${SECURITY_UNVERIFIED_EMAIL_EXPIRE_HRS:4}
+  unverified-password-reset-expire-hours: ${SECURITY_PASSWORD_RESET_EXPIRE_HRS:2}
+  delete-unverified-cronjob: ${SECURITY_DELETE_UNVERIFIED_CRONJOB:0 /15 * * * *}
   password-salt: ${SECURITY_HASHED_PASSWORD_SALT:changeit}
   token-secret-key: ${SECURITY_TOKEN_SECRET_KEY:a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6} #must be 32 bytes
   allowed-origins: ${SECURITY_ALLOWED_ORIGINS:["*"]} # TODO -> Only for dev
@@ -57,14 +60,20 @@ security:
     expiration: ${SECURITY_SESSION_EXPIRATION_DURATION:1d}
     core-pool-update-size: ${SECURITY_SESSION_CORE_POOL_UPDATE_SIZE:6}
     max-allowed-sessions-size: ${SECURITY_SESSION_MAX_ALLOWED_SESSIONS_SIZE:4}
+  internal:
+    username: ${SECURITY_INTERNAL_USERNAME:furizon}
+    password: ${SECURITY_INTERNAL_PASSWORD:changeit}
 
 membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
 
 frontend:
+  login-url: ${FRONTEND_LOGIN_URL:}
   login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
+  password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
+  confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
 
 pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}

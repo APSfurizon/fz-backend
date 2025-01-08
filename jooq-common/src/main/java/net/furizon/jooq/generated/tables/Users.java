@@ -18,8 +18,9 @@ import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
+import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
-import net.furizon.jooq.generated.tables.UserGroup.UserGroupPath;
+import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -266,17 +267,25 @@ public class Users extends TableImpl<Record> {
         return _roomGuests;
     }
 
-    private transient UserGroupPath _userGroup;
+    private transient UserHasRolePath _userHasRole;
 
     /**
-     * Get the implicit to-many join path to the <code>public.user_group</code>
+     * Get the implicit to-many join path to the
+     * <code>public.user_has_role</code> table
+     */
+    public UserHasRolePath userHasRole() {
+        if (_userHasRole == null)
+            _userHasRole = new UserHasRolePath(this, null, Keys.USER_HAS_ROLE__USER_HAS_ROLE_USER_FK.getInverseKey());
+
+        return _userHasRole;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.roles</code>
      * table
      */
-    public UserGroupPath userGroup() {
-        if (_userGroup == null)
-            _userGroup = new UserGroupPath(this, null, Keys.USER_GROUP__USER_GROUP_USERS_FK.getInverseKey());
-
-        return _userGroup;
+    public RolesPath roles() {
+        return userHasRole().roles();
     }
 
     @Override

@@ -24,7 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.*;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.BOOL;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.DROPDOWN;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.INPUT;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.TEXT_AREA;
 
 @Component
 @RequiredArgsConstructor
@@ -95,7 +98,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         }
 
         var generatedUrl = autocartLinkGenerator.generateUrl(actions);
-        if (!generatedUrl.isPresent()) {
+        if (generatedUrl.isEmpty()) {
             throw new RuntimeException("Autocart link generation failed.");
         }
         return new LinkResponse(generatedUrl.get() + "&z=0"); //Random param to prevent typos from destroying payload

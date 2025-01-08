@@ -11,30 +11,34 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/internal/cache/pretix")
+@RequestMapping("/cache/pretix")
 @RequiredArgsConstructor
-//TODO: Only admins are allowed to run these!
 public class PretixCacheController {
     @NotNull
     private final PretixInformation pretixService;
 
-    @Operation(summary = "Reloads the pretix's events, organizers, questions and products", description =
-            "Reloads the whole list of events and organizers from pretix and then, "
+    @Operation(
+        summary = "Reloads the pretix's events, organizers, questions and products",
+        description = "Reloads the whole list of events and organizers from pretix and then, "
             + "for the current event, refreshes the list of questions and products, "
             + "by compiling again the list of \"backend\" products. This method is meant "
-            + "to be launched ONLY by the backend admins")
+            + "to be launched ONLY by the backend admins"
+    )
     @PostMapping("/reload-struct")
+    //TODO [ADMIN_CHECK]
     public void reloadCache() {
-        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of cache");
         pretixService.resetCache();
     }
 
-    @Operation(summary = "Refetches the full order list and updates them in the db", description =
-            "This method is meant to be launched ONLY by the backend admins")
+    @Operation(
+        summary = "Refetches the full order list and updates them in the db",
+        description =
+        "This method is meant to be launched ONLY by the backend admins"
+    )
     @PostMapping("/reload-orders")
+    //TODO [ADMIN_CHECK]
     public void reloadOrders() {
-        //TODO [ADMIN_CHECK]
         log.info("[PRETIX] Manual reload of orders");
         pretixService.reloadAllOrders();
     }

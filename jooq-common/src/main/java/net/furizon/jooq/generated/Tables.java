@@ -7,20 +7,22 @@ package net.furizon.jooq.generated;
 import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
+import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.Fursuits;
 import net.furizon.jooq.generated.tables.FursuitsEvents;
-import net.furizon.jooq.generated.tables.GroupPermissions;
-import net.furizon.jooq.generated.tables.Groups;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
 import net.furizon.jooq.generated.tables.Orders;
+import net.furizon.jooq.generated.tables.Permission;
+import net.furizon.jooq.generated.tables.ResetPasswordRequests;
+import net.furizon.jooq.generated.tables.Roles;
 import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Sessions;
-import net.furizon.jooq.generated.tables.UserGroup;
+import net.furizon.jooq.generated.tables.UserHasRole;
 import net.furizon.jooq.generated.tables.Users;
 
 
@@ -43,6 +45,11 @@ public class Tables {
     public static final Authentications AUTHENTICATIONS = Authentications.AUTHENTICATIONS;
 
     /**
+     * The table <code>public.email_confirmation_request</code>.
+     */
+    public static final EmailConfirmationRequest EMAIL_CONFIRMATION_REQUEST = EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST;
+
+    /**
      * The table <code>public.events</code>.
      */
     public static final Events EVENTS = Events.EVENTS;
@@ -56,16 +63,6 @@ public class Tables {
      * The table <code>public.fursuits_events</code>.
      */
     public static final FursuitsEvents FURSUITS_EVENTS = FursuitsEvents.FURSUITS_EVENTS;
-
-    /**
-     * The table <code>public.group_permissions</code>.
-     */
-    public static final GroupPermissions GROUP_PERMISSIONS = GroupPermissions.GROUP_PERMISSIONS;
-
-    /**
-     * The table <code>public.groups</code>.
-     */
-    public static final Groups GROUPS = Groups.GROUPS;
 
     /**
      * The table <code>public.media</code>.
@@ -88,6 +85,21 @@ public class Tables {
     public static final Orders ORDERS = Orders.ORDERS;
 
     /**
+     * The table <code>public.permission</code>.
+     */
+    public static final Permission PERMISSION = Permission.PERMISSION;
+
+    /**
+     * The table <code>public.reset_password_requests</code>.
+     */
+    public static final ResetPasswordRequests RESET_PASSWORD_REQUESTS = ResetPasswordRequests.RESET_PASSWORD_REQUESTS;
+
+    /**
+     * The table <code>public.roles</code>.
+     */
+    public static final Roles ROLES = Roles.ROLES;
+
+    /**
      * The table <code>public.room_guests</code>.
      */
     public static final RoomGuests ROOM_GUESTS = RoomGuests.ROOM_GUESTS;
@@ -108,9 +120,9 @@ public class Tables {
     public static final Sessions SESSIONS = Sessions.SESSIONS;
 
     /**
-     * The table <code>public.user_group</code>.
+     * The table <code>public.user_has_role</code>.
      */
-    public static final UserGroup USER_GROUP = UserGroup.USER_GROUP;
+    public static final UserHasRole USER_HAS_ROLE = UserHasRole.USER_HAS_ROLE;
 
     /**
      * The table <code>public.users</code>.
