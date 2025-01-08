@@ -42,7 +42,10 @@ public class UserController {
     ) {
         return executor.execute(
                 GetUserDisplayDataUseCase.class,
-                user.getUserId()
+                new GetUserDisplayDataUseCase.Input(
+                        user.getUserId(),
+                        pretixInformation.getCurrentEvent()
+                )
         );
     }
 
