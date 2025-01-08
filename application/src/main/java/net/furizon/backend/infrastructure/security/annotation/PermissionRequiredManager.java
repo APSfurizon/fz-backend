@@ -15,7 +15,7 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -39,7 +39,7 @@ public class PermissionRequiredManager implements AuthorizationManager<MethodInv
             throw new AccessDeniedException("User is not logged in");
         }
         final Permission[] requiredPermissions = annotation.permissions();
-        final List<Permission> userPermissions = permissionFinder.getUserPermissions(user.getUserId());
+        final Set<Permission> userPermissions = permissionFinder.getUserPermissions(user.getUserId());
 
         String methodFullName = object.getMethod().getDeclaringClass().getName()
                 + "." + object.getMethod().getName() + "()";

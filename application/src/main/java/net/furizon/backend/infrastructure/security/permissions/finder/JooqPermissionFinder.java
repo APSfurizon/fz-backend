@@ -16,6 +16,8 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.PERMISSION;
 import static net.furizon.jooq.generated.Tables.ROLES;
@@ -28,10 +30,10 @@ public class JooqPermissionFinder implements PermissionFinder {
     private final SqlQuery sqlQuery;
 
     @Override
-    public @NotNull List<Permission> getUserPermissions(long userId) {
+    public @NotNull Set<Permission> getUserPermissions(long userId) {
         return sqlQuery
             .fetch(
-                PostgresDSL.select(PERMISSION.PERMISSION_VALUE)
+                PostgresDSL.selectDistinct(PERMISSION.PERMISSION_VALUE)
                 .from(USER_HAS_ROLE)
                 .innerJoin(PERMISSION)
                 .on(
@@ -41,7 +43,7 @@ public class JooqPermissionFinder implements PermissionFinder {
             )
             .stream()
             .map((it) -> Permission.get(it.get(PERMISSION.PERMISSION_VALUE)))
-            .toList();
+            .collect(Collectors.toSet());
     }
 
     @Override
