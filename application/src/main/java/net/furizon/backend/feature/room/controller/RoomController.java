@@ -128,7 +128,7 @@ public class RoomController {
 
     @NotNull
     @Operation(summary = "Invites (forcefully, if desired) users to the room", description =
-        "This operation can be performed only by the room's owner or an administrator ."
+        "This operation can be performed only by the room's owner or an administrator. "
         + "It invites the users specified in the `userId` param in the owner's room. "
         + "An administrator needs to specify the `roomId` param as well. "
         + "By setting `force` to true, this operation will bypass the invitation step. "
@@ -184,7 +184,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Cancel the specified invitation", description =
-            "This operation can be done only by someone who doesn't own a room. "
+            "This operation can be done only by someone who owns a room. "
             + "Using the `guestId` param you can specify which invitation to cancel")
     @PostMapping("/invite/cancel")
     public boolean cancelInvitation(
@@ -202,7 +202,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Kicks someone from the room", description =
-        "Kicks the person specified in the `guestId` parameter from the room"
+        "Kicks the person specified in the `guestId` parameter from the room. "
         + "This operation can be performed only by the room's owner or by an administrator.")
     @PostMapping("/kick")
     public boolean kickFromRoom(
@@ -298,7 +298,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Unconfirms the current room", description =
-            "This operation can be performed only by the room's owner or by an admin."
+            "This operation can be performed only by the room's owner or by an admin. "
             + "By default, it unconfirms the room owned by the current user. If this operation "
             + "is performed by an admin, the room to confirm can be specified in the `roomId` param.")
     @PostMapping("/unconfirm")
@@ -415,7 +415,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Starts a room or full order transfer/exchange", description =
-        "This method, after verifying that all conditions for the exchange are met,"
+        "This method, after verifying that all conditions for the exchange are met, "
         + "will start the exchange flow by sending emails to both parties to confirm "
         + "or refuse the exchange. Only after both have confirmed the actual transfer will happen. "
         + "With the `action` paramether you can choose to run a full order transfer or a "

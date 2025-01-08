@@ -28,7 +28,8 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
                 event,
                 input.filterRoom,
                 input.filterPaid,
-                filterMembershipYear
+                filterMembershipYear,
+                input.banStatus
         ));
     }
 
@@ -38,6 +39,7 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
             boolean filterRoom,
             boolean filterPaid,
             boolean filterMembership,
-            @Nullable Short filterMembershipForYear
+            @Nullable Short filterMembershipForYear,
+            @Nullable Boolean banStatus
     ) {}
 }

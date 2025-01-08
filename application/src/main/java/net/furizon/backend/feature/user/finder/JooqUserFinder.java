@@ -119,11 +119,13 @@ public class JooqUserFinder implements UserFinder {
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
-            @Nullable Short filterMembershipCardForYear
+            @Nullable Short filterMembershipCardForYear,
+            @Nullable Boolean filterBanStatus
     ) {
         Condition condition = PostgresDSL.trueCondition();
         boolean joinOrders = false;
         boolean joinMembershipCards = false;
+        boolean joinBanStatus = false;
 
         Table<?> searchFursonaQuery = selectUser()
             .where(
@@ -161,9 +163,15 @@ public class JooqUserFinder implements UserFinder {
 
         if (filterMembershipCardForYear != null) {
             joinMembershipCards = true;
-            //TODO test, it might be broken
             condition = condition.and(
                 MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear)
+            );
+        }
+
+        if (filterBanStatus != null) {
+            joinBanStatus = true;
+            condition = condition.and(
+                    AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
             );
         }
 
@@ -176,6 +184,12 @@ public class JooqUserFinder implements UserFinder {
             .from(searchFursonaQuery)
             .leftJoin(MEDIA)
             .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
+
+        if (joinBanStatus) {
+            query = query
+                .innerJoin(AUTHENTICATIONS)
+                .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
+        }
 
         if (joinOrders) {
             query = query

@@ -71,7 +71,6 @@ public class SecurityConfiguration {
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
-                    antMatcher(HttpMethod.GET, "/internal/**"), //TODO is this needed?
                     antMatcher(HttpMethod.GET, "/docs/**"),
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),

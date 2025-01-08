@@ -35,7 +35,8 @@ public class SearchUserController {
                     + "own a room or are in a room. Using the optional `filter-paid` you can filter out only people "
                     + "with orders marked as paid. With `filter-no-membership-card` you can filter only people who "
                     + "don't have a membership card for the current event; specifying "
-                    + "`filter-no-membership-card-for-year` will let you chose for which year. ")
+                    + "`filter-no-membership-card-for-year` will let you chose for which year. With `filterBanStatus` "
+                    + "you can filter out people who are banned/not by the admins; by default everyone is returned. ")
     @GetMapping("/current-event")
     public SearchUsersResponse searchByFursonaNameInCurrentEvent(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -59,7 +60,11 @@ public class SearchUserController {
             @Valid
             @Nullable
             @RequestParam("filter-no-membership-card-for-year")
-            final Short filterNoMembershipCardForYear
+            final Short filterNoMembershipCardForYear,
+            @Valid
+            @Nullable
+            @RequestParam("filter-ban-status")
+            final Boolean filterBanStatus
     ) {
         return executor.execute(
                 SearchUserInEventUseCase.class,
@@ -69,7 +74,8 @@ public class SearchUserController {
                         filterNotInRoom == null ? false : filterNotInRoom,
                         filterPaid == null ? false : filterPaid,
                         filterNoMembershipCard == null ? false : filterNoMembershipCard,
-                        filterNoMembershipCardForYear
+                        filterNoMembershipCardForYear,
+                        filterBanStatus
                 )
         );
     }
