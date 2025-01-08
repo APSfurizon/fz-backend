@@ -11,6 +11,8 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.email.model.TemplateMessage;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EmailSenderService implements EmailSender {
     @NotNull private final UserFinder userFinder;
+    @NotNull private final PermissionFinder permissionFinder;
 
     @NotNull private final JavaMailSender mailSender;
     @NotNull private final AsyncTaskExecutor asyncTaskExecutor;
@@ -31,6 +34,17 @@ public class EmailSenderService implements EmailSender {
 
     @Value("${spring.mail.username}")
     private String from;
+
+    @Override
+    public void sendToRole(@NotNull String roleInternalName, @NotNull String subject,
+                           @NotNull String templateName, MailVarPair... vars) {
+        permissionFinder.getUsersWithRole(roleInternalName).forEach(u -> send(u, subject, templateName, vars));
+    }
+    @Override
+    public void sendToPermission(@NotNull Permission permission, @NotNull String subject,
+                                 @NotNull String templateName, MailVarPair... vars) {
+        permissionFinder.getUsersWithPermission(permission).forEach(u -> send(u, subject, templateName, vars));
+    }
 
     @Override
     public void send(long userId, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) {

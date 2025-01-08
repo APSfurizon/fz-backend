@@ -20,7 +20,11 @@ public interface PermissionFinder {
 
     @Nullable Role getRoleFromInternalName(@NotNull String roleInternalName);
 
-    @NotNull List<Role> getRolesFromUserId(long roleId);
+    @NotNull List<Role> getRolesFromUserId(long userId);
+
+    @NotNull List<Long> getUsersWithRole(@NotNull String roleInternalName);
+
+    @NotNull List<Long> getUsersWithPermission(@NotNull Permission permission);
 
     boolean userHasRole(long userId, long roleId);
 
