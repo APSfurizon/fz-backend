@@ -54,7 +54,7 @@ public class CreateLoginSessionValidation {
     private final ApiException createInvalidCredentialsException() {
         return new ApiException(
                 "Invalid Credentials",
-                AuthenticationCodes.INVALID_CREDENTIALS.name()
+                AuthenticationCodes.INVALID_CREDENTIALS
         );
     }
 }

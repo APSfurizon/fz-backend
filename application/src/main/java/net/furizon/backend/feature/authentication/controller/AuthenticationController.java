@@ -47,14 +47,6 @@ public class AuthenticationController {
     private final UseCaseExecutor executor;
     private final PretixInformation pretixService;
 
-    @GetMapping("/test")
-    @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS}, mode = PermissionRequiredMode.ANY)
-    public boolean testPermission(
-            @AuthenticationPrincipal @Nullable final FurizonUser user
-    ) {
-        return true;
-    }
-
     @PostMapping("/login")
     public LoginResponse loginUser(
         @AuthenticationPrincipal @Nullable final FurizonUser user,

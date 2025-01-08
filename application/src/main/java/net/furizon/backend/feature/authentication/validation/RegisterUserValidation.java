@@ -22,7 +22,7 @@ public class RegisterUserValidation {
         if (authentication != null) {
             throw new ApiException(
                 "User already exists with email: %s".formatted(input.getEmail()),
-                AuthenticationCodes.EMAIL_ALREADY_REGISTERED.name()
+                AuthenticationCodes.EMAIL_ALREADY_REGISTERED
             );
         }
 
@@ -31,7 +31,7 @@ public class RegisterUserValidation {
                 && pretixInformation.getStatesOfCountry(birthCountryCode).size() > 0) {
             throw new ApiException(
                 "Region not provided for: %s".formatted(birthCountryCode),
-                AuthenticationCodes.REGION_NOT_PROVIDED.name()
+                AuthenticationCodes.REGION_NOT_PROVIDED
             );
         }
 
@@ -40,7 +40,7 @@ public class RegisterUserValidation {
                 && pretixInformation.getStatesOfCountry(residenceCountryCode).size() > 0) {
             throw new ApiException(
                     "Region not provided for: %s".formatted(residenceCountryCode),
-                    AuthenticationCodes.REGION_NOT_PROVIDED.name()
+                    AuthenticationCodes.REGION_NOT_PROVIDED
             );
         }
     }
