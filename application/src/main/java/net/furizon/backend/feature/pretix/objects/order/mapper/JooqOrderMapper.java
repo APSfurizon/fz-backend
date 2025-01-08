@@ -56,6 +56,7 @@ public class JooqOrderMapper {
                 .roomPositionPosid(record.get(ORDERS.ORDER_ROOM_POSITION_POSITIONID))
                 .earlyPositionId(record.get(ORDERS.ORDER_EARLY_POSITION_ID))
                 .latePositionId(record.get(ORDERS.ORDER_LATE_POSITION_ID))
+                .extraFursuits(record.get(ORDERS.ORDER_EXTRA_FURSUITS))
                 .answers(answerList, pretixInformation)
                 .orderOwnerUserId(userId)
                 .eventId(record.get(ORDERS.EVENT_ID))

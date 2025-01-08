@@ -173,6 +173,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_EARLY_POSITION_ID,
                         ORDERS.ORDER_LATE_POSITION_ID,
                         ORDERS.ORDER_ANSWERS_JSON,
+                        ORDERS.ORDER_EXTRA_FURSUITS,
                         ORDERS.USER_ID,
                         ORDERS.EVENT_ID
                 ).from(ORDERS);

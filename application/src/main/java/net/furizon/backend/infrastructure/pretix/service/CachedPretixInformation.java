@@ -26,6 +26,7 @@ import net.furizon.backend.feature.pretix.objects.quota.usecase.ReloadQuotaUseCa
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
@@ -77,6 +78,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final PretixProductFinder pretixProductFinder;
     @NotNull
     private final PretixConfig pretixConfig;
+    @NotNull
+    private final FursuitConfig fursuitConfig;
 
     // *** CACHE
     @NotNull
@@ -335,6 +338,7 @@ public class CachedPretixInformation implements PretixInformation {
             Long latePositionId = null;
             boolean membership = false;
             short roomCapacity = 0;
+            short extraFursuits = 0;
             Long userId = null;
 
             List<PretixPosition> positions = pretixOrder.getPositions();
@@ -420,6 +424,12 @@ public class CachedPretixInformation implements PretixInformation {
                             hotelInternalName = room.hotelInternalName();
                         }
                     }
+
+                } else if (checkItemId.apply(CacheItemTypes.EXTRA_FURSUITS, itemId)) {
+                    if (extraFursuits < fursuitConfig.getMaxExtraFursuits() && extraFursuits < Short.MAX_VALUE) {
+                        extraFursuits++;
+                    }
+
                 }
             }
 
@@ -448,6 +458,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .eventId(event.getId())
                     .orderOwnerUserId(userId)
                     .answers(answers, this)
+                    .extraFursuits(extraFursuits)
                     .userFinder(userFinder)
                     .eventFinder(eventFinder)
                     .build()
@@ -619,6 +630,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
         itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
+        itemIdsCache.put(CacheItemTypes.EXTRA_FURSUITS, products.extraFursuitsItemIds());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());

@@ -93,6 +93,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             );
                             break;
                         }
+                        case PretixConst.METADATA_EXTRA_FURSUIT_BADGE: {
+                            result.extraFursuitsItemIds().add(productId);
+                            break;
+                        }
 
                         default: {
                             log.warn(

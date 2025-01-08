@@ -85,6 +85,10 @@ room:
     delete-expired-cronjob: ${ROOM_EXCHANGE_DELETE_EXPIRED_CRONJOB:0 0 /1 * * *}
     expire-after-ms: ${ROOM_EXCHANGE_EXPIRE_AFTER_MS:172800000}
 
+fursuits:
+  default-fursuits-no: ${FURSUITS_DEFAULT_NO:2}
+  max-extra-fursuits: ${FURSUITS_MAX_EXTRA:5}
+
 pretix:
   event:
     public-booking-start-time: ${PRETIX_EVENT_START_PUBLIC_BOOKING_TIME:}

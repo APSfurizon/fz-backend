@@ -89,6 +89,9 @@ public class Order {
     @Nullable
     private Long latePositionId;
 
+    @Builder.Default
+    private short extraFursuits = 0;
+
     @Nullable
     @Builder.Default
     @Setter(AccessLevel.NONE)

@@ -14,6 +14,8 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Events.EventsPath;
+import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
+import net.furizon.jooq.generated.tables.FursuitsOrders.FursuitsOrdersPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.Rooms.RoomsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
@@ -146,6 +148,11 @@ public class Orders extends TableImpl<Record> {
      * The column <code>public.orders.order_hotel_internal_name</code>.
      */
     public final TableField<Record, String> ORDER_HOTEL_INTERNAL_NAME = createField(DSL.name("order_hotel_internal_name"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.orders.order_extra_fursuits</code>.
+     */
+    public final TableField<Record, Short> ORDER_EXTRA_FURSUITS = createField(DSL.name("order_extra_fursuits"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>public.orders.has_membership</code>.
@@ -284,6 +291,19 @@ public class Orders extends TableImpl<Record> {
         return _users;
     }
 
+    private transient FursuitsOrdersPath _fursuitsOrders;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.fursuits_orders</code> table
+     */
+    public FursuitsOrdersPath fursuitsOrders() {
+        if (_fursuitsOrders == null)
+            _fursuitsOrders = new FursuitsOrdersPath(this, null, Keys.FURSUITS_ORDERS__FURSUITS_ORDERS_ORDER_FK.getInverseKey());
+
+        return _fursuitsOrders;
+    }
+
     private transient MembershipCardsPath _membershipCards;
 
     /**
@@ -307,6 +327,14 @@ public class Orders extends TableImpl<Record> {
             _rooms = new RoomsPath(this, null, Keys.ROOMS__ROOMS_ORDERS_ID.getInverseKey());
 
         return _rooms;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.fursuits</code> table
+     */
+    public FursuitsPath fursuits() {
+        return fursuitsOrders().fursuits();
     }
 
     @Override
