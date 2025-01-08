@@ -21,6 +21,8 @@ import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -342,11 +344,11 @@ public class RoomController {
         + "This method is sync, expect a long running time! The returned array contains "
         + "a list of error logs detailing all the incongruences found. It should directly "
         + "be displayed to the admin (be aware of xss tho)")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_ROOMS})
     @PostMapping("/run-sanity-checks")
     public AdminSanityChecksResponse runSanityChecks(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        //TODO [ADMIN_CHECK]
         List<String> errors = sanityCheckService.runSanityChecks();
         return new AdminSanityChecksResponse(errors);
     }

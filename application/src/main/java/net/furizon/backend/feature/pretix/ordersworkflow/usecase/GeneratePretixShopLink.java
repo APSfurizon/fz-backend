@@ -16,6 +16,8 @@ import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +38,9 @@ import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionT
 @Slf4j
 public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.Input, LinkResponse> {
     @NotNull private final OrderFinder orderFinder;
-    @NotNull private final MembershipCardFinder membershipCardFinder;
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final PersonalInfoFinder personalInfoFinder;
+    @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
     @NotNull private final PretixConfig pretixConfig;
 
@@ -50,8 +53,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         Event event = pretixService.getCurrentEvent();
 
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
-        if (bookingStart != null && (bookingStart.isAfter(OffsetDateTime.now()) || false)) {
-            //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK] add check "is not admin"
+        boolean earlyBook = permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
+        if (bookingStart != null && bookingStart.isAfter(OffsetDateTime.now()) && !earlyBook) {
             log.error("User requested a shop link before opening date!");
             throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
         }

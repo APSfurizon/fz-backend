@@ -15,6 +15,8 @@ import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseCase.Input, FullInfoResponse> {
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final OrderFinder orderFinder;
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final SanityCheck sanityCheck;
@@ -50,7 +53,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
         OrderDataResponse orderDataResponse = orderFinder.getOrderDataResponseFromUserEvent(userId, event, input.pretixInformation);
 
         OffsetDateTime startBooking = pretixConfig.getEvent().getPublicBookingStartTime();
-        boolean displayCountdown = true && OffsetDateTime.now().isBefore(startBooking); //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK]
+        boolean displayCountdown = true && OffsetDateTime.now().isBefore(startBooking) && permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());

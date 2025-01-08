@@ -16,6 +16,8 @@ import net.furizon.backend.feature.membership.usecase.SetCardRegisterStatusUseCa
 import net.furizon.backend.feature.membership.usecase.UpdatePersonalUserInformationUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -94,12 +96,12 @@ public class MembershipController {
     @Operation(summary = "Add a membership card to an user for the current event", description =
         "Adds a membership card object for the specified user in the current event's year. "
         + "This method should be executed ONLY by a backend admin!!")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/add-card")
     public boolean addMembershipCard(
             @Valid @RequestBody final AddMembershipCardRequest req,
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        //TODO [ADMIN_CHECK]
         executor.execute(
             CreateMembershipUseCase.class,
             new CreateMembershipUseCase.Input(
@@ -115,6 +117,7 @@ public class MembershipController {
         "Returns a list of membership cards with the full (current) info of the respective user. "
         + "`year` param is optional, if it's not present or it's `< 0` we return the list of membership cards for "
         + "the current event. This method should be executed ONLY by a backend admin!!")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @GetMapping("/get-cards")
     public GetMembershipCardsResponse getMembershipCards(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -122,7 +125,6 @@ public class MembershipController {
             @RequestParam("year")
             final short year
     ) {
-        //TODO [ADMIN_CHECK]
         return executor.execute(
             LoadAllMembershipInfosUseCase.class,
             new LoadAllMembershipInfosUseCase.Input(
@@ -136,12 +138,12 @@ public class MembershipController {
         "Membership cards have to be manually register to an external website for being legally valid."
         + "This endpoint should be used by ADMINS only and it's used to mark a membership card as registered "
         + "in the external website or not")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/set-membership-card-registration-status")
     public boolean setMembershipCardRegistration(
             @Valid @RequestBody final SetMembershipCardRegistrationStatusRequest req,
             @AuthenticationPrincipal@NotNull final FurizonUser user
     ) {
-        //TODO [ADMIN_CHECK]
         return executor.execute(
                 SetCardRegisterStatusUseCase.class,
                 req

@@ -15,6 +15,8 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RoomChecks {
     @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomConfig roomConfig;
@@ -114,6 +117,9 @@ public class RoomChecks {
         }
     }
     public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId) {
+        return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomReqId, null);
+    }
+    public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId, @Nullable Boolean isAdminCached) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         long roomId;
 
@@ -127,7 +133,10 @@ public class RoomChecks {
         } else {
             long rId = roomReqId;
             if (!r.isPresent() || r.get() != rId) {
-                if (true) { //TODO [ADMIN_CHECK]
+                if (isAdminCached == null) {
+                    isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
+                }
+                if (isAdminCached) {
                     roomId = rId;
                     if (!roomFinder.isRoomConfirmed(roomId).isPresent()) {
                         log.error("Room with id {} doesn't exist!", roomId);
@@ -206,7 +215,7 @@ public class RoomChecks {
     }
 
     public void assertIsGuestObjOwnerOrAdmin(RoomGuest guest, long requesterUserId) {
-        boolean isAdmin = true; //TODO [ADMIN_CHECK]
+        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
         if (guest.getUserId() != requesterUserId && !isAdmin) {
             log.error("User {} has no rights over guest obj {}", requesterUserId, guest.getGuestId());
             throw new ApiException("User has no rights over specified guest!", RoomErrorCodes.USER_IS_NOT_ADMIN);
@@ -271,7 +280,7 @@ public class RoomChecks {
 
     public long getUserIdAndAssertPermission(@Nullable Long userId, @NotNull FurizonUser user) {
         long id = userId == null ? user.getUserId() : userId;
-        boolean isAdmin = true; //TODO [ADMIN_CHECK]
+        boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
         if (userId != null && userId != user.getUserId() && !isAdmin) {
             log.error("User {} has no permission over userId {}", user.getUserId(), userId);
             throw new ApiException("User is not an admin", RoomErrorCodes.USER_IS_NOT_ADMIN);
