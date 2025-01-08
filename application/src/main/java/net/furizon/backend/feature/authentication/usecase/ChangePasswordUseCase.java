@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_CHANGED;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_CHANGED;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -42,7 +45,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
         log.info("Changing password for user {}", userId);
         sessionAuthenticationManager.changePassword(userId, input.req.getNewPassword());
 
-        //TODO EMAIL notify user that his account has changed password
+        sender.send(userId, SUBJECT_PW_CHANGED, TEMPLATE_PW_CHANGED);
 
         return true;
     }

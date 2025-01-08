@@ -49,7 +49,7 @@ public class EmailSenderService implements EmailSender {
                 emailData.getUserId(), mail, subject);
 
 
-        TemplateMessage msg = TemplateMessage.of("old_template.jte")
+        TemplateMessage msg = TemplateMessage.of(templateName)
                 .addParam("fursonaName", emailData.getFursonaName());
 
         for (MailVarPair var : vars) {

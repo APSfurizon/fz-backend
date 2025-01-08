@@ -1,3 +1,5 @@
+@param String fursonaName
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +23,7 @@
         <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">The password of your account has been changed</h2>
+            <p class="main-content">Dear ${fursonaName},</p>
             <p class="main-content">If you haven't changed your password, please, contact us and use the <i>reset password</i> form to get your account back.</p>
         </div>
     </div>
