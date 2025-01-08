@@ -9,6 +9,7 @@ import net.furizon.backend.feature.user.UserSession;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
+import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
 import net.furizon.backend.feature.user.usecase.SearchUserInEventUseCase;
@@ -40,15 +41,12 @@ public class UserController {
     }
 
     @GetMapping("/me/display")
-    public Optional<UserDisplayData> getMeDisplay(
+    public Optional<UserDisplayDataResponse> getMeDisplay(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
                 GetUserDisplayDataUseCase.class,
-                new GetUserDisplayDataUseCase.Input(
-                    user.getUserId(),
-                    pretixInformation.getCurrentEvent()
-                )
+                user.getUserId()
         );
     }
 

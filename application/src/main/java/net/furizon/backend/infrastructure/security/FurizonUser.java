@@ -72,6 +72,6 @@ public class FurizonUser implements UserDetails {
     }
 
     public boolean isTwoFactorEnabled() {
-        return authentication.isTwoFactorEnabled();
+        return authentication.is2FaEnabled();
     }
 }

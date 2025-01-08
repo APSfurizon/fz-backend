@@ -27,7 +27,7 @@ import static net.furizon.jooq.generated.Tables.*;
 @Component
 @RequiredArgsConstructor
 public class JooqUserFinder implements UserFinder {
-    private final SqlQuery sqlQuery;
+    @NotNull private final SqlQuery sqlQuery;
 
     @Nullable
     @Override
