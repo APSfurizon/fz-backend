@@ -62,7 +62,7 @@ security:
     max-allowed-sessions-size: ${SECURITY_SESSION_MAX_ALLOWED_SESSIONS_SIZE:4}
   internal:
     username: ${SECURITY_INTERNAL_USERNAME:furizon}
-    password: ${SECURITY_INTERNAL_PASSWORD:changit}
+    password: ${SECURITY_INTERNAL_PASSWORD:changeit}
 
 membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}

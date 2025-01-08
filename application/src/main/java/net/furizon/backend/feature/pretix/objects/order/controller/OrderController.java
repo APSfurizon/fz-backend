@@ -8,10 +8,13 @@ import net.furizon.backend.feature.pretix.objects.order.dto.OrderWebhookRequest;
 import net.furizon.backend.feature.pretix.objects.order.usecase.FetchSingleOrderUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,9 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/internal/orders")
 @RequiredArgsConstructor
 public class OrderController {
+    @NotNull
     private final UseCaseExecutor useCaseExecutor;
     @NotNull
     private final PretixInformation pretixService;
+
+    @GetMapping("/ping")
+    @InternalAuthorize
+    public boolean internalPing() {
+        return true;
+    }
 
     @Operation(
         summary = "A pretix order has changed",
