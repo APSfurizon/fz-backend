@@ -3,11 +3,6 @@ package net.furizon.backend.infrastructure.pretix.model;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @Getter
 @RequiredArgsConstructor
 public enum Sponsorship {
@@ -17,11 +12,7 @@ public enum Sponsorship {
 
     private final String color; //TODO for frontend
 
-    private static final Map<Integer, Sponsorship> MAP = Arrays
-        .stream(Sponsorship.values())
-        .collect(Collectors.toMap(Sponsorship::ordinal, Function.identity()));
-
     public static Sponsorship get(int ordinal) {
-        return MAP.get(ordinal);
+        return Sponsorship.values()[ordinal];
     }
 }

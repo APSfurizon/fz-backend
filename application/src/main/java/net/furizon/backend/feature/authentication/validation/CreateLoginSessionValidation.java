@@ -29,14 +29,14 @@ public class CreateLoginSessionValidation {
         if (authentication.isDisabled()) {
             throw new ApiException(
                 "Not possible to login",
-                AuthenticationCodes.AUTHENTICATION_IS_DISABLED.name()
+                AuthenticationCodes.AUTHENTICATION_IS_DISABLED
             );
         }
 
         if (authentication.getMailVerificationCreationMs() != null) {
             throw new ApiException(
                     "Email confirmation is still pending",
-                    AuthenticationCodes.CONFIRMATION_STILL_PENDING.name()
+                    AuthenticationCodes.CONFIRMATION_STILL_PENDING
             );
         }
 

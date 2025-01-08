@@ -48,7 +48,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName(),
-                regUserReq.getPersonalUserInformation().getBirthCountry());
+                regUserReq.getPersonalUserInformation().getResidenceCountry());
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
             email,

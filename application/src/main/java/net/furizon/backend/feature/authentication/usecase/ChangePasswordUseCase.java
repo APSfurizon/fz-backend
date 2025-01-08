@@ -2,6 +2,7 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -34,8 +35,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
             userId = sessionAuthenticationManager.getUserIdFromPasswordResetReqId(resetPwId);
             if (userId == null) {
-                //TODO error fix
-                //throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
+                throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
             }
         }
 

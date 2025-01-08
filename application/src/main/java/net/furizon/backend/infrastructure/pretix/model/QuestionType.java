@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.pretix.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,7 +33,7 @@ public enum QuestionType {
         .stream(QuestionType.values())
         .collect(Collectors.toMap(QuestionType::getCode, Function.identity()));
 
-    public static QuestionType get(String code) {
+    public static QuestionType get(@NotNull String code) {
         return MAP.get(code);
     }
 }
