@@ -52,7 +52,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
                 mailService.sendUpdate(
-                        r.get(), TEMPLATE_USER_LEFT_ROOM, new MailVarPair(FURSONA_NAME, data.getFursonaName())
+                        r.get(), TEMPLATE_USER_LEFT_ROOM, MailVarPair.of(FURSONA_NAME, data.getFursonaName())
                 );
             }
         }

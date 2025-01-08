@@ -11,12 +11,23 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.order.action.deleteOrder.DeleteOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.action.upsertOrder.UpsertOrderAction;
+import net.furizon.backend.infrastructure.email.EmailSender;
+import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_FATAL_ERROR_MEMBERSHIP;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR;
+import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
+import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
+import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
+import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_OWNER_ID;
+import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_PREV_OWNER_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +38,7 @@ public class UpdateOrderInDb {
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final UpdateMembershipCardOwner updateMembershipCardOwner;
     @NotNull private final CreateMembershipCardAction createMembershipCardAction;
+    @NotNull private final EmailSender emailSender;
 
     public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
                                              @NotNull Event event,
@@ -66,7 +78,7 @@ public class UpdateOrderInDb {
                                 updateMembershipCardOwner.invoke(card, orderOwnerId);
 
                             } else { //Otherwise, send an error email to web admins
-                                log.error("[PRETIX] [PRETIX] Order {} has already generated the membeship card {}/{}. "
+                                log.error("[PRETIX] Order {} has already generated the membeship card {}/{}. "
                                         + "Order owner has changed ({} -> {}), "
                                         + "but membership card was already registered!!"
                                         + "Manual fix is needed!!! +++",
@@ -74,7 +86,17 @@ public class UpdateOrderInDb {
                                     card.getCardId(), card.getIdInYear(),
                                     cardOwnerId, orderOwnerId
                                 );
-                                //TODO SPAM EMAIL TO ADMINS
+
+                                emailSender.sendToPermission(
+                                        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                        SUBJECT_FATAL_ERROR_MEMBERSHIP,
+                                        TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR,
+                                        MailVarPair.of(ORDER_CODE, order.getCode()),
+                                        MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                        MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear())),
+                                        MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                        MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                );
                             }
                         }
                     }

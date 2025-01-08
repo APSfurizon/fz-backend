@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.EXCHANGE_ROOM;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_INITIALIZED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TRANSFER_FULL_ORDER;
@@ -66,10 +66,10 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
             };
             MailVarPair[] vars = {
-                new MailVarPair(EXCHANGE_ACTION_TEXT, actionText),
-                new MailVarPair(OWNER_FURSONA_NAME, sourceData.getFursonaName()),
-                new MailVarPair(FURSONA_NAME, destData.getFursonaName()),
-                new MailVarPair(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
+                MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                MailVarPair.of(ROOM_OWNER_FURSONA_NAME, sourceData.getFursonaName()),
+                MailVarPair.of(FURSONA_NAME, destData.getFursonaName()),
+                MailVarPair.of(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
             };
             mailService.sendUpdate(destUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
             mailService.sendUpdate(sourceUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
