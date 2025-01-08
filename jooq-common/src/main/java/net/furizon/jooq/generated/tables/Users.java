@@ -13,6 +13,8 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Authentications.AuthenticationsPath;
+import net.furizon.jooq.generated.tables.Events.EventsPath;
+import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.ExchangeConfirmationStatusPath;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
@@ -87,12 +89,17 @@ public class Users extends TableImpl<Record> {
     /**
      * The column <code>public.users.user_locale</code>.
      */
-    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'en-us'::character varying"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> USER_LOCALE = createField(DSL.name("user_locale"), SQLDataType.VARCHAR(8).defaultValue(DSL.field(DSL.raw("'it'::character varying"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.users.media_id_propic</code>.
      */
     public final TableField<Record, Long> MEDIA_ID_PROPIC = createField(DSL.name("media_id_propic"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.users.show_in_nosecount</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
 
     private Users(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -215,6 +222,34 @@ public class Users extends TableImpl<Record> {
         return _membershipCards;
     }
 
+    private transient ExchangeConfirmationStatusPath _exchangeConfirmationStatusSourceUserFk;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.exchange_confirmation_status</code> table, via the
+     * <code>exchange_confirmation_status_source_user_fk</code> key
+     */
+    public ExchangeConfirmationStatusPath exchangeConfirmationStatusSourceUserFk() {
+        if (_exchangeConfirmationStatusSourceUserFk == null)
+            _exchangeConfirmationStatusSourceUserFk = new ExchangeConfirmationStatusPath(this, null, Keys.EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_SOURCE_USER_FK.getInverseKey());
+
+        return _exchangeConfirmationStatusSourceUserFk;
+    }
+
+    private transient ExchangeConfirmationStatusPath _exchangeConfirmationStatusTargetUserFk;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.exchange_confirmation_status</code> table, via the
+     * <code>exchange_confirmation_status_target_user_fk</code> key
+     */
+    public ExchangeConfirmationStatusPath exchangeConfirmationStatusTargetUserFk() {
+        if (_exchangeConfirmationStatusTargetUserFk == null)
+            _exchangeConfirmationStatusTargetUserFk = new ExchangeConfirmationStatusPath(this, null, Keys.EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_TARGET_USER_FK.getInverseKey());
+
+        return _exchangeConfirmationStatusTargetUserFk;
+    }
+
     private transient FursuitsPath _fursuits;
 
     /**
@@ -286,6 +321,22 @@ public class Users extends TableImpl<Record> {
      */
     public RolesPath roles() {
         return userHasRole().roles();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.events</code>
+     * table, via the <code>exchange_confirmation_status_event_fk</code> key
+     */
+    public EventsPath exchangeConfirmationStatusEventFk() {
+        return exchangeConfirmationStatusSourceUserFk().events();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.events</code>
+     * table, via the <code>orders_events_id</code> key
+     */
+    public EventsPath ordersEventsId() {
+        return orders().events();
     }
 
     @Override

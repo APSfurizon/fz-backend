@@ -1,0 +1,81 @@
+package net.furizon.backend.feature.room.usecase;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.dto.RoomInfo;
+import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
+import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
+import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
+import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
+import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.RoomConfig;
+import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.usecase.UseCase;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, RoomInfoResponse> {
+    @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
+    @NotNull private final RoomFinder roomFinder;
+    @NotNull private final RoomLogic roomLogic;
+    @NotNull private final RoomConfig roomConfig;
+
+    @Override
+    public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
+        long userId = input.user.getUserId();
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
+
+        OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
+        boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
+
+        boolean isOwner = true; //By defaulting it on true, we can upgrade room also if we don't have a room
+        if (info != null) {
+            isOwner = info.getRoomOwner().getUserId() == userId;
+            long roomId = info.getRoomId();
+            info.setUserIsOwner(isOwner);
+            info.setCanConfirm(isOwner && editingTimeAllowed && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
+            info.setCanUnconfirm(isOwner && editingTimeAllowed && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
+            info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
+            info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
+
+            List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
+
+            info.setCanInvite(isOwner && editingTimeAllowed && (
+                    //guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
+                    guests.size() //Counting also unconfirmed invites to prevent mass spam
+                    < (int) info.getRoomData().getRoomCapacity()
+                )
+            );
+            info.setGuests(guests);
+        }
+        List<RoomInvitationResponse> invitations =
+            roomFinder.getUserReceivedInvitations(userId, input.event, input.pretixInformation);
+        for (RoomInvitationResponse invitation : invitations) {
+            var guests = roomFinder.getRoomGuestResponseFromRoomId(invitation.getRoom().getRoomId(), input.event);
+            invitation.getRoom().setGuests(guests);
+        }
+
+        boolean canCreateRoom = editingTimeAllowed && info == null && roomLogic.canCreateRoom(userId, input.event);
+        boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(input.event);
+
+        boolean canBuyOrUpgrade = buyOrUpgradeSupported && editingTimeAllowed && isOwner
+                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
+
+        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported, canBuyOrUpgrade, endRoomEditingTime, invitations);
+    }
+
+    public record Input(
+            @NotNull FurizonUser user,
+            @NotNull Event event,
+            @NotNull PretixInformation pretixInformation
+    ) {}
+}

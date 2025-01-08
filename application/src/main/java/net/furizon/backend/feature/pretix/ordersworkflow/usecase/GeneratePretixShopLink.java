@@ -8,7 +8,9 @@ import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
+import net.furizon.backend.feature.pretix.ordersworkflow.controller.OrdersWorkflowController;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
@@ -17,9 +19,9 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +39,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final PersonalInfoFinder personalInfoFinder;
     @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
+    @NotNull private final PretixConfig pretixConfig;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
@@ -44,36 +47,39 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         long userId = input.user.getUserId();
         String mail = input.user.getEmail();
         PretixInformation pretixService = input.pretixService;
-        var e = pretixService.getCurrentEvent();
+        Event event = pretixService.getCurrentEvent();
+
+        OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        if (bookingStart != null && (bookingStart.isAfter(OffsetDateTime.now()) || false)) {
+            //TODO [ADMIN_CHECK] //TODO [STAFFER_CHECK] add check "is not admin"
+            log.error("User requested a shop link before opening date!");
+            throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
+        }
 
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
-        @Nullable Event event = e.orElse(null);
-        if (event != null) {
-            int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
-            if (ordersNo > 0) {
-                throw new ApiException(
-                        "You already made an order!",
-                        OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE.name()
-                );
-            }
-
-            membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
-        } else {
-            log.error("Unable to fetch current event. Generating pretix shop link anyway without a membership card");
+        int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
+        if (ordersNo > 0) {
+            throw new ApiException(
+                    "You already made an order!",
+                    OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE
+            );
         }
+
+
+        membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
 
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
 
         actions.add(new AutocartAction<>("id_email", mail, INPUT));
         actions.add(new AutocartAction<>("id_email_repeat", mail, INPUT));
         if (info != null) {
-            actions.add(new AutocartAction<>("id_phone_0", info.getPhoneNumber(), DROPDOWN));
+            actions.add(new AutocartAction<>("id_phone_0", info.getPrefixPhoneNumber(), DROPDOWN));
             actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), INPUT));
             actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), INPUT));
             actions.add(new AutocartAction<>("id_name_parts_1", info.getLastName(), INPUT));
             actions.add(new AutocartAction<>("id_street", info.getResidenceAddress(), TEXT_AREA));
             actions.add(new AutocartAction<>("id_zipcode", info.getResidenceZipCode(), INPUT));
-            actions.add(new AutocartAction<>("id_city", info.getResidenceZipCode(), INPUT));
+            actions.add(new AutocartAction<>("id_city", info.getResidenceCity(), INPUT));
             actions.add(new AutocartAction<>("id_country", info.getResidenceCountry(), DROPDOWN));
             String region = info.getResidenceRegion();
             if (region != null) {
@@ -91,8 +97,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             }
         }
         if (membershipNo == 0) {
-            Set<Integer> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
-            for (int membershipCardId : mcIds) {
+            Set<Long> mcIds = input.pretixService.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS);
+            for (long membershipCardId : mcIds) {
                 actions.add(new AutocartAction<>("cp_$_item_" + membershipCardId, true, BOOL));
             }
         }

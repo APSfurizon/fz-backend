@@ -11,4 +11,6 @@ import java.util.List;
 public class GetMembershipCardsResponse {
     @NotNull
     private List<FullInfoMembershipCard> response;
+
+    private boolean canAddCards;
 }

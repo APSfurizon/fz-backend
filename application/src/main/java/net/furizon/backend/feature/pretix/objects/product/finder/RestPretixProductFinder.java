@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.product.finder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
@@ -16,7 +17,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
-import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
 @Component
 @RequiredArgsConstructor
@@ -48,6 +49,26 @@ public class RestPretixProductFinder implements PretixProductFinder {
             return Optional
                     .ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody())
                     .orElse(PretixPaging.empty());
+        } catch (final HttpClientErrorException ex) {
+            log.error(ex.getResponseBodyAsString());
+            throw ex;
+        }
+    }
+
+    @Override
+    public @NotNull Optional<PretixProduct> fetchProductById(@NotNull final Event event, final long itemId) {
+        var pair = event.getOrganizerAndEventPair();
+        final var request = HttpRequest.<PretixProduct>create()
+                .method(HttpMethod.GET)
+                .path("/organizers/{organizer}/events/{event}/items/{id}/")
+                .uriVariable("organizer", pair.getOrganizer())
+                .uriVariable("event", pair.getEvent())
+                .uriVariable("id", String.valueOf(itemId))
+                .responseType(PretixProduct.class)
+                .build();
+
+        try {
+            return Optional.ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody());
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;

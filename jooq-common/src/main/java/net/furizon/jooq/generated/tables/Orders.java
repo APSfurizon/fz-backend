@@ -93,9 +93,34 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> ORDER_STATUS = createField(DSL.name("order_status"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
-     * The column <code>public.orders.order_answers_main_position_id</code>.
+     * The column <code>public.orders.order_ticket_position_id</code>.
      */
-    public final TableField<Record, Integer> ORDER_ANSWERS_MAIN_POSITION_ID = createField(DSL.name("order_answers_main_position_id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Long> ORDER_TICKET_POSITION_ID = createField(DSL.name("order_ticket_position_id"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_ticket_position_positionid</code>.
+     */
+    public final TableField<Record, Long> ORDER_TICKET_POSITION_POSITIONID = createField(DSL.name("order_ticket_position_positionid"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_room_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_POSITION_ID = createField(DSL.name("order_room_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_room_position_positionid</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_POSITION_POSITIONID = createField(DSL.name("order_room_position_positionid"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_early_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_EARLY_POSITION_ID = createField(DSL.name("order_early_position_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.orders.order_late_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_LATE_POSITION_ID = createField(DSL.name("order_late_position_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.orders.order_daily_days</code>.
@@ -108,14 +133,19 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, Short> ORDER_EXTRA_DAYS_TYPE = createField(DSL.name("order_extra_days_type"), SQLDataType.SMALLINT, this, "");
 
     /**
+     * The column <code>public.orders.order_room_pretix_item_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_ROOM_PRETIX_ITEM_ID = createField(DSL.name("order_room_pretix_item_id"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.orders.order_room_capacity</code>.
      */
     public final TableField<Record, Short> ORDER_ROOM_CAPACITY = createField(DSL.name("order_room_capacity"), SQLDataType.SMALLINT, this, "");
 
     /**
-     * The column <code>public.orders.order_hotel_location</code>.
+     * The column <code>public.orders.order_hotel_internal_name</code>.
      */
-    public final TableField<Record, String> ORDER_HOTEL_LOCATION = createField(DSL.name("order_hotel_location"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> ORDER_HOTEL_INTERNAL_NAME = createField(DSL.name("order_hotel_internal_name"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.orders.has_membership</code>.
@@ -218,6 +248,11 @@ public class Orders extends TableImpl<Record> {
     @Override
     public UniqueKey<Record> getPrimaryKey() {
         return Keys.ORDERS_PKEY;
+    }
+
+    @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.ORDERS_ONE_ORDER_PER_EVENT);
     }
 
     @Override

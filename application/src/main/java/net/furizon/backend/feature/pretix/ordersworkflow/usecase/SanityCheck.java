@@ -6,7 +6,6 @@ import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
@@ -22,35 +21,33 @@ public class SanityCheck {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
 
-    public @NotNull SanityCheckResponse execute(@NotNull FurizonUser user,
+    public @NotNull List<OrderWorkflowErrorCode> execute(@NotNull FurizonUser user,
                                                 @NotNull PretixInformation pretixInformation) {
         List<OrderWorkflowErrorCode> errors = new LinkedList<>();
 
-        var e = pretixInformation.getCurrentEvent();
-        if (e.isPresent()) {
-            Event event = e.get();
+        Event event = pretixInformation.getCurrentEvent();
 
-            int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
-            int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(user.getUserId(), event);
+        int ordersNo = orderFinder.countOrdersOfUserOnEvent(user.getUserId(), event);
+        int membershipNo = membershipCardFinder.countCardsPerUserPerEvent(user.getUserId(), event);
 
-            // An user owns more than one order
-            if (ordersNo > 1) {
-                errors.add(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
-            }
-            // An user owns more than one membership order
-            if (membershipNo > 1) {
-                errors.add(OrderWorkflowErrorCode.MEMBERSHIP_MULTIPLE_DONE);
-            }
+        execute(ordersNo, membershipNo, errors);
 
-            // An user has at least one order, but no membership card
-            if (ordersNo > 0 && membershipNo == 0) {
-                errors.add(OrderWorkflowErrorCode.MEMBERSHIP_MISSING);
-            }
+        return errors;
+    }
 
-        } else {
-            errors.add(OrderWorkflowErrorCode.SERVER_ERROR);
+    public void execute(int ordersNo, int membershipNo, @NotNull List<OrderWorkflowErrorCode> errors) {
+        // An user owns more than one order
+        if (ordersNo > 1) {
+            errors.add(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
+        }
+        // An user owns more than one membership order
+        if (membershipNo > 1) {
+            errors.add(OrderWorkflowErrorCode.MEMBERSHIP_MULTIPLE_DONE);
         }
 
-        return new SanityCheckResponse(errors);
+        // An user has at least one order, but no membership card
+        if (ordersNo > 0 && membershipNo == 0) {
+            errors.add(OrderWorkflowErrorCode.MEMBERSHIP_MISSING);
+        }
     }
 }

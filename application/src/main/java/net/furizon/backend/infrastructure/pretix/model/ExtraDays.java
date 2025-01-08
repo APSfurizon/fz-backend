@@ -11,11 +11,15 @@ public enum ExtraDays {
     LATE,
     BOTH;
 
-    private static final Map<Integer, ExtraDays> MAP = Arrays
-        .stream(ExtraDays.values())
-        .collect(Collectors.toMap(ExtraDays::ordinal, Function.identity()));
+    public boolean isEarly() {
+        return (this.ordinal() & 0b01) != 0;
+    }
+
+    public boolean isLate() {
+        return (this.ordinal() & 0b10) != 0;
+    }
 
     public static ExtraDays get(int ordinal) {
-        return MAP.get(ordinal);
+        return ExtraDays.values()[ordinal];
     }
 }

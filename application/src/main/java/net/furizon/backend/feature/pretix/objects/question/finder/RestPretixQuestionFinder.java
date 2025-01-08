@@ -16,11 +16,11 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
-import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class RestPretixQuestionFinder implements PretixQuestionFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixQuestion>> pretixPagedQuestion =
         new ParameterizedTypeReference<>() {};

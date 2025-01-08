@@ -74,8 +74,20 @@ frontend:
   order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
   password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
+  transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
+
+room:
+  logic: ${ROOM_LOGIC:roomLogic-default}
+  sanity-check-cronjob: ${ROOM_SANITY_CHECKS_CRONJOB:0 30 5 * * *}
+  room-changes-end-time: ${ROOM_CHANGES_END_TIME:}
+  exchanges:
+    delete-expired-cronjob: ${ROOM_EXCHANGE_DELETE_EXPIRED_CRONJOB:0 0 /1 * * *}
+    expire-after-ms: ${ROOM_EXCHANGE_EXPIRE_AFTER_MS:172800000}
 
 pretix:
+  event:
+    public-booking-start-time: ${PRETIX_EVENT_START_PUBLIC_BOOKING_TIME:}
+    edit-booking-end-time: ${PRETIX_EVENT_EDIT_BOOKING_END_TIME:}
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
@@ -84,7 +96,7 @@ pretix:
     path: ${PRETIX_API_PATH:/api/v1/}
     key: ${PRETIX_API_KEY:OwO}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
-  cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 0 * * *}
+  cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 /8 * * *}
   shop:
     host: ${PRETIX_SHOP_HOST:localhost}
     port: ${PRETIX_SHOP_PORT:8000}

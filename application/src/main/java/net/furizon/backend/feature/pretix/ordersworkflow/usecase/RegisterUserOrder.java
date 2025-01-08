@@ -14,7 +14,15 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
+import net.furizon.backend.feature.user.User;
+import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
+import net.furizon.backend.infrastructure.email.EmailSender;
+import net.furizon.backend.infrastructure.email.EmailSenderService;
+import net.furizon.backend.infrastructure.email.EmailVars;
+import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -25,6 +33,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Optional;
 
+import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.*;
+
 @Data
 @Slf4j
 @Component
@@ -34,8 +44,10 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final UpdateOrderAction updateOrderAction;
     @NotNull private final OrderFinder orderFinder;
+    @NotNull private final EmailSender mailService;
     @NotNull private final FrontendConfig config;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
+    private final UserFinder userFinder;
 
     private RedirectView successView;
     @PostConstruct
@@ -51,26 +63,10 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
             log.error("[PRETIX] Registration of order {} failed: User is not logged in", input.code);
             return new RedirectView(config.getLoginRedirectUrl(input.request.getRequestURL().toString()));
         }
-        var e = pretixService.getCurrentEvent();
-        if (!e.isPresent()) {
-            log.error("[PRETIX] Registration of order {} failed: Unable to fetch current event", input.code);
-            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.SERVER_ERROR));
-        }
-        Event event = e.get();
+        long userId = user.getUserId();
+        Event event = pretixService.getCurrentEvent();
         log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
                 user.getUserId(), input.code, input.secret);
-
-        //Check if user already owns an order
-        Order prevOrder = orderFinder.findOrderByUserIdEvent(user.getUserId(), event, pretixService);
-        if (prevOrder != null) {
-            //If the order the user owns is the same we're trying to claim, do nothing and return
-            if (prevOrder.getCode().equals(input.code)) {
-                log.debug("[PRETIX] User {} already owned order {}", user.getUserId(), input.code);
-                return successView;
-            }
-            log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
-            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE));
-        }
 
         Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
         if (order == null) {
@@ -102,6 +98,50 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
             return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH));
         }
 
+        //Check if user already owns an order
+        Order prevOrder = orderFinder.findOrderByUserIdEvent(userId, event, pretixService);
+        if (prevOrder != null) {
+            //If the order the user owns is the same we're trying to claim, do nothing and return
+            if (prevOrder.getCode().equals(input.code)) {
+                log.debug("[PRETIX] User {} already owned order {}", userId, input.code);
+                return successView;
+            }
+            //We detected a duplicate order for an user.
+            log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
+            //We update the duplicate "frontend" field for that order, so pretix admins can verify that this order
+            // was really tried to be claimed by the current user
+            String prevOrderCode = prevOrder.getCode();
+            UserEmailData mail = userFinder.getMailDataForUser(userId);
+
+            String prevDuplicateData = "";
+            var v = order.getAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA);
+            if (v.isPresent()) {
+                prevDuplicateData = (String) v.get();
+            }
+            prevDuplicateData +=
+                      "\n----------------------------\n"
+                    + "\nUserId: " + user.getUserId()
+                    + "\nFursona name: " + mail == null ? "-" : mail.getFursonaName()
+                    + "\nUser email: " + mail == null ? "-" : mail.getEmail()
+                    + "\nOriginal order code: " + prevOrderCode;
+            order.setAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA, prevDuplicateData);
+            boolean success = pushPretixAnswerAction.invoke(order, pretixService);
+            if (!success) {
+                log.warn("[PRETIX] Unable to update duplicate order data for order {} of user {}",
+                        input.code, userId);
+            }
+
+            //We send an email to alert the user
+            var eventNames = event.getEventNames();
+            mailService.send(mail, SUBJECT_ORDER_PROBLEM, TEMPLATE_DUPLICATE_ORDER,
+                new MailVarPair(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
+                new MailVarPair(EmailVars.ORDER_CODE, prevOrderCode),
+                new MailVarPair(EmailVars.DUPLICATE_ORDER_CODE, order.getCode())
+            );
+
+            return new RedirectView(config.getOrderHomepageUrl(OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE));
+        }
+
         //If this order is already owned by someone who, for some reasons, owns more than one order we can reclaim it
         Long prevOwnerId = order.getOrderOwnerUserId();
         if (prevOwnerId != null && prevOwnerId > 0L) {
@@ -113,10 +153,10 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
                         OrderWorkflowErrorCode.ORDER_ALREADY_OWNED_BY_SOMEBODY_ELSE));
             }
             log.info("[PRETIX] Order {} was already owned by {} (who had multiple orders). Changing ownership to {}",
-                    input.code, prevOwnerId, user.getUserId());
+                    input.code, prevOwnerId, userId);
         }
 
-        order.setOrderOwnerUserId(user.getUserId());
+        order.setOrderOwnerUserId(userId);
         boolean success = pushPretixAnswerAction.invoke(order, pretixService);
 
         if (!success) {
@@ -126,7 +166,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Redir
         }
 
         updateOrderAction.invoke(order, pretixService);
-        log.info("[PRETIX] Order {} was successfully claimed by {}!", input.code, user.getUserId());
+        log.info("[PRETIX] Order {} was successfully claimed by {}!", input.code, userId);
 
         return successView;
     }

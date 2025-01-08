@@ -11,23 +11,21 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class GetUserSessionsUseCase implements UseCase<GetUserSessionsUseCase.Input, List<UserSession>> {
+public class GetUserSessionsUseCase implements UseCase<Long, List<UserSession>> {
     private final SessionAuthenticationManager sessionAuthenticationManager;
 
     @Override
-    public @NotNull List<UserSession> executor(@NotNull Input input) {
-        return sessionAuthenticationManager.getUserSessions(input.userId)
-            .stream()
-            .map(session ->
-                new UserSession(
-                    session.getId(),
-                    session.getUserAgent(),
-                    session.getCreatedAt(),
-                    session.getModifiedAt()
+    public @NotNull List<UserSession> executor(@NotNull Long userId) {
+        return sessionAuthenticationManager.getUserSessions(userId)
+                .stream()
+                .map(session ->
+                        new UserSession(
+                                session.getId(),
+                                session.getUserAgent(),
+                                session.getCreatedAt(),
+                                session.getModifiedAt()
+                        )
                 )
-            )
-            .toList();
+                .toList();
     }
-
-    public record Input(long userId) {}
 }

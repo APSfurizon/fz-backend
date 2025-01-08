@@ -21,7 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static net.furizon.backend.infrastructure.pretix.Const.PRETIX_HTTP_CLIENT;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
 @Slf4j
 @Component

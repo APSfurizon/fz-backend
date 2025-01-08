@@ -4,17 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Data
+@Slf4j
 @Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class Event {
     private long id;
 
@@ -57,5 +61,21 @@ public class Event {
     public OrganizerAndEventPair getOrganizerAndEventPair() {
         String[] sp = slug.split("/");
         return new OrganizerAndEventPair(sp[0], sp[1]);
+    }
+
+    @Override
+    public String toString() {
+        return slug + "@" + id;
+    }
+
+    public short getMembershipYear(MembershipYearUtils membershipYearUtils) {
+        OffsetDateTime from = dateFrom;
+        if (from == null) {
+            log.error("From date was unavailable for event {}. Falling back to Date.now()", slug);
+            from = OffsetDateTime.now();
+        }
+
+        LocalDate date = from.toLocalDate();
+        return membershipYearUtils.getMembershipYear(date);
     }
 }

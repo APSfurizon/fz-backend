@@ -92,7 +92,7 @@ public class AuthenticationController {
             new RegisterUserUseCase.Input(
                 request,
                 registerUserRequest,
-                pretixService.getCurrentEvent().orElse(null)
+                pretixService.getCurrentEvent()
             )
         );
 

@@ -11,16 +11,19 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public record PretixProductResults(
-    @NotNull Set<Integer> ticketItemIds,
-    @NotNull Map<Integer, Integer> dailyIdToDay,
-    @NotNull Set<Integer> membershipCardItemIds,
-    @NotNull Set<Integer> sponsorshipItemIds,
-    @NotNull Map<Integer, Sponsorship> sponsorshipIdToType,
-    @NotNull Map<Integer, ExtraDays> extraDaysIdToDay,
-    @NotNull Set<Integer> roomItemIds,
-    @NotNull Map<Integer, HotelCapacityPair> roomIdToInfo,
-    @NotNull Map<HotelCapacityPair, Map<String, String>> roomInfoToNames,
-    @NotNull Set<Integer> noRoomVariationIds
+    @NotNull Set<Long> ticketItemIds,
+    @NotNull Map<Long, Integer> dailyIdToDay,
+    @NotNull Set<Long> membershipCardItemIds,
+    @NotNull Set<Long> sponsorshipItemIds,
+    @NotNull Map<Long, Sponsorship> sponsorshipIdToType,
+    @NotNull Map<Long, ExtraDays> extraDaysIdToDay,
+    @NotNull Set<Long> roomItemIds,
+    @NotNull Map<Long, HotelCapacityPair> roomIdToInfo,
+    @NotNull Map<Long, Long> itemIdToPrice,
+    @NotNull Map<Long, Map<String, String>> roomPretixItemIdToNames,
+    @NotNull Set<Long> noRoomItemIds,
+    @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
+    @NotNull Map<HotelCapacityPair, Long> lateDaysItemId
 ) {
     public PretixProductResults() {
         this(
@@ -33,7 +36,10 @@ public record PretixProductResults(
             new TreeSet<>(),
             new TreeMap<>(),
             new HashMap<>(),
-            new TreeSet<>()
+            new HashMap<>(),
+            new TreeSet<>(),
+            new HashMap<>(),
+            new HashMap<>()
         );
     }
 }

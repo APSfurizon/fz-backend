@@ -14,12 +14,10 @@ import net.furizon.backend.feature.membership.usecase.LoadAllMembershipInfosUseC
 import net.furizon.backend.feature.membership.usecase.MarkPersonalUserInformationAsUpdatedUseCase;
 import net.furizon.backend.feature.membership.usecase.SetCardRegisterStatusUseCase;
 import net.furizon.backend.feature.membership.usecase.UpdatePersonalUserInformationUseCase;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +46,7 @@ public class MembershipController {
                 CheckIfUserShouldUpdateInfoUseCase.class,
                 new CheckIfUserShouldUpdateInfoUseCase.Input(
                         user,
-                        getEvent()
+                        pretixInformation.getCurrentEvent()
                 )
         );
 
@@ -68,7 +66,7 @@ public class MembershipController {
                 new UpdatePersonalUserInformationUseCase.Input(
                     user,
                     personalUserInformation,
-                    getEvent()
+                    pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -87,7 +85,7 @@ public class MembershipController {
                 MarkPersonalUserInformationAsUpdatedUseCase.class,
                 new MarkPersonalUserInformationAsUpdatedUseCase.Input(
                         user,
-                        getEvent()
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -107,7 +105,7 @@ public class MembershipController {
             new CreateMembershipUseCase.Input(
                 req,
                 user,
-                getEvent()
+                pretixInformation.getCurrentEvent()
             )
         );
         return true;
@@ -127,7 +125,10 @@ public class MembershipController {
         //TODO [ADMIN_CHECK]
         return executor.execute(
             LoadAllMembershipInfosUseCase.class,
-            year
+            new LoadAllMembershipInfosUseCase.Input(
+                    year,
+                    pretixInformation.getCurrentEvent()
+            )
         );
     }
 
@@ -145,23 +146,5 @@ public class MembershipController {
                 SetCardRegisterStatusUseCase.class,
                 req
         );
-    }
-
-    //This should not be needed
-    /*@Operation(summary = "Exports the membership cards for the given year in CSV", description =
-        "If no year is specified or `year < 0`, the list of the current event is returned")
-    public void exportMembershipCardList(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid
-            @RequestParam("year")
-            final short year
-    ) {
-        //TODO [ADMIN_CHECK]
-        //TODO
-    }*/
-
-    @Nullable
-    private Event getEvent() {
-        return pretixInformation.getCurrentEvent().orElse(null);
     }
 }

@@ -1,6 +1,10 @@
 DROP INDEX IF EXISTS authentications_email_idx;
 DROP INDEX IF EXISTS authentication_hashed_password;
 
+DROP TRIGGER IF EXISTS delete_room_guests_on_order_deletion ON orders;
+DROP FUNCTION IF EXISTS deleteRoomGuests();
+
+DROP TABLE IF EXISTS exchange_confirmation_status;
 DROP TABLE IF EXISTS room_guests;
 DROP TABLE IF EXISTS rooms;
 DROP TABLE IF EXISTS membership_cards;
@@ -19,3 +23,4 @@ DROP TABLE IF EXISTS media;
 DROP TABLE IF EXISTS events;
 
 DROP SEQUENCE IF EXISTS membership_cards_id_in_years;
+

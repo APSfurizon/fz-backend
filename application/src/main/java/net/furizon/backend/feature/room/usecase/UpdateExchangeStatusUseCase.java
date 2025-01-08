@@ -1,0 +1,67 @@
+package net.furizon.backend.feature.room.usecase;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.action.confirmUserExchangeStatus.ConfirmUserExchangeStatusAction;
+import net.furizon.backend.feature.room.action.deleteExchangeStatusObjAction.DeleteExchangeStatusObjAction;
+import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
+import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
+import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
+import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.usecase.UseCase;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class UpdateExchangeStatusUseCase implements UseCase<UpdateExchangeStatusUseCase.Input, ExchangeConfirmationStatus> {
+    @NotNull private final ConfirmUserExchangeStatusAction confirm;
+    @NotNull private final DeleteExchangeStatusObjAction delete;
+    @NotNull private final ExchangeConfirmationFinder finder;
+    @NotNull private final RoomChecks checks;
+
+    @Override
+    public @NotNull ExchangeConfirmationStatus executor(@NotNull Input input) {
+        long exchangeId = input.req.getExchangeId();
+        boolean toConfirm = input.req.isConfirm();
+        long userId = input.user.getUserId();
+        log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
+                userId, exchangeId, toConfirm);
+
+        ExchangeConfirmationStatus status = finder.getExchangeStatusFromId(exchangeId);
+        checks.assertExchangeExist(status, exchangeId);
+        checks.assertUserHasRightsOnExchange(userId, status);
+
+        if (toConfirm) {
+            boolean isSourceUser = userId == status.getSourceUserId();
+            boolean otherSideAlreadyConfirmed = isSourceUser ? status.isTargetConfirmed() : status.isSourceConfirmed();
+
+            if(otherSideAlreadyConfirmed) {
+                //If the other side has already confirmed, the flow is done:
+                // we delete the confirmation entry and we return true
+                // to say to the caller we can continue with the operation
+                log.info("[ROOM_EXCHANGE] {}: Both parties have confirmed!", exchangeId);
+                delete.invoke(exchangeId);
+                status.confirmUser(isSourceUser);
+            } else {
+                log.info("[ROOM_EXCHANGE] {}: User {} has confirmed the exchange",
+                        exchangeId, userId);
+                status.confirmUser(isSourceUser, confirm);
+            }
+        } else {
+            log.info("[ROOM_EXCHANGE] {}: User {} has rejected the exchange. Deleting it...",
+                    exchangeId, userId);
+            delete.invoke(exchangeId);
+            status.unconfirmAll();
+        }
+
+        return status;
+    }
+
+    public record Input(
+            @NotNull FurizonUser user,
+            @NotNull UpdateExchangeStatusRequest req
+    ) {}
+}

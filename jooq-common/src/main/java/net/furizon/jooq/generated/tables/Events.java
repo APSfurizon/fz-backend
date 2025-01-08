@@ -11,11 +11,13 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.ExchangeConfirmationStatusPath;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.FursuitsEvents.FursuitsEventsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
+import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
@@ -183,6 +185,19 @@ public class Events extends TableImpl<Record> {
         return Keys.EVENT_PKEY;
     }
 
+    private transient ExchangeConfirmationStatusPath _exchangeConfirmationStatus;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.exchange_confirmation_status</code> table
+     */
+    public ExchangeConfirmationStatusPath exchangeConfirmationStatus() {
+        if (_exchangeConfirmationStatus == null)
+            _exchangeConfirmationStatus = new ExchangeConfirmationStatusPath(this, null, Keys.EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_EVENT_FK.getInverseKey());
+
+        return _exchangeConfirmationStatus;
+    }
+
     private transient FursuitsEventsPath _fursuitsEvents;
 
     /**
@@ -236,11 +251,28 @@ public class Events extends TableImpl<Record> {
     }
 
     /**
+     * Get the implicit many-to-many join path to the <code>public.users</code>
+     * table, via the <code>exchange_confirmation_status_source_user_fk</code>
+     * key
+     */
+    public UsersPath exchangeConfirmationStatusSourceUserFk() {
+        return exchangeConfirmationStatus().exchangeConfirmationStatusSourceUserFk();
+    }
+
+    /**
      * Get the implicit many-to-many join path to the
      * <code>public.fursuits</code> table
      */
     public FursuitsPath fursuits() {
         return fursuitsEvents().fursuits();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>public.users</code>
+     * table, via the <code>orders_users_id</code> key
+     */
+    public UsersPath ordersUsersId() {
+        return orders().users();
     }
 
     @Override

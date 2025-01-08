@@ -15,14 +15,20 @@ import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.usecase.ReloadOrdersUseCase;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
+import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
+import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
+import net.furizon.backend.feature.pretix.objects.quota.finder.PretixQuotaFinder;
+import net.furizon.backend.feature.pretix.objects.quota.usecase.ReloadQuotaUseCase;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.pretix.Const;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -31,9 +37,11 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +55,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
-import static net.furizon.backend.infrastructure.pretix.Const.QUESTIONS_ACCOUNT_USERID;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_ACCOUNT_USERID;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +72,10 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     private final EventFinder eventFinder;
     @NotNull
+    private final PretixQuotaFinder quotaFinder;
+    @NotNull
+    private final PretixProductFinder pretixProductFinder;
+    @NotNull
     private final PretixConfig pretixConfig;
 
     // *** CACHE
@@ -71,57 +84,144 @@ public class CachedPretixInformation implements PretixInformation {
 
     //Event Struct
 
+    //map id -> price * 100
+    @NotNull
+    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
+
+
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
-    private final Cache<CacheItemTypes, Set<Integer>> itemIdsCache = Caffeine.newBuilder().build();
+    private final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
 
     //Questions
     @NotNull
-    private final AtomicReference<Integer> questionUserId = new AtomicReference<>(-1);
+    private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
     @NotNull
-    private final Cache<Integer, QuestionType> questionIdToType = Caffeine.newBuilder().build();
+    private final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
     @NotNull
-    private final Cache<Integer, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
-    private final Cache<String, Integer> questionIdentifierToId = Caffeine.newBuilder().build();
+    private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
 
     //Tickets
     @NotNull
-    private final Cache<Integer, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
+    private final Cache<Long, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
 
     //Sponsors
     @NotNull
-    private final Cache<Integer, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+    private final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
 
     //Extra days
     @NotNull
-    private final Cache<Integer, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
+    private final Cache<Long, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
 
     //Rooms
     //map id -> (capacity, hotelName)
     @NotNull
-    private final Cache<Integer, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
-    //map capacity/name -> room name
+    private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    //map id -> room names
     @NotNull
-    private final Cache<HotelCapacityPair, Map<String, String>> roomInfoToNames =
-        Caffeine.newBuilder().build();
+    private final Cache<Long, Map<String, String>> roomPretixItemIdToNames = Caffeine.newBuilder().build();
+    //map (capacity, hotelName) -> earlyExtraDays item id
+    @NotNull
+    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();    //map (capacity, hotelName) -> earlyExtraDays item id
+    //map (capacity, hotelName) -> lateExtraDays item id
+    @NotNull
+    private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
 
+
+    //Quotas
+    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
+
+    //Countries
     @NotNull
     private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
             .expireAfterWrite(7L, TimeUnit.DAYS)
             .build();
 
+    @Override
     @PostConstruct
-    public void init() {
+    public void reloadCacheAndOrders() {
         if (!pretixConfig.isEnableSync()) {
-            log.warn("[PRETIX] Pretix initialization has been disabled");
+            log.warn("[PRETIX] Pretix synchronization has been disabled");
+            loadCurrentEventFromDb();
             return;
         }
-        log.info("[PRETIX] Initializing pretix information and cache it");
+        log.info("[PRETIX] Syncing pretix information and cache it");
         long start = System.currentTimeMillis();
         resetCache();
         reloadAllOrders();
         log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
+    }
+
+    @Override
+    public @Nullable Long getItemPrice(long itemId, boolean ignoreCache) {
+        if (ignoreCache) {
+            var v = pretixProductFinder.fetchProductById(getCurrentEvent(), itemId);
+            if (!v.isPresent()) {
+                return null;
+            }
+            long value = PretixGenericUtils.fromStrPriceToLong(v.get().getPrice());
+            lock.writeLock().lock();
+            itemIdToPrice.put(itemId, value);
+            lock.writeLock().unlock();
+            return value;
+        } else {
+            lock.readLock().lock();
+            Long value = itemIdToPrice.getIfPresent(itemId);
+            lock.readLock().unlock();
+            return value;
+        }
+    }
+
+    @Override
+    public @NotNull Set<Long> getRoomPretixIds() {
+        lock.readLock().lock();
+        Set<Long> v = new HashSet<Long>(roomIdToInfo.asMap().keySet());
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @Override
+    public @Nullable HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId) {
+        lock.readLock().lock();
+        var v = roomIdToInfo.getIfPresent(roomPretixItemId);
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @NotNull
+    @Override
+    public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
+        lock.readLock().lock();
+        var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
+        lock.readLock().unlock();
+        return v == null ? new HashMap<>() : v;
+    }
+
+    @Nullable
+    @Override
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day) {
+        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, capacity), day);
+    }
+    @Nullable
+    @Override
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day) {
+        Cache<HotelCapacityPair, Long> map = null;
+        if (day == ExtraDays.EARLY) {
+            map = roomIdToEarlyExtraDayItemId;
+        } else if (day == ExtraDays.LATE) {
+            map = roomIdToLateExtraDayItemId;
+        }
+        if (map == null) {
+            return null;
+        }
+        lock.readLock().lock();
+        Long ret = map.getIfPresent(pair);
+        lock.readLock().unlock();
+        return ret;
     }
 
     @NotNull
@@ -134,7 +234,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Set<Integer> getIdsForItemType(CacheItemTypes type) {
+    public Set<Long> getIdsForItemType(CacheItemTypes type) {
         lock.readLock().lock();
         var v = itemIdsCache.getIfPresent(type);
         lock.readLock().unlock();
@@ -143,23 +243,34 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Event> getCurrentEvent() {
+    public Event getCurrentEvent() {
         lock.readLock().lock();
         var v = currentEvent.get();
         lock.readLock().unlock();
-        return Optional.ofNullable(v);
+        if (v == null) {
+            log.error("Current event is not set! (null value found)");
+            throw new IllegalStateException("No current event available");
+        }
+        return v;
     }
 
-    public int getQuestionUserId() {
+    public long getQuestionUserId() {
         lock.readLock().lock();
         var v = questionUserId.get();
         lock.readLock().unlock();
         return v;
     }
 
+    public long getQuestionDuplicateData() {
+        lock.readLock().lock();
+        var v = questionDuplicateData.get();
+        lock.readLock().unlock();
+        return v;
+    }
+
     @NotNull
     @Override
-    public Optional<QuestionType> getQuestionTypeFromId(int id) {
+    public Optional<QuestionType> getQuestionTypeFromId(long id) {
         lock.readLock().lock();
         var v = questionIdToType.getIfPresent(id);
         lock.readLock().unlock();
@@ -177,7 +288,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<String> getQuestionIdentifierFromId(int id) {
+    public Optional<String> getQuestionIdentifierFromId(long id) {
         lock.readLock().lock();
         var v = questionIdToIdentifier.getIfPresent(id);
         lock.readLock().unlock();
@@ -186,7 +297,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Optional<Integer> getQuestionIdFromIdentifier(@NotNull String identifier) {
+    public Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier) {
         lock.readLock().lock();
         var v = questionIdentifierToId.getIfPresent(identifier);
         lock.readLock().unlock();
@@ -200,18 +311,28 @@ public class CachedPretixInformation implements PretixInformation {
         try {
             Integer cacheDay;
             ExtraDays cacheExtraDays;
-            BiFunction<CacheItemTypes, @NotNull Integer, @NotNull Boolean> checkItemId = (type, item) ->
+            BiFunction<CacheItemTypes, @NotNull Long, @NotNull Boolean> checkItemId = (type, item) ->
                     Objects.requireNonNull(itemIdsCache.getIfPresent(type)).contains(item);
 
+            long questionUserId = this.getQuestionUserId();
+            long questionDuplicateData = this.getQuestionDuplicateData();
+
             boolean hasTicket = false; //If no ticket is found, we don't store the order at all
+            boolean foundDuplicate = false;
             OrderStatus status = OrderStatus.get(pretixOrder.getStatus());
 
             Set<Integer> days = new HashSet<>();
             Sponsorship sponsorship = Sponsorship.NONE;
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
-            int answersMainPositionId = 0;
-            String hotelLocation = null;
+            String hotelInternalName = null;
+            Long pretixRoomItemId = null;
+            long ticketPositionId = -1L;
+            long ticketPosid = -1L;
+            Long roomPositionId = null;
+            Long roomPosid = null;
+            Long earlyPositionId = null;
+            Long latePositionId = null;
             boolean membership = false;
             short roomCapacity = 0;
             Long userId = null;
@@ -221,46 +342,61 @@ public class CachedPretixInformation implements PretixInformation {
                 status = OrderStatus.CANCELED;
             }
 
+            positionLoop:
             for (PretixPosition position : positions) {
                 if (position.isCanceled()) {
                     continue;
                 }
 
-                int item = position.getItemId();
+                long itemId = position.getItemId();
 
-                if (checkItemId.apply(CacheItemTypes.TICKETS, item)) {
+                if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
-                    answersMainPositionId = position.getPositionId();
+                    ticketPositionId = position.getPositionId();
+                    ticketPosid = position.getPositionPosid();
                     answers = position.getAnswers();
                     for (PretixAnswer answer : answers) {
-                        int questionId = answer.getQuestionId();
+                        long questionId = answer.getQuestionId();
                         var questionType = getQuestionTypeFromId(questionId);
                         if (questionType.isPresent()) {
                             if (questionType.get() == QuestionType.FILE) {
-                                answer.setAnswer(Const.QUESTIONS_FILE_KEEP);
+                                answer.setAnswer(PretixConst.QUESTIONS_FILE_KEEP);
                             }
-                            if (questionId == this.getQuestionUserId()) {
+                            if (questionId == questionUserId) {
                                 String s = answer.getAnswer();
                                 if (s != null && !s.isBlank()) {
                                     userId = Long.parseLong(s);
+                                }
+                            } else if (questionId == questionDuplicateData) {
+                                String s = answer.getAnswer();
+                                if (s == null || s.isBlank()) {
+                                    log.warn("Order was already marked as duplicate. "
+                                            + "Skipping it. Duplicate data: {}", s);
+                                    foundDuplicate = true;
+                                    break positionLoop;
                                 }
                             }
                         }
                     }
 
-                } else if ((cacheDay = dailyIdToDay.getIfPresent(item)) != null) {
+                } else if ((cacheDay = dailyIdToDay.getIfPresent(itemId)) != null) {
                     days.add(cacheDay);
 
-                } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, item)) {
+                } else if (checkItemId.apply(CacheItemTypes.MEMBERSHIP_CARDS, itemId)) {
                     membership = true;
 
-                } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, item)) {
+                } else if (checkItemId.apply(CacheItemTypes.SPONSORSHIPS, itemId)) {
                     Sponsorship s = sponsorshipIdToType.getIfPresent(position.getVariationId());
                     if (s != null && s.ordinal() > sponsorship.ordinal()) {
                         sponsorship = s; //keep the best sponsorship
                     }
 
-                } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(item)) != null) {
+                } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
+                    if (extraDays == ExtraDays.EARLY) {
+                        earlyPositionId = position.getPositionId();
+                    } else if (extraDays == ExtraDays.LATE) {
+                        latePositionId = position.getPositionId();
+                    }
                     if (extraDays != ExtraDays.BOTH) {
                         if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
                             extraDays = ExtraDays.BOTH;
@@ -269,22 +405,25 @@ public class CachedPretixInformation implements PretixInformation {
                         }
                     }
 
-                } else if (checkItemId.apply(CacheItemTypes.ROOMS, item)) {
-                    int variationId = position.getVariationId();
-                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_VARIATION, variationId)) {
+                } else if (checkItemId.apply(CacheItemTypes.ROOMS, itemId)) {
+                    //Set the room position and item id anyway, even if we have a NO_ROOM item
+                    roomPositionId = position.getPositionId();
+                    roomPosid = position.getPositionPosid();
+                    pretixRoomItemId = itemId;
+                    if (checkItemId.apply(CacheItemTypes.NO_ROOM_ITEM, itemId)) {
                         roomCapacity = 0;
-                        hotelLocation = null;
+                        hotelInternalName = null;
                     } else {
-                        HotelCapacityPair room = roomIdToInfo.getIfPresent(variationId);
+                        HotelCapacityPair room = roomIdToInfo.getIfPresent(itemId);
                         if (room != null) {
                             roomCapacity = room.capacity();
-                            hotelLocation = room.hotel();
+                            hotelInternalName = room.hotelInternalName();
                         }
                     }
                 }
             }
 
-            if (!hasTicket) {
+            if (!hasTicket || foundDuplicate) {
                 return Optional.empty();
             }
 
@@ -296,10 +435,16 @@ public class CachedPretixInformation implements PretixInformation {
                     .extraDays(extraDays)
                     .dailyDays(days)
                     .roomCapacity(roomCapacity)
-                    .hotelLocation(hotelLocation)
+                    .pretixRoomItemId(pretixRoomItemId)
+                    .hotelInternalName(hotelInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
-                    .answersMainPositionId(answersMainPositionId)
+                    .ticketPositionId(ticketPositionId)
+                    .ticketPositionPosid(ticketPosid)
+                    .roomPositionId(roomPositionId)
+                    .roomPositionPosid(roomPosid)
+                    .earlyPositionId(earlyPositionId)
+                    .latePositionId(latePositionId)
                     .eventId(event.getId())
                     .orderOwnerUserId(userId)
                     .answers(answers, this)
@@ -310,6 +455,46 @@ public class CachedPretixInformation implements PretixInformation {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    @Override
+    public @Nullable List<PretixQuota> getQuotaFromItemId(long itemId) {
+        lock.readLock().lock();
+        var v = itemIdToQuota.getIfPresent(itemId);
+        lock.readLock().unlock();
+        return v;
+    }
+
+    //This is NOT cached!!
+    @Override
+    public @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromItemId(long itemId) {
+        List<PretixQuota> quota = getQuotaFromItemId(itemId);
+        if (quota == null || quota.isEmpty()) {
+            log.warn("Quota not found for item {}", itemId);
+            return Optional.of(new PretixQuotaAvailability(
+                    true,
+                    null,
+                    null,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L));
+        }
+        //We return only the smallest availability
+        Event event = getCurrentEvent();
+        PretixQuotaAvailability availability = null;
+        for (PretixQuota q : quota) {
+            var a = quotaFinder.getAvailability(event, q.getId());
+            if (a.isPresent()) {
+                PretixQuotaAvailability av = a.get();
+                if (availability == null || av.calcEffectiveRemainig() < availability.calcEffectiveRemainig()) {
+                    availability = av;
+                }
+            }
+        }
+        return Optional.ofNullable(availability);
     }
 
     @Override
@@ -339,9 +524,11 @@ public class CachedPretixInformation implements PretixInformation {
 
         //General
         itemIdsCache.invalidateAll();
+        itemIdToPrice.invalidateAll();
 
         //Questions
-        questionUserId.set(-1);
+        questionUserId.set(-1L);
+        questionDuplicateData.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
         questionIdentifierToId.invalidateAll();
@@ -357,7 +544,12 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Rooms
         roomIdToInfo.invalidateAll();
-        roomInfoToNames.invalidateAll();
+        roomPretixItemIdToNames.invalidateAll();
+        roomIdToEarlyExtraDayItemId.invalidateAll();
+        roomIdToLateExtraDayItemId.invalidateAll();
+
+        //Quotas
+        itemIdToQuota.invalidateAll();
     }
 
 
@@ -370,21 +562,28 @@ public class CachedPretixInformation implements PretixInformation {
             });
     }
 
-    private void reloadEventStructure() {
-        final Event event = currentEvent.get();
-        if (event == null) {
-            log.warn("[PRETIX] Current event is null, skipping event structure reload");
-            return;
+    private void loadCurrentEventFromDb() {
+        String slug = PretixGenericUtils.buildOrgEventSlug(pretixConfig.getDefaultEvent(), pretixConfig.getDefaultOrganizer());
+        Event evt = eventFinder.findEventBySlug(slug);
+        if (evt != null) {
+            log.info("[PRETIX] Loaded current event from db: '{}'", evt);
+            currentEvent.set(evt);
+        } else {
+            log.error("[PRETIX] Unable to load current event from db. CURRENT EVENT NOT SET!!");
         }
-
-        reloadQuestions(event);
-        reloadProducts(event);
     }
 
-    private void reloadQuestions(Event event) {
+    private void reloadEventStructure() {
+        Event event = getCurrentEvent();
+        reloadQuestions(event);
+        reloadProducts(event);
+        reloadQuotas(event);
+    }
+
+    private void reloadQuestions(@NotNull Event event) {
         List<PretixQuestion> questionList = useCaseExecutor.execute(ReloadQuestionsUseCase.class, event);
         questionList.forEach(question -> {
-            int questionId = question.getId();
+            long questionId = question.getId();
             QuestionType questionType = question.getType();
             String questionIdentifier = question.getIdentifier();
 
@@ -393,41 +592,63 @@ public class CachedPretixInformation implements PretixInformation {
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_USERID
-        Integer accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
+        Long accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
         if (accountUserId != null) {
             log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
             questionUserId.set(accountUserId);
+        } else {
+            log.warn("[PRETIX] Question account user id not found");
+        }
+        Long duplicateData = questionIdentifierToId.getIfPresent(QUESTIONS_DUPLICATE_DATA);
+        if (duplicateData != null) {
+            log.info("[PRETIX] Question duplicate data found, setup it on value = '{}'", duplicateData);
+            questionDuplicateData.set(duplicateData);
+        } else {
+            log.warn("[PRETIX] Question duplicate data not found");
         }
     }
 
-    private void reloadProducts(Event event) {
+    private void reloadProducts(@NotNull Event event) {
         PretixProductResults products = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
 
         itemIdsCache.put(CacheItemTypes.TICKETS, products.ticketItemIds());
         itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
-        itemIdsCache.put(CacheItemTypes.NO_ROOM_VARIATION, products.noRoomVariationIds());
+        itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
-        roomInfoToNames.putAll(products.roomInfoToNames());
+        itemIdToPrice.putAll(products.itemIdToPrice());
+        roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
+        roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
+        roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
+    }
+
+    private void reloadQuotas(@NotNull Event event) {
+        List<PretixQuota> quotas = useCaseExecutor.execute(ReloadQuotaUseCase.class, event);
+        quotas.forEach(quota -> quota.getItems().forEach(i -> {
+            List<PretixQuota> existingQuota = itemIdToQuota.getIfPresent(i);
+            //An item can be assigned to multiple quota
+            if (existingQuota == null) {
+                existingQuota = new LinkedList<>();
+                itemIdToQuota.put(i, existingQuota);
+            }
+            existingQuota.add(quota);
+        }));
     }
 
     @Override
     public void reloadAllOrders() {
-        var event = getCurrentEvent();
-        if (event.isPresent()) {
-            var input = new ReloadOrdersUseCase.Input(event.get(), this);
-            useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
-        }
+        var input = new ReloadOrdersUseCase.Input(getCurrentEvent(), this);
+        useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
     }
 
     @Scheduled(cron = "${pretix.cache-reload-cronjob}")
     private void cronReloadCache() {
         log.info("[PRETIX] Cronjob running");
-        init();
+        reloadCacheAndOrders();
     }
 }

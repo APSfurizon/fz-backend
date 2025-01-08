@@ -43,14 +43,9 @@ public class OrderController {
     @InternalAuthorize
     public ResponseEntity<Void> pretixWebhook(OrderWebhookRequest request) {
         log.info("[PRETIX WEBHOOK] Fetching order {}", request);
-        var e = pretixService.getCurrentEvent();
-        if (e.isEmpty()) {
-            log.error("[PRETIX WEBHOOK] No current event set!");
-            return ResponseEntity.internalServerError().build();
-        }
+        Event event = pretixService.getCurrentEvent();
 
         String slug = PretixGenericUtils.buildOrgEventSlug(request.getEvent(), request.getOrganizer());
-        Event event = e.get();
 
         if (!event.getSlug().equals(slug)) {
             log.error("[PRETIX WEBHOOK] Webhook request is not for the current event!");
