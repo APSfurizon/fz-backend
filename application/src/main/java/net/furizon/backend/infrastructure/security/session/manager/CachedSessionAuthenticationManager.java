@@ -200,7 +200,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     @Override
     public @Nullable Authentication findAuthenticationByEmail(@NotNull String email) {
         try {
-            return sqlQuery.fetchSingle(
+            return sqlQuery.fetchFirst(
                 PostgresDSL.select(
                     AUTHENTICATIONS.AUTHENTICATION_ID,
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL,
@@ -212,7 +212,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 )
                 .from(AUTHENTICATIONS)
                 .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
-            ).map(JooqAuthenticationMapper::map);
+            ).mapOrNull(JooqAuthenticationMapper::map);
         } catch (NoDataFoundException e) {
             return null;
         }

@@ -23,6 +23,9 @@ import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.ResetPasswordUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,6 +46,14 @@ import java.util.UUID;
 public class AuthenticationController {
     private final UseCaseExecutor executor;
     private final PretixInformation pretixService;
+
+    @GetMapping("/test")
+    @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS}, mode = PermissionRequiredMode.ANY)
+    public boolean testPermission(
+            @AuthenticationPrincipal @Nullable final FurizonUser user
+    ) {
+        return true;
+    }
 
     @PostMapping("/login")
     public LoginResponse loginUser(
