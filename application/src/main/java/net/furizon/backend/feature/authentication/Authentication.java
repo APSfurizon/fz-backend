@@ -25,6 +25,8 @@ public class Authentication {
     @NotNull
     private final String hashedPassword;
 
+    private final short failedAttempts;
+
     @Nullable
     private final String authToken;
 

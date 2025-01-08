@@ -15,6 +15,7 @@ public class JooqAuthenticationMapper {
             .mailVerificationCreationMs(record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION))
             .isDisabled(record.get(AUTHENTICATIONS.AUTHENTICATION_DISABLED))
             .hashedPassword(record.get(AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD))
+            .failedAttempts(record.get(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS))
             .authToken(record.get(AUTHENTICATIONS.AUTHENTICATION_TOKEN))
             .userId(record.get(AUTHENTICATIONS.USER_ID))
             .build();

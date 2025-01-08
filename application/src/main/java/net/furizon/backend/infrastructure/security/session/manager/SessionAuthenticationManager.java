@@ -37,6 +37,10 @@ public interface SessionAuthenticationManager {
 
     boolean markEmailAsVerified(@NotNull UUID reqId);
 
+    void disableUser(long userId);
+
+    void renableUser(long userId);
+
     void changePassword(long userId, @NotNull String password);
 
     @Nullable Long getUserIdFromPasswordResetReqId(@Nullable UUID pwResetId);
@@ -49,6 +53,10 @@ public interface SessionAuthenticationManager {
      * @return UUID the id which needs to be opened to reset the password
      */
     UUID initResetPassword(@NotNull String email);
+
+    void resetLoginAttempts(@NotNull String email);
+
+    void increaseLoginAttempts(@NotNull String email);
 
     int deleteUnverifiedEmailAccounts();
 

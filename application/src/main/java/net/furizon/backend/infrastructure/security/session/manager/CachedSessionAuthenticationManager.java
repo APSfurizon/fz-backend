@@ -173,6 +173,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION,
                     AUTHENTICATIONS.AUTHENTICATION_DISABLED,
                     AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                    AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS,
                     AUTHENTICATIONS.AUTHENTICATION_TOKEN,
                     AUTHENTICATIONS.USER_ID
                 )
@@ -207,6 +208,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION,
                     AUTHENTICATIONS.AUTHENTICATION_DISABLED,
                     AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+                    AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS,
                     AUTHENTICATIONS.AUTHENTICATION_TOKEN,
                     AUTHENTICATIONS.USER_ID
                 )
@@ -275,6 +277,26 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     }
 
     @Override
+    public void disableUser(long userId) {
+        sqlCommand.execute(
+            PostgresDSL.update(AUTHENTICATIONS)
+            .set(AUTHENTICATIONS.AUTHENTICATION_DISABLED, true)
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
+        );
+        clearAllSession(userId);
+    }
+    @Override
+    public void renableUser(long userId) {
+        sqlCommand.execute(
+            PostgresDSL.update(AUTHENTICATIONS)
+            .set(AUTHENTICATIONS.AUTHENTICATION_DISABLED, false)
+            .set(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS, (short) 0)
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
+        );
+        clearAllSession(userId);
+    }
+
+    @Override
     public void changePassword(long userId, @NotNull String password) {
         sqlCommand.execute(
             PostgresDSL.update(AUTHENTICATIONS)
@@ -282,6 +304,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
                 encoder.encode(securityConfig.getPasswordSalt() + password)
             )
+            .set(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS, (short) 0)
             .where(AUTHENTICATIONS.USER_ID.eq(userId))
         );
         invalidateCache(userId);
@@ -346,6 +369,26 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             )
         );
         return resetPwId;
+    }
+    @Override
+    public void resetLoginAttempts(@NotNull String email) {
+        Optional<Long> userId = sqlCommand.executeResult(
+            PostgresDSL.update(AUTHENTICATIONS)
+            .set(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS, (short) 0)
+            .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+            .returning(AUTHENTICATIONS.USER_ID)
+        ).stream().map(r -> r.get(AUTHENTICATIONS.USER_ID)).findFirst();
+        userId.ifPresent(this::invalidateCache);
+    }
+    @Override
+    public void increaseLoginAttempts(@NotNull String email) {
+        Optional<Long> userId = sqlCommand.executeResult(
+            PostgresDSL.update(AUTHENTICATIONS)
+            .set(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS, AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS.plus(1))
+            .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+            .returning(AUTHENTICATIONS.USER_ID)
+        ).stream().map(r -> r.get(AUTHENTICATIONS.USER_ID)).findFirst();
+        userId.ifPresent(this::invalidateCache);
     }
 
     @Override

@@ -14,13 +14,7 @@ import net.furizon.backend.feature.authentication.dto.responses.AuthenticationCo
 import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.dto.responses.LogoutUserResponse;
 import net.furizon.backend.feature.authentication.dto.responses.RegisterUserResponse;
-import net.furizon.backend.feature.authentication.usecase.ChangePasswordUseCase;
-import net.furizon.backend.feature.authentication.usecase.ConfirmEmailUseCase;
-import net.furizon.backend.feature.authentication.usecase.GetResetPwStatusUseCase;
-import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.ResetPasswordUseCase;
+import net.furizon.backend.feature.authentication.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -164,6 +158,48 @@ public class AuthenticationController {
         return executor.execute(
                 ConfirmEmailUseCase.class,
                 id
+        );
+    }
+
+    @Operation(summary = "Destroys all sessions of the logged in user", description =
+        "Destroyes all login sessions of the current user, logging it also out")
+    @PostMapping("/destroy-all-sessions")
+    public boolean destroyAllSessions(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                DestroyAllSessionsUseCase.class,
+                user
+        );
+    }
+
+    @Operation(summary = "Ban an user", description =
+        "This operation can be performed only by an admin. "
+        + "Disables the login and destroys all sessions for the specified user")
+    @PermissionRequired(permissions = {Permission.CAN_BAN_USERS})
+    @PostMapping("/ban")
+    public boolean banUser(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestBody final UserIdRequest req
+    ) {
+        return executor.execute(
+                BanUserUseCase.class,
+                new BanUserUseCase.Input(user, req)
+        );
+    }
+
+    @Operation(summary = "Unban an user", description =
+        "This operation can be performed only by an admin. "
+        + "Reenables the login and resets the failed attempts for the specified user")
+    @PermissionRequired(permissions = {Permission.CAN_BAN_USERS})
+    @PostMapping("/unban")
+    public boolean unbanUser(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestBody final UserIdRequest req
+    ) {
+        return executor.execute(
+                UnbanUserUseCase.class,
+                new UnbanUserUseCase.Input(user, req)
         );
     }
 }
