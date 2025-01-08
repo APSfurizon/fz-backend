@@ -1,13 +1,5 @@
 package net.furizon.backend.infrastructure.rooms;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
-import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
-
 public class RoomEmailTexts {
     public static final String SUBJECT_ROOM_PROBLEM = "There's a problem with your room reservation";
     public static final String SUBJECT_ROOM_UPDATE = "There's an update regarding your room reservation";
@@ -40,7 +32,8 @@ public class RoomEmailTexts {
     public static final String SC_OWNER_HAS_NOT_BOUGHT_ROOM = "Room's owner has not bought a room!";
     public static final String SC_OWNER_HAS_DAILY_TICKET = "Room's owner has daily ticket!";
     public static final String SC_OWNER_IN_TOO_MANY_ROOMS = "Room's owner is in too many rooms!";
-    public static final String SC_OWNER_ORDER_INVALID_ORDER_STATUS = "Room's owner order is not in 'Paid' or 'Pending' status!";
+    public static final String SC_OWNER_ORDER_INVALID_STATUS = "Room's owner order is not in "
+            + "'Paid' or 'Pending' status!";
     public static final String SC_OWNER_NOT_IN_ROOM = "Room's owner is not a room member!";
     public static final String SC_USER_ORDER_INVALID_ORDER_STATUS = "User order is not in 'Paid' or 'Pending' status!";
     public static final String SC_USER_IN_TOO_MANY_ROOMS = "User is in too many rooms!";

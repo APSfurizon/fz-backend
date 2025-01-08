@@ -3,7 +3,6 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -20,9 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_CONFIRMED;
 
 @Slf4j
 @Component
@@ -62,7 +61,9 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null && !names.isEmpty()) {
-                    mailService.broadcastUpdate(roomId, TEMPLATE_ROOM_CONFIRMED, MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)));
+                    mailService.broadcastUpdate(
+                            roomId, TEMPLATE_ROOM_CONFIRMED, MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                    );
                 }
             }
         }

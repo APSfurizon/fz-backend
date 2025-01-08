@@ -8,7 +8,6 @@ import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
-import net.furizon.backend.feature.pretix.ordersworkflow.controller.OrdersWorkflowController;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
@@ -46,11 +45,11 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
-        List<AutocartAction<?>> actions = new ArrayList<>();
-        long userId = input.user.getUserId();
-        String mail = input.user.getEmail();
-        PretixInformation pretixService = input.pretixService;
-        Event event = pretixService.getCurrentEvent();
+        final List<AutocartAction<?>> actions = new ArrayList<>();
+        final long userId = input.user.getUserId();
+        final String mail = input.user.getEmail();
+        final PretixInformation pretixService = input.pretixService;
+        final Event event = pretixService.getCurrentEvent();
 
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
         boolean earlyBook = permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);

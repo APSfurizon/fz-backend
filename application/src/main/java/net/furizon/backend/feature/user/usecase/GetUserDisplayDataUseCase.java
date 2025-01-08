@@ -2,9 +2,7 @@ package net.furizon.backend.feature.user.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
-import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
 import net.furizon.backend.infrastructure.security.permissions.Permission;

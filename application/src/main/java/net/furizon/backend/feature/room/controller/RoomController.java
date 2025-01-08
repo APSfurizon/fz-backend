@@ -1,22 +1,49 @@
 package net.furizon.backend.feature.room.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.request.*;
-import net.furizon.backend.feature.room.dto.RoomGuest;
+import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
+import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
+import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
+import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
+import net.furizon.backend.feature.room.dto.request.GetExchangeConfirmationStatusRequest;
+import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
+import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
+import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
+import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
 import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
-import net.furizon.backend.feature.room.usecase.*;
+import net.furizon.backend.feature.room.usecase.BuyUpgradeRoomUseCase;
+import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.ConfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.CreateRoomUseCase;
+import net.furizon.backend.feature.room.usecase.DeleteRoomUseCase;
+import net.furizon.backend.feature.room.usecase.ExchangeFullOrderUseCase;
+import net.furizon.backend.feature.room.usecase.ExchangeRoomUseCase;
+import net.furizon.backend.feature.room.usecase.GetExchangeConfirmationStatusInfoUseCase;
+import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
+import net.furizon.backend.feature.room.usecase.InitializeExchangeFlowUseCase;
+import net.furizon.backend.feature.room.usecase.InviteAcceptUseCase;
+import net.furizon.backend.feature.room.usecase.InviteCancelUseCase;
+import net.furizon.backend.feature.room.usecase.InviteRefuseUseCase;
+import net.furizon.backend.feature.room.usecase.InviteToRoomUseCase;
+import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
+import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
+import net.furizon.backend.feature.room.usecase.ListRoomWithPricesAndQuotaUseCase;
+import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
+import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
+import net.furizon.backend.feature.room.usecase.UpdateExchangeStatusUseCase;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
@@ -217,7 +244,7 @@ public class RoomController {
     @GetMapping("/can-confirm")
     public boolean canConfirm(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 CanConfirmRoomUseCase.class,
@@ -238,7 +265,7 @@ public class RoomController {
     @GetMapping("/can-unconfirm")
     public boolean canUnconfirm(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 CanUnconfirmRoomUseCase.class,
@@ -258,7 +285,7 @@ public class RoomController {
     @PostMapping("/confirm")
     public boolean confirmRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 ConfirmRoomUseCase.class,
@@ -277,7 +304,7 @@ public class RoomController {
     @PostMapping("/unconfirm")
     public boolean unconfirmRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Null @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 UnconfirmRoomUseCase.class,
@@ -433,10 +460,10 @@ public class RoomController {
         return success;
     }
 
-    @Operation(summary = "Updates the exchange status, and if both parties have confirmed, actually run the exchange", description =
-        "It updates the exchange status. If `confirmed == false`, it deletes the exchange attempt, so everyone is free to retry it."
-        + "If both users have confirmed, it deletes the exchange attempt anyway, BUT it will also run the actual exchange specified "
-        + "in the `action` parameter of the original /init request")
+    @Operation(summary = "Updates the exchange status, and if both parties have confirmed, actually run the exchange",
+        description = "It updates the exchange status. If `confirmed == false`, it deletes the exchange attempt, "
+        + "so everyone is free to retry it. If both users have confirmed, it deletes the exchange attempt anyway, "
+        + "BUT it will also run the actual exchange specified in the `action` parameter of the original /init request")
     @PostMapping("/exchange/update")
     public boolean updateExchangeStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,

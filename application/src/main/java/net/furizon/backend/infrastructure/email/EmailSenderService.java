@@ -43,7 +43,8 @@ public class EmailSenderService implements EmailSender {
     }
 
     @Override
-    public void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) {
+    public void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName,
+                     MailVarPair... vars) {
         String mail = emailData.getEmail();
         log.info("Sending email to user {} ({}) with subject '{}'",
                 emailData.getUserId(), mail, subject);

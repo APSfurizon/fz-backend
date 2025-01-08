@@ -44,7 +44,8 @@ public class RoomChecks {
         }
     }
 
-    @NotNull public Order getOrderAndAssertItExists(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    @NotNull public Order getOrderAndAssertItExists(long userId, @NotNull Event event,
+                                                    @NotNull PretixInformation pretixInformation) {
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, pretixInformation);
         assertOrderFound(Optional.ofNullable(order), userId, event);
         return order;
@@ -97,7 +98,8 @@ public class RoomChecks {
         boolean userInRoom = roomFinder.isUserInvitedInRoom(userId, roomId);
         if (userInRoom) {
             log.error("User {} is already invited to room {}", userId, roomId);
-            throw new ApiException("User is already invited to specified room", RoomErrorCodes.USER_ALREADY_INVITED_TO_ROOM);
+            throw new ApiException("User is already invited to specified room",
+                    RoomErrorCodes.USER_ALREADY_INVITED_TO_ROOM);
         }
     }
 
@@ -119,7 +121,8 @@ public class RoomChecks {
     public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId) {
         return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomReqId, null);
     }
-    public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId, @Nullable Boolean isAdminCached) {
+    public long getRoomIdAndAssertPermissionsOnRoom(long userId, @NotNull Event event, @Nullable Long roomReqId,
+                                                    @Nullable Boolean isAdminCached) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         long roomId;
 
@@ -131,23 +134,23 @@ public class RoomChecks {
                 throw new ApiException("User doesn't own a room", RoomErrorCodes.USER_DOES_NOT_OWN_A_ROOM);
             }
         } else {
-            long rId = roomReqId;
-            if (!r.isPresent() || r.get() != rId) {
+            long idRes = roomReqId;
+            if (!r.isPresent() || r.get() != idRes) {
                 if (isAdminCached == null) {
                     isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
                 }
                 if (isAdminCached) {
-                    roomId = rId;
+                    roomId = idRes;
                     if (!roomFinder.isRoomConfirmed(roomId).isPresent()) {
                         log.error("Room with id {} doesn't exist!", roomId);
                         throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
                     }
                 } else {
-                    log.error("User is not an admin! It cannot operate on room {}", rId);
+                    log.error("User is not an admin! It cannot operate on room {}", idRes);
                     throw new ApiException("User is not an admin!", RoomErrorCodes.USER_IS_NOT_ADMIN);
                 }
             } else {
-                roomId = rId;
+                roomId = idRes;
             }
         }
 
@@ -184,7 +187,8 @@ public class RoomChecks {
         }
     }
 
-    @NotNull public RoomGuest getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(long userId, @NotNull Event event) {
+    @NotNull public RoomGuest getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
+            long userId, @NotNull Event event) {
         var r = roomFinder.getConfirmedRoomGuestFromUserEvent(userId, event);
         if (!r.isPresent()) {
             log.error("Could not find any roomGuest obj for user {} at event {}", userId, event);

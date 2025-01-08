@@ -17,8 +17,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.*;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
+import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.EXCHANGE_ROOM;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_INITIALIZED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TRANSFER_FULL_ORDER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TRANSFER_ROOM;
 
 @Slf4j
 @Component

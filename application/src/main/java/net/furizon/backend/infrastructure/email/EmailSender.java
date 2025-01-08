@@ -13,7 +13,8 @@ public interface EmailSender {
     void send(long userId, @NotNull String subject, @NotNull String templateName, MailVarPair... vars);
 
     @NonBlocking
-    void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName, MailVarPair... vars);
+    void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName,
+              MailVarPair... vars);
 
     @Blocking
     void send(MailRequest request) throws MessagingException, MailException;

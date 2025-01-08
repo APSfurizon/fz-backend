@@ -13,12 +13,15 @@ public enum RoomErrorCodes {
     ORDER_NOT_FOUND, //Unable to find the specified order
     ORDER_ALREADY_BOUGHT, //We expected that the user had no order, but instead he has at least one
     ORDER_NOT_PAID, //An order is not in a paid status
-    ORDER_PAYMENTS_STILL_PENDING, //An order is found with payments in CREATED or PENDING state. Only confirmed and canceled states are allowed
-    ORDER_REFUNDS_STILL_PENDING, //An order is found with refunds in CREATED, TRANSIT or EXTERNAL states. Only confirmed and canceled states are allowed
+    //An order is found with payments in CREATED or PENDING state. Only confirmed and canceled states are allowed
+    ORDER_PAYMENTS_STILL_PENDING,
+    //An order is found with refunds in CREATED, TRANSIT or EXTERNAL states. Only confirmed and canceled are allowed
+    ORDER_REFUNDS_STILL_PENDING,
     EDIT_TIMEFRAME_ENDED, //You tried editing a room, but the allowed editing time is passed
     BUY_ROOM_SAME_ROOM, //You tried upgrading with the same room type you had already bought
     BUY_ROOM_NEW_ROOM_COSTS_LESS, //An user has tried purchasing a room which costs less than what he originally paid
-    BUY_ROOM_NEW_ROOM_LOW_CAPACITY, //An user has tried purchasing a room which less capacity than the number members who are already in the room
+    //An user has tried purchasing a room which less capacity than the number members who are already in the room
+    BUY_ROOM_NEW_ROOM_LOW_CAPACITY,
     BUY_ROOM_NEW_ROOM_QUOTA_ENDED, //An user has tried purchasing a room which quota has ended
     BUY_ROOM_ERROR_UPDATING_POSITION, //An error occurred while actually adding the room to the user's order
     USER_IS_NOT_ADMIN,
