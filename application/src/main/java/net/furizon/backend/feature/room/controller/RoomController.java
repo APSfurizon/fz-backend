@@ -403,7 +403,7 @@ public class RoomController {
     @GetMapping("/exchange/info")
     public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @NotNull @Size(min = 2) @RequestParam("id") Long exchangeId
+            @Valid @NotNull @RequestParam("id") Long exchangeId
     ) {
         return executor.execute(
                 GetExchangeConfirmationStatusInfoUseCase.class,
