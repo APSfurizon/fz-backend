@@ -149,6 +149,11 @@ public class MembershipInfo extends TableImpl<Record> {
     public final TableField<Record, String> INFO_PHONE_PREFIX = createField(DSL.name("info_phone_prefix"), SQLDataType.VARCHAR(8).nullable(false), this, "");
 
     /**
+     * The column <code>public.membership_info.info_allergies</code>.
+     */
+    public final TableField<Record, String> INFO_ALLERGIES = createField(DSL.name("info_allergies"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>public.membership_info.last_updated_event_id</code>.
      */
     public final TableField<Record, Long> LAST_UPDATED_EVENT_ID = createField(DSL.name("last_updated_event_id"), SQLDataType.BIGINT, this, "");

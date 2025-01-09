@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS membership_info
     info_country           text                                                                                                                     NOT NULL,
     info_phone             text                                                                                                                     NOT NULL,
     info_phone_prefix      varchar(8)                                                                                                               NOT NULL,
+    info_allergies         text                                                                                                                     NULL,
     last_updated_event_id  int8                                                                                                                     NULL,
     CONSTRAINT membership_info_id_pkey PRIMARY KEY (id),
     CONSTRAINT membership_info_users_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,

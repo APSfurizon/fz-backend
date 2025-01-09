@@ -86,6 +86,9 @@ public class PersonalUserInformation {
     @Size(min = 2)
     private final String prefixPhoneNumber;
 
+    @Nullable
+    private final String allergies;
+
     private final long lastUpdatedEventId;
 
     private final long userId;
