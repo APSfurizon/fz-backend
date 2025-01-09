@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public enum Permission {
     CAN_UPGRADE_USERS(0L),
     CAN_BAN_USERS(1L),
+    CAN_SEE_ADMIN_PAGES(2L),
     CAN_MANAGE_ROOMS(100L),
     CAN_MANAGE_MEMBERSHIP_CARDS(101L),
     CAN_REFRESH_PRETIX_CACHE(102L),
