@@ -70,7 +70,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(input.event);
 
         boolean canExchange = editingTimeAllowed && isOwner
-                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) != null;
+                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) == null;
         boolean canBuyOrUpgrade = canExchange && buyOrUpgradeSupported;
 
         return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported,
