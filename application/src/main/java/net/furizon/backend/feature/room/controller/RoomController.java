@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
@@ -14,7 +15,6 @@ import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
-import net.furizon.backend.feature.room.dto.request.GetExchangeConfirmationStatusRequest;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -402,13 +403,13 @@ public class RoomController {
     @GetMapping("/exchange/info")
     public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @NotNull @Valid @RequestBody final GetExchangeConfirmationStatusRequest req
+            @Valid @NotNull @Size(min = 2) @RequestParam("id") Long exchangeId
     ) {
         return executor.execute(
                 GetExchangeConfirmationStatusInfoUseCase.class,
                 new GetExchangeConfirmationStatusInfoUseCase.Input(
                         user,
-                        req,
+                        exchangeId,
                         pretixInformation
                 )
         );

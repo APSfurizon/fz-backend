@@ -28,6 +28,7 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
                 event,
                 input.filterRoom,
                 input.filterPaid,
+                input.filterNotMadeAnOrder,
                 filterMembershipYear,
                 input.banStatus
         ));
@@ -38,6 +39,7 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
             @NotNull PretixInformation pretixService,
             boolean filterRoom,
             boolean filterPaid,
+            boolean filterNotMadeAnOrder,
             boolean filterMembership,
             @Nullable Short filterMembershipForYear,
             @Nullable Boolean banStatus

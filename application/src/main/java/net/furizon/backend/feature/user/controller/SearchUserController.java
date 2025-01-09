@@ -55,6 +55,10 @@ public class SearchUserController {
             final Boolean filterPaid,
             @Valid
             @Nullable
+            @RequestParam("filter-not-made-an-order")
+            final Boolean filterNotMadeAnOrder,
+            @Valid
+            @Nullable
             @RequestParam("filter-no-membership-card")
             final Boolean filterNoMembershipCard,
             @Valid
@@ -73,6 +77,7 @@ public class SearchUserController {
                         pretixInformation,
                         filterNotInRoom == null ? false : filterNotInRoom,
                         filterPaid == null ? false : filterPaid,
+                        filterNotMadeAnOrder == null ? false : filterNotMadeAnOrder,
                         filterNoMembershipCard == null ? false : filterNoMembershipCard,
                         filterNoMembershipCardForYear,
                         filterBanStatus

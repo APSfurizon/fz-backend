@@ -61,9 +61,10 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation);
-        boolean canBuyOrUpgrade = roomLogic.isRoomBuyOrUpgradeSupported(event) && roomEditingTimeAllowed
+        boolean canExchange = roomEditingTimeAllowed
                 && (info == null || info.getRoomOwner().getUserId() == userId)
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) != null;
+        boolean canBuyOrUpgrade = roomLogic.isRoomBuyOrUpgradeSupported(event) && canExchange;
 
         return FullInfoResponse.builder()
             .bookingStartTime(startBooking)
@@ -71,6 +72,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
             .editBookEndTime(pretixConfig.getEvent().getEditBookingEndTime())
             .hasActiveMembershipForEvent(membershipNo > 0)
             .canBuyOrUpgradeRoom(canBuyOrUpgrade)
+            .canExchange(canExchange)
             .eventNames(event.getEventNames())
             .order(orderDataResponse)
             .errors(errors)

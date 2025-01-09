@@ -119,11 +119,13 @@ public class JooqUserFinder implements UserFinder {
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
+            boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
             @Nullable Boolean filterBanStatus
     ) {
         Condition condition = PostgresDSL.trueCondition();
-        boolean joinOrders = false;
+        boolean innerJoinOrders = false;
+        boolean leftJoinOrders = false;
         boolean joinMembershipCards = false;
         boolean joinBanStatus = false;
 
@@ -140,7 +142,7 @@ public class JooqUserFinder implements UserFinder {
             ).asTable("fursonaq");
 
         if (filterRoom) {
-            joinOrders = true;
+            innerJoinOrders = true;
             condition = condition.and(
                 searchFursonaQuery.field(USERS.USER_ID).notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
@@ -155,9 +157,16 @@ public class JooqUserFinder implements UserFinder {
         }
 
         if (filterPaid) {
-            joinOrders = true;
+            innerJoinOrders = true;
             condition = condition.and(
                 ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
+            );
+        }
+
+        if (filerNotMadeAnOrder) {
+            leftJoinOrders = true;
+            condition = condition.and(
+                ORDERS.ID.isNull()
             );
         }
 
@@ -191,13 +200,21 @@ public class JooqUserFinder implements UserFinder {
                 .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
         }
 
-        if (joinOrders) {
+        if (innerJoinOrders) {
             query = query
-                    .leftJoin(ORDERS)
-                    .on(
-                        searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
-                        .and(ORDERS.EVENT_ID.eq(event.getId()))
-                    );
+                .innerJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
+        }
+        if (leftJoinOrders && !innerJoinOrders) {
+            query = query
+                .leftJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
         }
 
         if (joinMembershipCards) {

@@ -8,7 +8,6 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomData;
-import net.furizon.backend.feature.room.dto.request.GetExchangeConfirmationStatusRequest;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
@@ -38,7 +37,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        long exchangeId = input.req.getExchangeId();
+        long exchangeId = input.exchangeId;
         ExchangeConfirmationStatus status = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeId);
         checks.assertExchangeExist(status, exchangeId);
         checks.assertUserHasRightsOnExchange(input.user.getUserId(), status);
@@ -49,6 +48,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         RoomData targetRoomData = null;
         ExtraDays sourceExtraDays = null;
         ExtraDays targetExtraDays = null;
+        Boolean targetRoomHidden = null;
 
         long sourceUserId = status.getSourceUserId();
         UserDisplayData sourceUser = userFinder.getDisplayUser(sourceUserId, event);
@@ -62,13 +62,15 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 sourceRoomData = o.getRoom();
                 sourceExtraDays = o.getExtraDays();
 
+                o = Objects.requireNonNull(
+                        orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
+                );
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
                 if (status.isTargetConfirmed() || isSourceUser) {
-                    o = Objects.requireNonNull(
-                            orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
-                    );
                     targetRoomData = o.getRoom();
                     targetExtraDays = o.getExtraDays();
+                } else {
+                    targetRoomHidden = o.getRoom() != null;
                 }
                 break;
             }
@@ -90,6 +92,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 .fullOrderExchange(orderData)
                 .sourceRoomExchange(sourceRoomData)
                 .sourceExtraDays(sourceExtraDays)
+                .targetRoomInfoHidden(targetRoomHidden)
                 .targetRoomExchange(targetRoomData)
                 .targetExtraDays(targetExtraDays)
                 .build();
@@ -97,7 +100,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull GetExchangeConfirmationStatusRequest req,
+            @NotNull Long exchangeId,
             @NotNull PretixInformation pretixInformation
     ) {}
 }

@@ -18,6 +18,7 @@ public class RoomInfoResponse {
 
     private final boolean buyOrUpgradeRoomSupported;
     private final boolean canBuyOrUpgradeRoom;
+    private final boolean canExchange;
 
     @Nullable
     private final OffsetDateTime editingRoomEndTime;

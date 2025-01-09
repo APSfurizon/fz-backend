@@ -21,6 +21,7 @@ public interface UserFinder {
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
+            boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
             @Nullable Boolean filterBanStatus
     );
