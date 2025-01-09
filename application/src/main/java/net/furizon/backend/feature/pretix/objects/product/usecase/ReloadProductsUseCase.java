@@ -44,9 +44,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     String[] sp = s.split("_");
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
                     String hotelName = sp[1];
-                    short capacity = Short.parseShort(sp[2]);
+                    String roomName = sp[2];
+                    short capacity = Short.parseShort(sp[3]);
                     result.extraDaysIdToDay().put(productId, ed);
-                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, capacity);
+                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
                     if (ed == ExtraDays.EARLY) {
                         result.earlyDaysItemId().put(hcPair, productId);
                     } else if (ed == ExtraDays.LATE) {
@@ -66,8 +67,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     } else {
                         String[] sp = s.split("_");
                         String hotelName = sp[0];
-                        short capacity = Short.parseShort(sp[1]);
-                        result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, capacity));
+                        String roomName = sp[1];
+                        short capacity = Short.parseShort(sp[2]);
+                        result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
                         result.roomPretixItemIdToNames().put(productId, product.getNames());
                     }
 

@@ -36,6 +36,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         Long pretixRoomItemId = order.getPretixRoomItemId();
         short roomCapacity = order.getRoomCapacity();
         String hotelInternalName = order.getHotelInternalName();
+        String roomInternalName = order.getRoomInternalName();
         String orderSecret = order.getPretixOrderSecret();
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
@@ -71,6 +72,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                     ORDERS.ORDER_ROOM_CAPACITY,
                     ORDERS.ORDER_HOTEL_INTERNAL_NAME,
+                    ORDERS.ORDER_ROOM_INTERNAL_NAME,
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_TICKET_POSITION_ID,
@@ -94,6 +96,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     pretixRoomItemId,
                     roomCapacity,
                     hotelInternalName,
+                    roomInternalName,
                     orderSecret,
                     membership,
                     ticketPositionId,
@@ -116,6 +119,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID, pretixRoomItemId)
                 .set(ORDERS.ORDER_ROOM_CAPACITY, roomCapacity)
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, hotelInternalName)
+                .set(ORDERS.ORDER_ROOM_INTERNAL_NAME, roomInternalName)
                 .set(ORDERS.ORDER_SECRET, orderSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
                 .set(ORDERS.ORDER_TICKET_POSITION_ID, ticketPositionId)

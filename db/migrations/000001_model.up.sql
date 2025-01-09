@@ -135,6 +135,7 @@ CREATE TABLE IF NOT EXISTS orders
     order_extra_days_type            int2                         NULL,
     order_room_pretix_item_id        int8                         NULL,
     order_room_capacity              int2                         NULL,
+    order_room_internal_name         varchar(255)                 NULL,
     order_hotel_internal_name        varchar(255)                 NULL,
     order_extra_fursuits             int2 DEFAULT 0               NOT NULL,
     has_membership                   bool                         NOT NULL,

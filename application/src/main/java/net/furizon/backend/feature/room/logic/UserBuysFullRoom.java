@@ -456,7 +456,9 @@ public class UserBuysFullRoom implements RoomLogic {
         //Get early and late data
         if (sourceOrder.hasRoom()) {
             HotelCapacityPair sourcePair = new HotelCapacityPair(
-                    Objects.requireNonNull(sourceOrder.getHotelInternalName()), sourceOrder.getRoomCapacity()
+                    Objects.requireNonNull(sourceOrder.getHotelInternalName()),
+                    Objects.requireNonNull(sourceOrder.getRoomInternalName()),
+                    sourceOrder.getRoomCapacity()
             );
             if (sourceExtraDays.isEarly()) {
                 sourceEarlyPositionId = sourceOrder.getEarlyPositionId();
@@ -473,7 +475,9 @@ public class UserBuysFullRoom implements RoomLogic {
         }
         if (targetOrder.hasRoom()) {
             HotelCapacityPair targetPair = new HotelCapacityPair(
-                    Objects.requireNonNull(targetOrder.getHotelInternalName()), targetOrder.getRoomCapacity()
+                    Objects.requireNonNull(targetOrder.getHotelInternalName()),
+                    Objects.requireNonNull(targetOrder.getRoomInternalName()),
+                    targetOrder.getRoomCapacity()
             );
             if (targetExtraDays.isEarly()) {
                 targetEarlyPositionId = targetOrder.getEarlyPositionId();
@@ -881,7 +885,9 @@ public class UserBuysFullRoom implements RoomLogic {
         Long originalLateItemId = null;
         if (order.hasRoom()) {
             HotelCapacityPair originalPair = new HotelCapacityPair(
-                    Objects.requireNonNull(order.getHotelInternalName()), order.getRoomCapacity()
+                    Objects.requireNonNull(order.getHotelInternalName()),
+                    Objects.requireNonNull(order.getRoomInternalName()),
+                    order.getRoomCapacity()
             );
             if (extraDays.isEarly()) {
                 originalEarlyItemId = Objects.requireNonNull(

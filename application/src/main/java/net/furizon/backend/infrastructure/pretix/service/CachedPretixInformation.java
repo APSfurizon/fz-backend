@@ -206,8 +206,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Nullable
     @Override
-    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day) {
-        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, capacity), day);
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                                  short capacity, @NotNull ExtraDays day) {
+        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, roomInternalName, capacity), day);
     }
     @Nullable
     @Override
@@ -329,6 +330,7 @@ public class CachedPretixInformation implements PretixInformation {
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
+            String roomInternalName = null;
             Long pretixRoomItemId = null;
             long ticketPositionId = -1L;
             long ticketPosid = -1L;
@@ -417,11 +419,13 @@ public class CachedPretixInformation implements PretixInformation {
                     if (checkItemId.apply(CacheItemTypes.NO_ROOM_ITEM, itemId)) {
                         roomCapacity = 0;
                         hotelInternalName = null;
+                        roomInternalName = null;
                     } else {
                         HotelCapacityPair room = roomIdToInfo.getIfPresent(itemId);
                         if (room != null) {
                             roomCapacity = room.capacity();
                             hotelInternalName = room.hotelInternalName();
+                            roomInternalName = room.roomInternalName();
                         }
                     }
 
@@ -447,6 +451,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .roomCapacity(roomCapacity)
                     .pretixRoomItemId(pretixRoomItemId)
                     .hotelInternalName(hotelInternalName)
+                    .roomInternalName(roomInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .ticketPositionId(ticketPositionId)

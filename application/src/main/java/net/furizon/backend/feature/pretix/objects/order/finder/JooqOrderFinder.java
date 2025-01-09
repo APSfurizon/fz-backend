@@ -164,6 +164,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
+                        ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_TICKET_POSITION_ID,

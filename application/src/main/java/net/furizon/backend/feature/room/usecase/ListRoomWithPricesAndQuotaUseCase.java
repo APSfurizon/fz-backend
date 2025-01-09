@@ -61,12 +61,14 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         ExtraDays extraDays = order.getExtraDays();
         short capacity = order.getRoomCapacity();
         String hotelInternalName = null;
+        String roomInternalName = null;
         if (order.hasRoom() && buyOrUpgradeSupported) {
             hotelInternalName = Objects.requireNonNull(order.getHotelInternalName());
+            roomInternalName = Objects.requireNonNull(order.getRoomInternalName());
             if (extraDays.isEarly()) {
                 long extraDayItemId = Objects.requireNonNull(
                         pretixInformation.getExtraDayItemIdForHotelCapacity(
-                                hotelInternalName, capacity, ExtraDays.EARLY
+                                hotelInternalName, roomInternalName, capacity, ExtraDays.EARLY
                         )
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(
@@ -76,7 +78,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (extraDays.isLate()) {
                 long extraDayItemId = Objects.requireNonNull(
                         pretixInformation.getExtraDayItemIdForHotelCapacity(
-                                hotelInternalName, capacity, ExtraDays.LATE
+                                hotelInternalName, roomInternalName, capacity, ExtraDays.LATE
                         )
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(

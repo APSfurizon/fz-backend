@@ -65,6 +65,8 @@ public class Order {
     private short roomCapacity = 0; // 0 = has no room
     @Nullable
     private String hotelInternalName;
+    @Nullable
+    private String roomInternalName;
 
 
     @NotNull

@@ -179,8 +179,7 @@ public class JooqRoomFinder implements RoomFinder {
         return query.fetchFirst(
             PostgresDSL.select(
                     ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
-                    ORDERS.ORDER_ROOM_CAPACITY,
-                    ORDERS.ORDER_HOTEL_INTERNAL_NAME
+                    ORDERS.ORDER_ROOM_CAPACITY
             )
             .from(ORDERS)
             .where(

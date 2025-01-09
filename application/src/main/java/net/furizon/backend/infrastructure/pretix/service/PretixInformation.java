@@ -36,7 +36,8 @@ public interface PretixInformation {
     @Nullable
     HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
     @Nullable
-    Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day);
+    Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                           short capacity, @NotNull ExtraDays day);
     @Nullable
     Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
 
