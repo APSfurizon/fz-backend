@@ -12,23 +12,19 @@ import java.util.UUID;
 public interface SessionAuthenticationManager {
     //Write
     void updateSession(@NotNull UUID sessionId, @NotNull String clientIp);
-
     void deleteSession(@NotNull UUID sessionId);
-
     @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent);
 
     void clearOldestSessions(long userId);
-
     void clearAllSession(long userId);
 
     //Read
     @NotNull List<Session> getUserSessions(long userId);
-
     int getUserSessionsCount(long userId);
-
     @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId);
 
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
+    @Nullable Authentication findAuthenticationByUserId(long userId);
 
     /**
      * @return UUID the id which needs to be opened to confirm the email
@@ -38,27 +34,19 @@ public interface SessionAuthenticationManager {
     boolean markEmailAsVerified(@NotNull UUID reqId);
 
     void disableUser(long userId);
-
     void renableUser(long userId);
 
     void changePassword(long userId, @NotNull String password);
-
     @Nullable Long getUserIdFromPasswordResetReqId(@Nullable UUID pwResetId);
-
     boolean deletePasswordResetAttempt(@NotNull UUID pwResetId);
-
     boolean isResetPwRequestPending(@NotNull UUID pwResetId);
-
     /**
      * @return UUID the id which needs to be opened to reset the password
      */
     UUID initResetPassword(@NotNull String email);
-
     void resetLoginAttempts(@NotNull String email);
-
     void increaseLoginAttempts(@NotNull String email);
 
     int deleteUnverifiedEmailAccounts();
-
     int deleteExpiredPasswordResets();
 }
