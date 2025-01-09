@@ -351,10 +351,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         boolean alreadyResettingPw = sqlQuery.fetchFirst(
             PostgresDSL.select(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID)
             .from(RESET_PASSWORD_REQUESTS)
-                    .innerJoin(AUTHENTICATIONS)
-                    .on(RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID
-                            .eq(AUTHENTICATIONS.AUTHENTICATION_ID))
-            .where(AUTHENTICATIONS.AUTHENTICATION_ID.eq(authId))
+            .where(RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID.eq(authId))
         ).isPresent();
         if (alreadyResettingPw) {
             return null;
