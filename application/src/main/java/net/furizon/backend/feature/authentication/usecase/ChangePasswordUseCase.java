@@ -2,7 +2,6 @@ package net.furizon.backend.feature.authentication.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
 import net.furizon.backend.infrastructure.email.EmailSender;
