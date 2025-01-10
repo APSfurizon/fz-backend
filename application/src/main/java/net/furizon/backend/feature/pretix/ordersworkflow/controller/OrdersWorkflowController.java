@@ -136,7 +136,7 @@ public class OrdersWorkflowController {
     @Operation(summary = "Links an order to a user", description =
             "When a user makes an order, changes an order or cancels the change of an order, it is "
             + "automatically redirected to a page in the frontend, configurable from pretix itself, "
-            + "with the order's params in the query: `?c={code}&s={secret}`. "
+            + "with the order's params in the query: `?c={code}&s={secret}&m={message}`. "
             + "This page should call this method to link the order to the logged in user. "
             + "After calling this page the frontend should redirect the user to the order home page, "
             + "displaying a popup with the results of this operation. "
