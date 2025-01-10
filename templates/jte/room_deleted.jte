@@ -21,7 +21,7 @@
 </head>
 <div class="body">
     <div class="container">
-        <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
+        <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">Your accommodation got an update!</h2>
             <p class="main-content">Dear ${fursonaName},</p>

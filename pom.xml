@@ -38,6 +38,7 @@
         <guava.version>33.3.1-jre</guava.version>
         <uuid.creator.version>6.0.0</uuid.creator.version>
         <paseto4j.version>2024.3</paseto4j.version>
+        <jte.version>3.1.15</jte.version>
     </properties>
     <dependencies>
         <dependency>

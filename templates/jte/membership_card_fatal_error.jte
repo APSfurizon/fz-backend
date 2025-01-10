@@ -24,7 +24,7 @@
 </head>
 <div class="body">
     <div class="container">
-        <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
+        <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">Membership card management fatal error</h2>
             <p class="main-content">Order <b>${orderCode}</b> has already generated and REGISTERED the membeship card (<i>${cardId}/${cardIdInYear}</i>), BUT the order's owner has changed (<i>${orderPrevOwnerId} -> ${orderOwnerId}</i>).</p>

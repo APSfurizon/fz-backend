@@ -20,7 +20,7 @@
 </head>
 <div class="body">
     <div class="container">
-        <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
+        <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">Reset the password of your account</h2>
             <p class="main-content">Click the following link to reset the password of your account:</p>
