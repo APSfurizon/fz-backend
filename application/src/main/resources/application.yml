@@ -71,8 +71,6 @@ membership:
 
 frontend:
   login-url: ${FRONTEND_LOGIN_URL:}
-  login-redirect-url: ${FRONTEND_LOGIN_REDIRECT_URL:}
-  order-homepage-url: ${FRONTEND_ORDER_HOMEPAGE_URL:}
   password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}

@@ -2,6 +2,7 @@ package net.furizon.backend.feature.membership.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.AddMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.GetMembershipCardsResponse;
@@ -19,7 +20,6 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,8 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/membership")
 @RequiredArgsConstructor
 public class MembershipController {
-    @NotNull private final PretixInformation pretixInformation;
-    @NotNull private final UseCaseExecutor executor;
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
+    @org.jetbrains.annotations.NotNull
+    private final UseCaseExecutor executor;
 
     @NotNull
     @Operation(summary = "Check if an user has updated his membership card within the last event", description =
@@ -61,7 +63,7 @@ public class MembershipController {
     @PostMapping("/update-persona-user-information")
     public boolean updateInfo(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestBody final PersonalUserInformation personalUserInformation
+            @NotNull @Valid @RequestBody final PersonalUserInformation personalUserInformation
     ) {
         return executor.execute(
                 UpdatePersonalUserInformationUseCase.class,
@@ -99,7 +101,7 @@ public class MembershipController {
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/add-card")
     public boolean addMembershipCard(
-            @Valid @RequestBody final AddMembershipCardRequest req,
+            @NotNull @Valid @RequestBody final AddMembershipCardRequest req,
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         executor.execute(
@@ -121,8 +123,7 @@ public class MembershipController {
     @GetMapping("/get-cards")
     public GetMembershipCardsResponse getMembershipCards(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid
-            @RequestParam("year")
+            @Valid @RequestParam("year")
             final short year
     ) {
         return executor.execute(
@@ -141,8 +142,8 @@ public class MembershipController {
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/set-membership-card-registration-status")
     public boolean setMembershipCardRegistration(
-            @Valid @RequestBody final SetMembershipCardRegistrationStatusRequest req,
-            @AuthenticationPrincipal@NotNull final FurizonUser user
+            @NotNull @Valid @RequestBody final SetMembershipCardRegistrationStatusRequest req,
+            @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
                 SetCardRegisterStatusUseCase.class,

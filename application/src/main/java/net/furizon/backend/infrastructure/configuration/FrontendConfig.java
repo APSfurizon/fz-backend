@@ -21,12 +21,6 @@ public class FrontendConfig {
     @NotNull private String loginUrl;
 
     @Getter(AccessLevel.NONE)
-    @NotNull private String loginRedirectUrl;
-
-    @Getter(AccessLevel.NONE)
-    @NotNull private String orderHomepageUrl;
-
-    @Getter(AccessLevel.NONE)
     @NotNull private String passwordResetUrl;
 
     @Getter(AccessLevel.NONE)
@@ -48,20 +42,6 @@ public class FrontendConfig {
         } catch (URISyntaxException use) {
             return loginUrl;
         }
-    }
-
-    @NotNull
-    public String getLoginRedirectUrl(@NotNull final String redirectToUrl) {
-        return loginRedirectUrl + URLEncoder.encode(redirectToUrl, StandardCharsets.UTF_8);
-    }
-
-    @NotNull
-    public String getOrderHomepageUrl() {
-        return getOrderHomepageUrl(null);
-    }
-    @NotNull
-    public String getOrderHomepageUrl(@Nullable OrderWorkflowErrorCode errorCode) {
-        return errorCode == null ? orderHomepageUrl : orderHomepageUrl + "?error=" + errorCode;
     }
 
     @NotNull
