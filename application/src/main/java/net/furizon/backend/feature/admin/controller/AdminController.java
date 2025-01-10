@@ -21,6 +21,11 @@ public class AdminController {
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
 
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
+
     @Operation(summary = "Gets what an user can do in the admin panel", description =
         "This method should be used to display or not buttons in the admin panel of the "
         + "reserved area")
