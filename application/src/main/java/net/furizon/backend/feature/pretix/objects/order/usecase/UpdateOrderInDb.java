@@ -75,14 +75,20 @@ public class UpdateOrderInDb {
 
                         if (cardOwnerId != null && !cardOwnerId.equals(orderOwnerId)) { //Order owner has changed
                             if (!card.isRegistered()) { //If the card was not registered yet, we can change the owners
-                                log.warn("[PRETIX] Order {} has already generated the membeship card {}/{}. "
-                                        + "However, the order owner has changed ({} -> {}) and, since the card "
-                                        + "was not registered yet, the card's owner is now changed as well",
-                                    order.getCode(),
-                                    card.getCardId(), card.getIdInYear(),
-                                    cardOwnerId, orderOwnerId
-                                );
-                                updateMembershipCardOwner.invoke(card, orderOwnerId);
+                                if (userFinder.findById(orderOwnerId) != null) {
+                                    log.warn("[PRETIX] Order {} has already generated the membeship card {}/{}. "
+                                            + "However, the order owner has changed ({} -> {}) and, since the card "
+                                            + "was not registered yet, the card's owner is now changed as well",
+                                        order.getCode(),
+                                        card.getCardId(), card.getIdInYear(),
+                                        cardOwnerId, orderOwnerId
+                                    );
+                                    updateMembershipCardOwner.invoke(card, orderOwnerId);
+                                } else {
+                                    log.warn("[PRETIX] Tried changing card owner {} -> {}, "
+                                            + "but the new one doesn't exist in the DB",
+                                            cardOwnerId, orderOwnerId);
+                                }
 
                             } else { //Otherwise, send an error email to web admins
                                 log.error("[PRETIX] Order {} has already generated the membeship card {}/{}. "
