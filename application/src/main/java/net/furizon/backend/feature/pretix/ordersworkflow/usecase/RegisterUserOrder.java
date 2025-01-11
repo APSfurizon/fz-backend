@@ -66,7 +66,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
             if (!pretixOrder.isPresent()) {
                 log.error("[PRETIX] Registration of order {} failed: "
                         + "Order was not in the db and we were unable to fetch it from pretix", input.code);
-                throw new ApiException("Unable to fetch order", OrderWorkflowErrorCode.ORDEDR_NOT_FOUND);
+                throw new ApiException("Unable to fetch order", OrderWorkflowErrorCode.ORDER_NOT_FOUND);
             }
 
             var o = updateOrderInDb.execute(pretixOrder.get(), event, pretixService);
@@ -74,7 +74,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 log.error("[PRETIX] Registration of order {} failed: "
                         + "Order was not in the db and an error occurred in "
                         + "parsing or storing the newly fetched order", input.code);
-                throw new ApiException("Unable to parse order", OrderWorkflowErrorCode.ORDEDR_NOT_FOUND);
+                throw new ApiException("Unable to parse order", OrderWorkflowErrorCode.ORDER_NOT_FOUND);
             }
             order = o.get();
         }
