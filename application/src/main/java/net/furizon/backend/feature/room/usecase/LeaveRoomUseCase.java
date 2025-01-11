@@ -15,7 +15,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_USER_LEFT_ROOM;
 
 @Slf4j
@@ -52,7 +52,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
                 mailService.sendUpdate(
-                        r.get(), TEMPLATE_USER_LEFT_ROOM, MailVarPair.of(FURSONA_NAME, data.getFursonaName())
+                        r.get(), TEMPLATE_USER_LEFT_ROOM, MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
                 );
             }
         }

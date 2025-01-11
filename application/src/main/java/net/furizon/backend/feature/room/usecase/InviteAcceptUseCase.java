@@ -16,7 +16,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_INVITE_ACCEPTED;
 
 @Slf4j
@@ -56,7 +56,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
                 mailService.sendUpdate(
-                        r.get(), TEMPLATE_INVITE_ACCEPTED, MailVarPair.of(FURSONA_NAME, data.getFursonaName())
+                        r.get(), TEMPLATE_INVITE_ACCEPTED, MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
                 );
             }
         }

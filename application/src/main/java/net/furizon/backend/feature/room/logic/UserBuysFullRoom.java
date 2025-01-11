@@ -50,7 +50,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_NO_OWNER;
@@ -995,7 +995,7 @@ public class UserBuysFullRoom implements RoomLogic {
                                                @NotNull String roomName, @NotNull String reason) {
         mailService.sendProblem(
                 ownerId, TEMPLATE_SANITY_CHECK_KICK_OWNER,
-                MailVarPair.of(FURSONA_NAME, fursonaName),
+                MailVarPair.of(OTHER_FURSONA_NAME, fursonaName),
                 MailVarPair.of(ROOM_NAME, roomName),
                 MailVarPair.of(SANITY_CHECK_REASON, reason)
         );

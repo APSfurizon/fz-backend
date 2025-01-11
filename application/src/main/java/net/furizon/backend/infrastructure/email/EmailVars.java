@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum EmailVars {
-    FURSONA_NAME("otherfursonaName"),
+    FURSONA_NAME("fursonaName"),
+    OTHER_FURSONA_NAME("otherfursonaName"),
     ROOM_OWNER_FURSONA_NAME("ownerFursonaName"),
     ROOM_NAME("roomName"),
     ROOM_TYPE_NAME("roomTypeName"),

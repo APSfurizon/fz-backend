@@ -11,12 +11,17 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
+import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
+import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_COMPLETED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_HAS_NEW_OWNER;
 
 @Slf4j
@@ -65,12 +70,25 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
 
         boolean res = roomLogic.exchangeRoom(destUserId, sourceUserId, roomId, event, input.pretixInformation);
         if (res) {
-            UserEmailData data = userFinder.getMailDataForUser(destUserId);
-            if (data != null) {
+            UserEmailData destData = userFinder.getMailDataForUser(destUserId);
+            UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
+            if (destData != null) {
                 mailService.broadcastUpdate(
                         roomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
-                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName())
+                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
                 );
+
+                if (sourceData != null) {
+                    String actionText = RoomEmailTexts.getActionText(input.req.getAction(), destRoom.isPresent());
+                    mailService.sendUpdate(destData, TEMPLATE_EXCHANGE_COMPLETED,
+                        MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                        MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName())
+                    );
+                    mailService.sendUpdate(sourceData, TEMPLATE_EXCHANGE_COMPLETED,
+                        MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                        MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName())
+                    );
+                }
             }
         }
         return res;
