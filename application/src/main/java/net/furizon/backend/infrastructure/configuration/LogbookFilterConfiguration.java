@@ -11,6 +11,9 @@ import static org.zalando.logbook.json.JsonBodyFilters.replaceJsonStringProperty
 
 @Configuration
 public class LogbookFilterConfiguration {
+    // NOTICE: All passwords needs to be named "password" to be
+    // mathced by net.furizon.backend.infrastructure.configuration.LogbookFilterConfiguration
+    // and be hidden in logs
     @Bean
     public BodyFilter bodyFilter() {
         return merge(
