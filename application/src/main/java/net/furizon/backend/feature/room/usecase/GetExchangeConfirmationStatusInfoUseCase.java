@@ -51,26 +51,27 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         Boolean targetRoomHidden = null;
 
         long sourceUserId = status.getSourceUserId();
+        long targetUserId = status.getTargetUserId();
         UserDisplayData sourceUser = userFinder.getDisplayUser(sourceUserId, event);
-        UserDisplayData targetUser = userFinder.getDisplayUser(status.getTargetUserId(), event);
+        UserDisplayData targetUser = userFinder.getDisplayUser(targetUserId, event);
 
         switch (action) {
             case TRASFER_EXCHANGE_ROOM: {
-                OrderDataResponse o = Objects.requireNonNull(
+                OrderDataResponse sourceResp = Objects.requireNonNull(
                         orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
                 );
-                sourceRoomData = o.getRoom();
-                sourceExtraDays = o.getExtraDays();
+                sourceRoomData = sourceResp.getRoom();
+                sourceExtraDays = sourceResp.getExtraDays();
 
-                o = Objects.requireNonNull(
-                        orderFinder.getOrderDataResponseFromUserEvent(sourceUserId, event, pretixInformation)
+                OrderDataResponse targetResp = Objects.requireNonNull(
+                        orderFinder.getOrderDataResponseFromUserEvent(targetUserId, event, pretixInformation)
                 );
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
                 if (status.isTargetConfirmed() || isSourceUser) {
-                    targetRoomData = o.getRoom();
-                    targetExtraDays = o.getExtraDays();
+                    targetRoomData = targetResp.getRoom();
+                    targetExtraDays = targetResp.getExtraDays();
                 } else {
-                    targetRoomHidden = o.getRoom() != null;
+                    targetRoomHidden = targetResp.getRoom() != null;
                 }
                 break;
             }
