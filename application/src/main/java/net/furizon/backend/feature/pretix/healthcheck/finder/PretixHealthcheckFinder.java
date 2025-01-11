@@ -25,9 +25,11 @@ public class PretixHealthcheckFinder implements PretixHealthcheck {
     @Override
     public boolean runHealthcheck() {
         try {
-            final var request = HttpRequest.<Void>create()
+            final var request = HttpRequest.<String>create()
                     .method(HttpMethod.GET)
+                    .overrideBasePath("/")
                     .path("/healthcheck/")
+                    .responseType(String.class)
                     .build();
             return pretixHttpClient.send(PretixConfig.class, request).getStatusCode().is2xxSuccessful();
         } catch (final Exception ex) {
