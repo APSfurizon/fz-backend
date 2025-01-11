@@ -7,7 +7,7 @@
         </discriminator>
         <sift>
             <appender name="FILE-${logName}" class="ch.qos.logback.core.FileAppender">
-                <file>${logName}.log</file>
+                <file>data/logs/${logName}.log</file>
                 <append>false</append>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <pattern>%d [%thread] %level %mdc %logger{35} - %msg%n</pattern>
