@@ -87,7 +87,7 @@ public class PersonalUserInformation {
     private final String prefixPhoneNumber;
 
     @Nullable
-    @Size(min = 1000)
+    @Size(max = 1000)
     private final String allergies;
 
     @Nullable
