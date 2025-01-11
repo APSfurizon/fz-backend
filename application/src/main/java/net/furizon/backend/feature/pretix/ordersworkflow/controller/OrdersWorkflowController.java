@@ -141,7 +141,7 @@ public class OrdersWorkflowController {
             + "After calling this page the frontend should redirect the user to the order home page, "
             + "displaying a popup with the results of this operation. "
             + "This operation can drop the following errors: `SERVER_ERROR`, `ORDER_SECRET_NOT_MATCH`, "
-            + " `ORDER_MULTIPLE_DONE` and `ORDEDR_NOT_FOUND`.")
+            + " `ORDER_MULTIPLE_DONE` and `ORDER_NOT_FOUND`.")
     @PostMapping("/link-order")
     public boolean linkOrder(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
