@@ -11,6 +11,7 @@ import net.furizon.backend.feature.membership.dto.SetMembershipCardRegistrationS
 import net.furizon.backend.feature.membership.dto.ShouldUpdateInfoResponse;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
 import net.furizon.backend.feature.membership.usecase.CreateMembershipUseCase;
+import net.furizon.backend.feature.membership.usecase.GetPersonalUserInformationUseCase;
 import net.furizon.backend.feature.membership.usecase.LoadAllMembershipInfosUseCase;
 import net.furizon.backend.feature.membership.usecase.MarkPersonalUserInformationAsUpdatedUseCase;
 import net.furizon.backend.feature.membership.usecase.SetCardRegisterStatusUseCase;
@@ -60,7 +61,7 @@ public class MembershipController {
     @Operation(summary = "Update the personal user information of the user", description =
         "This method also resets the last event where the personal user information has "
         + "been updated to the current event. Returns `false` if the update has failed")
-    @PostMapping("/update-persona-user-information")
+    @PostMapping("/update-personal-user-information")
     public boolean updateInfo(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final PersonalUserInformation personalUserInformation
@@ -73,6 +74,12 @@ public class MembershipController {
                     pretixInformation.getCurrentEvent()
                 )
         );
+    }
+
+    @Operation(summary = "Gets the personal information about the current logged in user")
+    @GetMapping("/get-personal-user-information")
+    public PersonalUserInformation getInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
+        return executor.execute(GetPersonalUserInformationUseCase.class, user);
     }
 
     @Operation(summary = "Resets the last information event updated", description =
