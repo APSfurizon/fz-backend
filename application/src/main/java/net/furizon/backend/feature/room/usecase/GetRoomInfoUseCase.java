@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
@@ -19,12 +20,14 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, RoomInfoResponse> {
     @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
+    @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomConfig roomConfig;
@@ -32,7 +35,8 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
         long userId = input.user.getUserId();
-        RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
+        Event event = input.event;
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
@@ -43,13 +47,13 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
             info.setCanConfirm(isOwner && editingTimeAllowed
-                               && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, input.event));
+                               && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, event));
             info.setCanUnconfirm(isOwner && editingTimeAllowed
                                && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
             info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
             info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
 
-            List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, input.event);
+            List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
 
             info.setCanInvite(isOwner && editingTimeAllowed && (
                     //guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).count()
@@ -60,20 +64,24 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             info.setGuests(guests);
         }
         List<RoomInvitationResponse> invitations =
-            roomFinder.getUserReceivedInvitations(userId, input.event, input.pretixInformation);
+            roomFinder.getUserReceivedInvitations(userId, event, input.pretixInformation);
         for (RoomInvitationResponse invitation : invitations) {
-            var guests = roomFinder.getRoomGuestResponseFromRoomId(invitation.getRoom().getRoomId(), input.event);
+            var guests = roomFinder.getRoomGuestResponseFromRoomId(invitation.getRoom().getRoomId(), event);
             invitation.getRoom().setGuests(guests);
         }
 
-        boolean canCreateRoom = editingTimeAllowed && info == null && roomLogic.canCreateRoom(userId, input.event);
-        boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(input.event);
+        Optional<Boolean> r = orderFinder.isOrderDaily(userId, event);
+        boolean hasOrder = r.isPresent();
 
-        boolean canExchange = editingTimeAllowed && isOwner
-                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, input.event) == null;
+        boolean canCreateRoom = editingTimeAllowed && hasOrder
+                && info == null && roomLogic.canCreateRoom(userId, event);
+        boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(event);
+
+        boolean canExchange = editingTimeAllowed && isOwner && hasOrder
+                && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
         boolean canBuyOrUpgrade = canExchange && buyOrUpgradeSupported;
 
-        return new RoomInfoResponse(info, canCreateRoom, buyOrUpgradeSupported,
+        return new RoomInfoResponse(info, hasOrder, canCreateRoom, buyOrUpgradeSupported,
                 canBuyOrUpgrade, canExchange, endRoomEditingTime, invitations);
     }
 
