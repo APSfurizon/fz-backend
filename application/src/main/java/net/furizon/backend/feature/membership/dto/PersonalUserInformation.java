@@ -87,7 +87,12 @@ public class PersonalUserInformation {
     private final String prefixPhoneNumber;
 
     @Nullable
+    @Size(min = 1000)
     private final String allergies;
+
+    @Nullable
+    @Size(max = 1000)
+    private final String note;
 
     private final long lastUpdatedEventId;
 

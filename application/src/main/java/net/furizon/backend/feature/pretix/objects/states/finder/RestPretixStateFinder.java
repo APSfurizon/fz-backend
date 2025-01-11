@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -44,6 +45,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
 
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
+    private final PretixConfig pretixConfig;
 
     private final ObjectMapper objectMapper;
 
@@ -57,6 +59,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
                 .queryParam("country", countryCode)
                 .responseParameterizedType(pretixStatesType)
                 .sendConfigHeaders(false)
+                .header(HttpHeaders.HOST, pretixConfig.getShop().getHost())
                 .build();
         try {
             var res = pretixHttpClient.send(PretixConfig.class, request).getBody();

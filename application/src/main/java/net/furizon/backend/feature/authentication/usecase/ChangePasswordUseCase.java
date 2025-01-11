@@ -43,7 +43,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
         }
 
         log.info("Changing password for user {}", userId);
-        sessionAuthenticationManager.changePassword(userId, input.req.getNewPassword());
+        sessionAuthenticationManager.changePassword(userId, input.req.getPassword());
         // Request cleanup
         if (resetPwId != null) {
             sessionAuthenticationManager.deletePasswordResetAttempt(resetPwId);

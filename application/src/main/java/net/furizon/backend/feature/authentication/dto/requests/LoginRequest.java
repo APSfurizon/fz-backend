@@ -15,6 +15,9 @@ public class LoginRequest {
     @Email(regexp = EMAIL_REGEX)
     private final String email;
 
+    // NOTICE: All passwords needs to be named "password" to be
+    // mathced by net.furizon.backend.infrastructure.configuration.LogbookFilterConfiguration
+    // and be hidden in logs
     @NotNull
     @NotEmpty
     @Size(min = 6)
