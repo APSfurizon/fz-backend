@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.healthcheck.finder.PretixHealthcheck;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.event.usecase.ReloadEventsUseCase;
@@ -76,6 +77,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final PretixQuotaFinder quotaFinder;
     @NotNull
     private final PretixProductFinder pretixProductFinder;
+    @NotNull
+    private final PretixHealthcheck healthcheck;
     @NotNull
     private final PretixConfig pretixConfig;
     @NotNull
@@ -152,6 +155,7 @@ public class CachedPretixInformation implements PretixInformation {
             loadCurrentEventFromDb();
             return;
         }
+        healthcheck.waitForPretix();
         log.info("[PRETIX] Syncing pretix information and cache it");
         long start = System.currentTimeMillis();
         resetCache();
