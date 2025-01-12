@@ -56,7 +56,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
 
         OffsetDateTime startBooking = pretixConfig.getEvent().getPublicBookingStartTime();
         boolean displayCountdown = OffsetDateTime.now().isBefore(startBooking)
-                                   && permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
+                                   && !permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
