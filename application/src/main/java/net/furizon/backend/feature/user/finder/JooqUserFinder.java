@@ -173,7 +173,8 @@ public class JooqUserFinder implements UserFinder {
         if (filterMembershipCardForYear != null) {
             joinMembershipCards = true;
             condition = condition.and(
-                MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear)
+                MEMBERSHIP_CARDS.ISSUE_YEAR.isNull()
+                .or(MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear))
             );
         }
 
