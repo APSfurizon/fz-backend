@@ -1,21 +1,19 @@
 package net.furizon.backend.feature.pretix.objects.question;
 
 import lombok.Data;
-import net.furizon.backend.infrastructure.pretix.model.QuestionType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Map;
 
 @Data
-public class PretixQuestion {
+public class PretixOption {
     private final long id;
-
-    @NotNull
-    private final QuestionType type;
 
     @NotNull
     private final String identifier;
 
     @NotNull
-    private final List<PretixOption> options;
+    private final Map<String, String> answer;
+
+    private final long position;
 }

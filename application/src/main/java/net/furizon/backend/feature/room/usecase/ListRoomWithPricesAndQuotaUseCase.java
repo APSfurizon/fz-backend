@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -147,7 +148,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 }
             }
             return null;
-        }).filter(Objects::nonNull).toList() : List.of();
+        }).filter(Objects::nonNull).toList() : Collections.emptyList();
 
         return new ListRoomPricesAvailabilityResponse(
                 order.getBoughtRoomData(pretixInformation),

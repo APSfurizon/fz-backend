@@ -4,6 +4,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.pretix.objects.question.PretixOption;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
@@ -55,6 +56,8 @@ public interface PretixInformation {
 
     @NotNull
     Optional<String> getQuestionIdentifierFromId(long id);
+
+    @NotNull Optional<List<PretixOption>> getQuestionOptionsFromId(long id);
 
     @NotNull
     Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier);

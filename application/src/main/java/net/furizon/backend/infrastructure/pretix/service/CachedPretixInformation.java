@@ -18,6 +18,7 @@ import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
+import net.furizon.backend.feature.pretix.objects.question.PretixOption;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
@@ -108,6 +109,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
     private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Long, List<PretixOption>> questionIdToOptions = Caffeine.newBuilder().build();
     @NotNull
     private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
 
@@ -299,6 +302,14 @@ public class CachedPretixInformation implements PretixInformation {
     public Optional<String> getQuestionIdentifierFromId(long id) {
         lock.readLock().lock();
         var v = questionIdToIdentifier.getIfPresent(id);
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
+    }
+
+    @Override
+    public @NotNull Optional<List<PretixOption>> getQuestionOptionsFromId(long id) {
+        lock.readLock().lock();
+        var v = questionIdToOptions.getIfPresent(id);
         lock.readLock().unlock();
         return Optional.ofNullable(v);
     }
@@ -551,6 +562,7 @@ public class CachedPretixInformation implements PretixInformation {
         questionDuplicateData.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
+        questionIdToOptions.invalidateAll();
         questionIdentifierToId.invalidateAll();
 
         //Tickets
@@ -608,10 +620,12 @@ public class CachedPretixInformation implements PretixInformation {
         questionList.forEach(question -> {
             long questionId = question.getId();
             QuestionType questionType = question.getType();
+            List<PretixOption> options = question.getOptions();
             String questionIdentifier = question.getIdentifier();
 
             questionIdToType.put(questionId, questionType);
             questionIdToIdentifier.put(questionId, questionIdentifier);
+            questionIdToOptions.put(questionId, options);
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_USERID
