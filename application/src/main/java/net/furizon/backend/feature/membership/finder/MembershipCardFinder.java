@@ -12,4 +12,5 @@ public interface MembershipCardFinder {
     int countCardsPerUserPerEvent(long userId, @NotNull Event event);
     List<FullInfoMembershipCard> getMembershipCards(short year);
     @Nullable MembershipCard getMembershipCardByOrderId(long orderId);
+    @Nullable MembershipCard getMembershipCardByCardId(long cardId);
 }

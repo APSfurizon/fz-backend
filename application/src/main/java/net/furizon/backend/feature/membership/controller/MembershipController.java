@@ -5,12 +5,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.AddMembershipCardRequest;
+import net.furizon.backend.feature.membership.dto.DeleteMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.GetMembershipCardsResponse;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.membership.dto.SetMembershipCardRegistrationStatusRequest;
 import net.furizon.backend.feature.membership.dto.ShouldUpdateInfoResponse;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
 import net.furizon.backend.feature.membership.usecase.CreateMembershipUseCase;
+import net.furizon.backend.feature.membership.usecase.DeleteMembershipCardUseCase;
 import net.furizon.backend.feature.membership.usecase.GetPersonalUserInformationUseCase;
 import net.furizon.backend.feature.membership.usecase.LoadAllMembershipInfosUseCase;
 import net.furizon.backend.feature.membership.usecase.MarkPersonalUserInformationAsUpdatedUseCase;
@@ -118,6 +120,26 @@ public class MembershipController {
                 user,
                 pretixInformation.getCurrentEvent()
             )
+        );
+        return true;
+    }
+
+    @Operation(summary = "Deletes a membership card", description =
+            "Deletes the specified membership card. Keep in mind that membership cards "
+            + "with still active orders will be recreated automatically next time the backend "
+            + "will fetch it from pretix, so the deletions of these kinds of cards is NOT possible "
+            + "and will return a `MEMBERSHIP_CARD_ORDER_STILL_LINKED` error. It's NOT possible "
+            + "as well the deletion of already registered cards, in this instance the error "
+            + "will be `MEMBERSHIP_CARD_WAS_REGISTERED`")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
+    @PostMapping("/delete-card")
+    public boolean deleteMembershipCards(
+            @NotNull @Valid @RequestBody final DeleteMembershipCardRequest req,
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        executor.execute(
+                DeleteMembershipCardUseCase.class,
+                req
         );
         return true;
     }

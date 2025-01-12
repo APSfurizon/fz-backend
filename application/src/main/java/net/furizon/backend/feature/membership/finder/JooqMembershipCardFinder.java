@@ -11,6 +11,8 @@ import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Record6;
+import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -49,20 +51,30 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
     @Override
     public MembershipCard getMembershipCardByOrderId(long orderId) {
         return sqlQuery.fetchFirst(
-                PostgresDSL
-                        .select(
-                                MEMBERSHIP_CARDS.USER_ID,
-                                MEMBERSHIP_CARDS.CARD_DB_ID,
-                                MEMBERSHIP_CARDS.ID_IN_YEAR,
-                                MEMBERSHIP_CARDS.ISSUE_YEAR,
-                                MEMBERSHIP_CARDS.ALREADY_REGISTERED,
-                                MEMBERSHIP_CARDS.CREATED_FOR_ORDER
-                        )
-                        .from(MEMBERSHIP_CARDS)
-                        .where(
-                                MEMBERSHIP_CARDS.CREATED_FOR_ORDER.eq(orderId)
-                        )
+            membershipSelect()
+            .where(MEMBERSHIP_CARDS.CREATED_FOR_ORDER.eq(orderId))
         ).mapOrNull(MembershipCardMapper::map);
+    }
+
+    @Override
+    public @Nullable MembershipCard getMembershipCardByCardId(long cardId) {
+        return sqlQuery.fetchFirst(
+            membershipSelect()
+            .where(MEMBERSHIP_CARDS.CARD_DB_ID.eq(cardId))
+        ).mapOrNull(MembershipCardMapper::map);
+    }
+
+    private @NotNull SelectJoinStep<Record6<Long, Long, Integer, Short, Boolean, Long>> membershipSelect() {
+        return PostgresDSL
+                .select(
+                        MEMBERSHIP_CARDS.USER_ID,
+                        MEMBERSHIP_CARDS.CARD_DB_ID,
+                        MEMBERSHIP_CARDS.ID_IN_YEAR,
+                        MEMBERSHIP_CARDS.ISSUE_YEAR,
+                        MEMBERSHIP_CARDS.ALREADY_REGISTERED,
+                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER
+                )
+                .from(MEMBERSHIP_CARDS);
     }
 
     @NotNull
