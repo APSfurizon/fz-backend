@@ -156,12 +156,13 @@ public class Order {
     public void setOrderOwnerUserId(@Nullable Long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
-        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, Optional.ofNullable(userId).map(Float::valueOf));
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
         orderOwnerUserId = orderOwner.getId();
-        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, Float.valueOf(orderOwnerUserId)); //update userId answer
     }
     public @Nullable User getOrderOwner() {
         if (orderOwner == null && orderOwnerUserId != null && orderOwnerUserId >= 0L) {
