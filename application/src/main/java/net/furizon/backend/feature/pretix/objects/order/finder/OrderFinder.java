@@ -9,8 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrderFinder {
+    @NotNull Set<String> findOrderCodesForEvent(@NotNull Event event);
+
     @Nullable
     Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event, @NotNull PretixInformation pretixService);
 
