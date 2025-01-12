@@ -375,7 +375,7 @@ public class CachedPretixInformation implements PretixInformation {
                             if (questionId == questionUserId) {
                                 String s = answer.getAnswer();
                                 if (s != null && !s.isBlank()) {
-                                    userId = Long.parseLong(s);
+                                    userId = Float.valueOf(s).longValue();
                                 }
                             } else if (questionId == questionDuplicateData) {
                                 String s = answer.getAnswer();
