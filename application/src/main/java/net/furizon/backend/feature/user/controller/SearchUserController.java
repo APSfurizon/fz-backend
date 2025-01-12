@@ -59,10 +59,6 @@ public class SearchUserController {
             final Boolean filterNotMadeAnOrder,
             @Valid
             @Nullable
-            @RequestParam("filter-no-membership-card")
-            final Boolean filterNoMembershipCard,
-            @Valid
-            @Nullable
             @RequestParam("filter-no-membership-card-for-year")
             final Short filterNoMembershipCardForYear,
             @Valid
@@ -78,7 +74,6 @@ public class SearchUserController {
                         filterNotInRoom == null ? false : filterNotInRoom,
                         filterPaid == null ? false : filterPaid,
                         filterNotMadeAnOrder == null ? false : filterNotMadeAnOrder,
-                        filterNoMembershipCard == null ? false : filterNoMembershipCard,
                         filterNoMembershipCardForYear,
                         filterBanStatus
                 )
