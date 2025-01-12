@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.pretix.objects.order.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +35,9 @@ public class OrderController {
         return true;
     }
 
+    private static final ResponseEntity<Void> OK = ResponseEntity.ok().build();
+    private static final ResponseEntity<Void> NOP = ResponseEntity.internalServerError().build();
+
     @Operation(
         summary = "A pretix order has changed",
         description = "Each time a pretix order changes, pretix will hit this webhook with the information "
@@ -41,7 +46,7 @@ public class OrderController {
     )
     @PostMapping("/webhook")
     @InternalAuthorize
-    public ResponseEntity<Void> pretixWebhook(OrderWebhookRequest request) {
+    public ResponseEntity<Void> pretixWebhook(@Valid @NotNull @RequestBody OrderWebhookRequest request) {
         log.info("[PRETIX WEBHOOK] Fetching order {}", request);
         Event event = pretixService.getCurrentEvent();
 
@@ -57,6 +62,6 @@ public class OrderController {
             request.getCode(),
             pretixService
         ));
-        return res.isPresent() ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
+        return res.isPresent() ? OK : NOP;
     }
 }
