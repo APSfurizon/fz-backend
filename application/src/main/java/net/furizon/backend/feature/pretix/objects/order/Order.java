@@ -157,10 +157,7 @@ public class Order {
         this.orderOwnerUserId = userId;
         orderOwner = null;
         //update userId answer
-        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID,
-                Optional.ofNullable(userId)
-                        .map(Float::valueOf)
-                        .orElse(null));
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, userId == null ? null : Float.valueOf(userId));
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
