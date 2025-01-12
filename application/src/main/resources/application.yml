@@ -110,3 +110,7 @@ pretix:
   autocart:
     priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
     priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}
+
+badge:
+  storage-path: ${BADGE_STORAGE_PATH:/Users/starkthedragon/Furizon/images/badges}
+  jpeg-quality-threshold: ${BADGE_IMAGE_JPEG_QUALITY_THRESHOLD:90}

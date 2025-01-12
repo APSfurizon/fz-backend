@@ -33,9 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/membership")
 @RequiredArgsConstructor
 public class MembershipController {
-    @org.jetbrains.annotations.NotNull
     private final PretixInformation pretixInformation;
-    @org.jetbrains.annotations.NotNull
+
     private final UseCaseExecutor executor;
 
     @NotNull
