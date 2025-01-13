@@ -263,7 +263,8 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull String sourceOrderCode,
             @NotNull String targetOrderCode,
             @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            boolean createTempPositionFirst
     ) {
         log.info("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Exchanging i{} p{} a{} -> i{} p{} a{}",
                 sourceUsrId, targetUsrId, event, sourceItemId, sourcePositionId, sourceAddonToPositionId,
@@ -320,12 +321,12 @@ public class UserBuysFullRoom implements RoomLogic {
         boolean res = true;
         if (sourceItemId != null) {
             if (targetHasPosition) {
-                //Creates a temporary position with target's item to keep quota reserved while performming the exchange
+                //Creates a temporary position with target's item to keep quota reserved while performing the exchange
                 PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                         targetOrderCode,
                         Objects.requireNonNull(targetAddonToPositionId),
                         targetItemId
-                ));
+                ), createTempPositionFirst, pretixInformation, 0L); //price is not important since it's the temp item
                 if (pp == null) {
                     log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
                             + "res was false after create temporary position with item {}",
@@ -337,13 +338,13 @@ public class UserBuysFullRoom implements RoomLogic {
                         targetOrderCode,
                         sourceItemId,
                         sourcePrice
-                ));
+                )) != null;
             } else {
                 PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                         targetOrderCode,
                         Objects.requireNonNull(targetAddonToPositionId),
                         sourceItemId
-                ));
+                ), createTempPositionFirst, pretixInformation, sourcePrice);
                 res = pp != null;
                 if (res) {
                     targetPositionId = pp.getPositionId();
@@ -371,13 +372,13 @@ public class UserBuysFullRoom implements RoomLogic {
                         sourceOrderCode,
                         targetItemId,
                         targetPrice
-                ));
+                )) != null;
             } else {
                 PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                         sourceOrderCode,
                         Objects.requireNonNull(sourceAddonToPositionId),
                         targetItemId
-                ));
+                ), createTempPositionFirst, pretixInformation, targetPrice);
                 res = pp != null;
                 if (res) {
                     sourcePositionId = pp.getPositionId();
@@ -515,10 +516,11 @@ public class UserBuysFullRoom implements RoomLogic {
 
         //Now that we have everything, update pretix and calc balances
         ExchangeResult exchange;
+        //Exchange room
         exchange = exchangeSingleItem(
                 sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId,
                 sourceTicketPosid, targetTicketPosid, sourceUsrId, targetUsrId,
-                sourceOrderCode, targetOrderCode, event, pretixInformation);
+                sourceOrderCode, targetOrderCode, event, pretixInformation, true);
         if (exchange == null) {
             return false;
         }
@@ -528,19 +530,21 @@ public class UserBuysFullRoom implements RoomLogic {
         targetRoomPosid = exchange.targetPosid == null ? targetRoomPosid : exchange.targetPosid;
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
+        //Exchange early
         exchange = exchangeSingleItem(
                 sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId,
                 sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                sourceOrderCode, targetOrderCode, event, pretixInformation);
+                sourceOrderCode, targetOrderCode, event, pretixInformation, false);
         if (exchange == null) {
             return false;
         }
         sourceBalance += exchange.sourceBalance;
         targetBalance += exchange.targetBalance;
+        //Exchange late
         exchange = exchangeSingleItem(
                 sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId,
                 sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                sourceOrderCode, targetOrderCode, event, pretixInformation);
+                sourceOrderCode, targetOrderCode, event, pretixInformation, false);
         if (exchange == null) {
             return false;
         }
@@ -734,7 +738,8 @@ public class UserBuysFullRoom implements RoomLogic {
             long newRoomItemId,
             @NotNull String orderCode,
             @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            boolean createTempAddonFirst
     ) {
         if (newItemId == null || newItemPrice == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: newItemId was null",
@@ -765,7 +770,7 @@ public class UserBuysFullRoom implements RoomLogic {
                         orderCode,
                         addonToPositionId,
                         originalItemId
-                ));
+                ), createTempAddonFirst, pretixInformation, 0L); //price is not important since it's the temp item
                 if (tempPosition == null) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
                             + "Unable to create temporary position for rollback with item {}",
@@ -777,13 +782,13 @@ public class UserBuysFullRoom implements RoomLogic {
                     orderCode,
                     newItemId,
                     newItemPrice
-            ));
+            )) != null;
         } else {
             PretixPosition pos = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
                     orderCode,
                     addonToPositionId,
                     newItemId
-            ));
+            ), createTempAddonFirst, pretixInformation, newItemPrice);
             res = pos != null;
             if (res) {
                 positionId = pos.getPositionId();
@@ -828,7 +833,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     orderCode,
                     rollbackItemId,
                     rollbackPrice
-            ));
+            )) != null;
         } else {
             res = deletePretixPositionAction.invoke(event, positionId);
         }
@@ -904,7 +909,8 @@ public class UserBuysFullRoom implements RoomLogic {
         //Perform the upgrades
         BuyOrUpgradeResult roomRes = buyOrUpgradeItem(originalRoomItemId, newRoomItemId, newRoomPrice,
                 originallyHadAroomPosition, roomPositionId,
-                order.getTicketPositionPosid(), userId, newRoomItemId, orderCode, event, pretixInformation);
+                order.getTicketPositionPosid(), userId, newRoomItemId,
+                orderCode, event, pretixInformation, true);
         if (roomRes == null) {
             return false;
         }
@@ -919,7 +925,8 @@ public class UserBuysFullRoom implements RoomLogic {
             if (extraDays.isEarly()) {
                 earlyRes = buyOrUpgradeItem(originalEarlyItemId, newEarlyItemId, newEarlyPrice,
                         originallyHadAroomPosition, earlyPositionId,
-                        roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                        roomPosid, userId, newRoomItemId,
+                        orderCode, event, pretixInformation, true);
                 if (earlyRes == null) {
                     return false;
                 }
@@ -929,7 +936,8 @@ public class UserBuysFullRoom implements RoomLogic {
             if (extraDays.isLate()) {
                 lateRes = buyOrUpgradeItem(originalLateItemId, newLateItemId, newLatePrice,
                         originallyHadAroomPosition, latePositionId,
-                        roomPosid, userId, newRoomItemId, orderCode, event, pretixInformation);
+                        roomPosid, userId, newRoomItemId,
+                        orderCode, event, pretixInformation, true);
                 if (lateRes == null) {
                     return false;
                 }

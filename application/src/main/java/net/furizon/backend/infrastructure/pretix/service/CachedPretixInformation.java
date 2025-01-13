@@ -654,6 +654,7 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
         itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
         itemIdsCache.put(CacheItemTypes.EXTRA_FURSUITS, products.extraFursuitsItemIds());
+        itemIdsCache.put(CacheItemTypes.TEMP_ADDON, products.tempAddons());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());

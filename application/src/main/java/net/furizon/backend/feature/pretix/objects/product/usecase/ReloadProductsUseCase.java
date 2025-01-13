@@ -100,6 +100,11 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             break;
                         }
 
+                        case PretixConst.METADATA_TEMP_ADDON: {
+                            result.tempAddons().add(productId);
+                            break;
+                        }
+
                         default: {
                             log.warn(
                                 "Unrecognized identifier while parsing product ({}) :'{}'",
