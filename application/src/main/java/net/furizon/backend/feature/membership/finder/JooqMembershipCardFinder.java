@@ -112,7 +112,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
                         MEDIA.MEDIA_PATH,
-                        ORDERS.ORDER_SPONSORSHIP_TYPE //We always will return this equal to null
+                        ORDERS.ORDER_SPONSORSHIP_TYPE,
+                        ORDERS.ORDER_CODE
                 )
                 .from(MEMBERSHIP_CARDS)
                 .innerJoin(USERS)
