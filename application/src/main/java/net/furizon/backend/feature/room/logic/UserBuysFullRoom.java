@@ -534,7 +534,7 @@ public class UserBuysFullRoom implements RoomLogic {
         exchange = exchangeSingleItem(
                 sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId,
                 sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                sourceOrderCode, targetOrderCode, event, pretixInformation, false);
+                sourceOrderCode, targetOrderCode, event, pretixInformation, true);
         if (exchange == null) {
             return false;
         }
@@ -544,7 +544,7 @@ public class UserBuysFullRoom implements RoomLogic {
         exchange = exchangeSingleItem(
                 sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId,
                 sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                sourceOrderCode, targetOrderCode, event, pretixInformation, false);
+                sourceOrderCode, targetOrderCode, event, pretixInformation, true);
         if (exchange == null) {
             return false;
         }
