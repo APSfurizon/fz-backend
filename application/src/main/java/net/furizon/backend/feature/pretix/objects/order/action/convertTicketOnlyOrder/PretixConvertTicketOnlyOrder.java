@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
+import net.furizon.backend.feature.pretix.objects.order.action.setAddonAsBundled.SetAddonAsBundledAction;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
@@ -27,8 +28,9 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderAction {
 
-    @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
-    @NotNull private final PushPretixPositionAction pushPretixPositionAction;
+    @NotNull private final UpdatePretixPositionAction updatePretixPosition;
+    @NotNull private final PushPretixPositionAction pushPretixPosition;
+    @NotNull private final SetAddonAsBundledAction setAddonAsBundled;
     @NotNull private final PretixPositionFinder pretixPositionFinder;
     @NotNull private final PretixOrderFinder pretixOrderFinder;
 
@@ -48,12 +50,14 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
             OrderController.suspendWebhook();
             var p = pretixPositionFinder.fetchPositionById(event, order.getTicketPositionId());
             if (p.isEmpty()) {
-                log.error("Position {} of order {} not found on pretix", order.getTicketPositionId(), order.getCode());
+                log.error("[PRETIX_TICKET_CONVERT] Position {} of order {} not found on pretix",
+                        order.getTicketPositionId(), order.getCode());
                 return false;
             }
             PretixPosition pretixPosition = p.get();
 
-            log.info("Converting 'ticket only' order {} to room + ticket", order.getCode());
+            log.info("[PRETIX_TICKET_CONVERT] Converting 'ticket only' order {} to room + ticket",
+                    order.getCode());
             PushPretixPositionRequest pushReq = PushPretixPositionRequest.builder()
                     .orderCode(order.getCode())
                     .addonTo(order.getTicketPositionPosid())
@@ -76,7 +80,7 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
                     .validUntil(pretixPosition.getValidUntil())
                     .build();
 
-            pushPretixPositionAction.invoke(
+            PretixPosition newPos = pushPretixPosition.invoke(
                     event,
                     pushReq,
                     true,
@@ -84,17 +88,43 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
                     PretixGenericUtils.fromStrPriceToLong(pretixPosition.getPrice())
             );
 
-            updatePretixPositionAction.invoke(event, order.getTicketPositionId(), new UpdatePretixPositionRequest(
+            if (newPos == null) {
+                log.error("[PRETIX_TICKET_CONVERT] PushPretixPosition failed while converting order {}",
+                        order.getCode());
+                return false;
+            }
+
+            long ticketPositionId = order.getTicketPositionId();
+            boolean updateRes = updatePretixPosition.invoke(event, ticketPositionId, new UpdatePretixPositionRequest(
                     order.getCode(),
                     noRoomItemId,
                     PretixGenericUtils.fromPriceToString(0L, '.'),
                     Collections.emptyList()
-            ));
+            )) != null;
+
+            if (!updateRes) {
+                log.error("[PRETIX_TICKET_CONVERT] UpdatePretixPosition failed while converting order {}",
+                        order.getCode());
+                return false;
+            }
+
+            boolean bundleRes = setAddonAsBundled.invoke(
+                    newPos.getPositionId(),
+                    true,
+                    event
+            );
+
+            if (!bundleRes) {
+                log.error("[PRETIX_TICKET_CONVERT] SetBundle failed while converting order {}. "
+                        + "The order cannot be changed anymore, MANUAL FIX NEEDED", order.getCode());
+                //We don't want to return
+            }
 
             if (updateOrderInDb != null) {
                 var o = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), order.getCode());
                 if (o.isEmpty()) {
-                    log.error("Order {} not found on pretix after converting it to room + ticket bundle",
+                    log.error("[PRETIX_TICKET_CONVERT] "
+                            + "Order {} not found on pretix after converting it to room + ticket bundle",
                             order.getCode());
                     return false;
                 }

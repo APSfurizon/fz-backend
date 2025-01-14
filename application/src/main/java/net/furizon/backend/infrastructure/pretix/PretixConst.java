@@ -30,4 +30,6 @@ public class PretixConst {
     public static final String QUESTIONS_FILE_KEEP = "file:keep";
 
     public static final String ALL_COUNTRIES_STATE_KEY = "countries";
+
+    public static final String FZBACKENDUTILS_API_HEADER_NAME = "fz-backend-api";
 }
