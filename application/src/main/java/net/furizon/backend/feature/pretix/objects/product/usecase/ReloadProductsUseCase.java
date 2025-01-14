@@ -16,6 +16,8 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -70,7 +72,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         String roomName = sp[1];
                         short capacity = Short.parseShort(sp[2]);
                         result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
-                        result.roomPretixItemIdToNames().put(productId, product.getNames());
+                        Map<String, String> names = product.getCustomNames();
+                        names = names.isEmpty() ? product.getNames() : names;
+                        result.roomPretixItemIdToNames().put(productId, names);
                     }
 
 
