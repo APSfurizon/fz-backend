@@ -483,14 +483,15 @@ public class RoomController {
                 )
         );
         boolean success = true;
-        log.info("Exchange update status: src {}; dst {}", status.isSourceConfirmed(), status.isTargetConfirmed());
+        long userId = status.getSourceUserId();
+        log.info("Exchange update status: src ({}) = {}; ({}) = dst {}",
+                userId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
         if (status.isFullyConfirmed()) {
             ExchangeRequest exchangeRequest = new ExchangeRequest(
-                status.getSourceUserId(),
+                    userId,
                 status.getTargetUserId(),
                 status.getAction()
             );
-            long userId = status.getSourceUserId();
             var auth = Objects.requireNonNull(sessionAuthenticationManager.findAuthenticationByUserId(userId));
             FurizonUser fakeUser = FurizonUser.builder()
                     .userId(userId)
@@ -498,7 +499,8 @@ public class RoomController {
                     .sessionId(user.getSessionId())
                     .build();
 
-            log.info("Exchange is fully confirmed, running action {}", status.getAction());
+            log.info("Exchange is fully confirmed, running action {} with usr {}",
+                    status.getAction(), fakeUser.getUserId());
             switch (status.getAction()) {
                 case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
                         ExchangeRoomUseCase.class,

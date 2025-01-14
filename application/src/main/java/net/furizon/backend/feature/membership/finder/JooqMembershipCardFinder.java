@@ -128,7 +128,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 .leftJoin(MEDIA)
                 .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
                 .leftJoin(ORDERS)
-                .on(ORDERS.USER_ID.eq(USERS.USER_ID))
+                .on(ORDERS.ID.eq(MEMBERSHIP_CARDS.CREATED_FOR_ORDER))
                 .orderBy(MEMBERSHIP_CARDS.ID_IN_YEAR)
         ).stream().map(r -> r.map(FullInfoMembershipMapper::map)).toList();
     }

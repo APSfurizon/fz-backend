@@ -147,7 +147,11 @@ public class JooqUserFinder implements UserFinder {
                 searchFursonaQuery.field(USERS.USER_ID).notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
                     .from(ROOM_GUESTS)
-                    .where(ROOM_GUESTS.CONFIRMED.isTrue())
+                    .where(
+                        ROOM_GUESTS.CONFIRMED.isTrue()
+                    //TODO find users inside the same room of the current user
+                    //.and(ROOM_GUESTS.ROOM_ID.notEqual())
+                    )
                 )
                 .and(
                     ORDERS.ORDER_ROOM_CAPACITY.isNull()

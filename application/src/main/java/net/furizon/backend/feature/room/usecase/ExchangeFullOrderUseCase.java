@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -40,7 +41,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
 
         checks.assertInTimeframeToEditRooms();
 
-        checks.assertUserHasOrder(sourceUserId, event);
+        Order sourceOrder = checks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
         checks.assertUserHasNotAnOrder(destUserId, event);
 
         long roomId = -1L;
@@ -50,7 +51,8 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
             checks.assertRoomNotConfirmed(roomId);
         }
 
-        checks.assertOrderIsPaid(sourceUserId, event);
+        checks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
+        checks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
             return true;

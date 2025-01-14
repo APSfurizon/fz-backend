@@ -42,10 +42,10 @@ public class PasetoTokenDecoder implements TokenDecoder {
 
             return objectMapper.readValue(json, TokenMetadata.class);
         } catch (JsonProcessingException ex) {
-            log.warn("Could read json", ex);
+            log.warn("Could read json: {}", ex.getMessage());
             throw new AuthenticationServiceException("Bad message", ex);
         } catch (PasetoException e) {
-            log.warn("Could not decode token", e);
+            log.warn("Could not decode token: {}", e.getMessage());
             throw new BadCredentialsException("Invalid Session Token");
         }
     }
