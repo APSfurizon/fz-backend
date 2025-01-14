@@ -3,16 +3,16 @@ package net.furizon.backend.feature.badge.controller;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.dto.BadgeUploadResponse;
+import net.furizon.backend.feature.badge.usecase.DeleteUserBadgeUsecase;
 import net.furizon.backend.feature.badge.usecase.UploadUserBadgeUsecase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/badge")
@@ -31,6 +31,17 @@ public class BadgeController {
                 user,
                 image
             )
+        );
+    }
+
+    @DeleteMapping(value = "/")
+    public boolean deleteUpload(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestParam("id")Set<Long> ids
+    ) {
+        return useCaseExecutor.execute(
+            DeleteUserBadgeUsecase.class,
+            ids
         );
     }
 }
