@@ -55,12 +55,9 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
             //  by keeping it hidden (not visible) except for vouchers, the category won't appear at all
             //  in the add-on choice for the users
             long tempAddonItemId = (long) pretixInformation.getIdsForItemType(CacheItemTypes.TEMP_ADDON).toArray()[0];
-            PushPretixPositionRequest tempPositionReq = new PushPretixPositionRequest(
-                    position.getOrderCode(),
-                    position.getAddonTo(),
-                    tempAddonItemId
-            );
-            PretixPosition tempPosition = push(event, tempPositionReq);
+            long originalAddonItemId = position.getItem();
+            position.setItem(tempAddonItemId);
+            PretixPosition tempPosition = push(event, position);
             if (tempPosition == null) {
                 log.error("PushPretixPosition failed while generating a temp position id: {}", tempAddonItemId);
                 return null;
@@ -69,7 +66,7 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
             long tempPosId = tempPosition.getPositionId();
             return updatePretixPositionAction.invoke(event, tempPosId, new UpdatePretixPositionRequest(
                     position.getOrderCode(),
-                    position.getItem(),
+                    originalAddonItemId,
                     itemPrice
             ));
 

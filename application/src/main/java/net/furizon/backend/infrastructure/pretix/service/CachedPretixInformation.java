@@ -532,8 +532,8 @@ public class CachedPretixInformation implements PretixInformation {
     public void resetCache() {
         log.info("[PRETIX] Resetting cache for pretix information");
 
-        lock.writeLock().lock();
         try {
+            lock.writeLock().lock();
             invalidateEventsCache();
             invalidateEventStructCache();
 

@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.order.action.deleteOrder.DeleteOrderAction;
+import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -32,23 +33,28 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
     @NotNull
     @Override
     public Optional<Order> executor(@NotNull Input input) {
-        Event event = input.event;
-        String orderCode = input.code;
-        var eventInfo = event.getOrganizerAndEventPair();
+        try {
+            OrderController.suspendWebhook();
+            Event event = input.event;
+            String orderCode = input.code;
+            var eventInfo = event.getOrganizerAndEventPair();
 
-        Optional<PretixOrder> pretixOrder = pretixOrderFinder.fetchOrderByCode(
-            eventInfo.getOrganizer(),
-            eventInfo.getEvent(),
-            orderCode
-        );
+            Optional<PretixOrder> pretixOrder = pretixOrderFinder.fetchOrderByCode(
+                    eventInfo.getOrganizer(),
+                    eventInfo.getEvent(),
+                    orderCode
+            );
 
-        if (pretixOrder.isEmpty()) {
-            deleteOrderAction.invoke(orderCode);
-            log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, event.getSlug());
-            return Optional.empty();
+            if (pretixOrder.isEmpty()) {
+                deleteOrderAction.invoke(orderCode);
+                log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, event.getSlug());
+                return Optional.empty();
+            }
+
+            return updateOrderInDb.execute(pretixOrder.get(), event, input.pretixInformation);
+        } finally {
+            OrderController.resumeWebhook();
         }
-
-        return updateOrderInDb.execute(pretixOrder.get(), event, input.pretixInformation);
     }
 
     public record Input(
