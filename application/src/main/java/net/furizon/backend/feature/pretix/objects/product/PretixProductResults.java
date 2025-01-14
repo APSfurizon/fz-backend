@@ -26,7 +26,8 @@ public record PretixProductResults(
     @NotNull Set<Long> noRoomItemIds,
     @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
     @NotNull Map<HotelCapacityPair, Long> lateDaysItemId,
-    @NotNull Set<Long> tempAddons
+    @NotNull Set<Long> tempAddons,
+    @NotNull Set<Long> tempItems
 ) {
     public PretixProductResults() {
         this(
@@ -44,6 +45,7 @@ public record PretixProductResults(
             new TreeSet<>(),
             new HashMap<>(),
             new HashMap<>(),
+            new HashSet<>(),
             new HashSet<>()
         );
     }

@@ -24,6 +24,7 @@ public class PretixConst {
     public static final String METADATA_EXTRA_FURSUIT_BADGE = "fursuit_badge";
 
     public static final String METADATA_TEMP_ADDON = "temp_addon";
+    public static final String METADATA_TEMP_ITEM = "temp_item";
 
 
     public static final String QUESTIONS_FILE_KEEP = "file:keep";

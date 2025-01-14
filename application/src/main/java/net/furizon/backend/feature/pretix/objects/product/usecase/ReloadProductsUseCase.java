@@ -104,6 +104,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             result.tempAddons().add(productId);
                             break;
                         }
+                        case PretixConst.METADATA_TEMP_ITEM: {
+                            result.tempItems().add(productId);
+                            break;
+                        }
 
                         default: {
                             log.warn(
