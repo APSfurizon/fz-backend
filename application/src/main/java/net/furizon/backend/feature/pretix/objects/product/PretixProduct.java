@@ -14,6 +14,7 @@ import java.util.function.BiConsumer;
 @Data
 public class PretixProduct {
     private final long id;
+    private final boolean active;
 
     @NotNull
     @JsonProperty("default_price")
@@ -46,7 +47,7 @@ public class PretixProduct {
         BiConsumer<PretixProductVariation, String> callback
     ) {
         variations.stream()
-            .filter(v -> v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
+            .filter(v -> v.isActive() && v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
             .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));
     }
 }

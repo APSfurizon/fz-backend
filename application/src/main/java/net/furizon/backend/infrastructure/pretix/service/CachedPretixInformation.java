@@ -413,9 +413,9 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
-                    if (extraDays == ExtraDays.EARLY) {
+                    if (cacheExtraDays == ExtraDays.EARLY) {
                         earlyPositionId = position.getPositionId();
-                    } else if (extraDays == ExtraDays.LATE) {
+                    } else if (cacheExtraDays == ExtraDays.LATE) {
                         latePositionId = position.getPositionId();
                     }
                     if (extraDays != ExtraDays.BOTH) {

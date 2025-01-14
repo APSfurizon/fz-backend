@@ -35,7 +35,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
             r -> {
                 PretixProduct product = r.getLeft();
                 String identifier = product.getIdentifier();
-                if (identifier == null) {
+                if (identifier == null || !product.isActive()) {
+                    log.info("Skipping item {}: identifier = {}, isActive = {}",
+                            identifier, product.getIdentifier(), product.isActive());
                     return;
                 }
                 long productId = product.getId();

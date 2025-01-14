@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
@@ -49,6 +50,7 @@ import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +61,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/room")
 @RequiredArgsConstructor
@@ -70,6 +74,8 @@ public class RoomController {
     private final UseCaseExecutor executor;
     @org.jetbrains.annotations.NotNull
     private final SanityCheckService sanityCheckService;
+    @org.jetbrains.annotations.NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
@@ -477,18 +483,27 @@ public class RoomController {
                 )
         );
         boolean success = true;
+        log.info("Exchange update status: src {}; dst {}", status.isSourceConfirmed(), status.isTargetConfirmed());
         if (status.isFullyConfirmed()) {
             ExchangeRequest exchangeRequest = new ExchangeRequest(
                 status.getSourceUserId(),
                 status.getTargetUserId(),
                 status.getAction()
             );
+            long userId = status.getSourceUserId();
+            var auth = Objects.requireNonNull(sessionAuthenticationManager.findAuthenticationByUserId(userId));
+            FurizonUser fakeUser = FurizonUser.builder()
+                    .userId(userId)
+                    .authentication(auth)
+                    .sessionId(user.getSessionId())
+                    .build();
 
+            log.info("Exchange is fully confirmed, running action {}", status.getAction());
             switch (status.getAction()) {
                 case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
                         ExchangeRoomUseCase.class,
                         new ExchangeRoomUseCase.Input(
-                                user,
+                                fakeUser,
                                 exchangeRequest,
                                 pretixInformation,
                                 false
@@ -497,7 +512,7 @@ public class RoomController {
                 case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
                         ExchangeFullOrderUseCase.class,
                         new ExchangeFullOrderUseCase.Input(
-                                user,
+                                fakeUser,
                                 exchangeRequest,
                                 pretixInformation,
                                 false

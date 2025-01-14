@@ -11,8 +11,8 @@ import java.util.Map;
 
 @Data
 public class PretixProductVariation {
-
     private final long id;
+    private final boolean active;
 
     @NotNull
     @JsonProperty("value")

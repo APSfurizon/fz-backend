@@ -129,6 +129,19 @@ public class Order {
     private Map<String, List<String>> answerIdentifierToOptionIdentifier;
 
 
+    public String toFullString() {
+        return "code=" + code + " orderStatus=" + orderStatus
+            + " sponsorship=" + sponsorship + " extraDays=" + extraDays + " dailyDays=" + dailyDays
+            + " pretixRoomItemId=" + pretixRoomItemId + " roomCapacity=" + roomCapacity
+            + " hotelInternalName=" + hotelInternalName + " roomInternalName=" + roomInternalName
+            + " pretixOrderSecret=" + pretixOrderSecret + " hasMembership=" + hasMembership
+            + " ticketPositionId=" + ticketPositionId + " ticketPositionPosid=" + ticketPositionPosid
+            + " roomPositionId=" + roomPositionId + " roomPositionPosid=" + roomPositionPosid
+            + " earlyPositionId=" + earlyPositionId + " latePositionId=" + latePositionId
+            + " extraFursuits=" + extraFursuits
+            + " orderOwnerUserId=" + orderOwnerUserId + " eventId=" + eventId;
+    }
+
 
     public long getId() {
         return Hashing.sha512().hashString(code + String.format("%016x", eventId), StandardCharsets.UTF_8).asLong();

@@ -757,6 +757,13 @@ public class UserBuysFullRoom implements RoomLogic {
             @NotNull PretixInformation pretixInformation,
             boolean createTempAddonFirst
     ) {
+        log.debug("[ROOM_BUY] buyOrUpgradeItem called with "
+                + "originalItemId={} newItemId={} newItemPrice={} originallyHadAroomPosition={} "
+                + "positionId={} addonToPositionId={} userId={} newRoomItemId={} orderCode={} "
+                + "event={} pretixInformation={} createTempAddonFirst={}",
+                originalItemId, newItemId, newItemPrice, originallyHadAroomPosition,
+                positionId, addonToPositionId, userId, newRoomItemId, orderCode,
+                event, pretixInformation, createTempAddonFirst);
         if (newItemId == null || newItemPrice == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: newItemId was null",
                     userId, newRoomItemId, event);
@@ -892,6 +899,16 @@ public class UserBuysFullRoom implements RoomLogic {
             log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
                             + "User is buying or upgrading his room to r{} e{} l{}",
                     userId, newRoomItemId, event, newRoomItemId, newEarlyItemId, newLateItemId);
+            log.debug("[ROOM_BUY] buyOrUpgradeRoom called with params: "
+                + "newRoomItemId={} newRoomPrice={} oldRoomPaid={} userId={} roomId={} "
+                + "newEarlyItemId={} newEarlyPrice={} oldEarlyPaid={} "
+                + "newLateItemId={} newLatePrice={} oldLatePaid={} "
+                + "order=({}) evet={} pretixInformation={}",
+                newRoomItemId, newRoomPrice, oldRoomPaid, userId, roomId,
+                newEarlyItemId, newEarlyPrice, oldEarlyPaid,
+                newLateItemId, newLatePrice, oldLatePaid,
+                order.toFullString(), event, pretixInformation
+            );
             Long roomPositionId = order.getRoomPositionId();
             final boolean originallyHadAroomPosition = roomPositionId != null;
             Long earlyPositionId = order.getEarlyPositionId();
