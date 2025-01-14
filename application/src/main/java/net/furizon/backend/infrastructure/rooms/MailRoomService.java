@@ -37,7 +37,8 @@ public class MailRoomService {
         log.info("Sending broadcast problem to room: {}", roomId);
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
-            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
+            //TODO FIX HANG
+            //emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
         }
     }
 
@@ -45,7 +46,8 @@ public class MailRoomService {
         log.info("Sending broadcast update to room: {}", roomId);
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
-            emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
+            //TODO FIX HANG
+            //emailSender.send(guest.getUserId(), RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
         }
     }
 }
