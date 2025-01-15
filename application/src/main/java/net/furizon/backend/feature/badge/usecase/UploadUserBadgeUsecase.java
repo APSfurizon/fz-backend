@@ -6,8 +6,10 @@ import com.sksamuel.scrimage.nio.JpegWriter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.dto.BadgeUploadResponse;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
-import net.furizon.backend.infrastructure.badge.BadgeConfig;
-import net.furizon.backend.infrastructure.image.action.AddMediaAction;
+import net.furizon.backend.feature.user.action.setBadge.SetUserBadgeAction;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
+import net.furizon.backend.infrastructure.image.SimpleImageMetadata;
+import net.furizon.backend.infrastructure.image.action.StoreMediaOnDiskAction;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -16,29 +18,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
-@Component
 @Slf4j
+@Component
 public class UploadUserBadgeUsecase implements UseCase<UploadUserBadgeUsecase.Input, BadgeUploadResponse> {
-    private final BadgeConfig badgeConfig;
 
-    private final UploadUserBadgeValidator validator;
+    @NotNull private final BadgeConfig badgeConfig;
 
-    private final JpegWriter writer;
+    @NotNull private final UploadUserBadgeValidator validator;
 
-    private final AddMediaAction addMediaAction;
+    @NotNull private final JpegWriter writer;
+
+    @NotNull private final StoreMediaOnDiskAction storeMediaOnDiskAction;
+    @NotNull private final SetUserBadgeAction setUserBadgeAction;
 
     public UploadUserBadgeUsecase(
-        BadgeConfig badgeConfig,
-        UploadUserBadgeValidator validator,
-        AddMediaAction addMediaAction
+        @NotNull BadgeConfig badgeConfig,
+        @NotNull UploadUserBadgeValidator validator,
+        @NotNull StoreMediaOnDiskAction storeMediaOnDiskAction,
+        @NotNull SetUserBadgeAction setUserBadgeAction
     ) {
         this.badgeConfig = badgeConfig;
         this.validator = validator;
-        this.addMediaAction = addMediaAction;
+        this.storeMediaOnDiskAction = storeMediaOnDiskAction;
+        this.setUserBadgeAction = setUserBadgeAction;
         this.writer = new JpegWriter()
             .withCompression(badgeConfig.getJpegQualityThreshold())
             .withProgressive(true);
@@ -48,28 +52,25 @@ public class UploadUserBadgeUsecase implements UseCase<UploadUserBadgeUsecase.In
     @Override
     public @NotNull BadgeUploadResponse executor(UploadUserBadgeUsecase.@NotNull Input input) {
         try {
-            final var imageMetadata = validator.invoke(input);
-            final var loadedImage = ImmutableImage.loader().fromBytes(imageMetadata.getData());
-            final var image = imageMetadata.getWidth() / imageMetadata.getHeight() == 1
+            SimpleImageMetadata imageMetadata = validator.invoke(input);
+            ImmutableImage loadedImage = ImmutableImage.loader().fromBytes(imageMetadata.getData());
+            ImmutableImage image = imageMetadata.getWidth() == imageMetadata.getHeight()
                 ? loadedImage
                 : loadedImage.cover(imageMetadata.getWidth(), imageMetadata.getWidth(), Position.TopLeft);
 
-            final String filename = UUID.randomUUID() + ".jpg";
-            final String userId = String.valueOf(input.user.getUserId());
-            final String relativePath = "/%s/%s".formatted(userId, filename);
-            final String absolutePath = "%s%s".formatted(badgeConfig.getStoragePath(), relativePath);
-            final File userDir = new File("%s/%s".formatted(badgeConfig.getStoragePath(), userId));
+            StoreMediaOnDiskAction.Results res = storeMediaOnDiskAction.invoke(
+                    image,
+                    imageMetadata,
+                    input.user,
+                    badgeConfig.getStoragePath(),
+                    writer
+            );
 
-            if (!userDir.exists()) {
-                userDir.mkdirs();
-            }
-
-            addMediaAction.invoke(relativePath, imageMetadata.getType());
-            image.output(writer, new File(absolutePath));
+            setUserBadgeAction.invoke(input.user.getUserId(), res.mediaDbId());
 
             return BadgeUploadResponse.builder()
                 .id(1L)
-                .relativePath(relativePath)
+                .relativePath(res.relativePath())
                 .build();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

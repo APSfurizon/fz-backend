@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.MediaFinder;
-import net.furizon.backend.infrastructure.badge.BadgeConfig;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.image.action.DeleteMediaAction;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
