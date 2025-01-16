@@ -2,9 +2,10 @@ package net.furizon.backend.infrastructure.image.action;
 
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.nio.ImageWriter;
-import lombok.RequiredArgsConstructor;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
+import net.furizon.backend.infrastructure.image.ImageConfig;
 import net.furizon.backend.infrastructure.image.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
@@ -18,30 +19,50 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
+    @NotNull private final ImageConfig imageConfig;
     @NotNull private final StorageConfig storageConfig;
     @NotNull private final AddMediaAction addMediaAction;
+
+    @NotNull private final ImageWriter writer;
+
+
+    public StoreMediaOnDiskActionImpl(
+            @NotNull ImageConfig imageConfig,
+            @NotNull StorageConfig storageConfig,
+            @NotNull AddMediaAction addMediaAction
+    ) {
+        this.imageConfig = imageConfig;
+        this.storageConfig = storageConfig;
+        this.addMediaAction = addMediaAction;
+        //Q z m explaination here: https://developers.google.com/speed/webp/docs/cwebp
+        this.writer = new WebpWriter()
+                .withoutAlpha()
+                .withQ(imageConfig.getWebpQuality());
+    }
 
     @Override
     public @NotNull StoreMediaOnDiskAction.Results invoke(
             @NotNull ImmutableImage image, @NotNull SimpleImageMetadata metadata,
-            @NotNull FurizonUser user, @NotNull String basePath, @NotNull ImageWriter writer) throws IOException {
+            @NotNull FurizonUser user, @NotNull String basePath) throws IOException {
 
         log.info("Storing a media on disk for user {} on basePath {}", user.getUsername(), basePath);
 
-        String filename = UUID.randomUUID() + ".jpg";
+        String filename = UUID.randomUUID() + ".webp";
         String userId = String.valueOf(user.getUserId());
 
-        Path relativePath = Paths.get(basePath, userId, filename);
-        Path absolutePath = Paths.get(storageConfig.getBasePath()).resolve(relativePath);
+        Path relativePath = Paths.get(basePath, userId);
+        Path fullRelativePath = relativePath.resolve(filename);
+        Path baseStoragePath = Paths.get(storageConfig.getBasePath());
+        Path absolutePath = baseStoragePath.resolve(relativePath);
+        Path fullAbsolutePath = baseStoragePath.resolve(fullRelativePath);
         Files.createDirectories(absolutePath);
 
-        image.output(writer, absolutePath);
-        String relativePathStr = relativePath.toString();
+        String relativePathStr = fullRelativePath.toString();
         long mediaId = addMediaAction.invoke(relativePathStr, metadata.getType());
+        image.output(writer, fullAbsolutePath);
 
-        log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), absolutePath);
+        log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), fullAbsolutePath);
 
         return new Results(relativePathStr, mediaId);
     }

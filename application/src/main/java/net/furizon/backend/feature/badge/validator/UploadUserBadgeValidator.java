@@ -5,7 +5,7 @@ import com.sksamuel.scrimage.format.FormatDetector;
 import com.sksamuel.scrimage.metadata.ImageMetadata;
 import com.sksamuel.scrimage.metadata.Tag;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.badge.usecase.UploadUserBadgeUsecase;
+import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.image.ImageCodes;
 import net.furizon.backend.infrastructure.image.SimpleImageMetadata;
@@ -28,7 +28,7 @@ public class UploadUserBadgeValidator {
 
     @NotNull private final BadgeConfig badgeConfig;
 
-    public SimpleImageMetadata invoke(@NotNull UploadUserBadgeUsecase.Input input) throws IOException {
+    public SimpleImageMetadata invoke(@NotNull UploadBadgeUsecase.Input input) throws IOException {
         final byte[] imageBytes = input.image().getBytes();
         if (imageBytes.length > badgeConfig.getMaxSizeBytes()) {
             throw new ApiException("Image is too large to be uploaded", ImageCodes.IMAGE_SIZE_TOO_BIG);

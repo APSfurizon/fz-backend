@@ -9,4 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ImageConfig {
     @NotNull private final String basePath;
     @NotNull private final String fullBasePath;
+    private final int webpQuality;
 }

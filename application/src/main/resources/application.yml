@@ -114,14 +114,15 @@ pretix:
 storage:
   base-path: data/
 
+
 image:
   base-path: ${IMAGE_BASE_PATH:static/images/}
   full-base-path: ${storage.base-path}${image.base-path}
+  webp-quality: ${IMAGE_QUALITY:85}
 
 badge:
   storage-path: ${image.base-path}${BADGE_STORAGE_PATH:badges}
   full-storage-path: ${storage.base-path}${badge.storage-path}
-  jpeg-quality-threshold: ${BADGE_IMAGE_JPEG_QUALITY_THRESHOLD:90}
   max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:4194304} #4 MB
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
