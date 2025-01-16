@@ -90,10 +90,10 @@ public class UpdateOrderInDb {
                                 }
 
                             } else { //A membership card was already created with this order
-                                Long cardOwnerId = card.getCreatedForOrderId();
+                                long cardOwnerId = card.getUserOwnerId();
 
                                 //Order owner has changed
-                                if (cardOwnerId != null && !cardOwnerId.equals(orderOwnerId)) {
+                                if (!orderOwnerId.equals(cardOwnerId)) {
                                     //If the card wasn't registered yet, we can change the owners
                                     if (!card.isRegistered()) {
                                         if (userFinder.findById(orderOwnerId) != null) {
