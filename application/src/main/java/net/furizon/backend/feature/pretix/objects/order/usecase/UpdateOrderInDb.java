@@ -178,9 +178,15 @@ public class UpdateOrderInDb {
             }
 
             if (updateToRoomWithTicket && order != null && order.getRoomPositionId() == null) {
-                log.info("[PRETIX] Order {} was a 'ticket only' order. Converting it to ticket + room",
+                //If we convert a pending order, all pending payments will be canceled
+                if (order.getOrderStatus() != OrderStatus.PENDING) {
+                    log.info("[PRETIX] Order {} is a 'ticket only' order. Converting it to ticket + room",
                         order.getCode());
-                convertTicketOnlyOrderAction.invoke(order, pretixInformation, this);
+                    convertTicketOnlyOrderAction.invoke(order, pretixInformation, this);
+                } else {
+                    log.warn("[PRETIX] Order {} is a 'ticket only' order, but we're skipping convertion "
+                            + "because of its status: {}", order.getCode(), order.getOrderStatus());
+                }
             }
 
             return Optional.ofNullable(order);
