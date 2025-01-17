@@ -48,6 +48,7 @@ public class JooqOrderMapper {
                 .pretixRoomItemId(record.get((ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)))
                 .roomCapacity(record.get(ORDERS.ORDER_ROOM_CAPACITY))
                 .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
+                .roomInternalName(record.get(ORDERS.ORDER_ROOM_INTERNAL_NAME))
                 .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))
                 .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
                 .ticketPositionId(record.get(ORDERS.ORDER_TICKET_POSITION_ID))

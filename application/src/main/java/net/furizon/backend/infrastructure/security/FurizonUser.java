@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class FurizonUser implements UserDetails {
     @JsonIgnore
     @NotNull
     @Builder.Default
-    private final List<? extends GrantedAuthority> authorities = List.of();
+    private final List<? extends GrantedAuthority> authorities = Collections.emptyList();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

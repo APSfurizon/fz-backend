@@ -1,6 +1,9 @@
 package net.furizon.backend.feature.authentication.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -47,7 +50,9 @@ import java.util.UUID;
 @RequestMapping("/api/v1/authentication")
 @RequiredArgsConstructor
 public class AuthenticationController {
+    @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+    @org.jetbrains.annotations.NotNull
     private final PretixInformation pretixService;
 
     @PostMapping("/login")
@@ -160,14 +165,17 @@ public class AuthenticationController {
         "This endpoint SHOULD NOT be implemented in the frontend. Users will open a link directly to this page "
         + "and, on success, this page should redirect back to the login page with a code in the "
         + "url's `status` param with the result")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirects to the login page  "
+            + "with the result in the `status` query parameter of the url. The values can be: "
+            + "CONFIRMATION_SUCCESSFUL and CONFIRMATION_NOT_FOUND. Use these values to "
+            + "display a popup with the result in a textual form.", content = @Content)
+    })
     @GetMapping("/confirm-mail")
     public RedirectView confirmEmail(
         @Valid @RequestParam("id") @NotNull final UUID id
     ) {
-        return executor.execute(
-                ConfirmEmailUseCase.class,
-                id
-        );
+        return executor.execute(ConfirmEmailUseCase.class, id);
     }
 
     @Operation(summary = "Destroys all sessions of the logged in user", description =

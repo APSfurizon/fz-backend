@@ -4,6 +4,7 @@ public class PretixConst {
     public static final String PRETIX_HTTP_CLIENT = "pretixHttpClient";
 
     public static final String METADATA_IDENTIFIER_ITEM = "item_name";
+    public static final String METADATA_IDENTIFIER_CUSTOM_NAME = "custom_display_name";
 
     public static final String QUESTIONS_ACCOUNT_USERID = "account_userid";
     public static final String QUESTIONS_DUPLICATE_DATA = "account_double_order_data";
@@ -23,8 +24,13 @@ public class PretixConst {
 
     public static final String METADATA_EXTRA_FURSUIT_BADGE = "fursuit_badge";
 
+    public static final String METADATA_TEMP_ADDON = "temp_addon";
+    public static final String METADATA_TEMP_ITEM = "temp_item";
+
 
     public static final String QUESTIONS_FILE_KEEP = "file:keep";
 
     public static final String ALL_COUNTRIES_STATE_KEY = "countries";
+
+    public static final String FZBACKENDUTILS_API_HEADER_NAME = "fz-backend-api";
 }

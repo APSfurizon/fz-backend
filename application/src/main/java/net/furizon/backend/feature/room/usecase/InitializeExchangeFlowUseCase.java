@@ -11,6 +11,7 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
+import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +20,9 @@ import org.springframework.stereotype.Component;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
-import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.EXCHANGE_ROOM;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_INITIALIZED;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TRANSFER_FULL_ORDER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TRANSFER_ROOM;
 
 @Slf4j
 @Component
@@ -61,15 +59,11 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 var r = orderFinder.userHasBoughtAroom(destUserId, event);
                 destHasRoom = r.isPresent() && r.get();
             }
-            String actionText = switch (action) {
-                case TRASFER_EXCHANGE_ROOM -> TRANSFER_FULL_ORDER;
-                case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
-            };
             MailVarPair[] vars = {
-                new MailVarPair(EXCHANGE_ACTION_TEXT, actionText),
-                new MailVarPair(OWNER_FURSONA_NAME, sourceData.getFursonaName()),
-                new MailVarPair(FURSONA_NAME, destData.getFursonaName()),
-                new MailVarPair(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
+                MailVarPair.of(EXCHANGE_ACTION_TEXT, RoomEmailTexts.getActionText(action, destHasRoom)),
+                MailVarPair.of(ROOM_OWNER_FURSONA_NAME, sourceData.getFursonaName()),
+                MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
+                MailVarPair.of(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
             };
             mailService.sendUpdate(destUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
             mailService.sendUpdate(sourceUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);

@@ -21,8 +21,10 @@ public class ExchangeConfirmationStatusResponse {
     @NotNull private final ExchangeAction action;
 
     @Nullable private final OrderDataResponse fullOrderExchange;
+
     @Nullable private final RoomData sourceRoomExchange;
     @Nullable private final ExtraDays sourceExtraDays;
+    @Nullable private final Boolean targetRoomInfoHidden;
     @Nullable private final RoomData targetRoomExchange;
     @Nullable private final ExtraDays targetExtraDays;
 }

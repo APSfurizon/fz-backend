@@ -7,11 +7,14 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 import static net.furizon.backend.infrastructure.web.Web.Constants.Mdc.MDC_CORRELATION_ID;
 
@@ -27,6 +30,21 @@ public class CommonControllerAdvice {
             .body(
                 HttpErrorResponse.builder()
                     .errors(ex.getErrors())
+                    .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
+                    .build()
+            );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<HttpErrorResponse> handleAccessDeniedException(
+            @NotNull AccessDeniedException ex,
+            @NotNull HttpServletRequest request
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(
+                HttpErrorResponse.builder()
+                    .errors(List.of(new ApiError("User doesn't have correct permissions", "PERMISSION_NOT_FOUND")))
                     .requestId((String) request.getAttribute(MDC_CORRELATION_ID))
                     .build()
             );

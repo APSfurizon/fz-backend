@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
@@ -30,6 +31,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class RoomChecks {
+    @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
     @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final OrderFinder orderFinder;
@@ -214,7 +216,6 @@ public class RoomChecks {
         if (!guest.isConfirmed()) {
             log.error("Guest {} is NOT confirmed in the room {}", guest.getGuestId(), guest.getRoomId());
             throw new ApiException("Guest is NOT confirmed!", RoomErrorCodes.GUEST_NOT_CONFIRMED);
-
         }
     }
 
@@ -292,6 +293,9 @@ public class RoomChecks {
         return id;
     }
 
+    public void assertPaymentAndRefundConfirmed(@NotNull String orderCode, @NotNull Event event) {
+        pretixBalanceForProviderFinder.get(orderCode, event, true);
+    }
     private void assertOrderStatusPaid(@NotNull OrderStatus status, long userId, @NotNull Event event) {
         if (status != OrderStatus.PAID) {
             log.error("Order for user {} on event {} is not paid", userId, event);

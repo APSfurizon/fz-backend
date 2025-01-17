@@ -51,6 +51,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID, order.getPretixRoomItemId())
                 .set(ORDERS.ORDER_ROOM_CAPACITY, order.getRoomCapacity())
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, order.getHotelInternalName())
+                .set(ORDERS.ORDER_ROOM_INTERNAL_NAME, order.getRoomInternalName())
                 .set(ORDERS.ORDER_SECRET, order.getPretixOrderSecret())
                 .set(ORDERS.HAS_MEMBERSHIP, order.hasMembership())
                 .set(ORDERS.ORDER_TICKET_POSITION_ID, order.getTicketPositionId())

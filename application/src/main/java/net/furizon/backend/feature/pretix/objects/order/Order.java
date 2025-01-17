@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,8 @@ public class Order {
     private short roomCapacity = 0; // 0 = has no room
     @Nullable
     private String hotelInternalName;
+    @Nullable
+    private String roomInternalName;
 
 
     @NotNull
@@ -118,7 +121,26 @@ public class Order {
     @NotNull
     @Setter(AccessLevel.NONE)
     private Map<String, Object> answers;
+    @NotNull
+    @Setter(AccessLevel.NONE)
+    private Map<String, List<Long>> answerIdentifierToOptionId;
+    @NotNull
+    @Setter(AccessLevel.NONE)
+    private Map<String, List<String>> answerIdentifierToOptionIdentifier;
 
+
+    public String toFullString() {
+        return "code=" + code + " orderStatus=" + orderStatus
+            + " sponsorship=" + sponsorship + " extraDays=" + extraDays + " dailyDays=" + dailyDays
+            + " pretixRoomItemId=" + pretixRoomItemId + " roomCapacity=" + roomCapacity
+            + " hotelInternalName=" + hotelInternalName + " roomInternalName=" + roomInternalName
+            + " pretixOrderSecret=" + pretixOrderSecret + " hasMembership=" + hasMembership
+            + " ticketPositionId=" + ticketPositionId + " ticketPositionPosid=" + ticketPositionPosid
+            + " roomPositionId=" + roomPositionId + " roomPositionPosid=" + roomPositionPosid
+            + " earlyPositionId=" + earlyPositionId + " latePositionId=" + latePositionId
+            + " extraFursuits=" + extraFursuits
+            + " orderOwnerUserId=" + orderOwnerUserId + " eventId=" + eventId;
+    }
 
 
     public long getId() {
@@ -154,12 +176,13 @@ public class Order {
     public void setOrderOwnerUserId(@Nullable Long userId) {
         this.orderOwnerUserId = userId;
         orderOwner = null;
-        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, userId == null ? null : Float.valueOf(userId));
     }
     public void setOrderOwner(@NotNull User orderOwner) {
         this.orderOwner = orderOwner;
         orderOwnerUserId = orderOwner.getId();
-        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, orderOwnerUserId); //update userId answer
+        setAnswer(PretixConst.QUESTIONS_ACCOUNT_USERID, Float.valueOf(orderOwnerUserId)); //update userId answer
     }
     public @Nullable User getOrderOwner() {
         if (orderOwner == null && orderOwnerUserId != null && orderOwnerUserId >= 0L) {
@@ -188,16 +211,22 @@ public class Order {
 
 
     @NotNull
-    public Optional<Object> getAnswer(String questionIdentifier) {
+    public Optional<Object> getAnswer(@NotNull String questionIdentifier) {
         return Optional.ofNullable(answers.get(questionIdentifier));
     }
-    public boolean hasAnswer(String questionIdentifier) {
+    public boolean hasAnswer(@NotNull String questionIdentifier) {
         return answers.containsKey(questionIdentifier);
     }
-    public boolean deleteAnswer(String questionIdentifier) {
+    public boolean deleteAnswer(@NotNull String questionIdentifier) {
+        answerIdentifierToOptionId.remove(questionIdentifier);
+        answerIdentifierToOptionIdentifier.remove(questionIdentifier);
         return answers.remove(questionIdentifier) != null;
     }
-    public void setAnswer(String questionIdentifier, Object answer) {
+    public void setAnswer(@NotNull String questionIdentifier, @Nullable Object answer) {
+        this.setAnswer(questionIdentifier, answer, Collections.emptyList(), Collections.emptyList());
+    }
+    public void setAnswer(@NotNull String questionIdentifier, @Nullable Object answer,
+                          @Nullable List<Long> optionIds, @Nullable List<String> optionIdentifiers) {
         if (answer == null) {
             deleteAnswer(questionIdentifier);
             return;
@@ -210,6 +239,8 @@ public class Order {
             || answer instanceof LocalTime
             || answer instanceof ZonedDateTime) {
             answers.put(questionIdentifier, answer);
+            answerIdentifierToOptionId.put(questionIdentifier, optionIds);
+            answerIdentifierToOptionIdentifier.put(questionIdentifier, optionIdentifiers);
         } else {
             throw new IllegalArgumentException("answer must be of one of the following types: "
                 + "String, "
@@ -246,8 +277,13 @@ public class Order {
                 case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
             };
 
+
             if (out != null && !(out = out.strip()).isEmpty()) {
-                list.add(new PretixAnswer(id, out));
+                List<Long> optionsId = answerIdentifierToOptionId.getOrDefault(key, Collections.emptyList());
+                List<String> optionsIdentifiers = answerIdentifierToOptionIdentifier
+                        .getOrDefault(key, Collections.emptyList());
+
+                list.add(new PretixAnswer(id, out, optionsId, optionsIdentifiers));
             }
         }
 
@@ -273,6 +309,8 @@ public class Order {
 
         public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
             this.answers = new HashMap<>();
+            this.answerIdentifierToOptionId = new HashMap<>();
+            this.answerIdentifierToOptionIdentifier = new HashMap<>();
             for (PretixAnswer answer : answers) {
                 long questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);
@@ -302,6 +340,9 @@ public class Order {
                     };
                     this.answers.put(answerIdentifier, o);
                 }
+
+                answerIdentifierToOptionId.put(answerIdentifier, answer.getOptionsId());
+                answerIdentifierToOptionIdentifier.put(answerIdentifier, answer.getOptionIdentifiers());
             }
             return this;
         }

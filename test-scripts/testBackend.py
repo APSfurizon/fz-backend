@@ -35,10 +35,10 @@ HEADERS = {
 
 session = requests.session()
 
-def doPost(url, json=None, data=None, auth=None) -> Response:
+def doPost(url, json=None, data=None, auth=None, files=None) -> Response:
     global session
     global HEADERS
-    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
+    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth, files=files)
     print(f"\n-------- POST {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -49,6 +49,16 @@ def doGet(url, auth=None) -> Response:
     global session
     global HEADERS
     response = session.get(url, headers=HEADERS, allow_redirects=False, auth=auth)
+    print(f"\n-------- GET {url} --------")
+    print(response.status_code)
+    print(response.cookies.items())
+    print(response.headers)
+    print(response.text)
+    return response
+def doDelete(url) -> Response:
+    global session
+    global HEADERS
+    response = session.delete(url, headers=HEADERS, allow_redirects=False)
     print(f"\n-------- GET {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -100,7 +110,7 @@ def login() -> Response:
     return req
 
 def getMe() -> Response:
-    doGet(f'{BASE_URL_API}users/me/display')
+    doGet(f'{BASE_URL_API}users/display/me')
 
 def testPermission() -> Response:
     doGet(f'{BASE_URL_API}authentication/test')
@@ -109,9 +119,24 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
+def uploadBadge() -> Response:
+    imageName = 'testImage2.png'
+    files = {
+        'image': (imageName, open(imageName, 'rb')),
+    }
+    return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
+def deleteBadge() -> Response:
+    doDelete(f'{BASE_URL_API}badge/user/')
+def runDeleteDanglingBadges() -> Response:
+    #doGet(f'{BASE_URL_API}admin/ping')
+    doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
+
 #register()
 #confirmEmail()
 login()
 getMe()
-testPermission()
+#testPermission()
 #testInternalAuthorize()
+uploadBadge()
+#deleteBadge()
+runDeleteDanglingBadges()

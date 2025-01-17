@@ -42,7 +42,7 @@ public class InternalBasicFilter extends OncePerRequestFilter {
         final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.matches("(?i)^Basic .*")) {
             filterChain.doFilter(request, response);
-            log.warn("Bad basic auth header: {} on request {}", authHeader, request.getRequestURI());
+            //log.warn("Bad basic auth header: {} on request {}", authHeader, request.getRequestURI());
             return;
         }
 

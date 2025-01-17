@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class PersonalUserInformation {
     // If null, in documents this should appear as ""
     @Nullable
     @Size(min = 16, max = 16)
+    @Pattern(regexp = "^[A-Za-z]{6}\\d{2}[A-Za-z]\\d{2}[A-Za-z]\\d{3}[A-Za-z]$")
     private final String fiscalCode;
 
     @NotNull
@@ -85,6 +87,14 @@ public class PersonalUserInformation {
     @NotEmpty
     @Size(min = 2)
     private final String prefixPhoneNumber;
+
+    @Nullable
+    @Size(max = 1000)
+    private final String allergies;
+
+    @Nullable
+    @Size(max = 1000)
+    private final String note;
 
     private final long lastUpdatedEventId;
 

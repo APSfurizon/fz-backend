@@ -1,14 +1,13 @@
 package net.furizon.backend.infrastructure.rooms;
 
+import net.furizon.backend.feature.room.dto.ExchangeAction;
+import org.jetbrains.annotations.NotNull;
+
 public class RoomEmailTexts {
     public static final String SUBJECT_ROOM_PROBLEM = "There's a problem with your room reservation";
     public static final String SUBJECT_ROOM_UPDATE = "There's an update regarding your room reservation";
-
-
-    public static final String TITLE_RESERVATION_UPDATED = "Your accommodation got an update!";
-    public static final String TITLE_ROOM_UPDATED = "Your room got an update!";
-    public static final String TITLE_ROOM_FAILED_SC = "Your room has failed our sanity checks.";
-    public static final String TITLE_ACCOMMODATION_FAILED_SC = "Your accommodation has failed our sanity checks.";
+    public static final String SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED = "Full order exchange REFUND FAILED!!";
+    public static final String SUBJECT_EXCHANGE_ROOM_MONEY_FAILED = "Room exchange REFUND or PAYMENT FAILED!!";
 
 
     public static final String TEMPLATE_ROOM_HAS_NEW_OWNER = "room_has_new_owner.jte";
@@ -17,6 +16,9 @@ public class RoomEmailTexts {
     public static final String TEMPLATE_ROOM_UNCONFIRMED = "room_unconfirmed.jte";
     public static final String TEMPLATE_ROOM_DELETED = "room_deleted.jte";
     public static final String TEMPLATE_EXCHANGE_INITIALIZED = "exchange_initialized.jte";
+    public static final String TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED = "exchange_fullorder_failed_refund.jte";
+    public static final String TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED = "exchange_room_failed_money.jte";
+    public static final String TEMPLATE_EXCHANGE_COMPLETED = "exchange_completed.jte";
     public static final String TEMPLATE_INVITE_ACCEPTED = "invite_accepted.jte";
     public static final String TEMPLATE_INVITE_REFUSE = "invite_refused.jte";
     public static final String TEMPLATE_KICKED_FROM_ROOM = "room_kicked_from.jte";
@@ -46,6 +48,12 @@ public class RoomEmailTexts {
     public static final String EXCHANGE_ROOM = "room exchange";
 
 
+    public static final String getActionText(@NotNull ExchangeAction action, boolean destHasRoom) {
+        return switch (action) {
+            case TRASFER_EXCHANGE_ROOM -> TRANSFER_FULL_ORDER;
+            case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
+        };
+    }
 
     public static final String LANG_PRETIX = "en";
 }

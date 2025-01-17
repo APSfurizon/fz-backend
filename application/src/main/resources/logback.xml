@@ -1,4 +1,30 @@
 <configuration>
+    <appender name="FILE" class="ch.qos.logback.classic.sift.SiftingAppender">
+
+        <discriminator>
+            <key>logName</key>
+            <defaultValue>fz-backend-app</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${logName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>data/logs/${logName}.log</file>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%d [%thread] %level %mdc %logger{35} - %msg%n</pattern>
+                </layout>
+                <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                    <fileNamePattern>data/logs/${logName}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                    <maxFileSize>32MB</maxFileSize>
+                    <maxHistory>14</maxHistory>
+                    <totalSizeCap>16GB</totalSizeCap>
+                </rollingPolicy>
+            </appender>
+        </sift>
+    </appender>
+
+    <root level="ALL">
+        <appender-ref ref="FILE"/>
+    </root>
+
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.eclipse.jetty" level="INFO"/>

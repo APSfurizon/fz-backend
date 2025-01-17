@@ -27,6 +27,8 @@ public class PretixConfig implements HttpConfig {
     private final int connectionTimeout;
 
     private final boolean enableSync;
+
+    private final int healthcheckRetries;
   
     @NotNull
     private final String cacheReloadCronjob;
@@ -56,6 +58,7 @@ public class PretixConfig implements HttpConfig {
             {
                 add(HttpHeaders.HOST, shop.host); //Needed in prod, which talks locally with pretix
                 add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(api.key));
+                add(PretixConst.FZBACKENDUTILS_API_HEADER_NAME, api.fzbackendutilsToken);
             }
         };
     }
@@ -73,6 +76,7 @@ public class PretixConfig implements HttpConfig {
         @NotNull private final String url;
         @NotNull private final String path;
         @NotNull private final String key;
+        @NotNull private final String fzbackendutilsToken;
     }
 
     @Data

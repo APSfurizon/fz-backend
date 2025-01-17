@@ -19,9 +19,9 @@ import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class RestPretixProductFinder implements PretixProductFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixProduct>> pretixPagedProduct =
         new ParameterizedTypeReference<>() {};

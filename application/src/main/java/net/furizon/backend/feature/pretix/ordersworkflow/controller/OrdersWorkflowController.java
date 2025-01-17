@@ -1,22 +1,27 @@
 package net.furizon.backend.feature.pretix.ordersworkflow.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkOrderRequest;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GenerateFullStatusUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.RegisterUserOrder;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.SanityCheck;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,9 +29,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/orders-workflow")
 @RequiredArgsConstructor
 public class OrdersWorkflowController {
-    @NotNull private final UseCaseExecutor executor;
-    @NotNull private final PretixInformation pretixService;
-    @NotNull private final SanityCheck sanityCheck;
+    @org.jetbrains.annotations.NotNull
+    private final UseCaseExecutor executor;
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixService;
+    @org.jetbrains.annotations.NotNull
+    private final SanityCheck sanityCheck;
 
     @Operation(summary = "Generates an user personalized link for the pretix shop", description =
         "Generates a link to the pretix shop which contains the parameters for pretixautocart, "
@@ -123,5 +131,30 @@ public class OrdersWorkflowController {
             )
         );
         return r;
+    }
+
+    @Operation(summary = "Links an order to a user", description =
+            "When a user makes an order, changes an order or cancels the change of an order, it is "
+            + "automatically redirected to a page in the frontend, configurable from pretix itself, "
+            + "with the order's params in the query: `?c={code}&s={secret}&m={message}`. "
+            + "This page should call this method to link the order to the logged in user. "
+            + "After calling this page the frontend should redirect the user to the order home page, "
+            + "displaying a popup with the results of this operation. "
+            + "This operation can drop the following errors: `SERVER_ERROR`, `ORDER_SECRET_NOT_MATCH`, "
+            + " `ORDER_MULTIPLE_DONE` and `ORDER_NOT_FOUND`.")
+    @PostMapping("/link-order")
+    public boolean linkOrder(
+        @AuthenticationPrincipal @NotNull final FurizonUser user,
+        @NotNull @Valid @RequestBody final LinkOrderRequest request
+    ) {
+        return executor.execute(
+                RegisterUserOrder.class,
+                new RegisterUserOrder.Input(
+                        user,
+                        request.getOrderCode(),
+                        request.getOrderSecret(),
+                        pretixService
+                )
+        );
     }
 }

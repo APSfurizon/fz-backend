@@ -6,15 +6,18 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.Authentication;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMapper;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMapper;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.SelectJoinStep;
 import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -156,7 +159,6 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .where(SESSIONS.USER_ID.eq(userId))
         );
     }
-
     @Override
     public @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId) {
         Pair<Session, Authentication> res = sessionAuthenticationPairCache.getIfPresent(sessionId);
@@ -198,26 +200,41 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         }
         return res;
     }
+
     @Override
     public @Nullable Authentication findAuthenticationByEmail(@NotNull String email) {
         try {
             return sqlQuery.fetchFirst(
-                PostgresDSL.select(
-                    AUTHENTICATIONS.AUTHENTICATION_ID,
-                    AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                    AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION,
-                    AUTHENTICATIONS.AUTHENTICATION_DISABLED,
-                    AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
-                    AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS,
-                    AUTHENTICATIONS.AUTHENTICATION_TOKEN,
-                    AUTHENTICATIONS.USER_ID
-                )
-                .from(AUTHENTICATIONS)
+                selectAuthentication()
                 .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
             ).mapOrNull(JooqAuthenticationMapper::map);
         } catch (NoDataFoundException e) {
             return null;
         }
+    }
+    @Override
+    public @Nullable Authentication findAuthenticationByUserId(long userId) {
+        try {
+            return sqlQuery.fetchFirst(
+                selectAuthentication()
+                .where(AUTHENTICATIONS.USER_ID.eq(userId))
+            ).mapOrNull(JooqAuthenticationMapper::map);
+        } catch (NoDataFoundException e) {
+            return null;
+        }
+    }
+    private @NotNull SelectJoinStep<?> selectAuthentication() {
+        return PostgresDSL.select(
+            AUTHENTICATIONS.AUTHENTICATION_ID,
+            AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+            AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION,
+            AUTHENTICATIONS.AUTHENTICATION_DISABLED,
+            AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
+            AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS,
+            AUTHENTICATIONS.AUTHENTICATION_TOKEN,
+            AUTHENTICATIONS.USER_ID
+        )
+        .from(AUTHENTICATIONS);
     }
 
     @Override
@@ -298,11 +315,26 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @Override
     public void changePassword(long userId, @NotNull String password) {
+        String pwEncoded = encoder.encode(securityConfig.getPasswordSalt() + password);
+
+        boolean samePw = sqlQuery.fetchFirst(
+            PostgresDSL.select(AUTHENTICATIONS.AUTHENTICATION_ID)
+            .from(AUTHENTICATIONS)
+            .where(
+                AUTHENTICATIONS.USER_ID.eq(userId)
+                .and(AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD.eq(pwEncoded))
+            )
+            .limit(1)
+        ).isPresent();
+        if (samePw) {
+            throw new ApiException("The password is the same!", AuthenticationCodes.PW_CHAGE_SAME_PASSWORD);
+        }
+
         sqlCommand.execute(
             PostgresDSL.update(AUTHENTICATIONS)
             .set(
                 AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
-                encoder.encode(securityConfig.getPasswordSalt() + password)
+                pwEncoded
             )
             .set(AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS, (short) 0)
             .where(AUTHENTICATIONS.USER_ID.eq(userId))
@@ -351,7 +383,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         boolean alreadyResettingPw = sqlQuery.fetchFirst(
             PostgresDSL.select(RESET_PASSWORD_REQUESTS.RESETPW_REQ_ID)
             .from(RESET_PASSWORD_REQUESTS)
-            .where(AUTHENTICATIONS.AUTHENTICATION_ID.eq(authId))
+            .where(RESET_PASSWORD_REQUESTS.AUTHENTICATION_ID.eq(authId))
         ).isPresent();
         if (alreadyResettingPw) {
             return null;

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -16,19 +15,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCase.Input, SearchUsersResponse> {
-    @NotNull private final MembershipYearUtils membershipYearUtils;
     @NotNull private final UserFinder userFinder;
 
     @Override
     public @NotNull SearchUsersResponse executor(@NotNull SearchUserInEventUseCase.Input input) {
         Event event = input.pretixService.getCurrentEvent();
-        Short filterMembershipYear = input.filterMembership ? (event.getMembershipYear(membershipYearUtils)) : null;
         return new SearchUsersResponse(userFinder.searchUserInCurrentEvent(
                 input.fursonaName,
                 event,
                 input.filterRoom,
                 input.filterPaid,
-                filterMembershipYear
+                input.filterNotMadeAnOrder,
+                input.filterMembershipForYear,
+                input.banStatus
         ));
     }
 
@@ -37,7 +36,8 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
             @NotNull PretixInformation pretixService,
             boolean filterRoom,
             boolean filterPaid,
-            boolean filterMembership,
-            @Nullable Short filterMembershipForYear
+            boolean filterNotMadeAnOrder,
+            @Nullable Short filterMembershipForYear,
+            @Nullable Boolean banStatus
     ) {}
 }

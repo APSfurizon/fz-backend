@@ -24,6 +24,7 @@ public class JooqConfirmUserExchangeStatusAction implements ConfirmUserExchangeS
                                 : EXCHANGE_CONFIRMATION_STATUS.TARGET_CONFIRMED,
                         true
                 )
+                .where(EXCHANGE_CONFIRMATION_STATUS.EXCHANGE_ID.eq(exchangeId))
         ) > 0;
     }
 }

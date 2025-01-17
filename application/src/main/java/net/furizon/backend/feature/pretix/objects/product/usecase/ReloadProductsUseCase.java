@@ -16,6 +16,8 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -33,7 +35,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
             r -> {
                 PretixProduct product = r.getLeft();
                 String identifier = product.getIdentifier();
-                if (identifier == null) {
+                if (identifier == null || !product.isActive()) {
+                    log.info("Skipping item {}: identifier = {}, isActive = {}",
+                            identifier, product.getIdentifier(), product.isActive());
                     return;
                 }
                 long productId = product.getId();
@@ -44,9 +48,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     String[] sp = s.split("_");
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
                     String hotelName = sp[1];
-                    short capacity = Short.parseShort(sp[2]);
+                    String roomName = sp[2];
+                    short capacity = Short.parseShort(sp[3]);
                     result.extraDaysIdToDay().put(productId, ed);
-                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, capacity);
+                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
                     if (ed == ExtraDays.EARLY) {
                         result.earlyDaysItemId().put(hcPair, productId);
                     } else if (ed == ExtraDays.LATE) {
@@ -66,9 +71,12 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     } else {
                         String[] sp = s.split("_");
                         String hotelName = sp[0];
-                        short capacity = Short.parseShort(sp[1]);
-                        result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, capacity));
-                        result.roomPretixItemIdToNames().put(productId, product.getNames());
+                        String roomName = sp[1];
+                        short capacity = Short.parseShort(sp[2]);
+                        result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
+                        Map<String, String> names = product.getCustomNames();
+                        names = names.isEmpty() ? product.getNames() : names;
+                        result.roomPretixItemIdToNames().put(productId, names);
                     }
 
 
@@ -95,6 +103,15 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         }
                         case PretixConst.METADATA_EXTRA_FURSUIT_BADGE: {
                             result.extraFursuitsItemIds().add(productId);
+                            break;
+                        }
+
+                        case PretixConst.METADATA_TEMP_ADDON: {
+                            result.tempAddons().add(productId);
+                            break;
+                        }
+                        case PretixConst.METADATA_TEMP_ITEM: {
+                            result.tempItems().add(productId);
                             break;
                         }
 

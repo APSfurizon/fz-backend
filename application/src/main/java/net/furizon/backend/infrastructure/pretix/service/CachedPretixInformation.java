@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.healthcheck.finder.PretixHealthcheck;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.event.usecase.ReloadEventsUseCase;
@@ -17,6 +18,7 @@ import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
+import net.furizon.backend.feature.pretix.objects.question.PretixOption;
 import net.furizon.backend.feature.pretix.objects.question.PretixQuestion;
 import net.furizon.backend.feature.pretix.objects.question.usecase.ReloadQuestionsUseCase;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
@@ -77,6 +79,8 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     private final PretixProductFinder pretixProductFinder;
     @NotNull
+    private final PretixHealthcheck healthcheck;
+    @NotNull
     private final PretixConfig pretixConfig;
     @NotNull
     private final FursuitConfig fursuitConfig;
@@ -105,6 +109,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
     private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Long, List<PretixOption>> questionIdToOptions = Caffeine.newBuilder().build();
     @NotNull
     private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
 
@@ -152,6 +158,7 @@ public class CachedPretixInformation implements PretixInformation {
             loadCurrentEventFromDb();
             return;
         }
+        healthcheck.waitForPretix();
         log.info("[PRETIX] Syncing pretix information and cache it");
         long start = System.currentTimeMillis();
         resetCache();
@@ -206,8 +213,9 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Nullable
     @Override
-    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, short capacity, @NotNull ExtraDays day) {
-        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, capacity), day);
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                                  short capacity, @NotNull ExtraDays day) {
+        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, roomInternalName, capacity), day);
     }
     @Nullable
     @Override
@@ -298,6 +306,14 @@ public class CachedPretixInformation implements PretixInformation {
         return Optional.ofNullable(v);
     }
 
+    @Override
+    public @NotNull Optional<List<PretixOption>> getQuestionOptionsFromId(long id) {
+        lock.readLock().lock();
+        var v = questionIdToOptions.getIfPresent(id);
+        lock.readLock().unlock();
+        return Optional.ofNullable(v);
+    }
+
     @NotNull
     @Override
     public Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier) {
@@ -329,6 +345,7 @@ public class CachedPretixInformation implements PretixInformation {
             ExtraDays extraDays = ExtraDays.NONE;
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
+            String roomInternalName = null;
             Long pretixRoomItemId = null;
             long ticketPositionId = -1L;
             long ticketPosid = -1L;
@@ -369,7 +386,7 @@ public class CachedPretixInformation implements PretixInformation {
                             if (questionId == questionUserId) {
                                 String s = answer.getAnswer();
                                 if (s != null && !s.isBlank()) {
-                                    userId = Long.parseLong(s);
+                                    userId = Float.valueOf(s).longValue();
                                 }
                             } else if (questionId == questionDuplicateData) {
                                 String s = answer.getAnswer();
@@ -396,9 +413,9 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
-                    if (extraDays == ExtraDays.EARLY) {
+                    if (cacheExtraDays == ExtraDays.EARLY) {
                         earlyPositionId = position.getPositionId();
-                    } else if (extraDays == ExtraDays.LATE) {
+                    } else if (cacheExtraDays == ExtraDays.LATE) {
                         latePositionId = position.getPositionId();
                     }
                     if (extraDays != ExtraDays.BOTH) {
@@ -417,11 +434,13 @@ public class CachedPretixInformation implements PretixInformation {
                     if (checkItemId.apply(CacheItemTypes.NO_ROOM_ITEM, itemId)) {
                         roomCapacity = 0;
                         hotelInternalName = null;
+                        roomInternalName = null;
                     } else {
                         HotelCapacityPair room = roomIdToInfo.getIfPresent(itemId);
                         if (room != null) {
                             roomCapacity = room.capacity();
                             hotelInternalName = room.hotelInternalName();
+                            roomInternalName = room.roomInternalName();
                         }
                     }
 
@@ -447,6 +466,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .roomCapacity(roomCapacity)
                     .pretixRoomItemId(pretixRoomItemId)
                     .hotelInternalName(hotelInternalName)
+                    .roomInternalName(roomInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
                     .hasMembership(membership)
                     .ticketPositionId(ticketPositionId)
@@ -512,8 +532,8 @@ public class CachedPretixInformation implements PretixInformation {
     public void resetCache() {
         log.info("[PRETIX] Resetting cache for pretix information");
 
-        lock.writeLock().lock();
         try {
+            lock.writeLock().lock();
             invalidateEventsCache();
             invalidateEventStructCache();
 
@@ -542,6 +562,7 @@ public class CachedPretixInformation implements PretixInformation {
         questionDuplicateData.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
+        questionIdToOptions.invalidateAll();
         questionIdentifierToId.invalidateAll();
 
         //Tickets
@@ -599,10 +620,12 @@ public class CachedPretixInformation implements PretixInformation {
         questionList.forEach(question -> {
             long questionId = question.getId();
             QuestionType questionType = question.getType();
+            List<PretixOption> options = question.getOptions();
             String questionIdentifier = question.getIdentifier();
 
             questionIdToType.put(questionId, questionType);
             questionIdToIdentifier.put(questionId, questionIdentifier);
+            questionIdToOptions.put(questionId, options);
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_USERID
@@ -631,6 +654,8 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
         itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
         itemIdsCache.put(CacheItemTypes.EXTRA_FURSUITS, products.extraFursuitsItemIds());
+        itemIdsCache.put(CacheItemTypes.TEMP_ADDON, products.tempAddons());
+        itemIdsCache.put(CacheItemTypes.TEMP_ITEM, products.tempItems());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());

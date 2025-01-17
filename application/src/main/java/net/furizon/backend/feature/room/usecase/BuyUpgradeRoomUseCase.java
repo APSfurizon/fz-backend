@@ -53,6 +53,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         Order order = checks.getOrderAndAssertItExists(userId, event, pretixInformation);
 
         checks.assertOrderIsPaid(order, userId, event);
+        checks.assertPaymentAndRefundConfirmed(order.getCode(), event);
         checks.assertOrderIsNotDaily(order, userId, event);
         checks.assertUserIsNotInRoom(userId, event, true);
 

@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
@@ -14,7 +15,6 @@ import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
-import net.furizon.backend.feature.room.dto.request.GetExchangeConfirmationStatusRequest;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
@@ -50,16 +50,20 @@ import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/room")
 @RequiredArgsConstructor
@@ -70,6 +74,8 @@ public class RoomController {
     private final UseCaseExecutor executor;
     @org.jetbrains.annotations.NotNull
     private final SanityCheckService sanityCheckService;
+    @org.jetbrains.annotations.NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
@@ -128,7 +134,7 @@ public class RoomController {
 
     @NotNull
     @Operation(summary = "Invites (forcefully, if desired) users to the room", description =
-        "This operation can be performed only by the room's owner or an administrator ."
+        "This operation can be performed only by the room's owner or an administrator. "
         + "It invites the users specified in the `userId` param in the owner's room. "
         + "An administrator needs to specify the `roomId` param as well. "
         + "By setting `force` to true, this operation will bypass the invitation step. "
@@ -184,7 +190,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Cancel the specified invitation", description =
-            "This operation can be done only by someone who doesn't own a room. "
+            "This operation can be done only by someone who owns a room. "
             + "Using the `guestId` param you can specify which invitation to cancel")
     @PostMapping("/invite/cancel")
     public boolean cancelInvitation(
@@ -202,7 +208,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Kicks someone from the room", description =
-        "Kicks the person specified in the `guestId` parameter from the room"
+        "Kicks the person specified in the `guestId` parameter from the room. "
         + "This operation can be performed only by the room's owner or by an administrator.")
     @PostMapping("/kick")
     public boolean kickFromRoom(
@@ -298,7 +304,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Unconfirms the current room", description =
-            "This operation can be performed only by the room's owner or by an admin."
+            "This operation can be performed only by the room's owner or by an admin. "
             + "By default, it unconfirms the room owned by the current user. If this operation "
             + "is performed by an admin, the room to confirm can be specified in the `roomId` param.")
     @PostMapping("/unconfirm")
@@ -402,20 +408,20 @@ public class RoomController {
     @GetMapping("/exchange/info")
     public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @NotNull @Valid @RequestBody final GetExchangeConfirmationStatusRequest req
+            @Valid @NotNull @RequestParam("id") Long exchangeId
     ) {
         return executor.execute(
                 GetExchangeConfirmationStatusInfoUseCase.class,
                 new GetExchangeConfirmationStatusInfoUseCase.Input(
                         user,
-                        req,
+                        exchangeId,
                         pretixInformation
                 )
         );
     }
 
     @Operation(summary = "Starts a room or full order transfer/exchange", description =
-        "This method, after verifying that all conditions for the exchange are met,"
+        "This method, after verifying that all conditions for the exchange are met, "
         + "will start the exchange flow by sending emails to both parties to confirm "
         + "or refuse the exchange. Only after both have confirmed the actual transfer will happen. "
         + "With the `action` paramether you can choose to run a full order transfer or a "
@@ -477,18 +483,29 @@ public class RoomController {
                 )
         );
         boolean success = true;
+        long userId = status.getSourceUserId();
+        log.info("Exchange update status: src ({}) = {}; ({}) = dst {}",
+                userId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
         if (status.isFullyConfirmed()) {
             ExchangeRequest exchangeRequest = new ExchangeRequest(
-                status.getSourceUserId(),
+                    userId,
                 status.getTargetUserId(),
                 status.getAction()
             );
+            var auth = Objects.requireNonNull(sessionAuthenticationManager.findAuthenticationByUserId(userId));
+            FurizonUser fakeUser = FurizonUser.builder()
+                    .userId(userId)
+                    .authentication(auth)
+                    .sessionId(user.getSessionId())
+                    .build();
 
+            log.info("Exchange is fully confirmed, running action {} with usr {}",
+                    status.getAction(), fakeUser.getUserId());
             switch (status.getAction()) {
                 case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
                         ExchangeRoomUseCase.class,
                         new ExchangeRoomUseCase.Input(
-                                user,
+                                fakeUser,
                                 exchangeRequest,
                                 pretixInformation,
                                 false
@@ -497,7 +514,7 @@ public class RoomController {
                 case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
                         ExchangeFullOrderUseCase.class,
                         new ExchangeFullOrderUseCase.Input(
-                                user,
+                                fakeUser,
                                 exchangeRequest,
                                 pretixInformation,
                                 false

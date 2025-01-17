@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -25,9 +26,18 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @Component
 @RequiredArgsConstructor
 public class JooqOrderFinder implements OrderFinder {
-    private final SqlQuery query;
+    @NotNull private final SqlQuery query;
 
-    private final JooqOrderMapper orderMapper;
+    @NotNull private final JooqOrderMapper orderMapper;
+
+    @Override
+    public @NotNull Set<String> findOrderCodesForEvent(@NotNull Event event) {
+        return query.fetch(
+            PostgresDSL.select(ORDERS.ORDER_CODE)
+            .from(ORDERS)
+            .where(ORDERS.EVENT_ID.eq(event.getId()))
+        ).stream().map(s -> s.get(ORDERS.ORDER_CODE)).collect(Collectors.toSet());
+    }
 
     @Override
     public @Nullable Order findOrderByCodeEvent(@NotNull String code,
@@ -164,6 +174,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
+                        ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_TICKET_POSITION_ID,

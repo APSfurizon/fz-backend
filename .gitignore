@@ -40,3 +40,5 @@ build/
 .env.local
 
 /jte-classes
+/data
+/prod

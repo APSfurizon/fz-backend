@@ -38,7 +38,8 @@ public class PretixQuotaAvailability {
     }
 
     public long getUsed() {
-        return pendingOrders + paidOrders + exitedOrders + cartPositions + blockingVouchers + waitingList;
+        //IGNORE WAITING LIST, otherwise pendingOrders are counted twice for some reasons
+        return pendingOrders + paidOrders + exitedOrders + cartPositions + blockingVouchers /*+ waitingList*/;
     }
 
     public long getRemaining() {

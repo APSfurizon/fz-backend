@@ -71,7 +71,6 @@ public class SecurityConfiguration {
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
-                    antMatcher(HttpMethod.GET, "/internal/**"), //TODO is this needed?
                     antMatcher(HttpMethod.GET, "/docs/**"),
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
@@ -82,7 +81,7 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
-                    antMatcher(HttpMethod.GET, pretixConfig.getShop().getPath() + "order/**")
+                    antMatcher(HttpMethod.GET, "/api/v1/admin/ping")
                 )
                 .permitAll()
                 .anyRequest()

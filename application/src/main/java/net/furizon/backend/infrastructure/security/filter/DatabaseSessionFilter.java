@@ -23,7 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Collections;
 import java.util.concurrent.Executor;
 
 import static net.furizon.backend.infrastructure.security.Const.SESSION_THREAD_POOL_TASK_EXECUTOR;
@@ -85,7 +85,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                             .authentication(pair.getRight())
                             .build(),
                         null,
-                        List.of() // TODO -> Implement authorities
+                        Collections.emptyList() // TODO -> Implement authorities
                     )
                 );
 

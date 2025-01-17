@@ -14,7 +14,7 @@ import static net.furizon.jooq.generated.tables.Users.USERS;
 @Component
 @RequiredArgsConstructor
 public class JooqCreateUserAction implements CreateUserAction {
-    private final SqlCommand sqlCommand;
+    @NotNull private final SqlCommand sqlCommand;
 
     @Override
     public @NotNull User invoke(@NotNull String fursonaName, @Nullable String locale) {

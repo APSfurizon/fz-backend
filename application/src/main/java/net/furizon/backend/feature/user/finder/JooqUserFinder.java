@@ -119,11 +119,15 @@ public class JooqUserFinder implements UserFinder {
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
-            @Nullable Short filterMembershipCardForYear
+            boolean filerNotMadeAnOrder,
+            @Nullable Short filterMembershipCardForYear,
+            @Nullable Boolean filterBanStatus
     ) {
         Condition condition = PostgresDSL.trueCondition();
-        boolean joinOrders = false;
+        boolean innerJoinOrders = false;
+        boolean leftJoinOrders = false;
         boolean joinMembershipCards = false;
+        boolean joinBanStatus = false;
 
         Table<?> searchFursonaQuery = selectUser()
             .where(
@@ -138,12 +142,16 @@ public class JooqUserFinder implements UserFinder {
             ).asTable("fursonaq");
 
         if (filterRoom) {
-            joinOrders = true;
+            innerJoinOrders = true;
             condition = condition.and(
                 searchFursonaQuery.field(USERS.USER_ID).notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
                     .from(ROOM_GUESTS)
-                    .where(ROOM_GUESTS.CONFIRMED.isTrue())
+                    .where(
+                        ROOM_GUESTS.CONFIRMED.isTrue()
+                    //TODO find users inside the same room of the current user
+                    //.and(ROOM_GUESTS.ROOM_ID.notEqual())
+                    )
                 )
                 .and(
                     ORDERS.ORDER_ROOM_CAPACITY.isNull()
@@ -153,17 +161,31 @@ public class JooqUserFinder implements UserFinder {
         }
 
         if (filterPaid) {
-            joinOrders = true;
+            innerJoinOrders = true;
             condition = condition.and(
                 ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
             );
         }
 
+        if (filerNotMadeAnOrder) {
+            leftJoinOrders = true;
+            condition = condition.and(
+                ORDERS.ID.isNull()
+            );
+        }
+
         if (filterMembershipCardForYear != null) {
             joinMembershipCards = true;
-            //TODO test, it might be broken
             condition = condition.and(
-                MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear)
+                MEMBERSHIP_CARDS.ISSUE_YEAR.isNull()
+                .or(MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear))
+            );
+        }
+
+        if (filterBanStatus != null) {
+            joinBanStatus = true;
+            condition = condition.and(
+                    AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
             );
         }
 
@@ -177,13 +199,27 @@ public class JooqUserFinder implements UserFinder {
             .leftJoin(MEDIA)
             .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
 
-        if (joinOrders) {
+        if (joinBanStatus) {
             query = query
-                    .leftJoin(ORDERS)
-                    .on(
-                        searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
-                        .and(ORDERS.EVENT_ID.eq(event.getId()))
-                    );
+                .innerJoin(AUTHENTICATIONS)
+                .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
+        }
+
+        if (innerJoinOrders) {
+            query = query
+                .innerJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
+        }
+        if (leftJoinOrders && !innerJoinOrders) {
+            query = query
+                .leftJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
         }
 
         if (joinMembershipCards) {

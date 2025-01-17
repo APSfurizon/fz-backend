@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
@@ -22,9 +24,16 @@ public class JooqDeleteOrderAction implements DeleteOrderAction {
     @Override
     public void invoke(@NotNull final String code) {
         command.execute(
-            PostgresDSL
-                .deleteFrom(ORDERS)
-                .where(ORDERS.ORDER_CODE.eq(code))
+            PostgresDSL.deleteFrom(ORDERS)
+            .where(ORDERS.ORDER_CODE.eq(code))
+        );
+    }
+
+    @Override
+    public void invoke(@NotNull Set<String> orderCodes) {
+        command.execute(
+            PostgresDSL.deleteFrom(ORDERS)
+            .where(ORDERS.ORDER_CODE.in(orderCodes))
         );
     }
 }

@@ -70,6 +70,10 @@ public class RestPretixOrderFinder implements PretixOrderFinder {
 
         try {
             return Optional.ofNullable(pretixHttpClient.send(PretixConfig.class, request).getBody());
+        } catch (final HttpClientErrorException.NotFound ex) {
+            log.error("Order {} not found on event {}/{}. Response: {}",
+                    code, organizer, event, ex.getResponseBodyAsString());
+            return Optional.empty();
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;

@@ -15,12 +15,12 @@
         .title { font-size: 1.75em; margin-bottom: 1.2em; color: #e1e6eb; margin-top: 0; font-family: sans-serif; }
         .main-content { margin-top: 0; font-style: normal; font-weight: 400; font-family: sans-serif;}
         .con-logo { height:3em;}
-        .link { text-decoration: none; background-color: #1095c1; color: #fff; padding: 1em; border-radius: 5px; font-weight: 600; }
+        .link { color: #fff; font-weight: 600; font-size: medium; background-color: #00000000 }
     </style>
 </head>
 <div class="body">
     <div class="container">
-        <img src="https://reg.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
+        <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">Reset the password of your account</h2>
             <p class="main-content">Click the following link to reset the password of your account:</p>

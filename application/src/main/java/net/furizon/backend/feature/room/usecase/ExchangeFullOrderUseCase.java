@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -16,7 +17,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_HAS_NEW_OWNER;
 
 @Slf4j
@@ -32,15 +33,15 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeFullOrderUseCase.Input input) {
-        log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.user.getUserId());
-        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.sourceExchangeUser.getUserId());
+        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
 
         checks.assertInTimeframeToEditRooms();
 
-        checks.assertUserHasOrder(sourceUserId, event);
+        Order sourceOrder = checks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
         checks.assertUserHasNotAnOrder(destUserId, event);
 
         long roomId = -1L;
@@ -50,7 +51,8 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
             checks.assertRoomNotConfirmed(roomId);
         }
 
-        checks.assertOrderIsPaid(sourceUserId, event);
+        checks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
+        checks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
             return true;
@@ -61,7 +63,8 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
             UserEmailData data = userFinder.getMailDataForUser(destUserId);
             if (data != null) {
                 mailService.broadcastUpdate(
-                        roomId, TEMPLATE_ROOM_HAS_NEW_OWNER, MailVarPair.of(OWNER_FURSONA_NAME, data.getFursonaName())
+                        roomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
+                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName())
                 );
             }
         }
@@ -69,7 +72,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            @NotNull FurizonUser sourceExchangeUser,
             @NotNull ExchangeRequest req,
             @NotNull PretixInformation pretixInformation,
             boolean runOnlyChecks
