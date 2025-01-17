@@ -122,6 +122,12 @@
             <artifactId>jte</artifactId>
             <version>${jte.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.sksamuel.scrimage</groupId>
+            <artifactId>scrimage-webp</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

@@ -28,6 +28,11 @@ spring:
       "mail.smtp.starttls.enable": true
       "mail.smtp.starttls.required": true
       "mail.debug": ${MAIL_SENDER_PROVIDER_USE_DEBUG_PROP:true}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${BACKEND_UPLOAD_MAX_FILE_SIZE:4MB}
+      max-request-size: ${BACKEND_UPLOAD_MAX_REQUEST_SIZE:4MB}
 
 gg:
   jte:
@@ -111,3 +116,23 @@ pretix:
   autocart:
     priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
     priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}
+
+storage:
+  base-path: data/
+  base-public-path: ${storage.base-path}public/
+  media-path: static/
+  full-media-path: ${storage.base-public-path}${storage.media-path}
+  delete-dangling-media-cronjob: ${STORAGE_DELETE_DANGLING_MEDIA_CRONJOB:0 30 4 * * *}
+
+
+image:
+  base-path: ${IMAGE_BASE_PATH:images/}
+  full-base-path: ${storage.full-media-path}${image.base-path}
+  webp-quality: ${IMAGE_QUALITY:85}
+
+badge:
+  storage-path: ${image.base-path}${BADGE_STORAGE_PATH:badges}
+  full-storage-path: ${storage.full-media-path}${badge.storage-path}
+  max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:4194304} #4 MB
+  max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
+  max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}

@@ -1,0 +1,4 @@
+BEGIN;
+ALTER TABLE IF EXISTS media DROP CONSTRAINT IF EXISTS media_store_method_check;
+ALTER TABLE IF EXISTS media DROP COLUMN IF EXISTS media_store_method;
+COMMIT;
