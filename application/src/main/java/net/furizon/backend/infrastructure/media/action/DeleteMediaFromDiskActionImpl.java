@@ -27,19 +27,19 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
 
     @Override
     @Transactional
-    public boolean invoke(@NotNull Set<Long> ids) throws IOException {
-        return invoke(mediaFinder.findByIds(ids));
+    public boolean invoke(@NotNull Set<Long> ids, boolean deleteFromDb) throws IOException {
+        return invoke(mediaFinder.findByIds(ids), deleteFromDb);
     }
 
     @Override
     @Transactional
-    public boolean invoke(long id) throws IOException {
-        return invoke(Set.of(id));
+    public boolean invoke(long id, boolean deleteFromDb) throws IOException {
+        return invoke(Set.of(id), deleteFromDb);
     }
 
     @Override
     @Transactional
-    public boolean invoke(@NotNull List<MediaData> medias) throws IOException {
+    public boolean invoke(@NotNull List<MediaData> medias, boolean deleteFromDb) throws IOException {
         Path basePath = Paths.get(storageConfig.getFullMediaPath());
 
         for (MediaData media : medias) {
@@ -52,12 +52,12 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
             Files.deleteIfExists(p);
         }
 
-        return deleteMediaAction.deleteFromDb(medias.stream().map(MediaData::getId).toList());
+        return deleteFromDb ? deleteMediaAction.deleteFromDb(medias.stream().map(MediaData::getId).toList()) : false;
     }
 
     @Override
     @Transactional
-    public boolean invoke(@NotNull MediaData media) throws IOException {
-        return invoke(List.of(media));
+    public boolean invoke(@NotNull MediaData media, boolean deleteFromDb) throws IOException {
+        return invoke(List.of(media), deleteFromDb);
     }
 }

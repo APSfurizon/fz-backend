@@ -6,8 +6,12 @@ import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.*;
+import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Record;
+import org.jooq.Record4;
+import org.jooq.SelectJoinStep;
+import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 

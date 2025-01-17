@@ -10,14 +10,14 @@ import java.util.Set;
 
 public interface DeleteMediaFromDiskAction {
     @Transactional
-    boolean invoke(@NotNull Set<Long> ids) throws IOException;
+    boolean invoke(@NotNull Set<Long> ids, boolean deleteFromDb) throws IOException;
 
     @Transactional
-    boolean invoke(long id) throws IOException;
+    boolean invoke(long id, boolean deleteFromDb) throws IOException;
 
     @Transactional
-    boolean invoke(@NotNull List<MediaData> medias) throws IOException;
+    boolean invoke(@NotNull List<MediaData> medias, boolean deleteFromDb) throws IOException;
 
     @Transactional
-    boolean invoke(@NotNull MediaData media) throws IOException;
+    boolean invoke(@NotNull MediaData media, boolean deleteFromDb) throws IOException;
 }

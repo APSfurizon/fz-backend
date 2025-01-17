@@ -41,7 +41,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
             };
 
             if (media != null) {
-                return deleteMediaFromDiskAction.invoke(media);
+                return deleteMediaFromDiskAction.invoke(media, true);
             } else {
                 throw new ApiException("Badge not found!", ImageCodes.BADGE_NOT_FOUND);
             }

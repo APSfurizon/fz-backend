@@ -35,10 +35,10 @@ HEADERS = {
 
 session = requests.session()
 
-def doPost(url, json=None, data=None, auth=None) -> Response:
+def doPost(url, json=None, data=None, auth=None, files=None) -> Response:
     global session
     global HEADERS
-    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
+    response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth, files=files)
     print(f"\n-------- POST {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -109,8 +109,14 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
-#register()
-#confirmEmail()
+def uploadBadge() -> Response:
+    files = {
+        'image': ('testImage.png', open('testImage.png', 'rb')),
+    }
+    return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
+
+register()
+confirmEmail()
 #login()
 #getMe()
 #testPermission()

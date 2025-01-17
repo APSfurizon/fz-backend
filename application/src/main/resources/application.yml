@@ -28,6 +28,11 @@ spring:
       "mail.smtp.starttls.enable": true
       "mail.smtp.starttls.required": true
       "mail.debug": ${MAIL_SENDER_PROVIDER_USE_DEBUG_PROP:true}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${BACKEND_UPLOAD_MAX_FILE_SIZE:4MB}
+      max-request-size: ${BACKEND_UPLOAD_MAX_REQUEST_SIZE:4MB}
 
 gg:
   jte:

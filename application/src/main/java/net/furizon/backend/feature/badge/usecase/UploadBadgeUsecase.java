@@ -73,7 +73,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Bad
                 log.info("[BADGE] User {} is uploading a {} badge: Deleting prev badge id {} from {}",
                         userId, input.type, prevMedia.getId(), prevMedia.getPath());
                 //With oncascade this will also set null and clear DB entries for image
-                deleteMediaFromDiskAction.invoke(prevMedia);
+                deleteMediaFromDiskAction.invoke(prevMedia, true);
             }
 
             StoreMediaOnDiskAction.Results res = storeMediaOnDiskAction.invoke(

@@ -6,6 +6,7 @@ import net.furizon.backend.feature.badge.dto.MediaData;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaAction;
+import net.furizon.backend.infrastructure.media.action.PhysicallyDeleteMediaAction;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +16,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
+    @NotNull private final PhysicallyDeleteMediaAction physicallyDeleteMediaAction;
     @NotNull private final DeleteMediaAction deleteMediaAction;
     @NotNull private final MediaFinder mediaFinder;
     @NotNull private final StorageConfig storageConfig;
@@ -37,7 +42,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
             //Delete unreferenced media db objects
             if (!referencedMediaIds.contains(media.getId())) {
                 log.info("[DANGLING MEDIA] Deleting unreferenced db media: {}", media);
-                deleteMediaAction.deletePhysically(media);
+                physicallyDeleteMediaAction.invoke(media, false);
                 dbDeleteIds.add(media.getId());
                 deleted++;
                 continue;

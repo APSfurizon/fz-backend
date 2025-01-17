@@ -2,7 +2,6 @@ package net.furizon.backend.infrastructure.media.finder;
 
 import net.furizon.backend.feature.badge.dto.MediaData;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.Record3;
 import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 

@@ -54,7 +54,7 @@ public class AdminController {
             @RequestParam("id") Set<Long> ids
     ) {
         try {
-            return deleteMediaAction.invoke(ids);
+            return deleteMediaAction.invoke(ids, true);
         } catch (IOException e) {
             log.error("Error while deleting medias", e);
             return false;
