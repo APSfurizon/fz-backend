@@ -21,13 +21,13 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RemoveDanglingMediaUseCase implements UseCase<Void, Long> {
+public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
     @NotNull private final DeleteMediaAction deleteMediaAction;
     @NotNull private final MediaFinder mediaFinder;
     @NotNull private final StorageConfig storageConfig;
 
     @Override
-    public @NotNull Long executor(@NotNull Void input) {
+    public @NotNull Long executor(@NotNull Integer uselessInput) {
         List<MediaData> medias = new LinkedList<>(mediaFinder.findAll());
         Set<Long> referencedMediaIds = mediaFinder.getReferencedMediaIds();
         Set<Long> dbDeleteIds = new HashSet<>();
@@ -36,6 +36,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Void, Long> {
         for (MediaData media : medias) {
             //Delete unreferenced media db objects
             if (!referencedMediaIds.contains(media.getId())) {
+                log.info("[DANGLING MEDIA] Deleting unreferenced db media: {}", media);
                 deleteMediaAction.deletePhysically(media);
                 dbDeleteIds.add(media.getId());
                 deleted++;
@@ -45,6 +46,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Void, Long> {
             //Delete media db object without local file
             if (media.getStoreMethod() == StoreMethod.DISK) {
                 if (!Files.exists(Paths.get(media.getPath()))) {
+                    log.info("[DANGLING MEDIA] Deleting media without local file: {}", media);
                     dbDeleteIds.add(media.getId());
                     deleted++;
                 }
@@ -70,16 +72,19 @@ public class RemoveDanglingMediaUseCase implements UseCase<Void, Long> {
                 //If in the DB we don't have a file with the given normalized path. We also remove the base path
                 if (!allFiles.contains(path.normalize().toString().substring(basePathLength))) {
                     try {
+                        log.info("[DANGLING MEDIA] Deleting file without db object: {}", path);
                         Files.deleteIfExists(path);
                     } catch (IOException e) {
-                        log.error("Error while deleting file {} not present in db: {}", path, e.getMessage());
+                        log.error("[DANGLING MEDIA] Error while deleting file {} not present in db: {}",
+                                path, e.getMessage());
                     }
                 }
             });
         } catch (IOException e) {
-            log.error("Error while listing files: {}", e.getMessage());
+            log.error("[DANGLING MEDIA] Error while listing files: {}", e.getMessage());
         }
 
+        log.debug("[DANGLING MEDIA] Removing from db ids: {}", dbDeleteIds);
         deleteMediaAction.deleteFromDb(dbDeleteIds.stream().toList());
 
         return deleted;
