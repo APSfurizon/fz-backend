@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
+import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -14,6 +15,7 @@ import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +30,11 @@ import java.util.Set;
 public class AdminController {
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+
     @org.jetbrains.annotations.NotNull
     private final DeleteMediaFromDiskAction deleteMediaAction;
+    @org.jetbrains.annotations.NotNull
+    private final DeleteMediaCronjob deleteMediaCronjob;
 
     @GetMapping("/ping")
     public String ping() {
@@ -48,7 +53,7 @@ public class AdminController {
     }
 
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})
-    @DeleteMapping(value = "/medias")
+    @DeleteMapping("/media/")
     public boolean deleteMedias(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @RequestParam("id") Set<Long> ids
@@ -59,5 +64,13 @@ public class AdminController {
             log.error("Error while deleting medias", e);
             return false;
         }
+    }
+
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})
+    @PostMapping("/media/run-delete-media-cronjob")
+    public void runDeleteMediaCronjob(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        deleteMediaCronjob.deleteDanglingMedia();
     }
 }

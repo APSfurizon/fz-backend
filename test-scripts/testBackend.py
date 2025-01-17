@@ -127,6 +127,9 @@ def uploadBadge() -> Response:
     return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
 def deleteBadge() -> Response:
     doDelete(f'{BASE_URL_API}badge/user/')
+def runDeleteDanglingBadges() -> Response:
+    #doGet(f'{BASE_URL_API}admin/ping')
+    doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
 
 #register()
 #confirmEmail()
@@ -136,3 +139,4 @@ getMe()
 #testInternalAuthorize()
 uploadBadge()
 #deleteBadge()
+runDeleteDanglingBadges()

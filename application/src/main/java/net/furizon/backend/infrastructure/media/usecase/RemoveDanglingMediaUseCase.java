@@ -36,6 +36,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
         List<MediaData> medias = new LinkedList<>(mediaFinder.findAll());
         Set<Long> referencedMediaIds = mediaFinder.getReferencedMediaIds();
         Set<Long> dbDeleteIds = new HashSet<>();
+        String basePath = storageConfig.getBasePublicPath();
 
         long deleted = 0L;
         for (MediaData media : medias) {
@@ -50,7 +51,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
 
             //Delete media db object without local file
             if (media.getStoreMethod() == StoreMethod.DISK) {
-                if (!Files.exists(Paths.get(media.getPath()))) {
+                if (!Files.exists(Paths.get(basePath, media.getPath()))) {
                     log.info("[DANGLING MEDIA] Deleting media without local file: {}", media);
                     dbDeleteIds.add(media.getId());
                     deleted++;
@@ -68,7 +69,6 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
             }
         });
         //Get paths
-        String basePath = storageConfig.getBasePath();
         int basePathLength = basePath.length();
         Path mediaPath = Paths.get(storageConfig.getFullMediaPath());
         //For each file
