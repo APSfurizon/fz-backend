@@ -119,8 +119,9 @@ pretix:
 
 storage:
   base-path: data/
+  base-public-path: ${storage.base-path}public/
   media-path: static/
-  full-media-path: ${storage.base-path}${storage.media-path}
+  full-media-path: ${storage.base-public-path}${storage.media-path}
   delete-dangling-media-cronjob: ${STORAGE_DELETE_DANGLING_MEDIA_CRONJOB:0 30 4 * * *}
 
 

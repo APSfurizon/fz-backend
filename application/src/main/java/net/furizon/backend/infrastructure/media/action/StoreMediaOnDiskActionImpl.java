@@ -54,7 +54,7 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
 
         Path relativePath = Paths.get(storageConfig.getMediaPath(), basePath, userId);
         Path fullRelativePath = relativePath.resolve(filename);
-        Path baseStoragePath = Paths.get(storageConfig.getFullMediaPath());
+        Path baseStoragePath = Paths.get(storageConfig.getBasePublicPath());
         Path absolutePath = baseStoragePath.resolve(relativePath);
         Path fullAbsolutePath = baseStoragePath.resolve(fullRelativePath);
         Files.createDirectories(absolutePath);

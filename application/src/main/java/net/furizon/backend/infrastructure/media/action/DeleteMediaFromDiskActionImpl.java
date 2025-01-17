@@ -40,7 +40,7 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
     @Override
     @Transactional
     public boolean invoke(@NotNull List<MediaData> medias, boolean deleteFromDb) throws IOException {
-        Path basePath = Paths.get(storageConfig.getFullMediaPath());
+        Path basePath = Paths.get(storageConfig.getBasePublicPath());
 
         for (MediaData media : medias) {
             if (media.getStoreMethod() != StoreMethod.DISK) {

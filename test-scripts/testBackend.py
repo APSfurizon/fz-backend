@@ -55,6 +55,16 @@ def doGet(url, auth=None) -> Response:
     print(response.headers)
     print(response.text)
     return response
+def doDelete(url) -> Response:
+    global session
+    global HEADERS
+    response = session.delete(url, headers=HEADERS, allow_redirects=False)
+    print(f"\n-------- GET {url} --------")
+    print(response.status_code)
+    print(response.cookies.items())
+    print(response.headers)
+    print(response.text)
+    return response
 
 def register() -> Response:
     json = {
@@ -100,7 +110,7 @@ def login() -> Response:
     return req
 
 def getMe() -> Response:
-    doGet(f'{BASE_URL_API}users/me/display')
+    doGet(f'{BASE_URL_API}users/display/me')
 
 def testPermission() -> Response:
     doGet(f'{BASE_URL_API}authentication/test')
@@ -110,14 +120,19 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
 def uploadBadge() -> Response:
+    imageName = 'testImage2.png'
     files = {
-        'image': ('testImage.png', open('testImage.png', 'rb')),
+        'image': (imageName, open(imageName, 'rb')),
     }
     return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
+def deleteBadge() -> Response:
+    doDelete(f'{BASE_URL_API}badge/user/')
 
-register()
-confirmEmail()
-#login()
-#getMe()
+#register()
+#confirmEmail()
+login()
+getMe()
 #testPermission()
-testInternalAuthorize()
+#testInternalAuthorize()
+uploadBadge()
+#deleteBadge()

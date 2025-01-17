@@ -10,4 +10,5 @@ public class StorageConfig {
     @NotNull private final String basePath;
     @NotNull private final String mediaPath;
     @NotNull private final String fullMediaPath;
+    @NotNull private final String basePublicPath;
 }
