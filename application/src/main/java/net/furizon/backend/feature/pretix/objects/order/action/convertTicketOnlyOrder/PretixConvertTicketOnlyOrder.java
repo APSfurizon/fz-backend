@@ -16,6 +16,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPosi
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
     public boolean invoke(@NotNull Order order,
                           @NotNull PretixInformation pretixInformation,
                           @Nullable UpdateOrderInDb updateOrderInDb) {
-        if (order.getRoomPositionId() != null) {
+        if (order.getRoomPositionId() != null || order.getOrderStatus() == OrderStatus.PENDING || order.isDaily()) {
             log.error("Order {} already has a room position", order.getCode());
             return true;
         }

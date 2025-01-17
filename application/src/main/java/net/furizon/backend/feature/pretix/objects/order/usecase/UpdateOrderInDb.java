@@ -177,7 +177,7 @@ public class UpdateOrderInDb {
                 deleteOrderAction.invoke(pretixOrder.getCode());
             }
 
-            if (updateToRoomWithTicket && order != null && order.getRoomPositionId() == null) {
+            if (updateToRoomWithTicket && order != null && order.getRoomPositionId() == null && !order.isDaily()) {
                 //If we convert a pending order, all pending payments will be canceled
                 if (order.getOrderStatus() != OrderStatus.PENDING) {
                     log.info("[PRETIX] Order {} is a 'ticket only' order. Converting it to ticket + room",
