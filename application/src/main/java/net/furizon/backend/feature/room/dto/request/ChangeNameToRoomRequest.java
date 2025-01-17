@@ -14,7 +14,7 @@ public class ChangeNameToRoomRequest {
 
     @NotNull
     @NotEmpty
-    @Size(min = 1, max = 254)
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{4,63}$")
+    @Size(min = 2, max = 254)
+    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
     private final String name;
 }
