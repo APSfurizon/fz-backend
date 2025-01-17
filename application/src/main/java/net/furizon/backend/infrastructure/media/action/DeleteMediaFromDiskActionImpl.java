@@ -1,10 +1,10 @@
-package net.furizon.backend.infrastructure.image.action;
+package net.furizon.backend.infrastructure.media.action;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.dto.MediaData;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
-import net.furizon.backend.infrastructure.image.finder.MediaFinder;
+import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

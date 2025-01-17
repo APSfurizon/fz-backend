@@ -1,4 +1,4 @@
-package net.furizon.backend.infrastructure.image.action;
+package net.furizon.backend.infrastructure.media.action;
 
 import org.jetbrains.annotations.NotNull;
 

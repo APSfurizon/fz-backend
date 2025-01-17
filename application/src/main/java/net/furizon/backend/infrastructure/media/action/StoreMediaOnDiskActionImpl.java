@@ -1,12 +1,12 @@
-package net.furizon.backend.infrastructure.image.action;
+package net.furizon.backend.infrastructure.media.action;
 
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.nio.ImageWriter;
 import com.sksamuel.scrimage.webp.WebpWriter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
-import net.furizon.backend.infrastructure.image.ImageConfig;
-import net.furizon.backend.infrastructure.image.SimpleImageMetadata;
+import net.furizon.backend.infrastructure.media.ImageConfig;
+import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package net.furizon.backend.infrastructure.image;
+package net.furizon.backend.infrastructure.media;
 
 import lombok.Builder;
 import lombok.Data;
