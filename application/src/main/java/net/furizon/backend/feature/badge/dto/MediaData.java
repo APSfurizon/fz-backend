@@ -15,11 +15,11 @@ public class MediaData {
     private final Long id;
 
     @NotNull
-    private final String relativePath;
+    private final String path;
 
     @NotNull
     private final String mediaType;
 
-    @Nullable
+    @NotNull
     private final StoreMethod storeMethod;
 }

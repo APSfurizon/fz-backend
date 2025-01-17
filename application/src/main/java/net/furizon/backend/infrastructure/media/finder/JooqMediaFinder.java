@@ -2,16 +2,12 @@ package net.furizon.backend.infrastructure.media.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.dto.MediaData;
-import net.furizon.backend.feature.badge.mapper.JooqMediaMapper;
+import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.Field;
-import org.jooq.ForeignKey;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Record3;
-import org.jooq.SelectJoinStep;
-import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -66,12 +62,12 @@ public class JooqMediaFinder implements MediaFinder {
     }
 
     @Override
-    public @NotNull SelectJoinStep<Record3<Long, String, String>> selectMedia() {
+    public @NotNull SelectJoinStep<Record4<Long, String, String, Integer>> selectMedia() {
         return PostgresDSL.select(
             MEDIA.MEDIA_ID,
             MEDIA.MEDIA_TYPE,
             MEDIA.MEDIA_PATH,
-            MEDIA.
+            MEDIA.MEDIA_STORE_METHOD
         ).from(MEDIA);
     }
 }

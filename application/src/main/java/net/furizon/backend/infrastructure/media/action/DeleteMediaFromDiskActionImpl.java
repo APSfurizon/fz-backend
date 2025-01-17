@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.dto.MediaData;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
+import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -39,15 +40,19 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
     @Override
     @Transactional
     public boolean invoke(@NotNull List<MediaData> medias) throws IOException {
-        Path basePath = Paths.get(storageConfig.getBasePath());
+        Path basePath = Paths.get(storageConfig.getFullMediaPath());
 
         for (MediaData media : medias) {
+            if (media.getStoreMethod() != StoreMethod.DISK) {
+                log.error("Unable to delete non-disk media {}", media);
+                continue;
+            }
             log.info("Deleting media {}", media);
-            Path p = basePath.resolve(media.getRelativePath());
+            Path p = basePath.resolve(media.getPath());
             Files.deleteIfExists(p);
         }
 
-        return deleteMediaAction.invoke(medias.stream().map(MediaData::getId).toList());
+        return deleteMediaAction.deleteFromDb(medias.stream().map(MediaData::getId).toList());
     }
 
     @Override

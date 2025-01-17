@@ -4,7 +4,9 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.processing.Generated;
 
@@ -14,6 +16,7 @@ import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -33,6 +36,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -79,6 +83,11 @@ public class Media extends TableImpl<Record> {
      * The column <code>public.media.media_type</code>.
      */
     public final TableField<Record, String> MEDIA_TYPE = createField(DSL.name("media_type"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>public.media.media_store_method</code>.
+     */
+    public final TableField<Record, Integer> MEDIA_STORE_METHOD = createField(DSL.name("media_store_method"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     private Media(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -181,6 +190,13 @@ public class Media extends TableImpl<Record> {
             _users = new UsersPath(this, null, Keys.USERS__USER_MEDIA_FK.getInverseKey());
 
         return _users;
+    }
+
+    @Override
+    public List<Check<Record>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("media_store_method_check"), "(((media_store_method >= 0) AND (media_store_method <= 0)))", true)
+        );
     }
 
     @Override

@@ -114,16 +114,18 @@ pretix:
 
 storage:
   base-path: data/
+  media-path: static/
+  full-media-path: ${storage.base-path}${storage.media-path}
 
 
 image:
-  base-path: ${IMAGE_BASE_PATH:static/images/}
-  full-base-path: ${storage.base-path}${image.base-path}
+  base-path: ${IMAGE_BASE_PATH:images/}
+  full-base-path: ${storage.full-media-path}${image.base-path}
   webp-quality: ${IMAGE_QUALITY:85}
 
 badge:
   storage-path: ${image.base-path}${BADGE_STORAGE_PATH:badges}
-  full-storage-path: ${storage.base-path}${badge.storage-path}
+  full-storage-path: ${storage.full-media-path}${badge.storage-path}
   max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:4194304} #4 MB
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}

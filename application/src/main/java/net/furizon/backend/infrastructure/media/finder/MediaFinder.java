@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.media.finder;
 import net.furizon.backend.feature.badge.dto.MediaData;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record3;
+import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface MediaFinder {
 
     @NotNull Set<Long> getReferencedMediaIds();
 
-    @NotNull SelectJoinStep<Record3<Long, String, String>> selectMedia();
+    @NotNull SelectJoinStep<Record4<Long, String, String, Integer>> selectMedia();
 }

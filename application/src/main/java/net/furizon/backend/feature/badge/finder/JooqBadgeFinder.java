@@ -2,7 +2,7 @@ package net.furizon.backend.feature.badge.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.dto.MediaData;
-import net.furizon.backend.feature.badge.mapper.JooqMediaMapper;
+import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;

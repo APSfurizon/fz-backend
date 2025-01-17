@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.ImageConfig;
 import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
+import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -51,15 +52,16 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
         String filename = UUID.randomUUID() + ".webp";
         String userId = String.valueOf(user.getUserId());
 
-        Path relativePath = Paths.get(basePath, userId);
+        Path relativePath = Paths.get(storageConfig.getMediaPath(), basePath, userId);
         Path fullRelativePath = relativePath.resolve(filename);
-        Path baseStoragePath = Paths.get(storageConfig.getBasePath());
+        Path baseStoragePath = Paths.get(storageConfig.getFullMediaPath());
         Path absolutePath = baseStoragePath.resolve(relativePath);
         Path fullAbsolutePath = baseStoragePath.resolve(fullRelativePath);
         Files.createDirectories(absolutePath);
 
-        String relativePathStr = fullRelativePath.toString();
-        long mediaId = addMediaAction.invoke(relativePathStr, metadata.getType());
+        //Important to normalize the path before!
+        String relativePathStr = fullRelativePath.normalize().toString();
+        long mediaId = addMediaAction.invoke(relativePathStr, metadata.getType(), StoreMethod.DISK);
         image.output(writer, fullAbsolutePath);
 
         log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), fullAbsolutePath);
