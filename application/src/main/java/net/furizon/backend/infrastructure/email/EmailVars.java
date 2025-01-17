@@ -20,6 +20,7 @@ public enum EmailVars {
     DUPLICATE_ORDER_CODE("duplicateOrderCode"),
     MEMBERSHIP_CARD_ID("cardId"),
     MEMBERSHIP_CARD_ID_IN_YEAR("cardIdInYear"),
+    REFUND_MONEY("refundMoney"),
     ;
 
     @Getter

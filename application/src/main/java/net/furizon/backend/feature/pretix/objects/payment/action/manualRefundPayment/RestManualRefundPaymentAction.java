@@ -41,6 +41,9 @@ public class RestManualRefundPaymentAction implements ManualRefundPaymentAction 
                 .build();
         try {
             return pretixHttpClient.send(PretixConfig.class, request).getStatusCode().is2xxSuccessful();
+        } catch (final HttpClientErrorException.BadRequest e) {
+            log.error("Error while refunding a payment: BAD REQUEST: {}", e.getResponseBodyAsString());
+            return false;
         } catch (final HttpClientErrorException ex) {
             log.error("Error while refunding a payment", ex);
             return false;

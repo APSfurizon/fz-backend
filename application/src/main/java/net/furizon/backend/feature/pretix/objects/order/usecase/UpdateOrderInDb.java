@@ -3,14 +3,17 @@ package net.furizon.backend.feature.pretix.objects.order.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.createMembershipCard.CreateMembershipCardAction;
+import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
 import net.furizon.backend.feature.membership.action.updateMembershipOwner.UpdateMembershipCardOwner;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
+import net.furizon.backend.feature.pretix.objects.order.action.convertTicketOnlyOrder.ConvertTicketOnlyOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.action.deleteOrder.DeleteOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.action.upsertOrder.UpsertOrderAction;
+import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
@@ -22,8 +25,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_FATAL_ERROR_MEMBERSHIP;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_FATAL_ERROR;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_WARNING;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_WARNING;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
@@ -36,97 +41,157 @@ import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_PREV_OWNE
 public class UpdateOrderInDb {
     @NotNull private final UpsertOrderAction upsertOrderAction;
     @NotNull private final DeleteOrderAction deleteOrderAction;
+    @NotNull private final DeleteMembershipCardAction deleteMembershipCardAction;
     @NotNull private final CreateMembershipCardAction createMembershipCardAction;
     @NotNull private final UpdateMembershipCardOwner updateMembershipCardOwner;
+    @NotNull private final ConvertTicketOnlyOrderAction convertTicketOnlyOrderAction;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final UserFinder userFinder;
 
+
     public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
-                                             @NotNull Event event,
-                                             @NotNull PretixInformation pretixInformation) {
-        Order order = null;
-        boolean shouldDelete = true;
+                                            @NotNull Event event,
+                                            @NotNull PretixInformation pretixInformation) {
+        return execute(pretixOrder, event, pretixInformation, true);
+    }
+    public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
+                                            @NotNull Event event,
+                                            @NotNull PretixInformation pretixInformation,
+                                            boolean updateToRoomWithTicket) {
+        try {
+            OrderController.suspendWebhook();
+            Order order = null;
+            boolean shouldDelete = true;
 
-        var orderOpt = pretixInformation.parseOrder(pretixOrder, event);
-        if (orderOpt.isPresent()) {
-            order = orderOpt.get();
-            OrderStatus os = order.getOrderStatus();
-            if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
-                log.debug("[PRETIX] Storing / Updating order: {}@{}", pretixOrder.getCode(), event.getSlug());
-                upsertOrderAction.invoke(order, pretixInformation);
+            var orderOpt = pretixInformation.parseOrder(pretixOrder, event);
+            if (orderOpt.isPresent()) {
+                order = orderOpt.get();
+                OrderStatus os = order.getOrderStatus();
+                if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
+                    log.debug("[PRETIX] Storing / Updating order: {}@{}", pretixOrder.getCode(), event.getSlug());
+                    upsertOrderAction.invoke(order, pretixInformation);
 
-                // GENERATE MEMBERSHIP CARD LOGIC
-                Long orderOwnerId = order.getOrderOwnerUserId();
-                if (orderOwnerId != null) {
-                    MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(order.getId());
+                    // GENERATE MEMBERSHIP CARD LOGIC
+                    Long orderOwnerId = order.getOrderOwnerUserId();
+                    if (orderOwnerId != null && os == OrderStatus.PAID) {
 
-                    if (card == null) { // No membership card has been generated by this order
-                        if (userFinder.findById(orderOwnerId) != null) {
-                            log.info("[PRETIX] Generating new membership card for user {}", orderOwnerId);
-                            createMembershipCardAction.invoke(orderOwnerId, event, order);
-                        } else {
-                            log.warn("[PRETIX] Tried generating card for user {}, but it doesn't exist in the DB",
-                                    orderOwnerId);
-                        }
+                        MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(order.getId());
+                        if (order.hasMembership()) {
 
-                    } else { //A membership card was already created with this order
-                        Long cardOwnerId = card.getCreatedForOrderId();
-
-                        if (cardOwnerId != null && !cardOwnerId.equals(orderOwnerId)) { //Order owner has changed
-                            if (!card.isRegistered()) { //If the card was not registered yet, we can change the owners
+                            if (card == null) { // No membership card has been generated by this order
                                 if (userFinder.findById(orderOwnerId) != null) {
-                                    log.warn("[PRETIX] Order {} has already generated the membeship card {}/{}. "
-                                            + "However, the order owner has changed ({} -> {}) and, since the card "
-                                            + "was not registered yet, the card's owner is now changed as well",
-                                        order.getCode(),
-                                        card.getCardId(), card.getIdInYear(),
-                                        cardOwnerId, orderOwnerId
-                                    );
-                                    updateMembershipCardOwner.invoke(card, orderOwnerId);
+                                    log.info("[PRETIX] Generating new membership card for user {}", orderOwnerId);
+                                    createMembershipCardAction.invoke(orderOwnerId, event, order);
                                 } else {
-                                    log.warn("[PRETIX] Tried changing card owner {} -> {}, "
-                                            + "but the new one doesn't exist in the DB",
-                                            cardOwnerId, orderOwnerId);
+                                    log.warn("[PRETIX] Tried generating card for user {}, "
+                                                    + "but it doesn't exist in the DB",
+                                            orderOwnerId);
                                 }
 
-                            } else { //Otherwise, send an error email to web admins
-                                log.error("[PRETIX] Order {} has already generated the membeship card {}/{}. "
-                                        + "Order owner has changed ({} -> {}), "
-                                        + "but membership card was already registered!!"
-                                        + "Manual fix is needed!!! +++",
-                                    order.getCode(),
-                                    card.getCardId(), card.getIdInYear(),
-                                    cardOwnerId, orderOwnerId
-                                );
+                            } else { //A membership card was already created with this order
+                                long cardOwnerId = card.getUserOwnerId();
 
-                                emailSender.sendToPermission(
+                                //Order owner has changed
+                                if (!orderOwnerId.equals(cardOwnerId)) {
+                                    //If the card wasn't registered yet, we can change the owners
+                                    if (!card.isRegistered()) {
+                                        if (userFinder.findById(orderOwnerId) != null) {
+                                            log.warn("[PRETIX] Order {} has already generated "
+                                                            + "the membeship card {}/{}. "
+                                                            + "However, the order owner "
+                                                            + "has changed ({} -> {}) and, since the card "
+                                                            + "was not registered yet, "
+                                                            + "the card's owner is now changed as well",
+                                                    order.getCode(),
+                                                    card.getCardId(), card.getIdInYear(),
+                                                    cardOwnerId, orderOwnerId
+                                            );
+                                            updateMembershipCardOwner.invoke(card, orderOwnerId);
+                                        } else {
+                                            log.warn("[PRETIX] Tried changing card owner {} -> {}, "
+                                                            + "but the new one doesn't exist in the DB",
+                                                    cardOwnerId, orderOwnerId);
+                                        }
+
+                                    } else { //Otherwise, send an error email to web admins
+                                        log.error("[PRETIX] Order {} has already generated the membeship card {}/{}. "
+                                                        + "Order owner has changed ({} -> {}), "
+                                                        + "but membership card was already registered!!"
+                                                        + "Manual fix is needed!!! +++",
+                                                order.getCode(),
+                                                card.getCardId(), card.getIdInYear(),
+                                                cardOwnerId, orderOwnerId
+                                        );
+
+                                        String idInYear = String.valueOf(card.getIdInYear());
+                                        emailSender.sendToPermission(
+                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                            SUBJECT_MEMBERSHIP_FATAL_ERROR,
+                                            TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR,
+                                            MailVarPair.of(ORDER_CODE, order.getCode()),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
+                                            MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                        );
+                                    }
+                                }
+                            }
+                        } else {
+                            if (card != null) { //The order HAD a membership card, but now it does not anymore
+                                if (!card.isRegistered()) {
+                                    log.info("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
+                                                    + "Deleting the previous registered card {}/{}",
+                                            order.getCode(), card.getCardId(), card.getIdInYear());
+                                    deleteMembershipCardAction.invoke(card);
+                                } else {
+                                    log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
+                                                    + "However, the previous membership card ({}/{}) "
+                                                    + "was already registered!! "
+                                                    + "No operation is going to be performed.",
+                                            order.getCode(), card.getCardId(), card.getIdInYear());
+
+                                    emailSender.sendToPermission(
                                         Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                        SUBJECT_FATAL_ERROR_MEMBERSHIP,
-                                        TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR,
+                                        SUBJECT_MEMBERSHIP_WARNING,
+                                        TEMPLATE_MEMBERSHIP_CARD_WARNING,
                                         MailVarPair.of(ORDER_CODE, order.getCode()),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                        MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear())),
-                                        MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                        MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
-                                );
+                                        MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
+                                    );
+                                }
                             }
                         }
                     }
+
+                    shouldDelete = false;
+                } else {
+                    order = null;
                 }
-
-                shouldDelete = false;
             } else {
-                order = null;
+                log.error("[PRETIX] Unable to parse order: {}@{}", pretixOrder.getCode(), event.getSlug());
             }
-        } else {
-            log.error("[PRETIX] Unable to parse order: {}@{}", pretixOrder.getCode(), event.getSlug());
-        }
 
-        if (shouldDelete) {
-            deleteOrderAction.invoke(pretixOrder.getCode());
-        }
+            if (shouldDelete) {
+                deleteOrderAction.invoke(pretixOrder.getCode());
+            }
 
-        return Optional.ofNullable(order);
+            if (updateToRoomWithTicket && order != null && order.getRoomPositionId() == null) {
+                //If we convert a pending order, all pending payments will be canceled
+                if (order.getOrderStatus() != OrderStatus.PENDING) {
+                    log.info("[PRETIX] Order {} is a 'ticket only' order. Converting it to ticket + room",
+                        order.getCode());
+                    convertTicketOnlyOrderAction.invoke(order, pretixInformation, this);
+                } else {
+                    log.warn("[PRETIX] Order {} is a 'ticket only' order, but we're skipping convertion "
+                            + "because of its status: {}", order.getCode(), order.getOrderStatus());
+                }
+            }
+
+            return Optional.ofNullable(order);
+        } finally {
+            OrderController.resumeWebhook();
+        }
     }
 }

@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -36,8 +37,8 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
-        log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
-        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.sourceExchangeUser.getUserId());
+        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
@@ -54,26 +55,36 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         checks.assertUserIsNotInRoom(destUserId, event, true);
 
         //checks.assertUserDoesNotOwnAroom(destUserId, event);
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+        long sourceRoomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
 
-        checks.assertRoomNotConfirmed(roomId);
+        checks.assertRoomNotConfirmed(sourceRoomId);
         var destRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
         destRoom.ifPresent(checks::assertRoomNotConfirmed);
 
-        checks.assertOrderIsPaid(sourceUserId, event);
-        checks.assertOrderIsPaid(destUserId, event);
+        Order sourceOrder = checks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
+        Order targetOrder = checks.getOrderAndAssertItExists(destUserId, event, input.pretixInformation);
+
+        checks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
+        checks.assertOrderIsPaid(targetOrder, destUserId, event);
+
+        checks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+        checks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
             return true;
         }
 
-        boolean res = roomLogic.exchangeRoom(destUserId, sourceUserId, roomId, event, input.pretixInformation);
+        boolean res = roomLogic.exchangeRoom(
+                destUserId, sourceUserId,
+                destRoom.orElse(null), sourceRoomId,
+                event, input.pretixInformation
+        );
         if (res) {
             UserEmailData destData = userFinder.getMailDataForUser(destUserId);
             UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
             if (destData != null) {
                 mailService.broadcastUpdate(
-                        roomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
+                        sourceRoomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
                         MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
                 );
 
@@ -94,7 +105,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            @NotNull FurizonUser sourceExchangeUser,
             @NotNull ExchangeRequest req,
             @NotNull PretixInformation pretixInformation,
             boolean runOnlyChecks

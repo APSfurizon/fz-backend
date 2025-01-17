@@ -21,9 +21,9 @@ public class ExchangeConfirmationStatus {
 
     public boolean confirmUser(boolean isSourceUser) {
         if (isSourceUser) {
-            targetConfirmed = true;
-        } else {
             sourceConfirmed = true;
+        } else {
+            targetConfirmed = true;
         }
         return isFullyConfirmed();
     }

@@ -413,9 +413,9 @@ public class CachedPretixInformation implements PretixInformation {
                     }
 
                 } else if ((cacheExtraDays = extraDaysIdToDay.getIfPresent(itemId)) != null) {
-                    if (extraDays == ExtraDays.EARLY) {
+                    if (cacheExtraDays == ExtraDays.EARLY) {
                         earlyPositionId = position.getPositionId();
-                    } else if (extraDays == ExtraDays.LATE) {
+                    } else if (cacheExtraDays == ExtraDays.LATE) {
                         latePositionId = position.getPositionId();
                     }
                     if (extraDays != ExtraDays.BOTH) {
@@ -532,8 +532,8 @@ public class CachedPretixInformation implements PretixInformation {
     public void resetCache() {
         log.info("[PRETIX] Resetting cache for pretix information");
 
-        lock.writeLock().lock();
         try {
+            lock.writeLock().lock();
             invalidateEventsCache();
             invalidateEventStructCache();
 
@@ -654,6 +654,8 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.ROOMS, products.roomItemIds());
         itemIdsCache.put(CacheItemTypes.NO_ROOM_ITEM, products.noRoomItemIds());
         itemIdsCache.put(CacheItemTypes.EXTRA_FURSUITS, products.extraFursuitsItemIds());
+        itemIdsCache.put(CacheItemTypes.TEMP_ADDON, products.tempAddons());
+        itemIdsCache.put(CacheItemTypes.TEMP_ITEM, products.tempItems());
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());

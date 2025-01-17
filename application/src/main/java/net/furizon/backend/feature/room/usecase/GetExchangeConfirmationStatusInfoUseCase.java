@@ -67,7 +67,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                         orderFinder.getOrderDataResponseFromUserEvent(targetUserId, event, pretixInformation)
                 );
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
-                if (status.isTargetConfirmed() || isSourceUser) {
+                if (status.isTargetConfirmed() || !isSourceUser) {
                     targetRoomData = targetResp.getRoom();
                     targetExtraDays = targetResp.getExtraDays();
                 } else {

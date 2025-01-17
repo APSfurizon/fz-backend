@@ -95,7 +95,7 @@ public class JooqRoomFinder implements RoomFinder {
     @Override
     public int countRoomsWithUser(long userId, long eventId) {
         return query.count(
-            PostgresDSL.select(ROOMS.ROOM_ID)
+            PostgresDSL.selectDistinct(ROOM_GUESTS.ROOM_GUEST_ID)
             .from(ROOMS)
             .innerJoin(ORDERS)
             .on(
@@ -104,7 +104,7 @@ public class JooqRoomFinder implements RoomFinder {
             )
             .innerJoin(ROOM_GUESTS)
             .on(
-                ROOMS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
                 .and(ROOM_GUESTS.USER_ID.eq(userId))
                 .and(ROOM_GUESTS.CONFIRMED.isTrue())
             )

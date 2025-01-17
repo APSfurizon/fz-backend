@@ -10,9 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.mail.MailException;
 
 public interface EmailSender {
+    @NonBlocking
     void sendToRole(@NotNull String roleInternalName, @NotNull String subject,
                     @NotNull String templateName, MailVarPair... vars);
 
+    @NonBlocking
     void sendToPermission(@NotNull Permission permission, @NotNull String subject,
                           @NotNull String templateName, MailVarPair... vars);
 

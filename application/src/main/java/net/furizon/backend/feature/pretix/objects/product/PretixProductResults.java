@@ -5,6 +5,7 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -24,7 +25,9 @@ public record PretixProductResults(
     @NotNull Map<Long, Map<String, String>> roomPretixItemIdToNames,
     @NotNull Set<Long> noRoomItemIds,
     @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
-    @NotNull Map<HotelCapacityPair, Long> lateDaysItemId
+    @NotNull Map<HotelCapacityPair, Long> lateDaysItemId,
+    @NotNull Set<Long> tempAddons,
+    @NotNull Set<Long> tempItems
 ) {
     public PretixProductResults() {
         this(
@@ -41,7 +44,9 @@ public record PretixProductResults(
             new HashMap<>(),
             new TreeSet<>(),
             new HashMap<>(),
-            new HashMap<>()
+            new HashMap<>(),
+            new HashSet<>(),
+            new HashSet<>()
         );
     }
 }

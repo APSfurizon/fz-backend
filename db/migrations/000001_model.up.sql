@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS membership_cards
     user_id            int8                                                                                                                     NOT NULL,
     already_registered bool DEFAULT false                                                                                                       NOT NULL,
     created_for_order  int8                                                                                                                     NULL, -- this has to be nullable, because manual insertions not linked to orders are possible --
-    CONSTRAINT only_one_card_per_year UNIQUE(issue_year, user_id),
+    -- CONSTRAINT only_one_card_per_year UNIQUE(issue_year, user_id), Duplicates must be resolved at code side by notifying the user on his page --
     CONSTRAINT cards_pkey PRIMARY KEY (card_db_id),
     CONSTRAINT card_user_fk FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT membership_cards_order_fk FOREIGN KEY (created_for_order) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE

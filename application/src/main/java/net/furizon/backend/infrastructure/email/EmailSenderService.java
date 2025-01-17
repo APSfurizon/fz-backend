@@ -38,12 +38,21 @@ public class EmailSenderService implements EmailSender {
     @Override
     public void sendToRole(@NotNull String roleInternalName, @NotNull String subject,
                            @NotNull String templateName, MailVarPair... vars) {
-        permissionFinder.getUsersWithRole(roleInternalName).forEach(u -> send(u, subject, templateName, vars));
+
+        //TODO FIX HANG
+        /*List<Long> users = permissionFinder.getUsersWithRole(roleInternalName);
+        for (Long user : users) {
+            send(user, subject, templateName, vars);
+        }*/
     }
     @Override
     public void sendToPermission(@NotNull Permission permission, @NotNull String subject,
                                  @NotNull String templateName, MailVarPair... vars) {
-        permissionFinder.getUsersWithPermission(permission).forEach(u -> send(u, subject, templateName, vars));
+        //TODO FIX HANG
+        /*List<Long> users = permissionFinder.getUsersWithPermission(permission);
+        for (Long user : users) {
+            send(user, subject, templateName, vars);
+        }*/
     }
 
     @Override

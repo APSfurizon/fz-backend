@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,7 @@ import java.util.function.BiConsumer;
 @Data
 public class PretixProduct {
     private final long id;
+    private final boolean active;
 
     @NotNull
     @JsonProperty("default_price")
@@ -34,12 +36,18 @@ public class PretixProduct {
         return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
     }
 
+    @NotNull
+    public Map<String, String> getCustomNames() {
+        return PretixGenericUtils.convertCustomNames(metadata.get(PretixConst.METADATA_IDENTIFIER_CUSTOM_NAME));
+
+    }
+
     public void forEachVariationByIdentifierPrefix(
         String prefix,
         BiConsumer<PretixProductVariation, String> callback
     ) {
         variations.stream()
-            .filter(v -> v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
+            .filter(v -> v.isActive() && v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
             .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));
     }
 }

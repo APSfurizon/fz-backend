@@ -152,7 +152,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
         return new ListRoomPricesAvailabilityResponse(
                 order.getBoughtRoomData(pretixInformation),
-                currentRoomPrice == null ? null : PretixGenericUtils.fromPriceToString(currentRoomPrice, '.'),
+                PretixGenericUtils.fromPriceToString(totalPaid, '.'),
                 rooms
         );
     }

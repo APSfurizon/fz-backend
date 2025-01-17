@@ -81,6 +81,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
         boolean canBuyOrUpgrade = canExchange && buyOrUpgradeSupported;
 
+        log.debug("RoomInfo: info={} userid={} event={} editingTimeAllowed={} isOwner={} hasOrder={}",
+                info, userId, event, editingTimeAllowed, isOwner, hasOrder);
+
         return new RoomInfoResponse(info, hasOrder, canCreateRoom, buyOrUpgradeSupported,
                 canBuyOrUpgrade, canExchange, endRoomEditingTime, invitations);
     }

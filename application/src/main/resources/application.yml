@@ -99,6 +99,7 @@ pretix:
     url: ${PRETIX_API_URL:http://localhost:8000}
     path: ${PRETIX_API_PATH:/api/v1/}
     key: ${PRETIX_API_KEY:OwO}
+    fzbackendutils-token: ${PRETIX_FZBACKENDUTILS_API_TOKEN:OwO}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
   cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 */8 * * *}
   shop:

@@ -6,5 +6,7 @@ public enum CacheItemTypes {
     SPONSORSHIPS,
     ROOMS,
     NO_ROOM_ITEM,
-    EXTRA_FURSUITS
+    EXTRA_FURSUITS,
+    TEMP_ADDON,
+    TEMP_ITEM
 }
