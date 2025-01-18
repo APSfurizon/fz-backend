@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 public enum Permission {
     CAN_UPGRADE_USERS(0L),
+    CAN_MANAGE_USER_PUBLIC_INFO(4L),
     CAN_BAN_USERS(1L),
     CAN_SEE_ADMIN_PAGES(2L),
     PRETIX_ADMIN(3L),
@@ -26,9 +28,17 @@ public enum Permission {
     // the code freely, without destroying existing permissions
     private final long value;
 
-    private static final Map<Long, Permission> PERMISSIONS = Arrays
-        .stream(Permission.values())
-        .collect(Collectors.toMap(Permission::getValue, Function.identity()));
+    private static final Map<Long, Permission> PERMISSIONS = new HashMap<>();
+
+    static {
+        for (final Permission permission : Permission.values()) {
+            long permissionValue = permission.value;
+            if (PERMISSIONS.containsKey(permissionValue)) {
+                throw new RuntimeException("Duplicate permission id: " + permissionValue);
+            }
+            PERMISSIONS.put(permissionValue, permission);
+        }
+    }
 
     @Nullable
     public static Permission get(final long value) {

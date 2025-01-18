@@ -16,6 +16,7 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.SecurityResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -149,7 +150,7 @@ public class RoomChecks {
                     }
                 } else {
                     log.error("User is not an admin! It cannot operate on room {}", idRes);
-                    throw new ApiException("User is not an admin!", RoomErrorCodes.USER_IS_NOT_ADMIN);
+                    throw new ApiException("User is not an admin!", SecurityResponseCodes.USER_IS_NOT_ADMIN);
                 }
             } else {
                 roomId = idRes;
@@ -223,7 +224,7 @@ public class RoomChecks {
         boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
         if (guest.getUserId() != requesterUserId && !isAdmin) {
             log.error("User {} has no rights over guest obj {}", requesterUserId, guest.getGuestId());
-            throw new ApiException("User has no rights over specified guest!", RoomErrorCodes.USER_IS_NOT_ADMIN);
+            throw new ApiException("User has no rights over specified guest!", SecurityResponseCodes.USER_IS_NOT_ADMIN);
         }
     }
 
@@ -279,7 +280,7 @@ public class RoomChecks {
         //We don't allow admin confirmation, otherwise which side do we confirm? For the future: maybe both?
         if (status.getSourceUserId() != userId && status.getTargetUserId() != userId) {
             log.error("User {} is trying on operate on exchange {} but has no rights!", userId, status.getExchangeId());
-            throw new ApiException("User has no rights on exchange", RoomErrorCodes.USER_IS_NOT_ADMIN);
+            throw new ApiException("User has no rights on exchange", SecurityResponseCodes.USER_IS_NOT_ADMIN);
         }
     }
 
@@ -288,7 +289,7 @@ public class RoomChecks {
         boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
         if (userId != null && userId != user.getUserId() && !isAdmin) {
             log.error("User {} has no permission over userId {}", user.getUserId(), userId);
-            throw new ApiException("User is not an admin", RoomErrorCodes.USER_IS_NOT_ADMIN);
+            throw new ApiException("User is not an admin", SecurityResponseCodes.USER_IS_NOT_ADMIN);
         }
         return id;
     }

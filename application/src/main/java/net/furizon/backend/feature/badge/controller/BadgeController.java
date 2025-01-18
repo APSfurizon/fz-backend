@@ -1,12 +1,15 @@
 package net.furizon.backend.feature.badge.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
+import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.GetFullInfoBadgeUseCase;
+import net.furizon.backend.feature.badge.usecase.UpdateUserBadgeInfoUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -14,13 +17,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -105,6 +102,13 @@ public class BadgeController {
         );
     }
 
+    @Operation(summary = "Returns the full info to be displayed on the badge page", description =
+        "This method returns information about: when the badges are going to be physically printed, so any "
+        + "further changes won't be on the actual physical badge; "
+        + "current user data, so its propic, fursona name, etc; "
+        + "how many fursuits the user can 'legally' bring to the event EG "
+        + "how many fursuits he has bought + default fursuit no;"
+        + "full list of fursuits the user has + if the user has marked that fursuit to be brought to the current event")
     @GetMapping("/")
     public @NotNull FullInfoBadgeResponse getBadge(
             @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -114,6 +118,24 @@ public class BadgeController {
                 new GetFullInfoBadgeUseCase.Input(
                         user,
                         pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Updates the badge info of the user", description =
+        "By specifying the field `userId` in the request, an administrator can "
+        + "update the information of another user. For normal people that field can "
+        + "be simply omitted")
+    @PostMapping("/update-user-badge-info")
+    public boolean updateUserBadgeInfo(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid @NotNull final UpdateUserBadgeRequest req
+    ) {
+        return useCaseExecutor.execute(
+                UpdateUserBadgeInfoUseCase.class,
+                new UpdateUserBadgeInfoUseCase.Input(
+                        user,
+                        req
                 )
         );
     }
