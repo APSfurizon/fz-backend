@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
-import net.furizon.backend.feature.badge.dto.BadgeUploadResponse;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
+import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
@@ -33,7 +33,7 @@ public class BadgeController {
         + "an invalid size or dimensions, we will return with an error. We return "
         + "the media id and the relative path where the file is served")
     @PostMapping(value = "/user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BadgeUploadResponse userUpload(
+    public MediaResponse userUpload(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
         @RequestParam("image") MultipartFile image
     ) {
@@ -54,7 +54,7 @@ public class BadgeController {
             + "an invalid size or dimensions, we will return with an error. We return "
             + "the media id and the relative path where the file is served")
     @PostMapping(value = "/fursuit/upload/{fursuitId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BadgeUploadResponse fursuitUpload(
+    public MediaResponse fursuitUpload(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId,
             @RequestParam("image") MultipartFile image

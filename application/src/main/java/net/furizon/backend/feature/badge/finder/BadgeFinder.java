@@ -1,6 +1,6 @@
 package net.furizon.backend.feature.badge.finder;
 
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import org.jetbrains.annotations.Nullable;
 
 public interface BadgeFinder {

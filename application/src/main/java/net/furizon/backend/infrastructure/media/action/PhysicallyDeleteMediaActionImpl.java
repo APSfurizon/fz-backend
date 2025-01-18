@@ -2,7 +2,7 @@ package net.furizon.backend.infrastructure.media.action;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

@@ -27,7 +27,7 @@ public class GetSelectedUsersByIdsUseCase implements UseCase<GetSelectedUsersByI
         final Set<Long> parsedIds = Arrays.stream(input.userIds).map(Long::parseLong).collect(Collectors.toSet());
         final List<UserDisplayData> result = userFinder.getDisplayUserByIds(parsedIds, input.event);
         return new SearchUsersResponse(result.stream().map(data ->
-                new SearchUser(data.getUserId(), data.getFursonaName(), data.getPropicUrl()))
+                new SearchUser(data.getUserId(), data.getFursonaName(), data.getPropic()))
                 .toList());
     }
 

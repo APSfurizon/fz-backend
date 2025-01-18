@@ -5,8 +5,7 @@ import com.sksamuel.scrimage.Position;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
-import net.furizon.backend.feature.badge.dto.BadgeUploadResponse;
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
 import net.furizon.backend.feature.user.action.setBadge.SetUserBadgeAction;
@@ -15,6 +14,7 @@ import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.media.action.StoreMediaOnDiskAction;
+import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -30,7 +30,7 @@ import java.util.Objects;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, BadgeUploadResponse> {
+public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, MediaResponse> {
 
     @NotNull private final BadgeConfig badgeConfig;
 
@@ -44,7 +44,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Bad
 
     @Override
     @Transactional
-    public @NotNull BadgeUploadResponse executor(@NotNull Input input) {
+    public @NotNull MediaResponse executor(@NotNull Input input) {
         try {
             long userId = input.user.getUserId();
             if (input.type == BadgeType.BADGE_FURSUIT) {
@@ -96,10 +96,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Bad
                     throw new IllegalStateException("Unexpected value: " + input.type);
             }
 
-            return BadgeUploadResponse.builder()
-                .id(1L)
-                .relativePath(res.relativePath())
-                .build();
+            return new MediaResponse(res.mediaDbId(), res.relativePath(), imageMetadata.getType());
         } catch (IOException e) {
             log.error("An error occurred while uploading a badge", e);
             throw new ApiException("Unable to upload image", ImageCodes.ERROR_WHILE_UPLOADING);

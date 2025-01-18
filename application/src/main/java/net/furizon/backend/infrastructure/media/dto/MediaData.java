@@ -1,9 +1,10 @@
-package net.furizon.backend.feature.badge.dto;
+package net.furizon.backend.infrastructure.media.dto;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.media.StoreMethod;
+import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import org.jetbrains.annotations.NotNull;
 
 @Data
@@ -21,4 +22,8 @@ public class MediaData {
 
     @NotNull
     private final StoreMethod storeMethod;
+
+    public MediaResponse toMediaResponse() {
+        return MediaResponseMapper.map(this);
+    }
 }
