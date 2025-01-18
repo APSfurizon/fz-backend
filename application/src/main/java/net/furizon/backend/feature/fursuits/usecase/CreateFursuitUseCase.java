@@ -46,6 +46,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 userId,
                 input.name,
                 input.species,
+                input.showInFursuitCount,
                 order
         );
 
@@ -54,6 +55,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 .name(input.name)
                 .species(input.species)
                 .bringingToEvent(input.bringToCurrentEvenet)
+                .showInFursuitCount(input.showInFursuitCount)
                 .ownerId(userId)
             .build();
     }
@@ -62,6 +64,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
             @NotNull String name,
             @NotNull String species,
             boolean bringToCurrentEvenet,
+            boolean showInFursuitCount,
             @NotNull FurizonUser user,
             @NotNull PretixInformation pretixInformation
     ){}

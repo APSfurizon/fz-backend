@@ -12,4 +12,6 @@ public class FursuitDataRequest {
     @NotNull private final String species;
 
     private final boolean bringToCurrentEvent;
+
+    private final boolean showInFursuitCount;
 }

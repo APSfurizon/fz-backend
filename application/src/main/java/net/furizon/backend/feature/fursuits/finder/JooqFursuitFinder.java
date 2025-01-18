@@ -91,6 +91,7 @@ public class JooqFursuitFinder implements FursuitFinder {
                 FURSUITS.FURSUIT_ID,
                 FURSUITS.FURSUIT_NAME,
                 FURSUITS.FURSUIT_SPECIES,
+                FURSUITS.SHOW_IN_FURSUITCOUNT,
                 FURSUITS.USER_ID,
                 ORDERS.ID
             )

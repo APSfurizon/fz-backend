@@ -123,6 +123,7 @@ public class FursuitController {
                         fursuitId,
                         req.getName(),
                         req.getSpecies(),
+                        req.isShowInFursuitCount(),
                         pretixInformation.getCurrentEvent(),
                         user
                 )
@@ -161,6 +162,7 @@ public class FursuitController {
             @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
             @Valid @NotNull @RequestParam("species") final String species,
             @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
+            @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
             @RequestParam("delete-image") final boolean deleteImage,
             @RequestParam("image") MultipartFile image
     ) {
@@ -170,6 +172,7 @@ public class FursuitController {
                         fursuitId,
                         name,
                         species,
+                        showInFursuitCount,
                         pretixInformation.getCurrentEvent(),
                         user
                 )
@@ -233,6 +236,7 @@ public class FursuitController {
                         req.getName(),
                         req.getSpecies(),
                         req.isBringToCurrentEvent(),
+                        req.isShowInFursuitCount(),
                         user,
                         pretixInformation
                 )
@@ -256,6 +260,7 @@ public class FursuitController {
         @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
         @Valid @NotNull @RequestParam("species") final String species,
         @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
+        @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
         @RequestParam("image") MultipartFile image
     ) {
         FursuitDisplayData data = executor.execute(
@@ -264,6 +269,7 @@ public class FursuitController {
                         name,
                         species,
                         bringToCurrentEvent,
+                        showInFursuitCount,
                         user,
                         pretixInformation
                 )

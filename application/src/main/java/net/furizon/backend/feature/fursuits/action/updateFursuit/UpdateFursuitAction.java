@@ -6,6 +6,7 @@ public interface UpdateFursuitAction {
     boolean invoke(
         long fursuitId,
         @NotNull String name,
-        @NotNull String species
+        @NotNull String species,
+        boolean showInFursuitCount
     );
 }

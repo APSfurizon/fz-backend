@@ -9,6 +9,7 @@ public interface CreateFursuitAction {
             long ownerId,
             @NotNull String name,
             @NotNull String species,
+            boolean showInFursuitCount,
             @Nullable Order linkedOrder
     );
 }

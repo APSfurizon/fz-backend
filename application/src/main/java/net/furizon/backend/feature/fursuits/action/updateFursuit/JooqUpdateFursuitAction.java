@@ -14,11 +14,12 @@ public class JooqUpdateFursuitAction implements UpdateFursuitAction {
     @NotNull private final SqlCommand command;
 
     @Override
-    public boolean invoke(long fursuitId, @NotNull String name, @NotNull String species) {
+    public boolean invoke(long fursuitId, @NotNull String name, @NotNull String species, boolean showInFursuitCount) {
         return command.execute(
             PostgresDSL.update(FURSUITS)
             .set(FURSUITS.FURSUIT_NAME, name)
             .set(FURSUITS.FURSUIT_SPECIES, species)
+            .set(FURSUITS.SHOW_IN_FURSUITCOUNT, showInFursuitCount)
             .where(FURSUITS.FURSUIT_ID.eq(fursuitId))
         ) > 0;
     }

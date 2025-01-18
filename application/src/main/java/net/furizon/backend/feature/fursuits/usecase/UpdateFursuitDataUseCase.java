@@ -32,12 +32,14 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
         boolean res = updateFursuitAction.invoke(
             fursuitId,
             input.name,
-            input.species
+            input.species,
+            input.showInFursuitCount
         );
 
         if (res) {
             fursuit.setName(input.name);
             fursuit.setSpecies(input.species);
+            fursuit.setShowInFursuitCount(input.showInFursuitCount);
         }
         return fursuit;
     }
@@ -46,6 +48,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
             long fursuitId,
             @NotNull String name,
             @NotNull String species,
+            boolean showInFursuitCount,
             @NotNull Event event,
             @NotNull FurizonUser user
     ) {}
