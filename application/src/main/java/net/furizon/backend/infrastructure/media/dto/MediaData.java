@@ -23,6 +23,7 @@ public class MediaData {
     @NotNull
     private final StoreMethod storeMethod;
 
+    @NotNull
     public MediaResponse toMediaResponse() {
         return MediaResponseMapper.map(this);
     }

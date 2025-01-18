@@ -14,7 +14,7 @@ public class JooqSearchUserMapper {
         return new SearchUser(
                 record.get(USERS.USER_ID),
                 record.get(USERS.USER_FURSONA_NAME),
-                MediaResponseMapper.map(record)
+                MediaResponseMapper.mapOrNull(record)
         );
     }
 }
