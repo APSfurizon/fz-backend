@@ -36,6 +36,12 @@ public interface EmailSender {
     @Blocking
     void send(MailRequest request) throws MessagingException, MailException;
 
+    @Blocking
+    void sendMany(MailRequest... requests) throws MessagingException, MailException;
+
     @NonBlocking
     void fireAndForget(MailRequest request);
+
+    @NonBlocking
+    void fireAndForgetMany(MailRequest... requests);
 }

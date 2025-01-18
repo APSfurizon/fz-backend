@@ -22,6 +22,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -107,20 +108,16 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void send(@NotNull MailRequest request) throws MessagingException, MailException {
+        mailSender.send(
+            transformMailRequestToMimeMessages(request)
+        );
+    }
 
-        final var isTemplateMessage = request.getTemplateMessage() != null;
-        final var bodyMessage = isTemplateMessage ? convertTemplateToString(request) : request.getMessage();
-        if (bodyMessage == null) {
-            throw new RuntimeException("message is required");
-        }
-
-        final var mimeMessages = request
-            .getTo()
-            .stream()
-            .map(to -> buildMimeMessage(to, request.getSubject(), bodyMessage, isTemplateMessage))
-            .toArray(MimeMessage[]::new);
-
-        mailSender.send(mimeMessages);
+    @Override
+    public void sendMany(MailRequest... requests) throws MessagingException, MailException {
+        mailSender.send(
+            transformMailRequestsToMimeMessages(requests)
+        );
     }
 
     @Override
@@ -133,6 +130,40 @@ public class EmailSenderService implements EmailSender {
                 log.error("Couldn't send message", ex);
             }
         });
+    }
+
+    @Override
+    public void fireAndForgetMany(MailRequest... requests) {
+        asyncTaskExecutor.execute(() -> {
+            try {
+                log.debug("Sending emails in async mode");
+                sendMany(requests);
+            } catch (MessagingException ex) {
+                log.error("Couldn't send message", ex);
+            }
+        });
+    }
+
+    private MimeMessage[] transformMailRequestsToMimeMessages(@NotNull MailRequest... requests) {
+        return Arrays
+            .stream(requests)
+            .map(this::transformMailRequestToMimeMessages)
+            .flatMap(Arrays::stream)
+            .toArray(MimeMessage[]::new);
+    }
+
+    private MimeMessage[] transformMailRequestToMimeMessages(@NotNull MailRequest request) {
+        final var isTemplateMessage = request.getTemplateMessage() != null;
+        final var bodyMessage = isTemplateMessage ? convertTemplateToString(request) : request.getMessage();
+        if (bodyMessage == null) {
+            throw new RuntimeException("message is required");
+        }
+
+        return request
+            .getTo()
+            .stream()
+            .map(to -> buildMimeMessage(to, request.getSubject(), bodyMessage, isTemplateMessage))
+            .toArray(MimeMessage[]::new);
     }
 
     @NotNull
