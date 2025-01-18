@@ -10,6 +10,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,8 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_R
 public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boolean> {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Override
@@ -39,14 +41,14 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
-        checks.assertRoomNotConfirmed(roomId);
-        checks.assertRoomCanBeConfirmed(roomId, event, roomLogic);
-        roomFinder.getRoomGuestsFromRoomId(roomId, true).forEach(g -> checks.assertOrderIsPaid(g.getUserId(), event));
+        roomChecks.assertRoomNotConfirmed(roomId);
+        roomChecks.assertRoomCanBeConfirmed(roomId, event, roomLogic);
+        roomFinder.getRoomGuestsFromRoomId(roomId, true).forEach(g -> generalChecks.assertOrderIsPaid(g.getUserId(), event));
 
         List<String> errors = new LinkedList<>();
         roomLogic.doSanityChecks(roomId, pretixInformation, errors);

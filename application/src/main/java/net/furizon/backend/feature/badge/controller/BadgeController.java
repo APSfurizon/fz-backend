@@ -38,7 +38,7 @@ public class BadgeController {
         + "the media id and the relative path where the file is served")
     @PostMapping(value = "/user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public @NotNull MediaResponse userUpload(
-        @AuthenticationPrincipal @NotNull final FurizonUser user,
+        @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
         @RequestParam("image") MultipartFile image
     ) {
         return useCaseExecutor.execute(
@@ -59,7 +59,7 @@ public class BadgeController {
             + "the media id and the relative path where the file is served")
     @PostMapping(value = "/fursuit/upload/{fursuitId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public @NotNull MediaResponse fursuitUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId,
             @RequestParam("image") MultipartFile image
     ) {
@@ -76,7 +76,7 @@ public class BadgeController {
 
     @DeleteMapping(value = "/user/")
     public boolean deleteUserUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
         return useCaseExecutor.execute(
                 DeleteBadgeUseCase.class,
@@ -89,7 +89,7 @@ public class BadgeController {
     }
     @DeleteMapping(value = "/fursuit/{fursuitId}")
     public boolean deleteFursuitUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId
     ) {
         return useCaseExecutor.execute(
@@ -111,7 +111,7 @@ public class BadgeController {
         + "full list of fursuits the user has + if the user has marked that fursuit to be brought to the current event")
     @GetMapping("/")
     public @NotNull FullInfoBadgeResponse getBadge(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
         return useCaseExecutor.execute(
                 GetFullInfoBadgeUseCase.class,
@@ -128,7 +128,7 @@ public class BadgeController {
         + "be simply omitted")
     @PostMapping("/update-user-badge-info")
     public boolean updateUserBadgeInfo(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @RequestBody @Valid @NotNull final UpdateUserBadgeRequest req
     ) {
         return useCaseExecutor.execute(

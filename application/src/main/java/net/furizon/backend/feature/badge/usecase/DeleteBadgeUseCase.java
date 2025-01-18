@@ -3,6 +3,7 @@ package net.furizon.backend.feature.badge.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
+import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
@@ -24,13 +25,15 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @NotNull private final DeleteMediaFromDiskAction deleteMediaFromDiskAction;
     @NotNull private final BadgeFinder badgeFinder;
 
+    @NotNull private final FursuitChecks fursuitChecks;
+
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
             long userId = input.user.getUserId();
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
-                //TODO verify user has rights on fursuit
+                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
             }
             log.info("[BADGE] User {} is deleting a {} badge: FursuitVal = {}",
                     userId, input.type, input.fursuitId);

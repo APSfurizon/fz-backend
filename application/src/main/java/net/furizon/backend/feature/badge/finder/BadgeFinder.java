@@ -5,4 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 public interface BadgeFinder {
     @Nullable MediaData getMediaDataOfUserBadge(long userId);
+
+    @Nullable MediaData getMediaDataOfFursuitBadge(long fursuitId);
 }

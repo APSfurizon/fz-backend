@@ -5,6 +5,8 @@ import com.sksamuel.scrimage.Position;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
+import net.furizon.backend.feature.fursuits.FursuitChecks;
+import net.furizon.backend.feature.fursuits.action.setBadge.SetFursuitBadgeAction;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
@@ -38,9 +40,12 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
 
     @NotNull private final DeleteMediaFromDiskAction deleteMediaFromDiskAction;
     @NotNull private final StoreMediaOnDiskAction storeMediaOnDiskAction;
+    @NotNull private final SetFursuitBadgeAction setFursuitBadgeAction;
     @NotNull private final SetUserBadgeAction setUserBadgeAction;
 
     @NotNull private final BadgeFinder badgeFinder;
+
+    @NotNull private final FursuitChecks fursuitChecks;
 
     @Override
     @Transactional
@@ -49,7 +54,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
             long userId = input.user.getUserId();
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
-                //TODO verify user has rights on fursuit
+                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
             }
             log.info("[BADGE] User {} is uploading a {} badge: FursuitVal = {}",
                     userId, input.type, input.fursuitId);
@@ -66,7 +71,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
             // however ad DoS is still possible. We pray in mommy Cloudflare's WAF to protect us from this
             // kind of attacks
             MediaData prevMedia = switch (input.type) {
-                case BadgeType.BADGE_FURSUIT -> null; //TODO
+                case BadgeType.BADGE_FURSUIT -> badgeFinder.getMediaDataOfFursuitBadge(input.fursuitId);
                 case BadgeType.BADGE_USER -> badgeFinder.getMediaDataOfUserBadge(userId);
             };
             if (prevMedia != null) {
@@ -85,7 +90,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
 
             switch (input.type) {
                 case BadgeType.BADGE_FURSUIT: {
-                    //TODO
+                    setFursuitBadgeAction.invoke(input.fursuitId, res.mediaDbId());
                     break;
                 }
                 case BadgeType.BADGE_USER: {

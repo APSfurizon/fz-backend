@@ -22,13 +22,14 @@ public class JooqFursuitDisplayMapper {
 
     @NotNull
     public static FursuitDisplayData map(Record record, boolean mapOrder) {
-        return new FursuitDisplayData(
-                record.get(FURSUITS.FURSUIT_ID),
-                record.get(FURSUITS.FURSUIT_NAME),
-                record.get(FURSUITS.FURSUIT_SPECIES),
-                MediaResponseMapper.mapOrNull(record),
-                mapOrder ? record.get(ORDERS.ID) != null : false,
-                mapOrder ? Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)) : null
-        );
+        return FursuitDisplayData.builder()
+                .id(record.get(FURSUITS.FURSUIT_ID))
+                .name(record.get(FURSUITS.FURSUIT_NAME))
+                .species(record.get(FURSUITS.FURSUIT_SPECIES))
+                .propic(MediaResponseMapper.mapOrNull(record))
+                .bringingToEvent(mapOrder ? record.get(ORDERS.ID) != null : false)
+                .ownerId(record.get(FURSUITS.USER_ID))
+                .sponsorship(mapOrder ? Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)) : null)
+            .build();
     }
 }

@@ -8,4 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class FursuitConfig {
     private final short defaultFursuitsNo;
     private final short maxExtraFursuits;
+    private final int maxBackendFursuitsNo;
 }

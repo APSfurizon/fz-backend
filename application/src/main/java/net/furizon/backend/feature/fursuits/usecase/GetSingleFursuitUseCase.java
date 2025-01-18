@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.fursuits.usecase;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.FursuitErrorCodes;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.Input, FursuitDisplayData> {
     @NotNull private final FursuitFinder fursuitFinder;
+    @NotNull private final FursuitChecks checks;
 
     @Override
     public @NotNull FursuitDisplayData executor(@NotNull Input input) {
@@ -26,8 +28,10 @@ public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.
             throw new ApiException("Fursuit not found", FursuitErrorCodes.FURSUIT_NOT_FOUND);
         }
 
+        //We assume that if someone is bringing his fursuit to an event, the info
+        // of the fursuit are already public
         if (!fursuit.isBringingToEvent()) {
-            //TODO check if user has permimssion on fursuit
+            checks.assertUserHasPermissionOnFursuit(userId, fursuit);
         }
 
         return fursuit;

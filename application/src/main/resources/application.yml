@@ -91,6 +91,7 @@ room:
 fursuits:
   default-fursuits-no: ${FURSUITS_DEFAULT_NO:2}
   max-extra-fursuits: ${FURSUITS_MAX_EXTRA:5}
+  max-backend-fursuits-no: ${FURSUITS_MAX_FURSUITS_BACKEND:32}
 
 pretix:
   event:

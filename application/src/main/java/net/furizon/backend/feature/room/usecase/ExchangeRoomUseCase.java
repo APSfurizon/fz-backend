@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -31,44 +32,45 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.sourceExchangeUser.getUserId());
-        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
+        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
 
-        checks.assertInTimeframeToEditRooms();
+        roomChecks.assertInTimeframeToEditRooms();
 
-        checks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
-        checks.assertUserHasOrderAndItsNotDaily(destUserId, event);
+        generalChecks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
+        generalChecks.assertUserHasOrderAndItsNotDaily(destUserId, event);
 
         //We can exchange room with someone else
         //checks.assertUserHasNotBoughtAroom(destUserId, event);
-        checks.assertUserHasBoughtAroom(sourceUserId, event);
+        roomChecks.assertUserHasBoughtAroom(sourceUserId, event);
 
-        checks.assertUserIsNotInRoom(destUserId, event, true);
+        roomChecks.assertUserIsNotInRoom(destUserId, event, true);
 
         //checks.assertUserDoesNotOwnAroom(destUserId, event);
-        long sourceRoomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+        long sourceRoomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
 
-        checks.assertRoomNotConfirmed(sourceRoomId);
+        roomChecks.assertRoomNotConfirmed(sourceRoomId);
         var destRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
-        destRoom.ifPresent(checks::assertRoomNotConfirmed);
+        destRoom.ifPresent(roomChecks::assertRoomNotConfirmed);
 
-        Order sourceOrder = checks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
-        Order targetOrder = checks.getOrderAndAssertItExists(destUserId, event, input.pretixInformation);
+        Order sourceOrder = generalChecks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
+        Order targetOrder = generalChecks.getOrderAndAssertItExists(destUserId, event, input.pretixInformation);
 
-        checks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
-        checks.assertOrderIsPaid(targetOrder, destUserId, event);
+        generalChecks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
+        generalChecks.assertOrderIsPaid(targetOrder, destUserId, event);
 
-        checks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
-        checks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
+        generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+        generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
             return true;

@@ -17,6 +17,7 @@ import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomConfig roomConfig;
-    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
 
     @Override
     public @NotNull ListRoomPricesAvailabilityResponse executor(
@@ -54,7 +55,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
-        Order order = roomChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
+        Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
         Long pretixRoomItemId = order.hasRoom() ? order.getPretixRoomItemId() : null;
 
 
