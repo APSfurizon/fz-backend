@@ -10,6 +10,7 @@ import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
+import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.GetSingleFursuitUseCase;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -59,6 +60,20 @@ public class FursuitController {
                         req.isBringToCurrentEvent(),
                         user,
                         pretixInformation
+                )
+        );
+    }
+
+    @DeleteMapping("/{fursuitId}")
+    public boolean deleteFursuit(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @PathVariable("fursuitId") final long fursuitId
+    ) {
+        return executor.execute(
+                DeleteFursuitUseCase.class,
+                new DeleteFursuitUseCase.Input(
+                        user,
+                        fursuitId
                 )
         );
     }

@@ -36,6 +36,7 @@ public class JooqCreateFursuitAction implements CreateFursuitAction {
         ).getFirst().get(FURSUITS.FURSUIT_ID);
 
         if (linkedOrder != null) {
+            //TODO Generalize
             command.execute(
                 PostgresDSL.insertInto(
                     FURSUITS_ORDERS,
