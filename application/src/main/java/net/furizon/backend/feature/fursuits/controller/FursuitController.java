@@ -86,7 +86,8 @@ public class FursuitController {
                 new BringFursuitToEventUseCase.Input(
                         req,
                         fursuitId,
-                        user
+                        user,
+                        pretixInformation
                 )
         );
     }

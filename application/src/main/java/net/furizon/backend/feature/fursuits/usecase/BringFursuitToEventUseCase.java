@@ -44,7 +44,7 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
                     order
             );
         } else {
-            
+
             fursuitChecks.assertFursuitIsBroughtToCurrentEvent(input.fursuitId, order);
             res = updateBringFursuitToEventAction.invoke(
                 input.fursuitId,
