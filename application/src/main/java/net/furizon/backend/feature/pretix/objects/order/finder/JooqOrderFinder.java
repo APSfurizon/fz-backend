@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -27,6 +28,8 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqOrderFinder implements OrderFinder {
     @NotNull private final SqlQuery query;
+
+    @NotNull private final FursuitConfig fursuitConfig;
 
     @NotNull private final JooqOrderMapper orderMapper;
 
@@ -158,6 +161,8 @@ public class JooqOrderFinder implements OrderFinder {
                         )
                 );
             }
+
+            orderDataBuilder.totalFursuits((short) (fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits()));
 
             orderDataResponse = orderDataBuilder.build();
         }
