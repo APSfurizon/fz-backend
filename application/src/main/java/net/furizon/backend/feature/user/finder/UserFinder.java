@@ -4,7 +4,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
-import net.furizon.backend.feature.user.objects.SearchUser;
+import net.furizon.backend.feature.user.objects.SearchUserResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +16,7 @@ public interface UserFinder {
     User findById(long userId);
 
     @NotNull
-    List<SearchUser> searchUserInCurrentEvent(
+    List<SearchUserResult> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
             boolean filterRoom,

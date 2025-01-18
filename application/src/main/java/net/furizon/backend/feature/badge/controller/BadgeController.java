@@ -4,14 +4,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
+import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
+import net.furizon.backend.feature.badge.usecase.GetFullInfoBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/badge")
 @RequiredArgsConstructor
 public class BadgeController {
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
+    @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor useCaseExecutor;
 
     //Serving the files is handled by nginx itself
@@ -33,7 +40,7 @@ public class BadgeController {
         + "an invalid size or dimensions, we will return with an error. We return "
         + "the media id and the relative path where the file is served")
     @PostMapping(value = "/user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public MediaResponse userUpload(
+    public @NotNull MediaResponse userUpload(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
         @RequestParam("image") MultipartFile image
     ) {
@@ -54,7 +61,7 @@ public class BadgeController {
             + "an invalid size or dimensions, we will return with an error. We return "
             + "the media id and the relative path where the file is served")
     @PostMapping(value = "/fursuit/upload/{fursuitId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public MediaResponse fursuitUpload(
+    public @NotNull MediaResponse fursuitUpload(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId,
             @RequestParam("image") MultipartFile image
@@ -69,8 +76,6 @@ public class BadgeController {
             )
         );
     }
-
-
 
     @DeleteMapping(value = "/user/")
     public boolean deleteUserUpload(
@@ -96,6 +101,19 @@ public class BadgeController {
                         user,
                         BadgeType.BADGE_FURSUIT,
                         fursuitId
+                )
+        );
+    }
+
+    @GetMapping("/")
+    public @NotNull FullInfoBadgeResponse getBadge(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return useCaseExecutor.execute(
+                GetFullInfoBadgeUseCase.class,
+                new GetFullInfoBadgeUseCase.Input(
+                        user,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }

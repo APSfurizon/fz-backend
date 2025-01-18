@@ -25,9 +25,6 @@ public interface EmailSender {
     void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName,
               MailVarPair... vars);
 
-    @Blocking
-    void send(MailRequest request) throws MessagingException, MailException;
-
     @NonBlocking
     void fireAndForget(MailRequest request);
 }

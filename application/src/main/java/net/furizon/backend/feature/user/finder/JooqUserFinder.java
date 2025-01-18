@@ -9,7 +9,7 @@ import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserEmailDataMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
-import net.furizon.backend.feature.user.objects.SearchUser;
+import net.furizon.backend.feature.user.objects.SearchUserResult;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -118,7 +118,7 @@ public class JooqUserFinder implements UserFinder {
 
     @NotNull
     @Override
-    public List<SearchUser> searchUserInCurrentEvent(
+    public List<SearchUserResult> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
             boolean filterRoom,

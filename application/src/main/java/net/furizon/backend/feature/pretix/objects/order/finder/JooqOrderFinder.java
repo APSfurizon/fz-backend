@@ -169,6 +169,18 @@ public class JooqOrderFinder implements OrderFinder {
         return orderDataResponse;
     }
 
+    @Override
+    public @Nullable Short getBoughtExtraFursuits(long userId, @NotNull Event event) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_EXTRA_FURSUITS)
+            .from(ORDERS)
+            .where(
+                ORDERS.USER_ID.eq(userId))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
+        ).mapOrNull(r -> r.get(ORDERS.ORDER_EXTRA_FURSUITS));
+    }
+
     private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,
