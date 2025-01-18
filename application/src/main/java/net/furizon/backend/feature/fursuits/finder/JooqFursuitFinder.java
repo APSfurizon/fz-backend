@@ -71,6 +71,18 @@ public class JooqFursuitFinder implements FursuitFinder {
         ).mapOrNull(r -> r.get(FURSUITS.USER_ID));
     }
 
+    @Override
+    public boolean isFursuitBroughtToEvent(long fursuitId, @NotNull Order order) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(FURSUITS_ORDERS.FURSUIT_ID)
+            .from(FURSUITS_ORDERS)
+            .where(
+                FURSUITS_ORDERS.FURSUIT_ID.eq(fursuitId)
+                .and(FURSUITS_ORDERS.ORDER_ID.eq(order.getId()))
+            )
+        ).isPresent();
+    }
+
     private @NotNull SelectOnConditionStep<?> selectDisplayFursuit(@Nullable Event event) {
         var q = PostgresDSL.select(
                 MEDIA.MEDIA_ID,

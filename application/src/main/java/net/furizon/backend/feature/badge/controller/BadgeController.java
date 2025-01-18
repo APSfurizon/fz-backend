@@ -117,7 +117,7 @@ public class BadgeController {
                 GetFullInfoBadgeUseCase.class,
                 new GetFullInfoBadgeUseCase.Input(
                         user,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation
                 )
         );
     }

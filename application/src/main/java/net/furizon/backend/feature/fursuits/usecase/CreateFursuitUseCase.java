@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.createFursuit.CreateFursuitAction;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -30,11 +31,13 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
 
         Order order = null;
         if (input.bringToCurrentEvenet) {
+            Event e = input.pretixInformation.getCurrentEvent();
             order = generalChecks.getOrderAndAssertItExists(
                     userId,
-                    input.pretixInformation.getCurrentEvent(),
+                    e,
                     input.pretixInformation
             );
+            generalChecks.assertOrderIsPaid(order, userId, e);
 
             fursuitChecks.assertUserHanNotReachedMaxFursuitBadges(userId, order);
         }

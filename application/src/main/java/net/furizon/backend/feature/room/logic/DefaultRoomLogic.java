@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -56,7 +57,7 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException("Order not found while creating a room", RoomErrorCodes.ORDER_NOT_FOUND);
+            throw new ApiException("Order not found while creating a room", GeneralResponseCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
         //Actual creation of the room

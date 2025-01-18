@@ -8,7 +8,7 @@ import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
-import net.furizon.backend.infrastructure.security.SecurityResponseCodes;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -37,8 +37,9 @@ public class FursuitChecks {
     public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitDisplayData fursuit) {
         if (userId != fursuit.getOwnerId()
                 && permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO)) {
+            log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuit.getId());
             throw new ApiException("You cannot manage a fursuit which is not yours!",
-                    SecurityResponseCodes.USER_IS_NOT_ADMIN);
+                    GeneralResponseCodes.USER_IS_NOT_ADMIN);
         }
     }
     public void assertUserHasPermissionOnFursuit(long userId, long fursuitId) {
@@ -46,8 +47,9 @@ public class FursuitChecks {
         assertFursuitObjExists(fursuitOwnerId);
         if (userId != fursuitOwnerId
                 && permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO)) {
+            log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuitId);
             throw new ApiException("You cannot manage a fursuit which is not yours!",
-                    SecurityResponseCodes.USER_IS_NOT_ADMIN);
+                    GeneralResponseCodes.USER_IS_NOT_ADMIN);
         }
     }
 
@@ -70,8 +72,27 @@ public class FursuitChecks {
         }
     }
 
+    public void assertFursuitNotAlreadyBroughtToCurrentEvent(long fursuitId, @NotNull Order order) {
+        boolean b = fursuitFinder.isFursuitBroughtToEvent(fursuitId, order);
+        if (b) {
+            log.error("Fursuit {} is already brought to current event {}!", fursuitId, order.getEventId());
+            throw new ApiException("Fursuit is already brought to current event!",
+                    FursuitErrorCodes.FURSUIT_ALREADY_BROUGHT_TO_CURRENT_EVENT);
+        }
+    }
+
+    public void assertFursuitIsBroughtToCurrentEvent(long fursuitId, @NotNull Order order) {
+        boolean b = fursuitFinder.isFursuitBroughtToEvent(fursuitId, order);
+        if (!b) {
+            log.error("Fursuit {} is not brought to current event {}!", fursuitId, order.getEventId());
+            throw new ApiException("Fursuit is already brought to current event!",
+                    FursuitErrorCodes.FURSUIT_NOT_BROUGHT_TO_CURRENT_EVENT);
+        }
+    }
+
     private void assertFursuitObjExists(@Nullable Object object) {
         if (object == null) {
+            log.error("Fursuit not found!");
             throw new ApiException("Fursuit not found", FursuitErrorCodes.FURSUIT_NOT_FOUND);
         }
     }

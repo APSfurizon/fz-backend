@@ -18,4 +18,6 @@ public interface FursuitFinder {
     int countFursuitOfUserToEvent(long userId, @NotNull Order order);
 
     @Nullable Long getFursuitOwner(long fursuitId);
+
+    boolean isFursuitBroughtToEvent(long fursuitId, @NotNull Order order);
 }

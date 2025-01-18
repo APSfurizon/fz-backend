@@ -15,4 +15,6 @@ public class FullInfoBadgeResponse {
 
     @NotNull private final List<FursuitDisplayData> fursuits;
     private final short maxFursuits;
+
+    private final boolean canBringFursuitsToEvent;
 }

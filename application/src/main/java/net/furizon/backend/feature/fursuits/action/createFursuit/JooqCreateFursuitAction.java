@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.fursuits.action.createFursuit;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.fursuits.action.bringFursuitToEvent.UpdateBringFursuitToEventAction;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -10,11 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
-import static net.furizon.jooq.generated.tables.FursuitsOrders.FURSUITS_ORDERS;
 
 @Component
 @RequiredArgsConstructor
 public class JooqCreateFursuitAction implements CreateFursuitAction {
+    @NotNull private final UpdateBringFursuitToEventAction updateBringFursuitToEventAction;
     @NotNull private final SqlCommand command;
 
     @Override
@@ -36,17 +37,10 @@ public class JooqCreateFursuitAction implements CreateFursuitAction {
         ).getFirst().get(FURSUITS.FURSUIT_ID);
 
         if (linkedOrder != null) {
-            //TODO Generalize
-            command.execute(
-                PostgresDSL.insertInto(
-                    FURSUITS_ORDERS,
-                    FURSUITS_ORDERS.FURSUIT_ID,
-                    FURSUITS_ORDERS.ORDER_ID
-                )
-                .values(
+            updateBringFursuitToEventAction.invoke(
                     fursuitId,
-                    linkedOrder.getId()
-                )
+                    true,
+                    linkedOrder
             );
         }
 

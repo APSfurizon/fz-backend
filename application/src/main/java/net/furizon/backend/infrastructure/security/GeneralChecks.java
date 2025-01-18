@@ -32,7 +32,7 @@ public class GeneralChecks {
             boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
             if (!isAdmin) {
                 log.error("User {} has no permission over userId {}", user.getUserId(), userId);
-                throw new ApiException("User is not an admin", SecurityResponseCodes.USER_IS_NOT_ADMIN);
+                throw new ApiException("User is not an admin", GeneralResponseCodes.USER_IS_NOT_ADMIN);
             }
         }
         return id;
@@ -61,7 +61,7 @@ public class GeneralChecks {
         var r = orderFinder.isOrderDaily(userId, event);
         if (r.isPresent()) {
             log.error("User {} has bought an order for event {}!", userId, event);
-            throw new ApiException("User has already bought an order", RoomErrorCodes.ORDER_ALREADY_BOUGHT);
+            throw new ApiException("User has already bought an order", GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
         }
     }
 
@@ -80,21 +80,21 @@ public class GeneralChecks {
     private void assertOrderStatusPaid(@NotNull OrderStatus status, long userId, @NotNull Event event) {
         if (status != OrderStatus.PAID) {
             log.error("Order for user {} on event {} is not paid", userId, event);
-            throw new ApiException("Order is not paid", RoomErrorCodes.ORDER_NOT_PAID);
+            throw new ApiException("Order is not paid", GeneralResponseCodes.ORDER_NOT_PAID);
         }
     }
 
     public void assertOrderIsNotDailyPrint(boolean isDaily, long userId, @NotNull Event event) {
         if (isDaily) {
             log.error("User {} is trying to manage a room on event {}, but has a daily ticket!", userId, event);
-            throw new ApiException("User has a daily ticket", RoomErrorCodes.USER_HAS_DAILY_TICKET);
+            throw new ApiException("User has a daily ticket", GeneralResponseCodes.USER_HAS_DAILY_TICKET);
         }
     }
 
     public void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {
         if (!r.isPresent()) {
             log.error("No order found for user {} on event {}", userId, event);
-            throw new ApiException("Order not found", RoomErrorCodes.ORDER_NOT_FOUND);
+            throw new ApiException("Order not found", GeneralResponseCodes.ORDER_NOT_FOUND);
         }
     }
 }
