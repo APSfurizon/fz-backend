@@ -6,7 +6,6 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.USERS;
 

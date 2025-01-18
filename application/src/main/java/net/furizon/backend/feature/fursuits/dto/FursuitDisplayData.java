@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 @Builder
 public class FursuitDisplayData {
     private final long id;
-    @NotNull private final String name;
-    @NotNull private final String species;
+    @NotNull private String name;
+    @NotNull private String species;
     @Nullable private MediaResponse propic;
     private final boolean bringingToEvent;
 

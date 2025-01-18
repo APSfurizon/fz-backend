@@ -21,7 +21,7 @@ public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUs
     public @NotNull Boolean executor(@NotNull Input input) {
         long requesterUserId = input.user.getUserId();
         UpdateUserBadgeRequest req = input.req;
-        long userId = checks.getUserIdAndAssertPermission(requesterUserId, req.getUserId());
+        long userId = checks.getUserIdAndAssertPermission(requesterUserId, input.user);
 
         log.info("User {} is updating badge to {}. Badge info: {}", requesterUserId, userId, req);
 

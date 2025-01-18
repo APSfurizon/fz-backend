@@ -40,7 +40,10 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.sourceExchangeUser.getUserId());
-        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
+        long sourceUserId = generalChecks.getUserIdAndAssertPermission(
+                input.req.getSourceUserId(),
+                input.sourceExchangeUser
+        );
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 

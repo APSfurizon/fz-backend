@@ -7,7 +7,6 @@ import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
-import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;

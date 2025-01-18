@@ -39,7 +39,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
                     userId, input.type, input.fursuitId);
 
             MediaData media = switch (input.type) {
-                case BadgeType.BADGE_FURSUIT -> null; //TODO
+                case BadgeType.BADGE_FURSUIT -> badgeFinder.getMediaDataOfFursuitBadge(input.fursuitId);
                 case BadgeType.BADGE_USER -> badgeFinder.getMediaDataOfUserBadge(userId);
             };
 
