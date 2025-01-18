@@ -53,7 +53,7 @@ public class JooqFursuitFinder implements FursuitFinder {
             .leftJoin(MEDIA)
             .on(MEDIA.MEDIA_ID.eq(FURSUITS.MEDIA_ID_PROPIC))
 
-            .leftJoin(ORDERS)
+            .leftJoin(FURSUITS_ORDERS)
             .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
             .leftJoin(ORDERS)
             .on(
