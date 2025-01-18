@@ -22,6 +22,7 @@ public class JooqFursuitDisplayMapper {
 
     @NotNull
     public static FursuitDisplayData map(Record record, boolean mapOrder) {
+        Short sponsor = mapOrder ? record.get(ORDERS.ORDER_SPONSORSHIP_TYPE) : null;
         return FursuitDisplayData.builder()
                 .id(record.get(FURSUITS.FURSUIT_ID))
                 .name(record.get(FURSUITS.FURSUIT_NAME))
@@ -30,7 +31,7 @@ public class JooqFursuitDisplayMapper {
                 .bringingToEvent(mapOrder ? record.get(ORDERS.ID) != null : false)
                 .ownerId(record.get(FURSUITS.USER_ID))
                 .showInFursuitCount(record.get(FURSUITS.SHOW_IN_FURSUITCOUNT))
-                .sponsorship(mapOrder ? Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)) : null)
+                .sponsorship(mapOrder && sponsor != null ? Sponsorship.get(sponsor) : null)
             .build();
     }
 }

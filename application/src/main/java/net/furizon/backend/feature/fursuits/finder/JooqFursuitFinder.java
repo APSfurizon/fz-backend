@@ -9,6 +9,7 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectOnConditionStep;
+import org.jooq.SelectSelectStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -84,7 +85,17 @@ public class JooqFursuitFinder implements FursuitFinder {
     }
 
     private @NotNull SelectOnConditionStep<?> selectDisplayFursuit(@Nullable Event event) {
-        var q = PostgresDSL.select(
+        SelectSelectStep<?> sel = event == null
+            ? PostgresDSL.select(
+                MEDIA.MEDIA_ID,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_PATH,
+                FURSUITS.FURSUIT_ID,
+                FURSUITS.FURSUIT_NAME,
+                FURSUITS.FURSUIT_SPECIES,
+                FURSUITS.SHOW_IN_FURSUITCOUNT,
+                FURSUITS.USER_ID
+            ) : PostgresDSL.select(
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_PATH,
@@ -94,7 +105,9 @@ public class JooqFursuitFinder implements FursuitFinder {
                 FURSUITS.SHOW_IN_FURSUITCOUNT,
                 FURSUITS.USER_ID,
                 ORDERS.ID
-            )
+            );
+
+        var q = sel
             .from(FURSUITS)
 
             .leftJoin(MEDIA)
