@@ -12,20 +12,24 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
+    @NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
-    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
-    @NotNull private final FrontendConfig frontendConfig;
-    @NotNull private final EmailSender sender;
+    @NotNull
+    private final FrontendConfig frontendConfig;
+
+    @NotNull
+    private final EmailSender sender;
 
     @Override
     public @NotNull Boolean executor(@NotNull EmailRequest input) {
@@ -43,11 +47,11 @@ public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
 
         sender.fireAndForget(
             MailRequest.builder()
-                .to(email)
+                .to(List.of(email))
                 .subject(SUBJECT_PW_RESET)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_PW_RESET)
-                    .addParam("link", url)
+                        .addParam("link", url)
                 )
                 .build()
         );

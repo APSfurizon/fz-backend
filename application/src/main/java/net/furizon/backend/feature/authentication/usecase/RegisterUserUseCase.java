@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
@@ -28,15 +29,23 @@ import static net.furizon.backend.feature.authentication.AuthenticationMailTexts
 @Component
 @RequiredArgsConstructor
 public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
+    @NotNull
+    private final RegisterUserValidation validation;
 
-    @NotNull private final RegisterUserValidation validation;
+    @NotNull
+    private final CreateUserAction createUserAction;
 
-    @NotNull private final CreateUserAction createUserAction;
-    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
-    @NotNull private final AddMembershipInfoAction addMembershipInfoAction;
+    @NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
-    @NotNull private final FrontendConfig frontendConfig;
-    @NotNull private final EmailSender sender;
+    @NotNull
+    private final AddMembershipInfoAction addMembershipInfoAction;
+
+    @NotNull
+    private final FrontendConfig frontendConfig;
+
+    @NotNull
+    private final EmailSender sender;
 
     @Transactional
     @Override
@@ -47,7 +56,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         validation.validate(regUserReq);
         final var user = createUserAction.invoke(regUserReq.getFursonaName(),
-                regUserReq.getPersonalUserInformation().getResidenceCountry());
+            regUserReq.getPersonalUserInformation().getResidenceCountry());
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
             email,
@@ -68,21 +77,21 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         sender.fireAndForget(
             MailRequest.builder()
-                .to(email)
+                .to(List.of(email))
                 .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)
-                    .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
+                        .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
                 )
-            .build()
+                .build()
         );
 
         return user;
     }
 
     public record Input(
-            @NotNull HttpServletRequest request,
-            @NotNull RegisterUserRequest user,
-            @NotNull Event event
-    ){}
+        @NotNull HttpServletRequest request,
+        @NotNull RegisterUserRequest user,
+        @NotNull Event event
+    ) {}
 }

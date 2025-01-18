@@ -21,16 +21,29 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.security.PrivateKey;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailSenderService implements EmailSender {
-    @NotNull private final UserFinder userFinder;
-    @NotNull private final PermissionFinder permissionFinder;
+    @NotNull
+    private final UserFinder userFinder;
 
-    @NotNull private final JavaMailSender mailSender;
-    @NotNull private final AsyncTaskExecutor asyncTaskExecutor;
-    @NotNull private final TemplateEngine templateEngine;
+    @NotNull
+    private final PermissionFinder permissionFinder;
+
+    @NotNull
+    private final JavaMailSender mailSender;
+
+    @NotNull
+    private final AsyncTaskExecutor asyncTaskExecutor;
+
+    @NotNull
+    private final TemplateEngine templateEngine;
+
+    private final PrivateKey privateKey;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -45,6 +58,7 @@ public class EmailSenderService implements EmailSender {
             send(user, subject, templateName, vars);
         }*/
     }
+
     @Override
     public void sendToPermission(@NotNull Permission permission, @NotNull String subject,
                                  @NotNull String templateName, MailVarPair... vars) {
@@ -70,11 +84,11 @@ public class EmailSenderService implements EmailSender {
                      MailVarPair... vars) {
         String mail = emailData.getEmail();
         log.info("Sending email to user {} ({}) with subject '{}'",
-                emailData.getUserId(), mail, subject);
+            emailData.getUserId(), mail, subject);
 
 
         TemplateMessage msg = TemplateMessage.of(templateName)
-                .addParam("fursonaName", emailData.getFursonaName());
+            .addParam("fursonaName", emailData.getFursonaName());
 
         for (MailVarPair var : vars) {
             if (var != null) {
@@ -84,7 +98,7 @@ public class EmailSenderService implements EmailSender {
 
         fireAndForget(
             MailRequest.builder()
-                .to(mail)
+                .to(List.of(mail))
                 .subject(subject)
                 .templateMessage(msg)
                 .build()
@@ -92,26 +106,21 @@ public class EmailSenderService implements EmailSender {
     }
 
     @Override
-    public void send(MailRequest request) throws MessagingException, MailException {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+    public void send(@NotNull MailRequest request) throws MessagingException, MailException {
 
-        mimeMessageHelper.setFrom(from);
-        mimeMessageHelper.setTo(request.getTo());
-        mimeMessageHelper.setSubject(request.getSubject());
-
-        if (request.getTemplateMessage() != null) {
-            final var message = request.getTemplateMessage();
-            TemplateOutput output = new StringOutput();
-            templateEngine.render(message.getTemplate(), message.getParams(), output);
-            mimeMessageHelper.setText(output.toString(), true);
-        } else if (request.getMessage() != null) {
-            mimeMessageHelper.setText(request.getMessage(), false);
-        } else {
-            throw new RuntimeException("message or template is required");
+        final var isTemplateMessage = request.getTemplateMessage() != null;
+        final var bodyMessage = isTemplateMessage ? convertTemplateToString(request) : request.getMessage();
+        if (bodyMessage == null) {
+            throw new RuntimeException("message is required");
         }
 
-        mailSender.send(mimeMessage);
+        final var mimeMessages = request
+            .getTo()
+            .stream()
+            .map(to -> buildMimeMessage(to, request.getSubject(), bodyMessage, isTemplateMessage))
+            .toArray(MimeMessage[]::new);
+
+        mailSender.send(mimeMessages);
     }
 
     @Override
@@ -124,5 +133,39 @@ public class EmailSenderService implements EmailSender {
                 log.error("Couldn't send message", ex);
             }
         });
+    }
+
+    @NotNull
+    private String convertTemplateToString(@NotNull MailRequest request) {
+        final var message = request.getTemplateMessage();
+        if (message == null) {
+            throw new RuntimeException("template is required for this action");
+        }
+
+        TemplateOutput output = new StringOutput();
+        templateEngine.render(message.getTemplate(), message.getParams(), output);
+        return output.toString();
+    }
+
+    @NotNull
+    private MimeMessage buildMimeMessage(
+        @NotNull String to,
+        @NotNull String subject,
+        @NotNull String body,
+        boolean isTemplateMessage
+    ) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+
+            mimeMessageHelper.setFrom(from);
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject(subject);
+            mimeMessageHelper.setText(body, isTemplateMessage);
+
+            return mimeMessage;
+        } catch (MessagingException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 }

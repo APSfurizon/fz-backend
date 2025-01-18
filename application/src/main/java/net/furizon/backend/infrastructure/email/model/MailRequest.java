@@ -6,12 +6,14 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @Data
 @Builder
 @RequiredArgsConstructor
 public class MailRequest {
     @NotNull
-    private final String to;
+    private final List<String> to;
 
     @NotNull
     private final String subject;

@@ -11,12 +11,20 @@ import org.springframework.mail.MailException;
 
 public interface EmailSender {
     @NonBlocking
-    void sendToRole(@NotNull String roleInternalName, @NotNull String subject,
-                    @NotNull String templateName, MailVarPair... vars);
+    void sendToRole(
+        @NotNull String roleInternalName,
+        @NotNull String subject,
+        @NotNull String templateName,
+        MailVarPair... vars
+    );
 
     @NonBlocking
-    void sendToPermission(@NotNull Permission permission, @NotNull String subject,
-                          @NotNull String templateName, MailVarPair... vars);
+    void sendToPermission(
+        @NotNull Permission permission,
+        @NotNull String subject,
+        @NotNull String templateName,
+        MailVarPair... vars
+    );
 
     @NonBlocking
     void send(long userId, @NotNull String subject, @NotNull String templateName, MailVarPair... vars);
