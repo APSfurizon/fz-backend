@@ -47,11 +47,6 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
 
     @Override
     public @NotNull Boolean executor(@NotNull BuyUpgradeRoomUseCase.Input input) {
-        int i = 0;
-        if (i == 0) {
-            throw new ApiException("Feature currently disabled");
-        }
-
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
