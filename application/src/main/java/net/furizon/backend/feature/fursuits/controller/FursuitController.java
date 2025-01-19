@@ -226,7 +226,7 @@ public class FursuitController {
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
-    @PostMapping("/add")
+    @PostMapping("/")
     public @NotNull FursuitDisplayData addFursuit(
         @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
         @RequestBody @NotNull @Valid final FursuitDataRequest req

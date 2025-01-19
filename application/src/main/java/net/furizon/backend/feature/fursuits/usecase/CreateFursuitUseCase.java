@@ -27,7 +27,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
         long userId = input.user.getUserId();
         log.info("User {} is creating fursuit {}", userId, input.name);
 
-        fursuitChecks.assertUserHaNotReachedMaxBackendFursuitNo(userId);
+        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(userId);
 
         Order order = null;
         if (input.bringToCurrentEvenet) {
@@ -39,7 +39,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
             );
             generalChecks.assertOrderIsPaid(order, userId, e);
 
-            fursuitChecks.assertUserHanNotReachedMaxFursuitBadges(userId, order);
+            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(userId, order);
         }
 
         long fursuitId = createFursuitAction.invoke(

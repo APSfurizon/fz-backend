@@ -53,7 +53,7 @@ public class FursuitChecks {
         }
     }
 
-    public void assertUserHaNotReachedMaxBackendFursuitNo(long userId) {
+    public void assertUserHasNotReachedMaxBackendFursuitNo(long userId) {
         //This suffers from race conditions
         int alreadyRegisteredSuits = fursuitFinder.countFursuitsOfUser(userId);
         if (alreadyRegisteredSuits >= fursuitConfig.getMaxBackendFursuitsNo()) {
@@ -63,7 +63,7 @@ public class FursuitChecks {
         }
     }
 
-    public void assertUserHanNotReachedMaxFursuitBadges(long userId, @NotNull Order order) {
+    public void assertUserHasNotReachedMaxFursuitBadges(long userId, @NotNull Order order) {
         int max = fursuitConfig.getMaxExtraFursuits() + order.getExtraFursuits();
         int alreadyRegisteredSuits = fursuitFinder.countFursuitOfUserToEvent(userId, order);
         if (alreadyRegisteredSuits >= Math.min(max, (int) fursuitConfig.getMaxExtraFursuits())) {

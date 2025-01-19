@@ -38,6 +38,7 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
 
             generalChecks.assertOrderIsPaid(order, userId, event);
             fursuitChecks.assertFursuitNotAlreadyBroughtToCurrentEvent(input.fursuitId, order);
+            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(userId, order);
             res = updateBringFursuitToEventAction.invoke(
                     input.fursuitId,
                     true,

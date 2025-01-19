@@ -131,12 +131,30 @@ def runDeleteDanglingBadges() -> Response:
     #doGet(f'{BASE_URL_API}admin/ping')
     doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
 
+def addFursuit() -> Response:
+    json = {
+        "name": "redwing " + generate_random_string(5),
+        "species": "Lucario",
+        "bringToCurrentEvent": False,
+        "showInFursuitCount": True
+    }
+    doPost(f'{BASE_URL_API}fursuits/', json=json)
+def updateBring() -> Response:
+    json = {
+        "bringFursuitToCurrentEvent": False,
+        "userId": 2
+    }
+    fursuitID = 1
+    doPost(f'{BASE_URL_API}fursuits/{fursuitID}/bringToEvent', json=json)
+
 #register()
 #confirmEmail()
 login()
 getMe()
 #testPermission()
 #testInternalAuthorize()
-uploadBadge()
+#uploadBadge()
 #deleteBadge()
-runDeleteDanglingBadges()
+#runDeleteDanglingBadges()
+#addFursuit()
+updateBring()
