@@ -206,7 +206,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         try {
             return sqlQuery.fetchFirst(
                 selectAuthentication()
-                .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.eq(email))
+                .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.equalIgnoreCase(email))
             ).mapOrNull(JooqAuthenticationMapper::map);
         } catch (NoDataFoundException e) {
             return null;
