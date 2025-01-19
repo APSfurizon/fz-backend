@@ -20,7 +20,13 @@ public class JooqCreateFursuitAction implements CreateFursuitAction {
 
     @Override
     @Transactional
-    public long invoke(long ownerId, @NotNull String name, @NotNull String species, boolean showInFursuitCount, @Nullable Order linkedOrder) {
+    public long invoke(
+            long ownerId,
+            @NotNull String name,
+            @NotNull String species,
+            boolean showInFursuitCount,
+            @Nullable Order linkedOrder
+    ) {
         long fursuitId = command.executeResult(
             PostgresDSL.insertInto(
                 FURSUITS,
