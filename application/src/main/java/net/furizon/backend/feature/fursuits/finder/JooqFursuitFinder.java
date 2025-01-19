@@ -104,7 +104,8 @@ public class JooqFursuitFinder implements FursuitFinder {
                 FURSUITS.FURSUIT_SPECIES,
                 FURSUITS.SHOW_IN_FURSUITCOUNT,
                 FURSUITS.USER_ID,
-                ORDERS.ID
+                ORDERS.ID,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
             );
 
         var q = sel

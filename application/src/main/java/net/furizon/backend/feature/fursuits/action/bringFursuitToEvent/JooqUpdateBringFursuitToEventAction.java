@@ -20,7 +20,7 @@ public class JooqUpdateBringFursuitToEventAction implements UpdateBringFursuitTo
     public boolean invoke(long fursuitId, boolean bringing, @NotNull Order linkedOrder) {
         //If order does not exist, due to ON CASCADE clause, this is automatically deleted as well
         log.info("Setting fursuit {} bringToEvent = {}", fursuitId, bringing);
-        if (bringing) {
+        if (!bringing) {
             return command.execute(
                 PostgresDSL.deleteFrom(FURSUITS_ORDERS)
                 .where(

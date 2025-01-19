@@ -20,6 +20,7 @@ import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -164,7 +165,7 @@ public class FursuitController {
             @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
             @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
             @RequestParam("delete-image") final boolean deleteImage,
-            @RequestParam("image") MultipartFile image
+            @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         FursuitDisplayData data = executor.execute(
                 UpdateFursuitDataUseCase.class,
@@ -261,7 +262,8 @@ public class FursuitController {
         @Valid @NotNull @RequestParam("species") final String species,
         @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
-        @RequestParam("image") MultipartFile image
+        @Nullable
+        @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         FursuitDisplayData data = executor.execute(
                 CreateFursuitUseCase.class,
