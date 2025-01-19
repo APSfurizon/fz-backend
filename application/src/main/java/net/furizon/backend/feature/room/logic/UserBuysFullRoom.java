@@ -251,7 +251,7 @@ public class UserBuysFullRoom implements RoomLogic {
             }
             sourcePaid = PretixGenericUtils.fromStrPriceToLong(sp.get().getPrice());
             //Fetch how much source item costs (It can be different from how much user has paid!)
-            sourcePrice = pretixInformation.getItemPrice(sourceItemId, true);
+            sourcePrice = pretixInformation.getItemPrice(sourceItemId, true, true);
             if (sourcePrice == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price for item {}",
                         sourceUsrId, targetUsrId, event, sourceItemId);
@@ -274,7 +274,7 @@ public class UserBuysFullRoom implements RoomLogic {
             }
             targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
 
-            targetPrice = pretixInformation.getItemPrice(targetItemId, true);
+            targetPrice = pretixInformation.getItemPrice(targetItemId, true, true);
             if (targetPrice == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target price for item {}",
                         sourceUsrId, targetUsrId, event, targetItemId);
@@ -315,7 +315,7 @@ public class UserBuysFullRoom implements RoomLogic {
                         targetOrderCode,
                         Objects.requireNonNull(targetAddonToPositionId),
                         sourceItemId
-                ), createTempPositionFirst, pretixInformation, sourcePrice);
+                ).setPrice(sourcePrice), createTempPositionFirst, pretixInformation, sourcePrice);
                 res = pp != null;
                 if (res) {
                     targetPositionId = pp.getPositionId();
@@ -349,7 +349,7 @@ public class UserBuysFullRoom implements RoomLogic {
                         sourceOrderCode,
                         Objects.requireNonNull(sourceAddonToPositionId),
                         targetItemId
-                ), createTempPositionFirst, pretixInformation, targetPrice);
+                ).setPrice(targetPrice), createTempPositionFirst, pretixInformation, targetPrice);
                 res = pp != null;
                 if (res) {
                     sourcePositionId = pp.getPositionId();
@@ -825,7 +825,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     orderCode,
                     addonToPositionId,
                     newItemId
-            ), createTempAddonFirst, pretixInformation, newItemPrice);
+            ).setPrice(newItemPrice), createTempAddonFirst, pretixInformation, newItemPrice);
             res = pos != null;
             if (res) {
                 positionId = pos.getPositionId();

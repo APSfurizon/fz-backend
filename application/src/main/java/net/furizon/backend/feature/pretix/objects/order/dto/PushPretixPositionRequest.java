@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,15 @@ public class PushPretixPositionRequest {
     private final String seat;
 
     @Nullable
-    private final String price;
+    private String price;
+    public PushPretixPositionRequest setPrice(@Nullable final String price) {
+        this.price = price;
+        return this;
+    }
+    public PushPretixPositionRequest setPrice(long price) {
+        this.price = PretixGenericUtils.fromPriceToString(price, '.');
+        return this;
+    }
 
     @Nullable
     @JsonProperty("attendee_email")

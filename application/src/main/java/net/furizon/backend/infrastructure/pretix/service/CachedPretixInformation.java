@@ -15,6 +15,8 @@ import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.usecase.ReloadOrdersUseCase;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
+import net.furizon.backend.feature.pretix.objects.product.PretixProductBundle;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.feature.pretix.objects.product.usecase.ReloadProductsUseCase;
@@ -94,7 +96,10 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> price * 100
     @NotNull
     private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
-
+    //map id -> bundles
+    private final Cache<Long, List<PretixProductBundle>> itemIdToBundle = Caffeine.newBuilder().build();
+    //map id -> quota
+    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
 
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
@@ -140,10 +145,6 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
 
-
-    //Quotas
-    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
-
     //Countries
     @NotNull
     private final Cache<String, List<PretixState>> statesOfCountry = Caffeine.newBuilder()
@@ -167,23 +168,39 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public @Nullable Long getItemPrice(long itemId, boolean ignoreCache) {
+    public @Nullable Long getItemPrice(long itemId, boolean ignoreCache, boolean subtractBundlesPrice) {
         if (ignoreCache) {
             var v = pretixProductFinder.fetchProductById(getCurrentEvent(), itemId);
             if (!v.isPresent()) {
                 return null;
             }
-            long value = PretixGenericUtils.fromStrPriceToLong(v.get().getPrice());
+            PretixProduct product = v.get();
+            long value = PretixGenericUtils.fromStrPriceToLong(product.getPrice());
+            List<PretixProductBundle> bundles = product.getBundles();
             lock.writeLock().lock();
             itemIdToPrice.put(itemId, value);
+            itemIdToBundle.put(itemId, bundles);
             lock.writeLock().unlock();
+            value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
             return value;
         } else {
             lock.readLock().lock();
             Long value = itemIdToPrice.getIfPresent(itemId);
+            List<PretixProductBundle> bundles = itemIdToBundle.getIfPresent(itemId);
             lock.readLock().unlock();
+            if (bundles != null) {
+                value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
+            }
             return value;
         }
+    }
+
+    @Override
+    public @Nullable List<PretixProductBundle> getBundlesForItem(long itemId) {
+        lock.readLock().lock();
+        List<PretixProductBundle> bundles = itemIdToBundle.getIfPresent(itemId);
+        lock.readLock().unlock();
+        return bundles;
     }
 
     @Override
@@ -520,6 +537,9 @@ public class CachedPretixInformation implements PretixInformation {
             var a = quotaFinder.getAvailability(event, q.getId());
             if (a.isPresent()) {
                 PretixQuotaAvailability av = a.get();
+                log.debug("Check if {} < {} ({} < {})",
+                        av, availability,
+                        av.calcEffectiveRemainig(), availability == null ? null : availability.calcEffectiveRemainig());
                 if (availability == null || av.calcEffectiveRemainig() < availability.calcEffectiveRemainig()) {
                     availability = av;
                 }
@@ -556,6 +576,8 @@ public class CachedPretixInformation implements PretixInformation {
         //General
         itemIdsCache.invalidateAll();
         itemIdToPrice.invalidateAll();
+        itemIdToBundle.invalidateAll();
+        itemIdToQuota.invalidateAll();
 
         //Questions
         questionUserId.set(-1L);
@@ -579,9 +601,6 @@ public class CachedPretixInformation implements PretixInformation {
         roomPretixItemIdToNames.invalidateAll();
         roomIdToEarlyExtraDayItemId.invalidateAll();
         roomIdToLateExtraDayItemId.invalidateAll();
-
-        //Quotas
-        itemIdToQuota.invalidateAll();
     }
 
 
@@ -662,6 +681,7 @@ public class CachedPretixInformation implements PretixInformation {
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
         itemIdToPrice.putAll(products.itemIdToPrice());
+        itemIdToBundle.putAll(products.itemIdToBundle());
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
         roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
         roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());

@@ -47,6 +47,11 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
 
     @Override
     public @NotNull Boolean executor(@NotNull BuyUpgradeRoomUseCase.Input input) {
+        int i = 0;
+        if (i == 0) {
+            throw new ApiException("Feature currently disabled");
+        }
+
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
@@ -92,7 +97,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         }
 
         //Get new room price
-        Long newRoomPrice = pretixInformation.getItemPrice(newRoomItemId, true);
+        Long newRoomPrice = pretixInformation.getItemPrice(newRoomItemId, true, true);
         if (newRoomPrice == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to fetch price of new room",
                     userId, newRoomItemId, event);
@@ -106,13 +111,13 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             newEarlyItemId = Objects.requireNonNull(
                     pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.EARLY));
             newRoomEarlyPrice = Objects.requireNonNull(
-                    pretixInformation.getItemPrice(newEarlyItemId, false));
+                    pretixInformation.getItemPrice(newEarlyItemId, true, true));
         }
         if (extraDays.isLate()) {
             newLateItemId = Objects.requireNonNull(
                     pretixInformation.getExtraDayItemIdForHotelCapacity(newRoomInfo, ExtraDays.LATE));
             newRoomLatePrice = Objects.requireNonNull(
-                    pretixInformation.getItemPrice(newLateItemId, false));
+                    pretixInformation.getItemPrice(newLateItemId, true, true));
         }
         long newRoomTotal = newRoomPrice + newRoomEarlyPrice + newRoomLatePrice;
 

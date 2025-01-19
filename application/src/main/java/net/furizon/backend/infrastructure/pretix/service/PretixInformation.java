@@ -4,6 +4,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.pretix.objects.product.PretixProductBundle;
 import net.furizon.backend.feature.pretix.objects.question.PretixOption;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
@@ -29,7 +30,10 @@ public interface PretixInformation {
     long getQuestionUserId();
 
     @Nullable
-    Long getItemPrice(long roomPretixItemId, boolean ignoreCache);
+    Long getItemPrice(long roomPretixItemId, boolean ignoreCache, boolean subtractBundlesPrice);
+
+    @Nullable List<PretixProductBundle> getBundlesForItem(long itemId);
+
     @NotNull
     Set<Long> getRoomPretixIds();
     @NotNull

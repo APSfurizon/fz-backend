@@ -120,7 +120,8 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
 def uploadBadge() -> Response:
-    imageName = 'testImage2.png'
+    #imageName = 'testImage2.png'
+    imageName = 'testImageSmall.jpg'
     files = {
         'image': (imageName, open(imageName, 'rb')),
     }
@@ -150,16 +151,16 @@ def updateBring() -> Response:
 def countdown() -> Response:
     return doGet(f'{BASE_URL_API}admin/countdown')
 
-#register()
-#confirmEmail()
-#login()
+register()
+confirmEmail()
+login()
 #getMe()
 #testPermission()
 #testInternalAuthorize()
-#uploadBadge()
+uploadBadge()
 #deleteBadge()
 #runDeleteDanglingBadges()
 #addFursuit()
 #updateBring()
 
-countdown()
+#countdown()
