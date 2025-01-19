@@ -126,10 +126,10 @@ def uploadBadge() -> Response:
     }
     return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
 def deleteBadge() -> Response:
-    doDelete(f'{BASE_URL_API}badge/user/')
+    return doDelete(f'{BASE_URL_API}badge/user/')
 def runDeleteDanglingBadges() -> Response:
     #doGet(f'{BASE_URL_API}admin/ping')
-    doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
+    return doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
 
 def addFursuit() -> Response:
     json = {
@@ -138,23 +138,28 @@ def addFursuit() -> Response:
         "bringToCurrentEvent": False,
         "showInFursuitCount": True
     }
-    doPost(f'{BASE_URL_API}fursuits/', json=json)
+    return doPost(f'{BASE_URL_API}fursuits/', json=json)
 def updateBring() -> Response:
     json = {
         "bringFursuitToCurrentEvent": False,
         "userId": 2
     }
     fursuitID = 1
-    doPost(f'{BASE_URL_API}fursuits/{fursuitID}/bringToEvent', json=json)
+    return doPost(f'{BASE_URL_API}fursuits/{fursuitID}/bringToEvent', json=json)
+
+def countdown() -> Response:
+    return doGet(f'{BASE_URL_API}admin/countdown')
 
 #register()
 #confirmEmail()
-login()
-getMe()
+#login()
+#getMe()
 #testPermission()
 #testInternalAuthorize()
 #uploadBadge()
 #deleteBadge()
 #runDeleteDanglingBadges()
 #addFursuit()
-updateBring()
+#updateBring()
+
+countdown()
