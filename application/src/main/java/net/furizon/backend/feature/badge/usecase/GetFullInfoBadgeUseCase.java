@@ -44,14 +44,17 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, input.pretixInformation);
         int maxFursuits = order == null ? 0 : fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits();
         List<FursuitDisplayData> fursuits = fursuitFinder.getFursuitsOfUser(userId, event);
+        long bringingToEvent = fursuits.stream().filter(FursuitDisplayData::isBringingToEvent).count();
 
-        boolean canBringFursuitToEvent = order != null && order.getOrderStatus() == OrderStatus.PAID
-                && fursuits.stream().filter(FursuitDisplayData::isBringingToEvent).count() < maxFursuits;
+        boolean canBringFursuitToEvent = order != null
+                && order.getOrderStatus() == OrderStatus.PAID
+                && bringingToEvent < maxFursuits;
 
         return new FullInfoBadgeResponse(
                 userData,
                 editingDeadline,
                 fursuits,
+                (short) bringingToEvent,
                 (short) maxFursuits,
                 canBringFursuitToEvent
         );

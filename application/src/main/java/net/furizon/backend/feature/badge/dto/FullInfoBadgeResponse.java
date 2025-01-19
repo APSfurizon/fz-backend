@@ -14,6 +14,7 @@ public class FullInfoBadgeResponse {
     @NotNull private final OffsetDateTime badgeEditingDeadline;
 
     @NotNull private final List<FursuitDisplayData> fursuits;
+    private final short bringingToEvent;
     private final short maxFursuits;
 
     private final boolean canBringFursuitsToEvent;
