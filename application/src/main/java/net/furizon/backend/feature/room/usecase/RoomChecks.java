@@ -129,6 +129,26 @@ public class RoomChecks {
 
         return roomId;
     }
+    public void assertPermissionsOnRoom(long userId, @NotNull Event event, long roomId,
+                                        @Nullable Boolean isAdminCached) {
+        var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        if (r.isEmpty()) {
+            log.error("User doesn't own a room!");
+            throw new ApiException("User doesn't own a room", RoomErrorCodes.USER_DOES_NOT_OWN_A_ROOM);
+        }
+
+        long ownerId = r.get();
+        if (ownerId != userId) {
+            if (isAdminCached == null) {
+                isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
+            }
+            if (!isAdminCached) {
+                log.error("User is not an admin! It cannot operate on room {}", roomId);
+                throw new ApiException("User is not an admin", GeneralResponseCodes.USER_IS_NOT_ADMIN);
+            }
+        }
+    }
+
 
     public void assertRoomNotConfirmed(long roomId) {
         var r = roomFinder.isRoomConfirmed(roomId);

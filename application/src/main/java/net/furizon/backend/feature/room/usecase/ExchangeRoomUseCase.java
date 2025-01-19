@@ -60,9 +60,12 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         roomChecks.assertUserIsNotInRoom(destUserId, event, true);
 
         //checks.assertUserDoesNotOwnAroom(destUserId, event);
-        long sourceRoomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+        var sourceRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
+        sourceRoom.ifPresent(id -> {
+            roomChecks.assertPermissionsOnRoom(sourceUserId, event, id, null);
+            roomChecks.assertRoomNotConfirmed(id);
+        });
 
-        roomChecks.assertRoomNotConfirmed(sourceRoomId);
         var destRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
         destRoom.ifPresent(roomChecks::assertRoomNotConfirmed);
 
@@ -81,17 +84,19 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
 
         boolean res = roomLogic.exchangeRoom(
                 destUserId, sourceUserId,
-                destRoom.orElse(null), sourceRoomId,
+                destRoom.orElse(null), sourceRoom.orElse(null),
                 event, input.pretixInformation
         );
         if (res) {
             UserEmailData destData = userFinder.getMailDataForUser(destUserId);
             UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
             if (destData != null) {
-                mailService.broadcastUpdate(
-                        sourceRoomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
-                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
-                );
+                if (sourceRoom.isPresent()) {
+                    mailService.broadcastUpdate(
+                            sourceRoom.get(), TEMPLATE_ROOM_HAS_NEW_OWNER,
+                            MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
+                    );
+                }
 
                 if (sourceData != null) {
                     String actionText = RoomEmailTexts.getActionText(input.req.getAction(), destRoom.isPresent());

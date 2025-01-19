@@ -385,7 +385,8 @@ public class UserBuysFullRoom implements RoomLogic {
         );
     }
     @Override
-    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, long sourceRoomId,
+    public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("[ROOM_EXCHANGE] called with params: "
                 + "targetUsrId={} sourceUsrId={} targetRoomId={} sourceRoomId={} event={} pretixInformation={}",
@@ -901,7 +902,7 @@ public class UserBuysFullRoom implements RoomLogic {
         }
     }
     @Override
-    public synchronized boolean buyOrUpgradeRoom(
+    public boolean buyOrUpgradeRoom(
             long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
             long userId,
             @Nullable Long roomId,
