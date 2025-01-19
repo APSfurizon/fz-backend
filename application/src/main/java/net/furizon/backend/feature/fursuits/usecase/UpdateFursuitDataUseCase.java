@@ -26,7 +26,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
 
         //This currently doesn't support admins
 
-        FursuitDisplayData fursuit = fursuitChecks.getFursuitAndAssertItExists(userId, input.event);
+        FursuitDisplayData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event);
         fursuitChecks.assertUserHasPermissionOnFursuit(userId, fursuit);
 
         boolean res = updateFursuitAction.invoke(
