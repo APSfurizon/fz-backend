@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -27,6 +28,8 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqOrderFinder implements OrderFinder {
     @NotNull private final SqlQuery query;
+
+    @NotNull private final FursuitConfig fursuitConfig;
 
     @NotNull private final JooqOrderMapper orderMapper;
 
@@ -159,9 +162,23 @@ public class JooqOrderFinder implements OrderFinder {
                 );
             }
 
+            orderDataBuilder.totalFursuits((short) (fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits()));
+
             orderDataResponse = orderDataBuilder.build();
         }
         return orderDataResponse;
+    }
+
+    @Override
+    public @Nullable Short getBoughtExtraFursuits(long userId, @NotNull Event event) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_EXTRA_FURSUITS)
+            .from(ORDERS)
+            .where(
+                ORDERS.USER_ID.eq(userId))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
+        ).mapOrNull(r -> r.get(ORDERS.ORDER_EXTRA_FURSUITS));
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {

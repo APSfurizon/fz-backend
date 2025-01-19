@@ -18,6 +18,7 @@ import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,8 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
     @NotNull private final PretixPositionFinder positionFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Override
@@ -48,14 +50,14 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        checks.assertInTimeframeToEditRooms();
-        long userId = checks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
-        Order order = checks.getOrderAndAssertItExists(userId, event, pretixInformation);
+        roomChecks.assertInTimeframeToEditRooms();
+        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
+        Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
 
-        checks.assertOrderIsPaid(order, userId, event);
-        checks.assertPaymentAndRefundConfirmed(order.getCode(), event);
-        checks.assertOrderIsNotDaily(order, userId, event);
-        checks.assertUserIsNotInRoom(userId, event, true);
+        generalChecks.assertOrderIsPaid(order, userId, event);
+        generalChecks.assertPaymentAndRefundConfirmed(order.getCode(), event);
+        generalChecks.assertOrderIsNotDaily(order, userId, event);
+        roomChecks.assertUserIsNotInRoom(userId, event, true);
 
         long newRoomItemId = input.req.getRoomPretixItemId();
         Long earlyPositionId = null;
@@ -74,7 +76,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                 var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
                 if (r.isPresent()) {
                     oldRoomId = r.get();
-                    checks.assertRoomNotConfirmed(oldRoomId);
+                    roomChecks.assertRoomNotConfirmed(oldRoomId);
                 }
                 earlyPositionId = order.getEarlyPositionId();
                 latePositionId = order.getLatePositionId();

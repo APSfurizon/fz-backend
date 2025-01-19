@@ -1,19 +1,27 @@
 package net.furizon.backend.feature.badge.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
-import net.furizon.backend.feature.badge.dto.BadgeUploadResponse;
+import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
+import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
+import net.furizon.backend.feature.badge.usecase.GetFullInfoBadgeUseCase;
+import net.furizon.backend.feature.badge.usecase.UpdateUserBadgeInfoUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
+import net.furizon.backend.infrastructure.media.dto.MediaResponse;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/badge")
 @RequiredArgsConstructor
 public class BadgeController {
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
+    @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor useCaseExecutor;
 
     //Serving the files is handled by nginx itself
@@ -33,8 +44,8 @@ public class BadgeController {
         + "an invalid size or dimensions, we will return with an error. We return "
         + "the media id and the relative path where the file is served")
     @PostMapping(value = "/user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BadgeUploadResponse userUpload(
-        @AuthenticationPrincipal @NotNull final FurizonUser user,
+    public @NotNull MediaResponse userUpload(
+        @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
         @RequestParam("image") MultipartFile image
     ) {
         return useCaseExecutor.execute(
@@ -54,8 +65,8 @@ public class BadgeController {
             + "an invalid size or dimensions, we will return with an error. We return "
             + "the media id and the relative path where the file is served")
     @PostMapping(value = "/fursuit/upload/{fursuitId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BadgeUploadResponse fursuitUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
+    public @NotNull MediaResponse fursuitUpload(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId,
             @RequestParam("image") MultipartFile image
     ) {
@@ -70,11 +81,9 @@ public class BadgeController {
         );
     }
 
-
-
     @DeleteMapping(value = "/user/")
     public boolean deleteUserUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
         return useCaseExecutor.execute(
                 DeleteBadgeUseCase.class,
@@ -87,7 +96,7 @@ public class BadgeController {
     }
     @DeleteMapping(value = "/fursuit/{fursuitId}")
     public boolean deleteFursuitUpload(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId
     ) {
         return useCaseExecutor.execute(
@@ -96,6 +105,44 @@ public class BadgeController {
                         user,
                         BadgeType.BADGE_FURSUIT,
                         fursuitId
+                )
+        );
+    }
+
+    @Operation(summary = "Returns the full info to be displayed on the badge page", description =
+        "This method returns information about: when the badges are going to be physically printed, so any "
+        + "further changes won't be on the actual physical badge; "
+        + "current user data, so its propic, fursona name, etc; "
+        + "how many fursuits the user can 'legally' bring to the event EG "
+        + "how many fursuits he has bought + default fursuit no;"
+        + "full list of fursuits the user has + if the user has marked that fursuit to be brought to the current event")
+    @GetMapping("/")
+    public @NotNull FullInfoBadgeResponse getBadge(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return useCaseExecutor.execute(
+                GetFullInfoBadgeUseCase.class,
+                new GetFullInfoBadgeUseCase.Input(
+                        user,
+                        pretixInformation
+                )
+        );
+    }
+
+    @Operation(summary = "Updates the badge info of the user", description =
+        "By specifying the field `userId` in the request, an administrator can "
+        + "update the information of another user. For normal people that field can "
+        + "be simply omitted")
+    @PostMapping("/update-user-badge-info")
+    public boolean updateUserBadgeInfo(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @RequestBody @Valid @NotNull final UpdateUserBadgeRequest req
+    ) {
+        return useCaseExecutor.execute(
+                UpdateUserBadgeInfoUseCase.class,
+                new UpdateUserBadgeInfoUseCase.Input(
+                        user,
+                        req
                 )
         );
     }

@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.media.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.infrastructure.query.SqlQuery;

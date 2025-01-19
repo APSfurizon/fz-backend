@@ -112,6 +112,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
                         MEDIA.MEDIA_PATH,
+                        MEDIA.MEDIA_ID,
+                        MEDIA.MEDIA_TYPE,
                         ORDERS.ORDER_SPONSORSHIP_TYPE,
                         ORDERS.ORDER_CODE
                 )

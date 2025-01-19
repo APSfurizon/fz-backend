@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.badge.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import static net.furizon.jooq.generated.tables.Users.USERS;
 import static net.furizon.jooq.generated.tables.Media.MEDIA;
+import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +27,18 @@ public class JooqBadgeFinder implements BadgeFinder {
             .on(
                 USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID)
                 .and(USERS.USER_ID.eq(userId))
+            )
+        ).mapOrNull(JooqMediaMapper::map);
+    }
+
+    @Override
+    public @Nullable MediaData getMediaDataOfFursuitBadge(long fursuitId) {
+        return sqlQuery.fetchFirst(
+            mediaFinder.selectMedia()
+            .join(FURSUITS)
+            .on(
+                FURSUITS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID)
+                .and(FURSUITS.FURSUIT_ID.eq(fursuitId))
             )
         ).mapOrNull(JooqMediaMapper::map);
     }

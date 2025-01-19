@@ -7,8 +7,8 @@ import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
-import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -56,7 +56,7 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
                         orderCode, event, payment.getId(), state);
                 if (crashOnInvalidState) {
                     throw new ApiException("Payment found in illegal state",
-                            RoomErrorCodes.ORDER_PAYMENTS_STILL_PENDING);
+                            GeneralResponseCodes.ORDER_PAYMENTS_STILL_PENDING);
                 }
             }
         }
@@ -79,7 +79,8 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
                                 + "can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
                         orderCode, event, refund.getId(), state);
                 if (crashOnInvalidState) {
-                    throw new ApiException("Refund found in illegal state", RoomErrorCodes.ORDER_REFUNDS_STILL_PENDING);
+                    throw new ApiException("Refund found in illegal state",
+                            GeneralResponseCodes.ORDER_REFUNDS_STILL_PENDING);
                 }
             }
         }

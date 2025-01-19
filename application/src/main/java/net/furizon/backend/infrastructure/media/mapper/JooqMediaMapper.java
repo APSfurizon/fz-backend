@@ -1,6 +1,6 @@
 package net.furizon.backend.infrastructure.media.mapper;
 
-import net.furizon.backend.feature.badge.dto.MediaData;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;

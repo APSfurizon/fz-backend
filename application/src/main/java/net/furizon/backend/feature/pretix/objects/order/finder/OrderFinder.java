@@ -35,4 +35,7 @@ public interface OrderFinder {
     @Nullable
     OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event,
                                                         @NotNull PretixInformation pretixService);
+
+    @Nullable
+    Short getBoughtExtraFursuits(long userId, @NotNull Event event);
 }

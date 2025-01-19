@@ -91,6 +91,7 @@ room:
 fursuits:
   default-fursuits-no: ${FURSUITS_DEFAULT_NO:2}
   max-extra-fursuits: ${FURSUITS_MAX_EXTRA:5}
+  max-backend-fursuits-no: ${FURSUITS_MAX_FURSUITS_BACKEND:32}
 
 pretix:
   event:
@@ -136,3 +137,4 @@ badge:
   max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:4194304} #4 MB
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
+  editing-deadline: ${BADGE_EDITING_DEADLINE:}

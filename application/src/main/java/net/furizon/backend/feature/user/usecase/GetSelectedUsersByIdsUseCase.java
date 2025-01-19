@@ -6,7 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.SearchUsersResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.feature.user.objects.SearchUser;
+import net.furizon.backend.feature.user.objects.SearchUserResult;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class GetSelectedUsersByIdsUseCase implements UseCase<GetSelectedUsersByI
         final Set<Long> parsedIds = Arrays.stream(input.userIds).map(Long::parseLong).collect(Collectors.toSet());
         final List<UserDisplayData> result = userFinder.getDisplayUserByIds(parsedIds, input.event);
         return new SearchUsersResponse(result.stream().map(data ->
-                new SearchUser(data.getUserId(), data.getFursonaName(), data.getPropicUrl()))
+                new SearchUserResult(data.getUserId(), data.getFursonaName(), data.getPropic()))
                 .toList());
     }
 

@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -27,32 +28,36 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeFullOrderUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.sourceExchangeUser.getUserId());
-        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.sourceExchangeUser);
+        long sourceUserId = generalChecks.getUserIdAndAssertPermission(
+                input.req.getSourceUserId(),
+                input.sourceExchangeUser
+        );
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
 
 
-        checks.assertInTimeframeToEditRooms();
+        roomChecks.assertInTimeframeToEditRooms();
 
-        Order sourceOrder = checks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
-        checks.assertUserHasNotAnOrder(destUserId, event);
+        Order sourceOrder = generalChecks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
+        generalChecks.assertUserHasNotAnOrder(destUserId, event);
 
         long roomId = -1L;
         var srcRoomId = roomFinder.getRoomIdFromOwnerUserId(sourceUserId, event);
         if (srcRoomId.isPresent()) {
-            roomId = checks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
-            checks.assertRoomNotConfirmed(roomId);
+            roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+            roomChecks.assertRoomNotConfirmed(roomId);
         }
 
-        checks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
-        checks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+        generalChecks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
+        generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
             return true;

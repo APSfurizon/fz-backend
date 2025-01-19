@@ -1,0 +1,9 @@
+package net.furizon.backend.feature.fursuits;
+
+public enum FursuitErrorCodes {
+    FURSUIT_NOT_FOUND,
+    FURSUIT_BADGES_ENDED,
+    FURSUIT_ALREADY_BROUGHT_TO_CURRENT_EVENT,
+    FURSUIT_NOT_BROUGHT_TO_CURRENT_EVENT,
+    TOO_MANY_FURSUITS_ARE_YOU_A_MILLIONAIRE,
+}
