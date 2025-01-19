@@ -11,6 +11,5 @@ public class RoomAvailabilityInfoResponse {
     private final RoomData data;
     @NotNull
     private final String price;
-    @NotNull
-    private final PretixQuotaAvailability quotaAvailability;
+    private final long remaining;
 }
