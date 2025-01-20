@@ -3,7 +3,7 @@ package net.furizon.backend.feature.membership.finder;
 import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ public interface MembershipCardFinder {
     @NotNull List<FullInfoMembershipCard> getMembershipCards(short year);
     @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo);
 
-    @NotNull List<UserDisplayData> getUsersAtEventWithoutMembershipCard(@NotNull Event event);
+    @NotNull List<UserDisplayDataWithOrderCode> getUsersAtEventWithoutMembershipCard(@NotNull Event event);
 
     boolean canDeleteCard(@NotNull MembershipCard card);
 }

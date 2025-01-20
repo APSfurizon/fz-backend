@@ -5,7 +5,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
-import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
+import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserEmailDataMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
@@ -69,7 +69,7 @@ public class JooqUserFinder implements UserFinder {
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
             .where(USERS.USER_ID.in(ids))
-        ).stream().map(JooqDisplayUserMapper::map).toList();
+        ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
     @Nullable
@@ -94,7 +94,7 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             ).where(USERS.USER_ID.eq(userId))
-        ).mapOrNull(JooqDisplayUserMapper::map);
+        ).mapOrNull(JooqUserDisplayMapper::map);
     }
 
     @Nullable

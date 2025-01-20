@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_FATAL_ERROR;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED;
-import static net.furizon.backend.infrastructure.email.EmailVars.*;
+import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
+import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
+import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 
 @Slf4j

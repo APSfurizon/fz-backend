@@ -6,7 +6,7 @@ import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.GetMembershipCardsResponse;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,7 @@ public class LoadAllMembershipInfosUseCase implements UseCase<LoadAllMembershipI
         }
 
         boolean isCurrentYear = input.year.equals(eventYear);
-        List<UserDisplayData> peopleWithNoCards = !isCurrentYear ? null :
+        List<UserDisplayDataWithOrderCode> peopleWithNoCards = !isCurrentYear ? null :
                 membershipCardFinder.getUsersAtEventWithoutMembershipCard(input.event);
 
         return new GetMembershipCardsResponse(cards, peopleWithNoCards, isCurrentYear);

@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.createMembershipCard.CreateMembershipCardAction;
 import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
-import net.furizon.backend.feature.membership.action.shiftEnumerationOfCards.ShiftEnumerationOfMembershipCardsAction;
 import net.furizon.backend.feature.membership.action.updateMembershipOwner.UpdateMembershipCardOwner;
-import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -19,7 +17,6 @@ import net.furizon.backend.feature.pretix.objects.order.controller.OrderControll
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
-import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -27,13 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_FATAL_ERROR;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_WARNING;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;

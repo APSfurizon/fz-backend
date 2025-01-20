@@ -7,8 +7,8 @@ import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.mapper.FullInfoMembershipMapper;
 import net.furizon.backend.feature.membership.mapper.MembershipCardMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.user.dto.UserDisplayData;
-import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
+import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -143,7 +143,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
     }
 
     @Override
-    public @NotNull List<UserDisplayData> getUsersAtEventWithoutMembershipCard(@NotNull Event event) {
+    public @NotNull List<UserDisplayDataWithOrderCode> getUsersAtEventWithoutMembershipCard(@NotNull Event event) {
         return sqlQuery.fetch(
             PostgresDSL.select(
                 USERS.USER_ID,
@@ -152,7 +152,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_TYPE,
-                ORDERS.ORDER_SPONSORSHIP_TYPE
+                ORDERS.ORDER_SPONSORSHIP_TYPE,
+                ORDERS.ORDER_CODE
             )
             .from(USERS)
             .innerJoin(ORDERS)
@@ -167,7 +168,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        ).stream().map(JooqDisplayUserMapper::map).toList();
+        ).stream().map(JooqUserDisplayMapper::mapWithOrderCode).toList();
     }
 
     @Override
