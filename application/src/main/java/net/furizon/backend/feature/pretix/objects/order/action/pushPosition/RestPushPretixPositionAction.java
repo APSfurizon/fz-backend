@@ -54,11 +54,13 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
             // The temp item must be an addon to the original item, however by placing it in an addon category and
             //  by keeping it hidden (not visible) except for vouchers, the category won't appear at all
             //  in the add-on choice for the users
-            var itemType = position.getAddonTo() == null ? CacheItemTypes.TEMP_ITEM : CacheItemTypes.TEMP_ADDON;
+            PushPretixPositionRequest req = position.toBuilder().build();
+            var itemType = req.getAddonTo() == null ? CacheItemTypes.TEMP_ITEM : CacheItemTypes.TEMP_ADDON;
             long tempItem = (long) pretixInformation.getIdsForItemType(itemType).toArray()[0];
-            long originalAddonItemId = position.getItem();
-            position.setItem(tempItem);
-            PretixPosition tempPosition = push(event, position);
+            long originalAddonItemId = req.getItem();
+            req.setItem(tempItem);
+            req.setPrice(0L);
+            PretixPosition tempPosition = push(event, req);
             if (tempPosition == null) {
                 log.error("PushPretixPosition failed while generating a temp position id: {}", tempItem);
                 return null;
