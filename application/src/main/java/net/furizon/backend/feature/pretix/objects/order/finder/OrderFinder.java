@@ -13,6 +13,7 @@ import java.util.Set;
 
 public interface OrderFinder {
     @NotNull Set<String> findOrderCodesForEvent(@NotNull Event event);
+    @NotNull Set<Long> findOrderIdsForEvent(@NotNull Event event);
 
     @Nullable
     Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event, @NotNull PretixInformation pretixService);
@@ -38,4 +39,7 @@ public interface OrderFinder {
 
     @Nullable
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
+
+    @Nullable String getOrderCodeById(long orderId);
+    @Nullable Long getOrderIdByCode(@NotNull String orderCode);
 }

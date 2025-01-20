@@ -169,4 +169,18 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(JooqDisplayUserMapper::map).toList();
     }
+
+    @Override
+    public boolean canDeleteCard(@NotNull MembershipCard card) {
+        return !sqlQuery.fetchFirst(
+                PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)
+                .from(MEMBERSHIP_CARDS)
+                .where(
+                    MEMBERSHIP_CARDS.ISSUE_YEAR.eq(card.getIssueYear())
+                    .and(MEMBERSHIP_CARDS.ID_IN_YEAR.greaterOrEqual(card.getIdInYear()))
+                    .and(MEMBERSHIP_CARDS.ALREADY_REGISTERED.isTrue())
+                )
+                .limit(1)
+        ).isPresent();
+    }
 }

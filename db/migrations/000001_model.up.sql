@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS orders
     order_sponsorship_type           int2                         NOT NULL,
     event_id                         int8                         NOT NULL,
     user_id                          int8 DEFAULT NULL            NULL,
-    creation_ts                      timestamptz                    NOT NULL DEFAULT NOW(), -- just for stats reasons --
+    creation_ts                      timestamptz                  NOT NULL DEFAULT NOW(), -- just for stats reasons --
     CONSTRAINT orders_one_order_per_event UNIQUE(user_id, event_id),
     CONSTRAINT orders_extra_days_check CHECK (((order_extra_days_type >= 0) AND (order_extra_days_type <= 3))),
     CONSTRAINT orders_sponsorship_check CHECK (((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2))),

@@ -48,14 +48,12 @@ public class UpdateOrderInDb {
     @NotNull private final UpsertOrderAction upsertOrderAction;
     @NotNull private final DeleteOrderAction deleteOrderAction;
     @NotNull private final DeleteMembershipCardAction deleteMembershipCardAction;
-    @NotNull private final ShiftEnumerationOfMembershipCardsAction shiftEnumerationAction;
     @NotNull private final CreateMembershipCardAction createMembershipCardAction;
     @NotNull private final UpdateMembershipCardOwner updateMembershipCardOwner;
     @NotNull private final ConvertTicketOnlyOrderAction convertTicketOnlyOrderAction;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final UserFinder userFinder;
-    @NotNull private final MembershipYearUtils membershipYearUtils;
 
     @Transactional
     public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
@@ -150,39 +148,18 @@ public class UpdateOrderInDb {
                         } else {
                             if (card != null) { //The order HAD a membership card, but now it does not anymore
                                 if (!card.isRegistered()) {
-                                    short year = event.getMembershipYear(membershipYearUtils);
                                     int cardIdInYear = card.getIdInYear();
-                                    List<FullInfoMembershipCard> cards = membershipCardFinder.getMembershipCards(
-                                            year, cardIdInYear
-                                    );
-                                    boolean canDelete = cards.stream().noneMatch(
-                                            c -> c.getMembershipCard().isRegistered()
-                                    );
 
-                                    if (canDelete) {
-                                        log.info("[PRETIX] Order {} previously had a membership card, "
-                                                + "but now it doesn't. "
-                                                + "Deleting the previous registered card {}/{} and "
-                                                + "shifting the enumeration of the others",
+                                    log.info("[PRETIX] Order {} previously had a membership card, "
+                                            + "but now it doesn't. "
+                                            + "Deleting the previous registered card {}/{} and "
+                                            + "shifting the enumeration of the others",
+                                            order.getCode(), card.getCardId(), cardIdInYear);
+                                    boolean del = deleteMembershipCardAction.invoke(card);
+                                    if (!del) {
+                                        log.error("[PRETIX] Order {} previously had a membership card {}/{},"
+                                                + "but we failed deleting it",
                                                 order.getCode(), card.getCardId(), cardIdInYear);
-                                        boolean del = deleteMembershipCardAction.invoke(card);
-                                        if (del) {
-                                            int res = shiftEnumerationAction.invoke(year, cardIdInYear, 1);
-                                            log.info("[PRETIX] Shifted {} cards after deleting card {}/{}",
-                                                    res, card.getCardId(), cardIdInYear);
-                                        } else {
-                                            log.error("Failed deleting card {}/{} after order change",
-                                                    card.getCardId(), cardIdInYear);
-                                        }
-                                    } else {
-                                        emailSender.sendToPermission(
-                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                            SUBJECT_MEMBERSHIP_FATAL_ERROR,
-                                            TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED,
-                                            MailVarPair.of(ORDER_CODE, order.getCode()),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(cardIdInYear))
-                                        );
                                     }
                                 } else {
                                     log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
@@ -194,7 +171,7 @@ public class UpdateOrderInDb {
                                     emailSender.sendToPermission(
                                         Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                                         SUBJECT_MEMBERSHIP_WARNING,
-                                            TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
+                                        TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
                                         MailVarPair.of(ORDER_CODE, order.getCode()),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))

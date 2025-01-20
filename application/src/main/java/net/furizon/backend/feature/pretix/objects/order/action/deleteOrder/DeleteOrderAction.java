@@ -9,6 +9,8 @@ public interface DeleteOrderAction {
     void invoke(@NotNull final Order order);
 
     void invoke(@NotNull final String code);
+    void invoke(long orderId);
 
-    void invoke(@NotNull final Set<String> orderCodes);
+    void invokeWithCodes(@NotNull final Set<String> orderCodes);
+    void invokeWithIds(@NotNull final Set<Long> orderIds);
 }

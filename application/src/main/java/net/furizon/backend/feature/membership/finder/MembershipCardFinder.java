@@ -18,4 +18,6 @@ public interface MembershipCardFinder {
     @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo);
 
     @NotNull List<UserDisplayData> getUsersAtEventWithoutMembershipCard(@NotNull Event event);
+
+    boolean canDeleteCard(@NotNull MembershipCard card);
 }
