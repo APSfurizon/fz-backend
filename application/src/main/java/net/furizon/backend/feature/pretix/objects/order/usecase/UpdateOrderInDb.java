@@ -140,11 +140,13 @@ public class UpdateOrderInDb {
                             }
                         } else {
                             if (card != null) { //The order HAD a membership card, but now it does not anymore
-                                if (!card.isRegistered()) {
+                                if (!card.isRegistered()) { //This is broken
+                                    //TODO if there's no registered membership card after this one,
+                                    // we can delete it and move the codes of the other cards
                                     log.info("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
                                                     + "Deleting the previous registered card {}/{}",
                                             order.getCode(), card.getCardId(), card.getIdInYear());
-                                    deleteMembershipCardAction.invoke(card);
+                                    //deleteMembershipCardAction.invoke(card);
                                 } else {
                                     log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
                                                     + "However, the previous membership card ({}/{}) "
