@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.createMembershipCard.CreateMembershipCardAction;
 import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
+import net.furizon.backend.feature.membership.action.shiftEnumerationOfCards.ShiftEnumerationOfMembershipCardsAction;
 import net.furizon.backend.feature.membership.action.updateMembershipOwner.UpdateMembershipCardOwner;
+import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -17,18 +19,22 @@ import net.furizon.backend.feature.pretix.objects.order.controller.OrderControll
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_FATAL_ERROR;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_MEMBERSHIP_WARNING;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_WARNING;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED;
+import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
@@ -42,19 +48,22 @@ public class UpdateOrderInDb {
     @NotNull private final UpsertOrderAction upsertOrderAction;
     @NotNull private final DeleteOrderAction deleteOrderAction;
     @NotNull private final DeleteMembershipCardAction deleteMembershipCardAction;
+    @NotNull private final ShiftEnumerationOfMembershipCardsAction shiftEnumerationAction;
     @NotNull private final CreateMembershipCardAction createMembershipCardAction;
     @NotNull private final UpdateMembershipCardOwner updateMembershipCardOwner;
     @NotNull private final ConvertTicketOnlyOrderAction convertTicketOnlyOrderAction;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final UserFinder userFinder;
+    @NotNull private final MembershipYearUtils membershipYearUtils;
 
-
+    @Transactional
     public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
                                             @NotNull Event event,
                                             @NotNull PretixInformation pretixInformation) {
         return execute(pretixOrder, event, pretixInformation, true);
     }
+    @Transactional
     public @NotNull Optional<Order> execute(@NotNull PretixOrder pretixOrder,
                                             @NotNull Event event,
                                             @NotNull PretixInformation pretixInformation,
@@ -128,7 +137,7 @@ public class UpdateOrderInDb {
                                         emailSender.sendToPermission(
                                             Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                                             SUBJECT_MEMBERSHIP_FATAL_ERROR,
-                                            TEMPLATE_MEMBERSHIP_CARD_FATAL_ERROR,
+                                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
                                             MailVarPair.of(ORDER_CODE, order.getCode()),
                                             MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
                                             MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
@@ -140,13 +149,41 @@ public class UpdateOrderInDb {
                             }
                         } else {
                             if (card != null) { //The order HAD a membership card, but now it does not anymore
-                                if (!card.isRegistered()) { //This is broken
-                                    //TODO if there's no registered membership card after this one,
-                                    // we can delete it and move the codes of the other cards
-                                    log.info("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
-                                                    + "Deleting the previous registered card {}/{}",
-                                            order.getCode(), card.getCardId(), card.getIdInYear());
-                                    //deleteMembershipCardAction.invoke(card);
+                                if (!card.isRegistered()) {
+                                    short year = event.getMembershipYear(membershipYearUtils);
+                                    int cardIdInYear = card.getIdInYear();
+                                    List<FullInfoMembershipCard> cards = membershipCardFinder.getMembershipCards(
+                                            year, cardIdInYear
+                                    );
+                                    boolean canDelete = cards.stream().noneMatch(
+                                            c -> c.getMembershipCard().isRegistered()
+                                    );
+
+                                    if (canDelete) {
+                                        log.info("[PRETIX] Order {} previously had a membership card, "
+                                                + "but now it doesn't. "
+                                                + "Deleting the previous registered card {}/{} and "
+                                                + "shifting the enumeration of the others",
+                                                order.getCode(), card.getCardId(), cardIdInYear);
+                                        boolean del = deleteMembershipCardAction.invoke(card);
+                                        if (del) {
+                                            int res = shiftEnumerationAction.invoke(year, cardIdInYear, 1);
+                                            log.info("[PRETIX] Shifted {} cards after deleting card {}/{}",
+                                                    res, card.getCardId(), cardIdInYear);
+                                        } else {
+                                            log.error("Failed deleting card {}/{} after order change",
+                                                    card.getCardId(), cardIdInYear);
+                                        }
+                                    } else {
+                                        emailSender.sendToPermission(
+                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                            SUBJECT_MEMBERSHIP_FATAL_ERROR,
+                                            TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED,
+                                            MailVarPair.of(ORDER_CODE, order.getCode()),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(cardIdInYear))
+                                        );
+                                    }
                                 } else {
                                     log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
                                                     + "However, the previous membership card ({}/{}) "
@@ -157,7 +194,7 @@ public class UpdateOrderInDb {
                                     emailSender.sendToPermission(
                                         Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                                         SUBJECT_MEMBERSHIP_WARNING,
-                                        TEMPLATE_MEMBERSHIP_CARD_WARNING,
+                                            TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
                                         MailVarPair.of(ORDER_CODE, order.getCode()),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
