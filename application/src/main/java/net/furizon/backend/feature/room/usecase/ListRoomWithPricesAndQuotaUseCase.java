@@ -147,7 +147,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                         return new RoomAvailabilityInfoResponse(
                             data,
                             PretixGenericUtils.fromPriceToString(totalPrice, '.'),
-                            quota.getRemaining()
+                            quota.isUnlimited() ? null : quota.getRemaining()
                         );
                     }
                 }
