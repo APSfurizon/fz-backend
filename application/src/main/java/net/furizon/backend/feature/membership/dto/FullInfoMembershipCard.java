@@ -23,4 +23,7 @@ public class FullInfoMembershipCard {
 
     @Nullable
     private final String fromOrderCode;
+
+    @Builder.Default
+    private boolean duplicate = false;
 }
