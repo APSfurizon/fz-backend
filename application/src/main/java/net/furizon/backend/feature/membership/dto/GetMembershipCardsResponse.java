@@ -3,6 +3,8 @@ package net.furizon.backend.feature.membership.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -10,7 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 public class GetMembershipCardsResponse {
     @NotNull
-    private List<FullInfoMembershipCard> response;
+    private List<FullInfoMembershipCard> cards;
+
+    @Nullable
+    private List<UserDisplayData> usersAtCurrentEventWithoutCard;
 
     private boolean canAddCards;
 }
