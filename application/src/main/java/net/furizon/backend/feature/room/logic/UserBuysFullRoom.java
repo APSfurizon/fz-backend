@@ -129,10 +129,13 @@ public class UserBuysFullRoom implements RoomLogic {
     public boolean deleteRoom(long roomId) {
         return defaultRoomLogic.deleteRoom(roomId);
     }
-
     @Override
     public boolean changeRoomName(String name, long roomId) {
         return defaultRoomLogic.changeRoomName(name, roomId);
+    }
+    @Override
+    public boolean setShowInNosecount(boolean showInNosecount, long roomId) {
+        return defaultRoomLogic.setShowInNosecount(showInNosecount, roomId);
     }
 
     @Override

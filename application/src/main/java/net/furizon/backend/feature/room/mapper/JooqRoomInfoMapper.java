@@ -17,6 +17,7 @@ public class JooqRoomInfoMapper {
                 .roomOwner(JooqUserDisplayMapper.map(record))
                 .confirmed(record.get(ROOMS.ROOM_CONFIRMED))
                 .roomData(JooqRoomDataMapper.map(record, pretixInformation))
+                .showInNosecount(record.get(ROOMS.SHOW_IN_NOSECOUNT))
             .build();
     }
 }

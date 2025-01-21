@@ -11,39 +11,12 @@ import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomInfo;
-import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
-import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
-import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
-import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
-import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
-import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
-import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
-import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
+import net.furizon.backend.feature.room.dto.request.*;
 import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
-import net.furizon.backend.feature.room.usecase.BuyUpgradeRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CreateRoomUseCase;
-import net.furizon.backend.feature.room.usecase.DeleteRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ExchangeFullOrderUseCase;
-import net.furizon.backend.feature.room.usecase.ExchangeRoomUseCase;
-import net.furizon.backend.feature.room.usecase.GetExchangeConfirmationStatusInfoUseCase;
-import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
-import net.furizon.backend.feature.room.usecase.InitializeExchangeFlowUseCase;
-import net.furizon.backend.feature.room.usecase.InviteAcceptUseCase;
-import net.furizon.backend.feature.room.usecase.InviteCancelUseCase;
-import net.furizon.backend.feature.room.usecase.InviteRefuseUseCase;
-import net.furizon.backend.feature.room.usecase.InviteToRoomUseCase;
-import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
-import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ListRoomWithPricesAndQuotaUseCase;
-import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
-import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.UpdateExchangeStatusUseCase;
+import net.furizon.backend.feature.room.usecase.*;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
@@ -127,6 +100,29 @@ public class RoomController {
                 new RenameRoomUseCase.Input(
                         user,
                         changeNameToRoomRequest,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Set if the room should be showed in the nosecount", description =
+        "For privacy reasons, some people might prefere to hide their room in the nosecount. "
+        + "If this is set to false, the users in this room will appear in the 'ticketless furs' section "
+        + "of the nosecount, so they won't be displayed together nor it won't be showed in which kind "
+        + "of room and in which hotel the people are staying. Only the owner of the room can set this "
+        + "property. Administrator can specify to which room this option should be changed by using the "
+        + "optional `roomId` parameter. If omitted, the user's room will be used instead. "
+        + "We return whenever the function was successful or not")
+    @PostMapping("/show-in-nosecount")
+    public boolean showInNosecount(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final SetShowInNosecountRequest req
+    ) {
+        return executor.execute(
+                SetShowInNosecountUseCase.class,
+                new SetShowInNosecountUseCase.Input(
+                        req,
+                        user,
                         pretixInformation.getCurrentEvent()
                 )
         );
