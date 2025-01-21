@@ -10,6 +10,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -160,6 +161,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             .on(
                 ORDERS.USER_ID.eq(USERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
                 .and(ORDERS.USER_ID.notIn(
                     PostgresDSL.select(MEMBERSHIP_CARDS.USER_ID)
                     .from(MEMBERSHIP_CARDS)
