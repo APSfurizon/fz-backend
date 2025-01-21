@@ -106,7 +106,7 @@ public class RoomController {
     }
 
     @Operation(summary = "Set if the room should be showed in the nosecount", description =
-        "For privacy reasons, some people might prefere to hide their room in the nosecount. "
+        "For privacy reasons, some people might prefer to hide their room in the nosecount. "
         + "If this is set to false, the users in this room will appear in the 'ticketless furs' section "
         + "of the nosecount, so they won't be displayed together nor it won't be showed in which kind "
         + "of room and in which hotel the people are staying. Only the owner of the room can set this "

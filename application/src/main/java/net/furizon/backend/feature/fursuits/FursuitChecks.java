@@ -3,6 +3,7 @@ package net.furizon.backend.feature.fursuits;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -25,19 +26,20 @@ public class FursuitChecks {
     @NotNull private final FursuitConfig fursuitConfig;
 
 
-    public @NotNull FursuitDisplayData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event) {
-        FursuitDisplayData data = fursuitFinder.getFursuit(fursuitId, event);
+    public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event) {
+        FursuitData data = fursuitFinder.getFursuit(fursuitId, event);
         assertFursuitExists(data);
         return data;
     }
-    public void assertFursuitExists(@Nullable FursuitDisplayData fursuit) {
+    public void assertFursuitExists(@Nullable FursuitData fursuit) {
         assertFursuitObjExists(fursuit);
     }
 
-    public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitDisplayData fursuit) {
+    public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitData fursuit) {
         if (userId != fursuit.getOwnerId()
                 && permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO)) {
-            log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuit.getId());
+            log.error("User {} is trying to manage fursuit {} but it's not the owner!",
+                    userId, fursuit.getFursuit().getId());
             throw new ApiException("You cannot manage a fursuit which is not yours!",
                     GeneralResponseCodes.USER_IS_NOT_ADMIN);
         }

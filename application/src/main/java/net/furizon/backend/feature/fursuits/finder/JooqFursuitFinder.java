@@ -1,7 +1,9 @@
 package net.furizon.backend.feature.fursuits.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
+import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -26,18 +28,18 @@ public class JooqFursuitFinder implements FursuitFinder {
     @NotNull private final SqlQuery sqlQuery;
 
     @Override
-    public @NotNull List<FursuitDisplayData> getFursuitsOfUser(long userId, @Nullable Event event) {
+    public @NotNull List<FursuitData> getFursuitsOfUser(long userId, @Nullable Event event) {
         return sqlQuery.fetch(
             selectDisplayFursuit(event)
             .where(FURSUITS.USER_ID.eq(userId))
-        ).stream().map(r -> JooqFursuitDisplayMapper.map(r, event != null)).toList();
+        ).stream().map(r -> JooqFursuitDataMapper.map(r, event != null)).toList();
     }
     @Override
-    public @Nullable FursuitDisplayData getFursuit(long fursuitId, @Nullable Event event) {
+    public @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event) {
         return sqlQuery.fetchFirst(
             selectDisplayFursuit(event)
             .where(FURSUITS.FURSUIT_ID.eq(fursuitId))
-        ).mapOrNull(r -> JooqFursuitDisplayMapper.map(r, event != null));
+        ).mapOrNull(r -> JooqFursuitDataMapper.map(r, event != null));
     }
 
     @Override

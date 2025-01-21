@@ -9,6 +9,7 @@ import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.usecase.BringFursuitToEventUseCase;
@@ -45,7 +46,7 @@ public class FursuitController {
         "If we're unable to retrieve the specified fursuit, we return a "
         + "`FURSUIT_NOT_FOUND` error")
     @GetMapping("/{fursuitId}")
-    public @NotNull FursuitDisplayData getFursuit(
+    public @NotNull FursuitData getFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") @NotNull final Long fursuitId
     ) {
@@ -54,7 +55,7 @@ public class FursuitController {
                 new GetSingleFursuitUseCase.Input(
                         fursuitId,
                         user,
-                    pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -113,12 +114,12 @@ public class FursuitController {
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
     @PostMapping("/{fursuitId}")
-    public @NotNull FursuitDisplayData updateFursuit(
+    public @NotNull FursuitData updateFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") @NotNull final Long fursuitId,
             @RequestBody @NotNull @Valid final FursuitDataRequest req
     ) {
-        FursuitDisplayData data = executor.execute(
+        FursuitData data = executor.execute(
                 UpdateFursuitDataUseCase.class,
                 new UpdateFursuitDataUseCase.Input(
                         fursuitId,
@@ -155,7 +156,7 @@ public class FursuitController {
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. ")
     @PostMapping("/{fursuitId}/update-with-image")
-    public @NotNull FursuitDisplayData updateFursuitWithImage(
+    public @NotNull FursuitData updateFursuitWithImage(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("fursuitId") @NotNull final Long fursuitId,
             @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
@@ -167,7 +168,7 @@ public class FursuitController {
             @RequestParam("delete-image") @NotNull final Boolean deleteImage,
             @RequestParam(value = "image", required = false) @jakarta.annotation.Nullable MultipartFile image
     ) {
-        FursuitDisplayData data = executor.execute(
+        FursuitData data = executor.execute(
                 UpdateFursuitDataUseCase.class,
                 new UpdateFursuitDataUseCase.Input(
                         fursuitId,
@@ -198,7 +199,7 @@ public class FursuitController {
                             fursuitId
                     )
             );
-            data.setPropic(null);
+            data.getFursuit().setPropic(null);
 
         } else if (image != null) {
             MediaResponse media = executor.execute(
@@ -210,7 +211,7 @@ public class FursuitController {
                             fursuitId
                     )
             );
-            data.setPropic(media);
+            data.getFursuit().setPropic(media);
         }
         return data;
     }
@@ -227,7 +228,7 @@ public class FursuitController {
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
     @PostMapping("/")
-    public @NotNull FursuitDisplayData addFursuit(
+    public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
         @RequestBody @NotNull @Valid final FursuitDataRequest req
     ) {
@@ -254,7 +255,7 @@ public class FursuitController {
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
     @PostMapping("/add-with-image")
-    public @NotNull FursuitDisplayData addFursuit(
+    public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
         @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
         @Valid @NotNull @RequestParam("name") final String name,
@@ -264,7 +265,7 @@ public class FursuitController {
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
         @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
-        FursuitDisplayData data = executor.execute(
+        FursuitData data = executor.execute(
                 CreateFursuitUseCase.class,
                 new CreateFursuitUseCase.Input(
                         name,
@@ -282,10 +283,10 @@ public class FursuitController {
                             user,
                             image,
                             BadgeType.BADGE_FURSUIT,
-                            data.getId()
+                            data.getFursuit().getId()
                     )
             );
-            data.setPropic(media);
+            data.getFursuit().setPropic(media);
         }
         return data;
     }

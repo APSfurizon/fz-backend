@@ -3,6 +3,7 @@ package net.furizon.backend.feature.fursuits.usecase;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.FursuitErrorCodes;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -14,16 +15,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.Input, FursuitDisplayData> {
+public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.Input, FursuitData> {
     @NotNull private final FursuitFinder fursuitFinder;
     @NotNull private final FursuitChecks checks;
 
     @Override
-    public @NotNull FursuitDisplayData executor(@NotNull Input input) {
+    public @NotNull FursuitData executor(@NotNull Input input) {
         long userId = input.user.getUserId();
         Event event = input.event;
 
-        FursuitDisplayData fursuit = fursuitFinder.getFursuit(userId, event);
+        FursuitData fursuit = fursuitFinder.getFursuit(userId, event);
         if (fursuit == null) {
             throw new ApiException("Fursuit not found", FursuitErrorCodes.FURSUIT_NOT_FOUND);
         }
