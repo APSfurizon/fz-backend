@@ -1,8 +1,10 @@
 package net.furizon.backend.feature.membership.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class DeleteMembershipCardRequest {
-    private final long cardId;
+    @NotNull
+    private final Long cardId;
 }

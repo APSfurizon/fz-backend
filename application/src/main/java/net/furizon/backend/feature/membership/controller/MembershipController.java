@@ -151,8 +151,8 @@ public class MembershipController {
     @GetMapping("/get-cards")
     public GetMembershipCardsResponse getMembershipCards(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @RequestParam("year")
-            final short year
+            @Valid @RequestParam("year") @NotNull
+            final Short year
     ) {
         return executor.execute(
             LoadAllMembershipInfosUseCase.class,

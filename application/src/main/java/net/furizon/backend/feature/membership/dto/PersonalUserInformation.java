@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.membership.dto;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -17,7 +18,9 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class PersonalUserInformation {
-    private final long id;
+    @NotNull
+    @Min(0L)
+    private final Long id;
 
     @NotNull
     @NotEmpty
@@ -96,7 +99,9 @@ public class PersonalUserInformation {
     @Size(max = 1000)
     private final String note;
 
-    private final long lastUpdatedEventId;
+    @NotNull
+    private final Long lastUpdatedEventId;
 
-    private final long userId;
+    @NotNull
+    private final Long userId;
 }

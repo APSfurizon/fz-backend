@@ -11,7 +11,7 @@ public class ExchangeRequest {
     private final Long sourceUserId;
 
     @NotNull
-    private final long destUserId;
+    private final Long destUserId;
 
     @NotNull
     private final ExchangeAction action;

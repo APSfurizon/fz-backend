@@ -11,7 +11,7 @@ public class FursuitDataRequest {
     @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
     @NotNull private final String species;
 
-    private final boolean bringToCurrentEvent;
+    @NotNull private final Boolean bringToCurrentEvent;
 
-    private final boolean showInFursuitCount;
+    @NotNull private final Boolean showInFursuitCount;
 }

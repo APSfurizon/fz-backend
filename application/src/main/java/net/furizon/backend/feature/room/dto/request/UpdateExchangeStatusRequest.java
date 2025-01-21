@@ -1,9 +1,10 @@
 package net.furizon.backend.feature.room.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class UpdateExchangeStatusRequest {
-    private final long exchangeId;
-    private final boolean confirm;
+    @NotNull private final Long exchangeId;
+    @NotNull private final Boolean confirm;
 }

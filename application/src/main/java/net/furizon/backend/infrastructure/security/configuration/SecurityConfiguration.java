@@ -1,7 +1,6 @@
 package net.furizon.backend.infrastructure.security.configuration;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredManager;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
@@ -37,8 +36,6 @@ public class SecurityConfiguration {
     private final InternalBasicFilter internalBasicFilter;
 
     private final SecurityConfig securityConfig;
-
-    private final PretixConfig pretixConfig;
 
     @Bean
     public SecurityFilterChain internalFilterChain(HttpSecurity http) throws Exception {

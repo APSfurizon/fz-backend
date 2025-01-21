@@ -8,8 +8,8 @@ import lombok.Data;
 public class SetMembershipCardRegistrationStatusRequest {
     @NotNull
     @Min(0L)
-    private final long membershipCardId;
+    private final Long membershipCardId;
 
     @NotNull
-    private final boolean registered;
+    private final Boolean registered;
 }

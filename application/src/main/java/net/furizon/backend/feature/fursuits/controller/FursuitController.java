@@ -47,7 +47,7 @@ public class FursuitController {
     @GetMapping("/{fursuitId}")
     public @NotNull FursuitDisplayData getFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
-            @PathVariable("fursuitId") final long fursuitId
+            @PathVariable("fursuitId") @NotNull final Long fursuitId
     ) {
         return executor.execute(
                 GetSingleFursuitUseCase.class,
@@ -65,7 +65,7 @@ public class FursuitController {
     @DeleteMapping("/{fursuitId}")
     public boolean deleteFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
-            @PathVariable("fursuitId") final long fursuitId
+            @PathVariable("fursuitId") @NotNull final Long fursuitId
     ) {
         return executor.execute(
                 DeleteFursuitUseCase.class,
@@ -115,7 +115,7 @@ public class FursuitController {
     @PostMapping("/{fursuitId}")
     public @NotNull FursuitDisplayData updateFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
-            @PathVariable("fursuitId") final long fursuitId,
+            @PathVariable("fursuitId") @NotNull final Long fursuitId,
             @RequestBody @NotNull @Valid final FursuitDataRequest req
     ) {
         FursuitDisplayData data = executor.execute(
@@ -124,16 +124,16 @@ public class FursuitController {
                         fursuitId,
                         req.getName(),
                         req.getSpecies(),
-                        req.isShowInFursuitCount(),
+                        req.getShowInFursuitCount(),
                         pretixInformation.getCurrentEvent(),
                         user
                 )
         );
-        if (data.isBringingToEvent() != req.isBringToCurrentEvent()) {
+        if (data.isBringingToEvent() != req.getBringToCurrentEvent()) {
             executor.execute(
                 BringFursuitToEventUseCase.class,
                 new BringFursuitToEventUseCase.Input(
-                    new BringFursuitToEventRequest(req.isBringToCurrentEvent(), user.getUserId()),
+                    new BringFursuitToEventRequest(req.getBringToCurrentEvent(), user.getUserId()),
                     fursuitId,
                     user,
                     pretixInformation
@@ -157,15 +157,15 @@ public class FursuitController {
     @PostMapping("/{fursuitId}/update-with-image")
     public @NotNull FursuitDisplayData updateFursuitWithImage(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @PathVariable("fursuitId") final long fursuitId,
+            @PathVariable("fursuitId") @NotNull final Long fursuitId,
             @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
             @Valid @NotNull @RequestParam("name") final String name,
             @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
             @Valid @NotNull @RequestParam("species") final String species,
-            @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
-            @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
-            @RequestParam("delete-image") final boolean deleteImage,
-            @RequestParam(value = "image", required = false) MultipartFile image
+            @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
+            @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
+            @RequestParam("delete-image") @NotNull final Boolean deleteImage,
+            @RequestParam(value = "image", required = false) @jakarta.annotation.Nullable MultipartFile image
     ) {
         FursuitDisplayData data = executor.execute(
                 UpdateFursuitDataUseCase.class,
@@ -236,8 +236,8 @@ public class FursuitController {
                 new CreateFursuitUseCase.Input(
                         req.getName(),
                         req.getSpecies(),
-                        req.isBringToCurrentEvent(),
-                        req.isShowInFursuitCount(),
+                        req.getBringToCurrentEvent(),
+                        req.getShowInFursuitCount(),
                         user,
                         pretixInformation
                 )
@@ -260,10 +260,9 @@ public class FursuitController {
         @Valid @NotNull @RequestParam("name") final String name,
         @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
         @Valid @NotNull @RequestParam("species") final String species,
-        @RequestParam("bring-to-current-event") final boolean bringToCurrentEvent,
-        @RequestParam("show-in-fursuit-count") final boolean showInFursuitCount,
-        @Nullable
-        @RequestParam(value = "image", required = false) MultipartFile image
+        @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
+        @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
+        @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         FursuitDisplayData data = executor.execute(
                 CreateFursuitUseCase.class,

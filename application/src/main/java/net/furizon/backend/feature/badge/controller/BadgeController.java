@@ -46,7 +46,7 @@ public class BadgeController {
     @PostMapping(value = "/user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public @NotNull MediaResponse userUpload(
         @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
-        @RequestParam("image") MultipartFile image
+        @RequestParam("image") @NotNull MultipartFile image
     ) {
         return useCaseExecutor.execute(
             UploadBadgeUsecase.class,
@@ -68,7 +68,7 @@ public class BadgeController {
     public @NotNull MediaResponse fursuitUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") final long fursuitId,
-            @RequestParam("image") MultipartFile image
+            @RequestParam("image") @NotNull MultipartFile image
     ) {
         return useCaseExecutor.execute(
             UploadBadgeUsecase.class,
@@ -97,7 +97,7 @@ public class BadgeController {
     @DeleteMapping(value = "/fursuit/{fursuitId}")
     public boolean deleteFursuitUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
-            @PathVariable("fursuitId") final long fursuitId
+            @PathVariable("fursuitId") @NotNull final Long fursuitId
     ) {
         return useCaseExecutor.execute(
                 DeleteBadgeUseCase.class,

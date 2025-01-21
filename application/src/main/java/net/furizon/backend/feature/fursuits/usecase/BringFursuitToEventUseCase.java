@@ -29,12 +29,12 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
 
         long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
         log.info("User {} is setting bringToCurrentEvent = {} on fursuit {}",
-                input.user.getUserId(), input.req.isBringFursuitToCurrentEvent(), input.fursuitId);
+                input.user.getUserId(), input.req.getBringFursuitToCurrentEvent(), input.fursuitId);
         fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
 
         boolean res;
         Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
-        if (input.req.isBringFursuitToCurrentEvent()) {
+        if (input.req.getBringFursuitToCurrentEvent()) {
 
             generalChecks.assertOrderIsPaid(order, userId, event);
             fursuitChecks.assertFursuitNotAlreadyBroughtToCurrentEvent(input.fursuitId, order);
