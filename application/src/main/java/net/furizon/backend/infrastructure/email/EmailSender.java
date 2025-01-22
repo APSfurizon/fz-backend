@@ -1,10 +1,15 @@
 package net.furizon.backend.infrastructure.email;
 
+import jakarta.mail.MessagingException;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.mail.MailException;
+
+import java.util.List;
 
 public interface EmailSender {
     @NonBlocking
@@ -13,7 +18,7 @@ public interface EmailSender {
         @NotNull String subject,
         @NotNull String templateName,
         MailVarPair... vars
-    );
+    ) throws MessagingException, MailException;
 
     @NonBlocking
     void sendToPermission(
@@ -21,14 +26,9 @@ public interface EmailSender {
         @NotNull String subject,
         @NotNull String templateName,
         MailVarPair... vars
-    );
+    ) throws MessagingException, MailException;
 
-    @NonBlocking
-    void send(long userId, @NotNull String subject, @NotNull String templateName, MailVarPair... vars);
-
-    @NonBlocking
-    void send(@NotNull UserEmailData emailData, @NotNull String subject, @NotNull String templateName,
-              MailVarPair... vars);
+    void sendToUsers(@NotNull List<Long> users, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) throws MessagingException, MailException;
 
     @Blocking
     void send(MailRequest request) throws MessagingException, MailException;

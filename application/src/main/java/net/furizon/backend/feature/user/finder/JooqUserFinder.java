@@ -101,19 +101,35 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public UserEmailData getMailDataForUser(long userId) {
         return sqlQuery.fetchFirst(
-                PostgresDSL
-                .select(
-                        USERS.USER_ID,
-                        USERS.USER_FURSONA_NAME,
-                        AUTHENTICATIONS.AUTHENTICATION_EMAIL
-                )
-                .from(USERS)
-                .innerJoin(AUTHENTICATIONS)
-                .on(
-                        USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID)
-                        .and(USERS.USER_ID.eq(userId))
-                )
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
+            )
+            .from(USERS)
+            .innerJoin(AUTHENTICATIONS)
+            .on(
+                USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID)
+                .and(USERS.USER_ID.eq(userId))
+            )
         ).mapOrNull(JooqUserEmailDataMapper::map);
+    }
+    @NotNull
+    @Override
+    public List<UserEmailData> getMailDataForUsers(@NotNull List<Long> userIds) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
+            )
+            .from(USERS)
+            .innerJoin(AUTHENTICATIONS)
+            .on(
+                USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID)
+                .and(USERS.USER_ID.in(userIds))
+            )
+        ).stream().map(JooqUserEmailDataMapper::map).toList();
     }
 
     @NotNull

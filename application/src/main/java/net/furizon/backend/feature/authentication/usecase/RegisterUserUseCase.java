@@ -79,7 +79,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         sender.fireAndForget(
             MailRequest.builder()
-                .to(List.of(email))
+                .to(email)
                 .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)

@@ -63,7 +63,7 @@ public class CreateLoginSessionValidation {
                 sessionAuthenticationManager.disableUser(authentication.getUserId());
                 emailSender.fireAndForget(
                     MailRequest.builder()
-                        .to(List.of(email))
+                        .to(email)
                         .subject(SUBJECT_TOO_MANY_LOGIN_ATTEMPTS)
                         .templateMessage(TemplateMessage.of(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS))
                         .build()

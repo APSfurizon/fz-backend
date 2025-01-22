@@ -47,7 +47,7 @@ public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
 
         sender.fireAndForget(
             MailRequest.builder()
-                .to(List.of(email))
+                .to(email)
                 .subject(SUBJECT_PW_RESET)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_PW_RESET)
