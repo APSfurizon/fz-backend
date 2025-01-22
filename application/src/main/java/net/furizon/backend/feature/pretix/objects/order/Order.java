@@ -291,6 +291,16 @@ public class Order {
         return list;
     }
 
+    public static @NotNull Set<Integer> parseDailyDays(long dailyDays) {
+        Set<Integer> ret = new TreeSet<>();
+        for (int i = 0; i < 63; i++) {
+            if ((dailyDays & (1L << i)) != 0L) {
+                ret.add(i);
+            }
+        }
+        return ret;
+    }
+
 
     public static class OrderBuilder {
         public OrderBuilder dailyDays(Set<Integer> days) {
@@ -299,12 +309,7 @@ public class Order {
         }
 
         public OrderBuilder dailyDays(long days) {
-            dailyDays = new TreeSet<>();
-            for (int i = 0; i < 63; i++) {
-                if ((days & (1L << i)) != 0L) {
-                    dailyDays.add(i);
-                }
-            }
+            dailyDays = parseDailyDays(days);
             return this;
         }
 

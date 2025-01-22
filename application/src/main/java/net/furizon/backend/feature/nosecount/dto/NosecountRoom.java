@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class NosecountRoom {
+    private final long id;
     @NotNull private final String roomName;
     @NotNull private final List<UserDisplayData> guests;
 }

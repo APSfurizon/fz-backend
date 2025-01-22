@@ -5,8 +5,12 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.nosecount.dto.FursuitCountResponse;
+import net.furizon.backend.feature.nosecount.dto.NoseCountResponse;
 import net.furizon.backend.feature.nosecount.finder.CountsFinder;
 import net.furizon.backend.feature.nosecount.usecase.LoadFursuitCountUseCase;
+import net.furizon.backend.feature.nosecount.usecase.LoadNosecountUseCase;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CountsController {
     private final PretixInformation pretixInformation;
     private final UseCaseExecutor executor;
+    private final EventFinder eventFinder;
 
     @Operation(summary = "Gets the fursuit count", description =
         "By using the optional paramether `event-id` you can choose of which event "
@@ -40,6 +45,21 @@ public class CountsController {
     }
 
     @GetMapping("/bopos")
-    public void getNosecount() {
+    public NoseCountResponse getNosecount(
+            @RequestParam(value = "event-id", required = false) @Valid @Nullable Long eventId
+    ) {
+        Event event;
+        if (eventId == null) {
+            event = pretixInformation.getCurrentEvent();
+        } else {
+            event = eventFinder.findEventById(eventId);
+        }
+        return executor.execute(
+                LoadNosecountUseCase.class,
+                new LoadNosecountUseCase.Input(
+                        event,
+                        pretixInformation
+                )
+        );
     }
 }

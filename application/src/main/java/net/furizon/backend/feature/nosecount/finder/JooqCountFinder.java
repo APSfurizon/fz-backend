@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
+import net.furizon.backend.feature.nosecount.mapper.JooqNosecountObjMapper;
+import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
@@ -53,8 +55,8 @@ public class JooqCountFinder implements CountsFinder {
 
     @Override
     public @NotNull List<JooqNosecountObj> getNosecount(long eventId) {
-        var roomOwnerOrder = ORDERS.as("roomOwnerOrder");
-        sqlQuery.fetch(
+        Orders roomOwnerOrder = ORDERS.as("roomOwnerOrder");
+        return sqlQuery.fetch(
             PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
@@ -82,7 +84,10 @@ public class JooqCountFinder implements CountsFinder {
             )
 
             .leftJoin(ROOM_GUESTS)
-            .on(USERS.USER_ID.eq(ROOM_GUESTS.USER_ID))
+            .on(
+                USERS.USER_ID.eq(ROOM_GUESTS.USER_ID)
+                .and(ROOM_GUESTS.CONFIRMED.isTrue())
+            )
             .leftJoin(ROOMS)
             .on(
                 ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
@@ -93,8 +98,6 @@ public class JooqCountFinder implements CountsFinder {
 
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        );
-
-        return null;
+        ).stream().map(r -> JooqNosecountObjMapper.map(r, roomOwnerOrder)).toList();
     }
 }
