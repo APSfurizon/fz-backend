@@ -4,11 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.nosecount.dto.FursuitCountResponse;
-import net.furizon.backend.feature.nosecount.dto.NoseCountResponse;
-import net.furizon.backend.feature.nosecount.finder.CountsFinder;
+import net.furizon.backend.feature.nosecount.dto.responses.FursuitCountResponse;
+import net.furizon.backend.feature.nosecount.dto.responses.NoseCountResponse;
+import net.furizon.backend.feature.nosecount.dto.responses.SponsorCountResponse;
 import net.furizon.backend.feature.nosecount.usecase.LoadFursuitCountUseCase;
-import net.furizon.backend.feature.nosecount.usecase.LoadNosecountUseCase;
+import net.furizon.backend.feature.nosecount.usecase.LoadNoseCountUseCase;
+import net.furizon.backend.feature.nosecount.usecase.LoadSponsorCountUseCase;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -44,6 +45,19 @@ public class CountsController {
         );
     }
 
+    @GetMapping("/sponsors")
+    public SponsorCountResponse getSponsorCount(
+            @RequestParam(value = "event-id", required = false) @Valid @Nullable Long eventId
+    ) {
+        if (eventId == null) {
+            eventId = pretixInformation.getCurrentEvent().getId();
+        }
+        return executor.execute(
+                LoadSponsorCountUseCase.class,
+                eventId
+        );
+    }
+
     @GetMapping("/bopos")
     public NoseCountResponse getNosecount(
             @RequestParam(value = "event-id", required = false) @Valid @Nullable Long eventId
@@ -55,8 +69,8 @@ public class CountsController {
             event = eventFinder.findEventById(eventId);
         }
         return executor.execute(
-                LoadNosecountUseCase.class,
-                new LoadNosecountUseCase.Input(
+                LoadNoseCountUseCase.class,
+                new LoadNoseCountUseCase.Input(
                         event,
                         pretixInformation
                 )

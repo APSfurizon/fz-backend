@@ -5,6 +5,8 @@ import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
 import net.furizon.backend.feature.nosecount.mapper.JooqNosecountObjMapper;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +52,30 @@ public class JooqCountFinder implements CountsFinder {
             .leftJoin(MEDIA)
             .on(FURSUITS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(JooqFursuitDisplayMapper::mapWithOrder).toList();
+    }
+
+    @Override
+    public @NotNull List<UserDisplayData> getSponsors(long eventId) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
+            )
+            .from(USERS)
+            .innerJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
+                .and(ORDERS.ORDER_SPONSORSHIP_TYPE.greaterThan((short) 0))
+            )
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+        ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
 

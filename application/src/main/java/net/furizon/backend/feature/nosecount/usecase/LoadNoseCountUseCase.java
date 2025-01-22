@@ -2,6 +2,7 @@ package net.furizon.backend.feature.nosecount.usecase;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.nosecount.dto.*;
+import net.furizon.backend.feature.nosecount.dto.responses.NoseCountResponse;
 import net.furizon.backend.feature.nosecount.finder.CountsFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -22,12 +23,12 @@ import java.util.*;
 
 @Component
 @RequiredArgsConstructor
-public class LoadNosecountUseCase implements UseCase<LoadNosecountUseCase.Input, NoseCountResponse> {
+public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input, NoseCountResponse> {
     @NotNull private final CountsFinder countsFinder;
     @NotNull private final RoomConfig roomConfig;
 
     @Override
-    public @NotNull NoseCountResponse executor(@NotNull LoadNosecountUseCase.Input input) {
+    public @NotNull NoseCountResponse executor(@NotNull LoadNoseCountUseCase.Input input) {
         if (input.event == null) {
             throw new ApiException("Event is null", GeneralResponseCodes.EVENT_NOT_FOUND);
         }

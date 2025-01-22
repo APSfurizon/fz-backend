@@ -1,6 +1,7 @@
-package net.furizon.backend.feature.nosecount.dto;
+package net.furizon.backend.feature.nosecount.dto.responses;
 
 import lombok.Data;
+import net.furizon.backend.feature.nosecount.dto.NosecountHotel;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import org.jetbrains.annotations.NotNull;
 

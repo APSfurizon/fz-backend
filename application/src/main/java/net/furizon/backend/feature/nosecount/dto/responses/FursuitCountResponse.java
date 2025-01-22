@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.nosecount.dto;
+package net.furizon.backend.feature.nosecount.dto.responses;
 
 import lombok.Data;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
