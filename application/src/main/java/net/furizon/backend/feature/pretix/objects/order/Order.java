@@ -205,6 +205,7 @@ public class Order {
         return pretixRoomItemId == null ? null : new RoomData(
                 roomCapacity,
                 pretixRoomItemId,
+                roomInternalName,
                 pretixInformation.getRoomNamesFromRoomPretixItemId(pretixRoomItemId)
         );
     }

@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.nosecount.dto.FursuitCountResponse;
+import net.furizon.backend.feature.nosecount.finder.CountsFinder;
 import net.furizon.backend.feature.nosecount.usecase.LoadFursuitCountUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -36,5 +37,9 @@ public class CountsController {
                 LoadFursuitCountUseCase.class,
                 eventId
         );
+    }
+
+    @GetMapping("/bopos")
+    public void getNosecount() {
     }
 }

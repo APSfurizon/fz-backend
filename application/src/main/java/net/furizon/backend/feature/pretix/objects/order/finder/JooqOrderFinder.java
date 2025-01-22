@@ -165,6 +165,7 @@ public class JooqOrderFinder implements OrderFinder {
                         new RoomData(
                                 roomCapacity,
                                 roomItemId,
+                                order.getRoomInternalName(),
                                 pretixService.getRoomNamesFromRoomPretixItemId(roomItemId)
                         )
                 );

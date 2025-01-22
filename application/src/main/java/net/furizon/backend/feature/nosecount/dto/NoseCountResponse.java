@@ -1,0 +1,15 @@
+package net.furizon.backend.feature.nosecount.dto;
+
+import lombok.Data;
+import net.furizon.backend.feature.user.dto.UserDisplayData;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+@Data
+public class NoseCountResponse {
+    @NotNull private final List<NosecountHotel> hotels;
+
+    @NotNull private final List<UserDisplayData> ticketOnlyFurs;
+    @NotNull private final List<UserDisplayData> dailyFurs;
+}

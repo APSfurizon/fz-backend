@@ -140,6 +140,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ROOMS.SHOW_IN_NOSECOUNT,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                ORDERS.ORDER_ROOM_INTERNAL_NAME,
                 ORDERS.ORDER_ROOM_CAPACITY
             )
             .from(ROOMS)
@@ -170,6 +171,7 @@ public class JooqRoomFinder implements RoomFinder {
         return new RoomData(
                 pair == null ? 0 : pair.capacity(),
                 pretixItemId,
+                pair == null ? null : pair.roomInternalName(),
                 pretixInformation.getRoomNamesFromRoomPretixItemId(pretixItemId)
         );
     }
@@ -182,6 +184,7 @@ public class JooqRoomFinder implements RoomFinder {
         return query.fetchFirst(
             PostgresDSL.select(
                     ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                    ORDERS.ORDER_ROOM_INTERNAL_NAME,
                     ORDERS.ORDER_ROOM_CAPACITY
             )
             .from(ORDERS)
@@ -310,6 +313,7 @@ public class JooqRoomFinder implements RoomFinder {
                         ORDERS.USER_ID,
                         ORDERS.ORDER_SPONSORSHIP_TYPE,
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                        ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_ROOM_CAPACITY
                 )
                 .from(ROOM_GUESTS)
