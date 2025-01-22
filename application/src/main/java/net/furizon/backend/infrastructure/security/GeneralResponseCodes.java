@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.security;
 public enum GeneralResponseCodes {
     USER_IS_NOT_ADMIN,
     ORDER_ALREADY_BOUGHT, //We expected that the user had no order, but instead he has at least one
+    EVENT_NOT_FOUND,
     ORDER_NOT_FOUND, //Unable to find the specified order
     ORDER_NOT_PAID, //An order is not in a paid status
     //An order is found with payments in CREATED or PENDING state. Only confirmed and canceled states are allowed
