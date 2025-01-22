@@ -16,7 +16,7 @@ public class JooqNosecountObjMapper {
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .userLocale(record.get(USERS.USER_LOCALE))
-                .media(MediaResponseMapper.map(record))
+                .media(MediaResponseMapper.mapOrNull(record))
                 .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                 .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
                 .roomId(record.get(ROOMS.ROOM_ID))
