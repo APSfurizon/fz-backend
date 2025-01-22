@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -23,6 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LoadNosecountUseCase implements UseCase<LoadNosecountUseCase.Input, NoseCountResponse> {
     @NotNull private final CountsFinder countsFinder;
+    @NotNull private final RoomConfig roomConfig;
 
     @Override
     public @NotNull NoseCountResponse executor(@NotNull LoadNosecountUseCase.Input input) {
@@ -77,12 +79,14 @@ public class LoadNosecountUseCase implements UseCase<LoadNosecountUseCase.Input,
 
                         //Fetch or create hotel
                         NosecountHotel hotel = hotelInternalNameToHotel.computeIfAbsent(obj.getHotelInternalName(),
-                            hotelInternalName -> new NosecountHotel(
-                                Map.of(), //TODO
-                                Objects.requireNonNull(hotelInternalName),
-                                new ArrayList<>()
-                            )
-                        );
+                            hotelInternalName -> {
+                                Objects.requireNonNull(hotelInternalName);
+                                return new NosecountHotel(
+                                    Objects.requireNonNull(roomConfig.getHotelNames(hotelInternalName)),
+                                    hotelInternalName,
+                                    new ArrayList<>()
+                                );
+                            });
                         hotel.getRoomTypes().add(rt);
                         return rt;
                     }
