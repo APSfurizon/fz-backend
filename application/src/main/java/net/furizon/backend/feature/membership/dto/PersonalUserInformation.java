@@ -19,10 +19,6 @@ import java.time.LocalDate;
 @Builder
 public class PersonalUserInformation {
     @NotNull
-    @Min(0L)
-    private final Long id;
-
-    @NotNull
     @NotEmpty
     @Size(min = 2)
     private final String firstName;
@@ -99,9 +95,8 @@ public class PersonalUserInformation {
     @Size(max = 1000)
     private final String note;
 
-    @NotNull
-    private final Long lastUpdatedEventId;
-
-    @NotNull
-    private final Long userId;
+    //Those are intended to be primitive types
+    private final long id;
+    private final long lastUpdatedEventId;
+    private final long userId;
 }
