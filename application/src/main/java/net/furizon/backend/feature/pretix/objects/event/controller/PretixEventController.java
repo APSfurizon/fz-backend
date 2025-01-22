@@ -27,13 +27,13 @@ public class PretixEventController {
 
     @GetMapping("/current")
     public Event getCurrent() {
-        return pretixInformation.getCurrentEvent();
+        Event e = pretixInformation.getCurrentEvent();
+        e.setPublicUrl("");
+        return e;
     }
 
     @GetMapping("/{eventId}")
-    public Event getSingleEvent(
-            @PathVariable("eventId") @NotNull final Long eventId
-    ) {
+    public Event getSingleEvent(@PathVariable("eventId") @NotNull final Long eventId) {
         return executor.execute(GetSingleEventUseCase.class, eventId);
     }
 }

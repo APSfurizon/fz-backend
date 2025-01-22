@@ -20,6 +20,7 @@ public class GetSingleEventUseCase implements UseCase<Long, Event> {
         if (e == null) {
             throw new ApiException("Event not found", GeneralResponseCodes.EVENT_NOT_FOUND);
         }
+        e.setPublicUrl("");
         return e;
     }
 }
