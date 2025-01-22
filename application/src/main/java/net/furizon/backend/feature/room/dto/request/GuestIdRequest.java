@@ -8,5 +8,5 @@ import lombok.Data;
 public class GuestIdRequest {
     @NotNull
     @Min(0L)
-    private final long guestId;
+    private final Long guestId;
 }

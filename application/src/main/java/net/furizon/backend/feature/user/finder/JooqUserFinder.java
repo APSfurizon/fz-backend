@@ -5,11 +5,11 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
-import net.furizon.backend.feature.user.mapper.JooqDisplayUserMapper;
+import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.feature.user.mapper.JooqSearchUserMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserEmailDataMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
-import net.furizon.backend.feature.user.objects.SearchUser;
+import net.furizon.backend.feature.user.objects.SearchUserResult;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +56,8 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
                 MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE
             )
             .from(USERS)
@@ -67,7 +69,7 @@ public class JooqUserFinder implements UserFinder {
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
             .where(USERS.USER_ID.in(ids))
-        ).stream().map(JooqDisplayUserMapper::map).toList();
+        ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
     @Nullable
@@ -80,6 +82,8 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
                 MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE
             )
             .from(USERS)
@@ -90,7 +94,7 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             ).where(USERS.USER_ID.eq(userId))
-        ).mapOrNull(JooqDisplayUserMapper::map);
+        ).mapOrNull(JooqUserDisplayMapper::map);
     }
 
     @Nullable
@@ -114,7 +118,7 @@ public class JooqUserFinder implements UserFinder {
 
     @NotNull
     @Override
-    public List<SearchUser> searchUserInCurrentEvent(
+    public List<SearchUserResult> searchUserInCurrentEvent(
             @NotNull String fursonaName,
             @NotNull Event event,
             boolean filterRoom,
@@ -193,7 +197,9 @@ public class JooqUserFinder implements UserFinder {
             .selectDistinct(
                 searchFursonaQuery.field(USERS.USER_ID),
                 searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
-                MEDIA.MEDIA_PATH
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID
             )
             .from(searchFursonaQuery)
             .leftJoin(MEDIA)

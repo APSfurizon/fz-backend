@@ -1,13 +1,10 @@
 package net.furizon.backend.infrastructure.email;
 
-import jakarta.mail.MessagingException;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.mail.MailException;
 
 public interface EmailSender {
     @NonBlocking

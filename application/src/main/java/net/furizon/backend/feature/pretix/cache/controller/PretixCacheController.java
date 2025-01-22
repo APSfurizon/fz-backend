@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/cache/pretix")
+@RequestMapping("/api/v1/cache/pretix")
 @RequiredArgsConstructor
 public class PretixCacheController {
     @NotNull

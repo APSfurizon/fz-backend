@@ -176,6 +176,11 @@ public class MembershipCards extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.MEMBERSHIP_CARDS_ONLY_ONE_ID_PER_YEAR);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.MEMBERSHIP_CARDS__CARD_USER_FK, Keys.MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK);
     }

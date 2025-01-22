@@ -129,6 +129,8 @@ public class JooqRoomFinder implements RoomFinder {
             PostgresDSL
             .select(
                 MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
@@ -217,7 +219,9 @@ public class JooqRoomFinder implements RoomFinder {
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
-                        MEDIA.MEDIA_PATH
+                        MEDIA.MEDIA_PATH,
+                        MEDIA.MEDIA_TYPE,
+                        MEDIA.MEDIA_ID
                 )
                 .from(ROOM_GUESTS)
                 .innerJoin(USERS)
@@ -293,6 +297,8 @@ public class JooqRoomFinder implements RoomFinder {
                         ROOM_GUESTS.ROOM_ID,
                         ROOM_GUESTS.CONFIRMED,
                         MEDIA.MEDIA_PATH,
+                        MEDIA.MEDIA_TYPE,
+                        MEDIA.MEDIA_ID,
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,

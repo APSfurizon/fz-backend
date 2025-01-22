@@ -1,7 +1,6 @@
 package net.furizon.backend.infrastructure.security.configuration;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredManager;
 import net.furizon.backend.infrastructure.security.filter.DatabaseSessionFilter;
@@ -37,8 +36,6 @@ public class SecurityConfiguration {
     private final InternalBasicFilter internalBasicFilter;
 
     private final SecurityConfig securityConfig;
-
-    private final PretixConfig pretixConfig;
 
     @Bean
     public SecurityFilterChain internalFilterChain(HttpSecurity http) throws Exception {
@@ -81,6 +78,7 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
+                    antMatcher(HttpMethod.GET, "/api/v1/admin/countdown"),
                     antMatcher(HttpMethod.GET, "/api/v1/admin/ping")
                 )
                 .permitAll()

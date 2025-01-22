@@ -42,6 +42,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 }
                 long productId = product.getId();
                 result.itemIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
+                result.itemIdToBundle().put(productId, product.getBundles());
 
                 if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX.length());

@@ -8,6 +8,7 @@ import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Slf4j
@@ -36,9 +39,19 @@ public class AdminController {
     @org.jetbrains.annotations.NotNull
     private final DeleteMediaCronjob deleteMediaCronjob;
 
+    @org.jetbrains.annotations.NotNull
+    private final PretixConfig pretixConfig;
+
     @GetMapping("/ping")
     public String ping() {
         return "pong";
+    }
+
+    @GetMapping("/countdown")
+    public String countdown() {
+        OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
+        return "Start time: " + bookingStart + "; Remaining time: " + remaining;
     }
 
     @Operation(summary = "Gets what an user can do in the admin panel", description =

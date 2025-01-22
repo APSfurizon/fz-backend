@@ -12,6 +12,7 @@ import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -25,18 +26,19 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
 
     @Override
     public @NotNull RoomInfo executor(@NotNull CreateRoomUseCase.Input input) {
         long userId = input.user.getUserId();
         Event event = input.event;
 
-        checks.assertInTimeframeToEditRooms();
-        checks.assertUserDoesNotOwnAroom(userId, event);
-        checks.assertUserIsNotInRoom(userId, event, false);
-        checks.assertUserHasOrderAndItsNotDaily(userId, event);
-        checks.assertOrderIsPaid(userId, event);
+        roomChecks.assertInTimeframeToEditRooms();
+        roomChecks.assertUserDoesNotOwnAroom(userId, event);
+        roomChecks.assertUserIsNotInRoom(userId, event, false);
+        generalChecks.assertUserHasOrderAndItsNotDaily(userId, event);
+        generalChecks.assertOrderIsPaid(userId, event);
 
         String name = input.createRoomRequest.getName();
         long roomId = roomLogic.createRoom(name, userId, event);

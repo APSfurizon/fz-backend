@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;

@@ -31,6 +31,9 @@ public class PretixProduct {
     @NotNull
     private final List<PretixProductVariation> variations;
 
+    @NotNull
+    private final List<PretixProductBundle> bundles;
+
     @Nullable
     public String getIdentifier() {
         return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);

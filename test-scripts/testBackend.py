@@ -120,23 +120,47 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
 def uploadBadge() -> Response:
-    imageName = 'testImage2.png'
+    #imageName = 'testImage2.png'
+    imageName = 'testImageSmall.jpg'
     files = {
         'image': (imageName, open(imageName, 'rb')),
     }
     return doPost(f'{BASE_URL_API}badge/user/upload', files=files)
 def deleteBadge() -> Response:
-    doDelete(f'{BASE_URL_API}badge/user/')
+    return doDelete(f'{BASE_URL_API}badge/user/')
 def runDeleteDanglingBadges() -> Response:
     #doGet(f'{BASE_URL_API}admin/ping')
-    doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
+    return doPost(f'{BASE_URL_API}admin/media/run-delete-media-cronjob')
 
-#register()
-#confirmEmail()
+def addFursuit() -> Response:
+    json = {
+        "name": "redwing " + generate_random_string(5),
+        "species": "Lucario",
+        "bringToCurrentEvent": False,
+        "showInFursuitCount": True
+    }
+    return doPost(f'{BASE_URL_API}fursuits/', json=json)
+def updateBring() -> Response:
+    json = {
+        "bringFursuitToCurrentEvent": False,
+        "userId": 2
+    }
+    fursuitID = 1
+    return doPost(f'{BASE_URL_API}fursuits/{fursuitID}/bringToEvent', json=json)
+
+def countdown() -> Response:
+    return doGet(f'{BASE_URL_API}admin/countdown')
+
+register()
+confirmEmail()
 login()
-getMe()
+#getMe()
 #testPermission()
 #testInternalAuthorize()
 uploadBadge()
 #deleteBadge()
-runDeleteDanglingBadges()
+#runDeleteDanglingBadges()
+#addFursuit()
+#updateBring()
+
+#countdown()

@@ -32,7 +32,7 @@ public interface RoomLogic {
     boolean canUnconfirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
-    boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, long sourceRoomId,
+    boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                          @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event,
                               @NotNull PretixInformation pretixInformation);

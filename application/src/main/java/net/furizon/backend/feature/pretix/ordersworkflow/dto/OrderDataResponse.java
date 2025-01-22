@@ -31,6 +31,8 @@ public class OrderDataResponse {
     @Nullable
     private final Set<LocalDate> dailyDays;
 
+    private short totalFursuits;
+
     @Nullable
     private RoomData room;
 }

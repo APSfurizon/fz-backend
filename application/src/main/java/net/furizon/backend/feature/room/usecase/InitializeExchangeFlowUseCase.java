@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +32,8 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     @NotNull private final CreateExchangeObjAction createExchangeObjAction;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Value("${frontend.transfer-exchange-confirmation-url}")
@@ -45,8 +47,8 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
         log.info("{} is initializing a {} exchange with target user {} ",
                 input.user.getUserId(), action, destUserId);
 
-        long sourceUserId = checks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
-        checks.assertSourceUserHasNotPendingExchanges(sourceUserId, input.event);
+        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        roomChecks.assertSourceUserHasNotPendingExchanges(sourceUserId, input.event);
 
         log.info("Init {} exchange: {} -> {}", action, sourceUserId, destUserId);
         long exchangeId  = createExchangeObjAction.invoke(destUserId, sourceUserId, action, event);

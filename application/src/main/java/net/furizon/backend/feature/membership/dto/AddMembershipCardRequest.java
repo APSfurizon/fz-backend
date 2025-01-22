@@ -8,5 +8,5 @@ import lombok.Data;
 public class AddMembershipCardRequest {
     @NotNull
     @Min(0L)
-    private final long userId;
+    private final Long userId;
 }

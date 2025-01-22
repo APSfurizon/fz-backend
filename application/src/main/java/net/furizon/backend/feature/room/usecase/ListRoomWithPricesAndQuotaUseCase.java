@@ -17,6 +17,7 @@ import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomConfig roomConfig;
-    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
 
     @Override
     public @NotNull ListRoomPricesAvailabilityResponse executor(
@@ -54,7 +55,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
-        Order order = roomChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
+        Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
         Long pretixRoomItemId = order.hasRoom() ? order.getPretixRoomItemId() : null;
 
 
@@ -73,7 +74,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                         )
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(
-                        pretixInformation.getItemPrice(extraDayItemId, false)
+                        pretixInformation.getItemPrice(extraDayItemId, false, true)
                 );
             }
             if (extraDays.isLate()) {
@@ -83,14 +84,14 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                         )
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(
-                        pretixInformation.getItemPrice(extraDayItemId, false)
+                        pretixInformation.getItemPrice(extraDayItemId, false, true)
                 );
             }
         }
         //Fetch room price
         Long currentRoomPrice = pretixRoomItemId == null
                 ? null
-                : pretixInformation.getItemPrice(pretixRoomItemId, false);
+                : pretixInformation.getItemPrice(pretixRoomItemId, false, true);
         //Fetch room guests
         Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
                 : Optional.empty();
@@ -111,7 +112,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
                 // (actual check against how much the user has paid is done on the actual action)
-                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false));
+                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false, true));
                 long extraDaysPrice = 0L;
                 Long earlyItemId = null;
                 Long lateItemId = null;
@@ -120,13 +121,17 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                         earlyItemId = Objects.requireNonNull(
                                 pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.EARLY)
                         );
-                        extraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(earlyItemId, false));
+                        extraDaysPrice += Objects.requireNonNull(
+                                pretixInformation.getItemPrice(earlyItemId, false, true)
+                        );
                     }
                     if (extraDays.isLate()) {
                         lateItemId = Objects.requireNonNull(
                                 pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.LATE)
                         );
-                        extraDaysPrice += Objects.requireNonNull(pretixInformation.getItemPrice(lateItemId, false));
+                        extraDaysPrice += Objects.requireNonNull(
+                                pretixInformation.getItemPrice(lateItemId, false, true)
+                        );
                     }
                 }
                 long totalPrice = roomPrice + extraDaysPrice;
@@ -142,7 +147,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                         return new RoomAvailabilityInfoResponse(
                             data,
                             PretixGenericUtils.fromPriceToString(totalPrice, '.'),
-                            quota
+                            quota.isUnlimited() ? null : quota.getRemaining()
                         );
                     }
                 }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -27,7 +28,8 @@ public record PretixProductResults(
     @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
     @NotNull Map<HotelCapacityPair, Long> lateDaysItemId,
     @NotNull Set<Long> tempAddons,
-    @NotNull Set<Long> tempItems
+    @NotNull Set<Long> tempItems,
+    @NotNull Map<Long, List<PretixProductBundle>> itemIdToBundle
 ) {
     public PretixProductResults() {
         this(
@@ -46,7 +48,8 @@ public record PretixProductResults(
             new HashMap<>(),
             new HashMap<>(),
             new HashSet<>(),
-            new HashSet<>()
+            new HashSet<>(),
+            new HashMap<>()
         );
     }
 }

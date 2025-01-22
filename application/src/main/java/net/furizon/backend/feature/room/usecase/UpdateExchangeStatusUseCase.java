@@ -25,7 +25,7 @@ public class UpdateExchangeStatusUseCase implements
     @Override
     public @NotNull ExchangeConfirmationStatus executor(@NotNull Input input) {
         long exchangeId = input.req.getExchangeId();
-        boolean toConfirm = input.req.isConfirm();
+        boolean toConfirm = input.req.getConfirm();
         long userId = input.user.getUserId();
         log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
                 userId, exchangeId, toConfirm);

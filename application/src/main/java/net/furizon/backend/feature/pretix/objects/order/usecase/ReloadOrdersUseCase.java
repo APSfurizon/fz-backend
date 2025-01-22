@@ -41,7 +41,7 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
             OrderController.suspendWebhook();
             var eventInfo = input.event.getOrganizerAndEventPair();
 
-            Set<String> pretixOrderCodes = new HashSet<>();
+            Set<Long> pretixOrderIds = new HashSet<>();
             PretixPagingUtil.forEachElement(
                     page -> pretixOrderFinder.getPagedOrders(eventInfo.getOrganizer(), eventInfo.getEvent(), page),
                     pretixOrder -> {
@@ -50,23 +50,21 @@ public class ReloadOrdersUseCase implements UseCase<ReloadOrdersUseCase.Input, B
                                 input.event,
                                 input.pretixInformation
                         );
-                        if (order.isPresent()) {
-                            pretixOrderCodes.add(order.get().getCode());
-                        }
+                        order.ifPresent(value -> pretixOrderIds.add(value.getId()));
                     }
             );
 
             //Find which orders are still stored in the DB but don't exist anymore on pretix
-            Set<String> dbOrderCodes = orderFinder.findOrderCodesForEvent(input.event);
-            dbOrderCodes.removeAll(pretixOrderCodes);
+            Set<Long> dbOrderIds = orderFinder.findOrderIdsForEvent(input.event);
+            dbOrderIds.removeAll(pretixOrderIds);
 
-            if (!dbOrderCodes.isEmpty()) {
+            if (!dbOrderIds.isEmpty()) {
                 log.info(
                         "[PRETIX] Removing the following orders from DB since "
                         + "they can't be found anymore on pretix: {}",
-                        dbOrderCodes
+                        dbOrderIds
                 );
-                deleteOrderAction.invoke(dbOrderCodes);
+                deleteOrderAction.invokeWithIds(dbOrderIds);
             }
 
             return true;

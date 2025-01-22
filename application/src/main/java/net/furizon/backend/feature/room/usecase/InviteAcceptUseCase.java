@@ -12,6 +12,7 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,8 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomLogic roomLogic;
-    @NotNull private final RoomChecks checks;
+    @NotNull private final RoomChecks roomChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Override
@@ -36,19 +38,19 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         Event event = input.event;
 
 
-        checks.assertInTimeframeToEditRooms();
-        RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
+        roomChecks.assertInTimeframeToEditRooms();
+        RoomGuest guest = roomChecks.getRoomGuestObjAndAssertItExists(guestId);
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();
 
-        checks.assertRoomNotConfirmed(roomId);
-        checks.assertGuestIsNotConfirmed(guest);
-        checks.assertOrderIsPaid(targetUserId, event);
-        checks.assertUserIsNotInRoom(targetUserId, event, false);
-        checks.assertUserIsNotRoomOwner(targetUserId, roomId);
-        checks.assertUserDoesNotOwnAroom(targetUserId, event);
-        checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
-        checks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
+        roomChecks.assertRoomNotConfirmed(roomId);
+        roomChecks.assertGuestIsNotConfirmed(guest);
+        generalChecks.assertOrderIsPaid(targetUserId, event);
+        roomChecks.assertUserIsNotInRoom(targetUserId, event, false);
+        roomChecks.assertUserIsNotRoomOwner(targetUserId, roomId);
+        roomChecks.assertUserDoesNotOwnAroom(targetUserId, event);
+        roomChecks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
+        generalChecks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
         boolean res = roomLogic.inviteAccept(guestId, targetUserId, roomId, event);
         if (res) {
