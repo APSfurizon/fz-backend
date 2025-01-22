@@ -3,7 +3,6 @@ package net.furizon.backend.feature.nosecount.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;

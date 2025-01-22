@@ -136,7 +136,7 @@ def addFursuit() -> Response:
     json = {
         "name": "redwing " + generate_random_string(5),
         "species": "Lucario",
-        "bringToCurrentEvent": False,
+        "bringToCurrentEvent": True,
         "showInFursuitCount": True
     }
     return doPost(f'{BASE_URL_API}fursuits/', json=json)
@@ -151,16 +151,23 @@ def updateBring() -> Response:
 def countdown() -> Response:
     return doGet(f'{BASE_URL_API}admin/countdown')
 
-register()
-confirmEmail()
-login()
+def fursuitCount() -> Response:
+    return doGet(f'{BASE_URL_API}counts/fursuit')
+
+#register()
+#confirmEmail()
+#login()
 #getMe()
 #testPermission()
 #testInternalAuthorize()
-uploadBadge()
+#uploadBadge()
 #deleteBadge()
 #runDeleteDanglingBadges()
+#addFursuit()
+#addFursuit()
 #addFursuit()
 #updateBring()
 
 #countdown()
+
+fursuitCount()

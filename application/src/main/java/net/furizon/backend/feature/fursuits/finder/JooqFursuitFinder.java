@@ -32,6 +32,7 @@ public class JooqFursuitFinder implements FursuitFinder {
         return sqlQuery.fetch(
             selectDisplayFursuit(event)
             .where(FURSUITS.USER_ID.eq(userId))
+            .orderBy(FURSUITS.FURSUIT_ID)
         ).stream().map(r -> JooqFursuitDataMapper.map(r, event != null)).toList();
     }
     @Override
