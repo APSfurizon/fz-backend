@@ -1,7 +1,6 @@
 package net.furizon.backend.infrastructure.email;
 
 import jakarta.mail.MessagingException;
-import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.Blocking;
@@ -13,32 +12,62 @@ import java.util.List;
 
 public interface EmailSender {
     @NonBlocking
-    void sendToRole(
+    List<MailRequest> prepareForRole(
         @NotNull String roleInternalName,
         @NotNull String subject,
         @NotNull String templateName,
         MailVarPair... vars
-    ) throws MessagingException, MailException;
+    );
 
     @NonBlocking
-    void sendToPermission(
+    List<MailRequest> prepareForPermission(
         @NotNull Permission permission,
         @NotNull String subject,
         @NotNull String templateName,
         MailVarPair... vars
-    ) throws MessagingException, MailException;
+    );
 
-    void sendToUsers(@NotNull List<Long> users, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) throws MessagingException, MailException;
+    @NonBlocking
+    List<MailRequest> prepareForUsers(
+            @NotNull List<Long> users,
+            @NotNull String subject,
+            @NotNull String templateName,
+            MailVarPair... vars
+    );
+
+    @NonBlocking
+    void prepareAndSendForRole(
+            @NotNull String roleInternalName,
+            @NotNull String subject,
+            @NotNull String templateName,
+            MailVarPair... vars
+    );
+    @NonBlocking
+    void prepareAndSendForPermission(
+            @NotNull Permission permission,
+            @NotNull String subject,
+            @NotNull String templateName,
+            MailVarPair... vars
+    );
+    @NonBlocking
+    void prepareAndSendForUsers(
+            @NotNull List<Long> users,
+            @NotNull String subject,
+            @NotNull String templateName,
+            MailVarPair... vars
+    );
 
     @Blocking
     void send(MailRequest request) throws MessagingException, MailException;
-
     @Blocking
     void sendMany(MailRequest... requests) throws MessagingException, MailException;
+    @Blocking
+    void sendMany(List<MailRequest> requests) throws MessagingException, MailException;
 
     @NonBlocking
     void fireAndForget(MailRequest request);
-
     @NonBlocking
     void fireAndForgetMany(MailRequest... requests);
+    @NonBlocking
+    void fireAndForgetMany(List<MailRequest> requests);
 }

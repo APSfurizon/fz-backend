@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -24,6 +26,7 @@ import static net.furizon.backend.feature.authentication.AuthenticationMailTexts
 public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Input, Boolean> {
 
     @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
+    @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender sender;
 
     @Override
@@ -48,7 +51,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
         if (resetPwId != null) {
             sessionAuthenticationManager.deletePasswordResetAttempt(resetPwId);
         }
-        sender.send(userId, SUBJECT_PW_CHANGED, TEMPLATE_PW_CHANGED);
+        sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED).subject(SUBJECT_PW_CHANGED));
 
         return true;
     }

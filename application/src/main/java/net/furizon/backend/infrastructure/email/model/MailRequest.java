@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.email.model;
 
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -40,8 +41,11 @@ public class MailRequest {
         this.templateMessage = templateMessage;
         return this;
     }
-    public MailRequest templateMessage(@NotNull String templateName, @NotNull String fursonaName, MailVarPair... vars) {
-        TemplateMessage msg = TemplateMessage.of(templateName).addParam("fursonaName", fursonaName);
+    public MailRequest templateMessage(@NotNull String templateName, @Nullable String fursonaName, MailVarPair... vars) {
+        TemplateMessage msg = TemplateMessage.of(templateName);
+        if (fursonaName != null) {
+            msg = msg.addParam("fursonaName", fursonaName);
+        }
         for (MailVarPair var : vars) {
             if (var != null) {
                 msg = msg.addParam(var.var().getName(), var.value());

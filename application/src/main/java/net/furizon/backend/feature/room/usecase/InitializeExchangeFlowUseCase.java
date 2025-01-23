@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -67,8 +68,10 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
                 MailVarPair.of(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
             };
-            mailService.sendUpdate(destUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
-            mailService.sendUpdate(sourceUserId, TEMPLATE_EXCHANGE_INITIALIZED, vars);
+            mailService.prepareAndSendUpdate(
+                new MailRequest(destData, TEMPLATE_EXCHANGE_INITIALIZED, vars),
+                new MailRequest(sourceData, TEMPLATE_EXCHANGE_INITIALIZED, vars)
+            );
             return true;
         }
         return false;

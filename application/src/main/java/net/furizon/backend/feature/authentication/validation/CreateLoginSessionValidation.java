@@ -62,11 +62,10 @@ public class CreateLoginSessionValidation {
             if (authentication.getFailedAttempts() > securityConfig.getMaxFailedLoginAttempts()) {
                 sessionAuthenticationManager.disableUser(authentication.getUserId());
                 emailSender.fireAndForget(
-                    MailRequest.builder()
+                    new MailRequest()
                         .to(email)
                         .subject(SUBJECT_TOO_MANY_LOGIN_ATTEMPTS)
-                        .templateMessage(TemplateMessage.of(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS))
-                        .build()
+                        .templateMessage(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS, null)
                 );
                 throw createdAccountDisabledException();
             }

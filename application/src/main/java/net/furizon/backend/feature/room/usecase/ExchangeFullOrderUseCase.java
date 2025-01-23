@@ -67,7 +67,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
         if (res) {
             UserEmailData data = userFinder.getMailDataForUser(destUserId);
             if (data != null) {
-                mailService.broadcastUpdate(
+                mailService.prepareAndSendBroadcastUpdate(
                         roomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
                         MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName())
                 );

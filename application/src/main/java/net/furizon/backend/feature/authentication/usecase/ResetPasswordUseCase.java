@@ -46,14 +46,13 @@ public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
         String url = frontendConfig.getPasswordResetUrl(resetPwId);
 
         sender.fireAndForget(
-            MailRequest.builder()
+            new MailRequest()
                 .to(email)
                 .subject(SUBJECT_PW_RESET)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_PW_RESET)
-                        .addParam("link", url)
+                    .addParam("link", url)
                 )
-                .build()
         );
 
         return true;

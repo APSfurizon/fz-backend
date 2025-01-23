@@ -78,14 +78,13 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         //ServletUriComponentsBuilder.fromServletMapping(request).build();
 
         sender.fireAndForget(
-            MailRequest.builder()
+            new MailRequest()
                 .to(email)
                 .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)
-                        .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
+                    .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
                 )
-                .build()
         );
 
         return user;

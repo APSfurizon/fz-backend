@@ -19,6 +19,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,41 +46,68 @@ public class EmailSenderService implements EmailSender {
     private String from;
 
     @Override
-    public void sendToRole(@NotNull String roleInternalName, @NotNull String subject,
-                           @NotNull String templateName, MailVarPair... vars)
-                           throws MessagingException, MailException {
+    public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull String subject,
+                           @NotNull String templateName, MailVarPair... vars) {
 
         List<Long> users = permissionFinder.getUsersWithRole(roleInternalName);
-        sendToUsers(users, subject, templateName, vars);
+        return prepareForUsers(users, subject, templateName, vars);
     }
 
     @Override
-    public void sendToPermission(@NotNull Permission permission, @NotNull String subject,
-                                 @NotNull String templateName, MailVarPair... vars)
-                                 throws MessagingException, MailException {
+    public List<MailRequest> prepareForPermission(@NotNull Permission permission, @NotNull String subject,
+                                 @NotNull String templateName, MailVarPair... vars) {
         List<Long> users = permissionFinder.getUsersWithPermission(permission);
-        sendToUsers(users, subject, templateName, vars);
+        return prepareForUsers(users, subject, templateName, vars);
     }
 
     @Override
-    public void sendToUsers(@NotNull List<Long> users, @NotNull String subject, @NotNull String templateName, MailVarPair... vars) throws MessagingException, MailException {
-        int i = 0;
-        MailRequest[] req = new MailRequest[users.size()];
+    public List<MailRequest> prepareForUsers(@NotNull List<Long> users, @NotNull String subject,
+                                             @NotNull String templateName, MailVarPair... vars) {
+        List<MailRequest> reqs = new ArrayList<>(users.size() + 8);
         for (Long user : users) {
-            req[i++] = new MailRequest(user, userFinder, templateName, vars);
+            reqs.add(new MailRequest(user, userFinder, templateName, vars));
         }
-        sendMany(req);
+        return reqs;
+    }
+
+    @Override
+    public void prepareAndSendForRole(@NotNull String roleInternalName, @NotNull String subject,
+                                      @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(prepareForRole(roleInternalName, subject, templateName, vars));
+    }
+    @Override
+    public void prepareAndSendForPermission(@NotNull Permission permission, @NotNull String subject,
+                                            @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(prepareForPermission(permission, subject, templateName, vars));
+    }
+    @Override
+    public void prepareAndSendForUsers(@NotNull List<Long> users, @NotNull String subject,
+                                       @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(prepareForUsers(users, subject, templateName, vars));
     }
 
 
     @Override
     public void send(@NotNull MailRequest request) throws MessagingException, MailException {
+        log.info("Sending email: {}", request);
         mailSender.send(transformMailRequestToMimeMessages(request));
     }
 
     @Override
     public void sendMany(MailRequest... requests) throws MessagingException, MailException {
+        if (requests.length == 0) {
+            return;
+        }
+        log.info("Sending emails: {}", Arrays.toString(requests));
         mailSender.send(transformMailRequestsToMimeMessages(requests));
+    }
+
+    @Override
+    public void sendMany(List<MailRequest> requests) throws MessagingException, MailException {
+        if (requests.isEmpty()) {
+            return;
+        }
+        mailSender.send(transformMailRequestsToMimeMessages(toArray(requests)));
     }
 
     @Override
@@ -96,6 +124,9 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void fireAndForgetMany(MailRequest... requests) {
+        if (requests.length == 0) {
+            return;
+        }
         asyncTaskExecutor.execute(() -> {
             try {
                 log.debug("Sending emails in async mode");
@@ -104,6 +135,14 @@ public class EmailSenderService implements EmailSender {
                 log.error("Couldn't send message", ex);
             }
         });
+    }
+
+    @Override
+    public void fireAndForgetMany(List<MailRequest> requests) {
+        if (requests.isEmpty()) {
+            return;
+        }
+        fireAndForgetMany(toArray(requests));
     }
 
     private MimeMessage[] transformMailRequestsToMimeMessages(@NotNull MailRequest... requests) {
@@ -157,5 +196,9 @@ public class EmailSenderService implements EmailSender {
         } catch (MessagingException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private @NotNull MailRequest[] toArray(@NotNull List<MailRequest> requests) {
+        return requests.toArray(new MailRequest[requests.size()]);
     }
 }

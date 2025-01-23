@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -52,11 +53,11 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
             String roomName = roomFinder.getRoomName(roomId);
             if (data != null && roomName != null) {
                 roomName = roomName.replaceAll("[^a-zA-Z0-9 \\\\/+\\-!?$()=]", "");
-                mailService.sendUpdate(
-                        targetUserId, TEMPLATE_KICKED_FROM_ROOM,
+                mailService.prepareAndSendUpdate(new MailRequest(
+                        targetUserId, userFinder, TEMPLATE_KICKED_FROM_ROOM,
                         MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
                         MailVarPair.of(ROOM_NAME, roomName)
-                );
+                ));
             }
         }
         return res;
