@@ -14,9 +14,11 @@ import net.furizon.backend.feature.pretix.objects.order.action.convertTicketOnly
 import net.furizon.backend.feature.pretix.objects.order.action.deleteOrder.DeleteOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.action.upsertOrder.UpsertOrderAction;
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
+import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -70,7 +72,23 @@ public class UpdateOrderInDb {
             if (orderOpt.isPresent()) {
                 order = orderOpt.get();
                 OrderStatus os = order.getOrderStatus();
-                if (os == OrderStatus.PENDING || os == OrderStatus.PAID) {
+
+                boolean expiredButPaid = false;
+                if (os == OrderStatus.EXPIRED) {
+                    for (PretixPayment payment : pretixOrder.getPayments()) {
+                        long amount = PretixGenericUtils.fromStrPriceToLong(payment.getAmount());
+                        PretixPayment.PaymentState state = payment.getState();
+                        if (amount > 0L
+                            && (state == PretixPayment.PaymentState.CREATED
+                            || state == PretixPayment.PaymentState.PENDING
+                            || state == PretixPayment.PaymentState.CONFIRMED)) {
+                            expiredButPaid = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (os == OrderStatus.PENDING || os == OrderStatus.PAID || expiredButPaid) {
                     log.debug("[PRETIX] Storing / Updating order: {}@{}", pretixOrder.getCode(), event.getSlug());
                     upsertOrderAction.invoke(order, pretixInformation);
 
