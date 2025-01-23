@@ -12,7 +12,6 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.UUID;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;

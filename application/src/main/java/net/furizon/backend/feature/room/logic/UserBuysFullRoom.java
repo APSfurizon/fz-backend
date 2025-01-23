@@ -1056,7 +1056,8 @@ public class UserBuysFullRoom implements RoomLogic {
         }
     }
 
-    private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId, @NotNull String roomName, @NotNull String reason) {
+    private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId,
+                                                                @NotNull String roomName, @NotNull String reason) {
         return mailService.prepareBroadcastProblem(
                 roomId, TEMPLATE_SANITY_CHECK_DELETED,
                 MailVarPair.of(ROOM_NAME, roomName),
@@ -1177,7 +1178,9 @@ public class UserBuysFullRoom implements RoomLogic {
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} is in too many rooms ({})!. Kicking the user",
                         usrId, guestId, roomId, roomNo);
-                    mails.addAll(prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_IN_TOO_MANY_ROOMS));
+                    mails.addAll(prepareSanityCheckMailUserKicked(
+                            ownerId, usrId, fursona, roomName, SC_USER_IN_TOO_MANY_ROOMS
+                    ));
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -1216,7 +1219,9 @@ public class UserBuysFullRoom implements RoomLogic {
                     //kick user, user has no order
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
-                    mails.addAll(prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_HAS_NO_ORDER));
+                    mails.addAll(
+                            prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_HAS_NO_ORDER)
+                    );
                     this.kickFromRoom(guestId);
                     continue;
                 }
@@ -1233,7 +1238,9 @@ public class UserBuysFullRoom implements RoomLogic {
                     //kick user, he has a daily ticket
                     sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
-                    mails.addAll(prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_HAS_DAILY_TICKET));
+                    mails.addAll(prepareSanityCheckMailUserKicked(
+                            ownerId, usrId, fursona, roomName, SC_USER_HAS_DAILY_TICKET
+                    ));
                     this.kickFromRoom(guestId);
                     continue;
                 }

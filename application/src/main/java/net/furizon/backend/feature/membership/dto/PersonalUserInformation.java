@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.membership.dto;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;

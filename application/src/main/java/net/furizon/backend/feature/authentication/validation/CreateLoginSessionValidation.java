@@ -6,15 +6,12 @@ import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_TOO_MANY_LOGIN_ATTEMPTS;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS;

@@ -1,22 +1,18 @@
 package net.furizon.backend.infrastructure.rooms;
 
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
-import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,13 +37,15 @@ public class MailRoomService {
 
     public List<MailRequest> prepareBroadcastProblem(long roomId, @NotNull String templateName, MailVarPair... vars) {
         log.info("Sending broadcast problem to room: {}", roomId);
-        List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true).stream().map(RoomGuest::getUserId).toList();
+        List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true)
+                .stream().map(RoomGuest::getUserId).toList();
         return emailSender.prepareForUsers(guests, RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
     }
 
     public List<MailRequest> prepareBroadcastUpdate(long roomId, @NotNull String templateName, MailVarPair... vars) {
         log.info("Sending broadcast update to room: {}", roomId);
-        List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true).stream().map(RoomGuest::getUserId).toList();
+        List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true)
+                .stream().map(RoomGuest::getUserId).toList();
         return emailSender.prepareForUsers(guests, RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
     }
 

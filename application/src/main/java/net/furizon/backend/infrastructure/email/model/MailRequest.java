@@ -1,7 +1,9 @@
 package net.furizon.backend.infrastructure.email.model;
 
-import jakarta.validation.constraints.Null;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
@@ -10,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Data
 @Setter(AccessLevel.NONE)
@@ -41,7 +42,8 @@ public class MailRequest {
         this.templateMessage = templateMessage;
         return this;
     }
-    public MailRequest templateMessage(@NotNull String templateName, @Nullable String fursonaName, MailVarPair... vars) {
+    public MailRequest templateMessage(@NotNull String templateName, @Nullable String fursonaName,
+                                       MailVarPair... vars) {
         TemplateMessage msg = TemplateMessage.of(templateName);
         if (fursonaName != null) {
             msg = msg.addParam("fursonaName", fursonaName);
@@ -66,7 +68,8 @@ public class MailRequest {
         templateMessage(templateName, emailData.getFursonaName(), vars);
     }
 
-    public MailRequest(@NotNull List<Long> userIds, @NotNull UserFinder finder, @NotNull String templateName, MailVarPair... vars) {
+    public MailRequest(@NotNull List<Long> userIds, @NotNull UserFinder finder, @NotNull String templateName,
+                       MailVarPair... vars) {
         this(finder.getMailDataForUsers(userIds), templateName, vars);
     }
 

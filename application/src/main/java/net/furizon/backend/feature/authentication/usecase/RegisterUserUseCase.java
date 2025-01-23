@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
