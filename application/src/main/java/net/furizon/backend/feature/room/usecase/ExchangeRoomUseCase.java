@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
@@ -18,6 +19,9 @@ import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
@@ -91,24 +95,30 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
             UserEmailData destData = userFinder.getMailDataForUser(destUserId);
             UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
             if (destData != null) {
+                List<MailRequest> mails = new ArrayList<>(16);
                 if (sourceRoom.isPresent()) {
-                    mailService.broadcastUpdate(
+                    mails.addAll(mailService.prepareBroadcastUpdate(
                             sourceRoom.get(), TEMPLATE_ROOM_HAS_NEW_OWNER,
                             MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
-                    );
+                    ));
                 }
 
                 if (sourceData != null) {
                     String actionText = RoomEmailTexts.getActionText(input.req.getAction(), destRoom.isPresent());
-                    mailService.sendUpdate(destData, TEMPLATE_EXCHANGE_COMPLETED,
-                        MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
-                        MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName())
-                    );
-                    mailService.sendUpdate(sourceData, TEMPLATE_EXCHANGE_COMPLETED,
-                        MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
-                        MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName())
-                    );
+                    mails.addAll(mailService.prepareUpdate(
+                        new MailRequest(
+                            destData, TEMPLATE_EXCHANGE_COMPLETED,
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                            MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName())
+                        ),
+                        new MailRequest(
+                            sourceData, TEMPLATE_EXCHANGE_COMPLETED,
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                            MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName())
+                        )
+                    ));
                 }
+                mailService.fireAndForgetMany(mails);
             }
         }
         return res;

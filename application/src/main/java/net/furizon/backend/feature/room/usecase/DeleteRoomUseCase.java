@@ -50,8 +50,9 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null) {
-                    mailService.broadcastUpdate(
-                            roomId, TEMPLATE_ROOM_DELETED, MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                    mailService.prepareAndSendBroadcastUpdate(
+                            roomId, TEMPLATE_ROOM_DELETED,
+                            MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
                     );
                 }
             }

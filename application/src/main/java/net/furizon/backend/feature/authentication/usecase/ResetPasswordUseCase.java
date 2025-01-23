@@ -17,15 +17,18 @@ import java.util.UUID;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_RESET;
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
+    @NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
-    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
-    @NotNull private final FrontendConfig frontendConfig;
-    @NotNull private final EmailSender sender;
+    @NotNull
+    private final FrontendConfig frontendConfig;
+
+    @NotNull
+    private final EmailSender sender;
 
     @Override
     public @NotNull Boolean executor(@NotNull EmailRequest input) {
@@ -42,14 +45,13 @@ public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
         String url = frontendConfig.getPasswordResetUrl(resetPwId);
 
         sender.fireAndForget(
-            MailRequest.builder()
+            new MailRequest()
                 .to(email)
                 .subject(SUBJECT_PW_RESET)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_PW_RESET)
                     .addParam("link", url)
                 )
-                .build()
         );
 
         return true;

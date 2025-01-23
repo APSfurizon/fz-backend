@@ -40,7 +40,7 @@ public class JooqDeleteMembershipCardAction implements DeleteMembershipCardActio
             Long orderId = card.getCreatedForOrderId();
             String orderCode = orderId == null ? "-" : orderFinder.getOrderCodeById(orderId);
             orderCode = orderCode == null ? "-" : orderCode;
-            emailSender.sendToPermission(
+            emailSender.prepareAndSendForPermission(
                 Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                 SUBJECT_MEMBERSHIP_FATAL_ERROR,
                 TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED,

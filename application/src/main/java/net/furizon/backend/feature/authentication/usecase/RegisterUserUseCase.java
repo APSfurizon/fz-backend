@@ -28,15 +28,23 @@ import static net.furizon.backend.feature.authentication.AuthenticationMailTexts
 @Component
 @RequiredArgsConstructor
 public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
+    @NotNull
+    private final RegisterUserValidation validation;
 
-    @NotNull private final RegisterUserValidation validation;
+    @NotNull
+    private final CreateUserAction createUserAction;
 
-    @NotNull private final CreateUserAction createUserAction;
-    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
-    @NotNull private final AddMembershipInfoAction addMembershipInfoAction;
+    @NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
-    @NotNull private final FrontendConfig frontendConfig;
-    @NotNull private final EmailSender sender;
+    @NotNull
+    private final AddMembershipInfoAction addMembershipInfoAction;
+
+    @NotNull
+    private final FrontendConfig frontendConfig;
+
+    @NotNull
+    private final EmailSender sender;
 
     @Transactional
     @Override
@@ -69,22 +77,21 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         //ServletUriComponentsBuilder.fromServletMapping(request).build();
 
         sender.fireAndForget(
-            MailRequest.builder()
+            new MailRequest()
                 .to(email)
                 .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)
                     .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
                 )
-            .build()
         );
 
         return user;
     }
 
     public record Input(
-            @NotNull HttpServletRequest request,
-            @NotNull RegisterUserRequest user,
-            @NotNull Event event
-    ){}
+        @NotNull HttpServletRequest request,
+        @NotNull RegisterUserRequest user,
+        @NotNull Event event
+    ) {}
 }

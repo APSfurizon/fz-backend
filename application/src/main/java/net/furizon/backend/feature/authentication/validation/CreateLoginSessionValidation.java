@@ -6,7 +6,6 @@ import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -20,13 +19,17 @@ import static net.furizon.backend.feature.authentication.AuthenticationMailTexts
 @Component
 @RequiredArgsConstructor
 public class CreateLoginSessionValidation {
-    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
+    @NotNull
+    private final SessionAuthenticationManager sessionAuthenticationManager;
 
-    @NotNull private final SecurityConfig securityConfig;
+    @NotNull
+    private final SecurityConfig securityConfig;
 
-    @NotNull private final EmailSender emailSender;
+    @NotNull
+    private final EmailSender emailSender;
 
-    @NotNull private final PasswordEncoder passwordEncoder;
+    @NotNull
+    private final PasswordEncoder passwordEncoder;
 
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         String email = input.email();
@@ -42,8 +45,8 @@ public class CreateLoginSessionValidation {
 
         if (authentication.getMailVerificationCreationMs() != null) {
             throw new ApiException(
-                    "Email confirmation is still pending",
-                    AuthenticationCodes.CONFIRMATION_STILL_PENDING
+                "Email confirmation is still pending",
+                AuthenticationCodes.CONFIRMATION_STILL_PENDING
             );
         }
 
@@ -56,11 +59,10 @@ public class CreateLoginSessionValidation {
             if (authentication.getFailedAttempts() > securityConfig.getMaxFailedLoginAttempts()) {
                 sessionAuthenticationManager.disableUser(authentication.getUserId());
                 emailSender.fireAndForget(
-                        MailRequest.builder()
-                            .to(email)
-                            .subject(SUBJECT_TOO_MANY_LOGIN_ATTEMPTS)
-                            .templateMessage(TemplateMessage.of(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS))
-                        .build()
+                    new MailRequest()
+                        .to(email)
+                        .subject(SUBJECT_TOO_MANY_LOGIN_ATTEMPTS)
+                        .templateMessage(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS, null)
                 );
                 throw createdAccountDisabledException();
             }
@@ -72,17 +74,17 @@ public class CreateLoginSessionValidation {
         return authentication.getUserId();
     }
 
-    private final ApiException createdAccountDisabledException() {
+    private ApiException createdAccountDisabledException() {
         return new ApiException(
-                "Not possible to login",
-                AuthenticationCodes.AUTHENTICATION_IS_DISABLED
+            "Not possible to login",
+            AuthenticationCodes.AUTHENTICATION_IS_DISABLED
         );
     }
 
-    private final ApiException createInvalidCredentialsException() {
+    private ApiException createInvalidCredentialsException() {
         return new ApiException(
-                "Invalid Credentials",
-                AuthenticationCodes.INVALID_CREDENTIALS
+            "Invalid Credentials",
+            AuthenticationCodes.INVALID_CREDENTIALS
         );
     }
 }

@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -57,9 +58,10 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.sendUpdate(
-                        r.get(), TEMPLATE_INVITE_ACCEPTED, MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
-                );
+                mailService.prepareAndSendUpdate(new MailRequest(
+                        r.get(), userFinder, TEMPLATE_INVITE_ACCEPTED,
+                        MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
+                ));
             }
         }
         return res;

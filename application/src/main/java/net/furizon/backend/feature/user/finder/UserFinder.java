@@ -28,6 +28,8 @@ public interface UserFinder {
 
     @Nullable
     UserEmailData getMailDataForUser(long userId);
+    @NotNull
+    List<UserEmailData> getMailDataForUsers(@NotNull List<Long> userIds);
 
     @Nullable
     UserDisplayData getDisplayUser(long userId, @NotNull Event event);

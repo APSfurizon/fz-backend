@@ -18,6 +18,7 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -102,17 +103,14 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 String prevOrderCode = prevOrder.getCode();
                 UserEmailData mail = userFinder.getMailDataForUser(userId);
                 if (mail != null) {
-                    String prevDuplicateData = "";
                     var v = order.getAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA);
-                    if (v.isPresent()) {
-                        prevDuplicateData = (String) v.get();
-                    }
+                    String prevDuplicateData = v.isPresent() ? (String) v.get() : "";
                     prevDuplicateData +=
-                            "\n----------------------------\n"
-                                    + "\nUserId: " + user.getUserId()
-                                    + "\nFursona name: " + mail == null ? "-" : mail.getFursonaName()
-                                    + "\nUser email: " + mail == null ? "-" : mail.getEmail()
-                                    + "\nOriginal order code: " + prevOrderCode;
+                              "\n----------------------------\n"
+                            + "\nUserId: " + user.getUserId()
+                            + "\nFursona name: " + mail == null ? "-" : mail.getFursonaName()
+                            + "\nUser email: " + mail == null ? "-" : mail.getEmail()
+                            + "\nOriginal order code: " + prevOrderCode;
                     order.setAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA, prevDuplicateData);
                     boolean success = pushPretixAnswerAction.invoke(order, pretixService);
                     if (!success) {
@@ -122,10 +120,13 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
 
                     //We send an email to alert the user
                     var eventNames = event.getEventNames();
-                    mailService.send(mail, SUBJECT_ORDER_PROBLEM, TEMPLATE_DUPLICATE_ORDER,
+                    mailService.fireAndForget(
+                        new MailRequest(
+                            mail, TEMPLATE_DUPLICATE_ORDER,
                             MailVarPair.of(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
                             MailVarPair.of(EmailVars.ORDER_CODE, prevOrderCode),
                             MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode())
+                        ).subject(SUBJECT_ORDER_PROBLEM)
                     );
                 } else {
                     log.error("[PRETIX] Unable to send duplicate order mail to user {} with order {} ",
