@@ -14,8 +14,8 @@ public interface MembershipCardFinder {
     @Nullable MembershipCard getMembershipCardByOrderId(long orderId);
     @Nullable MembershipCard getMembershipCardByCardId(long cardId);
 
-    @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, @Nullable Long currentEventId);
-    @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo, @Nullable Long currentEventId);
+    @NotNull List<FullInfoMembershipCard> getMembershipCards(short year);
+    @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo);
 
     @NotNull List<UserDisplayDataWithOrderCode> getUsersAtEventWithoutMembershipCard(@NotNull Event event);
 

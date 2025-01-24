@@ -13,7 +13,7 @@ public class FullInfoMembershipMapper {
     @NotNull
     public static FullInfoMembershipCard map(Record record) {
         return FullInfoMembershipCard.builder()
-            .membershipCard(MembershipCardMapper.mapOrNull(record))
+            .membershipCard(MembershipCardMapper.map(record))
             .userInfo(MembershipInfoMapper.map(record))
             .user(JooqUserDisplayMapper.map(record))
             .email(record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL))

@@ -87,11 +87,6 @@ public class Rooms extends TableImpl<Record> {
      */
     public final TableField<Record, Long> ORDER_ID = createField(DSL.name("order_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
-    /**
-     * The column <code>public.rooms.show_in_nosecount</code>.
-     */
-    public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
-
     private Rooms(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
