@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.tables.Users.USERS;
-import static net.furizon.jooq.generated.tables.Media.MEDIA;
-import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
+import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
 
 @Component
 @RequiredArgsConstructor

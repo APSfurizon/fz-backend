@@ -24,9 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
-import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.ROOMS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 
 @Slf4j
 @Component

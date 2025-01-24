@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.Media.MEDIA;
+import static net.furizon.jooq.generated.Tables.MEDIA;
 
 public class MediaResponseMapper {
     @Nullable

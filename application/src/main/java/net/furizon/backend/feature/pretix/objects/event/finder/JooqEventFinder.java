@@ -6,13 +6,10 @@ import net.furizon.backend.feature.pretix.objects.event.mapper.JooqEventMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.JSON;
-import org.jooq.Record7;
 import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
@@ -45,7 +42,7 @@ public class JooqEventFinder implements EventFinder {
         return query.fetch(selectEvent()).stream().map(mapper::map).toList();
     }
 
-    private @NotNull SelectJoinStep<Record7<Long, String, OffsetDateTime, OffsetDateTime, Boolean, String, JSON>> selectEvent() {
+    private @NotNull SelectJoinStep<?> selectEvent() {
         return PostgresDSL.select(
                 EVENTS.ID,
                 EVENTS.EVENT_SLUG,

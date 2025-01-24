@@ -7,7 +7,7 @@ import org.jooq.Record;
 
 import java.util.Map;
 
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 
 public class JooqRoomDataMapper {
     @NotNull

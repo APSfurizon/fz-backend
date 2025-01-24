@@ -4,7 +4,7 @@ import net.furizon.backend.infrastructure.security.session.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.Sessions.SESSIONS;
+import static net.furizon.jooq.generated.Tables.SESSIONS;
 
 
 public class JooqSessionMapper {

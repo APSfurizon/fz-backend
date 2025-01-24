@@ -2,7 +2,6 @@ package net.furizon.backend.feature.nosecount.finder;
 
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import org.jetbrains.annotations.NotNull;
 

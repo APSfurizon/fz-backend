@@ -4,7 +4,7 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 
 public class RoomGuestMapper {
     @NotNull

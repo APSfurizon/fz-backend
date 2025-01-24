@@ -4,7 +4,7 @@ import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS;
+import static net.furizon.jooq.generated.Tables.EXCHANGE_CONFIRMATION_STATUS;
 
 public class ExchangeConfirmationStatusMapper {
     public static ExchangeConfirmationStatus map(Record record) {

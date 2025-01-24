@@ -2,9 +2,7 @@ package net.furizon.backend.feature.fursuits.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
-import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
-import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -17,10 +15,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.tables.Media.MEDIA;
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
-import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
-import static net.furizon.jooq.generated.tables.FursuitsOrders.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
+import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
 
 @Component
 @RequiredArgsConstructor

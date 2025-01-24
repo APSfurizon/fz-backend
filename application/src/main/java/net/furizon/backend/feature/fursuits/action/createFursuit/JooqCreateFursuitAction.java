@@ -10,7 +10,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
 
 @Component
 @RequiredArgsConstructor

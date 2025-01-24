@@ -26,7 +26,7 @@ import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.USERS;
-import static net.furizon.jooq.generated.tables.MembershipInfo.MEMBERSHIP_INFO;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Slf4j
 @Component

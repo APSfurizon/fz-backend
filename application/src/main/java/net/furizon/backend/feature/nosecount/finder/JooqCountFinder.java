@@ -15,11 +15,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.*;
-import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
-import static net.furizon.jooq.generated.tables.Media.MEDIA;
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
-import static net.furizon.jooq.generated.tables.FursuitsOrders.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.ROOMS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
 
 @Component
 @RequiredArgsConstructor

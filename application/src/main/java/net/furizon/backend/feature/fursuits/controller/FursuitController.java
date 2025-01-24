@@ -11,7 +11,6 @@ import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
-import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.usecase.BringFursuitToEventUseCase;
 import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;

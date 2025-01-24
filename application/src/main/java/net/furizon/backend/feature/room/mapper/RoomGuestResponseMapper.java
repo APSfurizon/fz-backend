@@ -5,7 +5,7 @@ import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 
 public class RoomGuestResponseMapper {
     public static RoomGuestResponse map(Record record) {

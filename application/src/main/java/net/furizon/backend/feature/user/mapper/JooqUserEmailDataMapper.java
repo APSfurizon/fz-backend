@@ -4,7 +4,7 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import org.jooq.Record;
 
 import static net.furizon.jooq.generated.Tables.USERS;
-import static net.furizon.jooq.generated.tables.Authentications.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 
 public class JooqUserEmailDataMapper {
     public static UserEmailData map(Record record) {

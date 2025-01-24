@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.tables.FursuitsOrders.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
 
 @Slf4j
 @Component

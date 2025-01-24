@@ -31,9 +31,9 @@ import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.USERS;
-import static net.furizon.jooq.generated.tables.Rooms.ROOMS;
-import static net.furizon.jooq.generated.tables.Orders.ORDERS;
-import static net.furizon.jooq.generated.tables.RoomGuests.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.ROOMS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 
 @Component
 @RequiredArgsConstructor

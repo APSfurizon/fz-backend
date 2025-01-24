@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -42,7 +41,8 @@ public class RoomConfig {
 
         String json = Files.readString(Paths.get(hotelNamesPath));
         ObjectMapper mapper = new ObjectMapper();
-        TypeReference<Map<String, Map<String, String>>> typeRef = new TypeReference<Map<String, Map<String, String>>>() {};
+        TypeReference<Map<String, Map<String, String>>> typeRef =
+                new TypeReference<Map<String, Map<String, String>>>() {};
         this.hotelInternalNameToNames = mapper.readValue(json, typeRef);
     }
 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.tables.Fursuits.FURSUITS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
 
 @Component
 @RequiredArgsConstructor

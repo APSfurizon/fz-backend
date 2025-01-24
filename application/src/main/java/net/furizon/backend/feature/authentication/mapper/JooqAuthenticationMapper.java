@@ -4,7 +4,7 @@ import net.furizon.backend.feature.authentication.Authentication;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.Authentications.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 
 public class JooqAuthenticationMapper {
     @NotNull

@@ -9,7 +9,7 @@ import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.tables.MembershipInfo.MEMBERSHIP_INFO;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Component
 @RequiredArgsConstructor

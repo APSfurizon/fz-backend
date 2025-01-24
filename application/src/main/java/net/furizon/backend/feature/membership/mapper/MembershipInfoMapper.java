@@ -4,7 +4,7 @@ import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
-import static net.furizon.jooq.generated.tables.MembershipInfo.MEMBERSHIP_INFO;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 public class MembershipInfoMapper {
     @NotNull
