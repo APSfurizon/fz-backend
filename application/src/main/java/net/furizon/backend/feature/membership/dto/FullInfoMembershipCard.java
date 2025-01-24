@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 @Data
 @Builder
 public class FullInfoMembershipCard {
-    @NotNull
+    @Nullable
     private final MembershipCard membershipCard;
 
     @NotNull

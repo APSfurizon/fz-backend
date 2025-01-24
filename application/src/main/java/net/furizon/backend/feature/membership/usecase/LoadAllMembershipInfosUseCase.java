@@ -10,6 +10,7 @@ import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -27,8 +28,10 @@ public class LoadAllMembershipInfosUseCase implements UseCase<LoadAllMembershipI
     @Override
     public @NotNull GetMembershipCardsResponse executor(@NotNull Input input) {
         log.info("Loading all membership cards for year {}", input.year);
-        short eventYear = input.event.getMembershipYear(membershipYearUtils);
-        List<FullInfoMembershipCard> cards = membershipCardFinder.getMembershipCards(input.year);
+        short eventYear = input.currentEvent.getMembershipYear(membershipYearUtils);
+        boolean isCurrentYear = input.year == eventYear;
+        Long currentEventId = isCurrentYear ? input.currentEvent.getId() : null;
+        List<FullInfoMembershipCard> cards = membershipCardFinder.getMembershipCards(input.year, currentEventId);
 
         //Mark duplicates
         Map<Long, FullInfoMembershipCard> userToCard = new HashMap<>();
@@ -44,12 +47,11 @@ public class LoadAllMembershipInfosUseCase implements UseCase<LoadAllMembershipI
             }
         }
 
-        boolean isCurrentYear = input.year.equals(eventYear);
         List<UserDisplayDataWithOrderCode> peopleWithNoCards = !isCurrentYear ? null :
-                membershipCardFinder.getUsersAtEventWithoutMembershipCard(input.event);
+                membershipCardFinder.getUsersAtEventWithoutMembershipCard(input.currentEvent);
 
         return new GetMembershipCardsResponse(cards, peopleWithNoCards, isCurrentYear);
     }
 
-    public record Input(Short year, @NotNull Event event) {}
+    public record Input(short year, @NotNull Event currentEvent) {}
 }

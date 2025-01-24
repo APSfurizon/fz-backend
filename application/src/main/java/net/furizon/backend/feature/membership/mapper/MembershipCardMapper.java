@@ -18,4 +18,26 @@ public class MembershipCardMapper {
                 record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED)
         );
     }
+
+    @NotNull
+    public static MembershipCard mapOrNull(Record record) {
+        Long cardId = record.get(MEMBERSHIP_CARDS.CARD_DB_ID);
+        Integer idInYear = record.get(MEMBERSHIP_CARDS.ID_IN_YEAR);
+        Short issueYear = record.get(MEMBERSHIP_CARDS.ISSUE_YEAR);
+        Long userId = record.get(MEMBERSHIP_CARDS.USER_ID);
+        Boolean alreadyRegistered = record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED);
+
+        if (cardId == null || idInYear == null || issueYear == null || userId == null || alreadyRegistered == null) {
+            return null;
+        }
+
+        return new MembershipCard(
+                cardId,
+                idInYear,
+                issueYear,
+                userId,
+                record.get(MEMBERSHIP_CARDS.CREATED_FOR_ORDER),
+                alreadyRegistered
+        );
+    }
 }

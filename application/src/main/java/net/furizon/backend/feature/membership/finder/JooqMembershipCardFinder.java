@@ -14,8 +14,7 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Record6;
-import org.jooq.SelectJoinStep;
+import org.jooq.*;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -82,14 +81,13 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
 
     @NotNull
     @Override
-    public List<FullInfoMembershipCard> getMembershipCards(short year) {
-        return getMembershipCards(year, 0);
+    public List<FullInfoMembershipCard> getMembershipCards(short year, @Nullable Long currentEventId) {
+        return getMembershipCards(year, 0, currentEventId);
     }
 
     @Override
-    public @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo) {
-        return sqlQuery.fetch(
-            PostgresDSL.select(
+    public @NotNull List<FullInfoMembershipCard> getMembershipCards(short year, int afterCardNo, @Nullable Long currentEventId) {
+        var q = PostgresDSL.select(
                 MEMBERSHIP_CARDS.USER_ID,
                 MEMBERSHIP_CARDS.CARD_DB_ID,
                 MEMBERSHIP_CARDS.ID_IN_YEAR,
@@ -124,23 +122,45 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_CODE
             )
-            .from(MEMBERSHIP_CARDS)
-            .innerJoin(USERS)
-            .on(
-                MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
-                .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
-                .and(MEMBERSHIP_CARDS.ID_IN_YEAR.greaterThan(afterCardNo))
-            )
+            .from(USERS)
             .innerJoin(MEMBERSHIP_INFO)
             .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
             .innerJoin(AUTHENTICATIONS)
             .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
             .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .leftJoin(ORDERS)
-            .on(ORDERS.ID.eq(MEMBERSHIP_CARDS.CREATED_FOR_ORDER))
-            .orderBy(MEMBERSHIP_CARDS.ID_IN_YEAR)
-        ).stream().map(r -> r.map(FullInfoMembershipMapper::map)).toList();
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID));
+
+        SelectLimitStep<?> finalQ = null;
+        if (currentEventId != null) {
+            finalQ = q.innerJoin(ORDERS)
+                .on(
+                    ORDERS.USER_ID.eq(USERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(currentEventId))
+                    .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
+                    .and(ORDERS.USER_ID.notIn(
+                        PostgresDSL.select(MEMBERSHIP_CARDS.USER_ID)
+                        .from(MEMBERSHIP_CARDS)
+                        .where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+                    ))
+                )
+                .orderBy(ORDERS.CREATION_TS);
+        } else {
+            finalQ = q.leftJoin(ORDERS)
+                .on(ORDERS.ID.eq(MEMBERSHIP_CARDS.CREATED_FOR_ORDER))
+                .innerJoin(MEMBERSHIP_CARDS)
+                .on(
+                    MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
+                    .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+                    .and(MEMBERSHIP_CARDS.ID_IN_YEAR.greaterThan(afterCardNo))
+                )
+                .orderBy(MEMBERSHIP_CARDS.ID_IN_YEAR);
+        }
+
+        return sqlQuery
+                .fetch(finalQ)
+                .stream()
+                .map(r -> r.map(FullInfoMembershipMapper::map))
+                .toList();
     }
 
     @Override
