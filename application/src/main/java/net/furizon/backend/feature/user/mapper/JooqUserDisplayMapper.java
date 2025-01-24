@@ -1,12 +1,15 @@
 package net.furizon.backend.feature.user.mapper;
 
+import net.furizon.backend.feature.membership.mapper.MembershipInfoMapper;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithPersonalInfo;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.USERS;
 
@@ -24,6 +27,17 @@ public class JooqUserDisplayMapper {
     }
 
     public static UserDisplayDataWithOrderCode mapWithOrderCode(Record record) {
-        return new UserDisplayDataWithOrderCode(map(record), record.get(ORDERS.ORDER_CODE));
+        return new UserDisplayDataWithOrderCode(
+                map(record),
+                record.get(ORDERS.ORDER_CODE)
+        );
+    }
+
+    public static UserDisplayDataWithPersonalInfo mapWithPersonalInfo(Record record) {
+        return new UserDisplayDataWithPersonalInfo(
+            mapWithOrderCode(record),
+            record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL),
+            MembershipInfoMapper.map(record)
+        );
     }
 }

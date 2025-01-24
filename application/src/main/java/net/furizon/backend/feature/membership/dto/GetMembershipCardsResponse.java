@@ -3,7 +3,7 @@ package net.furizon.backend.feature.membership.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithPersonalInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class GetMembershipCardsResponse {
     private List<FullInfoMembershipCard> cards;
 
     @Nullable
-    private List<UserDisplayDataWithOrderCode> usersAtCurrentEventWithoutCard;
+    private List<UserDisplayDataWithPersonalInfo> usersAtCurrentEventWithoutCard;
 
     private boolean canAddCards;
 }

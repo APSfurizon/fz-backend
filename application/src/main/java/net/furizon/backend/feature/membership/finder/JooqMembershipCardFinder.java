@@ -7,7 +7,7 @@ import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.mapper.FullInfoMembershipMapper;
 import net.furizon.backend.feature.membership.mapper.MembershipCardMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithPersonalInfo;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -144,7 +144,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
     }
 
     @Override
-    public @NotNull List<UserDisplayDataWithOrderCode> getUsersAtEventWithoutMembershipCard(@NotNull Event event) {
+    public @NotNull List<UserDisplayDataWithPersonalInfo> getUsersAtEventWithoutMembershipCard(@NotNull Event event) {
         return sqlQuery.fetch(
             PostgresDSL.select(
                 USERS.USER_ID,
@@ -154,7 +154,26 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_TYPE,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
-                ORDERS.ORDER_CODE
+                ORDERS.ORDER_CODE,
+                MEMBERSHIP_INFO.ID,
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_FISCAL_CODE,
+                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
+                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
+                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                MEMBERSHIP_INFO.INFO_ADDRESS,
+                MEMBERSHIP_INFO.INFO_ZIP,
+                MEMBERSHIP_INFO.INFO_CITY,
+                MEMBERSHIP_INFO.INFO_REGION,
+                MEMBERSHIP_INFO.INFO_COUNTRY,
+                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
+                MEMBERSHIP_INFO.INFO_PHONE,
+                MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
+                MEMBERSHIP_INFO.INFO_ALLERGIES,
+                MEMBERSHIP_INFO.USER_ID,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)
             .innerJoin(ORDERS)
@@ -170,7 +189,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        ).stream().map(JooqUserDisplayMapper::mapWithOrderCode).toList();
+        ).stream().map(JooqUserDisplayMapper::mapWithPersonalInfo).toList();
     }
 
     @Override
