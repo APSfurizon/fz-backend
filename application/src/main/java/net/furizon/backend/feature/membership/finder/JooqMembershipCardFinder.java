@@ -187,6 +187,10 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                     .where(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(event.getMembershipYear(membershipYearUtils)))
                 ))
             )
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+            .innerJoin(AUTHENTICATIONS)
+            .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(JooqUserDisplayMapper::mapWithPersonalInfo).toList();
