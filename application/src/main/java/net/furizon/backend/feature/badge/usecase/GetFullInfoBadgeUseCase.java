@@ -3,6 +3,7 @@ package net.furizon.backend.feature.badge.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -43,8 +44,8 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
 
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, input.pretixInformation);
         int maxFursuits = order == null ? 0 : fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits();
-        List<FursuitDisplayData> fursuits = fursuitFinder.getFursuitsOfUser(userId, event);
-        long bringingToEvent = fursuits.stream().filter(FursuitDisplayData::isBringingToEvent).count();
+        List<FursuitData> fursuits = fursuitFinder.getFursuitsOfUser(userId, event);
+        long bringingToEvent = fursuits.stream().filter(FursuitData::isBringingToEvent).count();
 
         boolean canBringFursuitToEvent = order != null
                 && order.getOrderStatus() == OrderStatus.PAID

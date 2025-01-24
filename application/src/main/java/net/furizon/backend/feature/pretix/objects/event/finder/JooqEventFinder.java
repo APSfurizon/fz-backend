@@ -6,8 +6,14 @@ import net.furizon.backend.feature.pretix.objects.event.mapper.JooqEventMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.JSON;
+import org.jooq.Record7;
+import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
 
@@ -21,36 +27,34 @@ public class JooqEventFinder implements EventFinder {
     @Override
     public @Nullable Event findEventBySlug(@NotNull String slug) {
         return query.fetchFirst(
-            PostgresDSL
-                .select(
-                    EVENTS.ID,
-                    EVENTS.EVENT_SLUG,
-                    EVENTS.EVENT_DATE_TO,
-                    EVENTS.EVENT_DATE_FROM,
-                    EVENTS.EVENT_IS_CURRENT,
-                    EVENTS.EVENT_PUBLIC_URL,
-                    EVENTS.EVENT_NAMES_JSON
-                )
-                .from(EVENTS)
-                .where(EVENTS.EVENT_SLUG.eq(slug))
+            selectEvent()
+            .where(EVENTS.EVENT_SLUG.eq(slug))
         ).mapOrNull(mapper::map);
     }
 
     @Override
     public @Nullable Event findEventById(long id) {
         return query.fetchFirst(
-                PostgresDSL
-                        .select(
-                                EVENTS.ID,
-                                EVENTS.EVENT_SLUG,
-                                EVENTS.EVENT_DATE_TO,
-                                EVENTS.EVENT_DATE_FROM,
-                                EVENTS.EVENT_IS_CURRENT,
-                                EVENTS.EVENT_PUBLIC_URL,
-                                EVENTS.EVENT_NAMES_JSON
-                        )
-                        .from(EVENTS)
-                        .where(EVENTS.ID.eq(id))
+            selectEvent()
+            .where(EVENTS.ID.eq(id))
         ).mapOrNull(mapper::map);
+    }
+
+    @Override
+    public @NotNull List<Event> getAllEvents() {
+        return query.fetch(selectEvent()).stream().map(mapper::map).toList();
+    }
+
+    private @NotNull SelectJoinStep<Record7<Long, String, OffsetDateTime, OffsetDateTime, Boolean, String, JSON>> selectEvent() {
+        return PostgresDSL.select(
+                EVENTS.ID,
+                EVENTS.EVENT_SLUG,
+                EVENTS.EVENT_DATE_TO,
+                EVENTS.EVENT_DATE_FROM,
+                EVENTS.EVENT_IS_CURRENT,
+                EVENTS.EVENT_PUBLIC_URL,
+                EVENTS.EVENT_NAMES_JSON
+            )
+            .from(EVENTS);
     }
 }

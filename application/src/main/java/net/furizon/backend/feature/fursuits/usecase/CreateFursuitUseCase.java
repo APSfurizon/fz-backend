@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.createFursuit.CreateFursuitAction;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -17,13 +18,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input, FursuitDisplayData> {
+public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input, FursuitData> {
     @NotNull private final CreateFursuitAction createFursuitAction;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitChecks fursuitChecks;
 
     @Override
-    public @NotNull FursuitDisplayData executor(@NotNull Input input) {
+    public @NotNull FursuitData executor(@NotNull Input input) {
         long userId = input.user.getUserId();
         log.info("User {} is creating fursuit {}", userId, input.name);
 
@@ -50,13 +51,16 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 order
         );
 
-        return FursuitDisplayData.builder()
+        FursuitDisplayData fursuit = FursuitDisplayData.builder()
                 .id(fursuitId)
                 .name(input.name)
                 .species(input.species)
+                .build();
+        return FursuitData.builder()
                 .bringingToEvent(input.bringToCurrentEvenet)
                 .showInFursuitCount(input.showInFursuitCount)
                 .ownerId(userId)
+                .fursuit(fursuit)
             .build();
     }
 

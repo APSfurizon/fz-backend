@@ -15,6 +15,7 @@ public interface RoomLogic {
     long createRoom(String name, long userId, @NotNull Event event);
     boolean deleteRoom(long roomId);
     boolean changeRoomName(String name, long roomId);
+    boolean setShowInNosecount(boolean showInNosecount, long roomId);
 
     //force = bypass invitation logic, forceExit = if the user is in another room, add him to the current one forcefully
     long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit);

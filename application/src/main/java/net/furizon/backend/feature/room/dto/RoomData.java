@@ -12,7 +12,6 @@ import java.util.Map;
 public class RoomData {
     private short roomCapacity;
     @Nullable private Long roomPretixItemId;
-    //@NotNull //This shouldn't be needed
-    //private String hotelInternalName;
+    @Nullable private String roomInternalName;
     @NotNull private Map<String, String> roomTypeNames;
 }

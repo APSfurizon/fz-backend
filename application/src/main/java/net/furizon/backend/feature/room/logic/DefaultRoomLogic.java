@@ -98,6 +98,16 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
+    public boolean setShowInNosecount(boolean showInNosecount, long roomId) {
+        log.info("Setting showInNosecount={} for room {}", showInNosecount, roomId);
+        return command.execute(
+                PostgresDSL.update(ROOMS)
+                .set(ROOMS.SHOW_IN_NOSECOUNT, showInNosecount)
+                .where(ROOMS.ROOM_ID.eq(roomId))
+        ) > 0;
+    }
+
+    @Override
     @Transactional
     public long invitePersonToRoom(
             long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit

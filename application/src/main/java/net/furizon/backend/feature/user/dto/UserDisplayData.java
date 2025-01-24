@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class UserDisplayData {
     private final long userId;
 

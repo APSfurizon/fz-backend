@@ -22,6 +22,9 @@ public class RenameRoomUseCase implements UseCase<RenameRoomUseCase.Input, Boole
         long requesterUserId = input.user.getUserId();
         Event event = input.event;
 
+        log.info("User {} is changing the name of room {} to {}",
+                requesterUserId, input.req.getRoomId(), input.req.getName());
+
         checks.assertInTimeframeToEditRooms();
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,

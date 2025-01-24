@@ -31,6 +31,8 @@ public class RoomInfo {
     private boolean canUnconfirm = false;
     private final boolean confirmed;
 
+    private final boolean showInNosecount;
+
     @NotNull
     private final RoomData roomData;
 

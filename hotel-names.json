@@ -1,0 +1,10 @@
+{
+    "main": {
+        "en": "Test hotel MAIN",
+        "it": "Hotel di test PRINCIPALE"
+    },
+    "test": {
+        "en": "Test hotel TEST",
+        "it": "Hotel di test PROVA"
+    }
+}

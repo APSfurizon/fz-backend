@@ -11,6 +11,7 @@ import org.jooq.Record;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
@@ -19,7 +20,7 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 @RequiredArgsConstructor
 @Slf4j
 public class JooqEventMapper {
-    private final TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {};
+    private final TypeReference<Map<String, String>> typeRef = new TypeReference<>() {};
 
     private final ObjectMapper objectMapper;
 

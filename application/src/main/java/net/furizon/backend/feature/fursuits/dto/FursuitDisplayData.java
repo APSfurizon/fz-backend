@@ -14,11 +14,6 @@ public class FursuitDisplayData {
     @NotNull private String name;
     @NotNull private String species;
     @Nullable private MediaResponse propic;
-    private final boolean bringingToEvent;
-
-    private boolean showInFursuitCount;
-
-    private final long ownerId;
 
     @Nullable private final Sponsorship sponsorship;
 }

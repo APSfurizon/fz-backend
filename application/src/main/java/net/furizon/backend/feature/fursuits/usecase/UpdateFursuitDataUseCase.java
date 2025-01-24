@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.updateFursuit.UpdateFursuitAction;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -14,19 +15,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCase.Input, FursuitDisplayData> {
+public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCase.Input, FursuitData> {
     @NotNull private final UpdateFursuitAction updateFursuitAction;
     @NotNull private final FursuitChecks fursuitChecks;
 
     @Override
-    public @NotNull FursuitDisplayData executor(@NotNull Input input) {
+    public @NotNull FursuitData executor(@NotNull Input input) {
         long userId = input.user.getUserId();
         long fursuitId = input.fursuitId;
         log.info("User {} is updating fursuit data {}", userId, fursuitId);
 
         //This currently doesn't support admins
 
-        FursuitDisplayData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event);
+        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event);
         fursuitChecks.assertUserHasPermissionOnFursuit(userId, fursuit);
 
         boolean res = updateFursuitAction.invoke(
@@ -37,8 +38,9 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
         );
 
         if (res) {
-            fursuit.setName(input.name);
-            fursuit.setSpecies(input.species);
+            FursuitDisplayData f = fursuit.getFursuit();
+            f.setName(input.name);
+            f.setSpecies(input.species);
             fursuit.setShowInFursuitCount(input.showInFursuitCount);
         }
         return fursuit;
