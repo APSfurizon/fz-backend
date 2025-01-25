@@ -53,6 +53,7 @@ public class JooqCountFinder implements CountsFinder {
             )
             .leftJoin(MEDIA)
             .on(FURSUITS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .orderBy(FURSUITS.FURSUIT_NAME)
         ).stream().map(JooqFursuitDisplayMapper::mapWithOrder).toList();
     }
 
@@ -77,6 +78,7 @@ public class JooqCountFinder implements CountsFinder {
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .orderBy(USERS.USER_FURSONA_NAME)
         ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
@@ -126,6 +128,7 @@ public class JooqCountFinder implements CountsFinder {
 
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .orderBy(ROOMS.ROOM_ID)
         ).stream().map(r -> JooqNosecountObjMapper.map(r, roomOwnerOrder)).toList();
     }
 }
