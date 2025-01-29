@@ -118,6 +118,7 @@ pretix:
   autocart:
     priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
     priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}
+  supported-languages: ${SUPPORTED_LANGUAGES:["it", "en"]}
 
 storage:
   base-path: data/
