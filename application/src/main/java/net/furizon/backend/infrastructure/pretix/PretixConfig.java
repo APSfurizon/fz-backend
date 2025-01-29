@@ -11,6 +11,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @ConfigurationProperties(prefix = "pretix")
@@ -35,6 +36,9 @@ public class PretixConfig implements HttpConfig {
 
     @NotNull
     private final Shop shop;
+
+    @NotNull
+    private final List<String> supportedLanguages;
 
     @NotNull
     @Override

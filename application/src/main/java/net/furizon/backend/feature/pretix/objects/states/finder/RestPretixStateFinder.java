@@ -123,7 +123,9 @@ public class RestPretixStateFinder implements PretixStateFinder {
                         res,
                         TypeFactory.defaultInstance().constructCollectionType(List.class, CountryDataRaw.class)
                 );
-                return countries.stream().map(k -> (PretixState) k.toPhoneCountry()).toList();
+                return countries.stream()
+                        .map(k -> (PretixState) k.toPhoneCountry(pretixConfig.getSupportedLanguages()))
+                        .toList();
             } else {
                 log.error("Unable to fetch countries. Returning an empty list");
                 return new LinkedList<>();
