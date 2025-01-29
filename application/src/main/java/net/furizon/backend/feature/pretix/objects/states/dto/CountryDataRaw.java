@@ -23,12 +23,14 @@ public class CountryDataRaw {
         var countryLocale = Locale.of("", code);
 
         Map<String, String> translatedDescription = supportedLanguages
-                .stream ()
-                .map (language -> {
+                .stream()
+                .map(language -> {
                     var languageLocale = Locale.of(language, "");
-                    return Map.entry(languageLocale.getLanguage(),
-                            countryLocale.getDisplayCountry(languageLocale));
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    return Map.entry(
+                        languageLocale.getLanguage(),
+                        countryLocale.getDisplayCountry(languageLocale)
+                    );
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new CountryData(name, code, phonePrefix, translatedDescription);
     }
 
