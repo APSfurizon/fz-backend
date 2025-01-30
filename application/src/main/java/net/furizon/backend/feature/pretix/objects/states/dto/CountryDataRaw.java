@@ -30,7 +30,7 @@ public class CountryDataRaw {
                         languageLocale.getLanguage(),
                         countryLocale.getDisplayCountry(languageLocale)
                     );
-            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new CountryData(name, code, phonePrefix, translatedDescription);
     }
 

@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +63,16 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
                     < (int) info.getRoomData().getRoomCapacity()
                 )
             );
-            info.setGuests(guests);
+            //By sorting we normally should have the owner of the room in the first position*
+            // *Except when the room has changed owner for some reaons. In this instance,
+            //  it's fine if it's not the first one
+            RoomGuestResponse[] arr = guests.toArray(new RoomGuestResponse[guests.size()]);
+            Arrays.sort(arr, (g1, g2) -> (int) (g1.getRoomGuest().getGuestId() - g2.getRoomGuest().getGuestId()));
+            List<RoomGuestResponse> sortedGuests = new ArrayList<>(arr.length);
+            //Include first the confirmed guests, later the invitations
+            sortedGuests.addAll(Arrays.stream(arr).filter(g -> g.getRoomGuest().isConfirmed()).toList());
+            sortedGuests.addAll(Arrays.stream(arr).filter(g -> !g.getRoomGuest().isConfirmed()).toList());
+            info.setGuests(sortedGuests);
         }
         List<RoomInvitationResponse> invitations =
             roomFinder.getUserReceivedInvitations(userId, event, input.pretixInformation);
