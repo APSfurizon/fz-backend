@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +21,9 @@ public interface OrderFinder {
 
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
+
+    @Nullable
+    List<Order> findOrdersByUserId(long userId, @NotNull PretixInformation pretixService);
 
     int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 

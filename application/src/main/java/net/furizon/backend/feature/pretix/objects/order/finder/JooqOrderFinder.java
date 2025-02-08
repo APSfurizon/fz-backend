@@ -17,9 +17,10 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -205,6 +206,17 @@ public class JooqOrderFinder implements OrderFinder {
             .from(ORDERS)
             .where(ORDERS.ORDER_CODE.eq(orderCode))
         ).mapOrNull(r -> r.get(ORDERS.ID));
+    }
+
+    @Nullable
+    @Override
+    public List<Order> findOrdersByUserId(long userId, @NotNull PretixInformation pretixService) {
+        return query.fetch(
+                selectFrom()
+                        .where(
+                                ORDERS.USER_ID.eq(userId)
+                        )
+        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {

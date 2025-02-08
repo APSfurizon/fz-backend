@@ -193,7 +193,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        ).stream().map(JooqUserDisplayMapper::mapWithPersonalInfo).toList();
+        ).stream().map(JooqUserDisplayMapper::mapWithOrderAndPersonalInfo).toList();
     }
 
     @Override
