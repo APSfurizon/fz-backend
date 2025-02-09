@@ -4,7 +4,6 @@ import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class UserAdminViewData {
@@ -12,5 +11,5 @@ public class UserAdminViewData {
     private final UserAdminViewDisplay user;
 
     @NotNull
-    private final Map<Long, List<Order>> orders;
+    private final List<Order> orders;
 }

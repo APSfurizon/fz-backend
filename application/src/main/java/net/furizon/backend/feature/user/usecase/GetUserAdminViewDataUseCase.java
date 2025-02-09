@@ -17,9 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -37,12 +35,10 @@ public class GetUserAdminViewDataUseCase implements UseCase<GetUserAdminViewData
             throw new ApiException("User not found", UserCodes.USER_NOT_FOUND);
         }
         // Then, get orders grouped by events
-        final Map<Long, List<Order>> ordersByEventSlug = Objects.requireNonNull(
-                orderFinder.findOrdersByUserId(input.userId, input.pretixInformation))
-                .stream()
-                .collect(Collectors.groupingBy(Order::getEventId));
+        final List<Order> orders = Objects.requireNonNull(
+                orderFinder.findOrdersByUserId(input.userId, input.pretixInformation));
 
-        return new UserAdminViewData(userData, ordersByEventSlug);
+        return new UserAdminViewData(userData, orders);
     }
 
     public record Input(
