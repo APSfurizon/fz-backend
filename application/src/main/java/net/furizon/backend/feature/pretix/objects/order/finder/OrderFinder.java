@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,5 +42,7 @@ public interface OrderFinder {
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
 
     @Nullable String getOrderCodeById(long orderId);
-    @Nullable Long getOrderIdByCode(@NotNull String orderCode);
+
+    @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
+
 }

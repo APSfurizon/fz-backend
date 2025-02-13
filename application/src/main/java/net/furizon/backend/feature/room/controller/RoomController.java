@@ -209,6 +209,7 @@ public class RoomController {
                 InviteRefuseUseCase.class,
                 new InviteRefuseUseCase.Input(
                         user,
+                        pretixInformation.getCurrentEvent(),
                         guestIdRequest
                 )
         );

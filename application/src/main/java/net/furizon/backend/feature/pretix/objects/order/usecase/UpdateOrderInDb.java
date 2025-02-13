@@ -203,7 +203,7 @@ public class UpdateOrderInDb {
             }
 
             if (shouldDelete) {
-                deleteOrderAction.invoke(pretixOrder.getCode());
+                deleteOrderAction.invoke(pretixOrder.getCode(), event);
             }
 
             if (updateToRoomWithTicket && order != null && order.getRoomPositionId() == null && !order.isDaily()) {

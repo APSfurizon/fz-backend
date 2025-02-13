@@ -17,6 +17,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -199,11 +200,14 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> r.get(ORDERS.ORDER_CODE));
     }
     @Override
-    public @Nullable Long getOrderIdByCode(@NotNull String orderCode) {
+    public @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event) {
         return query.fetchFirst(
             PostgresDSL.select(ORDERS.ID)
             .from(ORDERS)
-            .where(ORDERS.ORDER_CODE.eq(orderCode))
+            .where(
+                ORDERS.ORDER_CODE.eq(orderCode)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         ).mapOrNull(r -> r.get(ORDERS.ID));
     }
 

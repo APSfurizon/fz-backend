@@ -46,7 +46,7 @@ public class FetchSingleOrderUseCase implements UseCase<FetchSingleOrderUseCase.
             );
 
             if (pretixOrder.isEmpty()) {
-                deleteOrderAction.invoke(orderCode);
+                deleteOrderAction.invoke(orderCode, event);
                 log.error("[PRETIX] Unable to fetch order: {}@{}", orderCode, event.getSlug());
                 return Optional.empty();
             }
