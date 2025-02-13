@@ -274,6 +274,21 @@ public class JooqRoomFinder implements RoomFinder {
         ).mapOrNull(k -> k.get(ORDERS.USER_ID)));
     }
 
+    @Override
+    public @NotNull Optional<Long> getEventIdOfRoom(long roomId) {
+        return Optional.ofNullable(query.fetchFirst(
+            PostgresDSL
+                .select(ORDERS.EVENT_ID)
+                .from(ROOMS)
+                .innerJoin(ORDERS)
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ROOMS.ROOM_ID.eq(roomId))
+                )
+                .limit(1)
+        ).mapOrNull(k -> k.get(ORDERS.EVENT_ID)));
+    }
+
     @NotNull
     @Override
     public List<Long> getRoomsForEvent(long eventId) {

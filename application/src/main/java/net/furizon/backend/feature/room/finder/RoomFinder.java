@@ -48,6 +48,9 @@ public interface RoomFinder {
     Optional<Long> getOwnerUserIdFromRoomId(long roomId);
 
     @NotNull
+    Optional<Long> getEventIdOfRoom(long roomId);
+
+    @NotNull
     List<Long> getRoomsForEvent(long eventId);
 
     @NotNull

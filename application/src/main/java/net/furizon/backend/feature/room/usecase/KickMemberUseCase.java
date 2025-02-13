@@ -46,6 +46,7 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         roomId = checks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, roomId);
         checks.assertRoomNotConfirmed(roomId);
         checks.assertUserIsNotRoomOwner(targetUserId, roomId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.kickFromRoom(guestId);
         if (res) {

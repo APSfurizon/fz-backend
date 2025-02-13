@@ -44,6 +44,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         );
         checks.assertRoomConfirmed(roomId);
         checks.assertRoomCanBeUnconfirmed(roomId, roomLogic);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.unconfirmRoom(roomId);
         if (res) {

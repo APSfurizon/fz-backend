@@ -29,6 +29,7 @@ public class CanConfirmRoomUseCase implements UseCase<CanConfirmRoomUseCase.Inpu
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomNotConfirmed(roomId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         return roomLogic.canConfirmRoom(roomId, event);
     }

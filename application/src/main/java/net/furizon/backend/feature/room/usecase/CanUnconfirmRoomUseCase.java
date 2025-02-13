@@ -30,6 +30,7 @@ public class CanUnconfirmRoomUseCase implements UseCase<CanUnconfirmRoomUseCase.
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomConfirmed(roomId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         return roomLogic.canUnconfirmRoom(roomId);
     }
