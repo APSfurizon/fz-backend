@@ -1,0 +1,4 @@
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_buyer_email;
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_buyer_phone;
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_buyer_user;
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_buyer_locale;

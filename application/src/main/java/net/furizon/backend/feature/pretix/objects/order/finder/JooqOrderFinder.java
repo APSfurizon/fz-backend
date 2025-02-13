@@ -211,6 +211,17 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> r.get(ORDERS.ID));
     }
 
+    @Override
+    public @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event) {
+        return query.fetch(
+            selectFrom()
+            .where(
+                ORDERS.USER_ID.isNull()
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
+    }
+
     private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,
@@ -224,6 +235,10 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
+                        ORDERS.ORDER_BUYER_EMAIL,
+                        ORDERS.ORDER_BUYER_PHONE,
+                        ORDERS.ORDER_BUYER_USER,
+                        ORDERS.ORDER_BUYER_LOCALE,
                         ORDERS.ORDER_TICKET_POSITION_ID,
                         ORDERS.ORDER_TICKET_POSITION_POSITIONID,
                         ORDERS.ORDER_ROOM_POSITION_ID,

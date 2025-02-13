@@ -45,4 +45,5 @@ public interface OrderFinder {
 
     @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
 
+    @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event);
 }

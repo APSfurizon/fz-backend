@@ -8,6 +8,7 @@ import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -65,6 +66,17 @@ public class AdminController {
         return executor.execute(GetCapabilitiesUseCase.class, user);
     }
 
+    @Operation(summary = "Remind user to link their orders", description =
+        "Sends an email to all people who have made an order which is still unlinked with a link "
+        + "they have to open for link the accounts")
+    @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @GetMapping("/mail-reminders/order-linking")
+    public boolean remindOrderLink(
+        @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+
+    }
+
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})
     @DeleteMapping("/media/")
     public boolean deleteMedias(
@@ -84,6 +96,7 @@ public class AdminController {
     public void runDeleteMediaCronjob(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        deleteMediaCronjob.deleteDanglingMedia();
+        long deleted = executor.execute(RemoveDanglingMediaUseCase.class, 0); //input is useless
+        log.info("Deleted dangling {} medias", deleted);
     }
 }

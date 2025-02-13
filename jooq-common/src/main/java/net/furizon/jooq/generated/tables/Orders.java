@@ -189,6 +189,26 @@ public class Orders extends TableImpl<Record> {
      */
     public final TableField<Record, OffsetDateTime> CREATION_TS = createField(DSL.name("creation_ts"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>public.orders.order_buyer_email</code>.
+     */
+    public final TableField<Record, String> ORDER_BUYER_EMAIL = createField(DSL.name("order_buyer_email"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_buyer_phone</code>.
+     */
+    public final TableField<Record, String> ORDER_BUYER_PHONE = createField(DSL.name("order_buyer_phone"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_buyer_user</code>.
+     */
+    public final TableField<Record, String> ORDER_BUYER_USER = createField(DSL.name("order_buyer_user"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_buyer_locale</code>.
+     */
+    public final TableField<Record, String> ORDER_BUYER_LOCALE = createField(DSL.name("order_buyer_locale"), SQLDataType.CLOB, this, "");
+
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
