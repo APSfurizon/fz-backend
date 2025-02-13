@@ -11,6 +11,8 @@ import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +28,7 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
     @NotNull private final AddMediaAction addMediaAction;
 
     @NotNull private final ImageWriter writer;
+    @NotNull private final String mimeType;
 
 
     public StoreMediaOnDiskActionImpl(
@@ -40,11 +43,12 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
         this.writer = new WebpWriter()
                 .withoutAlpha()
                 .withQ(imageConfig.getWebpQuality());
+        this.mimeType = "image/webp";
     }
 
     @Override
     public @NotNull StoreMediaOnDiskAction.Results invoke(
-            @NotNull ImmutableImage image, @NotNull SimpleImageMetadata metadata,
+            @NotNull ImmutableImage image,
             @NotNull FurizonUser user, @NotNull String basePath) throws IOException {
 
         log.info("Storing a media on disk for user {} on basePath {}", user.getUsername(), basePath);
@@ -61,7 +65,7 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
 
         //Important to normalize the path before!
         String relativePathStr = fullRelativePath.normalize().toString();
-        long mediaId = addMediaAction.invoke(relativePathStr, metadata.getType(), StoreMethod.DISK);
+        long mediaId = addMediaAction.invoke(relativePathStr, mimeType, StoreMethod.DISK);
         image.output(writer, fullAbsolutePath);
 
         log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), fullAbsolutePath);
