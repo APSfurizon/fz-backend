@@ -22,6 +22,9 @@ public interface OrderFinder {
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
 
+    @NotNull
+    List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService);
+
     int countOrdersOfUserOnEvent(long userId, @NotNull Event event);
 
     //This checks directly on the capacity, so NO_ROOM item is still counted as not having a room
