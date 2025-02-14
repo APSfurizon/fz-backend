@@ -23,6 +23,7 @@ spring:
     username: ${MAIL_SENDER_PROVIDER_USERNAME:test@example.com}
     password: ${MAIL_SENDER_PROVIDER_PASSWORD:changeme}
     protocol: ${MAIL_SENDER_PROTOCOL:smtps}
+    subject-prepend-text: ${MAIL_SUBJECT_PREPEND_TEXT:}
     properties:
       "mail.smtp.auth": true
       "mail.smtp.starttls.enable": true

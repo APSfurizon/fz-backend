@@ -45,6 +45,8 @@ public class EmailSenderService implements EmailSender {
 
     @Value("${spring.mail.username}")
     private String from;
+    @Value("${spring.mail.subject-prepend-text}")
+    private String subjectPrependText;
 
     @Override
     public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull String subject,
@@ -189,9 +191,11 @@ public class EmailSenderService implements EmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
 
+            String subjectPrepend = subjectPrependText == null ? "" : subjectPrependText;
+
             mimeMessageHelper.setFrom(from);
             mimeMessageHelper.setTo(to); //TODO check if email leak is happening
-            mimeMessageHelper.setSubject(subject);
+            mimeMessageHelper.setSubject(subjectPrepend + subject);
             mimeMessageHelper.setText(body, isTemplateMessage);
 
             return mimeMessage;
