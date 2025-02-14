@@ -1,4 +1,5 @@
 @param String link
+@param String orderCode
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +24,7 @@
         <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
             <h2 class="title">Please, confirm your order!</h2>
-            <p class="main-content">We have noticed you have left the order process before we could be able to link to your account the order ${} you placed.</p>
+            <p class="main-content">We have noticed you have left the order process before we could be able to link to your account the order ${orderCode} you placed.</p>
             <p class="main-content">To fix this issue and fully confirm your order, please open the following link:</p>
             <a href="${link}" class="link">${link}</a>
         </div>

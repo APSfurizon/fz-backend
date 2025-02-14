@@ -140,3 +140,7 @@ badge:
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
   editing-deadline: ${BADGE_EDITING_DEADLINE:}
+
+reminders:
+  cronjobs:
+    order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}

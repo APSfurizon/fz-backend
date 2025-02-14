@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -147,6 +148,7 @@ public class EmailSenderService implements EmailSender {
 
     private MimeMessage[] transformMailRequestsToMimeMessages(@NotNull MailRequest... requests) {
         return Arrays.stream(requests)
+            .filter(Objects::nonNull)
             .map(this::transformMailRequestToMimeMessages)
             .flatMap(Arrays::stream)
             .toArray(MimeMessage[]::new);

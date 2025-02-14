@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -23,10 +24,12 @@ import java.util.List;
 public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Integer> {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final EmailSender emailSender;
+    @NotNull private final PretixConfig pretixConfig;
 
     @Override
     public @NotNull Integer executor(@NotNull PretixInformation pretixInformation) {
         int n = 0;
+        log.info("Sending order linking remind emails");
 
         List<Order> unlinkedOrders = orderFinder.getUnlinkedOrder(
                 pretixInformation,
@@ -40,16 +43,20 @@ public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Inte
                 continue;
             }
 
+            log.info("Sending order linking reminder email to {}", buyerEmail);
             MailRequest mail = new MailRequest();
             mail.to(buyerEmail);
             mail.subject(ReminderEmailTexts.SUBJECT_ORDER_LINK);
             mail.templateMessage(ReminderEmailTexts.TEMPLATE_ORDER_LINK, null,
-                MailVarPair.of(EmailVars.LINK, )
+                MailVarPair.of(EmailVars.LINK, pretixConfig.getShop().getOrderUrl(o)),
+                MailVarPair.of(EmailVars.ORDER_CODE, o.getCode())
             );
 
             mails[n] = mail;
             n++;
         }
+        //It's fine having some mails set to null
+        log.info("Firing order linking emails");
         emailSender.fireAndForgetMany(mails);
 
         return n;

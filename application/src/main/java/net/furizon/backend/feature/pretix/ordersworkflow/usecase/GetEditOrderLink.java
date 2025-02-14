@@ -49,14 +49,7 @@ public class GetEditOrderLink implements UseCase<GetEditOrderLink.Input, LinkRes
             throw new RuntimeException("Unable to find the order");
         }
 
-        return new LinkResponse(
-                  pretixConfig.getShop().getUrl()
-                + "order/"
-                + order.getCode()
-                + "/"
-                + order.getPretixOrderSecret()
-                + "/change"
-        );
+        return new LinkResponse(pretixConfig.getShop().getOrderUrl(order) + "change");
     }
 
     public record Input(

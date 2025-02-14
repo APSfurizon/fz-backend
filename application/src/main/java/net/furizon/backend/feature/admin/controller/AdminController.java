@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -42,6 +44,8 @@ public class AdminController {
 
     @org.jetbrains.annotations.NotNull
     private final PretixConfig pretixConfig;
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
 
     @GetMapping("/ping")
     public String ping() {
@@ -71,10 +75,11 @@ public class AdminController {
         + "they have to open for link the accounts")
     @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
     @GetMapping("/mail-reminders/order-linking")
-    public boolean remindOrderLink(
+    public void remindOrderLink(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-
+        int sent = executor.execute(OrderLinkReminderUseCase.class, pretixInformation);
+        log.info("Sent {} order linking emails", sent);
     }
 
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})
