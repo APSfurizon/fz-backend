@@ -149,6 +149,18 @@ public class RoomChecks {
         }
     }
 
+    public void assertRoomFromCurrentEvent(long roomId, @NotNull Event event) {
+        var r = roomFinder.getEventIdOfRoom(roomId);
+        assertRoomFound(r, roomId);
+        long eventId = r.get();
+        long currentEventId = event.getId();
+        if (eventId != currentEventId) {
+            log.error("User is trying to manage room {}, but it's not from current event! (e: {}, ce: {})",
+                    roomId, eventId, currentEventId);
+            throw new ApiException("Room is not from current event", RoomErrorCodes.ROOM_NOT_OF_CURRENT_EVENT);
+        }
+    }
+
 
     public void assertRoomNotConfirmed(long roomId) {
         var r = roomFinder.isRoomConfirmed(roomId);

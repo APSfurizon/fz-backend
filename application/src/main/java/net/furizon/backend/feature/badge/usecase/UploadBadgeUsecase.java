@@ -83,7 +83,6 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
 
             StoreMediaOnDiskAction.Results res = storeMediaOnDiskAction.invoke(
                     image,
-                    imageMetadata,
                     input.user,
                     badgeConfig.getStoragePath()
             );

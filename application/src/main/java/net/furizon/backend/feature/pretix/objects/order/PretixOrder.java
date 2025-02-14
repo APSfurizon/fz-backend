@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.order;
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -16,6 +17,15 @@ public class PretixOrder {
 
     @NotNull
     private final String status;
+
+    @Nullable
+    private final String email;
+    @Nullable
+    private final String phone;
+    @Nullable
+    private final String customer;
+    @Nullable
+    private final String locale;
 
     @NotNull
     private final List<PretixPayment> payments;

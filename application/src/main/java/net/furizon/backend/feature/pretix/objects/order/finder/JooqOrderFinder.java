@@ -17,6 +17,9 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Optional;
 import java.util.Objects;
@@ -200,11 +203,14 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> r.get(ORDERS.ORDER_CODE));
     }
     @Override
-    public @Nullable Long getOrderIdByCode(@NotNull String orderCode) {
+    public @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event) {
         return query.fetchFirst(
             PostgresDSL.select(ORDERS.ID)
             .from(ORDERS)
-            .where(ORDERS.ORDER_CODE.eq(orderCode))
+            .where(
+                ORDERS.ORDER_CODE.eq(orderCode)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         ).mapOrNull(r -> r.get(ORDERS.ID));
     }
 
@@ -215,6 +221,17 @@ public class JooqOrderFinder implements OrderFinder {
             selectFrom()
             .where(ORDERS.USER_ID.eq(userId))
             .orderBy(ORDERS.EVENT_ID)
+        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
+    }
+
+    @Override
+    public @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event) {
+        return query.fetch(
+            selectFrom()
+            .where(
+                ORDERS.USER_ID.isNull()
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
     }
 
@@ -231,6 +248,10 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
+                        ORDERS.ORDER_BUYER_EMAIL,
+                        ORDERS.ORDER_BUYER_PHONE,
+                        ORDERS.ORDER_BUYER_USER,
+                        ORDERS.ORDER_BUYER_LOCALE,
                         ORDERS.ORDER_TICKET_POSITION_ID,
                         ORDERS.ORDER_TICKET_POSITION_POSITIONID,
                         ORDERS.ORDER_ROOM_POSITION_ID,

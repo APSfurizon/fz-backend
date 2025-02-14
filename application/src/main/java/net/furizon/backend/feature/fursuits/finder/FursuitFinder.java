@@ -13,6 +13,8 @@ public interface FursuitFinder {
 
     @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event);
 
+    @NotNull List<FursuitData> getFursuitsWithoutPropic(@NotNull Event event);
+
     int countFursuitsOfUser(long userId);
 
     int countFursuitOfUserToEvent(long userId, @NotNull Order order);

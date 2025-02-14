@@ -1,14 +1,12 @@
-@param String fursonaName
-@param String otherfursonaName
-@param String ownerFursonaName
-@param String exchangeActionText
 @param String link
+@param String deadline
+@param String fursonaName
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your accommodation got an update!</title>
+    <title>Please, upload your propic!</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="supported-color-schemes" content="light dark">
@@ -26,9 +24,10 @@
     <div class="container">
         <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
         <div>
-            <h2 class="title">Your accommodation got an update!</h2>
+            <h2 class="title">Please, upload your propic!</h2>
             <p class="main-content">Dear ${fursonaName},</p>
-            <p class="main-content">You're receiving this email because a <b>${exchangeActionText}</b> has been initialized between <i>${ownerFursonaName}</i> and <i>${otherfursonaName}</i>. To watch <b>more details</b> and <b>accept</b> or <b>refuse</b>, visit the following link:</p>
+            <p class="main-content">We have noticed you haven't uploaded your propic yet! The propic will be printed onto your badge, so be sure to upload it before the ${deadline}!</p>
+            <p class="main-content">You can upload your propic from the badge section of our website:</p>
             <a href="${link}" class="link">${link}</a>
         </div>
     </div>

@@ -30,6 +30,7 @@ public class InviteCancelUseCase implements UseCase<InviteCancelUseCase.Input, B
 
         checks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, roomId);
         checks.assertUserIsNotRoomOwner(guest.getUserId(), roomId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
         //If for some reason I end up with a full/confirmed room and there are still pending invitations,
         // I want to be able to cancel them anyway
         //checks.assertRoomNotConfirmed(roomId);

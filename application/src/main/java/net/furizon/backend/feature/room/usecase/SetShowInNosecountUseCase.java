@@ -30,6 +30,7 @@ public class SetShowInNosecountUseCase implements UseCase<SetShowInNosecountUseC
                 event,
                 input.req.getRoomId()
         );
+        checks.assertRoomFromCurrentEvent(roomId, event);
         return roomLogic.setShowInNosecount(input.req.getShowInNosecount(), roomId);
     }
 

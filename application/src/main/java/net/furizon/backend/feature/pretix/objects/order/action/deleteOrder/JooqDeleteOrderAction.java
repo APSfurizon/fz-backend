@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -31,11 +32,14 @@ public class JooqDeleteOrderAction implements DeleteOrderAction {
     }
 
     @Override
-    public void invoke(@NotNull final String code) {
-        deleteCard(code);
+    public void invoke(@NotNull final String code, @NotNull Event event) {
+        deleteCard(code, event);
         command.execute(
             PostgresDSL.deleteFrom(ORDERS)
-            .where(ORDERS.ORDER_CODE.eq(code))
+            .where(
+                ORDERS.ORDER_CODE.eq(code)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         );
     }
 
@@ -49,14 +53,17 @@ public class JooqDeleteOrderAction implements DeleteOrderAction {
     }
 
     @Override
-    public void invokeWithCodes(@NotNull Set<String> orderCodes) {
+    public void invokeWithCodes(@NotNull Set<String> orderCodes, @NotNull Event event) {
         for (String code : orderCodes) {
-            deleteCard(code);
+            deleteCard(code, event);
         }
 
         command.execute(
             PostgresDSL.deleteFrom(ORDERS)
-            .where(ORDERS.ORDER_CODE.in(orderCodes))
+            .where(
+                ORDERS.ORDER_CODE.in(orderCodes)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
         );
     }
     @Override
@@ -71,8 +78,8 @@ public class JooqDeleteOrderAction implements DeleteOrderAction {
         );
     }
 
-    private void deleteCard(@NotNull String orderCode) {
-        Long orderId = orderFinder.getOrderIdByCode(orderCode);
+    private void deleteCard(@NotNull String orderCode, @NotNull Event event) {
+        Long orderId = orderFinder.getOrderIdByCode(orderCode, event);
         if (orderId != null) {
             deleteCard(orderId);
         } else {

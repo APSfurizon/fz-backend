@@ -11,6 +11,8 @@ import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.action.createUser.CreateUserAction;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.EmailSender;
+import net.furizon.backend.infrastructure.email.EmailVars;
+import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.email.model.TemplateMessage;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
@@ -81,8 +83,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
                 .to(email)
                 .subject(SUBJECT_EMAIL_CONFIRM)
                 .templateMessage(
-                    TemplateMessage.of(TEMPLATE_EMAIL_CONFIRM)
-                    .addParam("link", frontendConfig.getConfirmEmailUrl(confirmationId))
+                    TEMPLATE_EMAIL_CONFIRM, null,
+                    MailVarPair.of(EmailVars.LINK, frontendConfig.getConfirmEmailUrl(confirmationId))
                 )
         );
 

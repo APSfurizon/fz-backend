@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum EmailVars {
+    FURSUIT_NAME("fursuitName"),
     FURSONA_NAME("fursonaName"),
     OTHER_FURSONA_NAME("otherfursonaName"),
     ROOM_OWNER_FURSONA_NAME("ownerFursonaName"),
     ROOM_NAME("roomName"),
     ROOM_TYPE_NAME("roomTypeName"),
     EXCHANGE_ACTION_TEXT("exchangeActionText"),
-    EXCHANGE_LINK("exchangeLink"),
     SANITY_CHECK_REASON("sanityCheckReason"),
     EVENT_NAME("eventName"),
     ORDER_CODE("orderCode"),
@@ -21,6 +21,8 @@ public enum EmailVars {
     MEMBERSHIP_CARD_ID("cardId"),
     MEMBERSHIP_CARD_ID_IN_YEAR("cardIdInYear"),
     REFUND_MONEY("refundMoney"),
+    LINK("link"),
+    DEADLINE("deadline"),
     ;
 
     @Getter

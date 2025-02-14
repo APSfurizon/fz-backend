@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +45,8 @@ public class EmailSenderService implements EmailSender {
 
     @Value("${spring.mail.username}")
     private String from;
+    @Value("${spring.mail.subject-prepend-text}")
+    private String subjectPrependText;
 
     @Override
     public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull String subject,
@@ -147,6 +150,7 @@ public class EmailSenderService implements EmailSender {
 
     private MimeMessage[] transformMailRequestsToMimeMessages(@NotNull MailRequest... requests) {
         return Arrays.stream(requests)
+            .filter(Objects::nonNull)
             .map(this::transformMailRequestToMimeMessages)
             .flatMap(Arrays::stream)
             .toArray(MimeMessage[]::new);
@@ -187,9 +191,11 @@ public class EmailSenderService implements EmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
 
+            String subjectPrepend = subjectPrependText == null ? "" : subjectPrependText;
+
             mimeMessageHelper.setFrom(from);
             mimeMessageHelper.setTo(to); //TODO check if email leak is happening
-            mimeMessageHelper.setSubject(subject);
+            mimeMessageHelper.setSubject(subjectPrepend + subject);
             mimeMessageHelper.setText(body, isTemplateMessage);
 
             return mimeMessage;

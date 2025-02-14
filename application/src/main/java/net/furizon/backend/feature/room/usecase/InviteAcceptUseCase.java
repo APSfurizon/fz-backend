@@ -46,6 +46,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
 
         roomChecks.assertRoomNotConfirmed(roomId);
         roomChecks.assertGuestIsNotConfirmed(guest);
+        roomChecks.assertRoomFromCurrentEvent(roomId, event);
         generalChecks.assertOrderIsPaid(targetUserId, event);
         roomChecks.assertUserIsNotInRoom(targetUserId, event, false);
         roomChecks.assertUserIsNotRoomOwner(targetUserId, roomId);

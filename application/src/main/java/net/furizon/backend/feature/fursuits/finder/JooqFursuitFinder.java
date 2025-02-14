@@ -5,6 +5,7 @@ import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,22 @@ public class JooqFursuitFinder implements FursuitFinder {
             selectDisplayFursuit(event)
             .where(FURSUITS.FURSUIT_ID.eq(fursuitId))
         ).mapOrNull(r -> JooqFursuitDataMapper.map(r, event != null));
+    }
+
+    @Override
+    public @NotNull List<FursuitData> getFursuitsWithoutPropic(@NotNull Event event) {
+        return sqlQuery.fetch(
+            selectDisplayFursuit(null) //Event = null so we manually INNER join the order
+            .innerJoin(FURSUITS_ORDERS)
+            .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
+            .innerJoin(ORDERS)
+            .on(
+                FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
+            )
+            .where(FURSUITS.MEDIA_ID_PROPIC.isNull())
+        ).stream().map(r -> JooqFursuitDataMapper.map(r, false)).toList();
     }
 
     @Override

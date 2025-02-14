@@ -96,6 +96,15 @@ public class Order {
     private short extraFursuits = 0;
 
     @Nullable
+    private final String buyerEmail;
+    @Nullable
+    private final String buyerPhone;
+    @Nullable
+    private final String buyerUser;
+    @Nullable
+    private final String buyerLocale;
+
+    @Nullable
     @Builder.Default
     @Setter(AccessLevel.NONE)
     private Long orderOwnerUserId = null;
@@ -139,7 +148,9 @@ public class Order {
             + " roomPositionId=" + roomPositionId + " roomPositionPosid=" + roomPositionPosid
             + " earlyPositionId=" + earlyPositionId + " latePositionId=" + latePositionId
             + " extraFursuits=" + extraFursuits
-            + " orderOwnerUserId=" + orderOwnerUserId + " eventId=" + eventId;
+            + " orderOwnerUserId=" + orderOwnerUserId + " eventId=" + eventId
+            + " buyerEmail=" + buyerEmail + " buyerPhone=" + buyerPhone
+            + " buyerUser=" + buyerUser + " buyerLocale=" + buyerLocale;
     }
 
 

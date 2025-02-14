@@ -46,6 +46,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         checks.assertRoomNotConfirmed(roomId);
         checks.assertUserIsNotRoomOwner(targetUserId, roomId);
         checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.leaveRoom(guest.getGuestId());
         if (res) {

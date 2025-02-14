@@ -31,6 +31,7 @@ public class RenameRoomUseCase implements UseCase<RenameRoomUseCase.Input, Boole
                 event,
                 input.req.getRoomId()
         );
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         return roomLogic.changeRoomName(input.req.getName(), roomId);
     }

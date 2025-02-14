@@ -38,6 +38,10 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String hotelInternalName = order.getHotelInternalName();
         String roomInternalName = order.getRoomInternalName();
         String orderSecret = order.getPretixOrderSecret();
+        String buyerEmail = order.getBuyerEmail();
+        String buyerPhone = order.getBuyerPhone();
+        String buyerUser = order.getBuyerUser();
+        String buyerLocale = order.getBuyerLocale();
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
         long ticketPosid = order.getTicketPositionPosid();
@@ -75,6 +79,10 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_ROOM_INTERNAL_NAME,
                     ORDERS.ORDER_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
+                    ORDERS.ORDER_BUYER_EMAIL,
+                    ORDERS.ORDER_BUYER_PHONE,
+                    ORDERS.ORDER_BUYER_USER,
+                    ORDERS.ORDER_BUYER_LOCALE,
                     ORDERS.ORDER_TICKET_POSITION_ID,
                     ORDERS.ORDER_TICKET_POSITION_POSITIONID,
                     ORDERS.ORDER_ROOM_POSITION_ID,
@@ -99,6 +107,10 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     roomInternalName,
                     orderSecret,
                     membership,
+                    buyerEmail,
+                    buyerPhone,
+                    buyerUser,
+                    buyerLocale,
                     ticketPositionId,
                     ticketPosid,
                     roomPositionId,
@@ -122,6 +134,10 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_ROOM_INTERNAL_NAME, roomInternalName)
                 .set(ORDERS.ORDER_SECRET, orderSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
+                .set(ORDERS.ORDER_BUYER_EMAIL, buyerEmail)
+                .set(ORDERS.ORDER_BUYER_PHONE, buyerPhone)
+                .set(ORDERS.ORDER_BUYER_USER, buyerUser)
+                .set(ORDERS.ORDER_BUYER_LOCALE, buyerLocale)
                 .set(ORDERS.ORDER_TICKET_POSITION_ID, ticketPositionId)
                 .set(ORDERS.ORDER_TICKET_POSITION_POSITIONID, ticketPosid)
                 .set(ORDERS.ORDER_ROOM_POSITION_ID, roomPositionId)

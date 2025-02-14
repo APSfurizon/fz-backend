@@ -43,6 +43,7 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomNotConfirmed(roomId);
+        checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.deleteRoom(roomId);
         if (res) {

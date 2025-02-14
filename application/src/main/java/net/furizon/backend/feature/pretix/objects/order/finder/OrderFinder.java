@@ -45,5 +45,8 @@ public interface OrderFinder {
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
 
     @Nullable String getOrderCodeById(long orderId);
-    @Nullable Long getOrderIdByCode(@NotNull String orderCode);
+
+    @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
+
+    @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event);
 }

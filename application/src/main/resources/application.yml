@@ -23,6 +23,7 @@ spring:
     username: ${MAIL_SENDER_PROVIDER_USERNAME:test@example.com}
     password: ${MAIL_SENDER_PROVIDER_PASSWORD:changeme}
     protocol: ${MAIL_SENDER_PROTOCOL:smtps}
+    subject-prepend-text: ${MAIL_SUBJECT_PREPEND_TEXT:}
     properties:
       "mail.smtp.auth": true
       "mail.smtp.starttls.enable": true
@@ -79,6 +80,7 @@ frontend:
   password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
+  badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -140,3 +142,9 @@ badge:
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
   editing-deadline: ${BADGE_EDITING_DEADLINE:}
+
+reminders:
+  cronjobs:
+    order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
+    user-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
+    fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}

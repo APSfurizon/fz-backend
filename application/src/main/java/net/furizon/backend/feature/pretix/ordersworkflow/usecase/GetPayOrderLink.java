@@ -45,14 +45,7 @@ public class GetPayOrderLink implements UseCase<GetPayOrderLink.Input, LinkRespo
                     input.user.getUserId(), order.getCode(), order.getOrderStatus());
         }
 
-        return new LinkResponse(
-                  pretixConfig.getShop().getUrl()
-                + "order/"
-                + order.getCode()
-                + "/"
-                + order.getPretixOrderSecret()
-                + "/pay/change"
-        );
+        return new LinkResponse(pretixConfig.getShop().getOrderUrl(order) + "pay/change");
     }
 
     public record Input(

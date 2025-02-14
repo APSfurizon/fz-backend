@@ -10,4 +10,6 @@ public class CapabilitiesResponse {
     private final boolean canBanUsers;
     private final boolean canManageMembershipCards;
     private final boolean canRefreshPretixCache;
+    private final boolean canRemindOrderLinking;
+    private final boolean canRemindBadgeUploads;
 }

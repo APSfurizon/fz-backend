@@ -133,6 +133,29 @@ public class JooqUserFinder implements UserFinder {
             )
         ).stream().map(JooqUserEmailDataMapper::map).toList();
     }
+    @NotNull
+    @Override
+    public List<UserEmailData> getMailDataForUsersWithNoPropic(@NotNull Event event) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
+            )
+            .from(USERS)
+            .innerJoin(AUTHENTICATIONS)
+            .on(
+                USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID)
+                .and(USERS.MEDIA_ID_PROPIC.isNull())
+            )
+            .innerJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+        ).stream().map(JooqUserEmailDataMapper::map).toList();
+    }
 
     @NotNull
     @Override

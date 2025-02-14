@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public enum OrderStatus {
+    //Do not fucking change the order of these
     CANCELED("c"),
     PENDING("n"),
     PAID("p"),

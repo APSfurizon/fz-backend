@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.pretix;
 
 import lombok.Data;
+import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -90,5 +91,10 @@ public class PretixConfig implements HttpConfig {
         @NotNull private final String basePath;
         @NotNull private final String path;
         @NotNull private final String url;
+
+        @NotNull
+        public String getOrderUrl(@NotNull Order order) {
+            return url + "order/" + order.getCode() + "/" + order.getPretixOrderSecret() + "/";
+        }
     }
 }

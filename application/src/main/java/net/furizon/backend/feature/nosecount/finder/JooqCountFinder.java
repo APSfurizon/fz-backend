@@ -128,7 +128,7 @@ public class JooqCountFinder implements CountsFinder {
 
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .orderBy(ROOMS.ROOM_ID)
+            .orderBy(ROOMS.ROOM_ID, ROOM_GUESTS.ROOM_GUEST_ID)
         ).stream().map(r -> JooqNosecountObjMapper.map(r, roomOwnerOrder)).toList();
     }
 }

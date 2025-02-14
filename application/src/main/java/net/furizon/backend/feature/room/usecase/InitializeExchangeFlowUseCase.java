@@ -20,10 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
-import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_LINK;
-import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.*;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_INITIALIZED;
 
 @Slf4j
@@ -66,7 +63,7 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 MailVarPair.of(EXCHANGE_ACTION_TEXT, RoomEmailTexts.getActionText(action, destHasRoom)),
                 MailVarPair.of(ROOM_OWNER_FURSONA_NAME, sourceData.getFursonaName()),
                 MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
-                MailVarPair.of(EXCHANGE_LINK, transferExchangeConfirmationUrl + exchangeId),
+                MailVarPair.of(LINK, transferExchangeConfirmationUrl + exchangeId),
             };
             mailService.prepareAndSendUpdate(
                 new MailRequest(destData, TEMPLATE_EXCHANGE_INITIALIZED, vars),

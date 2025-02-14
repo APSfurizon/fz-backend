@@ -7,6 +7,7 @@ public enum RoomErrorCodes {
     ROOM_CANNOT_BE_UNCONFIRMED, //The room cannot be unconfirmed
     ROOM_ALREADY_CONFIRMED, //Room was expected to NOT be confirmed, but instead it was
     ROOM_NOT_CONFIRMED, //The room is not confirmed
+    ROOM_NOT_OF_CURRENT_EVENT, //The room the user is trying to manage is not from the current event
     GUEST_NOT_FOUND, //Unable to find the specified guest
     GUEST_ALREADY_CONFIRMED, //We expected that the guest had not confirmed yet, but instead it has
     GUEST_NOT_CONFIRMED, //Guest hasn't confirmed yet
