@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
@@ -71,7 +73,7 @@ public class AdminController {
     }
 
     @Operation(summary = "Remind user to link their orders", description =
-        "Sends an email to all people who have made an order which is still unlinked with a link "
+        "Sends an email to all people who have made a paid order which is still unlinked with a link "
         + "they have to open for link the accounts")
     @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
     @GetMapping("/mail-reminders/order-linking")
@@ -80,6 +82,30 @@ public class AdminController {
     ) {
         int sent = executor.execute(OrderLinkReminderUseCase.class, pretixInformation);
         log.info("Sent {} order linking emails", sent);
+    }
+
+    @Operation(summary = "Remind user to upload their user badge", description =
+        "Sends an email to all people who have made a paid order which have not set an user propic yet, "
+            + "reminding them to do so")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @GetMapping("/mail-reminders/user-badge-upload")
+    public void remindUserBadgeUpload(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(UserBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
+        log.info("Sent {} user badge upload emails", sent);
+    }
+
+    @Operation(summary = "Remind user to link their orders", description =
+        "Sends an email to all people who have made a paid order which have not set a fursuit propic yet "
+        + "for a fursuit they're bringing to the current event, reminding them to do so")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @GetMapping("/mail-reminders/fursuit-badge-upload")
+    public void remindFursuitBadgeUpload(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(FursuitBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
+        log.info("Sent {} fursuit badge upload emails", sent);
     }
 
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})

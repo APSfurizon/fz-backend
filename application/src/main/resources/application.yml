@@ -80,6 +80,7 @@ frontend:
   password-reset-url: ${FRONTEND_PASSWORD_RESET_URL:}
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
+  badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -144,4 +145,6 @@ badge:
 
 reminders:
   cronjobs:
-    order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
+    order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
+    user-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
+    fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}

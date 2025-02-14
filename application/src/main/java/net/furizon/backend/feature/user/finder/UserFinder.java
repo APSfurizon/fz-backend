@@ -15,6 +15,8 @@ public interface UserFinder {
     @Nullable
     User findById(long userId);
 
+    @NotNull List<UserEmailData> getMailDataForUsersWithNoPropic(@NotNull Event event);
+
     @NotNull
     List<SearchUserResult> searchUserInCurrentEvent(
             @NotNull String fursonaName,
