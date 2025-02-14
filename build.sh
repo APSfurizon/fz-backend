@@ -2,7 +2,7 @@
 set -e #crashes the script on errors
 
 echo "pulling from git"
-#git pull origin master
+git pull origin master
 echo "stopping service"
 service fz-backend stop
 echo "building docker"

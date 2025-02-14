@@ -31,7 +31,7 @@
         <java.version>23</java.version>
         <lombok.version>1.18.34</lombok.version>
         <checkstyle.version>10.18.2</checkstyle.version>
-        <spring.boot.version>3.3.4</spring.boot.version>
+        <spring.boot.version>3.4.2</spring.boot.version>
         <postgresql.version>42.7.4</postgresql.version>
         <jooq.version>3.19.13</jooq.version>
         <commons.lang.version>3.17.0</commons.lang.version>
@@ -39,6 +39,12 @@
         <uuid.creator.version>6.0.0</uuid.creator.version>
         <paseto4j.version>2024.3</paseto4j.version>
         <jte.version>3.1.15</jte.version>
+        <com.sksamuel.scrimage.version>4.3.0</com.sksamuel.scrimage.version>
+        <org.bouncycastle.version>1.79</org.bouncycastle.version>
+        <org.jetbrains.version>26.0.1</org.jetbrains.version>
+        <com.github.ben-manes.caffeine.version>3.1.8</com.github.ben-manes.caffeine.version>
+        <org.zalando.version>3.9.0</org.zalando.version>
+        <org.springdoc.version>2.5.0</org.springdoc.version>
     </properties>
     <dependencies>
         <dependency>
