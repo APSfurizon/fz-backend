@@ -24,7 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.*;
+import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.SUBJECT_FURSUIT_BADGE_UPLOAD;
+import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_FURSUIT_BADGE_UPLOAD;
 
 @Slf4j
 @Component
