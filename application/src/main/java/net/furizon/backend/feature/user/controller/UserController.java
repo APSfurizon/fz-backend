@@ -90,7 +90,7 @@ public class UserController {
             "This operation can be performed only by an admin. "
             + "Displays the user's data, along with the personal info and past event's orders and rooms."
             + "Users without the ")
-    @PermissionRequired(permissions = {Permission.CAN_VIEW_USER})
+    @PermissionRequired(permissions = {Permission.CAN_VIEW_USER, Permission.CAN_MANAGE_USER_PUBLIC_INFO})
     @GetMapping("/view/{id}")
     public UserAdminViewData getUserAdminViewData(
             @AuthenticationPrincipal @NotNull final FurizonUser user,

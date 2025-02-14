@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
-import net.furizon.backend.feature.user.UserCodes;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UserAdminViewDisplay;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -29,14 +29,14 @@ public class GetUserAdminViewDataUseCase implements UseCase<GetUserAdminViewData
     @Override
     public @NotNull UserAdminViewData executor(@NotNull Input input) {
         // Find user data first
-        final UserAdminViewDisplay userData = userFinder.getUserAdminViewDisplay(input.userId,
-                input.event);
+        UserAdminViewDisplay userData = userFinder.getUserAdminViewDisplay(input.userId, input.event);
         if (userData == null) {
-            throw new ApiException("User not found", UserCodes.USER_NOT_FOUND);
+            throw new ApiException("User not found", GeneralResponseCodes.USER_NOT_FOUND);
         }
         // Then, get orders grouped by events
-        final List<Order> orders = Objects.requireNonNull(
-                orderFinder.findOrdersByUserId(input.userId, input.pretixInformation));
+        List<Order> orders = Objects.requireNonNull(
+                orderFinder.findAllOrdersOfUser(input.userId, input.pretixInformation)
+        );
 
         return new UserAdminViewData(userData, orders);
     }

@@ -43,7 +43,7 @@ public class JooqUserFinder implements UserFinder {
         return sqlQuery
             .fetchFirst(
                 selectUser()
-                    .where(USERS.USER_ID.eq(userId))
+                .where(USERS.USER_ID.eq(userId))
             )
             .mapOrNull(JooqUserMapper::map);
     }
@@ -152,114 +152,113 @@ public class JooqUserFinder implements UserFinder {
         boolean joinBanStatus = false;
 
         Table<?> searchFursonaQuery = selectUser()
-                .where(
-                        USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
-                                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
-                                .or(
-                                        //If someone doesn't want to be displayed in the nosecount,
-                                        // find him only if it's a almost exact match
-                                        USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
-                                                .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
-                                )
-                ).asTable("fursonaq");
+            .where(
+                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
+                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
+                .or(
+                    //If someone doesn't want to be displayed in the nosecount,
+                    // find him only if it's a almost exact match
+                    USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
+                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse()))
+            ).asTable("fursonaq");
 
         if (filterRoom) {
             innerJoinOrders = true;
             condition = condition.and(
-                    searchFursonaQuery.field(USERS.USER_ID).notIn(
-                                    PostgresDSL.select(ROOM_GUESTS.USER_ID)
-                                            .from(ROOM_GUESTS)
-                                            .where(
-                                                    ROOM_GUESTS.CONFIRMED.isTrue()
-                                            //TODO find users inside the same room of the current user
-                                            //.and(ROOM_GUESTS.ROOM_ID.notEqual())
-                                            )
-                            )
-                            .and(
-                                    ORDERS.ORDER_ROOM_CAPACITY.isNull()
-                                            .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
-                            )
+                searchFursonaQuery.field(USERS.USER_ID).notIn(
+                    PostgresDSL.select(ROOM_GUESTS.USER_ID)
+                    .from(ROOM_GUESTS)
+                    .where(
+                        ROOM_GUESTS.CONFIRMED.isTrue()
+                        //TODO find users inside the same room of the current user
+                        //.and(ROOM_GUESTS.ROOM_ID.notEqual())
+                    )
+                )
+                .and(
+                    ORDERS.ORDER_ROOM_CAPACITY.isNull()
+                    .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
+                )
             );
         }
 
         if (filterPaid) {
             innerJoinOrders = true;
             condition = condition.and(
-                    ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
+                ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
             );
         }
 
         if (filerNotMadeAnOrder) {
             leftJoinOrders = true;
             condition = condition.and(
-                    ORDERS.ID.isNull()
+                ORDERS.ID.isNull()
             );
         }
 
         if (filterMembershipCardForYear != null) {
             joinMembershipCards = true;
             condition = condition.and(
-                    MEMBERSHIP_CARDS.ISSUE_YEAR.isNull()
-                            .or(MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear))
+                MEMBERSHIP_CARDS.ISSUE_YEAR.isNull()
+                .or(MEMBERSHIP_CARDS.ISSUE_YEAR.notEqual(filterMembershipCardForYear))
             );
         }
 
         if (filterBanStatus != null) {
             joinBanStatus = true;
             condition = condition.and(
-                    AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
+                AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
             );
         }
 
         SelectJoinStep<?> query = PostgresDSL
-                .selectDistinct(
-                        searchFursonaQuery.field(USERS.USER_ID),
-                        searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
-                        MEDIA.MEDIA_PATH,
-                        MEDIA.MEDIA_TYPE,
-                        MEDIA.MEDIA_ID
-                )
-                .from(searchFursonaQuery)
-                .leftJoin(MEDIA)
-                .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
+            .selectDistinct(
+                searchFursonaQuery.field(USERS.USER_ID),
+                searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID
+            )
+            .from(searchFursonaQuery)
+            .leftJoin(MEDIA)
+            .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
 
         if (joinBanStatus) {
             query = query
-                    .innerJoin(AUTHENTICATIONS)
-                    .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
+                .innerJoin(AUTHENTICATIONS)
+                .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
         }
 
         if (innerJoinOrders) {
             query = query
-                    .innerJoin(ORDERS)
-                    .on(
-                            searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
-                                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                    );
+                .innerJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
         }
         if (leftJoinOrders && !innerJoinOrders) {
             query = query
-                    .leftJoin(ORDERS)
-                    .on(
-                            searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
-                                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                    );
+                .leftJoin(ORDERS)
+                .on(
+                    searchFursonaQuery.field(USERS.USER_ID).eq(ORDERS.USER_ID)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                );
         }
 
         if (joinMembershipCards) {
             query = query
-                    .leftJoin(MEMBERSHIP_CARDS)
-                    .on(searchFursonaQuery.field(USERS.USER_ID).eq(MEMBERSHIP_CARDS.USER_ID));
+                .leftJoin(MEMBERSHIP_CARDS)
+                .on(searchFursonaQuery.field(USERS.USER_ID).eq(MEMBERSHIP_CARDS.USER_ID));
         }
 
         var finalQuery = query.where(condition).asTable("finalq");
         return sqlQuery.fetch(
-                PostgresDSL.select(PostgresDSL.asterisk())
-                        .from(finalQuery)
-                        .orderBy(
-                                PostgresDSL.position(fursonaName, finalQuery.field(USERS.USER_FURSONA_NAME)),
-                                finalQuery.field(USERS.USER_FURSONA_NAME)
-                        )
+            PostgresDSL.select(PostgresDSL.asterisk())
+            .from(finalQuery)
+            .orderBy(
+                PostgresDSL.position(fursonaName, finalQuery.field(USERS.USER_FURSONA_NAME)),
+                finalQuery.field(USERS.USER_FURSONA_NAME)
+            )
         ).stream().map(JooqSearchUserMapper::map).toList();
     }
 
@@ -267,61 +266,60 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public UserAdminViewDisplay getUserAdminViewDisplay(long userId, @NotNull Event event) {
         return sqlQuery.fetchFirst(
-                PostgresDSL
-                        .select(
-                                USERS.USER_ID,
-                                USERS.USER_FURSONA_NAME,
-                                USERS.USER_LOCALE,
-                                MEDIA.MEDIA_PATH,
-                                MEDIA.MEDIA_TYPE,
-                                MEDIA.MEDIA_ID,
-                                ORDERS.ORDER_SPONSORSHIP_TYPE,
-                                ORDERS.ORDER_CODE,
-                                MEMBERSHIP_INFO.ID,
-                                MEMBERSHIP_INFO.INFO_FIRST_NAME,
-                                MEMBERSHIP_INFO.INFO_LAST_NAME,
-                                MEMBERSHIP_INFO.INFO_FISCAL_CODE,
-                                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
-                                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
-                                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
-                                MEMBERSHIP_INFO.INFO_BIRTHDAY,
-                                MEMBERSHIP_INFO.INFO_ADDRESS,
-                                MEMBERSHIP_INFO.INFO_ZIP,
-                                MEMBERSHIP_INFO.INFO_CITY,
-                                MEMBERSHIP_INFO.INFO_REGION,
-                                MEMBERSHIP_INFO.INFO_COUNTRY,
-                                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
-                                MEMBERSHIP_INFO.INFO_PHONE,
-                                MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
-                                MEMBERSHIP_INFO.INFO_ALLERGIES,
-                                MEMBERSHIP_INFO.USER_ID,
-                                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                                AUTHENTICATIONS.AUTHENTICATION_DISABLED
-                        )
-                        .from(USERS)
-                        .innerJoin(MEMBERSHIP_INFO)
-                        .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
-                        .innerJoin(AUTHENTICATIONS)
-                        .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
-                        .leftJoin(MEDIA)
-                        .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-                        .leftJoin(ORDERS)
-                        .on(
-                                USERS.USER_ID.eq(ORDERS.USER_ID)
-                                        .and(ORDERS.EVENT_ID.eq(event.getId()))
-                        )
-                        .where(USERS.USER_ID.eq(userId))
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
+                ORDERS.ORDER_SPONSORSHIP_TYPE,
+                ORDERS.ORDER_CODE,
+                MEMBERSHIP_INFO.ID,
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_FISCAL_CODE,
+                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
+                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
+                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                MEMBERSHIP_INFO.INFO_ADDRESS,
+                MEMBERSHIP_INFO.INFO_ZIP,
+                MEMBERSHIP_INFO.INFO_CITY,
+                MEMBERSHIP_INFO.INFO_REGION,
+                MEMBERSHIP_INFO.INFO_COUNTRY,
+                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
+                MEMBERSHIP_INFO.INFO_PHONE,
+                MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
+                MEMBERSHIP_INFO.INFO_ALLERGIES,
+                MEMBERSHIP_INFO.USER_ID,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                AUTHENTICATIONS.AUTHENTICATION_DISABLED
+            )
+            .from(USERS)
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+            .innerJoin(AUTHENTICATIONS)
+            .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .leftJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+            .where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqUserDisplayMapper::mapWithAdminView);
     }
 
     private SelectJoinStep<?> selectUser() {
         return PostgresDSL
             .select(
-                    USERS.USER_ID,
-                    USERS.USER_FURSONA_NAME,
-                    USERS.USER_LOCALE,
-                    USERS.MEDIA_ID_PROPIC,
-                    USERS.SHOW_IN_NOSECOUNT
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                USERS.MEDIA_ID_PROPIC,
+                USERS.SHOW_IN_NOSECOUNT
             )
             .from(USERS);
     }

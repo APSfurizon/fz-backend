@@ -208,14 +208,13 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> r.get(ORDERS.ID));
     }
 
-    @Nullable
+    @NotNull
     @Override
-    public List<Order> findOrdersByUserId(long userId, @NotNull PretixInformation pretixService) {
+    public List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService) {
         return query.fetch(
-                selectFrom()
-                        .where(
-                                ORDERS.USER_ID.eq(userId)
-                        ).orderBy(ORDERS.EVENT_ID)
+            selectFrom()
+            .where(ORDERS.USER_ID.eq(userId))
+            .orderBy(ORDERS.EVENT_ID)
         ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
     }
 
