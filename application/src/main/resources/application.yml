@@ -148,3 +148,6 @@ reminders:
     order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
     user-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
     fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}
+
+admin:
+  custom-templates-location: ${CUSTOM_TEMPLATE_PATH:templates/jte/custom}

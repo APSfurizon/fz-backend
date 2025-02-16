@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
+import net.furizon.backend.feature.admin.usecase.GetBadgesToPrintUseCase;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
@@ -18,6 +19,9 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -129,5 +133,21 @@ public class AdminController {
     ) {
         long deleted = executor.execute(RemoveDanglingMediaUseCase.class, 0); //input is useless
         log.info("Deleted dangling {} medias", deleted);
+    }
+
+    @Operation(summary = "Generates and returns a pdf document of all badge", description =
+            "Sends an email to all people who have made a paid order which is still unlinked with a link "
+                    + "they have to open for link the accounts")
+    //@PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @GetMapping("/get-badges-to-print")
+    public ResponseEntity<Byte[]> generateBadges(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        Byte[] sent = executor.execute(GetBadgesToPrintUseCase.class,
+                new GetBadgesToPrintUseCase.Input(user, pretixInformation));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"generated.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(sent);
     }
 }
