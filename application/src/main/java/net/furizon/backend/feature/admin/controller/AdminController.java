@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
+import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
@@ -18,6 +19,8 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -106,6 +109,22 @@ public class AdminController {
     ) {
         int sent = executor.execute(FursuitBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} fursuit badge upload emails", sent);
+    }
+
+    @Operation(summary = "Exports the list of user for the hotel")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @GetMapping(value = "/export/hotel-user-list")
+    public ResponseEntity<String> exportHotel(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        log.info("User {} is exporting hotel users list", user.getUserId());
+        String data = executor.execute(ExportHotelUseCase.class, pretixInformation);
+        String fileName = "hotel-user-list-" + System.currentTimeMillis() + ".csv";
+        return ResponseEntity.ok()
+                             .contentType(new MediaType("text", "csv"))
+                             .contentLength(data.length())
+                             .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                             .body(data);
     }
 
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_RAW_UPLOADS})

@@ -42,6 +42,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String buyerPhone = order.getBuyerPhone();
         String buyerUser = order.getBuyerUser();
         String buyerLocale = order.getBuyerLocale();
+        String internalComment = order.getInternalComment();
+        String checkinText = order.getCheckinText();
+        boolean requiresAttention = order.isRequireAttention();
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
         long ticketPosid = order.getTicketPositionPosid();
@@ -90,6 +93,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_EARLY_POSITION_ID,
                     ORDERS.ORDER_LATE_POSITION_ID,
                     ORDERS.ORDER_EXTRA_FURSUITS,
+                    ORDERS.ORDER_REQUIRES_ATTENTION,
+                    ORDERS.ORDER_CHECKIN_TEXT,
+                    ORDERS.ORDER_INTERNAL_COMMENT,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON
@@ -118,6 +124,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     earlyPositionId,
                     latePositionId,
                     extraFursuits,
+                    requiresAttention,
+                    checkinText,
+                    internalComment,
                     userId,
                     eventId,
                     answers
@@ -145,6 +154,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_EARLY_POSITION_ID, earlyPositionId)
                 .set(ORDERS.ORDER_LATE_POSITION_ID, latePositionId)
                 .set(ORDERS.ORDER_EXTRA_FURSUITS, extraFursuits)
+                .set(ORDERS.ORDER_REQUIRES_ATTENTION, requiresAttention)
+                .set(ORDERS.ORDER_CHECKIN_TEXT, checkinText)
+                .set(ORDERS.ORDER_INTERNAL_COMMENT, internalComment)
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, eventId)
                 .set(ORDERS.ORDER_ANSWERS_JSON, answers)

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.order;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import org.jetbrains.annotations.NotNull;
@@ -32,4 +33,13 @@ public class PretixOrder {
 
     @NotNull
     private final List<PretixPosition> positions;
+
+    @Nullable
+    private final String comment;
+
+    @JsonProperty("checkin_attention")
+    private final boolean checkinRequiresAttention;
+    @Nullable
+    @JsonProperty("checkin_text")
+    private final String checkinText;
 }

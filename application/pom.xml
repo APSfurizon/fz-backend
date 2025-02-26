@@ -127,7 +127,11 @@
             <artifactId>scrimage-webp</artifactId>
             <version>${com.sksamuel.scrimage.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+            <version>2.18.2</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
