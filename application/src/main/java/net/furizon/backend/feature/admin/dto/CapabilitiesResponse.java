@@ -12,4 +12,5 @@ public class CapabilitiesResponse {
     private final boolean canRefreshPretixCache;
     private final boolean canRemindOrderLinking;
     private final boolean canRemindBadgeUploads;
+    private final boolean canExportHotelList;
 }
