@@ -31,7 +31,7 @@
         <java.version>23</java.version>
         <lombok.version>1.18.34</lombok.version>
         <checkstyle.version>10.18.2</checkstyle.version>
-        <spring.boot.version>3.4.2</spring.boot.version>
+        <spring.boot.version>3.3.8</spring.boot.version>
         <postgresql.version>42.7.4</postgresql.version>
         <jooq.version>3.19.13</jooq.version>
         <commons.lang.version>3.17.0</commons.lang.version>
