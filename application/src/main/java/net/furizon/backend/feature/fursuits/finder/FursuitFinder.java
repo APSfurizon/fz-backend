@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.fursuits.finder;
 
+import net.furizon.backend.feature.admin.dto.BadgePrint;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -22,4 +23,6 @@ public interface FursuitFinder {
     @Nullable Long getFursuitOwner(long fursuitId);
 
     boolean isFursuitBroughtToEvent(long fursuitId, @NotNull Order order);
+
+    @NotNull List<BadgePrint> getFursuitBadgesToPrint (@NotNull Event event);
 }

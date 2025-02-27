@@ -140,14 +140,14 @@ public class AdminController {
                     + "they have to open for link the accounts")
     //@PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
     @GetMapping("/get-badges-to-print")
-    public ResponseEntity<Byte[]> generateBadges(
+    public ResponseEntity<String> generateBadges(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        Byte[] sent = executor.execute(GetBadgesToPrintUseCase.class,
+        String sent = executor.execute(GetBadgesToPrintUseCase.class,
                 new GetBadgesToPrintUseCase.Input(user, pretixInformation));
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"generated.pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=generated.html")
+                .contentType(MediaType.TEXT_HTML)
                 .body(sent);
     }
 }
