@@ -52,6 +52,10 @@ public interface PretixInformation {
     @NotNull
     Set<Long> getIdsForItemType(CacheItemTypes type);
 
+    long getQuestionDuplicateData();
+
+    long getQuestionUserNotes();
+
     @NotNull
     Optional<QuestionType> getQuestionTypeFromId(long id);
 

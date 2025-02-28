@@ -247,6 +247,9 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_LATE_POSITION_ID,
                         ORDERS.ORDER_ANSWERS_JSON,
                         ORDERS.ORDER_EXTRA_FURSUITS,
+                        ORDERS.ORDER_REQUIRES_ATTENTION,
+                        ORDERS.ORDER_CHECKIN_TEXT,
+                        ORDERS.ORDER_INTERNAL_COMMENT,
                         ORDERS.USER_ID,
                         ORDERS.EVENT_ID
                 ).from(ORDERS);
