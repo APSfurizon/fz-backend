@@ -20,6 +20,7 @@ public class HotelExportRow {
     @NotNull private final String email;
     @NotNull private final String phone;
     private final long userId;
+    @NotNull private final String userName;
     @NotNull private final String orderCode;
     @NotNull private final String roomOwnerOrderCode;
 

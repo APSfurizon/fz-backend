@@ -446,6 +446,7 @@ public class JooqRoomFinder implements RoomFinder {
                 MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                 MEMBERSHIP_INFO.INFO_PHONE,
                 USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
                 ORDERS.ORDER_CODE,
                 roomOwnerOrder.ORDER_CODE,
                 ORDERS.ORDER_REQUIRES_ATTENTION,

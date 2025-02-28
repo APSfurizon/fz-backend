@@ -35,6 +35,7 @@ public class HotelExportRowMapper {
                     + record.get(MEMBERSHIP_INFO.INFO_PHONE)
                 )
                 .userId(record.get(USERS.USER_ID))
+                .userName(record.get(USERS.USER_FURSONA_NAME))
                 .orderCode(record.get(ORDERS.ORDER_CODE))
                 .roomOwnerOrderCode(record.get(roomOwnerOrder.ORDER_CODE))
                 .requiresAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
