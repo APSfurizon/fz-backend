@@ -26,6 +26,10 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
                 .canRefreshPretixCache(p.contains(Permission.CAN_REFRESH_PRETIX_CACHE))
                 .canRemindOrderLinking(p.contains(Permission.PRETIX_ADMIN))
                 .canRemindBadgeUploads(p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO))
+                .canViewUsers(
+                        p.contains(Permission.CAN_VIEW_USER)
+                        && p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                )
                 .build();
     }
 }

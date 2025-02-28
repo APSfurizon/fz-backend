@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -209,6 +212,16 @@ public class JooqOrderFinder implements OrderFinder {
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
         ).mapOrNull(r -> r.get(ORDERS.ID));
+    }
+
+    @NotNull
+    @Override
+    public List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService) {
+        return query.fetch(
+            selectFrom()
+            .where(ORDERS.USER_ID.eq(userId))
+            .orderBy(ORDERS.EVENT_ID)
+        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
     }
 
     @Override
