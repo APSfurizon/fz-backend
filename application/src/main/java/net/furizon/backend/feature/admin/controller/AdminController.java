@@ -122,7 +122,7 @@ public class AdminController {
         String fileName = "hotel-user-list-" + System.currentTimeMillis() + ".csv";
         return ResponseEntity.ok()
                              .contentType(new MediaType("text", "csv"))
-                             .contentLength(data.length())
+                             .contentLength(data.getBytes().length)
                              .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                              .body(data);
     }

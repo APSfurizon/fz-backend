@@ -35,6 +35,7 @@ public class ExportHotelUseCase implements UseCase<PretixInformation, String> {
                 pretixInformation.getCurrentEvent().getId(),
                 pretixInformation
         );
+        log.debug("Export hotel row length: {}", rows.size());
         String out;
         try {
             out = writer.writeValueAsString(rows);
