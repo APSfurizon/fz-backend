@@ -453,13 +453,9 @@ public class JooqRoomFinder implements RoomFinder {
             )
             .from(USERS)
             .innerJoin(MEMBERSHIP_INFO)
-            .on(
-                MEMBERSHIP_INFO.USER_ID.eq(USERS.USER_ID)
-            )
+            .on(MEMBERSHIP_INFO.USER_ID.eq(USERS.USER_ID))
             .innerJoin(AUTHENTICATIONS)
-            .on(
-                AUTHENTICATIONS.USER_ID.eq(USERS.USER_ID)
-            )
+            .on(AUTHENTICATIONS.USER_ID.eq(USERS.USER_ID))
             .innerJoin(ORDERS)
             .on(
                 ORDERS.USER_ID.eq(USERS.USER_ID)

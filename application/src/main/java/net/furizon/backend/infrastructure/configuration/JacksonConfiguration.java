@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -22,23 +23,20 @@ public class JacksonConfiguration {
         mapper.registerModule(new JavaTimeModule());
         mapper.findAndRegisterModules();
         mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
-
         return mapper;
     }
 
-    //Cannot do the classic bean approach, otherwise
-    // spring will complain since csvMapper is a subclass of objectMapper
-    private static CsvMapper csvMapper = null;
-    public static synchronized CsvMapper csvMapper() {
-        if (csvMapper == null) {
-            csvMapper = new CsvMapper();
-            csvMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            csvMapper.disable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
-            csvMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-            csvMapper.registerModule(new JavaTimeModule());
-            csvMapper.findAndRegisterModules();
-            csvMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
-        }
+    @Bean
+    CsvMapper csvMapper() {
+        final var builder = CsvMapper.builder();
+        builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        builder.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        builder.disable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        builder.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        final var csvMapper = builder.build();
+        csvMapper.registerModule(new JavaTimeModule());
+        csvMapper.findAndRegisterModules();
+        csvMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
         return csvMapper;
     }
 }

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.HotelExportRow;
 import net.furizon.backend.feature.room.finder.RoomFinder;
-import net.furizon.backend.infrastructure.configuration.JacksonConfiguration;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +20,9 @@ public class ExportHotelUseCase implements UseCase<PretixInformation, String> {
     @NotNull private final RoomFinder roomFinder;
 
     public ExportHotelUseCase(
-            @NotNull final RoomFinder roomFinder
+            @NotNull final RoomFinder roomFinder,
+            @NotNull final CsvMapper mapper
     ) {
-        CsvMapper mapper = JacksonConfiguration.csvMapper();
         CsvSchema schema = mapper.schemaFor(HotelExportRow.class)
                                  .withHeader();
         this.writer = mapper.writer(schema);
