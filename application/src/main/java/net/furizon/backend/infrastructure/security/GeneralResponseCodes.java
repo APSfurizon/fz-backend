@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.security;
 
 public enum GeneralResponseCodes {
     USER_IS_NOT_ADMIN,
+    USER_NOT_FOUND,
     ORDER_ALREADY_BOUGHT, //We expected that the user had no order, but instead he has at least one
     EVENT_NOT_FOUND,
     ORDER_NOT_FOUND, //Unable to find the specified order

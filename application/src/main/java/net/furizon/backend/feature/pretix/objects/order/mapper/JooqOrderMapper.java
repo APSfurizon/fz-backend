@@ -66,6 +66,7 @@ public class JooqOrderMapper {
                 .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
                 .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
                 .answers(answerList, pretixInformation)
+                .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                 .orderOwnerUserId(userId)
                 .eventId(record.get(ORDERS.EVENT_ID))
                 .userFinder(userFinder)

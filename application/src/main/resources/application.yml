@@ -146,5 +146,8 @@ badge:
 reminders:
   cronjobs:
     order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
-    user-badge-upload: ${REMINDERS_CRONJOB_USER_BADGE_UPLOAD:0 0 18 1 * *}
-    fursuit-badge-upload: ${REMINDERS_CRONJOB_FURSUIT_BADGE_UPLOAD:0 0 18 2 * *}
+    user-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
+    fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}
+
+admin:
+  custom-templates-location: ${CUSTOM_BADGE_TEMPLATE_PATH:templates/jte/custom}

@@ -1,6 +1,8 @@
 package net.furizon.backend.feature.badge.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.admin.dto.BadgePrint;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
@@ -8,6 +10,8 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
@@ -41,5 +45,12 @@ public class JooqBadgeFinder implements BadgeFinder {
                 .and(FURSUITS.FURSUIT_ID.eq(fursuitId))
             )
         ).mapOrNull(JooqMediaMapper::map);
+    }
+
+    @Override
+    public @NotNull List<BadgePrint> getRegularBadgesToPrint(@NotNull Event event) {
+        return sqlQuery.fetch(
+
+        );
     }
 }
