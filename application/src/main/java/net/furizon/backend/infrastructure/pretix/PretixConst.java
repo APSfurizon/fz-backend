@@ -8,6 +8,7 @@ public class PretixConst {
 
     public static final String QUESTIONS_ACCOUNT_USERID = "account_userid";
     public static final String QUESTIONS_DUPLICATE_DATA = "account_double_order_data";
+    public static final String QUESTIONS_USER_NOTES = "notes";
 
     public static final String METADATA_EVENT_TICKET = "ticket";
     public static final String METADATA_EVENT_TICKET_DAILY_TAG_PREFIX = "ticket_daily_";

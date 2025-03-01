@@ -7,7 +7,7 @@ COPY application-*.jar $APP_HOME/application.jar
 COPY prodkeys/*-key-autocart.rsa $APP_HOME/
 COPY hotel-names.json $APP_HOME/
 
-RUN apk --no-cache -s upgrade && apk --no-cache upgrade
+RUN apk --no-cache -s upgrade && apk --no-cache upgrade && apk add musl-locales && apk add lang
 
 WORKDIR $APP_HOME
 

@@ -20,7 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.*;
+import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_INITIALIZED;
 
 @Slf4j

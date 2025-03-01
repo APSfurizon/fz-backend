@@ -154,9 +154,12 @@ def countdown() -> Response:
 def fursuitCount() -> Response:
     return doGet(f'{BASE_URL_API}counts/fursuit')
 
+def exportHotel() -> Response:
+    return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
+
 #register()
 #confirmEmail()
-#login()
+login()
 #getMe()
 #testPermission()
 #testInternalAuthorize()
@@ -167,7 +170,8 @@ def fursuitCount() -> Response:
 #addFursuit()
 #addFursuit()
 #updateBring()
+exportHotel()
 
 #countdown()
 
-fursuitCount()
+#fursuitCount()

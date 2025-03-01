@@ -13,4 +13,5 @@ public class CapabilitiesResponse {
     private final boolean canRemindOrderLinking;
     private final boolean canRemindBadgeUploads;
     private final boolean canViewUsers;
+    private final boolean canExportHotelList;
 }

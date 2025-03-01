@@ -112,7 +112,7 @@ public class JooqCountFinder implements CountsFinder {
                 .and(ORDERS.EVENT_ID.eq(eventId))
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
             )
-
+            //TODO check innerjoin with room: check event of the room
             .leftJoin(ROOM_GUESTS)
             .on(
                 USERS.USER_ID.eq(ROOM_GUESTS.USER_ID)
@@ -124,7 +124,10 @@ public class JooqCountFinder implements CountsFinder {
                 .and(ROOMS.SHOW_IN_NOSECOUNT.isTrue())
             )
             .leftJoin(roomOwnerOrder)
-            .on(ROOMS.ORDER_ID.eq(roomOwnerOrder.ID))
+            .on(
+                ROOMS.ORDER_ID.eq(roomOwnerOrder.ID)
+                .and(roomOwnerOrder.EVENT_ID.eq(eventId)) //TODO check if this works
+            )
 
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
