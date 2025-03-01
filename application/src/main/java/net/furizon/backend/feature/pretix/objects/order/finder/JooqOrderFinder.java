@@ -264,7 +264,8 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_CHECKIN_TEXT,
                         ORDERS.ORDER_INTERNAL_COMMENT,
                         ORDERS.USER_ID,
-                        ORDERS.EVENT_ID
+                        ORDERS.EVENT_ID,
+                        ORDERS.ORDER_SERIAL_IN_EVENT
                 ).from(ORDERS);
     }
 }
