@@ -1,8 +1,7 @@
-package net.furizon.backend.infrastructure.admin.mapper;
+package net.furizon.backend.feature.badge.mapper;
 
-import net.furizon.backend.feature.admin.dto.BadgePrint;
+import net.furizon.backend.feature.badge.dto.BadgePrint;
 import net.furizon.backend.infrastructure.media.StoreMethod;
-import net.furizon.backend.infrastructure.media.dto.MediaData;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 

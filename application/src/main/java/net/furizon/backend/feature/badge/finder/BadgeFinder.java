@@ -1,6 +1,6 @@
 package net.furizon.backend.feature.badge.finder;
 
-import net.furizon.backend.feature.admin.dto.BadgePrint;
+import net.furizon.backend.feature.badge.dto.BadgePrint;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import org.jetbrains.annotations.NotNull;

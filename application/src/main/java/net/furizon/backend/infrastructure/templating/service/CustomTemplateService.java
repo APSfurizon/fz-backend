@@ -7,6 +7,7 @@ import gg.jte.output.StringOutput;
 import gg.jte.resolve.DirectoryCodeResolver;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.admin.AdminConfig;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -16,16 +17,17 @@ import java.util.Map;
 @Slf4j
 @Service
 public class CustomTemplateService {
-    private final AdminConfig adminConfig;
-    private final TemplateEngine templateEngine;
+    @NotNull private final AdminConfig adminConfig;
+    @NotNull private final TemplateEngine templateEngine;
 
-    public CustomTemplateService(AdminConfig adminConfig) {
+    public CustomTemplateService(@NotNull AdminConfig adminConfig) {
         final Path templatesPath = Paths.get(adminConfig.getCustomTemplatesLocation());
         this.adminConfig = adminConfig;
         this.templateEngine = TemplateEngine.create(
                 new DirectoryCodeResolver(templatesPath),
                 templatesPath,
-                ContentType.Html);
+                ContentType.Html
+        );
     }
 
     public String renderTemplate(String templateName, Map<String, Object> params) {

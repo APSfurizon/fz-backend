@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.admin.dto;
+package net.furizon.backend.feature.badge.dto;
 
 import lombok.Builder;
 import lombok.Data;
