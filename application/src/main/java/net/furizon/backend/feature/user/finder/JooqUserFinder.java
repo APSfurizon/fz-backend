@@ -40,8 +40,7 @@ public class JooqUserFinder implements UserFinder {
     @Nullable
     @Override
     public User findById(long userId) {
-        return sqlQuery
-            .fetchFirst(
+        return sqlQuery.fetchFirst(
                 selectUser()
                 .where(USERS.USER_ID.eq(userId))
             )
@@ -52,8 +51,7 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
         return sqlQuery.fetch(
-            PostgresDSL
-            .select(
+            PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
@@ -78,8 +76,7 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public UserDisplayData getDisplayUser(long userId, @NotNull Event event) {
         return sqlQuery.fetchFirst(
-            PostgresDSL
-            .select(
+            PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
@@ -95,7 +92,8 @@ public class JooqUserFinder implements UserFinder {
             .on(
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
-            ).where(USERS.USER_ID.eq(userId))
+            )
+            .where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqUserDisplayMapper::map);
     }
 
@@ -182,7 +180,8 @@ public class JooqUserFinder implements UserFinder {
                     //If someone doesn't want to be displayed in the nosecount,
                     // find him only if it's a almost exact match
                     USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
-                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse()))
+                    .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
+                )
             ).asTable("fursonaq");
 
         if (filterRoom) {
@@ -193,8 +192,8 @@ public class JooqUserFinder implements UserFinder {
                     .from(ROOM_GUESTS)
                     .where(
                         ROOM_GUESTS.CONFIRMED.isTrue()
-                        //TODO find users inside the same room of the current user
-                        //.and(ROOM_GUESTS.ROOM_ID.notEqual())
+                    //TODO find users inside the same room of the current user
+                    //.and(ROOM_GUESTS.ROOM_ID.notEqual())
                     )
                 )
                 .and(

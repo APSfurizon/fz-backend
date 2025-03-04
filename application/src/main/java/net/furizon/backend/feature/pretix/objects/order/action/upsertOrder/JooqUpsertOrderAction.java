@@ -14,7 +14,6 @@ import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Slf4j

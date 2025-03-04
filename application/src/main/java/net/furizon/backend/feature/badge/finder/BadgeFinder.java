@@ -25,5 +25,6 @@ public interface BadgeFinder {
             @Nullable String orderCodes,
             @Nullable String orderSerials,
             @Nullable String userIds,
-            @Nullable String fursuitIds);
+            @Nullable String fursuitIds
+    );
 }

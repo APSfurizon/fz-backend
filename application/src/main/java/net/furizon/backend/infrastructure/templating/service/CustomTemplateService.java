@@ -21,7 +21,7 @@ public class CustomTemplateService {
     @NotNull private final TemplateEngine templateEngine;
 
     public CustomTemplateService(@NotNull AdminConfig adminConfig) {
-        final Path templatesPath = Paths.get(adminConfig.getCustomTemplatesLocation());
+        final Path templatesPath = Paths.get(adminConfig.getCustomJteTemplatesLocation());
         this.adminConfig = adminConfig;
         this.templateEngine = TemplateEngine.create(
                 new DirectoryCodeResolver(templatesPath),
