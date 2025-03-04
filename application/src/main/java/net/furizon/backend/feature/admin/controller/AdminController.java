@@ -21,6 +21,7 @@ import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.HttpHeaders;
@@ -49,8 +50,6 @@ public class AdminController {
 
     @org.jetbrains.annotations.NotNull
     private final DeleteMediaFromDiskAction deleteMediaAction;
-    @org.jetbrains.annotations.NotNull
-    private final DeleteMediaCronjob deleteMediaCronjob;
 
     @org.jetbrains.annotations.NotNull
     private final PretixConfig pretixConfig;
@@ -167,7 +166,9 @@ public class AdminController {
         + "`orderSerials` and `userIds` a comma separated list of _intervals_ of order serials/badge number and "
         + "user ids, expressed with a - sign. EG: 1,2,3-10,15,17-20,23. When the - sign is not present, the element "
         + "is NOT considered as an interval.")
-    //@PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
     @GetMapping("/export/badges/user")
     public ResponseEntity<String> generateUserBadges(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -194,7 +195,9 @@ public class AdminController {
         + "When the - sign is not present, the element is NOT considered as an interval. "
         + "While `fursuitIds` lets you specify the exact id of the fursuit you want the badge of, "
         + "the other two filters returns all the fursuit the specified user is bring to the current event.")
-    //@PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
     @GetMapping("/export/badges/fursuits")
     public ResponseEntity<String> generateFursuitBadges(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
