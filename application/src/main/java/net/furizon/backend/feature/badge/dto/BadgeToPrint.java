@@ -12,17 +12,23 @@ import java.util.Set;
 
 @Data
 @Builder
-public class UserBadgePrint {
+public class BadgeToPrint {
 
     private final long userId;
 
     private final long serialNo;
+
+    @Nullable
+    private final Long fursuitId;
 
     @NotNull
     private final String orderCode;
 
     @NotNull
     private final String fursonaName;
+
+    @Nullable
+    private final String fursuitName;
 
     @Nullable
     private final String imageUrl;

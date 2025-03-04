@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.fursuits.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.badge.dto.UserBadgePrint;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;

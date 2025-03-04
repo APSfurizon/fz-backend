@@ -1,8 +1,8 @@
 package net.furizon.backend.feature.badge.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.badge.dto.UserBadgePrint;
-import net.furizon.backend.feature.badge.mapper.JooqUserBadgePrintMapper;
+import net.furizon.backend.feature.badge.dto.BadgeToPrint;
+import net.furizon.backend.feature.badge.mapper.JooqBadgeToPrintMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
@@ -12,7 +12,6 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
-import org.jooq.True;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -55,11 +54,98 @@ public class JooqBadgeFinder implements BadgeFinder {
     }
 
     @Override
-    public @NotNull List<UserBadgePrint> getUserBadgesToPrint(
+    public @NotNull List<BadgeToPrint> getUserBadgesToPrint(
             @NotNull Event event,
             @Nullable String orderCodes,
             @Nullable String orderSerials,
             @Nullable String userIds) {
+
+        Condition searchFilter = buildBadgesToPrintFilter(
+                orderCodes,
+                orderSerials,
+                userIds,
+                null
+        );
+
+        List<BadgeToPrint> badges = sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                ORDERS.ORDER_SERIAL_IN_EVENT,
+                ORDERS.ORDER_CODE,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
+            )
+            .from(USERS)
+            .innerJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .where(searchFilter)
+            .orderBy(ORDERS.ORDER_SERIAL_IN_EVENT)
+        ).stream().map(JooqBadgeToPrintMapper::mapUser).toList();
+
+        addPermissionsToBadgesToPrint(badges);
+        return badges;
+    }
+
+    @Override
+    public @NotNull List<BadgeToPrint> getFursuitBadgesToPrint(
+            @NotNull Event event,
+            @Nullable String orderCodes,
+            @Nullable String orderSerials,
+            @Nullable String userIds,
+            @Nullable String fursuitIds) {
+
+        Condition searchFilter = buildBadgesToPrintFilter(
+                orderCodes,
+                orderSerials,
+                userIds,
+                fursuitIds
+        );
+
+        List<BadgeToPrint> badges = sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                ORDERS.ORDER_SERIAL_IN_EVENT,
+                ORDERS.ORDER_CODE,
+                ORDERS.ORDER_SPONSORSHIP_TYPE,
+                FURSUITS.FURSUIT_ID,
+                FURSUITS.FURSUIT_NAME
+            )
+            .from(USERS)
+            .innerJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+            .innerJoin(FURSUITS_ORDERS)
+            .on(FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID))
+            .innerJoin(FURSUITS)
+            .on(FURSUITS.FURSUIT_ID.eq(FURSUITS_ORDERS.FURSUIT_ID))
+            .leftJoin(MEDIA)
+            .on(FURSUITS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .where(searchFilter)
+            .orderBy(ORDERS.ORDER_SERIAL_IN_EVENT)
+        ).stream().map(JooqBadgeToPrintMapper::mapFursuit).toList();
+
+        addPermissionsToBadgesToPrint(badges);
+        return badges;
+    }
+
+    private Condition buildBadgesToPrintFilter(@Nullable String orderCodes,
+                                               @Nullable String orderSerials,
+                                               @Nullable String userIds,
+                                               @Nullable String fursuitIds) {
         Condition searchFilter = PostgresDSL.trueCondition();
 
         if (orderCodes != null) {
@@ -104,32 +190,30 @@ public class JooqBadgeFinder implements BadgeFinder {
             searchFilter = searchFilter.and(condition);
         }
 
-        List<UserBadgePrint> badges = sqlQuery.fetch(
-            PostgresDSL.select(
-                USERS.USER_ID,
-                USERS.USER_FURSONA_NAME,
-                USERS.USER_LOCALE,
-                MEDIA.MEDIA_PATH,
-                MEDIA.MEDIA_TYPE,
-                ORDERS.ORDER_SERIAL_IN_EVENT,
-                ORDERS.ORDER_CODE,
-                ORDERS.ORDER_SPONSORSHIP_TYPE
-            )
-            .from(USERS)
-            .innerJoin(ORDERS)
-            .on(
-                USERS.USER_ID.eq(ORDERS.USER_ID)
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
-            )
-            .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .where(searchFilter)
-            .orderBy(ORDERS.ORDER_SERIAL_IN_EVENT)
-        ).stream().map(JooqUserBadgePrintMapper::map).toList();
+        if (fursuitIds != null) {
+            Condition condition = PostgresDSL.falseCondition();
+            for (String id : fursuitIds.split(",")) {
+                String[] sp = id.split("-");
+                long i = Long.parseLong(sp[0]);
+                if (sp.length > 1) {
+                    condition = condition.or(
+                        FURSUITS.FURSUIT_ID.greaterOrEqual(i)
+                        .and(FURSUITS.FURSUIT_ID.lessOrEqual(Long.parseLong(sp[1])))
+                    );
+                } else {
+                    condition = condition.or(FURSUITS.FURSUIT_ID.eq(i));
+                }
+            }
+            searchFilter = searchFilter.and(condition);
+        }
 
-        Map<Long, UserBadgePrint> idToObj = badges.stream().collect(
+        return searchFilter;
+    }
+
+    private void addPermissionsToBadgesToPrint(List<BadgeToPrint> badges) {
+        Map<Long, BadgeToPrint> idToObj = badges.stream().collect(
             Collectors.toMap(
-                UserBadgePrint::getUserId,
+                BadgeToPrint::getUserId,
                 Function.identity()
             )
         );
@@ -150,7 +234,5 @@ public class JooqBadgeFinder implements BadgeFinder {
             .getPermissions()
             .add(Permission.get(r.get(PERMISSION.PERMISSION_VALUE)))
         );
-
-        return badges;
     }
 }

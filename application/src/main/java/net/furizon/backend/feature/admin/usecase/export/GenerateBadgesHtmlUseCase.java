@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.GenerateBadgeRequest;
 import net.furizon.backend.feature.badge.dto.PrintedBadgeLevel;
-import net.furizon.backend.feature.badge.dto.UserBadgePrint;
+import net.furizon.backend.feature.badge.dto.BadgeToPrint;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
-import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
-import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -36,27 +34,45 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
         String orderCodes = null;
         String orderSerials = null;
         String userIds = null;
+        String fursuitIds = null;
         if (input.request != null) {
             orderCodes = input.request.getOrderCodes();
             orderSerials = input.request.getOrderSerials();
             userIds = input.request.getUserIds();
+            fursuitIds = input.request.getFursuitIds();
         }
 
-        List<UserBadgePrint> badges = badgeFinder.getUserBadgesToPrint(
-                input.pretixInformation.getCurrentEvent(),
-                orderCodes,
-                orderSerials,
-                userIds
-        );
+        List<BadgeToPrint> badges;
+        if (input.isFursuit) {
+            badges = badgeFinder.getFursuitBadgesToPrint(
+                    input.pretixInformation.getCurrentEvent(),
+                    orderCodes,
+                    orderSerials,
+                    userIds,
+                    fursuitIds
+            );
+        } else {
+            badges = badgeFinder.getUserBadgesToPrint(
+                    input.pretixInformation.getCurrentEvent(),
+                    orderCodes,
+                    orderSerials,
+                    userIds
+            );
+        }
 
         List<String> renderedBadges = new ArrayList<>(badges.size());
 
-        for (UserBadgePrint badge : badges) {
+        for (BadgeToPrint badge : badges) {
 
             String imageUrl = badge.getImageUrl();
             imageUrl = imageUrl == null ? badgeConfig.getExport().getDefaultImageUrl() : imageUrl;
             String mimeType = badge.getImageMimeType();
             mimeType = mimeType == null ? "" : mimeType;
+
+            Long fursuitId = badge.getFursuitId();
+            fursuitId = fursuitId == null ? -1L : fursuitId;
+            String fursuitName = badge.getFursuitName();
+            fursuitName = fursuitName == null ? "" : fursuitName;
 
             PrintedBadgeLevel badgeLevel = PrintedBadgeLevel.NORMAL_BADGE;
             //In your convention you may want to reimplement this
@@ -74,17 +90,21 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
             }
 
             String html = customTemplateService.renderTemplate(
-                badgeConfig.getExport().getUserBadgeJteFilename(),
-                Map.of(
-                    "userId", badge.getUserId(),
-                    "serialNo", badge.getSerialNo(),
-                    "orderCode", badge.getOrderCode(),
-                    "fursonaName", badge.getFursonaName(),
-                    "imageUrl", imageUrl,
-                    "imageMimeType", mimeType,
-                    "locales", badge.getLocales().getFirst(), //TODO support more flags
-                    "sponsorship", badge.getSponsorship(),
-                    "badgeLevel", badgeLevel
+                input.isFursuit
+                    ? badgeConfig.getExport().getFursuitBadgeJteFilename()
+                    : badgeConfig.getExport().getUserBadgeJteFilename(),
+                Map.ofEntries(
+                    Map.entry("userId", badge.getUserId()),
+                    Map.entry("serialNo", badge.getSerialNo()),
+                    Map.entry("orderCode", badge.getOrderCode()),
+                    Map.entry("fursonaName", badge.getFursonaName()),
+                    Map.entry("imageUrl", imageUrl),
+                    Map.entry("imageMimeType", mimeType),
+                    Map.entry("locales", badge.getLocales().getFirst()), //TODO support more flags
+                    Map.entry("sponsorship", badge.getSponsorship()),
+                    Map.entry("fursuitId", fursuitId),
+                    Map.entry("fursuitName", fursuitName),
+                    Map.entry("badgeLevel", badgeLevel)
                 )
             );
             renderedBadges.add(html);
@@ -98,6 +118,7 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
 
 
     public record Input(
+            boolean isFursuit,
             @NotNull FurizonUser user,
             @NotNull PretixInformation pretixInformation,
             @Nullable GenerateBadgeRequest request

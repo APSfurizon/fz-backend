@@ -175,7 +175,7 @@ public class AdminController {
     ) {
         String html = executor.execute(
                 GenerateBadgesHtmlUseCase.class,
-                new GenerateBadgesHtmlUseCase.Input(user, pretixInformation, request)
+                new GenerateBadgesHtmlUseCase.Input(false, user, pretixInformation, request)
         );
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=generated.html")
@@ -183,10 +183,17 @@ public class AdminController {
                 .body(html);
     }
 
-    //TODO
     @Operation(summary = "Generate the HTML page of the specified fursuit badges", description =
-            "Sends an email to all people who have made a paid order which is still unlinked with a link "
-                    + "they have to open for link the accounts")
+        "By default this generates the badge for every fursuit which comes to the current event. "
+        + "Once you specify a search parameter, you will get only what you're searching for. "
+        + "There are four search filter, they work in a AND manner (a badge is generated iff present in all of 4): "
+        + "`orderCodes` a simple comma separated list of order codes. A badge for a fursuit is generated only if "
+        + "the user who's bringing the suit has a order for the current event specified in the list. "
+        + "`orderSerials`, `userIds` and `fursuitIds` are a comma separated list of _intervals_ of order "
+        + "serials/badge number, user ids, and fursuit ids; expressed with a - sign. EG: 1,2,3-10,15,17-20,23. "
+        + "When the - sign is not present, the element is NOT considered as an interval. "
+        + "While `fursuitIds` lets you specify the exact id of the fursuit you want the badge of, "
+        + "the other two filters returns all the fursuit the specified user is bring to the current event.")
     //@PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
     @GetMapping("/export/badges/fursuits")
     public ResponseEntity<String> generateFursuitBadges(
@@ -195,7 +202,7 @@ public class AdminController {
     ) {
         String html = executor.execute(
                 GenerateBadgesHtmlUseCase.class,
-                new GenerateBadgesHtmlUseCase.Input(user, pretixInformation, request)
+                new GenerateBadgesHtmlUseCase.Input(true, user, pretixInformation, request)
         );
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=generated.html")

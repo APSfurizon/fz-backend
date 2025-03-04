@@ -13,4 +13,7 @@ public class GenerateBadgeRequest {
     private @Nullable String orderSerials;
     @Pattern(regexp = "^(\\d+(-\\d+)?,?)+$")
     private @Nullable String userIds;
+
+    @Pattern(regexp = "^(\\d+(-\\d+)?,?)+$")
+    private @Nullable String fursuitIds;
 }

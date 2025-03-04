@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.fursuits.finder;
 
-import net.furizon.backend.feature.badge.dto.UserBadgePrint;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
