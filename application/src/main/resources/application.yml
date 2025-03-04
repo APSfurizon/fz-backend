@@ -142,6 +142,11 @@ badge:
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
   editing-deadline: ${BADGE_EDITING_DEADLINE:}
+  export:
+    default-image-url: ${BADGE_EXPORT_DEFAULT_IMAGE_URL:https://furpanel.furizon.net/images/profile.png}
+    output-wrapper-badge-jte-filename: ${BADGE_EXPORT_OUTPUT_WRAPPER_JTE_FILENAME:badge_output.jte}
+    user-badge-jte-filename: ${BADGE_EXPORT_USER_JTE_FILENAME:badge_user.jte}
+    fursuit-badge-jte-filename: ${BADGE_EXPORT_FURSUIT_JTE_FILENAME:badge_fursuit.jte}
 
 reminders:
   cronjobs:
@@ -150,4 +155,4 @@ reminders:
     fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}
 
 admin:
-  custom-templates-location: ${CUSTOM_BADGE_TEMPLATE_PATH:templates/jte/custom}
+  custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}

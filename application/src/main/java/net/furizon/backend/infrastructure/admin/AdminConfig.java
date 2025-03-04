@@ -8,5 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("admin")
 public class AdminConfig {
     @NotNull
-    private final String customTemplatesLocation;
+    private final String customJteTemplatesLocation;
 }
