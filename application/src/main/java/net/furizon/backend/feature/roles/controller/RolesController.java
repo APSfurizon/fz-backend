@@ -14,6 +14,7 @@ import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseC
 import net.furizon.backend.feature.roles.dto.*;
 import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
+import net.furizon.backend.feature.roles.usecase.ListRolesUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
@@ -56,15 +57,15 @@ public class RolesController {
 
     @Operation(summary = "List all the created roles", description =
         "This method returns the list of roles created in the furpanel. For each one, we have: "
-        + "the internal name (which is mandatory), the display name (optional, may be used in admin counts),"
-        + "the number of users who has this rule permanently and temporarily and the number "
-        + "of permissions which has this role")
+        + "the internal name (which is mandatory), the display name (optional, may be used in admin counts), "
+        + "if the role is showed in the admin count, the number of users who has this rule permanently and "
+        + "temporarily and the number of permissions which has this role")
     @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
     @GetMapping("/")
     public @NotNull ListingRolesResponse listRoles(
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        return null;
+        return executor.execute(ListRolesUseCase.class, user);
     }
 
     @Operation(summary = "Creates a new role", description =
