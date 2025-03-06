@@ -12,6 +12,8 @@ import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderU
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
 import net.furizon.backend.feature.roles.dto.*;
+import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
+import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
@@ -75,7 +77,7 @@ public class RolesController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody CreateRoleRequest request
     ) {
-        return null;
+        return executor.execute(CreateRoleUseCase.class, request);
     }
 
 
@@ -115,6 +117,6 @@ public class RolesController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("roleId") @NotNull final Long roleId
     ) {
-        return true;
+        return executor.execute(DeleteRoleUseCase.class, roleId);
     }
 }
