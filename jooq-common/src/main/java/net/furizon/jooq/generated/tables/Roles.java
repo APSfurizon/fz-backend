@@ -83,6 +83,11 @@ public class Roles extends TableImpl<Record> {
      */
     public final TableField<Record, String> INTERNAL_NAME = createField(DSL.name("internal_name"), SQLDataType.CLOB, this, "");
 
+    /**
+     * The column <code>public.roles.show_in_nosecount</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
     private Roles(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS show_in_nosecount;
