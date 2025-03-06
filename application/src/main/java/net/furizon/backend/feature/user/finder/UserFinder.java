@@ -25,7 +25,8 @@ public interface UserFinder {
             boolean filterPaid,
             boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
-            @Nullable Boolean filterBanStatus
+            @Nullable Boolean filterBanStatus,
+            @Nullable String filterWithoutRole
     );
 
     @Nullable

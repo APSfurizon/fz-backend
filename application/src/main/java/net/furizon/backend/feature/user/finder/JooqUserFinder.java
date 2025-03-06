@@ -23,12 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
-import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
-import static net.furizon.jooq.generated.Tables.ORDERS;
-import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
-import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.*;
 
 @Component
 @RequiredArgsConstructor
@@ -164,7 +159,8 @@ public class JooqUserFinder implements UserFinder {
             boolean filterPaid,
             boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
-            @Nullable Boolean filterBanStatus
+            @Nullable Boolean filterBanStatus,
+            @Nullable String filterWithoutRole
     ) {
         Condition condition = PostgresDSL.trueCondition();
         boolean innerJoinOrders = false;
@@ -229,6 +225,20 @@ public class JooqUserFinder implements UserFinder {
             joinBanStatus = true;
             condition = condition.and(
                     AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
+            );
+        }
+
+        if (filterWithoutRole != null) {
+            condition = condition.and(
+                searchFursonaQuery.field(USERS.USER_ID).notIn(
+                    PostgresDSL.select(USER_HAS_ROLE.USER_ID)
+                    .from(USER_HAS_ROLE)
+                    .innerJoin(ROLES)
+                    .on(
+                        USER_HAS_ROLE.ROLE_ID.eq(ROLES.ROLE_ID)
+                        .and(ROLES.INTERNAL_NAME.eq(filterWithoutRole))
+                    )
+                )
             );
         }
 
