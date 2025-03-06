@@ -73,6 +73,8 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
             fursuitId = fursuitId == null ? -1L : fursuitId;
             String fursuitName = badge.getFursuitName();
             fursuitName = fursuitName == null ? "" : fursuitName;
+            String fursuitSpecies = badge.getFursuitSpecies();
+            fursuitSpecies = fursuitSpecies == null ? "" : fursuitSpecies;
 
             PrintedBadgeLevel badgeLevel = PrintedBadgeLevel.NORMAL_BADGE;
             //In your convention you may want to reimplement this
@@ -104,6 +106,7 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
                     Map.entry("sponsorship", badge.getSponsorship()),
                     Map.entry("fursuitId", fursuitId),
                     Map.entry("fursuitName", fursuitName),
+                    Map.entry("fursuitSpecies", fursuitSpecies),
                     Map.entry("badgeLevel", badgeLevel)
                 )
             );

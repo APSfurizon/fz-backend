@@ -30,6 +30,8 @@ public class BadgeToPrint {
     @Nullable
     private final String fursuitName;
 
+    @Nullable final String fursuitSpecies;
+
     @Nullable
     private final String imageUrl;
     @Nullable

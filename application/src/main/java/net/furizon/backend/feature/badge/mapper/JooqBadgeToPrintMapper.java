@@ -38,6 +38,7 @@ public class JooqBadgeToPrintMapper {
                 .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                 .fursuitId(withFursuit ? null : record.get(FURSUITS.FURSUIT_ID))
                 .fursuitName(withFursuit ? null : record.get(FURSUITS.FURSUIT_NAME))
+                .fursuitSpecies(withFursuit ? null : record.get(FURSUITS.FURSUIT_SPECIES))
                 .permissions(new HashSet<>())
             .build();
     }

@@ -126,7 +126,8 @@ public class JooqBadgeFinder implements BadgeFinder {
                 ORDERS.ORDER_CODE,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 FURSUITS.FURSUIT_ID,
-                FURSUITS.FURSUIT_NAME
+                FURSUITS.FURSUIT_NAME,
+                FURSUITS.FURSUIT_SPECIES
             )
             .from(USERS)
             .innerJoin(ORDERS)
