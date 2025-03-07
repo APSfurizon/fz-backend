@@ -5,35 +5,26 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
-import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
-import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
-import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
-import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
-import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
-import net.furizon.backend.feature.roles.dto.*;
-import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
-import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
-import net.furizon.backend.feature.roles.usecase.FetchRoleUseCase;
-import net.furizon.backend.feature.roles.usecase.ListRolesUseCase;
-import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
-import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
-import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.feature.roles.dto.CreateRoleRequest;
+import net.furizon.backend.feature.roles.dto.ListingPermissionsResponse;
+import net.furizon.backend.feature.roles.dto.ListingRolesResponse;
+import net.furizon.backend.feature.roles.dto.RoleIdResponse;
+import net.furizon.backend.feature.roles.dto.RoleResponse;
+import net.furizon.backend.feature.roles.dto.UpdateRoleRequest;
+import net.furizon.backend.feature.roles.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.util.Set;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -42,6 +33,9 @@ import java.util.Set;
 public class RolesController {
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
 
     @Operation(summary = "List all the possible permissions in the backend", description =
         "This method returns all the supported permissions in the backend. They should be displayed directly by "
@@ -110,7 +104,15 @@ public class RolesController {
             @PathVariable("roleId") @NotNull final Long roleId,
             @Valid @NotNull @RequestBody final UpdateRoleRequest request
     ) {
-        return true;
+        return executor.execute(
+                UpdateRoleUseCase.class,
+                new UpdateRoleUseCase.Input(
+                        user,
+                        roleId,
+                        request,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 
     @Operation(summary = "Deletes the specified role")

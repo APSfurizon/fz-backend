@@ -23,7 +23,14 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROLES;
+import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
+import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor

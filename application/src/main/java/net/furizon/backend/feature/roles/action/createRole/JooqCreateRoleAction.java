@@ -15,7 +15,7 @@ public class JooqCreateRoleAction implements CreateRoleAction {
 
 
     @Override
-    public long invoke(String roleName) {
+    public long invoke(@NotNull String roleName) {
         return command.executeResult(
                 PostgresDSL.insertInto(
                         ROLES,

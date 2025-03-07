@@ -15,7 +15,11 @@ import net.furizon.backend.infrastructure.security.permissions.mapper.JooqUserHa
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.*;
+import org.jooq.Field;
+import org.jooq.Record2;
+import org.jooq.Record4;
+import org.jooq.SelectJoinStep;
+import org.jooq.Table;
 import org.jooq.impl.SQLDataType;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -24,7 +28,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.PERMISSION;
+import static net.furizon.jooq.generated.Tables.ROLES;
+import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
@@ -275,14 +284,14 @@ public class JooqPermissionFinder implements PermissionFinder {
                 ROLES.INTERNAL_NAME,
                 ROLES.DISPLAY_NAME,
                 ROLES.SHOW_IN_NOSECOUNT,
-                permissionsPerRoleTable.field(permissionCount),
-                usersPerRoleTable.field(tempUsers),
-                usersPerRoleTable.field(permanentUsers)
+                PostgresDSL.coalesce(permissionsPerRoleTable.field(permissionCount), 0L).as(permissionCount),
+                PostgresDSL.coalesce(usersPerRoleTable.field(tempUsers), 0L).as(tempUsers),
+                PostgresDSL.coalesce(usersPerRoleTable.field(permanentUsers), 0L).as(permanentUsers)
             )
             .from(ROLES)
-            .innerJoin(usersPerRoleTable)
+            .leftJoin(usersPerRoleTable)
             .on(ROLES.ROLE_ID.eq(usersPerRoleTable.field(USER_HAS_ROLE.ROLE_ID)))
-            .innerJoin(permissionsPerRoleTable)
+            .leftJoin(permissionsPerRoleTable)
             .on(ROLES.ROLE_ID.eq(permissionsPerRoleTable.field(PERMISSION.ROLE_ID)))
         ).stream().map(r -> ListedRoleMapper.map(
             r,
