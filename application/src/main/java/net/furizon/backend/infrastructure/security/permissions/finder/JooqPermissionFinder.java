@@ -8,8 +8,10 @@ import net.furizon.backend.feature.roles.mapper.UserHasRoleMapper;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.Role;
 import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqUserHasRole;
 import net.furizon.backend.infrastructure.security.permissions.mapper.JooqPermissionMapper;
 import net.furizon.backend.infrastructure.security.permissions.mapper.JooqRoleMapper;
+import net.furizon.backend.infrastructure.security.permissions.mapper.JooqUserHasRoleMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -110,6 +112,16 @@ public class JooqPermissionFinder implements PermissionFinder {
     }
 
     @Override
+    public @NotNull List<Long> getUsersWithRoleId(long roleId) {
+        return sqlQuery.fetch(
+            PostgresDSL.selectDistinct(
+                USER_HAS_ROLE.USER_ID
+            ).from(USER_HAS_ROLE)
+            .where(USER_HAS_ROLE.ROLE_ID.eq(roleId))
+        ).stream().map(r -> r.get(USER_HAS_ROLE.USER_ID)).toList();
+    }
+
+    @Override
     public @NotNull List<UserHasRoleResponse> getDisplayUsersWithRoleId(long roleId) {
         return sqlQuery.fetch(
             PostgresDSL.select(
@@ -131,6 +143,19 @@ public class JooqPermissionFinder implements PermissionFinder {
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
         ).stream().map(UserHasRoleMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull List<JooqUserHasRole> getUserHasRoleByRoleId(long roleId) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USER_HAS_ROLE.USER_ID,
+                USER_HAS_ROLE.ROLE_ID,
+                USER_HAS_ROLE.TEMP_EVENT_ID
+            )
+            .from(USER_HAS_ROLE)
+            .where(USER_HAS_ROLE.ROLE_ID.eq(roleId))
+        ).stream().map(JooqUserHasRoleMapper::map).toList();
     }
 
     @Override

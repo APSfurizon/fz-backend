@@ -79,6 +79,7 @@ public class RolesController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody CreateRoleRequest request
     ) {
+        log.info("User {} is creating role '{}'", user, request.getInternalName());
         return executor.execute(CreateRoleUseCase.class, request);
     }
 
@@ -119,6 +120,7 @@ public class RolesController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("roleId") @NotNull final Long roleId
     ) {
+        log.info("User {} is deleting role {}", user.getUserId(), roleId);
         return executor.execute(DeleteRoleUseCase.class, roleId);
     }
 }
