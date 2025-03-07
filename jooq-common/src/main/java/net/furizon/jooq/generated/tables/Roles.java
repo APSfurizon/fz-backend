@@ -76,12 +76,12 @@ public class Roles extends TableImpl<Record> {
     /**
      * The column <code>public.roles.display_name</code>.
      */
-    public final TableField<Record, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<Record, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.roles.internal_name</code>.
      */
-    public final TableField<Record, String> INTERNAL_NAME = createField(DSL.name("internal_name"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INTERNAL_NAME = createField(DSL.name("internal_name"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.roles.show_in_nosecount</code>.
