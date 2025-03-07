@@ -18,5 +18,5 @@ public class ListedRoleResponse {
     private final long permanentUsersNumber;
     private final long temporaryUsersNumber;
 
-    private final long permissionsNumber;
+    private final int permissionsNumber;
 }

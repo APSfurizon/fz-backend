@@ -157,6 +157,9 @@ def fursuitCount() -> Response:
 def exportHotel() -> Response:
     return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
 
+def listPermissions() -> Response:
+    return doGet(f'{BASE_URL_API}roles/')
+
 #register()
 #confirmEmail()
 login()
@@ -170,7 +173,8 @@ login()
 #addFursuit()
 #addFursuit()
 #updateBring()
-exportHotel()
+#exportHotel()
+listPermissions()
 
 #countdown()
 

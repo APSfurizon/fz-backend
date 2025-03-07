@@ -24,6 +24,7 @@ import org.jooq.impl.SQLDataType;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -231,10 +232,10 @@ public class JooqPermissionFinder implements PermissionFinder {
     @Override
     public @NotNull List<ListedRoleResponse> listPermissions() {
         Field<Boolean> tempRole = PostgresDSL.field("temp_role", Boolean.class);
-        Field<Long> permissionCount = PostgresDSL.field("permissions", Long.class);
+        Field<Integer> permissionCount = PostgresDSL.field("permissions", Integer.class);
         Field<Long> usersCount = PostgresDSL.field("users", Long.class);
-        Field<Long> tempUsers = PostgresDSL.field("temp_users", Long.class);
-        Field<Long> permanentUsers = PostgresDSL.field("permanent_users", Long.class);
+        Field<BigDecimal> tempUsers = PostgresDSL.field("temp_users", BigDecimal.class);
+        Field<BigDecimal> permanentUsers = PostgresDSL.field("permanent_users", BigDecimal.class);
 
         Field<Boolean> tempRoleQuery = USER_HAS_ROLE.TEMP_EVENT_ID.isNotNull().as(tempRole);
         Table<?> usersCountTable = PostgresDSL.select(
