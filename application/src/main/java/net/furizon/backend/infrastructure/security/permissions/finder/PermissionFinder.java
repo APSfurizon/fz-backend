@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.security.permissions.finder;
 
 import net.furizon.backend.feature.roles.dto.ListedRoleResponse;
+import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.Role;
 import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
@@ -23,7 +24,9 @@ public interface PermissionFinder {
 
     @NotNull List<Role> getRolesFromUserId(long userId);
 
-    @NotNull List<Long> getUsersWithRole(@NotNull String roleInternalName);
+    @NotNull List<Long> getUsersWithRoleInternalName(@NotNull String roleInternalName);
+
+    @NotNull List<UserHasRoleResponse> getDisplayUsersWithRoleId(long roleId);
 
     @NotNull List<Long> getUsersWithPermission(@NotNull Permission permission);
 

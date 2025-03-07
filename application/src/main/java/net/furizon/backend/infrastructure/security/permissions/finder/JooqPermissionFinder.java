@@ -2,7 +2,9 @@ package net.furizon.backend.infrastructure.security.permissions.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.roles.dto.ListedRoleResponse;
+import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
 import net.furizon.backend.feature.roles.mapper.ListedRoleMapper;
+import net.furizon.backend.feature.roles.mapper.UserHasRoleMapper;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.Role;
 import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
@@ -11,11 +13,7 @@ import net.furizon.backend.infrastructure.security.permissions.mapper.JooqRoleMa
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Field;
-import org.jooq.Record2;
-import org.jooq.Record3;
-import org.jooq.SelectJoinStep;
-import org.jooq.Table;
+import org.jooq.*;
 import org.jooq.impl.SQLDataType;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -24,9 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.furizon.jooq.generated.Tables.PERMISSION;
-import static net.furizon.jooq.generated.Tables.ROLES;
-import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
+import static net.furizon.jooq.generated.Tables.*;
 
 @Component
 @RequiredArgsConstructor
@@ -100,7 +96,7 @@ public class JooqPermissionFinder implements PermissionFinder {
     }
 
     @Override
-    public @NotNull List<Long> getUsersWithRole(@NotNull String roleInternalName) {
+    public @NotNull List<Long> getUsersWithRoleInternalName(@NotNull String roleInternalName) {
         return sqlQuery.fetch(
             PostgresDSL.selectDistinct(
                 USER_HAS_ROLE.USER_ID
@@ -111,6 +107,30 @@ public class JooqPermissionFinder implements PermissionFinder {
                 .and(ROLES.INTERNAL_NAME.eq(roleInternalName))
             )
         ).stream().map(r -> r.get(USER_HAS_ROLE.USER_ID)).toList();
+    }
+
+    @Override
+    public @NotNull List<UserHasRoleResponse> getDisplayUsersWithRoleId(long roleId) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
+                ORDERS.ORDER_SPONSORSHIP_TYPE,
+                USER_HAS_ROLE.TEMP_EVENT_ID
+            )
+            .from(USERS)
+            .innerJoin(USER_HAS_ROLE)
+            .on(
+                USERS.USER_ID.eq(USER_HAS_ROLE.USER_ID)
+                .and(USER_HAS_ROLE.ROLE_ID.eq(roleId))
+            )
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+        ).stream().map(UserHasRoleMapper::map).toList();
     }
 
     @Override
@@ -176,45 +196,6 @@ public class JooqPermissionFinder implements PermissionFinder {
 
     @Override
     public @NotNull List<ListedRoleResponse> listPermissions() {
-        /*
-SELECT
-    x.role_id,
-    x.temp_users,
-    x.permanent_users,
-    z.permissions,
-    roles.display_name,
-    roles.internal_name--,
-    --roles.show_in_nosecount
-FROM (
-    SELECT
-        y.role_id,
-        SUM(users) FILTER (WHERE temp_role = TRUE) AS temp_users,
-        SUM(users) FILTER (WHERE temp_role = FALSE) AS permanent_users
-    FROM (
-        SELECT
-            user_has_role.role_id,
-            (user_has_role.temp_event_id IS NOT NULL) AS temp_role,
-            COUNT(DISTINCT CAST(user_has_role.user_id AS TEXT) || ' ' || user_has_role.role_id::int8) AS users
-        FROM
-            user_has_role
-        GROUP BY user_has_role.role_id, (user_has_role.temp_event_id IS NOT NULL)
-    ) AS y
-    GROUP BY y.role_id
-) AS x
-INNER JOIN roles
-ON
-    x.role_id = roles.role_id
-INNER JOIN (
-     SELECT
-         permission.role_id,
-         COUNT(DISTINCT permission.role_id::int8 || ' ' || permission.permission_value::int8) AS permissions
-     FROM
-         permission
-     GROUP BY permission.role_id
-) AS z
-ON
-    roles.role_id = z.role_id;
-         */
         Field<Boolean> tempRole = PostgresDSL.field("temp_role", Boolean.class);
         Field<Long> permissionCount = PostgresDSL.field("permissions", Long.class);
         Field<Long> usersCount = PostgresDSL.field("users", Long.class);
@@ -294,11 +275,12 @@ ON
         ).from(PERMISSION);
     }
 
-    private @NotNull SelectJoinStep<Record3<Long, String, String>> selectRole() {
+    private @NotNull SelectJoinStep<Record4<Long, String, String, Boolean>> selectRole() {
         return PostgresDSL.select(
             ROLES.ROLE_ID,
             ROLES.DISPLAY_NAME,
-            ROLES.INTERNAL_NAME
+            ROLES.INTERNAL_NAME,
+            ROLES.SHOW_IN_NOSECOUNT
         ).from(ROLES);
     }
 }

@@ -14,6 +14,7 @@ import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseC
 import net.furizon.backend.feature.roles.dto.*;
 import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
+import net.furizon.backend.feature.roles.usecase.FetchRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.ListRolesUseCase;
 import net.furizon.backend.infrastructure.media.DeleteMediaCronjob;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
@@ -91,11 +92,11 @@ public class RolesController {
         + "by the frontend")
     @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
     @GetMapping("/{roleId}")
-    public @NotNull ListingRolesResponse fetchRole(
+    public @NotNull RoleResponse fetchRole(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("roleId") @NotNull final Long roleId
     ) {
-        return null;
+        return executor.execute(FetchRoleUseCase.class, roleId);
     }
 
     @Operation(summary = "Fully updates the specified role", description =

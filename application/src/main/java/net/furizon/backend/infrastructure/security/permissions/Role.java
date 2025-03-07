@@ -15,6 +15,7 @@ public class Role {
     private final long roleId;
     @NotNull private final String displayName;
     @Nullable private final String internalName;
+    private final boolean showInNosecount;
 
     @Getter(AccessLevel.NONE)
     private List<JooqPermission> permissions = null;
