@@ -7,6 +7,7 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.objects.SearchUserResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.SelectJoinStep;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,8 @@ public interface UserFinder {
             boolean filterPaid,
             boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
-            @Nullable Boolean filterBanStatus
+            @Nullable Boolean filterBanStatus,
+            @Nullable String filterWithoutRole
     );
 
     @Nullable
@@ -38,4 +40,8 @@ public interface UserFinder {
 
     @NotNull
     List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event);
+
+    SelectJoinStep<?> selectJoinDisplayUser(long eventId);
+
+    SelectJoinStep<?> selectDisplayUser();
 }

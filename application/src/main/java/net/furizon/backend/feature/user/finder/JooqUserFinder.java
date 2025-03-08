@@ -27,8 +27,10 @@ import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.ROLES;
 import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
@@ -50,24 +52,7 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
         return sqlQuery.fetch(
-            PostgresDSL
-            .select(
-                USERS.USER_ID,
-                USERS.USER_FURSONA_NAME,
-                USERS.USER_LOCALE,
-                MEDIA.MEDIA_PATH,
-                MEDIA.MEDIA_TYPE,
-                MEDIA.MEDIA_ID,
-                ORDERS.ORDER_SPONSORSHIP_TYPE
-            )
-            .from(USERS)
-            .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .leftJoin(ORDERS)
-            .on(
-                USERS.USER_ID.eq(ORDERS.USER_ID)
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
-            )
+            selectJoinDisplayUser(event.getId())
             .where(USERS.USER_ID.in(ids))
         ).stream().map(JooqUserDisplayMapper::map).toList();
     }
@@ -76,24 +61,8 @@ public class JooqUserFinder implements UserFinder {
     @Override
     public UserDisplayData getDisplayUser(long userId, @NotNull Event event) {
         return sqlQuery.fetchFirst(
-            PostgresDSL
-            .select(
-                USERS.USER_ID,
-                USERS.USER_FURSONA_NAME,
-                USERS.USER_LOCALE,
-                MEDIA.MEDIA_PATH,
-                MEDIA.MEDIA_TYPE,
-                MEDIA.MEDIA_ID,
-                ORDERS.ORDER_SPONSORSHIP_TYPE
-            )
-            .from(USERS)
-            .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .leftJoin(ORDERS)
-            .on(
-                USERS.USER_ID.eq(ORDERS.USER_ID)
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
-            ).where(USERS.USER_ID.eq(userId))
+            selectJoinDisplayUser(event.getId())
+            .where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqUserDisplayMapper::map);
     }
 
@@ -164,7 +133,8 @@ public class JooqUserFinder implements UserFinder {
             boolean filterPaid,
             boolean filerNotMadeAnOrder,
             @Nullable Short filterMembershipCardForYear,
-            @Nullable Boolean filterBanStatus
+            @Nullable Boolean filterBanStatus,
+            @Nullable String filterWithoutRole
     ) {
         Condition condition = PostgresDSL.trueCondition();
         boolean innerJoinOrders = false;
@@ -232,6 +202,20 @@ public class JooqUserFinder implements UserFinder {
             );
         }
 
+        if (filterWithoutRole != null) {
+            condition = condition.and(
+                searchFursonaQuery.field(USERS.USER_ID).notIn(
+                    PostgresDSL.select(USER_HAS_ROLE.USER_ID)
+                    .from(USER_HAS_ROLE)
+                    .innerJoin(ROLES)
+                    .on(
+                        USER_HAS_ROLE.ROLE_ID.eq(ROLES.ROLE_ID)
+                        .and(ROLES.INTERNAL_NAME.eq(filterWithoutRole))
+                    )
+                )
+            );
+        }
+
         SelectJoinStep<?> query = PostgresDSL
             .selectDistinct(
                 searchFursonaQuery.field(USERS.USER_ID),
@@ -292,6 +276,32 @@ public class JooqUserFinder implements UserFinder {
                     USERS.USER_LOCALE,
                     USERS.MEDIA_ID_PROPIC,
                     USERS.SHOW_IN_NOSECOUNT
+            )
+            .from(USERS);
+    }
+
+    @Override
+    public SelectJoinStep<?> selectJoinDisplayUser(long eventId) {
+        return selectDisplayUser()
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .leftJoin(ORDERS)
+            .on(
+                USERS.USER_ID.eq(ORDERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            );
+    }
+
+    @Override
+    public SelectJoinStep<?> selectDisplayUser() {
+        return PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
+                ORDERS.ORDER_SPONSORSHIP_TYPE
             )
             .from(USERS);
     }
