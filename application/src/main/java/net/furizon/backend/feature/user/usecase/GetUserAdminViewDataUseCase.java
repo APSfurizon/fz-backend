@@ -105,7 +105,7 @@ public class GetUserAdminViewDataUseCase {
                         GetRoomInfoUseCase.class,
                         new GetRoomInfoUseCase.Input(
                                 userId,
-                                event,
+                                e,
                                 pretixInformation,
                                 true
                         )
