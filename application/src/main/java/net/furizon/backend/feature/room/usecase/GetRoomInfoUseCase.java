@@ -36,12 +36,14 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
 
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         Event event = input.event;
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
-        boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
+        boolean editingTimeAllowed = input.ignoreEditingTime
+                                  || endRoomEditingTime == null
+                                  || endRoomEditingTime.isAfter(OffsetDateTime.now());
 
         boolean isOwner = true; //By defaulting it on true, we can upgrade room also if we don't have a room
         if (info != null) {
@@ -100,8 +102,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            boolean ignoreEditingTime
     ) {}
 }

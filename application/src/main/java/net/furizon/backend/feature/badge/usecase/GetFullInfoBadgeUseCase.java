@@ -35,8 +35,7 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
     @Override
     public @NotNull FullInfoBadgeResponse executor(@NotNull GetFullInfoBadgeUseCase.Input input) {
         Event event = input.pretixInformation.getCurrentEvent();
-        FurizonUser user = input.user;
-        long userId = user.getUserId();
+        long userId = input.userId;
 
         UserDisplayData userData = userFinder.getDisplayUser(userId, event);
         OffsetDateTime editingDeadline = badgeConfig.getEditingDeadline();
@@ -61,7 +60,7 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull PretixInformation pretixInformation
     ) {}
 }

@@ -24,32 +24,13 @@ import net.furizon.backend.feature.room.dto.response.AdminSanityChecksResponse;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
-import net.furizon.backend.feature.room.usecase.BuyUpgradeRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CanConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CanUnconfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ConfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.CreateRoomUseCase;
-import net.furizon.backend.feature.room.usecase.DeleteRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ExchangeFullOrderUseCase;
-import net.furizon.backend.feature.room.usecase.ExchangeRoomUseCase;
-import net.furizon.backend.feature.room.usecase.GetExchangeConfirmationStatusInfoUseCase;
-import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
-import net.furizon.backend.feature.room.usecase.InitializeExchangeFlowUseCase;
-import net.furizon.backend.feature.room.usecase.InviteAcceptUseCase;
-import net.furizon.backend.feature.room.usecase.InviteCancelUseCase;
-import net.furizon.backend.feature.room.usecase.InviteRefuseUseCase;
-import net.furizon.backend.feature.room.usecase.InviteToRoomUseCase;
-import net.furizon.backend.feature.room.usecase.KickMemberUseCase;
-import net.furizon.backend.feature.room.usecase.LeaveRoomUseCase;
-import net.furizon.backend.feature.room.usecase.ListRoomWithPricesAndQuotaUseCase;
-import net.furizon.backend.feature.room.usecase.RenameRoomUseCase;
-import net.furizon.backend.feature.room.usecase.SetShowInNosecountUseCase;
-import net.furizon.backend.feature.room.usecase.UnconfirmRoomUseCase;
-import net.furizon.backend.feature.room.usecase.UpdateExchangeStatusUseCase;
+import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.feature.room.usecase.*;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
@@ -78,6 +59,8 @@ public class RoomController {
     private final SanityCheckService sanityCheckService;
     @org.jetbrains.annotations.NotNull
     private final SessionAuthenticationManager sessionAuthenticationManager;
+    @org.jetbrains.annotations.NotNull
+    private final GeneralChecks checks;
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
@@ -420,7 +403,12 @@ public class RoomController {
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
         return executor.execute(
             GetRoomInfoUseCase.class,
-            new GetRoomInfoUseCase.Input(user, pretixInformation.getCurrentEvent(), pretixInformation)
+            new GetRoomInfoUseCase.Input(
+                    user.getUserId(),
+                    pretixInformation.getCurrentEvent(),
+                    pretixInformation,
+                    false
+            )
         );
     }
 
@@ -441,7 +429,8 @@ public class RoomController {
                 new GetExchangeConfirmationStatusInfoUseCase.Input(
                         user,
                         exchangeId,
-                        pretixInformation
+                        pretixInformation,
+                        false
                 )
         );
     }
@@ -501,10 +490,11 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final UpdateExchangeStatusRequest req
     ) {
+        long reqUserId = checks.getUserIdAndAssertPermission(req.getUserId(), user);
         ExchangeConfirmationStatus status = executor.execute(
                 UpdateExchangeStatusUseCase.class,
                 new UpdateExchangeStatusUseCase.Input(
-                        user,
+                        reqUserId,
                         req
                 )
         );

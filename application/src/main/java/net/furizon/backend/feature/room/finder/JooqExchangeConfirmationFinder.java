@@ -12,6 +12,9 @@ import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static net.furizon.jooq.generated.Tables.EXCHANGE_CONFIRMATION_STATUS;
 
 @Component
@@ -38,6 +41,20 @@ public class JooqExchangeConfirmationFinder implements ExchangeConfirmationFinde
                     .and(EXCHANGE_CONFIRMATION_STATUS.EVENT_ID.eq(event.getId()))
                 )
         ).mapOrNull(ExchangeConfirmationStatusMapper::map);
+    }
+
+    @Override
+    public @NotNull List<ExchangeConfirmationStatus> getAllExchangesOfUserInEvent(long userId, @NotNull Event event) {
+        return query.fetch(
+                select()
+                .where(
+                    EXCHANGE_CONFIRMATION_STATUS.EVENT_ID.eq(event.getId())
+                    .and(
+                        EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID.eq(userId)
+                        .or(EXCHANGE_CONFIRMATION_STATUS.TARGET_USER_ID.eq(userId))
+                    )
+                )
+        ).stream().map(ExchangeConfirmationStatusMapper::map).toList();
     }
 
     @NotNull

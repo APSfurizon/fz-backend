@@ -123,7 +123,7 @@ public class BadgeController {
         return useCaseExecutor.execute(
                 GetFullInfoBadgeUseCase.class,
                 new GetFullInfoBadgeUseCase.Input(
-                        user,
+                        user.getUserId(),
                         pretixInformation
                 )
         );

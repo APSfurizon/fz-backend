@@ -35,6 +35,8 @@ public class UserController {
     @NotNull private final PretixInformation pretixInformation;
     @NotNull private final UseCaseExecutor executor;
 
+    @NotNull private final GetUserAdminViewDataUseCase getUserAdminViewDataUseCase;
+
     @GetMapping("/me")
     public FurizonUser getMe(
         @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -96,14 +98,11 @@ public class UserController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("id") Long userId
     ) {
-        return executor.execute(
-                GetUserAdminViewDataUseCase.class,
-                new GetUserAdminViewDataUseCase.Input(
-                        userId,
-                        pretixInformation.getCurrentEvent(),
-                        user,
-                        pretixInformation
-                )
+        return getUserAdminViewDataUseCase.execute(
+                user,
+                userId,
+                pretixInformation.getCurrentEvent(),
+                pretixInformation
         );
     }
 }

@@ -154,9 +154,12 @@ def countdown() -> Response:
 def fursuitCount() -> Response:
     return doGet(f'{BASE_URL_API}counts/fursuit')
 
+def usersAdminView(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/view/{id}')
+
 #register()
 #confirmEmail()
-#login()
+login()
 #getMe()
 #testPermission()
 #testInternalAuthorize()
@@ -168,6 +171,8 @@ def fursuitCount() -> Response:
 #addFursuit()
 #updateBring()
 
+usersAdminView(1)
+
 #countdown()
 
-fursuitCount()
+#fursuitCount()

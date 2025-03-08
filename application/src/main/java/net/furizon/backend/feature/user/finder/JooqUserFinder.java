@@ -3,7 +3,6 @@ package net.furizon.backend.feature.user.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
-import net.furizon.backend.feature.user.dto.UserAdminViewDisplay;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
@@ -30,7 +29,6 @@ import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
-import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Component
 @RequiredArgsConstructor
@@ -283,56 +281,6 @@ public class JooqUserFinder implements UserFinder {
                 finalQuery.field(USERS.USER_FURSONA_NAME)
             )
         ).stream().map(JooqSearchUserMapper::map).toList();
-    }
-
-    @Nullable
-    @Override
-    public UserAdminViewDisplay getUserAdminViewDisplay(long userId, @NotNull Event event) {
-        return sqlQuery.fetchFirst(
-            PostgresDSL.select(
-                USERS.USER_ID,
-                USERS.USER_FURSONA_NAME,
-                USERS.USER_LOCALE,
-                MEDIA.MEDIA_PATH,
-                MEDIA.MEDIA_TYPE,
-                MEDIA.MEDIA_ID,
-                ORDERS.ORDER_SPONSORSHIP_TYPE,
-                ORDERS.ORDER_CODE,
-                MEMBERSHIP_INFO.ID,
-                MEMBERSHIP_INFO.INFO_FIRST_NAME,
-                MEMBERSHIP_INFO.INFO_LAST_NAME,
-                MEMBERSHIP_INFO.INFO_FISCAL_CODE,
-                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
-                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
-                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
-                MEMBERSHIP_INFO.INFO_BIRTHDAY,
-                MEMBERSHIP_INFO.INFO_ADDRESS,
-                MEMBERSHIP_INFO.INFO_ZIP,
-                MEMBERSHIP_INFO.INFO_CITY,
-                MEMBERSHIP_INFO.INFO_REGION,
-                MEMBERSHIP_INFO.INFO_COUNTRY,
-                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
-                MEMBERSHIP_INFO.INFO_PHONE,
-                MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
-                MEMBERSHIP_INFO.INFO_ALLERGIES,
-                MEMBERSHIP_INFO.USER_ID,
-                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
-                AUTHENTICATIONS.AUTHENTICATION_DISABLED
-            )
-            .from(USERS)
-            .innerJoin(MEMBERSHIP_INFO)
-            .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
-            .innerJoin(AUTHENTICATIONS)
-            .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
-            .leftJoin(MEDIA)
-            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .leftJoin(ORDERS)
-            .on(
-                USERS.USER_ID.eq(ORDERS.USER_ID)
-                .and(ORDERS.EVENT_ID.eq(event.getId()))
-            )
-            .where(USERS.USER_ID.eq(userId))
-        ).mapOrNull(JooqUserDisplayMapper::mapWithAdminView);
     }
 
     private SelectJoinStep<?> selectUser() {

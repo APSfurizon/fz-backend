@@ -26,7 +26,7 @@ public class UpdateExchangeStatusUseCase implements
     public @NotNull ExchangeConfirmationStatus executor(@NotNull Input input) {
         long exchangeId = input.req.getExchangeId();
         boolean toConfirm = input.req.getConfirm();
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
                 userId, exchangeId, toConfirm);
 
@@ -61,7 +61,7 @@ public class UpdateExchangeStatusUseCase implements
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull UpdateExchangeStatusRequest req
     ) {}
 }
