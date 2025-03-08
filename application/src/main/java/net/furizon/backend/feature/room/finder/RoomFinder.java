@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.finder;
 
+import net.furizon.backend.feature.admin.dto.HotelExportRow;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.RoomData;
@@ -71,4 +72,6 @@ public interface RoomFinder {
 
     @Nullable
     Long getRoomItemIdFromRoomId(long roomId);
+
+    @NotNull List<HotelExportRow> exportHotel(long eventId, PretixInformation pretixInformation);
 }

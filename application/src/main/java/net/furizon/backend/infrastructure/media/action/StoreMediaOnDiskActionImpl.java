@@ -6,13 +6,10 @@ import com.sksamuel.scrimage.webp.WebpWriter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.ImageConfig;
-import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;

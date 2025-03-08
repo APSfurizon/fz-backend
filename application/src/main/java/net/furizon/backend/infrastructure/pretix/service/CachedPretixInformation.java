@@ -62,6 +62,7 @@ import java.util.function.BiFunction;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_ACCOUNT_USERID;
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
+import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_USER_NOTES;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +111,8 @@ public class CachedPretixInformation implements PretixInformation {
     private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
     @NotNull
     private final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
+    @NotNull
+    private final AtomicReference<Long> questionUserNotes = new AtomicReference<>(-1L);
     @NotNull
     private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
@@ -282,6 +285,7 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    @Override
     public long getQuestionUserId() {
         lock.readLock().lock();
         var v = questionUserId.get();
@@ -289,9 +293,18 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    @Override
     public long getQuestionDuplicateData() {
         lock.readLock().lock();
         var v = questionDuplicateData.get();
+        lock.readLock().unlock();
+        return v;
+    }
+
+    @Override
+    public long getQuestionUserNotes() {
+        lock.readLock().lock();
+        var v = questionUserNotes.get();
         lock.readLock().unlock();
         return v;
     }
@@ -400,11 +413,13 @@ public class CachedPretixInformation implements PretixInformation {
                             if (questionType.get() == QuestionType.FILE) {
                                 answer.setAnswer(PretixConst.QUESTIONS_FILE_KEEP);
                             }
+
                             if (questionId == questionUserId) {
                                 String s = answer.getAnswer();
                                 if (s != null && !s.isBlank()) {
                                     userId = Float.valueOf(s).longValue();
                                 }
+
                             } else if (questionId == questionDuplicateData) {
                                 String s = answer.getAnswer();
                                 if (s == null || s.isBlank()) {
@@ -502,6 +517,9 @@ public class CachedPretixInformation implements PretixInformation {
                     .extraFursuits(extraFursuits)
                     .userFinder(userFinder)
                     .eventFinder(eventFinder)
+                    .requireAttention(pretixOrder.isCheckinRequiresAttention())
+                    .checkinText(pretixOrder.getCheckinText())
+                    .internalComment(pretixOrder.getComment())
                     .build()
             );
         } finally {
@@ -585,6 +603,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Questions
         questionUserId.set(-1L);
+        questionUserNotes.set(-1L);
         questionDuplicateData.set(-1L);
         questionIdToType.invalidateAll();
         questionIdToIdentifier.invalidateAll();
@@ -665,6 +684,13 @@ public class CachedPretixInformation implements PretixInformation {
             questionDuplicateData.set(duplicateData);
         } else {
             log.warn("[PRETIX] Question duplicate data not found");
+        }
+        Long userNotes = questionIdentifierToId.getIfPresent(QUESTIONS_USER_NOTES);
+        if (userNotes != null) {
+            log.info("[PRETIX] Question user  notes found, setup it on value = '{}'", userNotes);
+            questionUserNotes.set(userNotes);
+        } else {
+            log.warn("[PRETIX] Question user notes not found");
         }
     }
 

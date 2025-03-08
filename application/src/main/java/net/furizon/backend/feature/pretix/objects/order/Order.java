@@ -104,6 +104,12 @@ public class Order {
     @Nullable
     private final String buyerLocale;
 
+    private final boolean requireAttention;
+    @Nullable private final String internalComment;
+    @Nullable private final String checkinText;
+
+    private final long orderSerialInEvent;
+
     @Nullable
     @Builder.Default
     @Setter(AccessLevel.NONE)

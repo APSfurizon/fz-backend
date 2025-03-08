@@ -15,7 +15,7 @@ public class PretixPaymentRequest {
     private final InfoObj info;
     @JsonProperty("send_email")
     private final boolean sendEmail = false;
-    private final String provider = "manual";
+    private final String provider = "fzbackend-manual";
 
     public PretixPaymentRequest(String amount, String comment) {
         this.amount = amount;

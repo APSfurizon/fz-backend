@@ -6,8 +6,11 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.jooq.infrastructure.JooqOptional;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
+import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +21,14 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqUpsertOrderAction implements UpsertOrderAction {
     @NotNull private final SqlCommand command;
+    @NotNull private final SqlQuery sqlQuery;
 
     @NotNull private final UserFinder userFinder;
 
     @NotNull private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(
+    public synchronized void invoke(
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
@@ -42,6 +46,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String buyerPhone = order.getBuyerPhone();
         String buyerUser = order.getBuyerUser();
         String buyerLocale = order.getBuyerLocale();
+        String internalComment = order.getInternalComment();
+        String checkinText = order.getCheckinText();
+        boolean requiresAttention = order.isRequireAttention();
         boolean membership = order.hasMembership();
         long ticketPositionId = order.getTicketPositionId();
         long ticketPosid = order.getTicketPositionPosid();
@@ -61,6 +68,20 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 order.setOrderOwnerUserId(null);
                 userId = null;
             }
+        }
+
+        //We don't use a sequence for the same reasons of the membership cards
+        JooqOptional<Record1<Long>> r = sqlQuery.fetchFirst(
+            PostgresDSL.select(
+                PostgresDSL.max(ORDERS.ORDER_SERIAL_IN_EVENT)
+            )
+            .from(ORDERS)
+            .where(ORDERS.EVENT_ID.eq(eventId))
+        );
+        long serial = 1L;
+        if (r.isPresent()) {
+            var res = r.get().get(0);
+            serial = res == null ? 1L : ((long) res) + 1L;
         }
 
         command.execute(
@@ -90,9 +111,13 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_EARLY_POSITION_ID,
                     ORDERS.ORDER_LATE_POSITION_ID,
                     ORDERS.ORDER_EXTRA_FURSUITS,
+                    ORDERS.ORDER_REQUIRES_ATTENTION,
+                    ORDERS.ORDER_CHECKIN_TEXT,
+                    ORDERS.ORDER_INTERNAL_COMMENT,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
-                    ORDERS.ORDER_ANSWERS_JSON
+                    ORDERS.ORDER_ANSWERS_JSON,
+                    ORDERS.ORDER_SERIAL_IN_EVENT
                 )
                 .values(
                     order.getId(),
@@ -118,9 +143,13 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     earlyPositionId,
                     latePositionId,
                     extraFursuits,
+                    requiresAttention,
+                    checkinText,
+                    internalComment,
                     userId,
                     eventId,
-                    answers
+                    answers,
+                    serial
                 )
                 .onConflict(ORDERS.ID)
                 .doUpdate()
@@ -145,6 +174,9 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_EARLY_POSITION_ID, earlyPositionId)
                 .set(ORDERS.ORDER_LATE_POSITION_ID, latePositionId)
                 .set(ORDERS.ORDER_EXTRA_FURSUITS, extraFursuits)
+                .set(ORDERS.ORDER_REQUIRES_ATTENTION, requiresAttention)
+                .set(ORDERS.ORDER_CHECKIN_TEXT, checkinText)
+                .set(ORDERS.ORDER_INTERNAL_COMMENT, internalComment)
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, eventId)
                 .set(ORDERS.ORDER_ANSWERS_JSON, answers)

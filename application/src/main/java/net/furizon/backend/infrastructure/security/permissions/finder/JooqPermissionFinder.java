@@ -31,8 +31,7 @@ public class JooqPermissionFinder implements PermissionFinder {
 
     @Override
     public @NotNull Set<Permission> getUserPermissions(long userId) {
-        return sqlQuery
-            .fetch(
+        return sqlQuery.fetch(
                 PostgresDSL.selectDistinct(PERMISSION.PERMISSION_VALUE)
                 .from(USER_HAS_ROLE)
                 .innerJoin(PERMISSION)
@@ -50,7 +49,7 @@ public class JooqPermissionFinder implements PermissionFinder {
     public @NotNull List<JooqPermission> getPermissionsFromRoleId(long roleId) {
         return sqlQuery.fetch(
             selectPermission()
-                .where(PERMISSION.ROLE_ID.eq(roleId))
+            .where(PERMISSION.ROLE_ID.eq(roleId))
         ).stream().map(JooqPermissionMapper::map).toList();
     }
 
@@ -129,7 +128,8 @@ public class JooqPermissionFinder implements PermissionFinder {
         return sqlQuery.fetchFirst(
             PostgresDSL.select(
                 USER_HAS_ROLE.USER_ID
-            ).from(USER_HAS_ROLE)
+            )
+            .from(USER_HAS_ROLE)
             .where(
                 USER_HAS_ROLE.USER_ID.eq(userId)
                 .and(USER_HAS_ROLE.ROLE_ID.eq(roleId))

@@ -1,8 +1,10 @@
 package net.furizon.backend.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +23,20 @@ public class JacksonConfiguration {
         mapper.registerModule(new JavaTimeModule());
         mapper.findAndRegisterModules();
         mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
-
         return mapper;
+    }
+
+    @Bean
+    CsvMapper csvMapper() {
+        final var builder = CsvMapper.builder();
+        builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        builder.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        builder.disable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        builder.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        final var csvMapper = builder.build();
+        csvMapper.registerModule(new JavaTimeModule());
+        csvMapper.findAndRegisterModules();
+        csvMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return csvMapper;
     }
 }
