@@ -89,9 +89,18 @@ public class UserController {
         );
     }
     @Operation(summary = "View user", description =
-            "This operation can be performed only by an admin. "
-            + "Displays the user's data, along with the personal info and past event's orders and rooms."
-            + "Users without the ")
+        "This operation can be performed only by an admin. "
+        + "Returns all the information we have regarding a user. The frontend page should let the admin "
+        + "to change the following data, using the dedicated endpoints: personalInfo, register/unregister "
+        + "membership cards, if an user is banned or not, currentRoomData management (create, invite, kick,"
+        + "leave, un/confirm, delete, name change, show in nosecount, accept/refuse/cancel invitations, "
+        + "buy/upgrade room), create/manage room and order exchanges, change nickname and badge photo, "
+        + "fursuit management (creation, deletion, bringToCurrentEvent, chane name and species, "
+        + "show in nosecount, change propic), add and remove roles. "
+        + "For every order, a buttons should be displayed that, once clicked, it retrives the link from "
+        + "the endpoint TODO which redirects the admin to the order's pretix page. "
+        + "When this page is loaded, a call to /admin/capabilities must be done to check which operations "
+        + "are currently permitted to the admin.")
     @PermissionRequired(permissions = {Permission.CAN_VIEW_USER, Permission.CAN_MANAGE_USER_PUBLIC_INFO})
     @GetMapping("/view/{id}")
     public UserAdminViewData getUserAdminViewData(
