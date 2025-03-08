@@ -19,4 +19,13 @@ public class BadgeConfig {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Nullable private final OffsetDateTime editingDeadline;
+
+    @NotNull private final Export export;
+    @Data
+    public static class Export {
+        @NotNull private final String defaultImageUrl;
+        @NotNull private final String outputWrapperBadgeJteFilename;
+        @NotNull private final String userBadgeJteFilename;
+        @NotNull private final String fursuitBadgeJteFilename;
+    }
 }
