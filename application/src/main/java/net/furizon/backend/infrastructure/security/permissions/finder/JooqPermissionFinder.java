@@ -141,7 +141,6 @@ public class JooqPermissionFinder implements PermissionFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
-                ORDERS.ORDER_SPONSORSHIP_TYPE,
                 USER_HAS_ROLE.TEMP_EVENT_ID
             )
             .from(USERS)

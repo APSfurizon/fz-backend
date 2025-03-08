@@ -69,6 +69,7 @@ public class RolesController {
 
     @Operation(summary = "Creates a new role", description =
         "To create a new role, it's mandatory to specify an internal name. "
+        + "The internal name must satisfy the regex `^[A-Za-z0-9_\\-]{3,64}$`."
         + "This method returns back the id of the newly created role, the frontend should then "
         + "redirect the user to the page to edit that role")
     @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
@@ -100,7 +101,8 @@ public class RolesController {
 
     @Operation(summary = "Fully updates the specified role", description =
         "This method updates every data of the specified role. Partial updates are currently unsupported, "
-        + "so you have to provide  the full role object. See the GetRole method for an explanation about the data")
+        + "so you have to provide  the full role object. See the GetRole method for an explanation about the data. "
+        + "The internal name must satisfy the regex `^[A-Za-z0-9_\\-]{3,64}$`.")
     @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
     @PostMapping("/{roleId}")
     public boolean updateRole(

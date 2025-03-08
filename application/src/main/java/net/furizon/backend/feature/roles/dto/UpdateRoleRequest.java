@@ -2,6 +2,7 @@ package net.furizon.backend.feature.roles.dto;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 
@@ -10,7 +11,9 @@ import java.util.Set;
 
 @Data
 public class UpdateRoleRequest {
-    @NotNull private final String roleInternalName;
+    @NotNull
+    @Pattern(regexp = "^[A-Za-z0-9_\\-]{3,64}$")
+    private final String roleInternalName;
     @Nullable private final String roleDisplayName;
 
     @NotNull private final Boolean showInAdminCount;
