@@ -13,7 +13,6 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.EXCHANGE_CONFIRMATION_STATUS;
 

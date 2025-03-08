@@ -7,7 +7,6 @@ import net.furizon.backend.feature.room.action.deleteExchangeStatusObjAction.Del
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

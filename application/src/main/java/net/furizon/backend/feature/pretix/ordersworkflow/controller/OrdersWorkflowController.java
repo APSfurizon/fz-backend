@@ -11,18 +11,22 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GenerateFullStatusUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
+import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopOrderLinkUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetEditOrderLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.RegisterUserOrder;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.SanityCheck;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -153,6 +157,23 @@ public class OrdersWorkflowController {
                         user,
                         request.getOrderCode(),
                         request.getOrderSecret(),
+                        pretixService
+                )
+        );
+    }
+
+    @Operation(summary = "Gets the link to the pretix control page for the specified order", description =
+        "Order must be expressed NOT by their code, but their db id")
+    @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @GetMapping("/generate-pretix-shop-order-link")
+    public LinkResponse generatePretixShopOrderLink(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestParam("id") final Long orderId
+    ) {
+        return executor.execute(
+            GeneratePretixShopOrderLinkUseCase.class,
+                new GeneratePretixShopOrderLinkUseCase.Input(
+                        orderId,
                         pretixService
                 )
         );
