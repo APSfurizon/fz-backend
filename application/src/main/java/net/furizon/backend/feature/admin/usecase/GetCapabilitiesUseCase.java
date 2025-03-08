@@ -30,6 +30,11 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
                         p.contains(Permission.CAN_VIEW_USER)
                         && p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
                 )
+                .canExportHotelList(p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO))
+                .canExportBadges(
+                        p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                        || p.contains(Permission.CAN_VIEW_USER)
+                )
                 .build();
     }
 }

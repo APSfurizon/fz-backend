@@ -209,6 +209,31 @@ public class Orders extends TableImpl<Record> {
      */
     public final TableField<Record, String> ORDER_BUYER_LOCALE = createField(DSL.name("order_buyer_locale"), SQLDataType.CLOB, this, "");
 
+    /**
+     * The column <code>public.orders.order_notes</code>.
+     */
+    public final TableField<Record, String> ORDER_NOTES = createField(DSL.name("order_notes"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_internal_comment</code>.
+     */
+    public final TableField<Record, String> ORDER_INTERNAL_COMMENT = createField(DSL.name("order_internal_comment"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_requires_attention</code>.
+     */
+    public final TableField<Record, Boolean> ORDER_REQUIRES_ATTENTION = createField(DSL.name("order_requires_attention"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.orders.order_checkin_text</code>.
+     */
+    public final TableField<Record, String> ORDER_CHECKIN_TEXT = createField(DSL.name("order_checkin_text"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.orders.order_serial_in_event</code>.
+     */
+    public final TableField<Record, Long> ORDER_SERIAL_IN_EVENT = createField(DSL.name("order_serial_in_event"), SQLDataType.BIGINT.nullable(false), this, "");
+
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -284,7 +309,7 @@ public class Orders extends TableImpl<Record> {
 
     @Override
     public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.ORDERS_ONE_ORDER_PER_EVENT);
+        return Arrays.asList(Keys.ORDER_ONLY_ONE_SERIAL_PER_EVENT, Keys.ORDERS_ONE_ORDER_PER_EVENT);
     }
 
     @Override

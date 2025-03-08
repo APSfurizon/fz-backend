@@ -157,6 +157,9 @@ def fursuitCount() -> Response:
 def usersAdminView(id: int) -> Response:
     return doGet(f'{BASE_URL_API}users/view/{id}')
 
+def exportHotel() -> Response:
+    return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
+
 #register()
 #confirmEmail()
 login()
@@ -170,6 +173,7 @@ login()
 #addFursuit()
 #addFursuit()
 #updateBring()
+#exportHotel()
 
 usersAdminView(1)
 

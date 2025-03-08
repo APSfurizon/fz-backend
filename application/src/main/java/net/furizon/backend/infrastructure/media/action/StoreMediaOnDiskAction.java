@@ -1,7 +1,6 @@
 package net.furizon.backend.infrastructure.media.action;
 
 import com.sksamuel.scrimage.ImmutableImage;
-import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 
