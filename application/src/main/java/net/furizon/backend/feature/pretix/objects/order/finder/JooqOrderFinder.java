@@ -149,6 +149,7 @@ public class JooqOrderFinder implements OrderFinder {
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
+                    .secret(order.getPretixOrderSecret())
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
