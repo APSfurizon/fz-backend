@@ -18,10 +18,10 @@ public class MarkPersonalUserInformationAsUpdatedUseCase implements
 
     @Override
     public @NotNull Boolean executor(@NotNull MarkPersonalUserInformationAsUpdatedUseCase.Input input) {
-        log.info("User {} is marking his information as already up to date", input.user.getUserId());
-        markPersonalUserInformationAsUpdated.invoke(input.user.getUserId(), input.event);
+        log.info("User {} is marking his information as already up to date", input.userId);
+        markPersonalUserInformationAsUpdated.invoke(input.userId, input.event);
         return true;
     }
 
-    public record Input(@NotNull FurizonUser user, @NotNull Event event){}
+    public record Input(long userId, @NotNull Event event){}
 }

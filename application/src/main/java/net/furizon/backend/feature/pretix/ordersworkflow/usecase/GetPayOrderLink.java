@@ -11,8 +11,10 @@ import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Data
@@ -21,22 +23,23 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class GetPayOrderLink implements UseCase<GetPayOrderLink.Input, LinkResponse> {
     @NotNull private final OrderFinder orderFinder;
-
     @NotNull private final PretixConfig pretixConfig;
+    @NotNull private final GeneralChecks generalChecks;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GetPayOrderLink.Input input) {
         PretixInformation pretixService = input.pretixService;
         Event event = pretixService.getCurrentEvent();
+        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user);
 
-        int orderNo = orderFinder.countOrdersOfUserOnEvent(input.user.getUserId(), event);
+        int orderNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (orderNo > 1) {
             throw new RuntimeException("Multiple orders found for the same user in the same event!");
         }
 
-        Order order = orderFinder.findOrderByUserIdEvent(input.user.getUserId(), event, pretixService);
+        Order order = orderFinder.findOrderByUserIdEvent(userId, event, pretixService);
         if (order == null) {
-            log.error("Unable to find order for user {} on event {}", input.user.getUserId(), event);
+            log.error("Unable to find order for user {} on event {}", userId, event);
             throw new RuntimeException("Unable to find the order");
         }
 
@@ -50,6 +53,7 @@ public class GetPayOrderLink implements UseCase<GetPayOrderLink.Input, LinkRespo
 
     public record Input(
             @NotNull FurizonUser user,
+            @Nullable Long userId,
             @NotNull PretixInformation pretixService
     ) {}
 }

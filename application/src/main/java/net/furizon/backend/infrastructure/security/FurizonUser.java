@@ -23,8 +23,8 @@ public class FurizonUser implements UserDetails {
     @NotNull
     private final UUID sessionId;
 
-    @Getter(AccessLevel.NONE)
     @NotNull
+    @Getter
     private final Authentication authentication;
 
     @JsonIgnore

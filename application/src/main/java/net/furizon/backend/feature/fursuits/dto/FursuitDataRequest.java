@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.fursuits.dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class FursuitDataRequest {
     @NotNull private final Boolean bringToCurrentEvent;
 
     @NotNull private final Boolean showInFursuitCount;
+
+    @Nullable private final Long userId;
 }

@@ -97,8 +97,9 @@ public class UserController {
         + "buy/upgrade room), create/manage room and order exchanges, change nickname and badge photo, "
         + "fursuit management (creation, deletion, bringToCurrentEvent, chane name and species, "
         + "show in nosecount, change propic), add and remove roles, link new orders by code. "
-        + "For every order, a buttons should be displayed that, once clicked, it retrives the link from "
-        + "the endpoint TODO which redirects the admin to the order's pretix page. "
+        + "For every order, a buttons should be displayed that, once clicked, it retrieves the link from "
+        + "the endpoint `orders-workflow/generate-pretix-control-order-link` "
+        + "which redirects the admin to the order's pretix control page. "
         + "When this page is loaded, a call to /admin/capabilities must be done to check which operations "
         + "are currently permitted to the admin.")
     @PermissionRequired(permissions = {Permission.CAN_VIEW_USER, Permission.CAN_MANAGE_USER_PUBLIC_INFO})

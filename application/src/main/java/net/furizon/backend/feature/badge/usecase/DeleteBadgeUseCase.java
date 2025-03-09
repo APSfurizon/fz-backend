@@ -30,7 +30,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
-            long userId = input.user.getUserId();
+            long userId = input.userId;
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
                 fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
@@ -55,7 +55,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull BadgeType type,
             @Nullable Long fursuitId
     ) {}

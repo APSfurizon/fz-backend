@@ -8,7 +8,4 @@ import org.jetbrains.annotations.Nullable;
 public class BringFursuitToEventRequest {
     @NotNull
     private final Boolean bringFursuitToCurrentEvent;
-
-    @Nullable
-    private final Long userId;
 }

@@ -19,10 +19,10 @@ public class UpdatePersonalUserInformationUseCase implements
 
     @Override
     public @NotNull Boolean executor(@NotNull UpdatePersonalUserInformationUseCase.Input input) {
-        log.info("User {} is updating his personal infos", input.user.getUserId());
-        updateMembershipInfoAction.invoke(input.user.getUserId(), input.info, input.event);
+        log.info("User {} is updating his personal infos", input.userId);
+        updateMembershipInfoAction.invoke(input.userId, input.info, input.event);
         return true;
     }
 
-    public record Input(@NotNull FurizonUser user, @NotNull PersonalUserInformation info, @NotNull Event event){}
+    public record Input(long userId, @NotNull PersonalUserInformation info, @NotNull Event event){}
 }

@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GeneratePretixShopOrderLinkUseCase
-        implements UseCase<GeneratePretixShopOrderLinkUseCase.Input, LinkResponse> {
+public class GeneratePretixControlOrderLinkUseCase
+        implements UseCase<GeneratePretixControlOrderLinkUseCase.Input, LinkResponse> {
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final OrderFinder orderFinder;
 
     @Override
-    public @NotNull LinkResponse executor(@NotNull GeneratePretixShopOrderLinkUseCase.Input input) {
+    public @NotNull LinkResponse executor(@NotNull GeneratePretixControlOrderLinkUseCase.Input input) {
         Order order = orderFinder.findOrderById(input.orderId, input.pretixInformation);
         if (order == null) {
             throw new ApiException("Order not found", GeneralResponseCodes.ORDER_NOT_FOUND);

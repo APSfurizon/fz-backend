@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
@@ -93,7 +94,7 @@ public class RoomController {
         return executor.execute(
                 CreateRoomUseCase.class,
                 new CreateRoomUseCase.Input(
-                    user,
+                    user.getUserId(),
                     createRoomRequest,
                     pretixInformation.getCurrentEvent(),
                     pretixInformation
@@ -258,12 +259,14 @@ public class RoomController {
         "This operation can be performed only by a guest in a room.")
     @PostMapping("/leave")
     public boolean leaveRoom(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid @Nullable final UserIdRequest request
     ) {
         return executor.execute(
                 LeaveRoomUseCase.class,
                 new LeaveRoomUseCase.Input(
                         user,
+                        request,
                         pretixInformation.getCurrentEvent()
                 )
         );
@@ -362,12 +365,14 @@ public class RoomController {
         + "user has paid and how much the room costs. Note that this difference may not be accurate")
     @GetMapping("/get-room-list-with-quota")
     public ListRoomPricesAvailabilityResponse getRoomList(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid @Nullable final UserIdRequest request
     ) {
         return executor.execute(
                 ListRoomWithPricesAndQuotaUseCase.class,
                 new ListRoomWithPricesAndQuotaUseCase.Input(
                         user,
+                        request,
                         pretixInformation
                 )
         );
@@ -395,6 +400,7 @@ public class RoomController {
         return success ? executor.execute(GetPayOrderLink.class,
                 new GetPayOrderLink.Input(
                         user,
+                        req.getUserId(),
                         pretixInformation
                 )
         ) : new LinkResponse("");

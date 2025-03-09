@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -25,8 +26,8 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
-        long userId = input.user.getUserId();
-        log.info("User {} is creating fursuit {}", userId, input.name);
+        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user);
+        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), userId, input.name);
 
         fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(userId);
 
@@ -69,6 +70,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
             @NotNull String species,
             boolean bringToCurrentEvenet,
             boolean showInFursuitCount,
+            @Nullable Long userId,
             @NotNull FurizonUser user,
             @NotNull PretixInformation pretixInformation
     ){}

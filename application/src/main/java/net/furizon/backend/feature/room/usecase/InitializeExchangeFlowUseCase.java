@@ -44,11 +44,11 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     public @NotNull Boolean executor(@NotNull Input input) {
         Event event = input.event;
         long destUserId = input.req.getDestUserId();
-        ExchangeAction action = input.req.getAction();
-        log.info("{} is initializing a {} exchange with target user {} ",
-                input.user.getUserId(), action, destUserId);
-
         long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        ExchangeAction action = input.req.getAction();
+        log.info("{} is initializing a {} exchange between {} -> {} ",
+                input.user.getUserId(), action, sourceUserId, destUserId);
+
         roomChecks.assertSourceUserHasNotPendingExchanges(sourceUserId, input.event);
 
         log.info("Init {} exchange: {} -> {}", action, sourceUserId, destUserId);

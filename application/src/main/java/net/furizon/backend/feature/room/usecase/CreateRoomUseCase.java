@@ -31,7 +31,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
     @Override
     public @NotNull RoomInfo executor(@NotNull CreateRoomUseCase.Input input) {
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         Event event = input.event;
 
         roomChecks.assertInTimeframeToEditRooms();
@@ -59,7 +59,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull CreateRoomRequest createRoomRequest,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
