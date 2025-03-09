@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.*;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.*;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/orders-workflow")
 @RequiredArgsConstructor
@@ -145,9 +147,34 @@ public class OrdersWorkflowController {
         return executor.execute(
                 RegisterUserOrder.class,
                 new RegisterUserOrder.Input(
-                        user,
+                        user.getUserId(),
+                        true,
+                        false,
                         request.getOrderCode(),
                         request.getOrderSecret(),
+                        pretixService
+                )
+        );
+
+    }
+    @Operation(summary = "Links the specified order to the specified user", description =
+        "This methods is only intended for an admin use")
+    @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
+    @PostMapping("/manual-order-link")
+    public boolean manualOrderLink(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @NotNull @Valid @RequestBody final ManualLinkOrderRequest request
+    ) {
+        log.info("User {} is trying to link order {} to user {}",
+                user.getUserId(), request.getOrderCode(), request.getUserId());
+        return executor.execute(
+                RegisterUserOrder.class,
+                new RegisterUserOrder.Input(
+                        user.getUserId(),
+                        false,
+                        true,
+                        request.getOrderCode(),
+                        null,
                         pretixService
                 )
         );
@@ -170,22 +197,4 @@ public class OrdersWorkflowController {
         );
     }
 
-    @Operation(summary = "Links the specified order to the specified user", description =
-        "This methods is only intended for an admin use")
-    @PermissionRequired(permissions = {Permission.PRETIX_ADMIN})
-    @PostMapping("/manual-order-link")
-    public boolean manualOrderLink(
-            @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @NotNull @Valid @RequestBody final ManualLinkOrderRequest request
-    ) {
-        return executor.execute(
-                ManualOrderLinkUseCase.class,
-                new ManualOrderLinkUseCase.Input(
-                        request,
-                        user,
-                        pretixService.getCurrentEvent(),
-                        pretixService
-                )
-        );
-    }
 }
