@@ -158,7 +158,8 @@ public class JooqUserFinder implements UserFinder {
     @NotNull
     @Override
     public List<SearchUserResult> searchUserInCurrentEvent(
-            @NotNull String fursonaName,
+            @NotNull String inputQuery,
+            boolean isAdminSearch,
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
@@ -167,25 +168,35 @@ public class JooqUserFinder implements UserFinder {
             @Nullable Boolean filterBanStatus
     ) {
         Condition condition = PostgresDSL.trueCondition();
-        boolean innerJoinOrders = false;
         boolean leftJoinOrders = false;
         boolean joinMembershipCards = false;
+        boolean joinPersonalUserInfo = false;
         boolean joinBanStatus = false;
+        boolean joinOrders = false;
 
-        Table<?> searchFursonaQuery = selectUser()
-            .where(
-                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + fursonaName + "%")
+        Condition searchFursonaQueryCondition;
+        if (isAdminSearch) {
+            joinPersonalUserInfo = true;
+            searchFursonaQueryCondition =
+                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%")
+                .or(MEMBERSHIP_INFO.INFO_LAST_NAME.likeIgnoreCase("%" + inputQuery + "%"))
+                .or(MEMBERSHIP_INFO.INFO_FIRST_NAME.likeIgnoreCase("%" + inputQuery + "%"));
+        } else {
+            searchFursonaQueryCondition =
+                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%")
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
                 .or(
                     //If someone doesn't want to be displayed in the nosecount,
                     // find him only if it's a almost exact match
-                    USERS.USER_FURSONA_NAME.like("_" + fursonaName + "_")
+                    USERS.USER_FURSONA_NAME.like("_" + inputQuery + "_")
                     .and(USERS.SHOW_IN_NOSECOUNT.isFalse())
-                )
-            ).asTable("fursonaq");
+                );
+        }
+
+        Table<?> searchFursonaQuery = selectUser().where(searchFursonaQueryCondition).asTable("fursonaq");
 
         if (filterRoom) {
-            innerJoinOrders = true;
+            joinOrders = true;
             condition = condition.and(
                 searchFursonaQuery.field(USERS.USER_ID).notIn(
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
@@ -204,7 +215,7 @@ public class JooqUserFinder implements UserFinder {
         }
 
         if (filterPaid) {
-            innerJoinOrders = true;
+            joinOrders = true;
             condition = condition.and(
                 ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
             );
@@ -232,8 +243,8 @@ public class JooqUserFinder implements UserFinder {
             );
         }
 
-        SelectJoinStep<?> query = PostgresDSL
-            .selectDistinct(
+        SelectJoinStep<?> query =
+            PostgresDSL.selectDistinct(
                 searchFursonaQuery.field(USERS.USER_ID),
                 searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
                 MEDIA.MEDIA_PATH,
@@ -250,7 +261,14 @@ public class JooqUserFinder implements UserFinder {
                 .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
         }
 
-        if (innerJoinOrders) {
+        if (joinPersonalUserInfo) {
+            query = query
+                .innerJoin(MEMBERSHIP_INFO)
+                .on(searchFursonaQuery.field(USERS.USER_ID).eq(MEMBERSHIP_INFO.USER_ID));
+
+        }
+
+        if (joinOrders) {
             query = query
                 .innerJoin(ORDERS)
                 .on(
@@ -258,7 +276,7 @@ public class JooqUserFinder implements UserFinder {
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
                 );
         }
-        if (leftJoinOrders && !innerJoinOrders) {
+        if (leftJoinOrders && !joinOrders) {
             query = query
                 .leftJoin(ORDERS)
                 .on(
@@ -278,7 +296,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.select(PostgresDSL.asterisk())
             .from(finalQuery)
             .orderBy(
-                PostgresDSL.position(fursonaName, finalQuery.field(USERS.USER_FURSONA_NAME)),
+                PostgresDSL.position(inputQuery, finalQuery.field(USERS.USER_FURSONA_NAME)),
                 finalQuery.field(USERS.USER_FURSONA_NAME)
             )
         ).stream().map(JooqSearchUserMapper::map).toList();

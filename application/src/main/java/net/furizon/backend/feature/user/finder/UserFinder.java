@@ -20,7 +20,8 @@ public interface UserFinder {
 
     @NotNull
     List<SearchUserResult> searchUserInCurrentEvent(
-            @NotNull String fursonaName,
+            @NotNull String inputQuery,
+            boolean isAdminSearch,
             @NotNull Event event,
             boolean filterRoom,
             boolean filterPaid,
