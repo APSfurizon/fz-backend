@@ -6,8 +6,11 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.jooq.infrastructure.JooqOptional;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
+import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +21,14 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqUpsertOrderAction implements UpsertOrderAction {
     @NotNull private final SqlCommand command;
+    @NotNull private final SqlQuery sqlQuery;
 
     @NotNull private final UserFinder userFinder;
 
     @NotNull private final JsonSerializer jsonSerializer;
 
     @Override
-    public void invoke(
+    public synchronized void invoke(
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
@@ -66,6 +70,20 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
             }
         }
 
+        //We don't use a sequence for the same reasons of the membership cards
+        JooqOptional<Record1<Long>> r = sqlQuery.fetchFirst(
+            PostgresDSL.select(
+                PostgresDSL.max(ORDERS.ORDER_SERIAL_IN_EVENT)
+            )
+            .from(ORDERS)
+            .where(ORDERS.EVENT_ID.eq(eventId))
+        );
+        long serial = 1L;
+        if (r.isPresent()) {
+            var res = r.get().get(0);
+            serial = res == null ? 1L : ((long) res) + 1L;
+        }
+
         command.execute(
             PostgresDSL
                 .insertInto(
@@ -98,7 +116,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_INTERNAL_COMMENT,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
-                    ORDERS.ORDER_ANSWERS_JSON
+                    ORDERS.ORDER_ANSWERS_JSON,
+                    ORDERS.ORDER_SERIAL_IN_EVENT
                 )
                 .values(
                     order.getId(),
@@ -129,7 +148,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     internalComment,
                     userId,
                     eventId,
-                    answers
+                    answers,
+                    serial
                 )
                 .onConflict(ORDERS.ID)
                 .doUpdate()

@@ -229,6 +229,11 @@ public class Orders extends TableImpl<Record> {
      */
     public final TableField<Record, String> ORDER_CHECKIN_TEXT = createField(DSL.name("order_checkin_text"), SQLDataType.CLOB, this, "");
 
+    /**
+     * The column <code>public.orders.order_serial_in_event</code>.
+     */
+    public final TableField<Record, Long> ORDER_SERIAL_IN_EVENT = createField(DSL.name("order_serial_in_event"), SQLDataType.BIGINT.nullable(false), this, "");
+
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -304,7 +309,7 @@ public class Orders extends TableImpl<Record> {
 
     @Override
     public List<UniqueKey<Record>> getUniqueKeys() {
-        return Arrays.asList(Keys.ORDERS_ONE_ORDER_PER_EVENT);
+        return Arrays.asList(Keys.ORDER_ONLY_ONE_SERIAL_PER_EVENT, Keys.ORDERS_ONE_ORDER_PER_EVENT);
     }
 
     @Override

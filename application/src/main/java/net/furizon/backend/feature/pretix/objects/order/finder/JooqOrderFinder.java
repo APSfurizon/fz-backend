@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -146,6 +149,7 @@ public class JooqOrderFinder implements OrderFinder {
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
+                    .secret(order.getPretixOrderSecret())
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
@@ -211,6 +215,16 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> r.get(ORDERS.ID));
     }
 
+    @NotNull
+    @Override
+    public List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService) {
+        return query.fetch(
+            selectFrom()
+            .where(ORDERS.USER_ID.eq(userId))
+            .orderBy(ORDERS.EVENT_ID)
+        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
+    }
+
     @Override
     public @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event) {
         return query.fetch(
@@ -251,7 +265,8 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_CHECKIN_TEXT,
                         ORDERS.ORDER_INTERNAL_COMMENT,
                         ORDERS.USER_ID,
-                        ORDERS.EVENT_ID
+                        ORDERS.EVENT_ID,
+                        ORDERS.ORDER_SERIAL_IN_EVENT
                 ).from(ORDERS);
     }
 }

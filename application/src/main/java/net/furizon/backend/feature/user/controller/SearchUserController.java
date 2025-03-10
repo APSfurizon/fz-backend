@@ -40,13 +40,17 @@ public class SearchUserController {
                     + "With `filterWithoutRole` you can filter out people who have the specified role, "
                     + "by the role internal name")
     @GetMapping("/current-event")
-    public SearchUsersResponse searchByFursonaNameInCurrentEvent(
+    public SearchUsersResponse searchByNameInCurrentEvent(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid
             @jakarta.validation.constraints.NotNull
             @Size(min = 2)
-            @RequestParam("fursona-name")
-            final String fursonaName,
+            @RequestParam("name")
+            final String inputQuery,
+            @Valid
+            @Nullable
+            @RequestParam("is-admin-search")
+            final Boolean isAdminSearch,
             @Valid
             @Nullable
             @RequestParam("filter-not-in-room")
@@ -75,7 +79,8 @@ public class SearchUserController {
         return executor.execute(
                 SearchUserInEventUseCase.class,
                 new SearchUserInEventUseCase.Input(
-                        fursonaName,
+                        inputQuery,
+                        isAdminSearch == null ? false : isAdminSearch,
                         pretixInformation,
                         filterNotInRoom == null ? false : filterNotInRoom,
                         filterPaid == null ? false : filterPaid,
@@ -91,7 +96,7 @@ public class SearchUserController {
     public SearchUsersResponse getUsersInCurrentEventById(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid
-            @NotNull
+            @jakarta.validation.constraints.NotNull
             @Size(min = 1)
             @RequestParam("id")
             final String[] userIds
