@@ -19,12 +19,14 @@ public class JooqUpdateRoleInfoAction implements UpdateRoleInformationAction {
             long roleId,
             @NotNull String roleInternalName,
             @Nullable String roleDisplayName,
+            long roleAdmincountPriority,
             boolean showInAdminCount) {
 
         return command.execute(
                 PostgresDSL.update(ROLES)
                 .set(ROLES.INTERNAL_NAME, roleInternalName)
                 .set(ROLES.DISPLAY_NAME, roleDisplayName)
+                .set(ROLES.ROLE_ADMINCOUNT_PRIORITY, roleAdmincountPriority)
                 .set(ROLES.SHOW_IN_NOSECOUNT, showInAdminCount)
                 .where(ROLES.ROLE_ID.eq(roleId))
         ) > 0;

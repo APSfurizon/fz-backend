@@ -1,4 +1,6 @@
 ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS show_in_nosecount bool NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS role_admincount_priority int8 NOT NULL DEFAULT 100;
+
 BEGIN;
 UPDATE roles SET internal_name = CAST(random() AS TEXT) WHERE internal_name IS NULL;
 ALTER TABLE roles ALTER COLUMN internal_name SET NOT NULL;
