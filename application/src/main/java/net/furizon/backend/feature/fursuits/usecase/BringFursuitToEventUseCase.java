@@ -27,7 +27,7 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
+        long userId = input.user.getUserId();
         log.info("User {} is setting bringToCurrentEvent = {} on fursuit {}",
                 input.user.getUserId(), input.req.getBringFursuitToCurrentEvent(), input.fursuitId);
         fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);

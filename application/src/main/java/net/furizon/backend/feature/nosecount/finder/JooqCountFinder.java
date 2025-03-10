@@ -41,6 +41,11 @@ public class JooqCountFinder implements CountsFinder {
                 MEDIA.MEDIA_TYPE
             )
             .from(FURSUITS)
+            .innerJoin(USERS)
+            .on(
+                FURSUITS.USER_ID.eq(USERS.USER_ID)
+                .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
+            )
             .innerJoin(FURSUITS_ORDERS)
             .on(
                 FURSUITS.FURSUIT_ID.eq(FURSUITS_ORDERS.FURSUIT_ID)

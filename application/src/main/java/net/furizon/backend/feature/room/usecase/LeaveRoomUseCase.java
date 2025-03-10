@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -12,8 +13,10 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
@@ -27,16 +30,19 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Override
     public @NotNull Boolean executor(@NotNull LeaveRoomUseCase.Input input) {
-        long requesterUserId = input.user.getUserId();
+        Long reqUserId = input.userIdRequest == null ? null : input.userIdRequest.getUserId();
         Event event = input.event;
+
+        long userId = generalChecks.getUserIdAndAssertPermission(reqUserId, input.user);
 
         checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(
-                requesterUserId,
+                userId,
                 event
         );
         checks.assertGuestIsConfirmed(guest);
@@ -45,7 +51,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
 
         checks.assertRoomNotConfirmed(roomId);
         checks.assertUserIsNotRoomOwner(targetUserId, roomId);
-        checks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
+        checks.assertIsGuestObjOwnerOrAdmin(guest, userId);
         checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.leaveRoom(guest.getGuestId());
@@ -64,6 +70,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
 
     public record Input(
             @NotNull FurizonUser user,
+            @Nullable UserIdRequest userIdRequest,
             @NotNull Event event
     ) {}
 }

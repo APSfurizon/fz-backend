@@ -154,6 +154,9 @@ def countdown() -> Response:
 def fursuitCount() -> Response:
     return doGet(f'{BASE_URL_API}counts/fursuit')
 
+def usersAdminView(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/view/{id}')
+
 def exportHotel() -> Response:
     return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
 
@@ -170,7 +173,9 @@ login()
 #addFursuit()
 #addFursuit()
 #updateBring()
-exportHotel()
+#exportHotel()
+
+usersAdminView(1)
 
 #countdown()
 

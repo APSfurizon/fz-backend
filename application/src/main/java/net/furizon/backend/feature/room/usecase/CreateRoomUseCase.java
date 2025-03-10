@@ -11,7 +11,6 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +30,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
     @Override
     public @NotNull RoomInfo executor(@NotNull CreateRoomUseCase.Input input) {
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         Event event = input.event;
 
         roomChecks.assertInTimeframeToEditRooms();
@@ -59,7 +58,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull CreateRoomRequest createRoomRequest,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation

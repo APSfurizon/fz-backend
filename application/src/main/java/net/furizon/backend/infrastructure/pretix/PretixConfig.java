@@ -90,11 +90,19 @@ public class PretixConfig implements HttpConfig {
         @NotNull private final String port;
         @NotNull private final String basePath;
         @NotNull private final String path;
+        @NotNull private final String controlBasePath;
         @NotNull private final String url;
+        @NotNull private final String controlUrl;
 
         @NotNull
         public String getOrderUrl(@NotNull Order order) {
             return url + "order/" + order.getCode() + "/" + order.getPretixOrderSecret() + "/";
+        }
+
+        @NotNull
+        public String getOrderControlUrl(@NotNull Order order) {
+            var event = order.getOrderEvent();
+            return controlUrl + event.getSlug() + "/orders/" + order.getCode() + "/";
         }
     }
 }
