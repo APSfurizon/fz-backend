@@ -156,7 +156,7 @@ public class JooqCountFinder implements CountsFinder {
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .orderBy(
-                //TODO add role priority
+                ROLES.ROLE_ADMINCOUNT_PRIORITY,
                 ROLES.DISPLAY_NAME,
                 ROLES.INTERNAL_NAME,
                 ROLES.ROLE_ID
