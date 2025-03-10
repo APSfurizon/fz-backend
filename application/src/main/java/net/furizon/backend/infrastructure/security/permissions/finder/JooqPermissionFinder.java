@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Field;
 import org.jooq.Record2;
-import org.jooq.Record4;
+import org.jooq.Record5;
 import org.jooq.SelectJoinStep;
 import org.jooq.Table;
 import org.jooq.impl.SQLDataType;
@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.PERMISSION;
 import static net.furizon.jooq.generated.Tables.ROLES;
 import static net.furizon.jooq.generated.Tables.USERS;
@@ -309,12 +308,13 @@ public class JooqPermissionFinder implements PermissionFinder {
         ).from(PERMISSION);
     }
 
-    private @NotNull SelectJoinStep<Record4<Long, String, String, Boolean>> selectRole() {
+    private @NotNull SelectJoinStep<Record5<Long, String, String, Boolean, Long>> selectRole() {
         return PostgresDSL.select(
             ROLES.ROLE_ID,
             ROLES.DISPLAY_NAME,
             ROLES.INTERNAL_NAME,
-            ROLES.SHOW_IN_NOSECOUNT
+            ROLES.SHOW_IN_NOSECOUNT,
+            ROLES.ROLE_ADMINCOUNT_PRIORITY
         ).from(ROLES);
     }
 }

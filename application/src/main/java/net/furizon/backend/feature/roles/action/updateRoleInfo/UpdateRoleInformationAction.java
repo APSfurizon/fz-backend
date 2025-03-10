@@ -8,6 +8,7 @@ public interface UpdateRoleInformationAction {
             long roleId,
             @NotNull String roleInternalName,
             @Nullable String roleDisplayName,
+            long roleAdmincountPriority,
             boolean showInAdminCount
     );
 }

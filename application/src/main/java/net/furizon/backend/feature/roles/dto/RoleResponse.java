@@ -19,6 +19,8 @@ public class RoleResponse {
 
     private final boolean showInAdminCount;
 
+    private final long roleAdmincountPriority;
+
     @NotNull private final Set<Permission> enabledPermissions;
 
     @NotNull private final List<UserHasRoleResponse> users;

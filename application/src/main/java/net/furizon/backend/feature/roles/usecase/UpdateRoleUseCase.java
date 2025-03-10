@@ -102,6 +102,7 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
             roleId,
             req.getRoleInternalName(),
             req.getRoleDisplayName(),
+            req.getRoleAdmincountPriority(),
             req.getShowInAdminCount()
         );
         throwDbError(res, 1, roleId, req);

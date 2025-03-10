@@ -15,6 +15,7 @@ public class Role {
     private final long roleId;
     @Nullable private final String displayName;
     @NotNull private final String internalName;
+    private final long roleAdmincountPriority;
     private final boolean showInNosecount;
 
     @Getter(AccessLevel.NONE)

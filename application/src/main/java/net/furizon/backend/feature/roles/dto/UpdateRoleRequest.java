@@ -18,6 +18,8 @@ public class UpdateRoleRequest {
 
     @NotNull private final Boolean showInAdminCount;
 
+    @NotNull private final Long roleAdmincountPriority;
+
     @NotNull private final Set<Permission> enabledPermissions;
 
     @NotNull private final List<UpdateRoleToUserRequest> users;
