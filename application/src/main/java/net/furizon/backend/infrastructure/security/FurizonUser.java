@@ -1,6 +1,5 @@
 package net.furizon.backend.infrastructure.security;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import net.furizon.backend.feature.authentication.Authentication;

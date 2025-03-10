@@ -2,9 +2,11 @@ package net.furizon.backend.feature.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.UserSession;
+import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
@@ -12,18 +14,20 @@ import net.furizon.backend.feature.user.usecase.GetUserAdminViewDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
 import net.furizon.backend.feature.user.usecase.SearchUsersByIdsUseCase;
+import net.furizon.backend.feature.user.usecase.UpdateShowInNosecountUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,10 +36,13 @@ import java.util.Optional;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-    @NotNull private final PretixInformation pretixInformation;
-    @NotNull private final UseCaseExecutor executor;
+    @org.jetbrains.annotations.NotNull
+    private final PretixInformation pretixInformation;
+    @org.jetbrains.annotations.NotNull
+    private final UseCaseExecutor executor;
 
-    @NotNull private final GetUserAdminViewDataUseCase getUserAdminViewDataUseCase;
+    @org.jetbrains.annotations.NotNull
+    private final GetUserAdminViewDataUseCase getUserAdminViewDataUseCase;
 
     @GetMapping("/me")
     public FurizonUser getMe(
@@ -88,6 +95,7 @@ public class UserController {
             user.getUserId()
         );
     }
+
     @Operation(summary = "View user", description =
         "This operation can be performed only by an admin. "
         + "Returns all the information we have regarding a user. The frontend page should let the admin "
@@ -114,5 +122,19 @@ public class UserController {
                 pretixInformation.getCurrentEvent(),
                 pretixInformation
         );
+    }
+
+    @Operation(summary = "Update showInNosecount user flag", description =
+        "This operation can be performed only by an admin. User's show in nosecount flag is a hidden "
+        + "flag for admins to hide users from be entirely displayed in any nosecount (exception is made "
+        + "for the admin count, since it includes also users not coming to an event), so the general "
+        + "public doesn't know that the user is coming to the event")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PostMapping("/show-in-nosecount")
+    public boolean updateShowInNosecount(
+        @AuthenticationPrincipal @NotNull final FurizonUser user,
+        @RequestBody @Valid @NotNull final UpdateShowInNosecountRequest request
+    ) {
+        return executor.execute(UpdateShowInNosecountUseCase.class, request);
     }
 }

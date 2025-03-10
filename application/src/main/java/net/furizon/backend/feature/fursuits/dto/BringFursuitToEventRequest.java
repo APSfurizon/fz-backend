@@ -2,7 +2,6 @@ package net.furizon.backend.feature.fursuits.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.jetbrains.annotations.Nullable;
 
 @Data
 public class BringFursuitToEventRequest {

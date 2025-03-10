@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.updateMembershipInfo.UpdateMembershipInfoAction;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

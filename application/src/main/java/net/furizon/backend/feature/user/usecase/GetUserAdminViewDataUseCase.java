@@ -20,7 +20,9 @@ import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.room.usecase.GetExchangeConfirmationStatusInfoUseCase;
 import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
+import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -45,6 +47,7 @@ public class GetUserAdminViewDataUseCase {
 
     @NotNull private final SessionAuthenticationManager authenticationFinder;
 
+    @NotNull private final UserFinder userFinder;
     @NotNull private final EventFinder eventFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final PermissionFinder permissionFinder;
@@ -61,7 +64,8 @@ public class GetUserAdminViewDataUseCase {
         // Fetch userData
         PersonalUserInformation privateInfo = personalInfoFinder.findByUserId(userId);
         Authentication auth = authenticationFinder.findAuthenticationByUserId(userId);
-        if (privateInfo == null || auth == null) {
+        User jooqUser = userFinder.findById(userId);
+        if (privateInfo == null || auth == null || jooqUser == null) {
             throw new ApiException("User not found", GeneralResponseCodes.USER_NOT_FOUND);
         }
 
@@ -157,6 +161,7 @@ public class GetUserAdminViewDataUseCase {
                 .currentRoomdata(roomInfo)
                 .exchanges(exchanges)
                 .otherRooms(prevRooms)
+                .showInNousecount(jooqUser.isShowInNoseCount())
                 .badgeData(badgeData)
                 .roles(roles)
                 .permissions(permissions)
