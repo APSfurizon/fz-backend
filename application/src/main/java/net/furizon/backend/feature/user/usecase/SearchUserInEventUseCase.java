@@ -43,7 +43,8 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
                 input.filterPaid,
                 input.filterNotMadeAnOrder,
                 input.filterMembershipForYear,
-                input.banStatus
+                input.banStatus,
+                input.filterWithoutRole
         ));
     }
 
@@ -56,6 +57,7 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
             boolean filterPaid,
             boolean filterNotMadeAnOrder,
             @Nullable Short filterMembershipForYear,
-            @Nullable Boolean banStatus
+            @Nullable Boolean banStatus,
+            @Nullable String filterWithoutRole
     ) {}
 }

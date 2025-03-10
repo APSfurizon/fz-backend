@@ -4,6 +4,7 @@ public enum GeneralResponseCodes {
     USER_IS_NOT_ADMIN,
     USER_NOT_FOUND,
     ORDER_ALREADY_BOUGHT, //We expected that the user had no order, but instead he has at least one
+    ROLE_NOT_FOUND,
     EVENT_NOT_FOUND,
     ORDER_NOT_FOUND, //Unable to find the specified order
     ORDER_NOT_PAID, //An order is not in a paid status
