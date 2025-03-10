@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.nosecount.finder;
 
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
+import net.furizon.backend.feature.nosecount.dto.JooqAdmincountObj;
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import org.jetbrains.annotations.NotNull;
@@ -14,4 +15,6 @@ public interface CountsFinder {
     @NotNull List<UserDisplayData> getSponsors(long eventId);
 
     @NotNull List<JooqNosecountObj> getNosecount(long eventId);
+
+    @NotNull List<JooqAdmincountObj> getAdmins();
 }

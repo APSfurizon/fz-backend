@@ -3,7 +3,9 @@ package net.furizon.backend.feature.nosecount.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
+import net.furizon.backend.feature.nosecount.dto.JooqAdmincountObj;
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
+import net.furizon.backend.feature.nosecount.mapper.JooqAdmincountObjMapper;
 import net.furizon.backend.feature.nosecount.mapper.JooqNosecountObjMapper;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
@@ -15,13 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.ROOMS;
-import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
-import static net.furizon.jooq.generated.Tables.USERS;
-import static net.furizon.jooq.generated.Tables.FURSUITS;
-import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.ORDERS;
-import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.*;
 
 @Component
 @RequiredArgsConstructor
@@ -133,5 +129,38 @@ public class JooqCountFinder implements CountsFinder {
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .orderBy(ROOMS.ROOM_ID, ROOM_GUESTS.ROOM_GUEST_ID)
         ).stream().map(r -> JooqNosecountObjMapper.map(r, roomOwnerOrder)).toList();
+    }
+
+    @Override
+    public @NotNull List<JooqAdmincountObj> getAdmins() {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LOCALE,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_ID,
+                ROLES.ROLE_ID,
+                ROLES.DISPLAY_NAME,
+                ROLES.INTERNAL_NAME
+            )
+            .from(USERS)
+            .innerJoin(USER_HAS_ROLE)
+            .on(USERS.USER_ID.eq(USER_HAS_ROLE.USER_ID))
+            .innerJoin(ROLES)
+            .on(
+                USER_HAS_ROLE.ROLE_ID.eq(ROLES.ROLE_ID)
+                .and(ROLES.SHOW_IN_NOSECOUNT.isTrue())
+            )
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+            .orderBy(
+                //TODO add role priority
+                ROLES.DISPLAY_NAME,
+                ROLES.INTERNAL_NAME,
+                ROLES.ROLE_ID
+            )
+        ).stream().map(JooqAdmincountObjMapper::map).toList();
     }
 }
