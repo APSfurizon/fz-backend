@@ -19,8 +19,7 @@ public class OrderDataResponse {
     private String code;
 
     @Nullable
-    //TODO change to checkinSecret
-    private String secret;
+    private String checkinSecret;
 
     @NotNull
     private OrderStatus orderStatus;
