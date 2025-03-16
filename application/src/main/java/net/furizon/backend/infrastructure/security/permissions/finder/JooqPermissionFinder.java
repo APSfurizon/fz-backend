@@ -292,6 +292,7 @@ public class JooqPermissionFinder implements PermissionFinder {
             .on(ROLES.ROLE_ID.eq(usersPerRoleTable.field(USER_HAS_ROLE.ROLE_ID)))
             .leftJoin(permissionsPerRoleTable)
             .on(ROLES.ROLE_ID.eq(permissionsPerRoleTable.field(PERMISSION.ROLE_ID)))
+            .orderBy(ROLES.ROLE_ADMINCOUNT_PRIORITY, ROLES.DISPLAY_NAME, ROLES.INTERNAL_NAME)
         ).stream().map(r -> ListedRoleMapper.map(
             r,
             permissionsPerRoleTable.field(permissionCount),
