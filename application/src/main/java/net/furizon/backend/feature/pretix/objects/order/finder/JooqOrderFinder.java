@@ -149,7 +149,7 @@ public class JooqOrderFinder implements OrderFinder {
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
-                    .secret(order.getPretixOrderSecret())
+                    .secret(order.getCheckinSecret())
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
@@ -248,6 +248,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                         ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
+                        ORDERS.ORDER_CHECKIN_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_BUYER_EMAIL,
                         ORDERS.ORDER_BUYER_PHONE,

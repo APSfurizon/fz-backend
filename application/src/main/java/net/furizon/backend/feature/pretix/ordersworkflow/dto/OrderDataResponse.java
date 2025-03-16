@@ -18,7 +18,8 @@ public class OrderDataResponse {
     @NotNull
     private String code;
 
-    @NotNull
+    @Nullable
+    //TODO change to checkinSecret
     private String secret;
 
     @NotNull
