@@ -143,17 +143,26 @@ public class JooqUserFinder implements UserFinder {
         Condition condition = PostgresDSL.trueCondition();
         boolean leftJoinOrders = false;
         boolean joinMembershipCards = false;
-        boolean joinPersonalUserInfo = false;
         boolean joinBanStatus = false;
         boolean joinOrders = false;
 
+        var searchFursonaQuerySelect = selectUser();
         Condition searchFursonaQueryCondition;
         if (isAdminSearch) {
-            joinPersonalUserInfo = true;
-            searchFursonaQueryCondition =
-                USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%")
-                .or(MEMBERSHIP_INFO.INFO_LAST_NAME.likeIgnoreCase("%" + inputQuery + "%"))
-                .or(MEMBERSHIP_INFO.INFO_FIRST_NAME.likeIgnoreCase("%" + inputQuery + "%"));
+            String[] sp = inputQuery.split("\\s+");
+            String s = String.join("%", sp);
+            searchFursonaQueryCondition = PostgresDSL.concat(
+                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FIRST_NAME, " "),
+                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_LAST_NAME, " "),
+                MEMBERSHIP_INFO.INFO_FIRST_NAME //First name repeated two times so both A B and B A return results
+            ).likeIgnoreCase("%" + s + "%");
+            //for (String ss : sp) {
+            searchFursonaQueryCondition = searchFursonaQueryCondition
+                                          .or(USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%"));
+            //}
+            searchFursonaQuerySelect = searchFursonaQuerySelect
+                    .innerJoin(MEMBERSHIP_INFO)
+                    .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID));
         } else {
             searchFursonaQueryCondition =
                 USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%")
@@ -166,7 +175,7 @@ public class JooqUserFinder implements UserFinder {
                 );
         }
 
-        Table<?> searchFursonaQuery = selectUser().where(searchFursonaQueryCondition).asTable("fursonaq");
+        Table<?> searchFursonaQuery = searchFursonaQuerySelect.where(searchFursonaQueryCondition).asTable("fursonaq");
 
         if (filterRoom) {
             joinOrders = true;
@@ -246,13 +255,6 @@ public class JooqUserFinder implements UserFinder {
             query = query
                 .innerJoin(AUTHENTICATIONS)
                 .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
-        }
-
-        if (joinPersonalUserInfo) {
-            query = query
-                .innerJoin(MEMBERSHIP_INFO)
-                .on(searchFursonaQuery.field(USERS.USER_ID).eq(MEMBERSHIP_INFO.USER_ID));
-
         }
 
         if (joinOrders) {
