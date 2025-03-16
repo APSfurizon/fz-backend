@@ -85,7 +85,7 @@ def register() -> Response:
             "residenceCountry": "IT",
             "prefixPhoneNumber": "+39",
             "phoneNumber": "3331234567"
-        }   
+        }
     }
     return doPost(f'{BASE_URL_API}authentication/register', json=json)
 
@@ -106,7 +106,7 @@ def login() -> Response:
         HEADERS["Authorization"] = val
         session.cookies.set("fz-token", val)
         print(HEADERS)
-    
+
     return req
 
 def getMe() -> Response:
@@ -157,6 +157,53 @@ def fursuitCount() -> Response:
 def exportHotel() -> Response:
     return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
 
+def listPermissions() -> Response:
+    return doGet(f'{BASE_URL_API}roles/permissions')
+def listRoles() -> Response:
+    return doGet(f'{BASE_URL_API}roles/')
+def crerateRole(roleInternalName: str) -> Response:
+    return doPost(f'{BASE_URL_API}roles/', json={"internalName": roleInternalName})
+def fetchRole(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}roles/{id}')
+def updateRole(id: int) -> Response:
+    json = {
+        "roleInternalName": "testtt",
+        "roleDisplayName": None,
+        "showInAdminCount": True,
+        "enabledPermissions": [
+            "CAN_MANAGE_USER_PUBLIC_INFO",
+            "CAN_MANAGE_ROOMS",
+            "CAN_MANAGE_MEMBERSHIP_CARDS",
+            #"PRETIX_ADMIN",
+            #"CAN_REFRESH_PRETIX_CACHE",
+        ],
+        "users": [
+            {
+                "userId": 1,
+                "tempRole": True
+                #"tempRole": False
+            },
+            {
+                "userId": 2,
+                "tempRole": True
+                #"tempRole": False
+            },
+            {
+                "userId": 3,
+                "tempRole": True
+                #"tempRole": False
+            },
+            {
+                "userId": 4,
+                #"tempRole": True
+                "tempRole": False
+            },
+        ]
+    }
+    return doPost(f'{BASE_URL_API}roles/{id}', json=json)
+def deleteRole(id: int) -> Response:
+    return doDelete(f'{BASE_URL_API}roles/{id}')
+
 #register()
 #confirmEmail()
 login()
@@ -170,7 +217,13 @@ login()
 #addFursuit()
 #addFursuit()
 #updateBring()
-exportHotel()
+#exportHotel()
+#listPermissions()
+#listRoles()
+#crerateRole("-_____")
+#fetchRole(1)
+updateRole(2)
+#deleteRole(4)
 
 #countdown()
 

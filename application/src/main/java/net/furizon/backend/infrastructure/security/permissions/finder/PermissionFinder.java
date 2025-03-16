@@ -1,8 +1,11 @@
 package net.furizon.backend.infrastructure.security.permissions.finder;
 
+import net.furizon.backend.feature.roles.dto.ListedRoleResponse;
+import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.Role;
 import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
+import net.furizon.backend.infrastructure.security.permissions.dto.JooqUserHasRole;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +25,13 @@ public interface PermissionFinder {
 
     @NotNull List<Role> getRolesFromUserId(long userId);
 
-    @NotNull List<Long> getUsersWithRole(@NotNull String roleInternalName);
+    @NotNull List<Long> getUsersWithRoleInternalName(@NotNull String roleInternalName);
+
+    @NotNull List<Long> getUsersWithRoleId(long roleId);
+
+    @NotNull List<UserHasRoleResponse> getDisplayUsersWithRoleId(long roleId);
+
+    @NotNull List<JooqUserHasRole> getUserHasRoleByRoleId(long roleId);
 
     @NotNull List<Long> getUsersWithPermission(@NotNull Permission permission);
 
@@ -31,4 +40,6 @@ public interface PermissionFinder {
     boolean userHasRole(long userId, @NotNull String roleInternalName);
 
     boolean userHasPermission(long userId, @NotNull Permission permission);
+
+    @NotNull List<ListedRoleResponse> listPermissions();
 }
