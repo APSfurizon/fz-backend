@@ -79,6 +79,7 @@ public class SearchUserController {
         return executor.execute(
                 SearchUserInEventUseCase.class,
                 new SearchUserInEventUseCase.Input(
+                        user,
                         inputQuery,
                         isAdminSearch == null ? false : isAdminSearch,
                         pretixInformation,
