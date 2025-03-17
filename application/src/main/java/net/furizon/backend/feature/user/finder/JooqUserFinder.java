@@ -308,6 +308,8 @@ public class JooqUserFinder implements UserFinder {
                 MEMBERSHIP_INFO.INFO_FIRST_NAME,
                 MEMBERSHIP_INFO.INFO_LAST_NAME,
                 MEMBERSHIP_INFO.INFO_FISCAL_CODE,
+                MEMBERSHIP_INFO.INFO_DOCUMENT_SEX,
+                MEMBERSHIP_INFO.INFO_GENDER,
                 MEMBERSHIP_INFO.INFO_BIRTH_CITY,
                 MEMBERSHIP_INFO.INFO_BIRTH_REGION,
                 MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
