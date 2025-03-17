@@ -17,6 +17,7 @@ import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -36,6 +37,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -158,6 +160,16 @@ public class MembershipInfo extends TableImpl<Record> {
      */
     public final TableField<Record, Long> LAST_UPDATED_EVENT_ID = createField(DSL.name("last_updated_event_id"), SQLDataType.BIGINT, this, "");
 
+    /**
+     * The column <code>public.membership_info.info_document_sex</code>.
+     */
+    public final TableField<Record, String> INFO_DOCUMENT_SEX = createField(DSL.name("info_document_sex"), SQLDataType.CHAR.nullable(false).defaultValue(DSL.field(DSL.raw("'M'::\"char\""), SQLDataType.CHAR)), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_gender</code>.
+     */
+    public final TableField<Record, String> INFO_GENDER = createField(DSL.name("info_gender"), SQLDataType.VARCHAR(64).defaultValue(DSL.field(DSL.raw("NULL::character varying"), SQLDataType.VARCHAR)), this, "");
+
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -263,6 +275,13 @@ public class MembershipInfo extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK, null);
 
         return _users;
+    }
+
+    @Override
+    public List<Check<Record>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("info_document_sex_mf"), "(((info_document_sex = 'M'::\"char\") OR (info_document_sex = 'm'::\"char\") OR (info_document_sex = 'F'::\"char\") OR (info_document_sex = 'f'::\"char\")))", true)
+        );
     }
 
     @Override

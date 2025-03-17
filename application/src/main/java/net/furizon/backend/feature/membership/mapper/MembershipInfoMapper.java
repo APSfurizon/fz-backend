@@ -14,6 +14,8 @@ public class MembershipInfoMapper {
                 .firstName(record.get(MEMBERSHIP_INFO.INFO_FIRST_NAME))
                 .lastName(record.get(MEMBERSHIP_INFO.INFO_LAST_NAME))
                 .fiscalCode(record.get(MEMBERSHIP_INFO.INFO_FISCAL_CODE))
+                .sex(record.get(MEMBERSHIP_INFO.INFO_DOCUMENT_SEX))
+                .gender(record.get(MEMBERSHIP_INFO.INFO_GENDER))
                 .birthCity(record.get(MEMBERSHIP_INFO.INFO_BIRTH_CITY))
                 .birthRegion(record.get(MEMBERSHIP_INFO.INFO_BIRTH_REGION))
                 .birthCountry(record.get(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY))
