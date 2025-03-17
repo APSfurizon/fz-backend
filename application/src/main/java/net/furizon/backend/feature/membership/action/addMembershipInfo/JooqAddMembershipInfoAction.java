@@ -45,7 +45,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getFirstName(),
                     personalUserInformation.getLastName(),
                     personalUserInformation.getFiscalCode(),
-                    "M",
+                    personalUserInformation.getSex(),
                     personalUserInformation.getGender(),
                     personalUserInformation.getBirthCity(),
                     personalUserInformation.getBirthRegion(),

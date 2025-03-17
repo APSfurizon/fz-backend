@@ -34,7 +34,7 @@ public class PersonalUserInformation {
     @Pattern(regexp = "^[A-Za-z]{6}\\d{2}[A-Za-z]\\d{2}[A-Za-z]\\d{3}[A-Za-z]$")
     private final String fiscalCode;
 
-    @Nullable
+    @NotNull
     @Pattern(regexp = "^[MmFf]$")
     private final String sex;
 
