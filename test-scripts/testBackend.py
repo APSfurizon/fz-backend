@@ -169,6 +169,7 @@ def updateRole(id: int) -> Response:
     json = {
         "roleInternalName": "testtt",
         "roleDisplayName": None,
+        "roleAdmincountPriority": 20,
         "showInAdminCount": True,
         "enabledPermissions": [
             "CAN_MANAGE_USER_PUBLIC_INFO",
@@ -190,13 +191,13 @@ def updateRole(id: int) -> Response:
             },
             {
                 "userId": 3,
-                "tempRole": True
-                #"tempRole": False
+                #"tempRole": True
+                "tempRole": False
             },
             {
                 "userId": 4,
-                #"tempRole": True
-                "tempRole": False
+                "tempRole": True
+                #"tempRole": False
             },
         ]
     }

@@ -36,6 +36,7 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
                     .set(MEMBERSHIP_INFO.INFO_COUNTRY, personalUserInformation.getResidenceCountry())
                     .set(MEMBERSHIP_INFO.INFO_PHONE_PREFIX, personalUserInformation.getPrefixPhoneNumber())
                     .set(MEMBERSHIP_INFO.INFO_PHONE, personalUserInformation.getPhoneNumber())
+                    .set(MEMBERSHIP_INFO.INFO_ALLERGIES, personalUserInformation.getAllergies())
                     .set(MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID, event.getId())
                 .where(MEMBERSHIP_INFO.USER_ID.eq(userId))
         );
