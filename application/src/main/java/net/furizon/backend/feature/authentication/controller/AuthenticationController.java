@@ -9,25 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
-import net.furizon.backend.feature.authentication.dto.requests.EmailRequest;
-import net.furizon.backend.feature.authentication.dto.requests.LoginRequest;
-import net.furizon.backend.feature.authentication.dto.requests.RegisterUserRequest;
+import net.furizon.backend.feature.authentication.dto.requests.*;
 import net.furizon.backend.feature.authentication.dto.responses.AuthenticationCodeResponse;
 import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.dto.responses.LogoutUserResponse;
 import net.furizon.backend.feature.authentication.dto.responses.RegisterUserResponse;
-import net.furizon.backend.feature.authentication.usecase.BanUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.ChangePasswordUseCase;
-import net.furizon.backend.feature.authentication.usecase.ConfirmEmailUseCase;
-import net.furizon.backend.feature.authentication.usecase.DestroyAllSessionsUseCase;
-import net.furizon.backend.feature.authentication.usecase.GetResetPwStatusUseCase;
-import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.LogoutUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.RegisterUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.ResetPasswordUseCase;
-import net.furizon.backend.feature.authentication.usecase.UnbanUserUseCase;
-import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
+import net.furizon.backend.feature.authentication.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -179,7 +166,7 @@ public class AuthenticationController {
     }
 
     @Operation(summary = "Destroys all sessions of the logged in user", description =
-        "Destroyes all login sessions of the current user, logging it also out")
+        "Destroys all login sessions of the current user, logging it also out")
     @PostMapping("/destroy-all-sessions")
     public boolean destroyAllSessions(
             @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -187,6 +174,19 @@ public class AuthenticationController {
         return executor.execute(
                 DestroyAllSessionsUseCase.class,
                 user
+        );
+    }
+
+    @Operation(summary = "Destroys a single session of the logged in user", description =
+            "Destroys a login session of the logged in user, by providing its session id")
+    @PostMapping("/destroy-session")
+    public boolean destroySession(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestBody DestroySessionRequest request
+    ) {
+        return executor.execute(
+                DestroySingleSessionUseCase.class,
+                new DestroySingleSessionUseCase.Input(user, request)
         );
     }
 
@@ -207,7 +207,7 @@ public class AuthenticationController {
 
     @Operation(summary = "Unban an user", description =
         "This operation can be performed only by an admin. "
-        + "Reenables the login and resets the failed attempts for the specified user")
+        + "Re-enables the login and resets the failed attempts for the specified user")
     @PermissionRequired(permissions = {Permission.CAN_BAN_USERS})
     @PostMapping("/unban")
     public boolean unbanUser(
