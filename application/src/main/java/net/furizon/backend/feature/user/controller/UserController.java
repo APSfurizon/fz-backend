@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.user.UserSession;
+import net.furizon.backend.feature.user.dto.AllSessionsResponse;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -78,7 +77,7 @@ public class UserController {
     }
 
     @GetMapping("/me/sessions")
-    public List<UserSession> getMeSessions(
+    public AllSessionsResponse getMeSessions(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
