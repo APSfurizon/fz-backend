@@ -1,98 +1,22 @@
-@param String nickname
-@param String mainOverlayImageUrl
-@param String profileImageUrl
-@param String staffRole
+@param String imageUrl
+@param String locales
+@param String badgeLevel
+@param String fursonaName
+@param long fursuitId
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="supported-color-schemes" content="light dark">
-    <style media="all" type="text/css">
-        :root {
-            --width: 53.98mm;
-            --height: 85.60mm;
-        }
+<div class="page">
+    <p id="name" class="txt-len name-container" style="top: 56.40mm; z-index: 289; --chars: 12">
+        <span class="text-fit" id="nameValue">${fursonaName}</span>
+    </p>
 
-        * { color: #bbc6ce; box-sizing: border-box; }
-        html,
-        body {
-            padding: 0px;
-            margin: 0px;
-            max-width: var(--width);
-            width: var(--width);
-            height: var(--height);
-        }
+    <p id="number" class="txt-len" style="top: 64mm; position: absolute; width: 100%; height: 3.30mm; z-index: 288; text-align: center;">
+        <span id="numberValue" style="font-family: 'main-text-font'; font-size: 4.94mm; color: #000000ff; ">${fursuitId}</span>
+    </p>
 
-        body {
-            overflow: hidden;
-        }
+    <div id="background" class="${badgeLevel}" style="left: 0.00mm; top: 0.00mm; position: absolute; width: 56.90mm; height: 88.90mm; z-index: 287; background-repeat: no-repeat; background-size: contain"></div>
 
-        div.content {
-            page-break-after: always;
-        }
+    <div id="flag" style="left: 22.44mm; top: 53.26mm; position: absolute; width: 12.11mm; height: 9.06mm; z-index: 282; background-repeat: no-repeat; background-size: contain; background-image: url('static/flags/${locales}.svg'); "></div>
 
-        div.badge {
-            width: var(--width);
-            height: var(--height);
-            background-color: white;
-            overflow: hidden;
-            background: #1095c1;
-            background-size: contain;
+    <div id="propic" style="left: 6.77mm; top: 3.47mm; position: absolute; width: 43.35mm; height: 43.35mm; z-index: 281; background-repeat: no-repeat; background-size: contain; background-image: url('${imageUrl}'); "></div>
 
-            img.profile {
-                position: fixed;
-                z-index: -1;
-                width: calc(var(--width) - 2mm);
-                height: calc(var(--width) - 2mm);
-                top: 8mm;
-                left: 1mm;
-            }
-
-            div.nickname-holder,
-            div.logo-holder {
-                position: fixed;
-                display: flex;
-                justify-content: center;
-                top: 0px;
-                left: 2mm;
-                width: calc(var(--width) - 4mm);
-                flex-wrap: wrap;
-            }
-
-            div.nickname-holder {
-                top: 56mm;
-
-                p.nickname {
-                    white-space: wrap;
-                    word-wrap: break-word;
-                    max-width: 100%;
-                    text-align: center;
-                }
-            }
-
-            div.logo-holder {
-                top: 2mm;
-                img.convention-logo {
-                    width: calc(var(--width) - 24mm);
-                    height: auto;
-                }
-            }
-        }
-    </style>
-</head>
-<body class="body">
-<div class="badge">
-    <img class="overlay">
-    <img class="profile" src="${profileImageUrl}">
-    <div class="nickname-holder">
-        <p class="nickname">${nickname}</p>
-    </div>
-    <div class="logo-holder">
-        <img class="convention-logo" src="https://furizon.net/wp-content/uploads/2022/08/Logo_base_no_sfondoo_Furizon_1-1.png">
-    </div>
 </div>
-</body>
-</html>

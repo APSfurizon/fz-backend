@@ -205,6 +205,9 @@ def updateRole(id: int) -> Response:
 def deleteRole(id: int) -> Response:
     return doDelete(f'{BASE_URL_API}roles/{id}')
 
+def exportBadges() -> Response:
+    return doGet(f'{BASE_URL_API}admin/export/badges/user')
+
 #register()
 #confirmEmail()
 login()
@@ -223,8 +226,9 @@ login()
 #listRoles()
 #crerateRole("-_____")
 #fetchRole(1)
-updateRole(2)
+#updateRole(2)
 #deleteRole(4)
+exportBadges()
 
 #countdown()
 
