@@ -376,6 +376,7 @@ public class CachedPretixInformation implements PretixInformation {
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
             String roomInternalName = null;
+            String checkinSecret = null;
             Long pretixRoomItemId = null;
             long ticketPositionId = -1L;
             long ticketPosid = -1L;
@@ -403,6 +404,7 @@ public class CachedPretixInformation implements PretixInformation {
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
+                    checkinSecret = position.getSecret();
                     ticketPositionId = position.getPositionId();
                     ticketPosid = position.getPositionPosid();
                     answers = position.getAnswers();
@@ -500,6 +502,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .hotelInternalName(hotelInternalName)
                     .roomInternalName(roomInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
+                    .checkinSecret(checkinSecret)
                     .hasMembership(membership)
                     .buyerEmail(pretixOrder.getEmail())
                     .buyerPhone(pretixOrder.getPhone())

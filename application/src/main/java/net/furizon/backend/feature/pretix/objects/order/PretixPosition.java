@@ -21,6 +21,9 @@ public class PretixPosition {
     private final long positionPosid;
 
     @Nullable
+    private final String secret;
+
+    @Nullable
     @JsonProperty("variation")
     private final Long variationId;
 

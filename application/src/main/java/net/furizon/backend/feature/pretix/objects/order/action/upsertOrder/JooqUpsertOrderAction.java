@@ -42,6 +42,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String hotelInternalName = order.getHotelInternalName();
         String roomInternalName = order.getRoomInternalName();
         String orderSecret = order.getPretixOrderSecret();
+        String checkinSecret = order.getCheckinSecret();
         String buyerEmail = order.getBuyerEmail();
         String buyerPhone = order.getBuyerPhone();
         String buyerUser = order.getBuyerUser();
@@ -99,6 +100,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                     ORDERS.ORDER_ROOM_INTERNAL_NAME,
                     ORDERS.ORDER_SECRET,
+                    ORDERS.ORDER_CHECKIN_SECRET,
                     ORDERS.HAS_MEMBERSHIP,
                     ORDERS.ORDER_BUYER_EMAIL,
                     ORDERS.ORDER_BUYER_PHONE,
@@ -131,6 +133,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     hotelInternalName,
                     roomInternalName,
                     orderSecret,
+                    checkinSecret,
                     membership,
                     buyerEmail,
                     buyerPhone,
@@ -162,6 +165,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, hotelInternalName)
                 .set(ORDERS.ORDER_ROOM_INTERNAL_NAME, roomInternalName)
                 .set(ORDERS.ORDER_SECRET, orderSecret)
+                .set(ORDERS.ORDER_CHECKIN_SECRET, checkinSecret)
                 .set(ORDERS.HAS_MEMBERSHIP, membership)
                 .set(ORDERS.ORDER_BUYER_EMAIL, buyerEmail)
                 .set(ORDERS.ORDER_BUYER_PHONE, buyerPhone)

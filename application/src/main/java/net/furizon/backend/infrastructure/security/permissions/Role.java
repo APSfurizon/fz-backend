@@ -13,8 +13,10 @@ import java.util.List;
 @Data
 public class Role {
     private final long roleId;
-    @NotNull private final String displayName;
-    @Nullable private final String internalName;
+    @Nullable private final String displayName;
+    @NotNull private final String internalName;
+    private final long roleAdmincountPriority;
+    private final boolean showInNosecount;
 
     @Getter(AccessLevel.NONE)
     private List<JooqPermission> permissions = null;

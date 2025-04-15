@@ -149,12 +149,13 @@ public class JooqOrderFinder implements OrderFinder {
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
+                    .checkinSecret(order.getCheckinSecret())
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
                     .isDailyTicket(isDaily);
 
-            OffsetDateTime from = event.getDateFrom();
+            OffsetDateTime from = event.getDateFromExcludeEarly();
             if (isDaily && from != null) {
                 orderDataBuilder = orderDataBuilder.dailyDays(
                         order.getDailyDays().stream().map(
@@ -247,6 +248,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                         ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
+                        ORDERS.ORDER_CHECKIN_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_BUYER_EMAIL,
                         ORDERS.ORDER_BUYER_PHONE,

@@ -76,12 +76,22 @@ public class Roles extends TableImpl<Record> {
     /**
      * The column <code>public.roles.display_name</code>.
      */
-    public final TableField<Record, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<Record, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.roles.internal_name</code>.
      */
-    public final TableField<Record, String> INTERNAL_NAME = createField(DSL.name("internal_name"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> INTERNAL_NAME = createField(DSL.name("internal_name"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.roles.show_in_nosecount</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.roles.role_admincount_priority</code>.
+     */
+    public final TableField<Record, Long> ROLE_ADMINCOUNT_PRIORITY = createField(DSL.name("role_admincount_priority"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("100"), SQLDataType.BIGINT)), this, "");
 
     private Roles(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

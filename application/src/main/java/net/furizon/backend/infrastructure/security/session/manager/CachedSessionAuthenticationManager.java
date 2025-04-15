@@ -52,25 +52,27 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .build();
 
     @Override
-    public void updateSession(@NotNull UUID sessionId, @NotNull String clientIp) {
+    public boolean updateSession(@NotNull UUID sessionId, @NotNull String clientIp) {
         final var now = OffsetDateTime.now();
         final var expireAt = now.plusSeconds(securityConfig.getSession().getExpiration().getSeconds());
-        sqlCommand.execute(
+        boolean res = sqlCommand.execute(
             PostgresDSL.update(SESSIONS)
             .set(SESSIONS.LAST_USED_BY_IP_ADDRESS, clientIp)
             .set(SESSIONS.MODIFIED_AT, now)
             .set(SESSIONS.EXPIRES_AT, expireAt)
             .where(SESSIONS.ID.eq(sessionId))
-        );
+        ) > 0;
         sessionAuthenticationPairCache.invalidate(sessionId);
+        return res;
     }
     @Override
-    public void deleteSession(@NotNull UUID sessionId) {
-        sqlCommand.execute(
+    public boolean deleteSession(@NotNull UUID sessionId) {
+        boolean res = sqlCommand.execute(
             PostgresDSL.deleteFrom(SESSIONS)
             .where(SESSIONS.ID.eq(sessionId))
-        );
+        ) > 0;
         sessionAuthenticationPairCache.invalidate(sessionId);
+        return res;
     }
     @Override
     public @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent) {

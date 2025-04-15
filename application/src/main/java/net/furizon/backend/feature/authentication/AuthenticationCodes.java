@@ -16,5 +16,6 @@ public enum AuthenticationCodes {
     PW_CHAGE_SAME_PASSWORD,
     MEMBERSHIP_CARD_ORDER_STILL_LINKED,
     MEMBERSHIP_CARD_WAS_REGISTERED,
-    MEMBERSHIP_NOT_FOUND
+    MEMBERSHIP_NOT_FOUND,
+    SESSION_NOT_YOURS // Someone tried deleting someone else's session
 }

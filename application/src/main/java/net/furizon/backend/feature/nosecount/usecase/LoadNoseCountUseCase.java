@@ -40,7 +40,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         if (input.event == null) {
             throw new ApiException("Event is null", GeneralResponseCodes.EVENT_NOT_FOUND);
         }
-        OffsetDateTime from = input.event.getDateFrom();
+        OffsetDateTime from = input.event.getDateFromExcludeEarly();
 
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
         List<UserDisplayData> roomless = new ArrayList<>();
