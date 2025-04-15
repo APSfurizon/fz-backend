@@ -20,7 +20,6 @@ public class LogoutUserUseCase implements UseCase<UUID, Boolean> {
     @Override
     public @NotNull Boolean executor(@NotNull UUID sessionId) {
         log.info("LogoutUserUseCase: sessionId: {}", sessionId);
-        sessionAuthenticationManager.deleteSession(sessionId);
-        return true;
+        return sessionAuthenticationManager.deleteSession(sessionId);
     }
 }

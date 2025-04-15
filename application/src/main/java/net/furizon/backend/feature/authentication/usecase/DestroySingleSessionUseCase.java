@@ -3,7 +3,7 @@ package net.furizon.backend.feature.authentication.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.Authentication;
-import net.furizon.backend.feature.authentication.dto.requests.AuthenticationErrorCodes;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.DestroySessionRequest;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -30,14 +30,17 @@ public class DestroySingleSessionUseCase implements UseCase<DestroySingleSession
         UUID sessionId = UUID.fromString(input.dsr.getSessionId());
         Pair<Session, Authentication> sessionData = sessionAuthenticationManager
                 .findSessionWithAuthenticationById(sessionId);
-        if (sessionData != null && sessionData.getRight().getUserId() != input.user.getUserId()
-                && !permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_BAN_USERS)) {
-            throw new ApiException("User tried deleting someone else's session",
-                AuthenticationErrorCodes.SESSION_NOT_YOURS);
+        if (sessionData != null
+            && sessionData.getRight().getUserId() != input.user.getUserId()
+            && !permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_BAN_USERS)
+        ) {
+            throw new ApiException(
+                "User tried deleting someone else's session",
+                AuthenticationCodes.SESSION_NOT_YOURS
+            );
         }
         log.info("Destroying session {} of user {}", input.dsr.getSessionId(), input.user.getUserId());
-        sessionAuthenticationManager.deleteSession(sessionId);
-        return true;
+        return sessionAuthenticationManager.deleteSession(sessionId);
     }
 
     public record Input(
