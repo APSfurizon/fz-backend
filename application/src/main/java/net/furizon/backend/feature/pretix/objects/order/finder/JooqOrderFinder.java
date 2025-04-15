@@ -155,7 +155,7 @@ public class JooqOrderFinder implements OrderFinder {
                     .extraDays(order.getExtraDays())
                     .isDailyTicket(isDaily);
 
-            OffsetDateTime from = event.getDateFrom();
+            OffsetDateTime from = event.getDateFromExcludeEarly();
             if (isDaily && from != null) {
                 orderDataBuilder = orderDataBuilder.dailyDays(
                         order.getDailyDays().stream().map(

@@ -6,12 +6,12 @@
 
 import psycopg2
 
-params = psycopg2.connect(
-	dbname="aaaaa",
-	user="bbbbb",
-	password="cccccc",
-	host="ddddddd"
-)
+params = {
+	"dbname":   "fzbackend",
+	"user":     "fzbackend",
+	"password": "",
+	"host":     "localhost"
+}
 
 conn = None
 try:
@@ -40,7 +40,10 @@ try:
 	cur = conn.cursor()
 
 	values = ",".join(genders)
-	cur.execute(f'UPDATE membership_info SET info_document_sex = t.s, info_gender = t.g FROM (VALUES {values}) AS t(i, s, g) WHERE user_id = t.i;')
+	#print(f'UPDATE membership_info SET info_document_sex = t.s, info_gender = t.g FROM (VALUES {values}) AS t(i, s, g) WHERE user_id = t.i;')
+	res = cur.execute(f'UPDATE membership_info SET info_document_sex = t.s, info_gender = t.g FROM (VALUES {values}) AS t(i, s, g) WHERE user_id = t.i;')
+	print(res)
+	conn.commit()
 	cur.close()
 except (Exception, psycopg2.DatabaseError) as error:
 	print(error)
