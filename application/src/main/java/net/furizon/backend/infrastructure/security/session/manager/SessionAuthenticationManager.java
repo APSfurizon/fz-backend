@@ -11,8 +11,8 @@ import java.util.UUID;
 
 public interface SessionAuthenticationManager {
     //Write
-    void updateSession(@NotNull UUID sessionId, @NotNull String clientIp);
-    void deleteSession(@NotNull UUID sessionId);
+    boolean updateSession(@NotNull UUID sessionId, @NotNull String clientIp);
+    boolean deleteSession(@NotNull UUID sessionId);
     @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent);
 
     void clearOldestSessions(long userId);
