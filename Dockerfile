@@ -6,6 +6,8 @@ ENV APP_HOME=/app
 COPY application-*.jar $APP_HOME/application.jar
 COPY prodkeys/*-key-autocart.rsa $APP_HOME/
 COPY hotel-names.json $APP_HOME/
+COPY templates/ $APP_HOME/templates/
+
 
 RUN apk --no-cache -s upgrade && apk --no-cache upgrade && apk add musl-locales && apk add lang
 
