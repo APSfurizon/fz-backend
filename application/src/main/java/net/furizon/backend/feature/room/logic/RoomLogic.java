@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.logic;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,6 +57,8 @@ public interface RoomLogic {
                              @NotNull Event event,
                              @NotNull PretixInformation pretixInformation
     );
+
+    @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId);
 
     void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
                         @Nullable List<String> detectedErrors);

@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -491,6 +492,11 @@ public class DefaultRoomLogic implements RoomLogic {
             @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;
+    }
+
+    @Override
+    public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
+        return orderFinder.getExtraDaysOfUser(userId, eventId);
     }
 
     private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {

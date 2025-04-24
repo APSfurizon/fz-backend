@@ -38,7 +38,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
         long userId = input.user.getUserId();
         Event event = input.event;
-        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation);
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
@@ -75,7 +75,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             info.setGuests(sortedGuests);
         }
         List<RoomInvitationResponse> invitations =
-            roomFinder.getUserReceivedInvitations(userId, event, input.pretixInformation);
+            roomFinder.getUserReceivedInvitations(userId, event, input.pretixInformation, roomLogic);
         for (RoomInvitationResponse invitation : invitations) {
             var guests = roomFinder.getRoomGuestResponseFromRoomId(invitation.getRoom().getRoomId(), event);
             invitation.getRoom().setGuests(guests);

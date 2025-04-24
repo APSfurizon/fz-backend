@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -234,6 +235,18 @@ public class JooqOrderFinder implements OrderFinder {
                 .and(ORDERS.EVENT_ID.eq(event.getId()))
             )
         ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
+    }
+
+    @Override
+    public @Nullable ExtraDays getExtraDaysOfUser(long userId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_EXTRA_DAYS_TYPE)
+            .from(ORDERS)
+            .where(
+                ORDERS.USER_ID.eq(userId)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+        ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
     }
 
     private @NotNull SelectJoinStep<?> selectFrom() {
