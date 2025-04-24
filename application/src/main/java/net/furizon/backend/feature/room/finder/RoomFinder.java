@@ -7,6 +7,8 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
+import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +29,8 @@ public interface RoomFinder {
     String getRoomName(long roomId);
 
     @Nullable
-    RoomInfo getRoomInfoForUser(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+    RoomInfo getRoomInfoForUser(long userId, @NotNull Event event,
+                                @NotNull PretixInformation pretixInformation, @NotNull RoomLogic roomLogic);
 
     @Nullable
     RoomData getRoomDataFromPretixItemId(long pretixItemId, @NotNull PretixInformation pretixInformation);
@@ -56,7 +59,8 @@ public interface RoomFinder {
 
     @NotNull
     List<RoomInvitationResponse> getUserReceivedInvitations(
-            long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+            long userId, @NotNull Event event,
+            @NotNull PretixInformation pretixInformation, @NotNull RoomLogic roomLogic);
 
     @NotNull
     Optional<Boolean> isRoomConfirmed(long roomId);
@@ -74,4 +78,6 @@ public interface RoomFinder {
     Long getRoomItemIdFromRoomId(long roomId);
 
     @NotNull List<HotelExportRow> exportHotel(long eventId, PretixInformation pretixInformation);
+
+    @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId);
 }

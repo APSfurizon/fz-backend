@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.order.finder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -49,4 +50,6 @@ public interface OrderFinder {
     @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
 
     @NotNull List<Order> getUnlinkedOrder(@NotNull PretixInformation pretixService, @NotNull Event event);
+
+    @Nullable ExtraDays getExtraDaysOfUser(long userId, long eventId);
 }

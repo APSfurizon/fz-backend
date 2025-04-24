@@ -11,11 +11,13 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.room.mapper.JooqRoomDataMapper;
 import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
 import net.furizon.backend.feature.room.mapper.RoomInvitationResponseMapper;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -52,30 +54,30 @@ public class JooqRoomFinder implements RoomFinder {
             c = c.and(ORDERS.USER_ID.notEqual(userId));
         }
         return query.fetchFirst(
-                PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
-                .from(ROOM_GUESTS)
-                .innerJoin(ROOMS)
-                .on(
-                    ROOM_GUESTS.USER_ID.eq(userId)
-                    .and(ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID))
-                    .and(ROOM_GUESTS.CONFIRMED.isTrue())
-                ).innerJoin(ORDERS)
-                .on(c)
-                .limit(1)
+            PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
+            .from(ROOM_GUESTS)
+            .innerJoin(ROOMS)
+            .on(
+                ROOM_GUESTS.USER_ID.eq(userId)
+                .and(ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID))
+                .and(ROOM_GUESTS.CONFIRMED.isTrue())
+            ).innerJoin(ORDERS)
+            .on(c)
+            .limit(1)
         ).isPresent();
     }
 
     @Override
     public boolean isUserInvitedInRoom(long userId, long roomId) {
         return query.fetchFirst(
-                PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
-                .from(ROOM_GUESTS)
-                .where(
-                    ROOM_GUESTS.USER_ID.eq(userId)
-                    .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
-                    .and(ROOM_GUESTS.CONFIRMED.isFalse())
-                )
-                .limit(1)
+            PostgresDSL.select(ROOM_GUESTS.ROOM_GUEST_ID)
+            .from(ROOM_GUESTS)
+            .where(
+                ROOM_GUESTS.USER_ID.eq(userId)
+                .and(ROOM_GUESTS.ROOM_ID.eq(roomId))
+                .and(ROOM_GUESTS.CONFIRMED.isFalse())
+            )
+            .limit(1)
         ).isPresent();
     }
 
@@ -128,7 +130,8 @@ public class JooqRoomFinder implements RoomFinder {
     @Nullable
     @Override
     public RoomInfo getRoomInfoForUser(
-            long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation
+            long userId, @NotNull Event event,
+            @NotNull PretixInformation pretixInformation, @NotNull RoomLogic roomLogic
     ) {
         return query.fetchFirst(
             PostgresDSL.select(
@@ -165,7 +168,7 @@ public class JooqRoomFinder implements RoomFinder {
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .limit(1)
-        ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation));
+        ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation, roomLogic, userId, event.getId()));
     }
 
     @Override
@@ -187,9 +190,9 @@ public class JooqRoomFinder implements RoomFinder {
     ) {
         return query.fetchFirst(
             PostgresDSL.select(
-                    ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
-                    ORDERS.ORDER_ROOM_INTERNAL_NAME,
-                    ORDERS.ORDER_ROOM_CAPACITY
+                ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                ORDERS.ORDER_ROOM_INTERNAL_NAME,
+                ORDERS.ORDER_ROOM_CAPACITY
             )
             .from(ORDERS)
             .where(
@@ -306,7 +309,8 @@ public class JooqRoomFinder implements RoomFinder {
     @NotNull
     @Override
     public List<RoomInvitationResponse> getUserReceivedInvitations(
-            long userId, @NotNull Event event, @NotNull PretixInformation pretixService) {
+            long userId, @NotNull Event event,
+            @NotNull PretixInformation pretixService, @NotNull RoomLogic roomLogic) {
         return query.fetch(
             PostgresDSL.select(
                 ROOM_GUESTS.ROOM_GUEST_ID,
@@ -345,7 +349,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(USERS.USER_ID.eq(ORDERS.USER_ID))
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService)).toList();
+        ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService, roomLogic, event.getId())).toList();
     }
 
     @NotNull
@@ -476,5 +480,20 @@ public class JooqRoomFinder implements RoomFinder {
             )
             .orderBy(ROOMS.ROOM_ID, USERS.USER_ID)
         ).stream().map(e -> HotelExportRowMapper.map(e, roomOwnerOrder, pretixInformation)).toList();
+    }
+
+    @Override
+    public @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_EXTRA_DAYS_TYPE)
+            .from(ROOM_GUESTS)
+            .innerJoin(ROOMS)
+            .on(
+                ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
+            )
+            .innerJoin(ORDERS)
+            .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+        ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
     }
 }

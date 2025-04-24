@@ -1052,6 +1052,11 @@ public class UserBuysFullRoom implements RoomLogic {
         }
     }
 
+    @Override
+    public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
+        return roomFinder.getExtraDaysOfRoomOwner(userId, eventId);
+    }
+
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
         log.error(message, args);
         if (logbook != null) {
