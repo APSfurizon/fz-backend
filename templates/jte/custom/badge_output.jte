@@ -90,19 +90,19 @@
         /* +++ BADGE BACKGROUND URLS +++ */
         /* Badge levels are defined in the net.furizon.backend.feature.badge.dto.PrintedBadgeLevel enum */
         .badge-level-staff-main {
-            background-image: url('static/badge-gen/mainStaff.png');
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/mainStaff.png');
         }
         .badge-level-staff-junior {
-            background-image: url('static/badge-gen/juniorStaff.png');
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/juniorStaff.png');
         }
         .badge-level-sponsor-normal {
-            background-image: url('static/badge-gen/sponsor.png');
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsor.png');
         }
         .badge-level-sponsor-super {
-            background-image: url('static/badge-gen/sponsorSuper.png');
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsorSuper.png');
         }
         .badge-level-normal {
-            background-image: url('static/badge-gen/attendee.png');
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/attendee.png');
         }
 
         /* Import text font */
@@ -110,7 +110,7 @@
             font-family: 'main-text-font';
             font-style: normal;
             font-weight: 400;
-            src: url('https://fzbe.furizon.net/static/badge-gen/RoundedEleganceRegular.otf') format('opentype');
+            src: url('https://furpanel.furizon.net/static/badge-gen/RoundedEleganceRegular.otf') format('opentype');
         }
     </style>
 </head>
