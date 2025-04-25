@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.FURSUITS;
@@ -218,12 +217,7 @@ public class JooqBadgeFinder implements BadgeFinder {
     }
 
     private void addPermissionsToBadgesToPrint(List<BadgeToPrint> badges) {
-        Map<Long, BadgeToPrint> idToObj = badges.stream().collect(
-            Collectors.toMap(
-                BadgeToPrint::getUserId,
-                Function.identity()
-            )
-        );
+        Map<Long, List<BadgeToPrint>> idToObj = badges.stream().collect(Collectors.groupingBy(BadgeToPrint::getUserId));
         Set<Long> fetchedUserIds = idToObj.keySet();
         sqlQuery.fetch(
             PostgresDSL.selectDistinct(
@@ -238,8 +232,7 @@ public class JooqBadgeFinder implements BadgeFinder {
             )
         ).forEach(r ->
             idToObj.get(r.get(USER_HAS_ROLE.USER_ID))
-            .getPermissions()
-            .add(Permission.get(r.get(PERMISSION.PERMISSION_VALUE)))
+            .forEach(btp -> btp.getPermissions().add(Permission.get(r.get(PERMISSION.PERMISSION_VALUE))))
         );
     }
 }

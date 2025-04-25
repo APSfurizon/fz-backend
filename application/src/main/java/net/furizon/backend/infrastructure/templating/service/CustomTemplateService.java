@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -21,13 +22,20 @@ public class CustomTemplateService {
     @NotNull private final TemplateEngine templateEngine;
 
     public CustomTemplateService(@NotNull AdminConfig adminConfig) {
-        final Path templatesPath = Paths.get(adminConfig.getCustomJteTemplatesLocation());
         this.adminConfig = adminConfig;
+        final Path templatesPath = Paths.get(adminConfig.getCustomJteTemplatesLocation());
+        log.info("Loading custom templates from '{}' using jte jar '{}'",
+                templatesPath, this.adminConfig.getJteRuntimeJarLocation());
         this.templateEngine = TemplateEngine.create(
                 new DirectoryCodeResolver(templatesPath),
                 templatesPath,
-                ContentType.Html
+                ContentType.Html,
+                this.getClass().getClassLoader()
         );
+        this.templateEngine.setClassPath(List.of(
+                templatesPath.toString(),
+                this.adminConfig.getJteRuntimeJarLocation()
+        ));
     }
 
     public String renderTemplate(String templateName, Map<String, Object> params) {
