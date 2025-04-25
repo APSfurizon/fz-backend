@@ -1,6 +1,6 @@
 @param String orderCode
-@param long cardId
-@param int cardIdInYear
+@param String cardId
+@param String cardIdInYear
 
 <!DOCTYPE html>
 <html lang="en">

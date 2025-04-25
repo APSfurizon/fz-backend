@@ -181,14 +181,19 @@ public class UpdateOrderInDb {
                                                     + "No operation is going to be performed.",
                                             order.getCode(), card.getCardId(), card.getIdInYear());
 
-                                    emailSender.prepareAndSendForPermission(
+                                    //TODO momentanerly disabled to prevent email mass spamming until we
+                                    // solve a bug with pretix configuration: users can remove an item
+                                    // they already paid, if they add another item which costs more:
+                                    // People were able to remove their membership card by adding a
+                                    // room or a sponsorship
+                                    /*emailSender.prepareAndSendForPermission(
                                         Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                                         SUBJECT_MEMBERSHIP_WARNING,
                                         TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
                                         MailVarPair.of(ORDER_CODE, order.getCode()),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
                                         MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
-                                    );
+                                    );*/
                                 }
                             }
                         }
