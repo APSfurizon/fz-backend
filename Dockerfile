@@ -1,5 +1,5 @@
 
-FROM amazoncorretto:23-alpine
+FROM amazoncorretto:23-alpine-jdk
 
 ENV APP_HOME=/app
 
@@ -15,6 +15,7 @@ WORKDIR $APP_HOME
 
 RUN addgroup --system --gid 1001 fz-backend
 RUN adduser --system --uid 1001 fz-backend
+RUN chown -R fz-backend:fz-backend $APP_HOME/templates/
 USER fz-backend
 
 EXPOSE 9091
