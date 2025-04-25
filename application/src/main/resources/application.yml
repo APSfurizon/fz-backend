@@ -156,3 +156,4 @@ reminders:
 
 admin:
   custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}
+  jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}
