@@ -271,7 +271,7 @@ public class CachedPretixInformation implements PretixInformation {
     public boolean isRegionOfCountryValid(@NotNull String countryIsoCode, @NotNull String region) {
         List<PretixState> countries = getStatesOfCountry(countryIsoCode);
         for (PretixState state : countries) {
-            if (state.getCode().equals(countryIsoCode)) {
+            if (state.getCode().equals(region)) {
                 return true;
             }
         }

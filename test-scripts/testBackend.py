@@ -84,10 +84,33 @@ def register() -> Response:
             "residenceRegion": "RM",
             "residenceCountry": "IT",
             "prefixPhoneNumber": "+39",
-            "phoneNumber": "3331234567"
+            "phoneNumber": "3331234567",
+            "sex":"M",
+            "gender":"CisMan"
         }
     }
     return doPost(f'{BASE_URL_API}authentication/register', json=json)
+
+def updateUserInfo() -> Response:
+    json = {
+            "firstName": "Luca",
+            "lastName": "Stracc",
+            "birthCity": "Rome",
+            "birthRegion": "RM",
+            "birthCountry": "IT",
+            "birthday": "2002-06-12",
+            "residenceAddress": "via Borgo Pio",
+            "residenceZipCode": "00100",
+            "residenceCity": "Rome",
+            "residenceRegion": "RM",
+            "residenceCountry": "IT",
+            "prefixPhoneNumber": "+39",
+            "phoneNumber": "3331234567",
+            "sex":"M",
+            "gender":"CisMan"
+    }
+    return doPost(f'{BASE_URL_API}membership/update-personal-user-information', json=json) 
+
 
 def confirmEmail() -> Response:
     uuid = input("Confirmation uuid: ")
@@ -212,6 +235,7 @@ def exportBadges() -> Response:
 #confirmEmail()
 login()
 #getMe()
+updateUserInfo()
 #testPermission()
 #testInternalAuthorize()
 #uploadBadge()
@@ -228,7 +252,7 @@ login()
 #fetchRole(1)
 #updateRole(2)
 #deleteRole(4)
-exportBadges()
+#exportBadges()
 
 #countdown()
 
