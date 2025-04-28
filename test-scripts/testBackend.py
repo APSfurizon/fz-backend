@@ -142,6 +142,9 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
+def getOrderLink() -> Response:
+    doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
+
 def uploadBadge() -> Response:
     #imageName = 'testImage2.png'
     imageName = 'testImageSmall.jpg'
@@ -235,7 +238,8 @@ def exportBadges() -> Response:
 #confirmEmail()
 login()
 #getMe()
-updateUserInfo()
+#updateUserInfo()
+getOrderLink()
 #testPermission()
 #testInternalAuthorize()
 #uploadBadge()
