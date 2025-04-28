@@ -5,7 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @ConfigurationProperties(prefix = "membership")
-public class MembershipCardConfig {
+public class MembershipConfig {
     private int cardEnumerationResetMonth;
     private int cardEnumerationResetDay;
+
+    private long minimumAgeAtEventDate;
 }

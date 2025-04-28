@@ -74,6 +74,7 @@ security:
 membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
+  minimum-age-at-event-date: ${MINIMUM_AGE_AT_EVENT_DATE:-1}
 
 frontend:
   login-url: ${FRONTEND_LOGIN_URL:}

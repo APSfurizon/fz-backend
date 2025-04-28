@@ -9,6 +9,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.infrastructure.configuration.MembershipConfig;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
@@ -22,7 +23,9 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +44,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final PersonalInfoFinder personalInfoFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
+    @NotNull private final MembershipConfig membershipConfig;
     @NotNull private final PretixConfig pretixConfig;
 
     @Override
@@ -51,6 +55,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         final PretixInformation pretixService = input.pretixService;
         final Event event = pretixService.getCurrentEvent();
 
+        // Public event orders check
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
         boolean earlyBook = permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
         if (bookingStart != null && bookingStart.isAfter(OffsetDateTime.now()) && !earlyBook) {
@@ -58,6 +63,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
         }
 
+        // Orders no check
         int membershipNo = 1; //By deafault, we don't ask for a membership if there's an error
         int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (ordersNo > 0) {
@@ -67,7 +73,6 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             );
         }
 
-
         membershipNo = membershipCardFinder.countCardsPerUserPerEvent(userId, event);
 
         PersonalUserInformation info = personalInfoFinder.findByUserId(userId);
@@ -75,6 +80,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         actions.add(new AutocartAction<>("id_email", mail, INPUT));
         actions.add(new AutocartAction<>("id_email_repeat", mail, INPUT));
         if (info != null) {
+            validatePersonalInfo(info, event);
             actions.add(new AutocartAction<>("id_phone_0", info.getPrefixPhoneNumber(), DROPDOWN));
             actions.add(new AutocartAction<>("id_phone_1", info.getPhoneNumber(), INPUT));
             actions.add(new AutocartAction<>("id_name_parts_0", info.getFirstName(), INPUT));
@@ -110,6 +116,31 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
             throw new RuntimeException("Autocart link generation failed.");
         }
         return new LinkResponse(generatedUrl.get() + "&z=0"); //Random param to prevent typos from destroying payload
+    }
+
+    public void validatePersonalInfo(@NotNull PersonalUserInformation info, @NotNull Event event) {
+        // User has marked his personal info as updated check
+        if (info.getLastUpdatedEventId() != event.getId()) {
+            throw new ApiException(
+                "User has to first update his personal info or mark them as updated!",
+                OrderWorkflowErrorCode.PERSONAL_USER_INFO_NOT_UPDATED
+            );
+        }
+
+        // User has the correct age check
+        LocalDate birthday = info.getBirthday();
+        //If event doesn't have a start date set, we default to the current date
+        LocalDate date = event.getDateFrom() == null ? LocalDate.now() : event.getDateFrom().toLocalDate();
+
+        long age = ChronoUnit.YEARS.between(date, birthday);
+        long minimumAge = membershipConfig.getMinimumAgeAtEventDate();
+        if (age < minimumAge) {
+            throw new ApiException(
+                    "You must be at least " + minimumAge + " years old to attend the event!",
+                    OrderWorkflowErrorCode.BELOW_MINIMUM_AGE
+            );
+        }
+
     }
 
     public record Input(
