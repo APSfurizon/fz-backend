@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.fursuits.mapper;
 
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
+import net.furizon.backend.feature.fursuits.dto.FursuitDisplayDataWithUserIdOrderCodeAndSerial;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
@@ -30,5 +31,15 @@ public class JooqFursuitDisplayMapper {
                 .propic(MediaResponseMapper.mapOrNull(record))
                 .sponsorship(mapOrder && sponsor != null ? Sponsorship.get(sponsor) : null)
             .build();
+    }
+
+    @NotNull
+    public static FursuitDisplayDataWithUserIdOrderCodeAndSerial mapWithUserIdOrderCodeSerial(Record record) {
+        return new FursuitDisplayDataWithUserIdOrderCodeAndSerial(
+                mapWithOrder(record),
+                record.get(FURSUITS.USER_ID),
+                record.get(ORDERS.ORDER_CODE),
+                record.get(ORDERS.ORDER_SERIAL_IN_EVENT)
+        );
     }
 }

@@ -8,9 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.dto.GenerateBadgeRequest;
+import net.furizon.backend.feature.admin.dto.PreviewFursuitBadgeResponse;
+import net.furizon.backend.feature.admin.dto.PreviewUserBadgeResponse;
 import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
+import net.furizon.backend.feature.admin.usecase.export.PreviewFursuitBadgesUseCase;
+import net.furizon.backend.feature.admin.usecase.export.PreviewUserBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
@@ -154,6 +158,41 @@ public class AdminController {
                              .contentType(new MediaType("text", "csv"))
                              .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                              .body(data);
+    }
+
+
+    @Operation(summary = "Gets the list of users from the specified data", description =
+        "Obtains the list of DisplayUserData with their orderCode and orderSerial, from the provided search "
+        + "query. The search query works the same as the export badge (/export/badges/user endpoint)")
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
+    @GetMapping("/export/badges/preview/user")
+    public PreviewUserBadgeResponse previewUserBadges(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @Nullable final GenerateBadgeRequest request
+    ) {
+        return executor.execute(
+                PreviewUserBadgesUseCase.class,
+                new PreviewUserBadgesUseCase.Input(user, pretixInformation, request)
+        );
+    }
+
+    @Operation(summary = "Gets the list of fursuits from the specified data", description =
+        "Obtains the list of DisplayFursuitData with their orderCode, orderSerial, userId, from the provided search "
+        + "query. The search query works the same as the export badge (/export/badges/fursuits endpoint)")
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
+    @GetMapping("/export/badges/preview/fursuits")
+    public PreviewFursuitBadgeResponse previewFursuitBadges(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @Nullable final GenerateBadgeRequest request
+    ) {
+        return executor.execute(
+                PreviewFursuitBadgesUseCase.class,
+                new PreviewFursuitBadgesUseCase.Input(user, pretixInformation, request)
+        );
     }
 
     @Operation(summary = "Generate the HTML page of the specified user badges", description =

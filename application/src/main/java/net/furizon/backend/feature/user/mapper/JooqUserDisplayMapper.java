@@ -4,6 +4,7 @@ import net.furizon.backend.feature.membership.mapper.MembershipInfoMapper;
 import net.furizon.backend.feature.user.dto.UserAdminViewDisplay;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCodeAndSerial;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithPersonalInfo;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -36,6 +37,14 @@ public class JooqUserDisplayMapper {
         return new UserDisplayDataWithOrderCode(
                 map(record, true),
                 record.get(ORDERS.ORDER_CODE)
+        );
+    }
+
+    public static UserDisplayDataWithOrderCodeAndSerial mapWithOrderCodeSerial(Record record) {
+        return new UserDisplayDataWithOrderCodeAndSerial(
+                map(record, true),
+                record.get(ORDERS.ORDER_CODE),
+                record.get(ORDERS.ORDER_SERIAL_IN_EVENT)
         );
     }
 
