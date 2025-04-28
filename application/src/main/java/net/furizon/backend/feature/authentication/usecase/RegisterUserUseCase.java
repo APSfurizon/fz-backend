@@ -3,8 +3,9 @@ package net.furizon.backend.feature.authentication.usecase;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.RegisterUserRequest;
-import net.furizon.backend.feature.authentication.validation.RegisterUserValidation;
+import net.furizon.backend.feature.membership.validation.PersonalUserInformationValidator;
 import net.furizon.backend.feature.membership.action.addMembershipInfo.AddMembershipInfoAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
@@ -16,6 +17,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +32,7 @@ import static net.furizon.backend.feature.authentication.AuthenticationMailTexts
 @RequiredArgsConstructor
 public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, User> {
     @NotNull
-    private final RegisterUserValidation validation;
+    private final PersonalUserInformationValidator validation;
 
     @NotNull
     private final CreateUserAction createUserAction;
@@ -54,7 +56,15 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         String email = regUserReq.getEmail();
         log.info("Registering account with email {}", email);
 
-        validation.validate(regUserReq);
+        final var authentication = sessionAuthenticationManager.findAuthenticationByEmail(regUserReq.getEmail());
+        if (authentication != null) {
+            throw new ApiException(
+                "User already exists with email: %s".formatted(regUserReq.getEmail()),
+                AuthenticationCodes.EMAIL_ALREADY_REGISTERED
+            );
+        }
+
+        validation.validate(regUserReq.getPersonalUserInformation());
         User user = createUserAction.invoke(
                 regUserReq.getFursonaName(),
                 regUserReq.getPersonalUserInformation().getResidenceCountry()

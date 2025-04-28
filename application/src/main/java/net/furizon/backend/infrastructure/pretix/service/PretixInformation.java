@@ -47,10 +47,16 @@ public interface PretixInformation {
     Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
 
     @NotNull
-    List<PretixState> getStatesOfCountry(String countryIsoCode);
+    List<PretixState> getStatesOfCountry(@NotNull String countryIsoCode);
+
+    boolean isCountryValid(@NotNull String countryIsoCode);
+
+    boolean isRegionOfCountryValid(@NotNull String countryIsoCode, @NotNull String region);
+
+    boolean isPhonePrefixValid(@NotNull String phonePrefix);
 
     @NotNull
-    Set<Long> getIdsForItemType(CacheItemTypes type);
+    Set<Long> getIdsForItemType(@NotNull CacheItemTypes type);
 
     long getQuestionDuplicateData();
 
