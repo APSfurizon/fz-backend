@@ -53,12 +53,12 @@ public class Event {
     }
 
     @Nullable
-    public OffsetDateTime getDateFromExcludeEarly() {
-        return dateFrom == null ? null : dateFrom.plusDays(ExtraDays.EARLY_DAYS_NO);
+    public OffsetDateTime getDateFromExcludeEarly(boolean includeEarly) {
+        return dateFrom == null ? null : (includeEarly ? dateFrom.plusDays(ExtraDays.EARLY_DAYS_NO) : dateFrom);
     }
     @Nullable
-    public OffsetDateTime getDateToExcludeLate() {
-        return dateTo == null ? null : dateTo.plusDays(ExtraDays.LATE_DAYS_NO);
+    public OffsetDateTime getDateToExcludeLate(boolean includeEarly) {
+        return dateTo == null ? null : (includeEarly ? dateTo.plusDays(ExtraDays.LATE_DAYS_NO) : dateTo);
     }
 
     @Data

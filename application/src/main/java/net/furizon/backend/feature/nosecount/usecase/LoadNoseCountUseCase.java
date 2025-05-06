@@ -11,6 +11,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -33,6 +34,7 @@ import java.util.TreeMap;
 @RequiredArgsConstructor
 public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input, NoseCountResponse> {
     @NotNull private final CountsFinder countsFinder;
+    @NotNull private final PretixConfig pretixConfig;
     @NotNull private final RoomConfig roomConfig;
 
     @Override
@@ -40,7 +42,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         if (input.event == null) {
             throw new ApiException("Event is null", GeneralResponseCodes.EVENT_NOT_FOUND);
         }
-        OffsetDateTime from = input.event.getDateFromExcludeEarly();
+        OffsetDateTime from = input.event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
 
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
         List<UserDisplayData> roomless = new ArrayList<>();

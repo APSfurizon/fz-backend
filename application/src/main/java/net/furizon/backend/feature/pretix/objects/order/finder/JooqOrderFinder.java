@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -35,6 +36,7 @@ public class JooqOrderFinder implements OrderFinder {
     @NotNull private final SqlQuery query;
 
     @NotNull private final FursuitConfig fursuitConfig;
+    @NotNull private final PretixConfig pretixConfig;
 
     @NotNull private final JooqOrderMapper orderMapper;
 
@@ -156,7 +158,7 @@ public class JooqOrderFinder implements OrderFinder {
                     .extraDays(order.getExtraDays())
                     .isDailyTicket(isDaily);
 
-            OffsetDateTime from = event.getDateFromExcludeEarly();
+            OffsetDateTime from = event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
             if (isDaily && from != null) {
                 orderDataBuilder = orderDataBuilder.dailyDays(
                         order.getDailyDays().stream().map(
