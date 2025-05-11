@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS fursuits DROP COLUMN IF EXISTS show_owner;

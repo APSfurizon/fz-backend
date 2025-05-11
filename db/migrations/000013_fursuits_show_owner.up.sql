@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS fursuits ADD COLUMN IF NOT EXISTS show_owner BOOL NOT NULL default false;
