@@ -39,6 +39,8 @@ public class JooqCountFinder implements CountsFinder {
                 FURSUITS.FURSUIT_ID,
                 FURSUITS.FURSUIT_NAME,
                 FURSUITS.FURSUIT_SPECIES,
+                FURSUITS.SHOW_OWNER,
+                FURSUITS.USER_ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_PATH,

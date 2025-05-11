@@ -112,6 +112,7 @@ public class JooqFursuitFinder implements FursuitFinder {
                 FURSUITS.FURSUIT_NAME,
                 FURSUITS.FURSUIT_SPECIES,
                 FURSUITS.SHOW_IN_FURSUITCOUNT,
+                FURSUITS.SHOW_OWNER,
                 FURSUITS.USER_ID
             ) : PostgresDSL.select(
                 MEDIA.MEDIA_ID,
@@ -121,6 +122,7 @@ public class JooqFursuitFinder implements FursuitFinder {
                 FURSUITS.FURSUIT_NAME,
                 FURSUITS.FURSUIT_SPECIES,
                 FURSUITS.SHOW_IN_FURSUITCOUNT,
+                FURSUITS.SHOW_OWNER,
                 FURSUITS.USER_ID,
                 ORDERS.ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE

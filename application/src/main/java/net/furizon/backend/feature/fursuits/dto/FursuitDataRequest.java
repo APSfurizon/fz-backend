@@ -14,4 +14,6 @@ public class FursuitDataRequest {
     @NotNull private final Boolean bringToCurrentEvent;
 
     @NotNull private final Boolean showInFursuitCount;
+
+    @NotNull private final Boolean showOwner;
 }

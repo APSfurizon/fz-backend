@@ -23,6 +23,7 @@ public class JooqFursuitDataMapper {
                 .bringingToEvent(mapOrder ? record.get(ORDERS.ID) != null : false)
                 .ownerId(record.get(FURSUITS.USER_ID))
                 .showInFursuitCount(record.get(FURSUITS.SHOW_IN_FURSUITCOUNT))
+                .showOwner(record.get(FURSUITS.SHOW_OWNER))
                 .fursuit(JooqFursuitDisplayMapper.map(record, mapOrder))
                 .build();
     }

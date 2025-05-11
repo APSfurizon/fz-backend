@@ -7,6 +7,7 @@ public interface UpdateFursuitAction {
         long fursuitId,
         @NotNull String name,
         @NotNull String species,
-        boolean showInFursuitCount
+        boolean showInFursuitCount,
+        boolean showOwner
     );
 }
