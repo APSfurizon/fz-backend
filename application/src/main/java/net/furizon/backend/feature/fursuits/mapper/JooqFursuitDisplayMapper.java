@@ -29,6 +29,7 @@ public class JooqFursuitDisplayMapper {
                 .name(record.get(FURSUITS.FURSUIT_NAME))
                 .species(record.get(FURSUITS.FURSUIT_SPECIES))
                 .propic(MediaResponseMapper.mapOrNull(record))
+                .ownerId(record.get(FURSUITS.SHOW_OWNER) ? record.get(FURSUITS.USER_ID) : null)
                 .sponsorship(mapOrder && sponsor != null ? Sponsorship.get(sponsor) : null)
             .build();
     }

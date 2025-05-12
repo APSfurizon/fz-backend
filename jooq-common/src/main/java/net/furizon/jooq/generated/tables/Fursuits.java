@@ -99,6 +99,11 @@ public class Fursuits extends TableImpl<Record> {
      */
     public final TableField<Record, Boolean> SHOW_IN_FURSUITCOUNT = createField(DSL.name("show_in_fursuitcount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
 
+    /**
+     * The column <code>public.fursuits.show_owner</code>.
+     */
+    public final TableField<Record, Boolean> SHOW_OWNER = createField(DSL.name("show_owner"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
     private Fursuits(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

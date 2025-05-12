@@ -25,6 +25,7 @@ public class JooqCreateFursuitAction implements CreateFursuitAction {
             @NotNull String name,
             @NotNull String species,
             boolean showInFursuitCount,
+            boolean showOwner,
             @Nullable Order linkedOrder
     ) {
         long fursuitId = command.executeResult(
@@ -33,12 +34,14 @@ public class JooqCreateFursuitAction implements CreateFursuitAction {
                 FURSUITS.FURSUIT_NAME,
                 FURSUITS.FURSUIT_SPECIES,
                 FURSUITS.SHOW_IN_FURSUITCOUNT,
+                FURSUITS.SHOW_OWNER,
                 FURSUITS.USER_ID
             )
             .values(
                 name,
                 species,
                 showInFursuitCount,
+                showOwner,
                 ownerId
             )
             .returning(FURSUITS.FURSUIT_ID)

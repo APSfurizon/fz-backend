@@ -34,7 +34,8 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
             fursuitId,
             input.name,
             input.species,
-            input.showInFursuitCount
+            input.showInFursuitCount,
+            input.showOwner
         );
 
         if (res) {
@@ -51,6 +52,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
             @NotNull String name,
             @NotNull String species,
             boolean showInFursuitCount,
+            boolean showOwner,
             @NotNull Event event,
             @NotNull FurizonUser user
     ) {}

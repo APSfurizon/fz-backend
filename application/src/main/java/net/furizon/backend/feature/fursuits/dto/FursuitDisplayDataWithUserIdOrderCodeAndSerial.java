@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 public class FursuitDisplayDataWithUserIdOrderCodeAndSerial {
     @NotNull private final FursuitDisplayData fursuit;
     private final long ownerUserId;
-    @Nullable
-    private final String orderCode;
+    @Nullable private final String orderCode;
     private final long orderSerial;
 }
