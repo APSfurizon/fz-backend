@@ -23,7 +23,7 @@ public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.
         long userId = input.user.getUserId();
         Event event = input.event;
 
-        FursuitData fursuit = fursuitFinder.getFursuit(userId, event);
+        FursuitData fursuit = fursuitFinder.getFursuit(userId, event, false);
         if (fursuit == null) {
             throw new ApiException("Fursuit not found", FursuitErrorCodes.FURSUIT_NOT_FOUND);
         }

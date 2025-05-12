@@ -60,7 +60,7 @@ public class JooqCountFinder implements CountsFinder {
             .leftJoin(MEDIA)
             .on(FURSUITS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .orderBy(FURSUITS.FURSUIT_NAME)
-        ).stream().map(JooqFursuitDisplayMapper::mapWithOrder).toList();
+        ).stream().map(f -> JooqFursuitDisplayMapper.mapWithOrder(f, false)).toList();
     }
 
     @Override

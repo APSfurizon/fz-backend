@@ -83,7 +83,7 @@ public class JooqBadgeFinder implements BadgeFinder {
             @Nullable String fursuitIds) {
         return sqlQuery.fetch(
             getFursuitBadgeQuery(event, orderCodes, orderSerials, userIds, fursuitIds)
-        ).stream().map(JooqFursuitDisplayMapper::mapWithUserIdOrderCodeSerial).toList();
+        ).stream().map(f -> JooqFursuitDisplayMapper.mapWithUserIdOrderCodeSerial(f, false)).toList();
     }
 
     @Override

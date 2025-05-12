@@ -56,6 +56,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 .id(fursuitId)
                 .name(input.name)
                 .species(input.species)
+                .ownerId(userId)
                 .build();
         return FursuitData.builder()
                 .bringingToEvent(input.bringToCurrentEvenet)

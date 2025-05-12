@@ -32,14 +32,14 @@ public class JooqFursuitFinder implements FursuitFinder {
             selectDisplayFursuit(event)
             .where(FURSUITS.USER_ID.eq(userId))
             .orderBy(FURSUITS.FURSUIT_ID)
-        ).stream().map(r -> JooqFursuitDataMapper.map(r, event != null)).toList();
+        ).stream().map(r -> JooqFursuitDataMapper.map(r, event != null, true)).toList();
     }
     @Override
-    public @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event) {
+    public @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event, boolean isOwner) {
         return sqlQuery.fetchFirst(
             selectDisplayFursuit(event)
             .where(FURSUITS.FURSUIT_ID.eq(fursuitId))
-        ).mapOrNull(r -> JooqFursuitDataMapper.map(r, event != null));
+        ).mapOrNull(r -> JooqFursuitDataMapper.map(r, event != null, isOwner));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class JooqFursuitFinder implements FursuitFinder {
                 .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
             )
             .where(FURSUITS.MEDIA_ID_PROPIC.isNull())
-        ).stream().map(r -> JooqFursuitDataMapper.map(r, false)).toList();
+        ).stream().map(r -> JooqFursuitDataMapper.map(r, false, false)).toList();
     }
 
     @Override
