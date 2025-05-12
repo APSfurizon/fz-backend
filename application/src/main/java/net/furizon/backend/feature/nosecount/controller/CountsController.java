@@ -33,7 +33,9 @@ public class CountsController {
         "By using the optional paramether `event-id` you can choose of which event "
         + "you can fetch the fursuit count. If you leave it blank or null, you will "
         + "obtain the one for the current event. Only the fursuits brought to that event "
-        + "with the `displayInNosecount` check will be returned by this method")
+        + "with the `displayInNosecount` check will be returned by this method. "
+        + "Some people may set their fursuit as publicly owned by them. In that instance "
+        + "the field `ownerId` will be populated with the userId of the owner of the fursuit.")
     @GetMapping("/fursuit")
     public FursuitCountResponse getFursuitCount(
             @RequestParam(value = "event-id", required = false) @Valid @Nullable Long eventId
