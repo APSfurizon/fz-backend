@@ -239,7 +239,7 @@ def exportBadges() -> Response:
 login()
 #getMe()
 #updateUserInfo()
-getOrderLink()
+#getOrderLink()
 #testPermission()
 #testInternalAuthorize()
 #uploadBadge()
@@ -256,7 +256,7 @@ getOrderLink()
 #fetchRole(1)
 #updateRole(2)
 #deleteRole(4)
-#exportBadges()
+exportBadges()
 
 #countdown()
 

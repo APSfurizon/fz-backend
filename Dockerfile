@@ -7,6 +7,7 @@ COPY application-*.jar $APP_HOME/application.jar
 COPY prodkeys/*-key-autocart.rsa $APP_HOME/
 COPY hotel-names.json $APP_HOME/
 COPY templates/ $APP_HOME/templates/
+COPY libs/ $APP_HOME/libs/
 
 
 RUN apk --no-cache -s upgrade && apk --no-cache upgrade && apk add musl-locales && apk add lang
@@ -20,4 +21,4 @@ USER fz-backend
 
 EXPOSE 9091
 
-CMD ["java",  "-XX:+UseG1GC", "-Xms4096m", "-Xmx4096m", "-XX:MaxGCPauseMillis=500",  "-jar", "./application.jar"]
+CMD ["java",  "-XX:+UseG1GC", "-Xms2048m", "-Xmx2048m", "-XX:MaxGCPauseMillis=500",  "-jar", "./application.jar"]
