@@ -8,13 +8,13 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -35,9 +35,7 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final BadgeConfig badgeConfig;
-
-    @Value("${frontend.badge-page-url}")
-    private String badgePageUrl;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Integer executor(@NotNull Event event) {
@@ -74,7 +72,7 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
             mails[n] = new MailRequest(
                     usr,
                     TEMPLATE_FURSUIT_BADGE_UPLOAD,
-                    MailVarPair.of(EmailVars.LINK, badgePageUrl),
+                    MailVarPair.of(EmailVars.LINK, frontendConfig.getBadgePageUrl()),
                     MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
                     MailVarPair.of(EmailVars.FURSUIT_NAME, suits)
             );

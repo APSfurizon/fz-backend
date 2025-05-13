@@ -82,6 +82,7 @@ frontend:
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
+  room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}

@@ -15,6 +15,7 @@ import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewFursuitBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewUserBadgesUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.EmptyRoomReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
@@ -135,6 +136,19 @@ public class AdminController {
         int sent = executor.execute(FursuitBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} fursuit badge upload emails", sent);
     }
+
+    @Operation(summary = "Remind user to create and full their rooms", description =
+        "Sends an email to all people who have made a paid order which have a room, "
+        + "but have not created or completely filled it")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_ROOMS})
+    @GetMapping("/mail-reminders/room-not-full")
+    public void remindRoomNotFull(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(EmptyRoomReminderUseCase.class, pretixInformation);
+        log.info("Sent {} room not full emails", sent);
+    }
+
 
     /*
   ________   _______   ____  _____ _______ _____

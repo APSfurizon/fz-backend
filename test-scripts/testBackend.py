@@ -234,6 +234,9 @@ def deleteRole(id: int) -> Response:
 def exportBadges() -> Response:
     return doGet(f'{BASE_URL_API}admin/export/badges/user')
 
+def remindRoomNotFull() -> Response:
+    return doGet(f'{BASE_URL_API}admin/mail-reminders/room-not-full')
+
 #register()
 #confirmEmail()
 login()
@@ -256,7 +259,8 @@ login()
 #fetchRole(1)
 #updateRole(2)
 #deleteRole(4)
-exportBadges()
+#exportBadges()
+remindRoomNotFull()
 
 #countdown()
 

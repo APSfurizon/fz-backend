@@ -3,7 +3,9 @@ package net.furizon.backend.feature.room.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.admin.dto.HotelExportRow;
+import net.furizon.backend.feature.admin.dto.JooqRoomNotFullRow;
 import net.furizon.backend.feature.admin.mapper.HotelExportRowMapper;
+import net.furizon.backend.feature.admin.mapper.JooqRoomNotFullRowMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.room.dto.RoomInfo;
@@ -17,17 +19,21 @@ import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
 import net.furizon.backend.feature.room.mapper.RoomInvitationResponseMapper;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
+import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOnConditionStep;
+import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -429,6 +435,76 @@ public class JooqRoomFinder implements RoomFinder {
                 .and(ORDERS.ID.eq(ROOMS.ORDER_ID))
             )
         ).mapOrNull(k -> k.get(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID));
+    }
+
+    @Override
+    public @NotNull List<JooqRoomNotFullRow> getNotFullRooms(long eventId,
+                                                             @NotNull PretixInformation pretixInformation) {
+        /*
+        SELECT
+            t.owner_id,
+            t.room_count,
+            users.user_fursona_name,
+            orders.order_room_pretix_item_id,
+            orders.order_room_capacity
+        FROM orders
+        INNER JOIN (
+            SELECT
+                orders.user_id AS owner_id,
+                COUNT(DISTINCT room_guests.user_id) AS room_count
+            FROM orders
+            LEFT JOIN rooms
+            ON orders.id = rooms.order_id
+            LEFT JOIN room_guests
+            ON
+                rooms.room_id = room_guests.room_id
+                AND room_guests.confirmed IS TRUE
+            WHERE
+              orders.order_status = 2
+              AND orders.order_room_pretix_item_id != 237
+            GROUP BY orders.user_id
+        ) t
+        ON orders.user_id = t.owner_id
+        INNER JOIN users
+        ON orders.user_id = users.user_id
+        WHERE t.room_count < orders.order_room_capacity;
+         */
+        Field<Integer> usersCount = PostgresDSL.field("users", Integer.class);
+
+        Table<?> roomCounts = PostgresDSL.select(
+                ORDERS.USER_ID,
+                PostgresDSL.countDistinct(ROOM_GUESTS.USER_ID).as(usersCount)
+            )
+            .from(ORDERS)
+            .leftJoin(ROOMS)
+            .on(ORDERS.ID.eq(ROOMS.ORDER_ID))
+            .leftJoin(ROOM_GUESTS)
+            .on(
+                ROOMS.ROOM_ID.eq(ROOM_GUESTS.ROOM_ID)
+                .and(ROOM_GUESTS.CONFIRMED.isTrue())
+            )
+            .where(
+                ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
+                .and(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID.isNotNull())
+                .and(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID.notIn(
+                        pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM)
+                ))
+            )
+            .groupBy(ORDERS.USER_ID)
+            .asTable("roomCounts");
+
+        return query.fetch(
+            PostgresDSL.select(
+                roomCounts.field(ORDERS.USER_ID),
+                roomCounts.field(usersCount),
+                ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
+                ORDERS.ORDER_ROOM_CAPACITY
+            )
+            .from(ORDERS)
+            .innerJoin(roomCounts)
+            .on(ORDERS.USER_ID.eq(roomCounts.field(ORDERS.USER_ID)))
+            .where(ORDERS.ORDER_ROOM_CAPACITY.greaterThan(roomCounts.field(usersCount).cast(Short.class)))
+        ).stream().map(r -> JooqRoomNotFullRowMapper.map(r, usersCount)).toList();
     }
 
     @Override
