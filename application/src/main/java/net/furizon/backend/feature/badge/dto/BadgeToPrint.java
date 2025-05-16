@@ -18,6 +18,8 @@ public class BadgeToPrint {
 
     private final long serialNo;
 
+    private final boolean isDaily;
+
     @Nullable
     private final Long fursuitId;
 

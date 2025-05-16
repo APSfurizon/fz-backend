@@ -95,11 +95,14 @@
         .badge-level-staff-junior {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/juniorStaff.png');
         }
-        .badge-level-sponsor-normal {
-            background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsor.png');
+        .badge-level-daily {
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/daily.png');
         }
         .badge-level-sponsor-super {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsorSuper.png');
+        }
+        .badge-level-sponsor-normal {
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsor.png');
         }
         .badge-level-normal {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/attendee.png');

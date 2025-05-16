@@ -9,8 +9,9 @@ public enum PrintedBadgeLevel {
     //For your own convention you may want to change this
     MAIN_STAFF("badge-level-staff-main"),
     JUNIOR_STAFF("badge-level-staff-junior"),
-    SUPER_SPONSOR("badge-level-sponsor-normal"),
-    NORMAL_SPONSOR("badge-level-sponsor-super"),
+    DAILY_BADGE("badge-level-daily"),
+    SUPER_SPONSOR("badge-level-sponsor-super"),
+    NORMAL_SPONSOR("badge-level-sponsor-normal"),
     NORMAL_BADGE("badge-level-normal"),
     ;
 

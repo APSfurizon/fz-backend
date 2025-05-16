@@ -135,8 +135,9 @@ public class JooqBadgeFinder implements BadgeFinder {
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
-                ORDERS.ORDER_SERIAL_IN_EVENT,
                 ORDERS.ORDER_CODE,
+                ORDERS.ORDER_DAILY_DAYS,
+                ORDERS.ORDER_SERIAL_IN_EVENT,
                 ORDERS.ORDER_SPONSORSHIP_TYPE
             )
             .from(USERS)
@@ -172,8 +173,9 @@ public class JooqBadgeFinder implements BadgeFinder {
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
-                ORDERS.ORDER_SERIAL_IN_EVENT,
                 ORDERS.ORDER_CODE,
+                ORDERS.ORDER_DAILY_DAYS,
+                ORDERS.ORDER_SERIAL_IN_EVENT,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 FURSUITS.USER_ID,
                 FURSUITS.FURSUIT_ID,
