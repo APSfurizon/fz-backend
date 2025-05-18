@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.logic;
 
+import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -58,7 +59,9 @@ public interface RoomLogic {
                              @NotNull PretixInformation pretixInformation
     );
 
+    //The logic of these two methods should be the same
     @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId);
+    void computeNosecountExtraDays(@NotNull NosecountRoom room);
 
     void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
                         @Nullable List<String> detectedErrors);

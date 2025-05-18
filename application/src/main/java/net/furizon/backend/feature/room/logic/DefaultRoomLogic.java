@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.logic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
@@ -497,6 +498,11 @@ public class DefaultRoomLogic implements RoomLogic {
     @Override
     public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
         return orderFinder.getExtraDaysOfUser(userId, eventId);
+    }
+
+    @Override
+    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
+
     }
 
     private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {

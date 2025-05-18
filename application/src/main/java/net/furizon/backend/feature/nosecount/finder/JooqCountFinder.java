@@ -103,9 +103,11 @@ public class JooqCountFinder implements CountsFinder {
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
 
                 ORDERS.ORDER_DAILY_DAYS,
+                ORDERS.ORDER_EXTRA_DAYS_TYPE,
 
                 ROOMS.ROOM_ID,
                 ROOMS.ROOM_NAME,
+                roomOwnerOrder.USER_ID,
                 roomOwnerOrder.ORDER_ROOM_CAPACITY,
                 roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID,
                 roomOwnerOrder.ORDER_ROOM_INTERNAL_NAME,

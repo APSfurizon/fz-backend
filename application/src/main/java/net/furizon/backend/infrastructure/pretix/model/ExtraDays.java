@@ -20,4 +20,15 @@ public enum ExtraDays {
     public static ExtraDays get(int ordinal) {
         return ExtraDays.values()[ordinal];
     }
+
+    public static ExtraDays or(ExtraDays saved, ExtraDays in) {
+        if (saved != ExtraDays.BOTH) {
+            if (saved != in && saved != ExtraDays.NONE) {
+                saved = ExtraDays.BOTH;
+            } else {
+                saved = in;
+            }
+        }
+        return saved;
+    }
 }
