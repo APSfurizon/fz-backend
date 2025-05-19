@@ -2,6 +2,7 @@ package net.furizon.backend.feature.nosecount.mapper;
 
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.jooq.generated.tables.Orders;
 import org.jooq.Record;
@@ -18,6 +19,7 @@ public class JooqNosecountObjMapper {
                 .userLocale(record.get(USERS.USER_LOCALE))
                 .media(MediaResponseMapper.mapOrNull(record))
                 .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
+                .extraDays(ExtraDays.get(record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)))
                 .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
                 .roomId(record.get(ROOMS.ROOM_ID))
                 .roomName(record.get(ROOMS.ROOM_NAME))
@@ -25,6 +27,7 @@ public class JooqNosecountObjMapper {
                 .roomPretixItemId(record.get(roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID))
                 .roomInternalName(record.get(roomOwnerOrder.ORDER_ROOM_INTERNAL_NAME))
                 .hotelInternalName(record.get(roomOwnerOrder.ORDER_HOTEL_INTERNAL_NAME))
+                .roomOwnerUserId(record.get(roomOwnerOrder.USER_ID))
             .build();
     }
 }

@@ -477,13 +477,7 @@ public class CachedPretixInformation implements PretixInformation {
                     } else if (cacheExtraDays == ExtraDays.LATE) {
                         latePositionId = position.getPositionId();
                     }
-                    if (extraDays != ExtraDays.BOTH) {
-                        if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
-                            extraDays = ExtraDays.BOTH;
-                        } else {
-                            extraDays = cacheExtraDays;
-                        }
-                    }
+                    extraDays = ExtraDays.or(extraDays, cacheExtraDays);
 
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, itemId)) {
                     //Set the room position and item id anyway, even if we have a NO_ROOM item

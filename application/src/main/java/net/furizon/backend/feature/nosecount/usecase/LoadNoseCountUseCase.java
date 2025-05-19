@@ -10,8 +10,11 @@ import net.furizon.backend.feature.nosecount.finder.CountsFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -36,6 +39,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
     @NotNull private final CountsFinder countsFinder;
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final RoomConfig roomConfig;
+    private final RoomLogic roomLogic;
 
     @Override
     public @NotNull NoseCountResponse executor(@NotNull LoadNoseCountUseCase.Input input) {
@@ -72,7 +76,10 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
             //Fetch or create room
             NosecountRoom room = roomIdToRoom.computeIfAbsent(obj.getRoomId(), roomId -> {
                 NosecountRoom r = new NosecountRoom(
-                        roomId, Objects.requireNonNull(obj.getRoomName()), new ArrayList<>()
+                        roomId,
+                        Objects.requireNonNull(obj.getRoomOwnerUserId()),
+                        Objects.requireNonNull(obj.getRoomName()),
+                        new ArrayList<>()
                 );
 
                 //Fetch or create room type
@@ -106,8 +113,18 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                 return r;
             });
 
-            room.getGuests().add(getUserDisplayData(obj));
+            room.getGuests().add(new UserDisplayDataWithExtraDays(getUserDisplayData(obj), obj.getExtraDays()));
         }
+
+        //Compute extra days
+        roomIdToRoom.values().forEach(room -> {
+            ExtraDays ed = ExtraDays.NONE;
+            for (UserDisplayDataWithExtraDays user : room.getGuests()) {
+                ed = ExtraDays.or(ed, user.getExtraDays());
+            }
+            room.setRoomExtraDays(ed);
+            roomLogic.computeNosecountExtraDays(room);
+        });
 
 
         return new NoseCountResponse(
