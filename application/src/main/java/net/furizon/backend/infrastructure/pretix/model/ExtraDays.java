@@ -22,7 +22,7 @@ public enum ExtraDays {
     }
 
     public static ExtraDays or(ExtraDays saved, ExtraDays in) {
-        if (saved != ExtraDays.BOTH) {
+        if (saved != ExtraDays.BOTH && in != ExtraDays.NONE) {
             if (saved != in && saved != ExtraDays.NONE) {
                 saved = ExtraDays.BOTH;
             } else {
