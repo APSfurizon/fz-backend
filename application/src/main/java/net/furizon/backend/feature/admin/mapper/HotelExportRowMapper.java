@@ -24,7 +24,7 @@ public class HotelExportRowMapper {
                 .lastName(record.get(MEMBERSHIP_INFO.INFO_LAST_NAME))
                 .birthday(record.get(MEMBERSHIP_INFO.INFO_BIRTHDAY))
                 .birthLocation(
-                    record.get(MEMBERSHIP_INFO.INFO_CITY) + " "
+                    record.get(MEMBERSHIP_INFO.INFO_BIRTH_CITY) + " "
                     + (birthRegion == null ? "" : "(" + birthRegion + ") ")
                     + "- " + record.get(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY)
                 )
