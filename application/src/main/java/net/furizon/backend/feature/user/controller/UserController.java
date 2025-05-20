@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.user.UserSession;
 import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
 import net.furizon.backend.feature.user.dto.SessionListResponse;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;

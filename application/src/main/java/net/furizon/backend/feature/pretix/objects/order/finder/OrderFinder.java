@@ -26,6 +26,9 @@ public interface OrderFinder {
     @Nullable
     Order findOrderById(long orderId, @NotNull PretixInformation pretixService);
 
+    @Nullable
+    String getOrderCodeById(long orderId);
+
     @NotNull
     List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService);
 
@@ -47,8 +50,6 @@ public interface OrderFinder {
 
     @Nullable
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
-
-    @Nullable String getOrderCodeById(long orderId);
 
     @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
 

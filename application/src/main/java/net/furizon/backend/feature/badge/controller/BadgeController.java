@@ -124,7 +124,9 @@ public class BadgeController {
                 )
         );
     }
-    @Operation(summary = "Deletes the specified user's badge")
+    @Operation(summary = "Deletes the specified user's badge", description =
+        "This is intended for admin use only")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
     @DeleteMapping(value = "/user/{userId}")
     public boolean deleteUserUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -144,6 +146,7 @@ public class BadgeController {
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @PathVariable("fursuitId") @NotNull final Long fursuitId
     ) {
+        //Permission checks done inside
         return useCaseExecutor.execute(
                 DeleteBadgeUseCase.class,
                 new DeleteBadgeUseCase.Input(

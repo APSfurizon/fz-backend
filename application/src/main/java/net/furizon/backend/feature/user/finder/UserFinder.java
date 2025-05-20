@@ -45,7 +45,4 @@ public interface UserFinder {
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
 
     SelectJoinStep<?> selectDisplayUser();
-  
-    @Nullable
-    UserAdminViewDisplay getUserAdminViewDisplay(long userId, @NotNull Event event);
 }
