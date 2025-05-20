@@ -27,6 +27,7 @@ import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.quota.finder.PretixQuotaFinder;
 import net.furizon.backend.feature.pretix.objects.quota.usecase.ReloadQuotaUseCase;
+import net.furizon.backend.feature.pretix.objects.states.CountryData;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
 import net.furizon.backend.feature.pretix.objects.states.usecase.FetchStatesByCountry;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -257,15 +258,39 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public List<PretixState> getStatesOfCountry(String countryIsoCode) {
+    public List<PretixState> getStatesOfCountry(@NotNull String countryIsoCode) {
         //No cache lock needed!
         var ret = statesOfCountry.get(countryIsoCode, k -> useCaseExecutor.execute(FetchStatesByCountry.class, k));
         return ret != null ? ret : new LinkedList<>();
     }
+    @Override
+    public boolean isCountryValid(@NotNull String countryIsoCode) {
+        return isRegionOfCountryValid(PretixConst.ALL_COUNTRIES_STATE_KEY, countryIsoCode);
+    }
+    @Override
+    public boolean isRegionOfCountryValid(@NotNull String countryIsoCode, @NotNull String region) {
+        List<PretixState> countries = getStatesOfCountry(countryIsoCode);
+        for (PretixState state : countries) {
+            if (state.getCode().equals(region)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    @Override
+    public boolean isPhonePrefixValid(@NotNull String phonePrefix) {
+        List<PretixState> countries = getStatesOfCountry(PretixConst.ALL_COUNTRIES_STATE_KEY);
+        for (PretixState state : countries) {
+            if (state instanceof CountryData && ((CountryData) state).getPhonePrefix().equals(phonePrefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @NotNull
     @Override
-    public Set<Long> getIdsForItemType(CacheItemTypes type) {
+    public Set<Long> getIdsForItemType(@NotNull CacheItemTypes type) {
         lock.readLock().lock();
         var v = itemIdsCache.getIfPresent(type);
         lock.readLock().unlock();
@@ -376,6 +401,7 @@ public class CachedPretixInformation implements PretixInformation {
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
             String roomInternalName = null;
+            String checkinSecret = null;
             Long pretixRoomItemId = null;
             long ticketPositionId = -1L;
             long ticketPosid = -1L;
@@ -403,6 +429,7 @@ public class CachedPretixInformation implements PretixInformation {
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
+                    checkinSecret = position.getSecret();
                     ticketPositionId = position.getPositionId();
                     ticketPosid = position.getPositionPosid();
                     answers = position.getAnswers();
@@ -450,13 +477,7 @@ public class CachedPretixInformation implements PretixInformation {
                     } else if (cacheExtraDays == ExtraDays.LATE) {
                         latePositionId = position.getPositionId();
                     }
-                    if (extraDays != ExtraDays.BOTH) {
-                        if (extraDays != cacheExtraDays && extraDays != ExtraDays.NONE) {
-                            extraDays = ExtraDays.BOTH;
-                        } else {
-                            extraDays = cacheExtraDays;
-                        }
-                    }
+                    extraDays = ExtraDays.or(extraDays, cacheExtraDays);
 
                 } else if (checkItemId.apply(CacheItemTypes.ROOMS, itemId)) {
                     //Set the room position and item id anyway, even if we have a NO_ROOM item
@@ -500,6 +521,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .hotelInternalName(hotelInternalName)
                     .roomInternalName(roomInternalName)
                     .pretixOrderSecret(pretixOrder.getSecret())
+                    .checkinSecret(checkinSecret)
                     .hasMembership(membership)
                     .buyerEmail(pretixOrder.getEmail())
                     .buyerPhone(pretixOrder.getPhone())

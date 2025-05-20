@@ -234,6 +234,11 @@ public class Orders extends TableImpl<Record> {
      */
     public final TableField<Record, Long> ORDER_SERIAL_IN_EVENT = createField(DSL.name("order_serial_in_event"), SQLDataType.BIGINT.nullable(false), this, "");
 
+    /**
+     * The column <code>public.orders.order_checkin_secret</code>.
+     */
+    public final TableField<Record, String> ORDER_CHECKIN_SECRET = createField(DSL.name("order_checkin_secret"), SQLDataType.VARCHAR(32).defaultValue(DSL.field(DSL.raw("NULL::character varying"), SQLDataType.VARCHAR)), this, "");
+
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

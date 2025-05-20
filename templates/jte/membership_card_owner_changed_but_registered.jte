@@ -1,8 +1,8 @@
 @param String orderCode
-@param long cardId
-@param int cardIdInYear
-@param long orderPrevOwnerId
-@param long orderOwnerId
+@param String cardId
+@param String cardIdInYear
+@param String orderPrevOwnerId
+@param String orderOwnerId
 
 <!DOCTYPE html>
 <html lang="en">

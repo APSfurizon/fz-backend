@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,6 +50,15 @@ public class Event {
             this.slug = PretixGenericUtils.buildOrgEventSlug(eventSlug, organizerSlug);
             return this;
         }
+    }
+
+    @Nullable
+    public OffsetDateTime getDateFromExcludeEarly(boolean includeEarly) {
+        return dateFrom == null ? null : (includeEarly ? dateFrom.plusDays(ExtraDays.EARLY_DAYS_NO) : dateFrom);
+    }
+    @Nullable
+    public OffsetDateTime getDateToExcludeLate(boolean includeEarly) {
+        return dateTo == null ? null : (includeEarly ? dateTo.plusDays(ExtraDays.LATE_DAYS_NO) : dateTo);
     }
 
     @Data

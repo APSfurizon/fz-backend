@@ -6,6 +6,9 @@ public enum ExtraDays {
     LATE,
     BOTH;
 
+    public static final long EARLY_DAYS_NO = 1L;
+    public static final long LATE_DAYS_NO = 1L;
+
     public boolean isEarly() {
         return (this.ordinal() & 0b01) != 0;
     }
@@ -16,5 +19,16 @@ public enum ExtraDays {
 
     public static ExtraDays get(int ordinal) {
         return ExtraDays.values()[ordinal];
+    }
+
+    public static ExtraDays or(ExtraDays saved, ExtraDays in) {
+        if (saved != ExtraDays.BOTH && in != ExtraDays.NONE) {
+            if (saved != in && saved != ExtraDays.NONE) {
+                saved = ExtraDays.BOTH;
+            } else {
+                saved = in;
+            }
+        }
+        return saved;
     }
 }

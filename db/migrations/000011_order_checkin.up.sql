@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS order_checkin_secret varchar(32) NULL DEFAULT NULL;

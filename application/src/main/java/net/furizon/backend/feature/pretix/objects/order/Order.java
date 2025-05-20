@@ -72,6 +72,8 @@ public class Order {
 
     @NotNull
     private String pretixOrderSecret;
+    @Nullable
+    private String checkinSecret;
 
     //Manually defining getters/setters because lombok's default names are ugly lol
     @Builder.Default

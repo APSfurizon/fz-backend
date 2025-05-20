@@ -9,5 +9,7 @@ public enum OrderWorkflowErrorCode {
     ORDER_SECRET_NOT_MATCH, //The provided secret does not match the one of the order
     ORDER_ALREADY_OWNED_BY_SOMEBODY_ELSE, //The provided order is already owned by someone else who owns only 1 order
     SHOP_NOT_OPENED_YET, //Tried to generate a shop url but he's not a staffer and the registrations aren't opened yet
-    ORDER_EDITS_CLOSED //Tried to generate a edit order url, but order editing is closed
+    ORDER_EDITS_CLOSED, //Tried to generate a edit order url, but order editing is closed
+    PERSONAL_USER_INFO_NOT_UPDATED, //The user has not updated his personal info or marked them as updated yet
+    BELOW_MINIMUM_AGE, //The age of the user doesn't reach the minimum event's age
 }

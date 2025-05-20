@@ -14,6 +14,7 @@ public class FursuitDisplayData {
     @NotNull private String name;
     @NotNull private String species;
     @Nullable private MediaResponse propic;
+    @Nullable private Long ownerId;
 
     @Nullable private final Sponsorship sponsorship;
 }

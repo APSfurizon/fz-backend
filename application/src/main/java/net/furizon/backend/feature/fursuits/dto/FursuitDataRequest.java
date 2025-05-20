@@ -16,5 +16,7 @@ public class FursuitDataRequest {
 
     @NotNull private final Boolean showInFursuitCount;
 
+    @NotNull private final Boolean showOwner;
+  
     @Nullable private final Long userId;
 }

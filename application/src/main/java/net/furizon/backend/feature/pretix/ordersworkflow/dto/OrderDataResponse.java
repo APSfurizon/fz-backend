@@ -18,6 +18,9 @@ public class OrderDataResponse {
     @NotNull
     private String code;
 
+    @Nullable
+    private String checkinSecret;
+
     @NotNull
     private OrderStatus orderStatus;
 

@@ -74,6 +74,7 @@ security:
 membership:
   card-enumeration-reset-month: ${MEMBERSHIPCARD_ENUMARATION_RESET_MONTH:10}
   card-enumeration-reset-day: ${MEMBERSHIPCARD_ENUMARATION_RESET_DAY:1}
+  minimum-age-at-event-date: ${MINIMUM_AGE_AT_EVENT_DATE:-1}
 
 frontend:
   login-url: ${FRONTEND_LOGIN_URL:}
@@ -81,6 +82,7 @@ frontend:
   confirm-email-url: ${BACKEND_CONFIRM_EMAIL_URL:}
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
+  room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -100,6 +102,7 @@ pretix:
   event:
     public-booking-start-time: ${PRETIX_EVENT_START_PUBLIC_BOOKING_TIME:}
     edit-booking-end-time: ${PRETIX_EVENT_EDIT_BOOKING_END_TIME:}
+    include-early-in-daily-count: ${PRETIX_EVENT_INCLUDE_EARLY_IN_DATES:true}
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
@@ -146,7 +149,7 @@ badge:
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
   editing-deadline: ${BADGE_EDITING_DEADLINE:}
   export:
-    default-image-url: ${BADGE_EXPORT_DEFAULT_IMAGE_URL:https://furpanel.furizon.net/images/profile.png}
+    default-image-url: ${BADGE_EXPORT_DEFAULT_IMAGE_URL:images/profile.png}
     output-wrapper-badge-jte-filename: ${BADGE_EXPORT_OUTPUT_WRAPPER_JTE_FILENAME:badge_output.jte}
     user-badge-jte-filename: ${BADGE_EXPORT_USER_JTE_FILENAME:badge_user.jte}
     fursuit-badge-jte-filename: ${BADGE_EXPORT_FURSUIT_JTE_FILENAME:badge_fursuit.jte}
@@ -159,3 +162,4 @@ reminders:
 
 admin:
   custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}
+  jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}

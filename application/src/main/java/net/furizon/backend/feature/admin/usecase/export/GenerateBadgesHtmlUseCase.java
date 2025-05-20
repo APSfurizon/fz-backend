@@ -2,6 +2,7 @@ package net.furizon.backend.feature.admin.usecase.export;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.admin.dto.BadgeExportVar;
 import net.furizon.backend.feature.admin.dto.GenerateBadgeRequest;
 import net.furizon.backend.feature.badge.dto.PrintedBadgeLevel;
 import net.furizon.backend.feature.badge.dto.BadgeToPrint;
@@ -84,6 +85,9 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
             if (badge.getSponsorship() == Sponsorship.SUPER_SPONSOR) {
                 badgeLevel = PrintedBadgeLevel.SUPER_SPONSOR;
             }
+            if (badge.isDaily()) {
+                badgeLevel = PrintedBadgeLevel.DAILY_BADGE;
+            }
             if (badge.getPermissions().contains(Permission.JUNIOR_STAFF)) {
                 badgeLevel = PrintedBadgeLevel.JUNIOR_STAFF;
             }
@@ -96,18 +100,18 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
                     ? badgeConfig.getExport().getFursuitBadgeJteFilename()
                     : badgeConfig.getExport().getUserBadgeJteFilename(),
                 Map.ofEntries(
-                    Map.entry("userId", badge.getUserId()),
-                    Map.entry("serialNo", badge.getSerialNo()),
-                    Map.entry("orderCode", badge.getOrderCode()),
-                    Map.entry("fursonaName", badge.getFursonaName()),
-                    Map.entry("imageUrl", imageUrl),
-                    Map.entry("imageMimeType", mimeType),
-                    Map.entry("locales", badge.getLocales().getFirst()), //TODO support more flags
-                    Map.entry("sponsorship", badge.getSponsorship()),
-                    Map.entry("fursuitId", fursuitId),
-                    Map.entry("fursuitName", fursuitName),
-                    Map.entry("fursuitSpecies", fursuitSpecies),
-                    Map.entry("badgeLevel", badgeLevel)
+                    Map.entry(BadgeExportVar.USER_ID.getVarName(), badge.getUserId()),
+                    Map.entry(BadgeExportVar.SERIAL_NUMBER.getVarName(), badge.getSerialNo()),
+                    Map.entry(BadgeExportVar.ORDER_CODE.getVarName(), badge.getOrderCode()),
+                    Map.entry(BadgeExportVar.FURSONA_NAME.getVarName(), badge.getFursonaName()),
+                    Map.entry(BadgeExportVar.IMAGE_URL.getVarName(), imageUrl.replace('\\', '/')),
+                    Map.entry(BadgeExportVar.IMAGE_MIME_TYPE.getVarName(), mimeType),
+                    Map.entry(BadgeExportVar.LOCALES.getVarName(), badge.getLocales().getFirst()), //TODO more flags
+                    Map.entry(BadgeExportVar.SPONSORSHIP.getVarName(), badge.getSponsorship().toString()),
+                    Map.entry(BadgeExportVar.FURSUIT_ID.getVarName(), fursuitId),
+                    Map.entry(BadgeExportVar.FURSUIT_NAME.getVarName(), fursuitName),
+                    Map.entry(BadgeExportVar.FURSUIT_SPECIES.getVarName(), fursuitSpecies),
+                    Map.entry(BadgeExportVar.BADGE_LEVEL.getVarName(), badgeLevel.getName())
                 )
             );
             renderedBadges.add(html);

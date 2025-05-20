@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.UserSession;
 import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
+import net.furizon.backend.feature.user.dto.SessionListResponse;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -45,7 +45,7 @@ public class UserController {
     private final GetUserAdminViewDataUseCase getUserAdminViewDataUseCase;
 
     @GetMapping("/me")
-    public FurizonUser getMe(
+    public @NotNull FurizonUser getMe(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return user;
@@ -69,7 +69,7 @@ public class UserController {
         + "a list of DisplayUserData, one for each found id, which contains all the information needed to "
         + "display an user on the frontend")
     @GetMapping("/display/by-id")
-    public UsersByIdResponse searchUsersByIds(
+    public @NotNull UsersByIdResponse searchUsersByIds(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid
             @NotNull
@@ -87,7 +87,7 @@ public class UserController {
     }
 
     @GetMapping("/me/sessions")
-    public List<UserSession> getMeSessions(
+    public @NotNull SessionListResponse getMeSessions(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(
@@ -112,7 +112,7 @@ public class UserController {
         + "are currently permitted to the admin.")
     @PermissionRequired(permissions = {Permission.CAN_VIEW_USER, Permission.CAN_MANAGE_USER_PUBLIC_INFO})
     @GetMapping("/view/{id}")
-    public UserAdminViewData getUserAdminViewData(
+    public @NotNull UserAdminViewData getUserAdminViewData(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("id") Long userId
     ) {

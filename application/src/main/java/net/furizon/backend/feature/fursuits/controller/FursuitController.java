@@ -125,6 +125,7 @@ public class FursuitController {
                         req.getName(),
                         req.getSpecies(),
                         req.getShowInFursuitCount(),
+                        req.getShowOwner(),
                         pretixInformation.getCurrentEvent(),
                         user
                 )
@@ -164,6 +165,7 @@ public class FursuitController {
             @Valid @NotNull @RequestParam("species") final String species,
             @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
             @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
+            @RequestParam("show-owner") @NotNull final Boolean showOwner,
             @RequestParam("delete-image") @NotNull final Boolean deleteImage,
             @RequestParam(value = "image", required = false) @jakarta.annotation.Nullable MultipartFile image
     ) {
@@ -174,6 +176,7 @@ public class FursuitController {
                         name,
                         species,
                         showInFursuitCount,
+                        showOwner,
                         pretixInformation.getCurrentEvent(),
                         user
                 )
@@ -239,6 +242,7 @@ public class FursuitController {
                         req.getBringToCurrentEvent(),
                         req.getShowInFursuitCount(),
                         req.getUserId(),
+                        req.getShowOwner(),
                         user,
                         pretixInformation
                 )
@@ -264,6 +268,7 @@ public class FursuitController {
         @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
         @RequestParam("user-id") @Nullable final Long userId,
+        @RequestParam("show-owner") @NotNull final Boolean showOwner,
         @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         FursuitData data = executor.execute(
@@ -274,6 +279,7 @@ public class FursuitController {
                         bringToCurrentEvent,
                         showInFursuitCount,
                         userId,
+                        showOwner,
                         user,
                         pretixInformation
                 )

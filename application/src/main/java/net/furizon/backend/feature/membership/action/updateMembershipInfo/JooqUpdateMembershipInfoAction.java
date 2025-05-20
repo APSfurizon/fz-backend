@@ -23,6 +23,8 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
                     .set(MEMBERSHIP_INFO.INFO_FIRST_NAME, personalUserInformation.getFirstName())
                     .set(MEMBERSHIP_INFO.INFO_LAST_NAME, personalUserInformation.getLastName())
                     .set(MEMBERSHIP_INFO.INFO_FISCAL_CODE, personalUserInformation.getFiscalCode())
+                    .set(MEMBERSHIP_INFO.INFO_DOCUMENT_SEX, personalUserInformation.getSex())
+                    .set(MEMBERSHIP_INFO.INFO_GENDER, personalUserInformation.getGender())
                     .set(MEMBERSHIP_INFO.INFO_BIRTH_CITY, personalUserInformation.getBirthCity())
                     .set(MEMBERSHIP_INFO.INFO_BIRTH_REGION, personalUserInformation.getBirthRegion())
                     .set(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY, personalUserInformation.getBirthCountry())
@@ -34,6 +36,7 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
                     .set(MEMBERSHIP_INFO.INFO_COUNTRY, personalUserInformation.getResidenceCountry())
                     .set(MEMBERSHIP_INFO.INFO_PHONE_PREFIX, personalUserInformation.getPrefixPhoneNumber())
                     .set(MEMBERSHIP_INFO.INFO_PHONE, personalUserInformation.getPhoneNumber())
+                    .set(MEMBERSHIP_INFO.INFO_ALLERGIES, personalUserInformation.getAllergies())
                     .set(MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID, event.getId())
                 .where(MEMBERSHIP_INFO.USER_ID.eq(userId))
         );

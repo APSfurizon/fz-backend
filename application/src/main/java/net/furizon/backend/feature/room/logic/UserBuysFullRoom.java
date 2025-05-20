@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.logic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
@@ -29,6 +30,7 @@ import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.usecase.RoomChecks;
+import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
@@ -1050,6 +1052,20 @@ public class UserBuysFullRoom implements RoomLogic {
         } finally {
             OrderController.resumeWebhook();
         }
+    }
+
+    @Override
+    public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
+        return roomFinder.getExtraDaysOfRoomOwner(userId, eventId);
+    }
+
+    @Override
+    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
+        List<UserDisplayDataWithExtraDays> guests = room.getGuests();
+        //Since the room extra days will depend on the owner and it's already set by the caller,
+        // we can just use it
+        ExtraDays ownerExtraDays = Objects.requireNonNull(room.getRoomExtraDays());
+        guests.forEach(g -> g.setExtraDays(ownerExtraDays));
     }
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {

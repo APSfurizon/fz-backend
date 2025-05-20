@@ -74,6 +74,7 @@ public class PretixConfig implements HttpConfig {
         @Nullable private OffsetDateTime editBookingEndTime;
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         @Nullable private OffsetDateTime publicBookingStartTime;
+        private boolean includeEarlyInDailyCount;
     }
 
     @Data

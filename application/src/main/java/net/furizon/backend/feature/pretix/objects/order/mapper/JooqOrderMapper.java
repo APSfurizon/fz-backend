@@ -50,6 +50,7 @@ public class JooqOrderMapper {
                 .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
                 .roomInternalName(record.get(ORDERS.ORDER_ROOM_INTERNAL_NAME))
                 .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))
+                .checkinSecret(record.get(ORDERS.ORDER_CHECKIN_SECRET))
                 .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
                 .buyerEmail(record.get(ORDERS.ORDER_BUYER_EMAIL))
                 .buyerPhone(record.get(ORDERS.ORDER_BUYER_PHONE))

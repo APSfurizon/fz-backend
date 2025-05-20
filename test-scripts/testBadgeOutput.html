@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        var txtLenElements = document.getElementsByClassName("txt-len");
+        for (var i = 0; i < txtLenElements.length; i++) {
+            var element = txtLenElements[i];
+            var text = element.innerText;
+            element.style.setProperty("--chars", text.length);
+        }
+        window.print();
+    </script>
+    <style>
+        :root {
+            --page-width: 56.90mm;
+            --page-height: 88.90mm;
+            --max-containable-text-width: calc(var(--page-width) * 0.70)
+        }
+
+        .name-container {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 1.8em;
+            width: 100%;
+            overflow: hidden;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .text-fit {
+            font-family: 'main-text-font';
+            font-size: 0.8em;
+            word-wrap: break-word;
+            max-width: var(--max-containable-text-width);
+            font-size: max(min(calc(var(--max-containable-text-width) / (var(--chars) * 0.85)), 1.7em), 0.8em);
+            text-align: center;
+            display: block;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            margin: 0;
+            padding: 0;
+        }
+        * {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            color: #000000ff;
+        }
+        .page {
+            position: relative;
+            width: 56.90mm;
+            min-height: 88.90mm;
+        }
+        @page {
+            size: 56.90mm 88.90mm;
+            margin: 0;
+        }
+        @media print {
+            html, body {
+                width: 56.90mm;
+                height: 88.90mm;
+            }
+            .page {
+                margin: 0;
+                border: initial;
+                border-radius: initial;
+                width: initial;
+                min-height: initial;
+                box-shadow: initial;
+                background: initial;
+                page-break-after: always;
+            }
+        }
+
+
+
+
+
+
+        .badge-level-staff-main {
+            background-image: url('https://fzbe.furizon.net/static/badge-gen/mainStaff.png');
+        }
+        .badge-level-staff-junior {
+            background-image: url('https://fzbe.furizon.net/static/badge-gen/juniorStaff.png');
+        }
+        .badge-level-sponsor-normal {
+            background-image: url('https://fzbe.furizon.net/static/badge-gen/sponsor.png');
+        }
+        .badge-level-sponsor-super {
+            background-image: url('https://fzbe.furizon.net/static/badge-gen/sponsorSuper.png');
+        }
+        .badge-level-normal {
+            background-image: url('https://fzbe.furizon.net/static/badge-gen/attendee.png');
+        }
+
+
+        @font-face {
+            font-family: 'main-text-font';
+            font-style: normal;
+            font-weight: 400;
+            src: url('https://fzbe.furizon.net/static/badge-gen/RoundedEleganceRegular.otf') format('opentype');
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="page">
+    <p id="name" class="txt-len name-container" style="top: 56.40mm; z-index: 289; --chars: 12">
+        <span class="text-fit" id="nameValue">Pisnello</span>
+    </p>
+
+    <p id="number" class="txt-len" style="top: 64mm; position: absolute; width: 100%; height: 3.30mm; z-index: 288; text-align: center;">
+        <span id="numberValue" style="font-family: 'main-text-font'; font-size: 4.94mm; color: #000000ff; ">-1</span>
+    </p>
+
+    <div id="background" class="badge-level-normal" style="left: 0.00mm; top: 0.00mm; position: absolute; width: 56.90mm; height: 88.90mm; z-index: 287; background-repeat: no-repeat; background-size: contain"></div>
+
+    <div id="flag" style="left: 22.44mm; top: 53.26mm; position: absolute; width: 12.11mm; height: 9.06mm; z-index: 282; background-repeat: no-repeat; background-size: contain; background-image: url('https://fzbe.furizon.net/static/flags/IT.svg'); "></div>
+
+    <div id="propic" style="left: 6.77mm; top: 3.47mm; position: absolute; width: 43.35mm; height: 43.35mm; z-index: 281; background-repeat: no-repeat; background-size: contain; background-image: url('static\images\badges\1\3f4204ea-7f43-4f5e-ba52-d1e955ab4a70.webp'); "></div>
+
+</div>
+
+</body>
+</html>

@@ -14,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 public class HotelExportRowMapper {
     public static HotelExportRow map(Record record, Orders roomOwnerOrder, PretixInformation pretixInformation) {
         String region = record.get(MEMBERSHIP_INFO.INFO_REGION);
+        String birthRegion = record.get(MEMBERSHIP_INFO.INFO_BIRTH_REGION);
         return HotelExportRow.builder()
                 .roomTypeName(pretixInformation.getRoomNamesFromRoomPretixItemId(
                     record.get(roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID)).entrySet().iterator().next().getValue()
@@ -22,6 +23,11 @@ public class HotelExportRowMapper {
                 .firstName(record.get(MEMBERSHIP_INFO.INFO_FIRST_NAME))
                 .lastName(record.get(MEMBERSHIP_INFO.INFO_LAST_NAME))
                 .birthday(record.get(MEMBERSHIP_INFO.INFO_BIRTHDAY))
+                .birthLocation(
+                    record.get(MEMBERSHIP_INFO.INFO_BIRTH_CITY) + " "
+                    + (birthRegion == null ? "" : "(" + birthRegion + ") ")
+                    + "- " + record.get(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY)
+                )
                 .fullResidenceAddress(
                     record.get(MEMBERSHIP_INFO.INFO_ADDRESS) + " - "
                     + record.get(MEMBERSHIP_INFO.INFO_CITY)

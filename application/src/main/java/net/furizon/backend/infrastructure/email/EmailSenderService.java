@@ -52,7 +52,7 @@ public class EmailSenderService implements EmailSender {
     public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull String subject,
                            @NotNull String templateName, MailVarPair... vars) {
 
-        List<Long> users = permissionFinder.getUsersWithRole(roleInternalName);
+        List<Long> users = permissionFinder.getUsersWithRoleInternalName(roleInternalName);
         return prepareForUsers(users, subject, templateName, vars);
     }
 

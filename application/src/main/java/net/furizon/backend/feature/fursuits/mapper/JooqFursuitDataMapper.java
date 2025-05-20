@@ -9,21 +9,22 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 
 public class JooqFursuitDataMapper {
     @NotNull
-    public static FursuitData mapWithOrder(org.jooq.Record record) {
-        return map(record, true);
+    public static FursuitData mapWithOrder(Record record, boolean isOwner) {
+        return map(record, true, isOwner);
     }
     @NotNull
-    public static FursuitData map(Record record) {
-        return map(record, false);
+    public static FursuitData map(Record record, boolean isOwner) {
+        return map(record, false, isOwner);
     }
 
     @NotNull
-    public static FursuitData map(Record record, boolean mapOrder) {
+    public static FursuitData map(Record record, boolean mapOrder, boolean isOwner) {
         return FursuitData.builder()
                 .bringingToEvent(mapOrder ? record.get(ORDERS.ID) != null : false)
                 .ownerId(record.get(FURSUITS.USER_ID))
                 .showInFursuitCount(record.get(FURSUITS.SHOW_IN_FURSUITCOUNT))
-                .fursuit(JooqFursuitDisplayMapper.map(record, mapOrder))
+                .showOwner(record.get(FURSUITS.SHOW_OWNER))
+                .fursuit(JooqFursuitDisplayMapper.map(record, mapOrder, isOwner))
                 .build();
     }
 }

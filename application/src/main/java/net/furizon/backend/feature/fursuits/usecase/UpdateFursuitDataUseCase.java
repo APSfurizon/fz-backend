@@ -27,14 +27,15 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
 
         //This currently doesn't support admins
 
-        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event);
+        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event, true);
         fursuitChecks.assertUserHasPermissionOnFursuit(userId, fursuit);
 
         boolean res = updateFursuitAction.invoke(
             fursuitId,
             input.name,
             input.species,
-            input.showInFursuitCount
+            input.showInFursuitCount,
+            input.showOwner
         );
 
         if (res) {
@@ -42,6 +43,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
             f.setName(input.name);
             f.setSpecies(input.species);
             fursuit.setShowInFursuitCount(input.showInFursuitCount);
+            fursuit.setShowOwner(input.showOwner);
         }
         return fursuit;
     }
@@ -51,6 +53,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
             @NotNull String name,
             @NotNull String species,
             boolean showInFursuitCount,
+            boolean showOwner,
             @NotNull Event event,
             @NotNull FurizonUser user
     ) {}

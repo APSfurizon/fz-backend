@@ -25,8 +25,8 @@ public class FursuitChecks {
     @NotNull private final FursuitConfig fursuitConfig;
 
 
-    public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event) {
-        FursuitData data = fursuitFinder.getFursuit(fursuitId, event);
+    public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event, boolean isOwner) {
+        FursuitData data = fursuitFinder.getFursuit(fursuitId, event, isOwner);
         assertFursuitExists(data);
         return data;
     }

@@ -60,7 +60,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
-        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation);
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
         boolean canExchange = roomEditingTimeAllowed && ordersNo > 0
                 && (info == null || info.getRoomOwner().getUserId() == userId)
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;

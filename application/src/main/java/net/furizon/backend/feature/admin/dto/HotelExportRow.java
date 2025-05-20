@@ -16,6 +16,7 @@ public class HotelExportRow {
     @NotNull private final String firstName;
     @NotNull private final String lastName;
     @Past @NotNull private final LocalDate birthday;
+    @NotNull private final String birthLocation;
     @NotNull private final String fullResidenceAddress;
     @NotNull private final String email;
     @NotNull private final String phone;

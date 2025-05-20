@@ -7,6 +7,8 @@ import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -34,6 +36,7 @@ public class JooqOrderFinder implements OrderFinder {
     @NotNull private final SqlQuery query;
 
     @NotNull private final FursuitConfig fursuitConfig;
+    @NotNull private final PretixConfig pretixConfig;
 
     @NotNull private final JooqOrderMapper orderMapper;
 
@@ -158,12 +161,13 @@ public class JooqOrderFinder implements OrderFinder {
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
+                    .checkinSecret(order.getCheckinSecret())
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
                     .isDailyTicket(isDaily);
 
-            OffsetDateTime from = event.getDateFrom();
+            OffsetDateTime from = event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
             if (isDaily && from != null) {
                 orderDataBuilder = orderDataBuilder.dailyDays(
                         order.getDailyDays().stream().map(
@@ -244,6 +248,18 @@ public class JooqOrderFinder implements OrderFinder {
         ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
     }
 
+    @Override
+    public @Nullable ExtraDays getExtraDaysOfUser(long userId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_EXTRA_DAYS_TYPE)
+            .from(ORDERS)
+            .where(
+                ORDERS.USER_ID.eq(userId)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+        ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
+    }
+
     private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,
@@ -256,6 +272,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
                         ORDERS.ORDER_ROOM_INTERNAL_NAME,
                         ORDERS.ORDER_SECRET,
+                        ORDERS.ORDER_CHECKIN_SECRET,
                         ORDERS.HAS_MEMBERSHIP,
                         ORDERS.ORDER_BUYER_EMAIL,
                         ORDERS.ORDER_BUYER_PHONE,

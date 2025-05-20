@@ -15,4 +15,5 @@ public class CapabilitiesResponse {
     private final boolean canViewUsers;
     private final boolean canExportHotelList;
     private final boolean canExportBadges;
+    private final boolean canRemindRoomsNotFull;
 }

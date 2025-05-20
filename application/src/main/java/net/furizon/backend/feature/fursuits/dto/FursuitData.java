@@ -11,5 +11,7 @@ public class FursuitData {
 
     private boolean showInFursuitCount;
 
+    private boolean showOwner;
+
     private final FursuitDisplayData fursuit;
 }

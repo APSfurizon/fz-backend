@@ -11,6 +11,8 @@ public enum EmailVars {
     ROOM_OWNER_FURSONA_NAME("ownerFursonaName"),
     ROOM_NAME("roomName"),
     ROOM_TYPE_NAME("roomTypeName"),
+    ROOM_CAPACITY("roomCapacity"),
+    ROOM_CURRENT_GUEST_NO("roomGuestNo"),
     EXCHANGE_ACTION_TEXT("exchangeActionText"),
     SANITY_CHECK_REASON("sanityCheckReason"),
     EVENT_NAME("eventName"),

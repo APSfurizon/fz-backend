@@ -11,7 +11,7 @@ import java.util.List;
 public interface FursuitFinder {
     @NotNull List<FursuitData> getFursuitsOfUser(long userId, @Nullable Event event);
 
-    @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event);
+    @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event, boolean isOwner);
 
     @NotNull List<FursuitData> getFursuitsWithoutPropic(@NotNull Event event);
 

@@ -35,6 +35,14 @@ public class PersonalUserInformation {
     private final String fiscalCode;
 
     @NotNull
+    @Pattern(regexp = "^[MmFf]$")
+    private final String sex;
+
+    @Nullable
+    @Size(min = 4, max = 64)
+    private final String gender;
+
+    @NotNull
     @NotEmpty
     @Size(min = 2)
     private final String birthCity;
