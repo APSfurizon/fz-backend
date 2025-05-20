@@ -8,7 +8,6 @@ import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +29,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
-            long userId = input.user.getUserId();
+            long userId = input.userId;
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
                 fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
@@ -55,7 +54,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull BadgeType type,
             @Nullable Long fursuitId
     ) {}

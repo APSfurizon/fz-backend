@@ -86,6 +86,15 @@ public class JooqOrderFinder implements OrderFinder {
     }
 
     @Override
+    public @Nullable Order findOrderById(long orderId, @NotNull PretixInformation pretixService) {
+        return query.fetchFirst(
+            selectFrom()
+            .where(ORDERS.ID.eq(orderId))
+            .limit(1)
+        ).mapOrNull(e -> orderMapper.map(e, pretixService));
+    }
+
+    @Override
     public int countOrdersOfUserOnEvent(long userId, @NotNull Event event) {
         return query.count(
             PostgresDSL.select(ORDERS.ID)

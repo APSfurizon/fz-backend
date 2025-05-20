@@ -13,7 +13,6 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -36,12 +35,14 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
 
     @Override
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         Event event = input.event;
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
-        boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
+        boolean editingTimeAllowed = input.ignoreEditingTime
+                                  || endRoomEditingTime == null
+                                  || endRoomEditingTime.isAfter(OffsetDateTime.now());
 
         boolean isOwner = true; //By defaulting it on true, we can upgrade room also if we don't have a room
         if (info != null) {
@@ -100,8 +101,9 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            boolean ignoreEditingTime
     ) {}
 }

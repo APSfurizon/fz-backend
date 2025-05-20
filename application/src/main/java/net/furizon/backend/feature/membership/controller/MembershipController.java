@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.dto.AddMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.DeleteMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.GetMembershipCardsResponse;
@@ -25,12 +26,14 @@ import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/membership")
 @RequiredArgsConstructor
@@ -70,9 +73,30 @@ public class MembershipController {
         return executor.execute(
                 UpdatePersonalUserInformationUseCase.class,
                 new UpdatePersonalUserInformationUseCase.Input(
-                    user,
+                    user.getUserId(),
                     personalUserInformation,
                     pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Update the personal user information of the specified user", description =
+        "This method is intended for admin use only. It also mark the information "
+        + "as updated for the current event")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PostMapping("/update-personal-user-information/{userId}")
+    public boolean updateInfoOfUser(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @PathVariable @Valid @NotNull final Long userId,
+            @NotNull @Valid @RequestBody final PersonalUserInformation personalUserInformation
+    ) {
+        log.info("User {} is updating Personal User information of user {}", user.getUserId(), userId);
+        return executor.execute(
+                UpdatePersonalUserInformationUseCase.class,
+                new UpdatePersonalUserInformationUseCase.Input(
+                        userId,
+                        personalUserInformation,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -96,11 +120,35 @@ public class MembershipController {
         return executor.execute(
                 MarkPersonalUserInformationAsUpdatedUseCase.class,
                 new MarkPersonalUserInformationAsUpdatedUseCase.Input(
-                        user,
+                        user.getUserId(),
                         pretixInformation.getCurrentEvent()
                 )
         );
     }
+
+    @Operation(summary = "Resets the last information event updated for the specified user", description =
+        "This method is intended for admin use only. "
+        + "Since it's critical to keep the personal user information updated for both "
+        + "insurance and legal reasons, each different event we prompt the user to update "
+        + "their information, or confirm that everything's still ok. This method is used to confirm "
+        + "that the information are ok, and resets the last event where the personal user information "
+        + "has been updated to the current event")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PostMapping("/mark-persona-user-information-as-updated/{userId}")
+    public boolean markInfoAsUpdatedOfUser(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @PathVariable @Valid @NotNull final Long userId
+    ) {
+        log.info("User {} is marking the personal user information of user {} as updated", user.getUserId(), userId);
+        return executor.execute(
+                MarkPersonalUserInformationAsUpdatedUseCase.class,
+                new MarkPersonalUserInformationAsUpdatedUseCase.Input(
+                        userId,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
 
 
     @Operation(summary = "Add a membership card to an user for the current event", description =

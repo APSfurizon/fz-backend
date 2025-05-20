@@ -40,7 +40,9 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         long exchangeId = input.exchangeId;
         ExchangeConfirmationStatus status = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeId);
         checks.assertExchangeExist(status, exchangeId);
-        checks.assertUserHasRightsOnExchange(input.user.getUserId(), status);
+        if (!input.internalRequest) {
+            checks.assertUserHasRightsOnExchange(input.user.getUserId(), status);
+        }
         ExchangeAction action = status.getAction();
 
         OrderDataResponse orderData = null;
@@ -67,7 +69,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                         orderFinder.getOrderDataResponseFromUserEvent(targetUserId, event, pretixInformation)
                 );
                 boolean isSourceUser = input.user.getUserId() == status.getSourceUserId();
-                if (status.isTargetConfirmed() || !isSourceUser) {
+                if (status.isTargetConfirmed() || !isSourceUser || input.internalRequest) {
                     targetRoomData = targetResp.getRoom();
                     targetExtraDays = targetResp.getExtraDays();
                 } else {
@@ -102,6 +104,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
     public record Input(
             @NotNull FurizonUser user,
             @NotNull Long exchangeId,
-            @NotNull PretixInformation pretixInformation
+            @NotNull PretixInformation pretixInformation,
+            boolean internalRequest
     ) {}
 }

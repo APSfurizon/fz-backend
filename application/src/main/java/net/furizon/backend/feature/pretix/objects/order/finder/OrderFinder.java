@@ -23,6 +23,9 @@ public interface OrderFinder {
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
 
+    @Nullable
+    Order findOrderById(long orderId, @NotNull PretixInformation pretixService);
+
     @NotNull
     List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService);
 

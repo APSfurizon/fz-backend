@@ -134,7 +134,7 @@ public class FursuitController {
             executor.execute(
                 BringFursuitToEventUseCase.class,
                 new BringFursuitToEventUseCase.Input(
-                    new BringFursuitToEventRequest(req.getBringToCurrentEvent(), user.getUserId()),
+                    new BringFursuitToEventRequest(req.getBringToCurrentEvent()),
                     fursuitId,
                     user,
                     pretixInformation
@@ -185,7 +185,7 @@ public class FursuitController {
             executor.execute(
                     BringFursuitToEventUseCase.class,
                     new BringFursuitToEventUseCase.Input(
-                            new BringFursuitToEventRequest(bringToCurrentEvent, user.getUserId()),
+                            new BringFursuitToEventRequest(bringToCurrentEvent),
                             fursuitId,
                             user,
                             pretixInformation
@@ -196,7 +196,7 @@ public class FursuitController {
             executor.execute(
                     DeleteBadgeUseCase.class,
                     new DeleteBadgeUseCase.Input(
-                            user,
+                            user.getUserId(),
                             BadgeType.BADGE_FURSUIT,
                             fursuitId
                     )
@@ -242,6 +242,7 @@ public class FursuitController {
                         req.getBringToCurrentEvent(),
                         req.getShowInFursuitCount(),
                         req.getShowOwner(),
+                        req.getUserId(),
                         user,
                         pretixInformation
                 )
@@ -267,6 +268,7 @@ public class FursuitController {
         @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
         @RequestParam("show-owner") @NotNull final Boolean showOwner,
+        @RequestParam("user-id") @Nullable final Long userId,
         @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         FursuitData data = executor.execute(
@@ -277,6 +279,7 @@ public class FursuitController {
                         bringToCurrentEvent,
                         showInFursuitCount,
                         showOwner,
+                        userId,
                         user,
                         pretixInformation
                 )

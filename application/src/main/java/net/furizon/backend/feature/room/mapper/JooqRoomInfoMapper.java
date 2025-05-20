@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
+import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.ROOMS;
 
 public class JooqRoomInfoMapper {
@@ -25,6 +26,7 @@ public class JooqRoomInfoMapper {
                 .roomData(JooqRoomDataMapper.map(record, pretixInformation))
                 .showInNosecount(record.get(ROOMS.SHOW_IN_NOSECOUNT))
                 .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
+                .eventId(record.get(ORDERS.EVENT_ID))
             .build();
     }
 }

@@ -2,6 +2,7 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
@@ -43,7 +44,9 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     @Override
     public @NotNull ListRoomPricesAvailabilityResponse executor(
             @NotNull ListRoomWithPricesAndQuotaUseCase.Input input) {
-        long userId = input.user.getUserId();
+        Long reqUserId = input.userIdRequest == null ? null : input.userIdRequest.getUserId();
+        long userId = generalChecks.getUserIdAndAssertPermission(reqUserId, input.user);
+        boolean disableUnupgradeFilter = reqUserId != null;
         log.debug("User {} is obtaining room quota and prices", userId);
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
@@ -107,7 +110,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (Objects.equals(itemId, pretixRoomItemId)) {
                 return null;
             }
-            //Check for room capacity > number of people already in room
+            //Check for room capacity >= number of people already in room
             HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(itemId);
             if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
@@ -136,7 +139,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 }
                 long totalPrice = roomPrice + extraDaysPrice;
 
-                if (totalPrice >= totalPaid) {
+                if (totalPrice >= totalPaid || disableUnupgradeFilter) {
                     //Fetch availability
                     PretixQuotaAvailability quota = getSmallestQuota(
                             pretixInformation, itemId, earlyItemId, lateItemId
@@ -185,7 +188,8 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     }
 
     public record Input(
-        FurizonUser user,
-        PretixInformation pretixInformation
+        @NotNull FurizonUser user,
+        @Nullable UserIdRequest userIdRequest,
+        @NotNull PretixInformation pretixInformation
     ) {}
 }

@@ -7,7 +7,6 @@ import net.furizon.backend.feature.room.action.deleteExchangeStatusObjAction.Del
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -26,7 +25,7 @@ public class UpdateExchangeStatusUseCase implements
     public @NotNull ExchangeConfirmationStatus executor(@NotNull Input input) {
         long exchangeId = input.req.getExchangeId();
         boolean toConfirm = input.req.getConfirm();
-        long userId = input.user.getUserId();
+        long userId = input.userId;
         log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
                 userId, exchangeId, toConfirm);
 
@@ -61,7 +60,7 @@ public class UpdateExchangeStatusUseCase implements
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull UpdateExchangeStatusRequest req
     ) {}
 }
