@@ -18,7 +18,7 @@ public interface OrderFinder {
     @NotNull Set<Long> findOrderIdsForEvent(@NotNull Event event);
 
     @Nullable
-    Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event, @NotNull PretixInformation pretixService);
+    Order findOrderByCodeEvent(@NotNull String code, long eventId, @NotNull PretixInformation pretixService);
 
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);

@@ -197,12 +197,14 @@ public class OrdersWorkflowController {
     @GetMapping("/generate-pretix-control-order-link")
     public LinkResponse generatePretixControlOrderLink(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @Valid @NotNull @RequestParam("id") final Long orderId
+            @Valid @NotNull @RequestParam("event-id") final Long eventId,
+            @Valid @NotNull @RequestParam("order-code") final String orderCode
     ) {
         return executor.execute(
             GeneratePretixControlOrderLinkUseCase.class,
                 new GeneratePretixControlOrderLinkUseCase.Input(
-                        orderId,
+                        eventId,
+                        orderCode,
                         pretixService
                 )
         );

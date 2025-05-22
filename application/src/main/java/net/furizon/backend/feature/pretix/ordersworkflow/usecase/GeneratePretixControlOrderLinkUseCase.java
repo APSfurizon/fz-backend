@@ -21,7 +21,11 @@ public class GeneratePretixControlOrderLinkUseCase
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixControlOrderLinkUseCase.Input input) {
-        Order order = orderFinder.findOrderById(input.orderId, input.pretixInformation);
+        Order order = orderFinder.findOrderByCodeEvent(
+                input.orderCode,
+                input.eventId,
+                input.pretixInformation
+        );
         if (order == null) {
             throw new ApiException("Order not found", GeneralResponseCodes.ORDER_NOT_FOUND);
         }
@@ -29,7 +33,8 @@ public class GeneratePretixControlOrderLinkUseCase
     }
 
     public record Input(
-            long orderId,
+            long eventId,
+            @NotNull String orderCode,
             @NotNull PretixInformation pretixInformation
     ) {}
 }

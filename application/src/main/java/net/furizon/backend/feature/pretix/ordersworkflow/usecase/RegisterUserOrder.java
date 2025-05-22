@@ -60,7 +60,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 Objects.requireNonNull(input.secret);
             }
 
-            Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
+            Order order = orderFinder.findOrderByCodeEvent(input.code, event.getId(), pretixService);
             if (order == null) {
                 //If order is not in the db, try to fetch it
                 var eventInfo = event.getOrganizerAndEventPair();
