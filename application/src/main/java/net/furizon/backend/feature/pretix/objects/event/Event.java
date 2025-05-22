@@ -78,6 +78,14 @@ public class Event {
         return slug + "@" + id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Event e)) {
+            return false;
+        }
+        return e.id == id;
+    }
+
     public short getMembershipYear(MembershipYearUtils membershipYearUtils) {
         OffsetDateTime from = dateFrom;
         if (from == null) {

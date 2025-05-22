@@ -6,7 +6,6 @@ import net.furizon.backend.feature.membership.action.updateMembershipInfo.Update
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.membership.validation.PersonalUserInformationValidator;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -21,11 +20,11 @@ public class UpdatePersonalUserInformationUseCase implements
 
     @Override
     public @NotNull Boolean executor(@NotNull UpdatePersonalUserInformationUseCase.Input input) {
-        log.info("User {} is updating his personal infos", input.user.getUserId());
+        log.info("User {} is updating his personal infos", input.userId);
         validator.validate(input.info);
-        updateMembershipInfoAction.invoke(input.user.getUserId(), input.info, input.event);
+        updateMembershipInfoAction.invoke(input.userId, input.info, input.event);
         return true;
     }
 
-    public record Input(@NotNull FurizonUser user, @NotNull PersonalUserInformation info, @NotNull Event event){}
+    public record Input(long userId, @NotNull PersonalUserInformation info, @NotNull Event event){}
 }
