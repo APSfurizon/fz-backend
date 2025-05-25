@@ -15,6 +15,7 @@ public class RoomInfoResponse {
     private final RoomInfo currentRoomInfo;
 
     private final boolean hasOrder;
+    private final boolean editingAllowed;
     private final boolean canCreateRoom;
     private final boolean buyOrUpgradeRoomSupported;
     private final boolean canBuyOrUpgradeRoom;
