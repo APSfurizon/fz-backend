@@ -11,7 +11,6 @@ public enum RoomErrorCodes {
     GUEST_NOT_FOUND, //Unable to find the specified guest
     GUEST_ALREADY_CONFIRMED, //We expected that the guest had not confirmed yet, but instead it has
     GUEST_NOT_CONFIRMED, //Guest hasn't confirmed yet
-    EDIT_TIMEFRAME_ENDED, //You tried editing a room, but the allowed editing time is passed
     BUY_ROOM_SAME_ROOM, //You tried upgrading with the same room type you had already bought
     BUY_ROOM_NEW_ROOM_COSTS_LESS, //An user has tried purchasing a room which costs less than what he originally paid
     //An user has tried purchasing a room which less capacity than the number members who are already in the room

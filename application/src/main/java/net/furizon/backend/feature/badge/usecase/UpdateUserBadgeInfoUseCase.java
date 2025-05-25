@@ -3,6 +3,8 @@ package net.furizon.backend.feature.badge.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.action.updateUserBadge.UpdateUserBadgeAction;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -16,9 +18,11 @@ import org.springframework.stereotype.Component;
 public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUseCase.Input, Boolean> {
     @NotNull private final UpdateUserBadgeAction action;
     @NotNull private final GeneralChecks checks;
+    @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
+        checks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
         long requesterUserId = input.user.getUserId();
         UpdateUserBadgeRequest req = input.req;
         long userId = checks.getUserIdAndAssertPermission(requesterUserId, input.user);
@@ -34,6 +38,7 @@ public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUs
 
     public record Input(
             @NotNull FurizonUser user,
-            @NotNull UpdateUserBadgeRequest req
+            @NotNull UpdateUserBadgeRequest req,
+            @NotNull Event event
     ) {}
 }

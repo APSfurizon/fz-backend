@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -35,6 +36,23 @@ public class GeneralChecks {
             }
         }
         return id;
+    }
+
+    public boolean isTimeframeForEventOk(@Nullable OffsetDateTime date, @Nullable Event event) {
+        if (date == null) {
+            return true;
+        }
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime eventEnd = event == null ? null : event.getDateTo();
+        if (now.isAfter(date) && (eventEnd == null || now.isBefore(eventEnd))) {
+            return false;
+        }
+        return true;
+    }
+    public void assertTimeframeForEventNotPassed(@Nullable OffsetDateTime date, @Nullable Event event) {
+        if (!isTimeframeForEventOk(date, event)) {
+            throw new ApiException("Editing timeframe has ended", GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
+        }
     }
 
 

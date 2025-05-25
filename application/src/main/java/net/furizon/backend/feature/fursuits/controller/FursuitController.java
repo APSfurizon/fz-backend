@@ -71,7 +71,8 @@ public class FursuitController {
                 DeleteFursuitUseCase.class,
                 new DeleteFursuitUseCase.Input(
                         user,
-                        fursuitId
+                        fursuitId,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -84,7 +85,9 @@ public class FursuitController {
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. "
-        + "Using the field `userId` an admin must specify the owner of the fursuit")
+        + "Using the field `userId` an admin must specify the owner of the fursuit."
+        + "Editing this field is not permitted after the badge editing deadline. To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/{fursuitId}/bringToEvent")
     public boolean bringFursuitToEvent(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -111,7 +114,9 @@ public class FursuitController {
         + "To check whenever or not an user can bring another fursuit to the event, check "
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
-        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
+        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. "
+        + "Editing the field `bringToCurrentEvent` is not permitted after the badge editing deadline. To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/{fursuitId}")
     public @NotNull FursuitData updateFursuit(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -154,7 +159,9 @@ public class FursuitController {
         + "To check whenever or not an user can bring another fursuit to the event, check "
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
-        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. ")
+        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. "
+        + "Editing the field `bringToCurrentEvent` is not permitted after the badge editing deadline. To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/{fursuitId}/update-with-image")
     public @NotNull FursuitData updateFursuitWithImage(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -198,7 +205,8 @@ public class FursuitController {
                     new DeleteBadgeUseCase.Input(
                             user.getUserId(),
                             BadgeType.BADGE_FURSUIT,
-                            fursuitId
+                            fursuitId,
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(null);
@@ -210,7 +218,8 @@ public class FursuitController {
                             user,
                             image,
                             BadgeType.BADGE_FURSUIT,
-                            fursuitId
+                            fursuitId,
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(media);
@@ -228,7 +237,10 @@ public class FursuitController {
         + "To check whenever or not an user can bring another fursuit to the event, check "
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
-        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
+        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors."
+        + "Creating a fursuit with the field `bringToCurrentEvent` is not permitted after the badge editing deadline."
+        + "To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/")
     public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -257,7 +269,9 @@ public class FursuitController {
         + "To check whenever or not an user can bring another fursuit to the event, check "
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
-        + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors")
+        + "Creating a fursuit with the field `bringToCurrentEvent` is not permitted after the badge editing deadline."
+        + "To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/add-with-image")
     public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
@@ -291,7 +305,8 @@ public class FursuitController {
                             user,
                             image,
                             BadgeType.BADGE_FURSUIT,
-                            data.getFursuit().getId()
+                            data.getFursuit().getId(),
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(media);

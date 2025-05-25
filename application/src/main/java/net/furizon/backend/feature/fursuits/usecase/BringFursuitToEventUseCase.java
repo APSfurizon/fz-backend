@@ -7,6 +7,7 @@ import net.furizon.backend.feature.fursuits.action.bringFursuitToEvent.UpdateBri
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -21,11 +22,15 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
     @NotNull private final UpdateBringFursuitToEventAction updateBringFursuitToEventAction;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitChecks fursuitChecks;
+    @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull BringFursuitToEventUseCase.Input input) {
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
+
+        // We cannot allow the editing of bringFursuitToEvent after the event has ended
+        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), null);
 
         long userId = input.user.getUserId();
         log.info("User {} is setting bringToCurrentEvent = {} on fursuit {}",

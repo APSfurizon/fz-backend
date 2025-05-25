@@ -80,7 +80,9 @@ public interface RoomFinder {
 
     @NotNull List<JooqRoomNotFullRow> getNotFullRooms(long eventId, @NotNull PretixInformation pretixInformation);
 
-    @NotNull List<HotelExportRow> exportHotel(long eventId, PretixInformation pretixInformation);
+    @NotNull List<HotelExportRow> exportHotel(long eventId,
+                                              @NotNull RoomLogic roomLogic,
+                                              @NotNull PretixInformation pretixInformation);
 
     @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId);
 }

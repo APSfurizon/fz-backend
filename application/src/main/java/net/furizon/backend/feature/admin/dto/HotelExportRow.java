@@ -3,6 +3,7 @@ package net.furizon.backend.feature.admin.dto;
 import jakarta.validation.constraints.Past;
 import lombok.Builder;
 import lombok.Data;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,7 @@ public class HotelExportRow {
     @NotNull private final String userName;
     @NotNull private final String orderCode;
     @NotNull private final String roomOwnerOrderCode;
+    @NotNull private final ExtraDays extraDays;
 
     private boolean requiresAttention;
     @Nullable private String comment;

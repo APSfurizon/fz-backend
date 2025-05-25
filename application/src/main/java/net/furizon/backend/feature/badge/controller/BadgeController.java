@@ -56,7 +56,8 @@ public class BadgeController {
                 user,
                 image,
                 BadgeType.BADGE_USER,
-                null
+                null,
+                pretixInformation.getCurrentEvent()
             )
         );
     }
@@ -105,7 +106,8 @@ public class BadgeController {
                 user,
                 image,
                 BadgeType.BADGE_FURSUIT,
-                fursuitId
+                fursuitId,
+                pretixInformation.getCurrentEvent()
             )
         );
     }
@@ -137,7 +139,8 @@ public class BadgeController {
                 new DeleteBadgeUseCase.Input(
                         userId,
                         BadgeType.BADGE_USER,
-                        null
+                        null,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -152,7 +155,8 @@ public class BadgeController {
                 new DeleteBadgeUseCase.Input(
                         user.getUserId(),
                         BadgeType.BADGE_FURSUIT,
-                        fursuitId
+                        fursuitId,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -162,8 +166,10 @@ public class BadgeController {
         + "further changes won't be on the actual physical badge; "
         + "current user data, so its propic, fursona name, etc; "
         + "how many fursuits the user can 'legally' bring to the event EG "
-        + "how many fursuits he has bought + default fursuit no;"
-        + "full list of fursuits the user has + if the user has marked that fursuit to be brought to the current event")
+        + "how many fursuits he has bought + default fursuit no; full list of fursuits the user has"
+        + " + if the user has marked that fursuit to be brought to the current event. "
+        + "If `allowedModifications` is set to false, the frontend should prevent the user from performing ANY "
+        + "actions on both badge information (EG fursona name, locale), badge propic and all fursuits interactions")
     @GetMapping("/")
     public @NotNull FullInfoBadgeResponse getBadge(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
@@ -190,7 +196,8 @@ public class BadgeController {
                 UpdateUserBadgeInfoUseCase.class,
                 new UpdateUserBadgeInfoUseCase.Input(
                         user,
-                        req
+                        req,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }

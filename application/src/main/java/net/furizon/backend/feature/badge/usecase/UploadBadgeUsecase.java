@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.setBadge.SetFursuitBadgeAction;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
@@ -18,6 +19,7 @@ import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.media.action.StoreMediaOnDiskAction;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +37,7 @@ import java.util.Objects;
 public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, MediaResponse> {
 
     @NotNull private final BadgeConfig badgeConfig;
+    @NotNull private final GeneralChecks checks;
 
     @NotNull private final UploadUserBadgeValidator validator;
 
@@ -51,6 +54,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
     @Transactional
     public @NotNull MediaResponse executor(@NotNull Input input) {
         try {
+            checks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
             long userId = input.user.getUserId();
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
@@ -111,6 +115,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
             @NotNull FurizonUser user,
             @NotNull MultipartFile image,
             @NotNull BadgeType type,
-            @Nullable Long fursuitId
+            @Nullable Long fursuitId,
+            @NotNull Event event
     ) {}
 }

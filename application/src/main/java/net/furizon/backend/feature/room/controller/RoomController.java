@@ -423,7 +423,9 @@ public class RoomController {
 
     @Operation(summary = "Gets the current user's room status and information", description =
             "This method returns various information about the status of the accommodation of the user."
-            + "Please read the other documentation of this controller to better understand the various fields")
+            + "Please read the other documentation of this controller to better understand the various fields. "
+            + "If `allowedModifications` is set to false, the frontend should prevent the user to perform any kind of "
+            + "actions on the room")
     @GetMapping("/info")
     @NotNull
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {

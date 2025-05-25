@@ -509,7 +509,9 @@ public class JooqRoomFinder implements RoomFinder {
     }
 
     @Override
-    public @NotNull List<HotelExportRow> exportHotel(long eventId, PretixInformation pretixInformation) {
+    public @NotNull List<HotelExportRow> exportHotel(long eventId,
+                                                     @NotNull RoomLogic roomLogic,
+                                                     @NotNull PretixInformation pretixInformation) {
         Orders roomOwnerOrder = ORDERS.as("roomOwnerOrder");
         return query.fetch(
             PostgresDSL.select(
@@ -559,7 +561,13 @@ public class JooqRoomFinder implements RoomFinder {
                 .and(roomOwnerOrder.EVENT_ID.eq(eventId))
             )
             .orderBy(ROOMS.ROOM_ID, USERS.USER_ID)
-        ).stream().map(e -> HotelExportRowMapper.map(e, roomOwnerOrder, pretixInformation)).toList();
+        ).stream().map(e -> HotelExportRowMapper.map(
+                e,
+                roomOwnerOrder,
+                eventId,
+                roomLogic,
+                pretixInformation
+        )).toList();
     }
 
     @Override

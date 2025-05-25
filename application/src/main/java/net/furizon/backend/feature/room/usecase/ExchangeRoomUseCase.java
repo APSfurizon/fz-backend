@@ -64,7 +64,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         roomChecks.assertUserIsNotInRoom(destUserId, event, true);
 
         //checks.assertUserDoesNotOwnAroom(destUserId, event);
-        var sourceRoom = roomFinder.getRoomIdFromOwnerUserId(destUserId, event);
+        var sourceRoom = roomFinder.getRoomIdFromOwnerUserId(sourceUserId, event);
         sourceRoom.ifPresent(id -> {
             roomChecks.assertPermissionsOnRoom(sourceUserId, event, id, null);
             roomChecks.assertRoomNotConfirmed(id);

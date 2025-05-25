@@ -96,7 +96,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         log.debug("RoomInfo: info={} userid={} event={} editingTimeAllowed={} isOwner={} hasOrder={}",
                 info, userId, event, editingTimeAllowed, isOwner, hasOrder);
 
-        return new RoomInfoResponse(info, hasOrder, canCreateRoom, buyOrUpgradeSupported,
+        return new RoomInfoResponse(info, hasOrder, editingTimeAllowed, canCreateRoom, buyOrUpgradeSupported,
                 canBuyOrUpgrade, canExchange, endRoomEditingTime, invitations);
     }
 

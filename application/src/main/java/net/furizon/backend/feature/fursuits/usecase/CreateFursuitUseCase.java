@@ -8,6 +8,7 @@ import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -23,6 +24,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
     @NotNull private final CreateFursuitAction createFursuitAction;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitChecks fursuitChecks;
+    @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
@@ -32,8 +34,16 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
         fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(userId);
 
         Order order = null;
+        //Ideally we can limit the interaction (CRUD) just for fursuits which are NOT brought to current event
+        // and also disallow people from changing the bringToCurrentEvent flag. However this is not so trivial,
+        // to implement, so we just globally disable the editing of fursuits from the deadline to the end of the event
+        Event e = input.pretixInformation.getCurrentEvent();
+        generalChecks.assertTimeframeForEventNotPassed(
+                badgeConfig.getEditingDeadline(),
+                //we cannot create fursuits with bringToCurrentEvenet after the event has ended
+                input.bringToCurrentEvenet ? null : e
+        );
         if (input.bringToCurrentEvenet) {
-            Event e = input.pretixInformation.getCurrentEvent();
             order = generalChecks.getOrderAndAssertItExists(
                     userId,
                     e,

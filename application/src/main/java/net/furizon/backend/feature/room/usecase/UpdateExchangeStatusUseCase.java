@@ -29,6 +29,7 @@ public class UpdateExchangeStatusUseCase implements
         log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
                 userId, exchangeId, toConfirm);
 
+        checks.assertInTimeframeToEditRooms();
         ExchangeConfirmationStatus status = finder.getExchangeStatusFromId(exchangeId);
         checks.assertExchangeExist(status, exchangeId);
         checks.assertUserHasRightsOnExchange(userId, status);

@@ -15,6 +15,8 @@ import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
+import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -29,6 +32,7 @@ import java.util.List;
 public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.Input, FullInfoBadgeResponse> {
     @NotNull private final FursuitConfig fursuitConfig;
     @NotNull private final BadgeConfig badgeConfig;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitFinder fursuitFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
@@ -53,9 +57,15 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
                 && order.getOrderStatus() == OrderStatus.PAID
                 && bringingToEvent < maxFursuits;
 
+        boolean allowedModifications = generalChecks.isTimeframeForEventOk(badgeConfig.getEditingDeadline(), event);
+        boolean allowEditBringFursuitToEvent = generalChecks.isTimeframeForEventOk(
+                badgeConfig.getEditingDeadline(), null);
+
         return new FullInfoBadgeResponse(
                 userData,
                 editingDeadline,
+                allowedModifications,
+                allowEditBringFursuitToEvent,
                 fursuits,
                 (short) bringingToEvent,
                 (short) maxFursuits,
