@@ -238,7 +238,9 @@ public class FursuitController {
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors."
-                + "")
+        + "Creating a fursuit with the field `bringToCurrentEvent` is not permitted after the badge editing deadline."
+        + "To understand if "
+        + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/")
     public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
