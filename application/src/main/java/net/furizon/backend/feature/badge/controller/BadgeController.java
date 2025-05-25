@@ -54,7 +54,8 @@ public class BadgeController {
                 user,
                 image,
                 BadgeType.BADGE_USER,
-                null
+                null,
+                pretixInformation.getCurrentEvent()
             )
         );
     }
@@ -76,7 +77,8 @@ public class BadgeController {
                 user,
                 image,
                 BadgeType.BADGE_FURSUIT,
-                fursuitId
+                fursuitId,
+                pretixInformation.getCurrentEvent()
             )
         );
     }
@@ -90,7 +92,8 @@ public class BadgeController {
                 new DeleteBadgeUseCase.Input(
                         user,
                         BadgeType.BADGE_USER,
-                        null
+                        null,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -104,7 +107,8 @@ public class BadgeController {
                 new DeleteBadgeUseCase.Input(
                         user,
                         BadgeType.BADGE_FURSUIT,
-                        fursuitId
+                        fursuitId,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -142,7 +146,8 @@ public class BadgeController {
                 UpdateUserBadgeInfoUseCase.class,
                 new UpdateUserBadgeInfoUseCase.Input(
                         user,
-                        req
+                        req,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }

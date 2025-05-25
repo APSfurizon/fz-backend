@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
+import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -24,12 +27,16 @@ import java.util.Objects;
 public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boolean> {
     @NotNull private final DeleteMediaFromDiskAction deleteMediaFromDiskAction;
     @NotNull private final BadgeFinder badgeFinder;
+    @NotNull private final BadgeConfig badgeConfig;
+    @NotNull private final GeneralChecks generalChecks;
 
     @NotNull private final FursuitChecks fursuitChecks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
+            generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
+
             long userId = input.user.getUserId();
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
@@ -57,6 +64,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     public record Input(
             @NotNull FurizonUser user,
             @NotNull BadgeType type,
-            @Nullable Long fursuitId
+            @Nullable Long fursuitId,
+            @NotNull Event event
     ) {}
 }

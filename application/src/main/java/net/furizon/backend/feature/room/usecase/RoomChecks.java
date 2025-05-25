@@ -39,7 +39,7 @@ public class RoomChecks {
         OffsetDateTime end = roomConfig.getRoomChangesEndTime();
         if (end != null && end.isBefore(OffsetDateTime.now())) {
             log.error("Editing of rooms is disabled after the date {}", end);
-            throw new ApiException("Room editing timeframe has ended", RoomErrorCodes.EDIT_TIMEFRAME_ENDED);
+            throw new ApiException("Room editing timeframe has ended", GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
         }
     }
 

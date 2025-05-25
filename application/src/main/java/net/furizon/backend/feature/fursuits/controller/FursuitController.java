@@ -71,7 +71,8 @@ public class FursuitController {
                 DeleteFursuitUseCase.class,
                 new DeleteFursuitUseCase.Input(
                         user,
-                        fursuitId
+                        fursuitId,
+                        pretixInformation.getCurrentEvent()
                 )
         );
     }
@@ -198,7 +199,8 @@ public class FursuitController {
                     new DeleteBadgeUseCase.Input(
                             user,
                             BadgeType.BADGE_FURSUIT,
-                            fursuitId
+                            fursuitId,
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(null);
@@ -210,7 +212,8 @@ public class FursuitController {
                             user,
                             image,
                             BadgeType.BADGE_FURSUIT,
-                            fursuitId
+                            fursuitId,
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(media);
@@ -288,7 +291,8 @@ public class FursuitController {
                             user,
                             image,
                             BadgeType.BADGE_FURSUIT,
-                            data.getFursuit().getId()
+                            data.getFursuit().getId(),
+                            pretixInformation.getCurrentEvent()
                     )
             );
             data.getFursuit().setPropic(media);

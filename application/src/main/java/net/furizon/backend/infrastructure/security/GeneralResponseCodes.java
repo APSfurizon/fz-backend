@@ -13,4 +13,5 @@ public enum GeneralResponseCodes {
     //An order is found with refunds in CREATED, TRANSIT or EXTERNAL states. Only confirmed and canceled are allowed
     ORDER_REFUNDS_STILL_PENDING,
     USER_HAS_DAILY_TICKET, //An order is of the type daily, thus it cannot attend the event in a room
+    EDIT_TIMEFRAME_ENDED,
 }
