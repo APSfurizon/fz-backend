@@ -37,6 +37,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         UseCase<ListRoomWithPricesAndQuotaUseCase.Input, ListRoomPricesAvailabilityResponse> {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final RoomLogic roomLogic;
+    @NotNull private final RoomChecks checks;
     @NotNull private final RoomConfig roomConfig;
     @NotNull private final GeneralChecks generalChecks;
 
@@ -45,6 +46,10 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             @NotNull ListRoomWithPricesAndQuotaUseCase.Input input) {
         long userId = input.user.getUserId();
         log.debug("User {} is obtaining room quota and prices", userId);
+
+        //Since it's an heavy request, we prevent people from randomly doing so when not needed
+        checks.assertInTimeframeToEditRooms();
+
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 

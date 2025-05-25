@@ -41,6 +41,8 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
+        roomChecks.assertInTimeframeToEditRooms();
+
         long roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,

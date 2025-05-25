@@ -25,6 +25,8 @@ public class SetShowInNosecountUseCase implements UseCase<SetShowInNosecountUseC
         log.info("User {} is setting showOnNosecount={} on room {}",
                 requesterUserId, input.req.getShowInNosecount(), input.req.getRoomId());
 
+        checks.assertInTimeframeToEditRooms();
+
         long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,
