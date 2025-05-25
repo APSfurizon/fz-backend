@@ -29,7 +29,8 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), event);
+        // We cannot allow the editing of bringFursuitToEvent after the event has ended
+        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), null);
 
         long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
         log.info("User {} is setting bringToCurrentEvent = {} on fursuit {}",

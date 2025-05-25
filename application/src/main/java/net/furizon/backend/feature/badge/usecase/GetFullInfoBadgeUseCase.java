@@ -54,11 +54,14 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
                 && bringingToEvent < maxFursuits;
 
         boolean allowedModifications = generalChecks.isTimeframeForEventOk(badgeConfig.getEditingDeadline(), event);
+        boolean allowEditBringFursuitToEvent = generalChecks.isTimeframeForEventOk(
+                badgeConfig.getEditingDeadline(), null);
 
         return new FullInfoBadgeResponse(
                 userData,
                 editingDeadline,
                 allowedModifications,
+                allowEditBringFursuitToEvent,
                 fursuits,
                 (short) bringingToEvent,
                 (short) maxFursuits,

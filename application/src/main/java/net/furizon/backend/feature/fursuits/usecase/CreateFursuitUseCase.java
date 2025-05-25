@@ -37,7 +37,11 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
         // and also disallow people from changing the bringToCurrentEvent flag. However this is not so trivial,
         // to implement, so we just globally disable the editing of fursuits from the deadline to the end of the event
         Event e = input.pretixInformation.getCurrentEvent();
-        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), e);
+        generalChecks.assertTimeframeForEventNotPassed(
+                badgeConfig.getEditingDeadline(),
+                //we cannot create fursuits with bringToCurrentEvenet after the event has ended
+                input.bringToCurrentEvenet ? null : e
+        );
         if (input.bringToCurrentEvenet) {
             order = generalChecks.getOrderAndAssertItExists(
                     userId,
