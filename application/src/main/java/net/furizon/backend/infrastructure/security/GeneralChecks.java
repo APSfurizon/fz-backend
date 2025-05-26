@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -26,11 +27,24 @@ public class GeneralChecks {
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final OrderFinder orderFinder;
 
-    public long getUserIdAndAssertPermission(@Nullable Long userId, @NotNull FurizonUser user) {
+    public long getUserIdAndAssertPermission(@Nullable Long userId,
+                                             @NotNull FurizonUser user,
+                                             @NotNull Permission permission) {
+        return getUserIdAndAssertPermission(userId, user, permission, null);
+    }
+    public long getUserIdAndAssertPermission(@Nullable Long userId,
+                                             @NotNull FurizonUser user,
+                                             @Nullable Permission permission,
+                                             @Nullable Boolean isAdminCached) {
         long id = userId == null ? user.getUserId() : userId;
         if (userId != null && userId != user.getUserId()) {
-            boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
-            if (!isAdmin) {
+            if (isAdminCached == null) {
+                isAdminCached = permissionFinder.userHasPermission(
+                        user.getUserId(),
+                        Objects.requireNonNull(permission)
+                );
+            }
+            if (!isAdminCached) {
                 log.error("User {} has no permission over userId {}", user.getUserId(), userId);
                 throw new ApiException("User is not an admin", GeneralResponseCodes.USER_IS_NOT_ADMIN);
             }
@@ -48,6 +62,23 @@ public class GeneralChecks {
             return false;
         }
         return true;
+    }
+    public void assertTimeframeForEventNotPassedAllowAdmin(@Nullable OffsetDateTime date,
+                                                           @Nullable Event event,
+                                                           @Nullable Long id,
+                                                           long userId,
+                                                           @Nullable Permission permission,
+                                                           @Nullable Boolean isAdminCached) {
+        if (id != null) {
+            if (isAdminCached == null) {
+                isAdminCached = permissionFinder.userHasPermission(userId, Objects.requireNonNull(permission));
+            }
+            if (isAdminCached) {
+                return;
+            }
+        }
+        assertTimeframeForEventNotPassed(date, event);
+
     }
     public void assertTimeframeForEventNotPassed(@Nullable OffsetDateTime date, @Nullable Event event) {
         if (!isTimeframeForEventOk(date, event)) {

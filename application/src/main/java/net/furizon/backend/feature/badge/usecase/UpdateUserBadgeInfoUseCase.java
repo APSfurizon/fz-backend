@@ -8,6 +8,8 @@ import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -16,16 +18,32 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUseCase.Input, Boolean> {
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final UpdateUserBadgeAction action;
-    @NotNull private final GeneralChecks checks;
     @NotNull private final BadgeConfig badgeConfig;
+    @NotNull private final GeneralChecks checks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
-        checks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
         long requesterUserId = input.user.getUserId();
+        Long targetUserId = input.req.getUserId();
+
+        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        checks.assertTimeframeForEventNotPassedAllowAdmin(
+                badgeConfig.getEditingDeadline(),
+                input.event,
+                targetUserId,
+                requesterUserId,
+                null,
+                isAdmin
+        );
         UpdateUserBadgeRequest req = input.req;
-        long userId = checks.getUserIdAndAssertPermission(requesterUserId, input.user);
+        long userId = checks.getUserIdAndAssertPermission(
+                targetUserId,
+                input.user,
+                null,
+                isAdmin
+        );
 
         log.info("User {} is updating badge to {}. Badge info: {}", requesterUserId, userId, req);
 

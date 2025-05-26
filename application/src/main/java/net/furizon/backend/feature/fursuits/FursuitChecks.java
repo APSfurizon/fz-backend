@@ -8,6 +8,7 @@ import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
@@ -16,14 +17,32 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.util.Objects;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class FursuitChecks {
     @NotNull private final PermissionFinder permissionFinder;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitFinder fursuitFinder;
     @NotNull private final FursuitConfig fursuitConfig;
 
+
+    public void assertPermissionAndTimeframe(long userId, long fursuitId,
+                                             @Nullable Event event, @Nullable OffsetDateTime deadline) {
+        boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
+                deadline,
+                event,
+                fursuitId,
+                userId,
+                null,
+                isAdmin
+        );
+        assertUserHasPermissionOnFursuit(userId, fursuitId, isAdmin);
+    }
 
     public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event, boolean isOwner) {
         FursuitData data = fursuitFinder.getFursuit(fursuitId, event, isOwner);
@@ -44,10 +63,15 @@ public class FursuitChecks {
         }
     }
     public void assertUserHasPermissionOnFursuit(long userId, long fursuitId) {
+        assertUserHasPermissionOnFursuit(userId, fursuitId, null);
+    }
+    public void assertUserHasPermissionOnFursuit(long userId, long fursuitId, @Nullable Boolean isAdminCached) {
         Long fursuitOwnerId = fursuitFinder.getFursuitOwner(fursuitId);
         assertFursuitObjExists(fursuitOwnerId);
-        if (userId != fursuitOwnerId
-                && permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO)) {
+        if (isAdminCached == null) {
+            isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        }
+        if (userId != fursuitOwnerId && isAdminCached) {
             log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuitId);
             throw new ApiException("You cannot manage a fursuit which is not yours!",
                     GeneralResponseCodes.USER_IS_NOT_ADMIN);

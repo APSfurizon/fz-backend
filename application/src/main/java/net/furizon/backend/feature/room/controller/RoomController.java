@@ -518,7 +518,7 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final UpdateExchangeStatusRequest req
     ) {
-        long reqUserId = checks.getUserIdAndAssertPermission(req.getUserId(), user);
+        long reqUserId = checks.getUserIdAndAssertPermission(req.getUserId(), user, Permission.CAN_MANAGE_ROOMS);
         ExchangeConfirmationStatus status = executor.execute(
                 UpdateExchangeStatusUseCase.class,
                 new UpdateExchangeStatusUseCase.Input(

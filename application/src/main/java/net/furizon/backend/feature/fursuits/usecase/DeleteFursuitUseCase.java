@@ -8,6 +8,8 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -18,17 +20,16 @@ import org.springframework.stereotype.Component;
 public class DeleteFursuitUseCase implements UseCase<DeleteFursuitUseCase.Input, Boolean> {
     @NotNull private final DeleteFursuitAction deleteFursuitAction;
     @NotNull private final FursuitChecks fursuitChecks;
-    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
-        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
         long userId = input.user.getUserId();
         long fursuitId = input.fursuitId;
+
         log.info("User {} is deleting fursuit {}", userId, fursuitId);
 
-        fursuitChecks.assertUserHasPermissionOnFursuit(userId, fursuitId);
+        fursuitChecks.assertPermissionAndTimeframe(userId, fursuitId, input.event, badgeConfig.getEditingDeadline());
 
         return deleteFursuitAction.invoke(fursuitId);
     }

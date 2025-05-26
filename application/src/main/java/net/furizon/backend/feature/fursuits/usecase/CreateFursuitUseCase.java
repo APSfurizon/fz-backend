@@ -12,6 +12,8 @@ import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,40 +24,46 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input, FursuitData> {
     @NotNull private final CreateFursuitAction createFursuitAction;
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitChecks fursuitChecks;
     @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
-        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user);
-        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), userId, input.name);
+        boolean isAdmin = permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        long targetUserId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user, null, isAdmin);
+        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), targetUserId, input.name);
 
-        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(userId);
+        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(targetUserId);
 
         Order order = null;
         //Ideally we can limit the interaction (CRUD) just for fursuits which are NOT brought to current event
         // and also disallow people from changing the bringToCurrentEvent flag. However this is not so trivial,
         // to implement, so we just globally disable the editing of fursuits from the deadline to the end of the event
         Event e = input.pretixInformation.getCurrentEvent();
-        generalChecks.assertTimeframeForEventNotPassed(
+        generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
                 badgeConfig.getEditingDeadline(),
                 //we cannot create fursuits with bringToCurrentEvenet after the event has ended
-                input.bringToCurrentEvenet ? null : e
+                input.bringToCurrentEvenet ? null : e,
+                0L, //this is ok
+                input.user.getUserId(),
+                null,
+                isAdmin
         );
         if (input.bringToCurrentEvenet) {
             order = generalChecks.getOrderAndAssertItExists(
-                    userId,
+                    targetUserId,
                     e,
                     input.pretixInformation
             );
-            generalChecks.assertOrderIsPaid(order, userId, e);
+            generalChecks.assertOrderIsPaid(order, targetUserId, e);
 
-            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(userId, order);
+            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(targetUserId, order);
         }
 
         long fursuitId = createFursuitAction.invoke(
-                userId,
+                targetUserId,
                 input.name,
                 input.species,
                 input.showInFursuitCount,
@@ -67,13 +75,13 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 .id(fursuitId)
                 .name(input.name)
                 .species(input.species)
-                .ownerId(userId)
+                .ownerId(targetUserId)
                 .build();
         return FursuitData.builder()
                 .bringingToEvent(input.bringToCurrentEvenet)
                 .showInFursuitCount(input.showInFursuitCount)
                 .showOwner(input.showOwner)
-                .ownerId(userId)
+                .ownerId(targetUserId)
                 .fursuit(fursuit)
             .build();
     }

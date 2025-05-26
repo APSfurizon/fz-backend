@@ -16,6 +16,7 @@ import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,8 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
         long sourceUserId = generalChecks.getUserIdAndAssertPermission(
                 input.req.getSourceUserId(),
-                input.user
+                input.user,
+                Permission.CAN_MANAGE_ROOMS
         );
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();

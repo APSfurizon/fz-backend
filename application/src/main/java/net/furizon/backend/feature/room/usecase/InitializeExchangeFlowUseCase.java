@@ -15,6 +15,7 @@ import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +45,7 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     public @NotNull Boolean executor(@NotNull Input input) {
         Event event = input.event;
         long destUserId = input.req.getDestUserId();
-        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user);
+        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user, Permission.CAN_MANAGE_ROOMS);
         ExchangeAction action = input.req.getAction();
         log.info("{} is initializing a {} exchange between {} -> {} ",
                 input.user.getUserId(), action, sourceUserId, destUserId);

@@ -57,7 +57,8 @@ public class BadgeController {
                 image,
                 BadgeType.BADGE_USER,
                 null,
-                pretixInformation.getCurrentEvent()
+                pretixInformation.getCurrentEvent(),
+                true
             )
         );
     }
@@ -85,7 +86,9 @@ public class BadgeController {
                         destUser,
                         image,
                         BadgeType.BADGE_USER,
-                        null
+                        null,
+                        pretixInformation.getCurrentEvent(),
+                        false
                 )
         );
     }
@@ -107,7 +110,8 @@ public class BadgeController {
                 image,
                 BadgeType.BADGE_FURSUIT,
                 fursuitId,
-                pretixInformation.getCurrentEvent()
+                pretixInformation.getCurrentEvent(),
+                true
             )
         );
     }
@@ -122,7 +126,9 @@ public class BadgeController {
                 new DeleteBadgeUseCase.Input(
                         user.getUserId(),
                         BadgeType.BADGE_USER,
-                        null
+                        null,
+                        pretixInformation.getCurrentEvent(),
+                        true
                 )
         );
     }
@@ -140,7 +146,8 @@ public class BadgeController {
                         userId,
                         BadgeType.BADGE_USER,
                         null,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        false
                 )
         );
     }
@@ -156,7 +163,8 @@ public class BadgeController {
                         user.getUserId(),
                         BadgeType.BADGE_FURSUIT,
                         fursuitId,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        true
                 )
         );
     }

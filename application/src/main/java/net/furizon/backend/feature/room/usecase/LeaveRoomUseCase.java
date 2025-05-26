@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
         Long reqUserId = input.userIdRequest == null ? null : input.userIdRequest.getUserId();
         Event event = input.event;
 
-        long userId = generalChecks.getUserIdAndAssertPermission(reqUserId, input.user);
+        long userId = generalChecks.getUserIdAndAssertPermission(reqUserId, input.user, Permission.CAN_MANAGE_ROOMS);
 
         checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjFromUserEventAndAssertItExistsAndConfirmed(

@@ -12,6 +12,7 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +31,7 @@ public class GetPayOrderLink implements UseCase<GetPayOrderLink.Input, LinkRespo
     public @NotNull LinkResponse executor(@NotNull GetPayOrderLink.Input input) {
         PretixInformation pretixService = input.pretixService;
         Event event = pretixService.getCurrentEvent();
-        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user);
+        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
 
         int orderNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (orderNo > 1) {

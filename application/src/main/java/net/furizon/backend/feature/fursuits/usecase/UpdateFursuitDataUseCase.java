@@ -20,12 +20,10 @@ import org.springframework.stereotype.Component;
 public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCase.Input, FursuitData> {
     @NotNull private final UpdateFursuitAction updateFursuitAction;
     @NotNull private final FursuitChecks fursuitChecks;
-    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
-        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
         long userId = input.user.getUserId();
         long fursuitId = input.fursuitId;
         log.info("User {} is updating fursuit data {}", userId, fursuitId);
@@ -33,7 +31,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
         //This currently doesn't support admins
 
         FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(fursuitId, input.event, true);
-        fursuitChecks.assertUserHasPermissionOnFursuit(userId, fursuit);
+        fursuitChecks.assertPermissionAndTimeframe(userId, fursuitId, input.event, badgeConfig.getEditingDeadline());
 
         boolean res = updateFursuitAction.invoke(
             fursuitId,

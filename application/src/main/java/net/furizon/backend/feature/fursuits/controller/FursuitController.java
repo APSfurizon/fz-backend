@@ -206,7 +206,8 @@ public class FursuitController {
                             user.getUserId(),
                             BadgeType.BADGE_FURSUIT,
                             fursuitId,
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(null);
@@ -219,7 +220,8 @@ public class FursuitController {
                             image,
                             BadgeType.BADGE_FURSUIT,
                             fursuitId,
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(media);
@@ -306,7 +308,8 @@ public class FursuitController {
                             image,
                             BadgeType.BADGE_FURSUIT,
                             data.getFursuit().getId(),
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(media);

@@ -20,6 +20,8 @@ import net.furizon.backend.infrastructure.media.action.StoreMediaOnDiskAction;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +48,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
     @NotNull private final SetFursuitBadgeAction setFursuitBadgeAction;
     @NotNull private final SetUserBadgeAction setUserBadgeAction;
 
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final BadgeFinder badgeFinder;
 
     @NotNull private final FursuitChecks fursuitChecks;
@@ -54,11 +57,21 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
     @Transactional
     public @NotNull MediaResponse executor(@NotNull Input input) {
         try {
-            checks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
             long userId = input.user.getUserId();
+            boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+            if (input.checkTimeframe) {
+                checks.assertTimeframeForEventNotPassedAllowAdmin(
+                        badgeConfig.getEditingDeadline(),
+                        input.event,
+                        input.fursuitId, //THIS IS RIGHT!!
+                        userId,
+                        null,
+                        isAdmin
+                );
+            }
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
-                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
+                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId, isAdmin);
             }
             log.info("[BADGE] User {} is uploading a {} badge: FursuitVal = {}",
                     userId, input.type, input.fursuitId);
@@ -116,6 +129,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
             @NotNull MultipartFile image,
             @NotNull BadgeType type,
             @Nullable Long fursuitId,
-            @NotNull Event event
+            @NotNull Event event,
+            boolean checkTimeframe
     ) {}
 }

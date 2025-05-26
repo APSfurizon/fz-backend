@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,8 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
         log.info("[ROOM_EXCHANGE] User {} is trying a full order exchange", input.user.getUserId());
         long sourceUserId = generalChecks.getUserIdAndAssertPermission(
                 input.req.getSourceUserId(),
-                input.user
+                input.user,
+                Permission.CAN_MANAGE_ROOMS
         );
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();

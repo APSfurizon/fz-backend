@@ -19,6 +19,7 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         Event event = pretixInformation.getCurrentEvent();
 
         roomChecks.assertInTimeframeToEditRooms();
-        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
+        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user, Permission.CAN_MANAGE_ROOMS);
         Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
 
         generalChecks.assertOrderIsPaid(order, userId, event);
