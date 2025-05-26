@@ -24,33 +24,29 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input, FursuitData> {
     @NotNull private final CreateFursuitAction createFursuitAction;
-    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final FursuitChecks fursuitChecks;
     @NotNull private final BadgeConfig badgeConfig;
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
-        boolean isAdmin = permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_MANAGE_USER_PUBLIC_INFO);
-        long targetUserId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user, null, isAdmin);
-        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), targetUserId, input.name);
-
-        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(targetUserId);
-
         Order order = null;
         //Ideally we can limit the interaction (CRUD) just for fursuits which are NOT brought to current event
         // and also disallow people from changing the bringToCurrentEvent flag. However this is not so trivial,
         // to implement, so we just globally disable the editing of fursuits from the deadline to the end of the event
         Event e = input.pretixInformation.getCurrentEvent();
-        generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
+        long targetUserId = generalChecks.getUserIdAssertPermissionCheckTimeframe(
+                input.userId,
+                input.user,
+                Permission.CAN_MANAGE_USER_PUBLIC_INFO,
                 badgeConfig.getEditingDeadline(),
                 //we cannot create fursuits with bringToCurrentEvenet after the event has ended
-                input.bringToCurrentEvenet ? null : e,
-                0L, //this is ok
-                input.user.getUserId(),
-                null,
-                isAdmin
+                input.bringToCurrentEvenet ? null : e
         );
+        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), targetUserId, input.name);
+
+        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(targetUserId);
+
         if (input.bringToCurrentEvenet) {
             order = generalChecks.getOrderAndAssertItExists(
                     targetUserId,

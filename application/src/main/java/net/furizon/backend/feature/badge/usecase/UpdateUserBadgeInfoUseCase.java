@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUseCase.Input, Boolean> {
-    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final UpdateUserBadgeAction action;
     @NotNull private final BadgeConfig badgeConfig;
     @NotNull private final GeneralChecks checks;
@@ -28,22 +27,16 @@ public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUs
         long requesterUserId = input.user.getUserId();
         Long targetUserId = input.req.getUserId();
 
-        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
-        checks.assertTimeframeForEventNotPassedAllowAdmin(
-                badgeConfig.getEditingDeadline(),
-                input.event,
-                targetUserId,
-                requesterUserId,
-                null,
-                isAdmin
-        );
-        UpdateUserBadgeRequest req = input.req;
-        long userId = checks.getUserIdAndAssertPermission(
+
+        long userId = checks.getUserIdAssertPermissionCheckTimeframe(
                 targetUserId,
                 input.user,
-                null,
-                isAdmin
+                Permission.CAN_MANAGE_USER_PUBLIC_INFO,
+                badgeConfig.getEditingDeadline(),
+                input.event
         );
+        UpdateUserBadgeRequest req = input.req;
+
 
         log.info("User {} is updating badge to {}. Badge info: {}", requesterUserId, userId, req);
 

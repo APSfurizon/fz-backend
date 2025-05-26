@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -38,8 +39,8 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
         Set<Long> targetUserIds = input.req.getUserIds();
         Event event = input.event;
 
-        roomChecks.assertInTimeframeToEditRooms();
         boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
+        roomChecks.assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, input.req.getRoomId(), isAdmin);
         long roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,
                 event,

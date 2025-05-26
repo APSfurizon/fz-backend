@@ -27,6 +27,16 @@ public class GeneralChecks {
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final OrderFinder orderFinder;
 
+    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long userId,
+                                                        @NotNull FurizonUser user,
+                                                        @NotNull Permission permission,
+                                                        @Nullable OffsetDateTime date,
+                                                        @Nullable Event event) {
+        boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), permission);
+        assertTimeframeForEventNotPassedAllowAdmin(date, event, userId, user.getUserId(), null, isAdmin);
+        return getUserIdAndAssertPermission(userId, user, permission, isAdmin);
+    }
+
     public long getUserIdAndAssertPermission(@Nullable Long userId,
                                              @NotNull FurizonUser user,
                                              @NotNull Permission permission) {

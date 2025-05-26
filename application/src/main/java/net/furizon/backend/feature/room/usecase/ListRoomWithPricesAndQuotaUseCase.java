@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
@@ -19,7 +20,6 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
-import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,12 +47,11 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     public @NotNull ListRoomPricesAvailabilityResponse executor(
             @NotNull ListRoomWithPricesAndQuotaUseCase.Input input) {
         Long reqUserId = input.userIdRequest == null ? null : input.userIdRequest.getUserId();
-        long userId = generalChecks.getUserIdAndAssertPermission(reqUserId, input.user, Permission.CAN_MANAGE_ROOMS);
+        //Since it's an heavy request, we prevent people from randomly doing so when not needed
+        long userId = checks.getUserIdAssertPermissionCheckTimeframe(reqUserId, input.user);
         boolean disableUnupgradeFilter = reqUserId != null;
         log.debug("User {} is obtaining room quota and prices", userId);
 
-        //Since it's an heavy request, we prevent people from randomly doing so when not needed
-        checks.assertInTimeframeToEditRooms();
 
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();

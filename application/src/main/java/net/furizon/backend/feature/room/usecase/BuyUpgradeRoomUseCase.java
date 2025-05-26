@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
@@ -19,7 +20,6 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
-import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -51,8 +51,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        roomChecks.assertInTimeframeToEditRooms();
-        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user, Permission.CAN_MANAGE_ROOMS);
+        long userId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getUserId(), input.user);
         Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
 
         generalChecks.assertOrderIsPaid(order, userId, event);

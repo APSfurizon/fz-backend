@@ -79,8 +79,6 @@ public class RoomController {
     @org.jetbrains.annotations.NotNull
     private final SanityCheckService sanityCheckService;
     @org.jetbrains.annotations.NotNull
-    private final SessionAuthenticationManager sessionAuthenticationManager;
-    @org.jetbrains.annotations.NotNull
     private final GeneralChecks checks;
 
     @NotNull
@@ -94,7 +92,7 @@ public class RoomController {
         return executor.execute(
                 CreateRoomUseCase.class,
                 new CreateRoomUseCase.Input(
-                    user.getUserId(),
+                    user,
                     createRoomRequest,
                     pretixInformation.getCurrentEvent(),
                     pretixInformation
@@ -522,34 +520,28 @@ public class RoomController {
         ExchangeConfirmationStatus status = executor.execute(
                 UpdateExchangeStatusUseCase.class,
                 new UpdateExchangeStatusUseCase.Input(
+                        user,
                         reqUserId,
                         req
                 )
         );
         boolean success = true;
-        long userId = status.getSourceUserId();
+        long sourceUserId = status.getSourceUserId();
         log.info("Exchange update status: src ({}) = {}; ({}) = dst {}",
-                userId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
+                sourceUserId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
         if (status.isFullyConfirmed()) {
             ExchangeRequest exchangeRequest = new ExchangeRequest(
-                    userId,
+                sourceUserId,
                 status.getTargetUserId(),
                 status.getAction()
             );
-            var auth = Objects.requireNonNull(sessionAuthenticationManager.findAuthenticationByUserId(userId));
-            FurizonUser fakeUser = FurizonUser.builder()
-                    .userId(userId)
-                    .authentication(auth)
-                    .sessionId(user.getSessionId())
-                    .build();
 
-            log.info("Exchange is fully confirmed, running action {} with usr {}",
-                    status.getAction(), fakeUser.getUserId());
+            log.info("Exchange is fully confirmed, running action {}", status.getAction());
             switch (status.getAction()) {
                 case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
                         ExchangeRoomUseCase.class,
                         new ExchangeRoomUseCase.Input(
-                                fakeUser,
+                                user,
                                 exchangeRequest,
                                 pretixInformation,
                                 false
@@ -558,7 +550,7 @@ public class RoomController {
                 case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
                         ExchangeFullOrderUseCase.class,
                         new ExchangeFullOrderUseCase.Input(
-                                fakeUser,
+                                user,
                                 exchangeRequest,
                                 pretixInformation,
                                 false

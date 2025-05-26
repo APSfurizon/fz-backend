@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.ChangeNameToRoomRequest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -25,8 +26,7 @@ public class RenameRoomUseCase implements UseCase<RenameRoomUseCase.Input, Boole
         log.info("User {} is changing the name of room {} to {}",
                 requesterUserId, input.req.getRoomId(), input.req.getName());
 
-        checks.assertInTimeframeToEditRooms();
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = checks.getRoomIdAssertPermissionCheckTimeframe(
                 requesterUserId,
                 event,
                 input.req.getRoomId()

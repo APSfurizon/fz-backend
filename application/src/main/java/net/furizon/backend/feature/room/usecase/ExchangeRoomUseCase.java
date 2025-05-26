@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -16,7 +17,6 @@ import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
-import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -45,16 +45,9 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
-        long sourceUserId = generalChecks.getUserIdAndAssertPermission(
-                input.req.getSourceUserId(),
-                input.user,
-                Permission.CAN_MANAGE_ROOMS
-        );
+        long sourceUserId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getSourceUserId(), input.user);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
-
-
-        roomChecks.assertInTimeframeToEditRooms();
 
         generalChecks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
         generalChecks.assertUserHasOrderAndItsNotDaily(destUserId, event);

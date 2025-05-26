@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -39,8 +40,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         Event event = input.event;
 
 
-        roomChecks.assertInTimeframeToEditRooms();
-        RoomGuest guest = roomChecks.getRoomGuestObjAndAssertItExists(guestId);
+        RoomGuest guest = roomChecks.getRoomGuestAssertPermissionCheckTimeframe(guestId, requesterUserId);
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();
 
@@ -51,7 +51,6 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         roomChecks.assertUserIsNotInRoom(targetUserId, event, false);
         roomChecks.assertUserIsNotRoomOwner(targetUserId, roomId);
         roomChecks.assertUserDoesNotOwnAroom(targetUserId, event);
-        roomChecks.assertIsGuestObjOwnerOrAdmin(guest, requesterUserId);
         generalChecks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
         boolean res = roomLogic.inviteAccept(guestId, targetUserId, roomId, event);

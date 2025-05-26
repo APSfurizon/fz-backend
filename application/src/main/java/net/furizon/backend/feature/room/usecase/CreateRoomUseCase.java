@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.RoomData;
@@ -11,6 +12,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +32,11 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
     @Override
     public @NotNull RoomInfo executor(@NotNull CreateRoomUseCase.Input input) {
-        long userId = input.userId;
+        Long targetUserId = input.createRoomRequest.getUserId();
         Event event = input.event;
 
-        roomChecks.assertInTimeframeToEditRooms();
+        long userId = roomChecks.getUserIdAssertPermissionCheckTimeframe(targetUserId, input.user);
+
         roomChecks.assertUserDoesNotOwnAroom(userId, event);
         roomChecks.assertUserIsNotInRoom(userId, event, false);
         generalChecks.assertUserHasOrderAndItsNotDaily(userId, event);
@@ -58,7 +61,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
     }
 
     public record Input(
-            long userId,
+            @NotNull FurizonUser user,
             @NotNull CreateRoomRequest createRoomRequest,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation

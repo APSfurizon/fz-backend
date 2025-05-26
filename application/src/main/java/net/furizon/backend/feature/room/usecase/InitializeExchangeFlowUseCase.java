@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.action.createExchangeConfirmationStatusObj.CreateExchangeObjAction;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
@@ -14,8 +15,6 @@ import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
-import net.furizon.backend.infrastructure.security.GeneralChecks;
-import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,6 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomChecks roomChecks;
-    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
 
     @Value("${frontend.transfer-exchange-confirmation-url}")
@@ -45,7 +43,7 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
     public @NotNull Boolean executor(@NotNull Input input) {
         Event event = input.event;
         long destUserId = input.req.getDestUserId();
-        long sourceUserId = generalChecks.getUserIdAndAssertPermission(input.req.getSourceUserId(), input.user, Permission.CAN_MANAGE_ROOMS);
+        long sourceUserId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getSourceUserId(), input.user);
         ExchangeAction action = input.req.getAction();
         log.info("{} is initializing a {} exchange between {} -> {} ",
                 input.user.getUserId(), action, sourceUserId, destUserId);

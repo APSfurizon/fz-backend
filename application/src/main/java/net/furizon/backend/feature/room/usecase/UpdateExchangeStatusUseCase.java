@@ -2,11 +2,13 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.action.confirmUserExchangeStatus.ConfirmUserExchangeStatusAction;
 import net.furizon.backend.feature.room.action.deleteExchangeStatusObjAction.DeleteExchangeStatusObjAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.request.UpdateExchangeStatusRequest;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -25,11 +27,11 @@ public class UpdateExchangeStatusUseCase implements
     public @NotNull ExchangeConfirmationStatus executor(@NotNull Input input) {
         long exchangeId = input.req.getExchangeId();
         boolean toConfirm = input.req.getConfirm();
-        long userId = input.userId;
+        long userId = input.targetUserId;
         log.info("[ROOM_EXCHANGE] User {} is updating confirmation status on exchange {}: Status = {}",
                 userId, exchangeId, toConfirm);
 
-        checks.assertInTimeframeToEditRooms();
+        checks.assertInTimeframeToEditRoomsAllowAdmin(input.user.getUserId(), userId, null);
         ExchangeConfirmationStatus status = finder.getExchangeStatusFromId(exchangeId);
         checks.assertExchangeExist(status, exchangeId);
         checks.assertUserHasRightsOnExchange(userId, status);
@@ -61,7 +63,9 @@ public class UpdateExchangeStatusUseCase implements
     }
 
     public record Input(
-            long userId,
+            @NotNull FurizonUser user,
+            //Permission on targetUserId MUST be checked in prior!!
+            long targetUserId,
             @NotNull UpdateExchangeStatusRequest req
     ) {}
 }
