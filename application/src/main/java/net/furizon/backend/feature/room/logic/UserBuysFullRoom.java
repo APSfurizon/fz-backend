@@ -29,7 +29,7 @@ import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFind
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
-import net.furizon.backend.feature.room.usecase.RoomChecks;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;

@@ -139,7 +139,7 @@ public class FursuitController {
             executor.execute(
                 BringFursuitToEventUseCase.class,
                 new BringFursuitToEventUseCase.Input(
-                    new BringFursuitToEventRequest(req.getBringToCurrentEvent(), user.getUserId()),
+                    new BringFursuitToEventRequest(req.getBringToCurrentEvent()),
                     fursuitId,
                     user,
                     pretixInformation
@@ -192,7 +192,7 @@ public class FursuitController {
             executor.execute(
                     BringFursuitToEventUseCase.class,
                     new BringFursuitToEventUseCase.Input(
-                            new BringFursuitToEventRequest(bringToCurrentEvent, user.getUserId()),
+                            new BringFursuitToEventRequest(bringToCurrentEvent),
                             fursuitId,
                             user,
                             pretixInformation
@@ -203,10 +203,11 @@ public class FursuitController {
             executor.execute(
                     DeleteBadgeUseCase.class,
                     new DeleteBadgeUseCase.Input(
-                            user,
+                            user.getUserId(),
                             BadgeType.BADGE_FURSUIT,
                             fursuitId,
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(null);
@@ -219,7 +220,8 @@ public class FursuitController {
                             image,
                             BadgeType.BADGE_FURSUIT,
                             fursuitId,
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(media);
@@ -253,6 +255,7 @@ public class FursuitController {
                         req.getSpecies(),
                         req.getBringToCurrentEvent(),
                         req.getShowInFursuitCount(),
+                        req.getUserId(),
                         req.getShowOwner(),
                         user,
                         pretixInformation
@@ -280,6 +283,7 @@ public class FursuitController {
         @Valid @NotNull @RequestParam("species") final String species,
         @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
+        @RequestParam("user-id") @Nullable final Long userId,
         @RequestParam("show-owner") @NotNull final Boolean showOwner,
         @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
@@ -290,6 +294,7 @@ public class FursuitController {
                         species,
                         bringToCurrentEvent,
                         showInFursuitCount,
+                        userId,
                         showOwner,
                         user,
                         pretixInformation
@@ -303,7 +308,8 @@ public class FursuitController {
                             image,
                             BadgeType.BADGE_FURSUIT,
                             data.getFursuit().getId(),
-                            pretixInformation.getCurrentEvent()
+                            pretixInformation.getCurrentEvent(),
+                            true
                     )
             );
             data.getFursuit().setPropic(media);

@@ -34,6 +34,8 @@ public class RoomInfo {
 
     private final boolean showInNosecount;
 
+    private final long eventId;
+
     @NotNull
     private final RoomData roomData;
 

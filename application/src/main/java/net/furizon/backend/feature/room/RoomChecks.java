@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.room.usecase;
+package net.furizon.backend.feature.room;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -35,6 +36,36 @@ public class RoomChecks {
     @NotNull private final GeneralChecks checks;
     @NotNull private final RoomConfig roomConfig;
 
+    public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId) {
+        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
+        assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, guestId, isAdmin);
+        RoomGuest guest = getRoomGuestObjAndAssertItExists(guestId);
+        assertIsGuestObjOwnerOrAdmin(guest, requesterUserId, isAdmin);
+        return guest;
+    }
+    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user) {
+        boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
+        assertInTimeframeToEditRoomsAllowAdmin(user.getUserId(), targetUserId, isAdmin);
+        return checks.getUserIdAndAssertPermission(targetUserId, user, null, isAdmin);
+    }
+    public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId) {
+        boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
+        assertInTimeframeToEditRoomsAllowAdmin(userId, roomId, isAdmin);
+        return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdmin);
+    }
+    public void assertInTimeframeToEditRoomsAllowAdmin(long userId,
+                                                       @Nullable Long id,
+                                                       @Nullable Boolean isAdminCached) {
+        if (id != null) {
+            if (isAdminCached == null) {
+                isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
+            }
+            if (isAdminCached) {
+                return;
+            }
+        }
+        assertInTimeframeToEditRooms();
+    }
     public void assertInTimeframeToEditRooms() {
         OffsetDateTime end = roomConfig.getRoomChangesEndTime();
         if (end != null && end.isBefore(OffsetDateTime.now())) {
@@ -131,22 +162,7 @@ public class RoomChecks {
     }
     public void assertPermissionsOnRoom(long userId, @NotNull Event event, long roomId,
                                         @Nullable Boolean isAdminCached) {
-        var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
-        if (r.isEmpty()) {
-            log.error("User doesn't own a room!");
-            throw new ApiException("User doesn't own a room", RoomErrorCodes.USER_DOES_NOT_OWN_A_ROOM);
-        }
-
-        long ownerId = r.get();
-        if (ownerId != userId) {
-            if (isAdminCached == null) {
-                isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
-            }
-            if (!isAdminCached) {
-                log.error("User is not an admin! It cannot operate on room {}", roomId);
-                throw new ApiException("User is not an admin", GeneralResponseCodes.USER_IS_NOT_ADMIN);
-            }
-        }
+        getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdminCached);
     }
 
     public void assertRoomFromCurrentEvent(long roomId, @NotNull Event event) {
@@ -223,8 +239,13 @@ public class RoomChecks {
     }
 
     public void assertIsGuestObjOwnerOrAdmin(RoomGuest guest, long requesterUserId) {
-        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
-        if (guest.getUserId() != requesterUserId && !isAdmin) {
+        assertIsGuestObjOwnerOrAdmin(guest, requesterUserId, null);
+    }
+    public void assertIsGuestObjOwnerOrAdmin(RoomGuest guest, long requesterUserId, @Nullable Boolean isAdminCached) {
+        if (isAdminCached == null) {
+            isAdminCached = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
+        }
+        if (guest.getUserId() != requesterUserId && !isAdminCached) {
             log.error("User {} has no rights over guest obj {}", requesterUserId, guest.getGuestId());
             throw new ApiException("User has no rights over specified guest!", GeneralResponseCodes.USER_IS_NOT_ADMIN);
         }

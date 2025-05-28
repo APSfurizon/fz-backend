@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -43,16 +44,10 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
-        log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.sourceExchangeUser.getUserId());
-        long sourceUserId = generalChecks.getUserIdAndAssertPermission(
-                input.req.getSourceUserId(),
-                input.sourceExchangeUser
-        );
+        log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
+        long sourceUserId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getSourceUserId(), input.user);
         long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
-
-
-        roomChecks.assertInTimeframeToEditRooms();
 
         generalChecks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
         generalChecks.assertUserHasOrderAndItsNotDaily(destUserId, event);
@@ -125,7 +120,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     }
 
     public record Input(
-            @NotNull FurizonUser sourceExchangeUser,
+            @NotNull FurizonUser user,
             @NotNull ExchangeRequest req,
             @NotNull PretixInformation pretixInformation,
             boolean runOnlyChecks

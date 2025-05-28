@@ -12,8 +12,10 @@ import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -27,34 +29,36 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
 
     @Override
     public @NotNull FursuitData executor(@NotNull Input input) {
-        long userId = input.user.getUserId();
-        log.info("User {} is creating fursuit {}", userId, input.name);
-
-        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(userId);
-
         Order order = null;
         //Ideally we can limit the interaction (CRUD) just for fursuits which are NOT brought to current event
         // and also disallow people from changing the bringToCurrentEvent flag. However this is not so trivial,
         // to implement, so we just globally disable the editing of fursuits from the deadline to the end of the event
         Event e = input.pretixInformation.getCurrentEvent();
-        generalChecks.assertTimeframeForEventNotPassed(
+        long targetUserId = generalChecks.getUserIdAssertPermissionCheckTimeframe(
+                input.userId,
+                input.user,
+                Permission.CAN_MANAGE_USER_PUBLIC_INFO,
                 badgeConfig.getEditingDeadline(),
                 //we cannot create fursuits with bringToCurrentEvenet after the event has ended
                 input.bringToCurrentEvenet ? null : e
         );
+        log.info("User {} is creating fursuit {} for user {}", input.user.getUserId(), targetUserId, input.name);
+
+        fursuitChecks.assertUserHasNotReachedMaxBackendFursuitNo(targetUserId);
+
         if (input.bringToCurrentEvenet) {
             order = generalChecks.getOrderAndAssertItExists(
-                    userId,
+                    targetUserId,
                     e,
                     input.pretixInformation
             );
-            generalChecks.assertOrderIsPaid(order, userId, e);
+            generalChecks.assertOrderIsPaid(order, targetUserId, e);
 
-            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(userId, order);
+            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(targetUserId, order);
         }
 
         long fursuitId = createFursuitAction.invoke(
-                userId,
+                targetUserId,
                 input.name,
                 input.species,
                 input.showInFursuitCount,
@@ -66,13 +70,13 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
                 .id(fursuitId)
                 .name(input.name)
                 .species(input.species)
-                .ownerId(userId)
+                .ownerId(targetUserId)
                 .build();
         return FursuitData.builder()
                 .bringingToEvent(input.bringToCurrentEvenet)
                 .showInFursuitCount(input.showInFursuitCount)
                 .showOwner(input.showOwner)
-                .ownerId(userId)
+                .ownerId(targetUserId)
                 .fursuit(fursuit)
             .build();
     }
@@ -82,6 +86,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
             @NotNull String species,
             boolean bringToCurrentEvenet,
             boolean showInFursuitCount,
+            @Nullable Long userId,
             boolean showOwner,
             @NotNull FurizonUser user,
             @NotNull PretixInformation pretixInformation

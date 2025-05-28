@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -36,8 +37,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        checks.assertInTimeframeToEditRooms();
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = checks.getRoomIdAssertPermissionCheckTimeframe(
                 requesterUserId,
                 event,
                 input.roomReq == null ? null : input.roomReq.getRoomId()

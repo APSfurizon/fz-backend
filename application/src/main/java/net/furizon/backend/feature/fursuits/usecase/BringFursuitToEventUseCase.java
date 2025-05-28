@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.bringFursuitToEvent.UpdateBringFursuitToEventAction;
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
@@ -29,21 +30,23 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        // We cannot allow the editing of bringFursuitToEvent after the event has ended
-        generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), null);
+        long userId = input.user.getUserId();
 
-        long userId = generalChecks.getUserIdAndAssertPermission(input.req.getUserId(), input.user);
         log.info("User {} is setting bringToCurrentEvent = {} on fursuit {}",
-                input.user.getUserId(), input.req.getBringFursuitToCurrentEvent(), input.fursuitId);
-        fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
+                userId, input.req.getBringFursuitToCurrentEvent(), input.fursuitId);
+        // We cannot allow the editing of bringFursuitToEvent after the event has ended
+        fursuitChecks.assertPermissionAndTimeframe(userId, input.fursuitId, null, badgeConfig.getEditingDeadline());
+
+        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(input.fursuitId, event, true);
+        long ownerId = fursuit.getOwnerId();
 
         boolean res;
-        Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
+        Order order = generalChecks.getOrderAndAssertItExists(ownerId, event, pretixInformation);
         if (input.req.getBringFursuitToCurrentEvent()) {
 
-            generalChecks.assertOrderIsPaid(order, userId, event);
+            generalChecks.assertOrderIsPaid(order, ownerId, event);
             fursuitChecks.assertFursuitNotAlreadyBroughtToCurrentEvent(input.fursuitId, order);
-            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(userId, order);
+            fursuitChecks.assertUserHasNotReachedMaxFursuitBadges(ownerId, order);
             res = updateBringFursuitToEventAction.invoke(
                     input.fursuitId,
                     true,

@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -17,15 +18,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UpdateUserBadgeInfoUseCase implements UseCase<UpdateUserBadgeInfoUseCase.Input, Boolean> {
     @NotNull private final UpdateUserBadgeAction action;
-    @NotNull private final GeneralChecks checks;
     @NotNull private final BadgeConfig badgeConfig;
+    @NotNull private final GeneralChecks checks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
-        checks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
         long requesterUserId = input.user.getUserId();
+        Long targetUserId = input.req.getUserId();
+
+
+        long userId = checks.getUserIdAssertPermissionCheckTimeframe(
+                targetUserId,
+                input.user,
+                Permission.CAN_MANAGE_USER_PUBLIC_INFO,
+                badgeConfig.getEditingDeadline(),
+                input.event
+        );
         UpdateUserBadgeRequest req = input.req;
-        long userId = checks.getUserIdAndAssertPermission(requesterUserId, input.user);
+
 
         log.info("User {} is updating badge to {}. Badge info: {}", requesterUserId, userId, req);
 

@@ -2,10 +2,12 @@ package net.furizon.backend.feature.room.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.ListRoomPricesAvailabilityResponse;
@@ -44,11 +46,12 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     @Override
     public @NotNull ListRoomPricesAvailabilityResponse executor(
             @NotNull ListRoomWithPricesAndQuotaUseCase.Input input) {
-        long userId = input.user.getUserId();
+        Long reqUserId = input.userIdRequest == null ? null : input.userIdRequest.getUserId();
+        //Since it's an heavy request, we prevent people from randomly doing so when not needed
+        long userId = checks.getUserIdAssertPermissionCheckTimeframe(reqUserId, input.user);
+        boolean disableUnupgradeFilter = reqUserId != null;
         log.debug("User {} is obtaining room quota and prices", userId);
 
-        //Since it's an heavy request, we prevent people from randomly doing so when not needed
-        checks.assertInTimeframeToEditRooms();
 
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
@@ -112,7 +115,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (Objects.equals(itemId, pretixRoomItemId)) {
                 return null;
             }
-            //Check for room capacity > number of people already in room
+            //Check for room capacity >= number of people already in room
             HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(itemId);
             if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
@@ -141,7 +144,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 }
                 long totalPrice = roomPrice + extraDaysPrice;
 
-                if (totalPrice >= totalPaid) {
+                if (totalPrice >= totalPaid || disableUnupgradeFilter) {
                     //Fetch availability
                     PretixQuotaAvailability quota = getSmallestQuota(
                             pretixInformation, itemId, earlyItemId, lateItemId
@@ -190,7 +193,8 @@ public class ListRoomWithPricesAndQuotaUseCase implements
     }
 
     public record Input(
-        FurizonUser user,
-        PretixInformation pretixInformation
+        @NotNull FurizonUser user,
+        @Nullable UserIdRequest userIdRequest,
+        @NotNull PretixInformation pretixInformation
     ) {}
 }

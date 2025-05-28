@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
@@ -50,9 +51,9 @@ import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.SanityCheckService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
-import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +64,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -77,7 +77,7 @@ public class RoomController {
     @org.jetbrains.annotations.NotNull
     private final SanityCheckService sanityCheckService;
     @org.jetbrains.annotations.NotNull
-    private final SessionAuthenticationManager sessionAuthenticationManager;
+    private final GeneralChecks checks;
 
     @NotNull
     @Operation(summary = "Creates a new room", description =
@@ -255,12 +255,14 @@ public class RoomController {
         "This operation can be performed only by a guest in a room.")
     @PostMapping("/leave")
     public boolean leaveRoom(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid @Nullable final UserIdRequest request
     ) {
         return executor.execute(
                 LeaveRoomUseCase.class,
                 new LeaveRoomUseCase.Input(
                         user,
+                        request,
                         pretixInformation.getCurrentEvent()
                 )
         );
@@ -359,12 +361,14 @@ public class RoomController {
         + "user has paid and how much the room costs. Note that this difference may not be accurate")
     @GetMapping("/get-room-list-with-quota")
     public ListRoomPricesAvailabilityResponse getRoomList(
-            @AuthenticationPrincipal @NotNull final FurizonUser user
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid @Nullable final UserIdRequest request
     ) {
         return executor.execute(
                 ListRoomWithPricesAndQuotaUseCase.class,
                 new ListRoomWithPricesAndQuotaUseCase.Input(
                         user,
+                        request,
                         pretixInformation
                 )
         );
@@ -392,6 +396,7 @@ public class RoomController {
         return success ? executor.execute(GetPayOrderLink.class,
                 new GetPayOrderLink.Input(
                         user,
+                        req.getUserId(),
                         pretixInformation
                 )
         ) : new LinkResponse("");
@@ -422,7 +427,12 @@ public class RoomController {
     public RoomInfoResponse getRoomInfo(@AuthenticationPrincipal @NotNull final FurizonUser user) {
         return executor.execute(
             GetRoomInfoUseCase.class,
-            new GetRoomInfoUseCase.Input(user, pretixInformation.getCurrentEvent(), pretixInformation)
+            new GetRoomInfoUseCase.Input(
+                    user.getUserId(),
+                    pretixInformation.getCurrentEvent(),
+                    pretixInformation,
+                    false
+            )
         );
     }
 
@@ -443,7 +453,8 @@ public class RoomController {
                 new GetExchangeConfirmationStatusInfoUseCase.Input(
                         user,
                         exchangeId,
-                        pretixInformation
+                        pretixInformation,
+                        false
                 )
         );
     }
@@ -503,37 +514,32 @@ public class RoomController {
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @NotNull @Valid @RequestBody final UpdateExchangeStatusRequest req
     ) {
+        long reqUserId = checks.getUserIdAndAssertPermission(req.getUserId(), user, Permission.CAN_MANAGE_ROOMS);
         ExchangeConfirmationStatus status = executor.execute(
                 UpdateExchangeStatusUseCase.class,
                 new UpdateExchangeStatusUseCase.Input(
                         user,
+                        reqUserId,
                         req
                 )
         );
         boolean success = true;
-        long userId = status.getSourceUserId();
+        long sourceUserId = status.getSourceUserId();
         log.info("Exchange update status: src ({}) = {}; ({}) = dst {}",
-                userId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
+                sourceUserId, status.isSourceConfirmed(), status.getTargetUserId(), status.isTargetConfirmed());
         if (status.isFullyConfirmed()) {
             ExchangeRequest exchangeRequest = new ExchangeRequest(
-                    userId,
+                sourceUserId,
                 status.getTargetUserId(),
                 status.getAction()
             );
-            var auth = Objects.requireNonNull(sessionAuthenticationManager.findAuthenticationByUserId(userId));
-            FurizonUser fakeUser = FurizonUser.builder()
-                    .userId(userId)
-                    .authentication(auth)
-                    .sessionId(user.getSessionId())
-                    .build();
 
-            log.info("Exchange is fully confirmed, running action {} with usr {}",
-                    status.getAction(), fakeUser.getUserId());
+            log.info("Exchange is fully confirmed, running action {}", status.getAction());
             switch (status.getAction()) {
                 case ExchangeAction.TRASFER_EXCHANGE_ROOM -> executor.execute(
                         ExchangeRoomUseCase.class,
                         new ExchangeRoomUseCase.Input(
-                                fakeUser,
+                                user,
                                 exchangeRequest,
                                 pretixInformation,
                                 false
@@ -542,7 +548,7 @@ public class RoomController {
                 case ExchangeAction.TRASFER_FULL_ORDER -> executor.execute(
                         ExchangeFullOrderUseCase.class,
                         new ExchangeFullOrderUseCase.Input(
-                                fakeUser,
+                                user,
                                 exchangeRequest,
                                 pretixInformation,
                                 false

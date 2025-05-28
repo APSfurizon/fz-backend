@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.user.mapper;
 
 import net.furizon.backend.feature.membership.mapper.MembershipInfoMapper;
-import net.furizon.backend.feature.user.dto.UserAdminViewDisplay;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCode;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithOrderCodeAndSerial;
@@ -53,15 +52,6 @@ public class JooqUserDisplayMapper {
             mapWithOrderCode(record),
             record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL),
             MembershipInfoMapper.map(record)
-        );
-    }
-
-    public static UserAdminViewDisplay mapWithAdminView(Record record) {
-        return new UserAdminViewDisplay(
-                map(record),
-                record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL),
-                MembershipInfoMapper.map(record),
-                record.get(AUTHENTICATIONS.AUTHENTICATION_DISABLED)
         );
     }
 }
