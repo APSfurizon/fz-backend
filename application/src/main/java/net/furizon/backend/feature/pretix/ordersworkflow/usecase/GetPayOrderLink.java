@@ -31,7 +31,11 @@ public class GetPayOrderLink implements UseCase<GetPayOrderLink.Input, LinkRespo
     public @NotNull LinkResponse executor(@NotNull GetPayOrderLink.Input input) {
         PretixInformation pretixService = input.pretixService;
         Event event = pretixService.getCurrentEvent();
-        long userId = generalChecks.getUserIdAndAssertPermission(input.userId, input.user, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        long userId = generalChecks.getUserIdAndAssertPermission(
+                input.userId,
+                input.user,
+                Permission.CAN_MANAGE_USER_PUBLIC_INFO
+        );
 
         int orderNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (orderNo > 1) {

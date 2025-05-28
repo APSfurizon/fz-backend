@@ -53,7 +53,9 @@ public class RoomChecks {
         assertInTimeframeToEditRoomsAllowAdmin(userId, roomId, isAdmin);
         return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdmin);
     }
-    public void assertInTimeframeToEditRoomsAllowAdmin(long userId, @Nullable Long id, @Nullable Boolean isAdminCached) {
+    public void assertInTimeframeToEditRoomsAllowAdmin(long userId,
+                                                       @Nullable Long id,
+                                                       @Nullable Boolean isAdminCached) {
         if (id != null) {
             if (isAdminCached == null) {
                 isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);

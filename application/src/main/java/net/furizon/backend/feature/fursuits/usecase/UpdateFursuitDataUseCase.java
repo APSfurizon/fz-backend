@@ -9,7 +9,6 @@ import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
-import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
