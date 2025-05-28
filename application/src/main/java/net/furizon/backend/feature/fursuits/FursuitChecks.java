@@ -70,7 +70,7 @@ public class FursuitChecks {
         if (isAdminCached == null) {
             isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
         }
-        if (userId != fursuitOwnerId && isAdminCached) {
+        if (userId != fursuitOwnerId && !isAdminCached) {
             log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuitId);
             throw new ApiException("You cannot manage a fursuit which is not yours!",
                     GeneralResponseCodes.USER_IS_NOT_ADMIN);
