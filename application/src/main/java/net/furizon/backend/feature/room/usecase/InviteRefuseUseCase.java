@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;

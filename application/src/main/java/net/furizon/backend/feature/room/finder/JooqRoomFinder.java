@@ -154,7 +154,8 @@ public class JooqRoomFinder implements RoomFinder {
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                 ORDERS.ORDER_ROOM_INTERNAL_NAME,
-                ORDERS.ORDER_ROOM_CAPACITY
+                ORDERS.ORDER_ROOM_CAPACITY,
+                ORDERS.EVENT_ID
             )
             .from(ROOMS)
             .innerJoin(ORDERS)

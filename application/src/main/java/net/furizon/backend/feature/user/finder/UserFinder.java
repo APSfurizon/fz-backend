@@ -2,7 +2,6 @@ package net.furizon.backend.feature.user.finder;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
-import net.furizon.backend.feature.user.dto.UserAdminViewDisplay;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.objects.SearchUserResult;
@@ -46,7 +45,4 @@ public interface UserFinder {
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
 
     SelectJoinStep<?> selectDisplayUser();
-  
-    @Nullable
-    UserAdminViewDisplay getUserAdminViewDisplay(long userId, @NotNull Event event);
 }

@@ -2,7 +2,7 @@ package net.furizon.backend.infrastructure.security.permissions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +28,8 @@ public enum Permission {
     EARLY_BOOK(10000L),
     JUNIOR_STAFF(10001L),
     MAIN_STAFF(10002L),
+
+    UNKNOWN_PERMISSION(Long.MAX_VALUE),
     ;
 
     // We use an external value instead of .ordinal() so we can rearrange and move
@@ -46,8 +48,12 @@ public enum Permission {
         }
     }
 
-    @Nullable
+    @NotNull
     public static Permission get(final long value) {
-        return PERMISSIONS.get(value);
+        Permission p = PERMISSIONS.get(value);
+        if (p == null) {
+            p = UNKNOWN_PERMISSION;
+        }
+        return p;
     }
 }

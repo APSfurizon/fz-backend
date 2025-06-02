@@ -18,10 +18,16 @@ public interface OrderFinder {
     @NotNull Set<Long> findOrderIdsForEvent(@NotNull Event event);
 
     @Nullable
-    Order findOrderByCodeEvent(@NotNull String code, @NotNull Event event, @NotNull PretixInformation pretixService);
+    Order findOrderByCodeEvent(@NotNull String code, long eventId, @NotNull PretixInformation pretixService);
 
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
+
+    @Nullable
+    Order findOrderById(long orderId, @NotNull PretixInformation pretixService);
+
+    @Nullable
+    String getOrderCodeById(long orderId);
 
     @NotNull
     List<Order> findAllOrdersOfUser(long userId, @NotNull PretixInformation pretixService);
@@ -44,8 +50,6 @@ public interface OrderFinder {
 
     @Nullable
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
-
-    @Nullable String getOrderCodeById(long orderId);
 
     @Nullable Long getOrderIdByCode(@NotNull String orderCode, @NotNull Event event);
 

@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.dto.request.CreateRoomRequest;
 import net.furizon.backend.feature.room.dto.RoomData;
@@ -31,10 +32,11 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
     @Override
     public @NotNull RoomInfo executor(@NotNull CreateRoomUseCase.Input input) {
-        long userId = input.user.getUserId();
+        Long targetUserId = input.createRoomRequest.getUserId();
         Event event = input.event;
 
-        roomChecks.assertInTimeframeToEditRooms();
+        long userId = roomChecks.getUserIdAssertPermissionCheckTimeframe(targetUserId, input.user);
+
         roomChecks.assertUserDoesNotOwnAroom(userId, event);
         roomChecks.assertUserIsNotInRoom(userId, event, false);
         generalChecks.assertUserHasOrderAndItsNotDaily(userId, event);

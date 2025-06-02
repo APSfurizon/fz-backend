@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.SetShowInNosecountRequest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -25,9 +26,7 @@ public class SetShowInNosecountUseCase implements UseCase<SetShowInNosecountUseC
         log.info("User {} is setting showOnNosecount={} on room {}",
                 requesterUserId, input.req.getShowInNosecount(), input.req.getRoomId());
 
-        checks.assertInTimeframeToEditRooms();
-
-        long roomId = checks.getRoomIdAndAssertPermissionsOnRoom(
+        long roomId = checks.getRoomIdAssertPermissionCheckTimeframe(
                 requesterUserId,
                 event,
                 input.req.getRoomId()

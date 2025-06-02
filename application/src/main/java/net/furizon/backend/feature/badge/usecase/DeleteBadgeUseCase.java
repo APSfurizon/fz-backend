@@ -10,8 +10,9 @@ import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +27,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boolean> {
     @NotNull private final DeleteMediaFromDiskAction deleteMediaFromDiskAction;
+    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final BadgeFinder badgeFinder;
     @NotNull private final BadgeConfig badgeConfig;
     @NotNull private final GeneralChecks generalChecks;
@@ -35,12 +37,23 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
-            generalChecks.assertTimeframeForEventNotPassed(badgeConfig.getEditingDeadline(), input.event);
+            long userId = input.userId;
+            boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
 
-            long userId = input.user.getUserId();
+            if (input.checkTimeframe) {
+                generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
+                        badgeConfig.getEditingDeadline(),
+                        input.event,
+                        input.fursuitId,
+                        userId,
+                        null,
+                        isAdmin
+                );
+            }
+
             if (input.type == BadgeType.BADGE_FURSUIT) {
                 Objects.requireNonNull(input.fursuitId);
-                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId);
+                fursuitChecks.assertUserHasPermissionOnFursuit(userId, input.fursuitId, isAdmin);
             }
             log.info("[BADGE] User {} is deleting a {} badge: FursuitVal = {}",
                     userId, input.type, input.fursuitId);
@@ -62,9 +75,10 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
             @NotNull BadgeType type,
             @Nullable Long fursuitId,
-            @NotNull Event event
+            @NotNull Event event,
+            boolean checkTimeframe
     ) {}
 }

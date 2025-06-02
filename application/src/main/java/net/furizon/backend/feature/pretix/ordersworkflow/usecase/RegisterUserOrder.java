@@ -21,12 +21,13 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.LANG_PRETIX;
@@ -51,14 +52,15 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
         try {
             OrderController.suspendWebhook();
             final PretixInformation pretixService = input.pretixService;
-            final FurizonUser user = input.user;
-
-            final long userId = user.getUserId();
+            final long userId = input.userId;
             final Event event = pretixService.getCurrentEvent();
-            log.info("[PRETIX] User {} is trying to claim order {} with secret {}",
-                    user.getUserId(), input.code, input.secret);
+            log.info("[PRETIX] User {} is trying to claim order {} with secret {} (checkSecret = {})",
+                    userId, input.code, input.secret, input.checkSecret);
+            if (input.checkSecret) {
+                Objects.requireNonNull(input.secret);
+            }
 
-            Order order = orderFinder.findOrderByCodeEvent(input.code, event, pretixService);
+            Order order = orderFinder.findOrderByCodeEvent(input.code, event.getId(), pretixService);
             if (order == null) {
                 //If order is not in the db, try to fetch it
                 var eventInfo = event.getOrganizerAndEventPair();
@@ -84,13 +86,16 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
             }
 
             //Check if secret matches
-            if (!order.getPretixOrderSecret().equals(input.secret)) {
+            if (input.checkSecret && !order.getPretixOrderSecret().equals(input.secret)) {
                 throw new ApiException("Invalid secret", OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH);
             }
 
             //Check if user already owns an order
             Order prevOrder = orderFinder.findOrderByUserIdEvent(userId, event, pretixService);
             if (prevOrder != null) {
+                if (input.immediateErrorOnDuplicateOrder) {
+                    throw new ApiException("User already owns an order", OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
+                }
                 //If the order the user owns is the same we're trying to claim, do nothing and return
                 if (prevOrder.getCode().equals(input.code)) {
                     log.debug("[PRETIX] User {} already owned order {}", userId, input.code);
@@ -107,7 +112,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                     String prevDuplicateData = v.map(o -> (String) o).orElse("");
                     prevDuplicateData +=
                               "\n----------------------------\n"
-                            + "\nUserId: " + user.getUserId()
+                            + "\nUserId: " + userId
                             + "\nFursona name: " + mail == null ? "-" : mail.getFursonaName()
                             + "\nUser email: " + mail == null ? "-" : mail.getEmail()
                             + "\nOriginal order code: " + prevOrderCode;
@@ -172,9 +177,11 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
     }
 
     public record Input(
-            @NotNull FurizonUser user,
+            long userId,
+            boolean checkSecret,
+            boolean immediateErrorOnDuplicateOrder,
             @NotNull String code,
-            @NotNull String secret,
+            @Nullable String secret,
             @NotNull PretixInformation pretixService
     ) {}
 }

@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.GuestIdRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -37,13 +38,12 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
         long guestId = input.req.getGuestId();
         Event event = input.event;
 
-        checks.assertInTimeframeToEditRooms();
         RoomGuest guest = checks.getRoomGuestObjAndAssertItExists(guestId);
         checks.assertGuestIsConfirmed(guest);
         long roomId = guest.getRoomId();
         long targetUserId = guest.getUserId();
 
-        roomId = checks.getRoomIdAndAssertPermissionsOnRoom(requesterUserId, event, roomId);
+        roomId = checks.getRoomIdAssertPermissionCheckTimeframe(requesterUserId, event, roomId);
         checks.assertRoomNotConfirmed(roomId);
         checks.assertUserIsNotRoomOwner(targetUserId, roomId);
         checks.assertRoomFromCurrentEvent(roomId, event);

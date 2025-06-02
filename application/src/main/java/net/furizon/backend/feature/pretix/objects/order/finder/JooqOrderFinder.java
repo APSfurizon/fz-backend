@@ -59,13 +59,13 @@ public class JooqOrderFinder implements OrderFinder {
 
     @Override
     public @Nullable Order findOrderByCodeEvent(@NotNull String code,
-                                                @NotNull Event event,
+                                                long eventId,
                                                 @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
             .where(
                 ORDERS.ORDER_CODE.eq(code))
-                .and(ORDERS.EVENT_ID.eq(event.getId())
+                .and(ORDERS.EVENT_ID.eq(eventId)
             )
             .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
@@ -81,6 +81,15 @@ public class JooqOrderFinder implements OrderFinder {
                 ORDERS.USER_ID.eq(userId))
                 .and(ORDERS.EVENT_ID.eq(event.getId())
             )
+            .limit(1)
+        ).mapOrNull(e -> orderMapper.map(e, pretixService));
+    }
+
+    @Override
+    public @Nullable Order findOrderById(long orderId, @NotNull PretixInformation pretixService) {
+        return query.fetchFirst(
+            selectFrom()
+            .where(ORDERS.ID.eq(orderId))
             .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
     }
