@@ -11,6 +11,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.tables.EventSettings.EventSettingsPath;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.ExchangeConfirmationStatusPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
@@ -181,6 +182,19 @@ public class Events extends TableImpl<Record> {
     @Override
     public UniqueKey<Record> getPrimaryKey() {
         return Keys.EVENT_PKEY;
+    }
+
+    private transient EventSettingsPath _eventSettings;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.event_settings</code> table
+     */
+    public EventSettingsPath eventSettings() {
+        if (_eventSettings == null)
+            _eventSettings = new EventSettingsPath(this, null, Keys.EVENT_SETTINGS__EVENT_SETTINGS_EVENTS_FK.getInverseKey());
+
+        return _eventSettings;
     }
 
     private transient ExchangeConfirmationStatusPath _exchangeConfirmationStatus;

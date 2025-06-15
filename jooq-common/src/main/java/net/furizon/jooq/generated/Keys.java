@@ -8,6 +8,7 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.tables.Authentications;
 import net.furizon.jooq.generated.tables.EmailConfirmationRequest;
+import net.furizon.jooq.generated.tables.EventSettings;
 import net.furizon.jooq.generated.tables.Events;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus;
 import net.furizon.jooq.generated.tables.Fursuits;
@@ -56,6 +57,7 @@ public class Keys {
     public static final UniqueKey<Record> AUTHENTICATIONS_UNIQUE_USER_ID = Internal.createUniqueKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_unique_user_id"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, true);
     public static final UniqueKey<Record> MAIL_CONFIRM_PKEY = Internal.createUniqueKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_pkey"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.MAIL_CONFIRM_REQ_ID }, true);
     public static final UniqueKey<Record> MAIL_CONFIRM_UNIQUE_AUTH = Internal.createUniqueKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_unique_auth"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID }, true);
+    public static final UniqueKey<Record> EVENT_SETTINGS_PK = Internal.createUniqueKey(EventSettings.EVENT_SETTINGS, DSL.name("event_settings_pk"), new TableField[] { EventSettings.EVENT_SETTINGS.EVENT_ID }, true);
     public static final UniqueKey<Record> EVENT_PKEY = Internal.createUniqueKey(Events.EVENTS, DSL.name("event_pkey"), new TableField[] { Events.EVENTS.ID }, true);
     public static final UniqueKey<Record> EXCHANGE_CONFIRMATION_STATUS_PKEY = Internal.createUniqueKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("exchange_confirmation_status_pkey"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.EXCHANGE_ID }, true);
     public static final UniqueKey<Record> ONLY_ONE_CONCURRENT_EXCHANGE_PER_EVENT = Internal.createUniqueKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("only_one_concurrent_exchange_per_event"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID, ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.EVENT_ID }, true);
@@ -87,6 +89,7 @@ public class Keys {
 
     public static final ForeignKey<Record, Record> AUTHENTICATIONS__AUTHENTICATIONS_USERS_FK = Internal.createForeignKey(Authentications.AUTHENTICATIONS, DSL.name("authentications_users_fk"), new TableField[] { Authentications.AUTHENTICATIONS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> EMAIL_CONFIRMATION_REQUEST__MAIL_CONFIRM_AUTH_FK = Internal.createForeignKey(EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST, DSL.name("mail_confirm_auth_fk"), new TableField[] { EmailConfirmationRequest.EMAIL_CONFIRMATION_REQUEST.AUTHENTICATION_ID }, Keys.AUTHENTICATIONS_PKEY, new TableField[] { Authentications.AUTHENTICATIONS.AUTHENTICATION_ID }, true);
+    public static final ForeignKey<Record, Record> EVENT_SETTINGS__EVENT_SETTINGS_EVENTS_FK = Internal.createForeignKey(EventSettings.EVENT_SETTINGS, DSL.name("event_settings_events_fk"), new TableField[] { EventSettings.EVENT_SETTINGS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);
     public static final ForeignKey<Record, Record> EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_EVENT_FK = Internal.createForeignKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("exchange_confirmation_status_event_fk"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true);
     public static final ForeignKey<Record, Record> EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_SOURCE_USER_FK = Internal.createForeignKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("exchange_confirmation_status_source_user_fk"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.SOURCE_USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
     public static final ForeignKey<Record, Record> EXCHANGE_CONFIRMATION_STATUS__EXCHANGE_CONFIRMATION_STATUS_TARGET_USER_FK = Internal.createForeignKey(ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS, DSL.name("exchange_confirmation_status_target_user_fk"), new TableField[] { ExchangeConfirmationStatus.EXCHANGE_CONFIRMATION_STATUS.TARGET_USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true);
