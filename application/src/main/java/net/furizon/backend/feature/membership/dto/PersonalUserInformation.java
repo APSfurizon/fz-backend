@@ -102,6 +102,10 @@ public class PersonalUserInformation {
     @Size(max = 1000)
     private final String note;
 
+    @NotNull
+    @Pattern(regexp = "^[a-zA-Z0-9_]{5,32}$")
+    private final String telegramUsername;
+
     //Those are intended to be primitive types
     private final long id;
     private final long lastUpdatedEventId;
