@@ -210,11 +210,6 @@ public class Orders extends TableImpl<Record> {
     public final TableField<Record, String> ORDER_BUYER_LOCALE = createField(DSL.name("order_buyer_locale"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.orders.order_notes</code>.
-     */
-    public final TableField<Record, String> ORDER_NOTES = createField(DSL.name("order_notes"), SQLDataType.CLOB, this, "");
-
-    /**
      * The column <code>public.orders.order_internal_comment</code>.
      */
     public final TableField<Record, String> ORDER_INTERNAL_COMMENT = createField(DSL.name("order_internal_comment"), SQLDataType.CLOB, this, "");
