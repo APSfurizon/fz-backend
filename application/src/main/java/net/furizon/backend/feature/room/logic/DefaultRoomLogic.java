@@ -286,6 +286,16 @@ public class DefaultRoomLogic implements RoomLogic {
         ) > 0;
     }
 
+    @Override
+    public boolean isExchangeRoomSupported(@NotNull Event event) {
+        return true;
+    }
+
+    @Override
+    public boolean isExchangeFullOrderSupported(@NotNull Event event) {
+        return true;
+    }
+
     public void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
         if (!result) {
             log.error("[ROOM_EXCHANGE] result was false after executing step {} "
@@ -388,6 +398,16 @@ public class DefaultRoomLogic implements RoomLogic {
                 return result;
             }
         );
+    }
+
+    @Override
+    public boolean isRefundRoomSupported(@NotNull Event event) {
+        return true;
+    }
+
+    @Override
+    public boolean isRefundFullOrderSupported(@NotNull Event event) {
+        return true;
     }
 
     private RoomGuest switchRooms(long targetUsrId, long sourceUsrId, long roomId,

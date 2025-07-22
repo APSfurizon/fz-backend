@@ -62,6 +62,7 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
         boolean canExchange = roomEditingTimeAllowed && ordersNo > 0
+                && roomLogic.isExchangeFullOrderSupported(event)
                 && (info == null || info.getRoomOwner().getUserId() == userId)
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
         boolean canBuyOrUpgrade = roomLogic.isRoomBuyOrUpgradeSupported(event) && canExchange;

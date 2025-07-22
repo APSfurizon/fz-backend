@@ -107,7 +107,6 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final PretixRefundFinder pretixRefundFinder;
     @NotNull private final PretixPaymentFinder pretixPaymentFinder;
     @NotNull private final PushPretixAnswerAction pushPretixAnswerAction;
-    @NotNull private final ManualRefundPaymentAction refundPaymentAction;
     @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
 
     //Exchange room related stuff
@@ -126,6 +125,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public long createRoom(String name, long userId, @NotNull Event event) {
         checks.assertUserHasBoughtAroom(userId, event);
+        checks.assertUserIsNotInRoom(userId, event, false);
         return defaultRoomLogic.createRoom(name, userId, event);
     }
 
@@ -205,6 +205,16 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean unconfirmRoom(long roomId) {
         return false;
+    }
+
+    @Override
+    public boolean isExchangeRoomSupported(@NotNull Event event) {
+        return true;
+    }
+
+    @Override
+    public boolean isExchangeFullOrderSupported(@NotNull Event event) {
+        return true;
     }
 
     private record ExchangeResult(
@@ -736,6 +746,16 @@ public class UserBuysFullRoom implements RoomLogic {
         } finally {
             OrderController.resumeWebhook();
         }
+    }
+
+    @Override
+    public boolean isRefundRoomSupported(@NotNull Event event) {
+        return false;
+    }
+
+    @Override
+    public boolean isRefundFullOrderSupported(@NotNull Event event) {
+        return false;
     }
 
     @Override

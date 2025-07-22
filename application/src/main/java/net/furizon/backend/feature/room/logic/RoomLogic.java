@@ -35,14 +35,18 @@ public interface RoomLogic {
     boolean canUnconfirmRoom(long roomId);
     boolean unconfirmRoom(long roomId);
 
+    boolean isExchangeRoomSupported(@NotNull Event event);
+    boolean isExchangeFullOrderSupported(@NotNull Event event);
     boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                          @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event,
                               @NotNull PretixInformation pretixInformation);
+    boolean isRefundRoomSupported(@NotNull Event event);
+    boolean isRefundFullOrderSupported(@NotNull Event event);
     boolean refundRoom(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
-    boolean isRoomBuyOrUpgradeSupported(@NotNull Event even);
+    boolean isRoomBuyOrUpgradeSupported(@NotNull Event event);
     boolean buyOrUpgradeRoom(long newRoomItemId,
                              long newRoomPrice,
                              @Nullable Long oldRoomPaid,
