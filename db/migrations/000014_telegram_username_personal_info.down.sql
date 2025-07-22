@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS membership_info DROP COLUMN IF EXISTS info_telegram_username;

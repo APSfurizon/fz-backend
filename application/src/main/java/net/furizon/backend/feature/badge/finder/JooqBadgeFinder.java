@@ -180,7 +180,8 @@ public class JooqBadgeFinder implements BadgeFinder {
                 FURSUITS.USER_ID,
                 FURSUITS.FURSUIT_ID,
                 FURSUITS.FURSUIT_NAME,
-                FURSUITS.FURSUIT_SPECIES
+                FURSUITS.FURSUIT_SPECIES,
+                FURSUITS.SHOW_OWNER
             )
             .from(USERS)
             .innerJoin(ORDERS)
