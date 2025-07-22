@@ -38,6 +38,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                     MEMBERSHIP_INFO.INFO_PHONE,
                     MEMBERSHIP_INFO.INFO_ALLERGIES,
+                    MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME,
                     MEMBERSHIP_INFO.USER_ID,
                     MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID
                 )
@@ -59,6 +60,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getPrefixPhoneNumber(),
                     personalUserInformation.getPhoneNumber(),
                     personalUserInformation.getAllergies(),
+                    personalUserInformation.getTelegramUsername(),
                     userId,
                     event.getId()
                 )

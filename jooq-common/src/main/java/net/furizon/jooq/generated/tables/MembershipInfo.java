@@ -170,6 +170,11 @@ public class MembershipInfo extends TableImpl<Record> {
      */
     public final TableField<Record, String> INFO_GENDER = createField(DSL.name("info_gender"), SQLDataType.VARCHAR(64).defaultValue(DSL.field(DSL.raw("NULL::character varying"), SQLDataType.VARCHAR)), this, "");
 
+    /**
+     * The column <code>public.membership_info.info_telegram_username</code>.
+     */
+    public final TableField<Record, String> INFO_TELEGRAM_USERNAME = createField(DSL.name("info_telegram_username"), SQLDataType.CLOB.nullable(false), this, "");
+
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
