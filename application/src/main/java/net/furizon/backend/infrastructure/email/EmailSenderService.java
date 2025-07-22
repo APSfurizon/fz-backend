@@ -68,7 +68,7 @@ public class EmailSenderService implements EmailSender {
                                              @NotNull String templateName, MailVarPair... vars) {
         List<MailRequest> reqs = new ArrayList<>(users.size() + 8);
         for (Long user : users) {
-            reqs.add(new MailRequest(user, userFinder, templateName, vars));
+            reqs.add(new MailRequest(user, userFinder, templateName, vars).subject(subject));
         }
         return reqs;
     }

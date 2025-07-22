@@ -143,16 +143,19 @@ public class UpdateOrderInDb {
                                         );
 
                                         String idInYear = String.valueOf(card.getIdInYear());
-                                        emailSender.prepareAndSendForPermission(
-                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                            SUBJECT_MEMBERSHIP_FATAL_ERROR,
-                                            TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
-                                            MailVarPair.of(ORDER_CODE, order.getCode()),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
-                                            MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
-                                        );
+                                        //TODO DISABLED TO PREVENT EMAIL MASS SPAMMING TO ADMINS
+                                        if (false) {
+                                            emailSender.prepareAndSendForPermission(
+                                                Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                                SUBJECT_MEMBERSHIP_FATAL_ERROR,
+                                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
+                                                MailVarPair.of(ORDER_CODE, order.getCode()),
+                                                MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                                MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
+                                                MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                                MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                            );
+                                        }
                                     }
                                 }
                             }
