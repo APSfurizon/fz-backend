@@ -66,7 +66,11 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
             PretixRefund.RefundState state = refund.getState();
             if (state == PretixRefund.RefundState.DONE) {
                 String provider = refund.getProvider();
-                long balance = balanceForProvider.get(provider);
+                Long balance = balanceForProvider.get(provider);
+                if (balance == null) {
+                    balance = 0L;
+                }
+
                 balance -= PretixGenericUtils.fromStrPriceToLong(refund.getAmount());
                 balanceForProvider.put(provider, balance);
 
