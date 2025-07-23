@@ -145,6 +145,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @Override
     public boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.error("[ROOM_CONFIRMATION] Confirming room {} on event {}", roomId, event);
+        //Check that everything is ok
         long ownerId = checks.getOwnerFromRoomIdAndAssertItExists(roomId);
         checks.assertUserHasNotBoughtAroom(ownerId, event);
         if (!defaultRoomLogic.canConfirmRoom(roomId, event, pretixInformation)) {
@@ -152,6 +153,7 @@ public class UserBuysGenericSpot implements RoomLogic {
             return false;
         }
 
+        //Find roomItemId by current room size
         List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         short roomCapacity  = (short) roomMates.size();
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity(roomCapacity);
@@ -161,9 +163,11 @@ public class UserBuysGenericSpot implements RoomLogic {
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
+        //Obtain order + roomPositionId
         Order order = generalChecks.getOrderAndAssertItExists(ownerId, event, pretixInformation);
         long positionId = Objects.requireNonNull(order.getRoomPositionId());
 
+        //Update room item with the correct one
         //Quota check is handled automatically by pretix when updating the item
         PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                 order.getCode(),
@@ -176,6 +180,7 @@ public class UserBuysGenericSpot implements RoomLogic {
             return false;
         }
 
+        //Refetch order from pretix and update it in the db
         var orgEvt = event.getOrganizerAndEventPair();
         var pretixOrder = pretixOrderFinder.fetchOrderByCode(orgEvt.getOrganizer(), orgEvt.getEvent(), order.getCode());
         if (!pretixOrder.isPresent()) {
@@ -189,6 +194,7 @@ public class UserBuysGenericSpot implements RoomLogic {
             }
         }
 
+        //DB confirmation
         return defaultRoomLogic.confirmRoom(roomId, event, pretixInformation);
     }
 
@@ -207,6 +213,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @Override
     public boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.error("[ROOM_UNCONFIRMATION] Unconfirming room {} on event {}", roomId, event);
+        //Check that everything is ok
         long ownerId = checks.getOwnerFromRoomIdAndAssertItExists(roomId);
         checks.assertUserHasBoughtAroom(ownerId, event);
         if (!defaultRoomLogic.canUnconfirmRoom(roomId, event, pretixInformation)) {
@@ -214,11 +221,14 @@ public class UserBuysGenericSpot implements RoomLogic {
             return false;
         }
 
+        //Get item id for the noroom
         long noRoomItemId = (long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
 
+        //Fetch order + room position id
         Order order = generalChecks.getOrderAndAssertItExists(ownerId, event, pretixInformation);
         long positionId = Objects.requireNonNull(order.getRoomPositionId());
 
+        //Update room position on pretix
         PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
                 order.getCode(),
                 noRoomItemId,
@@ -230,6 +240,7 @@ public class UserBuysGenericSpot implements RoomLogic {
             return false;
         }
 
+        //Refetch order and update db
         var orgEvt = event.getOrganizerAndEventPair();
         var pretixOrder = pretixOrderFinder.fetchOrderByCode(orgEvt.getOrganizer(), orgEvt.getEvent(), order.getCode());
         if (!pretixOrder.isPresent()) {
@@ -243,6 +254,7 @@ public class UserBuysGenericSpot implements RoomLogic {
             }
         }
 
+        //DB unconfirmation
         return defaultRoomLogic.unconfirmRoom(roomId, event, pretixInformation);
     }
 
