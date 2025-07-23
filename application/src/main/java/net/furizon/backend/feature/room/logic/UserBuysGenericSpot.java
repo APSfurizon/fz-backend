@@ -9,6 +9,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.room.RoomChecks;
+import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -35,6 +36,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @NotNull private final MailRoomService mailService;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
+    @NotNull private final RoomGeneralSanityCheck sanityChecks;
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
@@ -200,6 +202,11 @@ public class UserBuysGenericSpot implements RoomLogic {
 
     @Override
     public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
-
+        sanityChecks.doSanityChecks(
+                roomId,
+                this,
+                pretixInformation,
+                detectedErrors
+        );
     }
 }

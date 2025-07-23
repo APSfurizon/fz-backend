@@ -26,6 +26,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPosi
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
+import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
@@ -92,14 +93,14 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_S
 @ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-full-room")
 public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final RoomChecks checks;
-    @NotNull private final MailRoomService mailService;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
+    @NotNull private final RoomGeneralSanityCheck sanityChecks;
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
-    @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender emailSender;
+
 
     //Buy or upgrade related stuff
     @NotNull private final DeletePretixPositionAction deletePretixPositionAction;
@@ -1092,217 +1093,13 @@ public class UserBuysFullRoom implements RoomLogic {
     public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
     }
 
-    private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
-        log.error(message, args);
-        if (logbook != null) {
-            logbook.add(message);
-        }
-    }
-
-    private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId,
-                                                                @NotNull String roomName, @NotNull String reason) {
-        return mailService.prepareBroadcastProblem(
-                roomId, TEMPLATE_SANITY_CHECK_DELETED,
-                MailVarPair.of(ROOM_NAME, roomName),
-                MailVarPair.of(SANITY_CHECK_REASON, reason)
-        );
-    }
-    private List<MailRequest> prepareSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
-                                                               @NotNull String roomName, @NotNull String reason) {
-        return mailService.prepareProblem(
-            new MailRequest(
-                ownerId, userFinder, TEMPLATE_SANITY_CHECK_KICK_OWNER,
-                MailVarPair.of(OTHER_FURSONA_NAME, fursonaName),
-                MailVarPair.of(ROOM_NAME, roomName),
-                MailVarPair.of(SANITY_CHECK_REASON, reason)
-            ),
-            new MailRequest(
-                userId, userFinder, TEMPLATE_SANITY_CHECK_KICK_USER,
-                MailVarPair.of(ROOM_NAME, roomName),
-                MailVarPair.of(SANITY_CHECK_REASON, reason)
-            )
-        );
-    }
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
-                               @Nullable List<String> detectedErrors) {
-        log.info("[ROOM SANITY CHECKS] Running room sanity check on room {}", roomId);
-        final Event event = pretixInformation.getCurrentEvent();
-        final long eventId = event.getId();
-        List<MailRequest> mails = new LinkedList<>();
-
-        //The following checks are done:
-        //- User in multiple rooms
-        //- Members exceed room maximum
-        //- Owner not in room
-        //- Owner has multiple rooms
-        //- Owner order status == canceled
-        //- Owner doesn't own a room
-        //- Owner has a daily ticket
-        //- User order status == canceled
-        //- User order is daily
-
-        //RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
-        final List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
-        final List<RoomGuestResponse> confirmedGuests =
-                guests.stream().filter(k -> k.getRoomGuest().isConfirmed()).toList();
-
-        String roomName = roomFinder.getRoomName(roomId);
-        roomName = roomName == null ? "" : roomName;
-
-        var ownerIdOpt = roomFinder.getOwnerUserIdFromRoomId(roomId);
-        if (!ownerIdOpt.isPresent()) {
-            //delete room, no owner found
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                    + "No owner found in room {}. Deleting the room", roomId);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_NO_OWNER));
-            this.deleteRoom(roomId);
-            return;
-        }
-        long ownerId = ownerIdOpt.get();
-        Order order = orderFinder.findOrderByUserIdEvent(ownerId, event, pretixInformation);
-        if (order == null) {
-            //delete room, owner has no order
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                    + "Owner {} of room {} has no order. Deleting the room", ownerId, roomId);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_HAS_NO_ORDER));
-            this.deleteRoom(roomId);
-            return;
-        }
-        if (!order.hasRoom()) {
-            //delete room, owner has no room
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                    + "Owner {} of room {} hasn't bought a room. Deleting the room", ownerId, roomId);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_HAS_NOT_BOUGHT_ROOM));
-            this.deleteRoom(roomId);
-            return;
-        }
-        if (order.isDaily()) {
-            //delete room, owner has daily ticket
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                    + "Owner {} of room {} has a daily ticket. Deleting the room", ownerId, roomId);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_HAS_DAILY_TICKET));
-            this.deleteRoom(roomId);
-            return;
-        }
-
-        int guestNo = confirmedGuests.size();
-        int capacity = (int) order.getRoomCapacity();
-        if (guestNo > capacity) {
-            //delete room, too many members!
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                    + "Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_TOO_MANY_MEMBERS));
-            this.deleteRoom(roomId);
-            return;
-        }
-
-        boolean ownerFound = false;
-        for (RoomGuestResponse guest : confirmedGuests) {
-            long usrId = guest.getUser().getUserId();
-            long guestId = guest.getRoomGuest().getGuestId();
-
-            UserEmailData mail = userFinder.getMailDataForUser(usrId);
-            String fursona = mail == null ? null : mail.getFursonaName();
-            fursona = fursona == null ? "" : fursona;
-
-            //This (together with owner in room check) will also test if a owner has multiple rooms
-            int roomNo = roomFinder.countRoomsWithUser(usrId, eventId);
-            if (roomNo > 1) {
-                if (usrId == ownerId) {
-                    //delete room, owner is in too many rooms
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "Owner {} of room {} is in too many rooms ({})!. Deleting the room", usrId, roomId, roomNo);
-                    mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_IN_TOO_MANY_ROOMS));
-                    this.deleteRoom(roomId);
-                    return;
-                } else {
-                    //kick user, he's in too many rooms
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "User {}g{} of room {} is in too many rooms ({})!. Kicking the user",
-                        usrId, guestId, roomId, roomNo);
-                    mails.addAll(prepareSanityCheckMailUserKicked(
-                            ownerId, usrId, fursona, roomName, SC_USER_IN_TOO_MANY_ROOMS
-                    ));
-                    this.kickFromRoom(guestId);
-                    continue;
-                }
-            }
-
-            OrderStatus status = guest.getOrderStatus();
-            if (status == null || status == OrderStatus.CANCELED) {
-                if (usrId == ownerId) {
-                    //delete room, owner's order is canceled
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "Owner {} of room {} has a canceled order!. Deleting the room", usrId, roomId);
-                    mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_ORDER_INVALID_STATUS));
-                    this.deleteRoom(roomId);
-                    return;
-                } else {
-                    //kick user, his order is canceled
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "User {}g{} of room {} has a canceled order!. Kicking the user", usrId, guestId, roomId);
-                    mails.addAll(prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName,
-                            SC_USER_ORDER_INVALID_ORDER_STATUS));
-                    this.kickFromRoom(guestId);
-                    continue;
-                }
-            }
-
-            var daily = orderFinder.isOrderDaily(usrId, event);
-            if (!daily.isPresent()) {
-                if (usrId == ownerId) {
-                    //delete room, owner has no order
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "Owner {} of room {} has no order. Deleting the room", usrId, roomId);
-                    mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_HAS_NO_ORDER));
-                    this.deleteRoom(roomId);
-                    return;
-                } else {
-                    //kick user, user has no order
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "User {}g{} of room {} has no order. Kicking the user", usrId, guestId, roomId);
-                    mails.addAll(
-                            prepareSanityCheckMailUserKicked(ownerId, usrId, fursona, roomName, SC_USER_HAS_NO_ORDER)
-                    );
-                    this.kickFromRoom(guestId);
-                    continue;
-                }
-            }
-            if (daily.get()) {
-                if (usrId == ownerId) {
-                    //delete room, owner has a daily ticket
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "Owner {} of room {} has a daily ticket. Deleting the room", usrId, roomId);
-                    mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_HAS_DAILY_TICKET));
-                    this.deleteRoom(roomId);
-                    return;
-                } else {
-                    //kick user, he has a daily ticket
-                    sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                        + "User {}g{} of room {} has a daily ticket. Kicking the user", usrId, guestId, roomId);
-                    mails.addAll(prepareSanityCheckMailUserKicked(
-                            ownerId, usrId, fursona, roomName, SC_USER_HAS_DAILY_TICKET
-                    ));
-                    this.kickFromRoom(guestId);
-                    continue;
-                }
-            }
-
-            if (usrId == ownerId) {
-                ownerFound = true;
-            }
-        }
-
-        if (!ownerFound) {
-            //delete room, owner is not in room!
-            sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
-                + "Owner {} of room {} was not found in the room's guest. Deleting the room", ownerId, roomId);
-            mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_OWNER_NOT_IN_ROOM));
-            this.deleteRoom(roomId);
-            return;
-        }
-
-        mailService.fireAndForgetMany(mails);
+    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
+        sanityChecks.doSanityChecks(
+                roomId,
+                this,
+                pretixInformation,
+                detectedErrors
+        );
     }
 }
