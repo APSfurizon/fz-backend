@@ -234,7 +234,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
+    public boolean canConfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         if (!isConfirmationSupported()) {
             return false;
         }
@@ -254,7 +254,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean confirmRoom(long roomId) {
+    public boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Room {} has been confirmed!", roomId);
         //Deletes pending invitations
         command.execute(
@@ -278,7 +278,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canUnconfirmRoom(long roomId) {
+    public boolean canUnconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         if (!isUnconfirmationSupported()) {
             return false;
         }
@@ -287,7 +287,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean unconfirmRoom(long roomId) {
+    public boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Room {} has been unconfirmed!", roomId);
         return command.execute(
             PostgresDSL.update(ROOMS)

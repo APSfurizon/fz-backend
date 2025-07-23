@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -54,8 +55,8 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
                 .roomOwner(owner)
                 .userIsOwner(true)
                 .confirmed(false)
-                .canConfirm(roomLogic.canConfirmRoom(roomId, event))
-                .roomData(roomData)
+                .canConfirm(roomLogic.canConfirmRoom(roomId, event, input.pretixInformation))
+                .roomData(Objects.requireNonNull(roomData))
                 .guests(new LinkedList<>())
                 .build();
     }

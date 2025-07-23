@@ -16,6 +16,8 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 
 @Component
@@ -88,6 +90,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         String roomName = sp[1];
                         short capacity = Short.parseShort(sp[2]);
                         result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
+                        result.capacityToRoomItemIds().computeIfAbsent(capacity, k -> new ArrayList<>()).add(productId);
                         Map<String, String> names = product.getCustomNames();
                         names = names.isEmpty() ? product.getNames() : names;
                         result.roomPretixItemIdToNames().put(productId, names);

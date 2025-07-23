@@ -47,14 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -148,6 +141,9 @@ public class CachedPretixInformation implements PretixInformation {
     //map (capacity, hotelName) -> lateExtraDays item id
     @NotNull
     private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
+    //map capacity -> List[id of room items with that capacity]
+    @NotNull
+    private final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
 
     //Countries
     @NotNull
@@ -221,6 +217,14 @@ public class CachedPretixInformation implements PretixInformation {
         var v = roomIdToInfo.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
         return v;
+    }
+
+    @Override
+    public @NotNull List<Long> getRoomItemIdsForCapacity(short capacity) {
+        lock.readLock().lock();
+        List<Long> v = roomCapacityToItemId.getIfPresent(capacity);
+        lock.readLock().unlock();
+        return v == null ? Collections.emptyList() : v;
     }
 
     @Override
@@ -661,6 +665,7 @@ public class CachedPretixInformation implements PretixInformation {
         roomPretixItemIdToNames.invalidateAll();
         roomIdToEarlyExtraDayItemId.invalidateAll();
         roomIdToLateExtraDayItemId.invalidateAll();
+        roomCapacityToItemId.invalidateAll();
     }
 
 
@@ -752,6 +757,7 @@ public class CachedPretixInformation implements PretixInformation {
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
         roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
         roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
+        roomCapacityToItemId.putAll(products.capacityToRoomItemIds());
     }
 
     private void reloadQuotas(@NotNull Event event) {

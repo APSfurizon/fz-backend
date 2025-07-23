@@ -197,14 +197,14 @@ public class RoomChecks {
         }
     }
 
-    public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event, @NotNull RoomLogic logic) {
-        if (!logic.canConfirmRoom(roomId, event)) {
+    public void assertRoomCanBeConfirmed(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, @NotNull RoomLogic logic) {
+        if (!logic.canConfirmRoom(roomId, event, pretixInformation)) {
             log.error("Room {} cannot be confirmed!", roomId);
             throw new ApiException("Room cannot be confirmed", RoomErrorCodes.ROOM_CANNOT_BE_CONFIRMED);
         }
     }
-    public void assertRoomCanBeUnconfirmed(long roomId, @NotNull RoomLogic logic) {
-        if (!logic.canUnconfirmRoom(roomId)) {
+    public void assertRoomCanBeUnconfirmed(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, @NotNull RoomLogic logic) {
+        if (!logic.canUnconfirmRoom(roomId, event, pretixInformation)) {
             log.error("Room {} cannot be unconfirmed!", roomId);
             throw new ApiException("Room cannot be unconfirmed", RoomErrorCodes.ROOM_CANNOT_BE_UNCONFIRMED);
         }
@@ -315,7 +315,7 @@ public class RoomChecks {
         }
     }
 
-    private void assertRoomFound(Optional<?> o, long roomId) {
+    public void assertRoomFound(Optional<?> o, long roomId) {
         if (!o.isPresent()) {
             log.error("Room {} was not found!", roomId);
             throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);

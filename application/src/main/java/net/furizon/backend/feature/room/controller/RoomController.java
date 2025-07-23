@@ -287,7 +287,8 @@ public class RoomController {
                 new CanConfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -308,7 +309,8 @@ public class RoomController {
                 new CanUnconfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }

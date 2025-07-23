@@ -184,18 +184,18 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
+    public boolean canConfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return false;
     }
 
     @Override
-    public boolean canUnconfirmRoom(long roomId) {
+    public boolean canUnconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return false;
     }
 
     @Override
-    public boolean confirmRoom(long roomId) {
-        return defaultRoomLogic.confirmRoom(roomId);
+    public boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        return false;
     }
 
     @Override
@@ -204,7 +204,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public boolean unconfirmRoom(long roomId) {
+    public boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return false;
     }
 

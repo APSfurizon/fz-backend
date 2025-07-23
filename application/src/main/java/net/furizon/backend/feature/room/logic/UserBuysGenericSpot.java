@@ -11,12 +11,15 @@ import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.feature.room.dto.RoomErrorCodes;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -110,12 +113,33 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
-        return false;
+    public boolean canConfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, true);
+        List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity((short) roomMates.size());
+
+        if (possibleRoomItemIds.isEmpty()) {
+            log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({})", roomMates.size());
+            return false;
+        }
+
+        long roomItemId = possibleRoomItemIds.getFirst();
+        var q = pretixInformation.getSmallestAvailabilityFromItemId(roomItemId);
+        if (!q.isPresent()) {
+            log.error("[ROOM_CONFIRMATION] Confirming room {} on event {}: Unable to fetch quota of item {}", roomId, event, roomItemId);
+            return false;
+        }
+        if (!q.get().isAvailable()) {
+            return false;
+        }
+
+        var o = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        checks.assertRoomFound(o, roomId);
+        checks.assertUserHasNotBoughtAroom(o.get(), event);
+        return defaultRoomLogic.canConfirmRoom(roomId, event, pretixInformation);
     }
 
     @Override
-    public boolean confirmRoom(long roomId) {
+    public boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return false;
     }
 
@@ -125,12 +149,15 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public boolean canUnconfirmRoom(long roomId) {
-        return false;
+    public boolean canUnconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        var o = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        checks.assertRoomFound(o, roomId);
+        checks.assertUserHasBoughtAroom(o.get(), event);
+        return defaultRoomLogic.canUnconfirmRoom(roomId, event, pretixInformation);
     }
 
     @Override
-    public boolean unconfirmRoom(long roomId) {
+    public boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         return false;
     }
 

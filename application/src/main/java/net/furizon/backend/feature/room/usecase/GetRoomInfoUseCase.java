@@ -37,7 +37,8 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
     public @NotNull RoomInfoResponse executor(@NotNull GetRoomInfoUseCase.Input input) {
         long userId = input.userId;
         Event event = input.event;
-        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
+        PretixInformation pretixInformation = input.pretixInformation;
+        RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, pretixInformation, roomLogic);
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = input.ignoreEditingTime
@@ -50,12 +51,12 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
             info.setCanConfirm(isOwner && editingTimeAllowed
-                               && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, event));
+                               && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, event, pretixInformation));
             info.setCanUnconfirm(isOwner && editingTimeAllowed
-                               && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
+                               && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId, event, pretixInformation));
             info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
             info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
-            roomLogic.updateRoomCapacity(info.getRoomData(), event, input.pretixInformation);
+            roomLogic.updateRoomCapacity(info.getRoomData(), event, pretixInformation);
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
 

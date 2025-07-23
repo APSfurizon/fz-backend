@@ -48,7 +48,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         roomChecks.assertRoomNotConfirmed(roomId);
-        roomChecks.assertRoomCanBeConfirmed(roomId, event, roomLogic);
+        roomChecks.assertRoomCanBeConfirmed(roomId, event, input.pretixInformation, roomLogic);
         roomChecks.assertRoomFromCurrentEvent(roomId, event);
         roomFinder.getRoomGuestsFromRoomId(roomId, true)
                   .forEach(g -> generalChecks.assertOrderIsPaid(g.getUserId(), event));
@@ -60,7 +60,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
             return false;
         }
 
-        boolean res = roomLogic.confirmRoom(roomId);
+        boolean res = roomLogic.confirmRoom(roomId, event, input.pretixInformation);
         if (res) {
             Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
             if (roomItemId != null) {

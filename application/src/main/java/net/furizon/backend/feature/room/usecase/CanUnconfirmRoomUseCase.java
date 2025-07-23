@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -29,15 +30,15 @@ public class CanUnconfirmRoomUseCase implements UseCase<CanUnconfirmRoomUseCase.
                 event,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
-        checks.assertRoomConfirmed(roomId);
         checks.assertRoomFromCurrentEvent(roomId, event);
 
-        return roomLogic.canUnconfirmRoom(roomId);
+        return roomLogic.canUnconfirmRoom(roomId, event, input.pretixInformation);
     }
 
     public record Input(
             @NotNull FurizonUser user,
             @Nullable RoomIdRequest roomReq,
-            @NotNull Event event
+            @NotNull Event event,
+            @NotNull PretixInformation pretixInformation
     ) {}
 }

@@ -30,11 +30,11 @@ public interface RoomLogic {
     boolean leaveRoom(long guestId);
 
     boolean isConfirmationSupported();
-    boolean canConfirmRoom(long roomId, @NotNull Event event);
-    boolean confirmRoom(long roomId);
+    boolean canConfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+    boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean isUnconfirmationSupported();
-    boolean canUnconfirmRoom(long roomId);
-    boolean unconfirmRoom(long roomId);
+    boolean canUnconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+    boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     boolean isExchangeRoomSupported(@NotNull Event event);
     boolean isExchangeFullOrderSupported(@NotNull Event event);
