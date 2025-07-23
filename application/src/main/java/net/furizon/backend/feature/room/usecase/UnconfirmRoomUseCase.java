@@ -43,7 +43,8 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomConfirmed(roomId);
-        checks.assertRoomCanBeUnconfirmed(roomId, event, input.pretixInformation, roomLogic);
+        //Following check should be done inside the confirmation method for performance reasons
+        //checks.assertRoomCanBeUnconfirmed(roomId, event, input.pretixInformation, roomLogic);
         checks.assertRoomFromCurrentEvent(roomId, event);
 
         boolean res = roomLogic.unconfirmRoom(roomId, event, input.pretixInformation);

@@ -610,7 +610,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 Function<String, Boolean> fetchAndUpdateOrder = (orderCode) -> {
                     var order = pretixOrderFinder.fetchOrderByCode(organizerName, eventName, orderCode);
                     if (!order.isPresent()) {
-                        log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}:"
+                        log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
                                 + "Unable to refetch order {} from pretix",
                                 sourceUsrId, targetUsrId, event, orderCode);
                         return false;

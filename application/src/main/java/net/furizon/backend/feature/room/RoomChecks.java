@@ -252,6 +252,11 @@ public class RoomChecks {
             throw new ApiException("User has no rights over specified guest!", GeneralResponseCodes.USER_IS_NOT_ADMIN);
         }
     }
+    public long getOwnerFromRoomIdAndAssertItExists(long roomId) {
+        var o = roomFinder.getOwnerUserIdFromRoomId(roomId);
+        assertRoomFound(o, roomId);
+        return o.get();
+    }
 
     public void assertRoomNotFull(long roomId, boolean onlyConfirmed) {
         List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, onlyConfirmed);
