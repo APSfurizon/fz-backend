@@ -223,6 +223,21 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    @Override
+    public @Nullable HotelCapacityPair getBiggestRoomCapacity() {
+        HotelCapacityPair biggest = null;
+        short maxCapacity = 0;
+        lock.readLock().lock();
+        for (HotelCapacityPair p : roomIdToInfo.asMap().values()) {
+            if (p.capacity() > maxCapacity) {
+                maxCapacity = p.capacity();
+                biggest = p;
+            }
+        }
+        lock.readLock().unlock();
+        return biggest;
+    }
+
     @NotNull
     @Override
     public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {

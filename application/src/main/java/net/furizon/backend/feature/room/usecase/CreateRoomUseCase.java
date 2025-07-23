@@ -43,7 +43,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
         generalChecks.assertOrderIsPaid(userId, event);
 
         String name = input.createRoomRequest.getName();
-        long roomId = roomLogic.createRoom(name, userId, event);
+        long roomId = roomLogic.createRoom(name, userId, event, input.pretixInformation);
 
         RoomData roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
         UserDisplayData owner = userFinder.getDisplayUser(userId, event);

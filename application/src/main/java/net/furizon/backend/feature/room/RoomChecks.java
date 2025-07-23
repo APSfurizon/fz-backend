@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -261,6 +263,21 @@ public class RoomChecks {
         }
 
         if (capacity.get() <= roomMates.size()) {
+            log.error("Room {} is already full!", roomId);
+            throw new ApiException("Room is full", RoomErrorCodes.ROOM_FULL);
+        }
+    }
+
+    public void assertRoomLessThenBiggestCapacity(long roomId, boolean onlyConfirmed, @NotNull PretixInformation pretixInformation) {
+        List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, onlyConfirmed);
+        HotelCapacityPair p = pretixInformation.getBiggestRoomCapacity();
+
+        if (p == null) {
+            log.error("Unable to get biggest room capacity");
+            throw new ApiException("Room not found", RoomErrorCodes.ROOM_NOT_FOUND);
+        }
+
+        if (p.capacity() <= roomMates.size()) {
             log.error("Room {} is already full!", roomId);
             throw new ApiException("Room is full", RoomErrorCodes.ROOM_FULL);
         }

@@ -26,6 +26,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPosi
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -123,10 +124,9 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public long createRoom(String name, long userId, @NotNull Event event) {
+    public long createRoom(String name, long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertUserHasBoughtAroom(userId, event);
-        checks.assertUserIsNotInRoom(userId, event, false);
-        return defaultRoomLogic.createRoom(name, userId, event);
+        return defaultRoomLogic.createRoom(name, userId, event, pretixInformation);
     }
 
     @Override
@@ -144,17 +144,17 @@ public class UserBuysFullRoom implements RoomLogic {
 
     @Override
     public long invitePersonToRoom(
-            long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit) {
+            long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit) {
         checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
-        return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, force, forceExit);
+        return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, pretixInformation, force, forceExit);
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
-        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event);
+        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event, pretixInformation);
     }
 
     @Override
@@ -1086,6 +1086,10 @@ public class UserBuysFullRoom implements RoomLogic {
         // we can just use it
         ExtraDays ownerExtraDays = Objects.requireNonNull(room.getRoomExtraDays());
         guests.forEach(g -> g.setExtraDays(ownerExtraDays));
+    }
+
+    @Override
+    public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
     }
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {

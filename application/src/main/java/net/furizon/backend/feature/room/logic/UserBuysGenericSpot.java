@@ -9,6 +9,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.room.RoomChecks;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Primary
@@ -46,55 +48,58 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public long createRoom(String name, long userId, @NotNull Event event) {
+    public long createRoom(String name, long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertUserHasNotBoughtAroom(userId, event);
-        checks.assertUserIsNotInRoom(userId, event, false);
-        return defaultRoomLogic.createRoom(name, userId, event);
+        return defaultRoomLogic.createRoom(name, userId, event, pretixInformation);
     }
 
     @Override
     public boolean deleteRoom(long roomId) {
-        return false;
+        return defaultRoomLogic.deleteRoom(roomId);
     }
 
     @Override
     public boolean changeRoomName(String name, long roomId) {
-        return false;
+        return defaultRoomLogic.changeRoomName(name, roomId);
     }
 
     @Override
     public boolean setShowInNosecount(boolean showInNosecount, long roomId) {
-        return false;
+        return defaultRoomLogic.setShowInNosecount(showInNosecount, roomId);
     }
 
     @Override
-    public long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit) {
-        return 0;
+    public long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit) {
+        checks.assertRoomLessThenBiggestCapacity(roomId, true, pretixInformation);
+        checks.assertUserHasNotBoughtAroom(invitedUserId, event);
+        return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, pretixInformation, force, forceExit);
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
-        return false;
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        checks.assertRoomLessThenBiggestCapacity(roomId, true, pretixInformation);
+        checks.assertUserHasNotBoughtAroom(invitedUserId, event);
+        return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event, pretixInformation);
     }
 
     @Override
     public boolean inviteRefuse(long guestId) {
-        return false;
+        return defaultRoomLogic.inviteRefuse(guestId);
     }
 
     @Override
     public boolean inviteCancel(long guestId) {
-        return false;
+        return defaultRoomLogic.inviteCancel(guestId);
     }
 
     @Override
     public boolean kickFromRoom(long guestId) {
-        return false;
+        return defaultRoomLogic.kickFromRoom(guestId);
     }
 
     @Override
     public boolean leaveRoom(long guestId) {
-        return false;
+        return defaultRoomLogic.leaveRoom(guestId);
     }
 
     @Override
@@ -114,7 +119,7 @@ public class UserBuysGenericSpot implements RoomLogic {
 
     @Override
     public boolean isUnconfirmationSupported() {
-        return false;
+        return true;
     }
 
     @Override
@@ -137,11 +142,13 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        //TODO implement when pretix is updated
         log.warn("Exchange of room not supported with UserBuysGenericSpot");
         return false;
     }
     @Override
     public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        //TODO implement when pretix is updated
         log.warn("Exchange of full orders not supported with UserBuysGenericSpot");
         return false;
     }
@@ -183,6 +190,13 @@ public class UserBuysGenericSpot implements RoomLogic {
     @Override
     public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
 
+    }
+
+    @Override
+    public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        if (roomData.getRoomCapacity() <= 0) {
+            roomData.setRoomCapacity(Objects.requireNonNull(pretixInformation.getBiggestRoomCapacity()).capacity());
+        }
     }
 
     @Override

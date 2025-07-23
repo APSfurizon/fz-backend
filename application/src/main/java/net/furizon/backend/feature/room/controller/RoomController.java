@@ -175,7 +175,8 @@ public class RoomController {
                 new InviteToRoomUseCase.Input(
                         user,
                         inviteToRoomRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -193,7 +194,8 @@ public class RoomController {
                 new InviteAcceptUseCase.Input(
                         user,
                         guestIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }

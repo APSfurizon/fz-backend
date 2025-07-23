@@ -55,6 +55,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
                                && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId));
             info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
             info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
+            roomLogic.updateRoomCapacity(info.getRoomData(), event, input.pretixInformation);
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
 
@@ -88,20 +89,27 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         boolean canCreateRoom = editingTimeAllowed && hasOrder
                 && info == null && roomLogic.canCreateRoom(userId, event);
         boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(event);
+        boolean exchangeSupported = roomLogic.isExchangeRoomSupported(event);
 
-        boolean canExchange = editingTimeAllowed && isOwner && hasOrder
-                && roomLogic.isExchangeRoomSupported(event)
+        boolean canExchange = editingTimeAllowed && isOwner && hasOrder && exchangeSupported
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
         boolean canBuyOrUpgrade = canExchange && buyOrUpgradeSupported;
 
         log.debug("RoomInfo: info={} userid={} event={} editingTimeAllowed={} isOwner={} hasOrder={}",
                 info, userId, event, editingTimeAllowed, isOwner, hasOrder);
 
-        return new RoomInfoResponse(
-                info, hasOrder, editingTimeAllowed,
-                canCreateRoom, buyOrUpgradeSupported, canBuyOrUpgrade, canExchange,
-                endRoomEditingTime, invitations
-        );
+        return RoomInfoResponse.builder()
+                .currentRoomInfo(info)
+                .hasOrder(hasOrder)
+                .allowedModifications(editingTimeAllowed)
+                .canCreateRoom(canCreateRoom)
+                .buyOrUpgradeRoomSupported(buyOrUpgradeSupported)
+                .canBuyOrUpgradeRoom(canBuyOrUpgrade)
+                .exchangeSupported(exchangeSupported)
+                .canExchange(canExchange)
+                .editingRoomEndTime(endRoomEditingTime)
+                .invitations(invitations)
+            .build();
     }
 
     public record Input(

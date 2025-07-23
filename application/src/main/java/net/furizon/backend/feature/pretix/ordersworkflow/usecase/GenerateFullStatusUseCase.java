@@ -61,22 +61,25 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean roomEditingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, input.pretixInformation, roomLogic);
-        boolean canExchange = roomEditingTimeAllowed && ordersNo > 0
-                && roomLogic.isExchangeFullOrderSupported(event)
+        boolean exchangeSupported = roomLogic.isExchangeFullOrderSupported(event);
+        boolean canExchange = roomEditingTimeAllowed && ordersNo > 0 && exchangeSupported
                 && (info == null || info.getRoomOwner().getUserId() == userId)
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
-        boolean canBuyOrUpgrade = roomLogic.isRoomBuyOrUpgradeSupported(event) && canExchange;
+        boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(event);
+        boolean canBuyOrUpgrade = buyOrUpgradeSupported && canExchange;
 
         return FullInfoResponse.builder()
-            .bookingStartTime(startBooking)
-            .shouldDisplayCountdown(displayCountdown)
-            .editBookEndTime(pretixConfig.getEvent().getEditBookingEndTime())
-            .hasActiveMembershipForEvent(membershipNo > 0)
-            .canBuyOrUpgradeRoom(canBuyOrUpgrade)
-            .canExchange(canExchange)
-            .eventNames(event.getEventNames())
-            .order(orderDataResponse)
-            .errors(errors)
+                .bookingStartTime(startBooking)
+                .shouldDisplayCountdown(displayCountdown)
+                .editBookEndTime(pretixConfig.getEvent().getEditBookingEndTime())
+                .hasActiveMembershipForEvent(membershipNo > 0)
+                .buyOrUpgradeSupported(buyOrUpgradeSupported)
+                .canBuyOrUpgradeRoom(canBuyOrUpgrade)
+                .exchangeSupported(exchangeSupported)
+                .canExchange(canExchange)
+                .eventNames(event.getEventNames())
+                .order(orderDataResponse)
+                .errors(errors)
             .build();
     }
 

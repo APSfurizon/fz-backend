@@ -12,6 +12,7 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -53,7 +54,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
         roomChecks.assertUserDoesNotOwnAroom(targetUserId, event);
         generalChecks.assertUserHasOrderAndItsNotDaily(targetUserId, event);
 
-        boolean res = roomLogic.inviteAccept(guestId, targetUserId, roomId, event);
+        boolean res = roomLogic.inviteAccept(guestId, targetUserId, roomId, event, input.pretixInformation);
         if (res) {
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
@@ -70,6 +71,7 @@ public class InviteAcceptUseCase implements UseCase<InviteAcceptUseCase.Input, B
     public record Input(
             @NotNull FurizonUser user,
             @NotNull GuestIdRequest req,
-            @NotNull Event event
+            @NotNull Event event,
+            @NotNull PretixInformation pretixInformation
     ) {}
 }
