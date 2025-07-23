@@ -184,12 +184,11 @@ public class UserBuysGenericSpot implements RoomLogic {
 
     @Override
     public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
-        return null;
+        return orderFinder.getExtraDaysOfUser(userId, eventId);
     }
 
     @Override
     public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
-
     }
 
     @Override

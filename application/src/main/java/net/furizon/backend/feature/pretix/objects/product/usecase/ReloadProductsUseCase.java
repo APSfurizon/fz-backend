@@ -48,15 +48,28 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     String s = identifier.substring(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
                     String[] sp = s.split("_");
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
-                    String hotelName = sp[1];
-                    String roomName = sp[2];
-                    short capacity = Short.parseShort(sp[3]);
                     result.extraDaysIdToDay().put(productId, ed);
-                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
-                    if (ed == ExtraDays.EARLY) {
-                        result.earlyDaysItemId().put(hcPair, productId);
-                    } else if (ed == ExtraDays.LATE) {
-                        result.lateDaysItemId().put(hcPair, productId);
+                    switch (sp.length) {
+                        case 1: {
+                            //Do nothing, we've already done in parsing
+                            break;
+                        }
+                        case 4: {
+                            String hotelName = sp[1];
+                            String roomName = sp[2];
+                            short capacity = Short.parseShort(sp[3]);
+                            HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
+                            if (ed == ExtraDays.EARLY) {
+                                result.earlyDaysItemId().put(hcPair, productId);
+                            } else if (ed == ExtraDays.LATE) {
+                                result.lateDaysItemId().put(hcPair, productId);
+                            }
+                            break;
+                        }
+                        default: {
+                            log.error("Invalid extra days identifier length: '{}' ({}) for item {}", s, sp.length, productId);
+                            break;
+                        }
                     }
 
                 } else if (identifier.startsWith(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
