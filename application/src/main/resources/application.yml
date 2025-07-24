@@ -106,6 +106,7 @@ pretix:
   enable-sync: ${PRETIX_ENABLE_INIT_SYNC:true}
   default-organizer: ${PRETIX_DEFAULT_ORGANIZER:org}
   default-event: ${PRETIX_DEFAULT_EVENT:event}
+  healthcheck-enabled: ${PRETIX_HEALTHCHECK_ENABLED:true}
   healthcheck-retries: ${PRETIX_HEALTHCHECK_RETRIES:100}
   api:
     url: ${PRETIX_API_URL:http://localhost:8000}

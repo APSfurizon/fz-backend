@@ -24,6 +24,10 @@ public class PretixHealthcheckFinder implements PretixHealthcheck {
 
     @Override
     public boolean runHealthcheck() {
+        if (!pretixConfig.isHealthcheckEnabled()) {
+            return true;
+        }
+
         try {
             final var request = HttpRequest.<String>create()
                     .method(HttpMethod.GET)
