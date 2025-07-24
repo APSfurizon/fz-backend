@@ -116,6 +116,11 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                 MEMBERSHIP_INFO.INFO_ALLERGIES,
                 MEMBERSHIP_INFO.USER_ID,
+                MEMBERSHIP_INFO.INFO_ID_TYPE,
+                MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                MEMBERSHIP_INFO.INFO_SHIRT_SIZE,
                 MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL,
                 USERS.USER_ID,
@@ -178,7 +183,6 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                 MEMBERSHIP_INFO.INFO_ALLERGIES,
                 MEMBERSHIP_INFO.USER_ID,
-                MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)

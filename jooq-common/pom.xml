@@ -42,6 +42,12 @@
             <artifactId>annotations</artifactId>
             <version>${org.jetbrains.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.furizon</groupId>
+            <artifactId>fz-jooq-utils</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -75,6 +81,11 @@
                         <artifactId>jooq-meta</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>net.furizon</groupId>
+                        <artifactId>fz-jooq-utils</artifactId>
+                        <version>0.0.1-SNAPSHOT</version>
+                    </dependency>
                 </dependencies>
                 <configuration>
                     <!--<logging>WARN</logging>-->
@@ -102,6 +113,9 @@
                             <deprecated>false</deprecated>
                             <pojos>false</pojos>
                         </generate>
+                        <strategy>
+                            <name>net.furizon.jooq.strategies.FzGeneratorStrategy</name>
+                        </strategy>
                         <target>
                             <packageName>net.furizon.jooq.generated</packageName>
                             <directory>src/main/java</directory>

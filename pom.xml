@@ -26,6 +26,7 @@
         <!-- Add module names here -->
         <module>application</module>
         <module>jooq-common</module>
+        <module>fz-jooq-utils</module>
     </modules>
     <properties>
         <java.version>23</java.version>
@@ -34,7 +35,7 @@
         <spring.boot.version>3.3.8</spring.boot.version>
         <postgresql.version>42.7.4</postgresql.version>
         <jooq.version>3.19.13</jooq.version>
-        <commons.lang.version>3.17.0</commons.lang.version>
+        <commons.lang.version>3.18.0</commons.lang.version>
         <guava.version>33.3.1-jre</guava.version>
         <uuid.creator.version>6.0.0</uuid.creator.version>
         <paseto4j.version>2024.3</paseto4j.version>
@@ -45,6 +46,7 @@
         <com.github.ben-manes.caffeine.version>3.1.8</com.github.ben-manes.caffeine.version>
         <org.zalando.version>3.9.0</org.zalando.version>
         <org.springdoc.version>2.5.0</org.springdoc.version>
+        <com.fasterxml.jackson.core.version>2.15.0</com.fasterxml.jackson.core.version>
     </properties>
     <dependencies>
         <dependency>

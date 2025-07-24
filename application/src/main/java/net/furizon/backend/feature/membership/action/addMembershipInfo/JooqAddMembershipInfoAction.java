@@ -40,7 +40,12 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     MEMBERSHIP_INFO.INFO_ALLERGIES,
                     MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME,
                     MEMBERSHIP_INFO.USER_ID,
-                    MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID
+                    MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
+                    MEMBERSHIP_INFO.INFO_ID_TYPE,
+                    MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                    MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                    MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                    MEMBERSHIP_INFO.INFO_SHIRT_SIZE
                 )
                 .values(
                     personalUserInformation.getFirstName(),
@@ -62,7 +67,12 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getAllergies(),
                     personalUserInformation.getTelegramUsername(),
                     userId,
-                    event.getId()
+                    event.getId(),
+                    personalUserInformation.getIdType(),
+                    personalUserInformation.getIdNumber(),
+                    personalUserInformation.getIdIssuer(),
+                    personalUserInformation.getIdExpiry(),
+                    personalUserInformation.getShirtSize()
                 )
         );
     }

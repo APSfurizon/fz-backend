@@ -43,6 +43,11 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
                             MEMBERSHIP_INFO.INFO_ALLERGIES,
                             MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                             MEMBERSHIP_INFO.USER_ID,
+                            MEMBERSHIP_INFO.INFO_ID_TYPE,
+                            MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                            MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                            MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                            MEMBERSHIP_INFO.INFO_SHIRT_SIZE,
                             MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME
                         )
                         .from(MEMBERSHIP_INFO)

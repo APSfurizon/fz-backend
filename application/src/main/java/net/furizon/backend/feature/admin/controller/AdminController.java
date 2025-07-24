@@ -174,7 +174,6 @@ public class AdminController {
                              .body(data);
     }
 
-
     @Operation(summary = "Gets the list of users from the specified data", description =
         "Obtains the list of DisplayUserData with their orderCode and orderSerial, from the provided search "
         + "query. The search query works the same as the export badge (/export/badges/user endpoint)")

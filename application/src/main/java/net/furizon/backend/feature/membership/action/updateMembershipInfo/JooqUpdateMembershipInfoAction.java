@@ -38,6 +38,11 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
                     .set(MEMBERSHIP_INFO.INFO_PHONE, personalUserInformation.getPhoneNumber())
                     .set(MEMBERSHIP_INFO.INFO_ALLERGIES, personalUserInformation.getAllergies())
                     .set(MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID, event.getId())
+                    .set(MEMBERSHIP_INFO.INFO_ID_TYPE, personalUserInformation.getIdType())
+                    .set(MEMBERSHIP_INFO.INFO_ID_NUMBER, personalUserInformation.getIdNumber())
+                    .set(MEMBERSHIP_INFO.INFO_ID_ISSUER, personalUserInformation.getIdIssuer())
+                    .set(MEMBERSHIP_INFO.INFO_ID_EXPIRY, personalUserInformation.getIdExpiry())
+                    .set(MEMBERSHIP_INFO.INFO_SHIRT_SIZE, personalUserInformation.getShirtSize())
                     .set(MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME, personalUserInformation.getTelegramUsername())
                 .where(MEMBERSHIP_INFO.USER_ID.eq(userId))
         );

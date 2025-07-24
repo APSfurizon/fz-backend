@@ -30,6 +30,11 @@ public class MembershipInfoMapper {
                 .allergies(record.get(MEMBERSHIP_INFO.INFO_ALLERGIES))
                 .lastUpdatedEventId(record.get(MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID))
                 .userId(record.get(MEMBERSHIP_INFO.USER_ID))
+                .idType(record.get(MEMBERSHIP_INFO.INFO_ID_TYPE))
+                .idNumber(record.get(MEMBERSHIP_INFO.INFO_ID_NUMBER))
+                .idExpiry(record.get(MEMBERSHIP_INFO.INFO_ID_EXPIRY))
+                .idIssuer(record.get(MEMBERSHIP_INFO.INFO_ID_ISSUER))
+                .shirtSize(record.get(MEMBERSHIP_INFO.INFO_SHIRT_SIZE))
                 .telegramUsername(record.get(MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME))
             .build();
     }
