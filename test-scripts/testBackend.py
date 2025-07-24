@@ -195,6 +195,9 @@ def countdown() -> Response:
 def fursuitCount() -> Response:
     return doGet(f'{BASE_URL_API}counts/fursuit')
 
+def noseCount() -> Response:
+    return doGet(f'{BASE_URL_API}counts/bopos')
+
 def usersAdminView(id: int) -> Response:
     return doGet(f'{BASE_URL_API}users/view/{id}')
 
@@ -306,8 +309,8 @@ login()
 #usersAdminView(1)
 
 #roomCreate()
-roomGetInfo()
-roomConfirm()
+#roomGetInfo()
+#roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
@@ -317,3 +320,4 @@ roomConfirm()
 #countdown()
 
 #fursuitCount()
+noseCount()

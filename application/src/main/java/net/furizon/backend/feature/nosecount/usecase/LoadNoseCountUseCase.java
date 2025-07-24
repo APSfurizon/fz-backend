@@ -14,6 +14,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
@@ -48,6 +49,8 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         }
         OffsetDateTime from = input.event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
 
+        Long noRoomItemId = (Long) input.pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
+
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
         List<UserDisplayData> roomless = new ArrayList<>();
         Map<Long, NosecountRoom> roomIdToRoom = new HashMap<>();
@@ -67,7 +70,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
             }
 
             //Roomless furs
-            if (obj.getRoomId() == null) {
+            if (obj.getRoomId() == null || noRoomItemId.equals(obj.getRoomPretixItemId())) {
                 roomless.add(getUserDisplayData(obj));
                 continue;
             }
