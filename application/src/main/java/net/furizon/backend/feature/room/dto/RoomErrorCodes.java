@@ -13,6 +13,8 @@ public enum RoomErrorCodes {
     GUEST_NOT_CONFIRMED, //Guest hasn't confirmed yet
     BUY_ROOM_SAME_ROOM, //You tried upgrading with the same room type you had already bought
     BUY_ROOM_NEW_ROOM_COSTS_LESS, //An user has tried purchasing a room which costs less than what he originally paid
+    //An user has tried confirming a room, but we were unable to find one matching the current occupation
+    NO_ROOM_WITH_SPECIFIED_CAPACITY,
     //An user has tried purchasing a room which less capacity than the number members who are already in the room
     BUY_ROOM_NEW_ROOM_LOW_CAPACITY,
     BUY_ROOM_NEW_ROOM_QUOTA_ENDED, //An user has tried purchasing a room which quota has ended

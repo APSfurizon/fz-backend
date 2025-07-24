@@ -240,7 +240,7 @@ public class DefaultRoomLogic implements RoomLogic {
         }
 
         var confirmed = roomFinder.isRoomConfirmed(roomId);
-        if (confirmed.isEmpty() || !confirmed.get()) {
+        if (confirmed.isEmpty() || confirmed.get()) {
             return false;
         }
 

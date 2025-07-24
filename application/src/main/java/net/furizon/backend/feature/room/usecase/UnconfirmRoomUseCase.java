@@ -47,16 +47,19 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         //checks.assertRoomCanBeUnconfirmed(roomId, event, input.pretixInformation, roomLogic);
         checks.assertRoomFromCurrentEvent(roomId, event);
 
+        Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
         boolean res = roomLogic.unconfirmRoom(roomId, event, input.pretixInformation);
         if (res) {
-            Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
-                if (names != null) {
-                    mailService.prepareAndSendBroadcastUpdate(
-                        roomId, TEMPLATE_ROOM_UNCONFIRMED,
-                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
-                    );
+                if (names != null && !names.isEmpty()) {
+                    String name = names.get(LANG_PRETIX);
+                    if (name != null) {
+                        mailService.prepareAndSendBroadcastUpdate(
+                            roomId, TEMPLATE_ROOM_UNCONFIRMED,
+                            MailVarPair.of(ROOM_TYPE_NAME, name)
+                        );
+                    }
                 }
             }
         }

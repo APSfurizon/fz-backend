@@ -113,7 +113,7 @@ public class MembershipController {
         + "their information, or confirm that everything's still ok. This method is used to confirm "
         + "that the information are ok, and resets the last event where the personal user information "
         + "has been updated to the current event")
-    @PostMapping("/mark-persona-user-information-as-updated")
+    @PostMapping("/mark-personal-user-information-as-updated")
     public boolean markInfoAsUpdated(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
@@ -134,7 +134,7 @@ public class MembershipController {
         + "that the information are ok, and resets the last event where the personal user information "
         + "has been updated to the current event")
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
-    @PostMapping("/mark-persona-user-information-as-updated/{userId}")
+    @PostMapping("/mark-personal-user-information-as-updated/{userId}")
     public boolean markInfoAsUpdatedOfUser(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable @Valid @NotNull final Long userId

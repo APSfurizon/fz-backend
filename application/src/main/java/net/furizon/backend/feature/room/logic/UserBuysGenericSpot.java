@@ -24,6 +24,7 @@ import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -159,7 +160,7 @@ public class UserBuysGenericSpot implements RoomLogic {
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity(roomCapacity);
         if (possibleRoomItemIds.isEmpty()) {
             log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). RoomId = {}", roomCapacity, roomId);
-            return false;
+            throw new ApiException("Unsupported room capacity", RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
@@ -177,7 +178,7 @@ public class UserBuysGenericSpot implements RoomLogic {
         if (position == null) {
             log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: An error occurred while updating room position to order {}",
                     roomId, roomCapacity, order);
-            return false;
+            throw new ApiException("The room quota has ended", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
         //Refetch order from pretix and update it in the db

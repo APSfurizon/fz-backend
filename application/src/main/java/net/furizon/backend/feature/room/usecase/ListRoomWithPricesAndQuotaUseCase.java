@@ -59,7 +59,11 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         //Check if we actually can buy or upgrade room
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = endRoomEditingTime == null || endRoomEditingTime.isAfter(OffsetDateTime.now());
-        boolean buyOrUpgradeSupported = editingTimeAllowed && roomLogic.isRoomBuyOrUpgradeSupported(event);
+        //We will load data if the current room logic allows for buying/upgrade or room confirmation
+        boolean canLoadData = editingTimeAllowed && (
+                roomLogic.isConfirmationSupported()
+                || roomLogic.isRoomBuyOrUpgradeSupported(event)
+        );
 
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
@@ -72,7 +76,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         short capacity = order.getRoomCapacity();
         String hotelInternalName = null;
         String roomInternalName = null;
-        if (order.hasRoom() && buyOrUpgradeSupported) {
+        if (order.hasRoom() && canLoadData) {
             hotelInternalName = Objects.requireNonNull(order.getHotelInternalName());
             roomInternalName = Objects.requireNonNull(order.getRoomInternalName());
             if (extraDays.isEarly()) {
@@ -101,7 +105,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 ? null
                 : pretixInformation.getItemPrice(pretixRoomItemId, false, true);
         //Fetch room guests
-        Optional<Long> roomId = buyOrUpgradeSupported ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
+        Optional<Long> roomId = canLoadData ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
                 : Optional.empty();
         List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, false))
                 .orElse(null);
@@ -110,7 +114,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid;
         Set<Long> roomItemIds = pretixInformation.getRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
-        List<RoomAvailabilityInfoResponse> rooms = buyOrUpgradeSupported ? roomItemIds.stream().map(itemId -> {
+        List<RoomAvailabilityInfoResponse> rooms = canLoadData ? roomItemIds.stream().map(itemId -> {
             //We exclude the current room
             if (Objects.equals(itemId, pretixRoomItemId)) {
                 return null;
