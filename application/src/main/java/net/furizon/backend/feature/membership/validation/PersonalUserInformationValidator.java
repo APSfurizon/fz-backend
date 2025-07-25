@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @RequiredArgsConstructor
 public class PersonalUserInformationValidator {
@@ -42,7 +44,6 @@ public class PersonalUserInformationValidator {
             }
         }
 
-
         String residenceCountry = userInfo.getResidenceCountry();
         String residenceRegion = userInfo.getResidenceRegion();
         boolean residenceCountryHasRegions = pretixInformation.getStatesOfCountry(residenceCountry).size() > 0;
@@ -73,6 +74,13 @@ public class PersonalUserInformationValidator {
             throw new ApiException(
                     "Invalid phone prefix: %s".formatted(phonePrefix),
                     AuthenticationCodes.PHONE_PREFIX_INVALID
+            );
+        }
+
+        if (userInfo.getIdExpiry().isBefore(LocalDate.now())) {
+            throw new ApiException(
+                    "Id Expired",
+                    AuthenticationCodes.ID_EXPIRED
             );
         }
     }

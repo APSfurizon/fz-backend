@@ -25,6 +25,7 @@ public class FrontendConfig {
 
     @NotNull private String badgePageUrl;
     @NotNull private String roomPageUrl;
+    @NotNull private String userPageUrl;
 
 
     @NotNull
