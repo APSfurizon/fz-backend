@@ -52,7 +52,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         Long noRoomItemId = (Long) input.pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
 
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
-        List<UserDisplayData> roomless = new ArrayList<>();
+        List<UserDisplayDataWithExtraDays> roomless = new ArrayList<>();
         Map<Long, NosecountRoom> roomIdToRoom = new HashMap<>();
         Map<Long, NosecountRoomType> roomPretixItemIdToRoomType = new HashMap<>();
         Map<String, NosecountHotel> hotelInternalNameToHotel = new HashMap<>();
@@ -71,7 +71,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
 
             //Roomless furs
             if (obj.getRoomId() == null || noRoomItemId.equals(obj.getRoomPretixItemId())) {
-                roomless.add(getUserDisplayData(obj));
+                roomless.add(new UserDisplayDataWithExtraDays(getUserDisplayData(obj), obj.getExtraDays()));
                 continue;
             }
 

@@ -310,7 +310,7 @@ login()
 
 #roomCreate()
 #roomGetInfo()
-#roomConfirm()
+roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
