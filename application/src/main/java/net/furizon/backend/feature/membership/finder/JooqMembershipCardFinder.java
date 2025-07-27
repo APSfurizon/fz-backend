@@ -178,10 +178,16 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEMBERSHIP_INFO.INFO_CITY,
                 MEMBERSHIP_INFO.INFO_REGION,
                 MEMBERSHIP_INFO.INFO_COUNTRY,
+                MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME,
                 MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
                 MEMBERSHIP_INFO.INFO_PHONE,
                 MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                 MEMBERSHIP_INFO.INFO_ALLERGIES,
+                MEMBERSHIP_INFO.INFO_ID_TYPE,
+                MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                MEMBERSHIP_INFO.INFO_SHIRT_SIZE,
                 MEMBERSHIP_INFO.USER_ID,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )

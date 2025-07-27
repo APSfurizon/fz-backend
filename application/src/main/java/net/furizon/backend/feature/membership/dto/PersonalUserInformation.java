@@ -113,9 +113,11 @@ public class PersonalUserInformation {
     private final IdType idType;
 
     @NotNull
+    @NotEmpty
     private final String idNumber;
 
     @NotNull
+    @NotEmpty
     private final String idIssuer;
 
     @NotNull

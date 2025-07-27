@@ -16,12 +16,13 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.SUBJECT_EXPIRED_ID;
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_EXPIRED_ID;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 
 @Slf4j
 @Component
@@ -43,15 +44,15 @@ public class ExpiredIdReminderUseCase implements UseCase<Event, Integer> {
         //Obtain list of emails
         List<UserEmailData> userEmails = userFinder.getMailDataForUsers(expiredIdList.keySet().stream().toList());
         MailRequest[] mails = new MailRequest[userEmails.size()];
+        String userPageUrl = frontendConfig.getUserPageUrl();
+        var now = LocalDate.now();
         for (UserEmailData usr : userEmails) {
-
             log.debug("Sending expired id reminder email to {}", usr.getEmail());
-            final String date = expiredIdList.getOrDefault(usr.getUserId(), LocalDate.now())
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String date = expiredIdList.getOrDefault(usr.getUserId(), now).format(ISO_LOCAL_DATE);
             mails[n] = new MailRequest(
                     usr,
                     TEMPLATE_EXPIRED_ID,
-                    MailVarPair.of(EmailVars.LINK, frontendConfig.getUserPageUrl()),
+                    MailVarPair.of(EmailVars.LINK, userPageUrl),
                     MailVarPair.of(EmailVars.DEADLINE, date)
             );
             mails[n].subject(SUBJECT_EXPIRED_ID);

@@ -30,6 +30,8 @@
 
             <p class="main-content">You can update your document data from the user section of our website:</p>
             <a href="${link}" class="link">Update my data</a>
+
+            <p class="main-content">Keep in mind that to participate in an event you need to present a valid document in the check-in face for identification, and that your document will be transmitted to the host hotel for legal reasons</p>
         </div>
     </div>
 </div>

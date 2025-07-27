@@ -46,7 +46,7 @@
         <com.github.ben-manes.caffeine.version>3.1.8</com.github.ben-manes.caffeine.version>
         <org.zalando.version>3.9.0</org.zalando.version>
         <org.springdoc.version>2.5.0</org.springdoc.version>
-        <com.fasterxml.jackson.core.version>2.15.0</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.core.version>2.19.2</com.fasterxml.jackson.core.version>
     </properties>
     <dependencies>
         <dependency>
