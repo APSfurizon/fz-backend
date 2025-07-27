@@ -42,7 +42,6 @@ public class PersonalUserInformationValidator {
             }
         }
 
-
         String residenceCountry = userInfo.getResidenceCountry();
         String residenceRegion = userInfo.getResidenceRegion();
         boolean residenceCountryHasRegions = pretixInformation.getStatesOfCountry(residenceCountry).size() > 0;
@@ -75,5 +74,16 @@ public class PersonalUserInformationValidator {
                     AuthenticationCodes.PHONE_PREFIX_INVALID
             );
         }
+
+        // We don't want to check when an user inserts it's documents if it's expired or not:
+        // Let's say the registrations for an event open soon and the user has not got yet a
+        // new document after the previous one has expired: We don't want to stop the user from joining.
+        // He will receive anyway manual mails regarding the status of his document
+        /*if (userInfo.getIdExpiry().isBefore(LocalDate.now())) {
+            throw new ApiException(
+                    "Id Expired",
+                    AuthenticationCodes.ID_EXPIRED
+            );
+        }*/
     }
 }

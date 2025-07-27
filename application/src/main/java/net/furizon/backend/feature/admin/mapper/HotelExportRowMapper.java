@@ -8,6 +8,8 @@ import net.furizon.jooq.generated.tables.Orders;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 
+import java.time.ZoneOffset;
+
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -48,7 +50,10 @@ public class HotelExportRowMapper {
                 .phone(
                     record.get(MEMBERSHIP_INFO.INFO_PHONE_PREFIX) + " "
                     + record.get(MEMBERSHIP_INFO.INFO_PHONE)
-                )
+                ).idType(record.get(MEMBERSHIP_INFO.INFO_ID_TYPE).getLiteral())
+                .idNumber(record.get(MEMBERSHIP_INFO.INFO_ID_NUMBER))
+                .idIssuer(record.get(MEMBERSHIP_INFO.INFO_ID_ISSUER))
+                .idExpiry(record.get(MEMBERSHIP_INFO.INFO_ID_EXPIRY).atStartOfDay().atOffset(ZoneOffset.UTC))
                 .userId(userId)
                 .userName(record.get(USERS.USER_FURSONA_NAME))
                 .orderCode(record.get(ORDERS.ORDER_CODE))

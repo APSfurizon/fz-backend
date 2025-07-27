@@ -83,6 +83,7 @@ frontend:
   transfer-exchange-confirmation-url: ${FRONTEND_EXCHANGE_CONFIRMATION_URL:}
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
+  user-page-url: ${FRONTEND_USER_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -158,8 +159,9 @@ badge:
 reminders:
   cronjobs:
     order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
-    user-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 1 * *}
-    fursuit-badge-upload: ${REMINDERS_CRONJOB_ORDER_LINKING:0 0 18 2 * *}
+    user-badge-upload: ${REMINDERS_USER_BADGE_UPLOAD:0 0 18 1 * *}
+    fursuit-badge-upload: ${REMINDERS_FURSUIT_BADGE_UPLOAD:0 0 18 2 * *}
+    expired-id: ${REMINDERS_CRONJOB_EXPIRED_ID:0 10 18 * * *}
 
 admin:
   custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}

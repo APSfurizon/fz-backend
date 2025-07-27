@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -26,6 +27,10 @@ public class HotelExportRow {
     @NotNull private final String orderCode;
     @NotNull private final String roomOwnerOrderCode;
     @NotNull private final ExtraDays extraDays;
+    @NotNull private final String idType;
+    @NotNull private final String idNumber;
+    @NotNull private final OffsetDateTime idExpiry;
+    @NotNull private final String idIssuer;
 
     private boolean requiresAttention;
     @Nullable private String comment;

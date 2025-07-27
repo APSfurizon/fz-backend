@@ -13,6 +13,8 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
+import net.furizon.jooq.generated.enums.IdType;
+import net.furizon.jooq.generated.enums.ShirtSize;
 import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -174,6 +176,31 @@ public class MembershipInfo extends TableImpl<Record> {
      * The column <code>public.membership_info.info_telegram_username</code>.
      */
     public final TableField<Record, String> INFO_TELEGRAM_USERNAME = createField(DSL.name("info_telegram_username"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_id_type</code>.
+     */
+    public final TableField<Record, IdType> INFO_ID_TYPE = createField(DSL.name("info_id_type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(IdType.class), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_id_number</code>.
+     */
+    public final TableField<Record, String> INFO_ID_NUMBER = createField(DSL.name("info_id_number"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_id_issuer</code>.
+     */
+    public final TableField<Record, String> INFO_ID_ISSUER = createField(DSL.name("info_id_issuer"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_shirt_size</code>.
+     */
+    public final TableField<Record, ShirtSize> INFO_SHIRT_SIZE = createField(DSL.name("info_shirt_size"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(ShirtSize.class), this, "");
+
+    /**
+     * The column <code>public.membership_info.info_id_expiry</code>.
+     */
+    public final TableField<Record, LocalDate> INFO_ID_EXPIRY = createField(DSL.name("info_id_expiry"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
