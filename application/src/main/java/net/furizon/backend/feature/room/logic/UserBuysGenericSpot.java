@@ -17,14 +17,10 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
-import net.furizon.backend.feature.user.finder.UserFinder;
-import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
-import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,7 +55,8 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public long createRoom(String name, long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public long createRoom(String name, long userId,
+                           @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertUserHasNotBoughtAroom(userId, event);
         return defaultRoomLogic.createRoom(name, userId, event, pretixInformation);
     }
@@ -80,14 +77,17 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit) {
+    public long invitePersonToRoom(long invitedUserId, long roomId,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                                   boolean force, boolean forceExit) {
         checks.assertRoomLessThenBiggestCapacity(roomId, true, pretixInformation);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
         return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, pretixInformation, force, forceExit);
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertRoomLessThenBiggestCapacity(roomId, true, pretixInformation);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
         return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event, pretixInformation);
@@ -124,14 +124,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity((short) roomMates.size());
 
         if (possibleRoomItemIds.isEmpty()) {
-            log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({})", roomMates.size());
+            log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({})",
+                      roomMates.size());
             return false;
         }
 
         long roomItemId = possibleRoomItemIds.getFirst();
         var q = pretixInformation.getSmallestAvailabilityFromItemId(roomItemId);
         if (!q.isPresent()) {
-            log.error("[ROOM_CONFIRMATION] Confirming room {} on event {}: Unable to fetch quota of item {}", roomId, event, roomItemId);
+            log.error("[ROOM_CONFIRMATION] Confirming room {} on event {}: Unable to fetch quota of item {}",
+                      roomId, event, roomItemId);
             return false;
         }
         if (!q.get().isAvailable()) {
@@ -159,7 +161,8 @@ public class UserBuysGenericSpot implements RoomLogic {
         short roomCapacity  = (short) roomMates.size();
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity(roomCapacity);
         if (possibleRoomItemIds.isEmpty()) {
-            log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). RoomId = {}", roomCapacity, roomId);
+            log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). "
+                    + "RoomId = {}", roomCapacity, roomId);
             throw new ApiException("Unsupported room capacity", RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
@@ -176,7 +179,8 @@ public class UserBuysGenericSpot implements RoomLogic {
                 0L
         ));
         if (position == null) {
-            log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: An error occurred while updating room position to order {}",
+            log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: "
+                    + "An error occurred while updating room position to order {}",
                     roomId, roomCapacity, order);
             throw new ApiException("The room quota has ended", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
@@ -268,13 +272,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         return false;
     }
     @Override
-    public boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         //TODO implement when pretix is updated
         log.warn("Exchange of room not supported with UserBuysGenericSpot");
         return false;
     }
     @Override
-    public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId,
+                                     @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         //TODO implement when pretix is updated
         log.warn("Exchange of full orders not supported with UserBuysGenericSpot");
         return false;
@@ -304,7 +311,14 @@ public class UserBuysGenericSpot implements RoomLogic {
         return false;
     }
     @Override
-    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId, @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid, @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid, @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice,
+                                    @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
+                                    @Nullable Long newEarlyItemId,
+                                    @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+                                    @Nullable Long newLateItemId,
+                                    @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+                                    @NotNull Order order,
+                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");
         return false;
     }
@@ -319,14 +333,16 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
 
     @Override
-    public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public void updateRoomCapacity(@NotNull RoomData roomData,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         if (roomData.getRoomCapacity() <= 0) {
             roomData.setRoomCapacity(Objects.requireNonNull(pretixInformation.getBiggestRoomCapacity()).capacity());
         }
     }
 
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
+    public void doSanityChecks(long roomId,
+                               @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
         sanityChecks.doSanityChecks(
                 roomId,
                 this,

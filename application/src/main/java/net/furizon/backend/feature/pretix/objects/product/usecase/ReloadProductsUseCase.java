@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Map;
 
 @Component
@@ -69,7 +68,8 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             break;
                         }
                         default: {
-                            log.error("Invalid extra days identifier length: '{}' ({}) for item {}", s, sp.length, productId);
+                            log.error("Invalid extra days identifier length: '{}' ({}) for item {}",
+                                      s, sp.length, productId);
                             break;
                         }
                     }

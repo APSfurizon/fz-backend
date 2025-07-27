@@ -13,7 +13,6 @@ import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.Up
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
 import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
-import net.furizon.backend.feature.pretix.objects.payment.action.manualRefundPayment.ManualRefundPaymentAction;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
@@ -29,21 +28,15 @@ import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFind
 import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
-import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
-import net.furizon.backend.feature.user.dto.UserEmailData;
-import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
-import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
-import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
-import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +45,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,27 +56,10 @@ import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.REFUND_MONEY;
-import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
-import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_NO_OWNER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_DAILY_TICKET;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NOT_BOUGHT_ROOM;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NO_ORDER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_IN_TOO_MANY_ROOMS;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_NOT_IN_ROOM;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_ORDER_INVALID_STATUS;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_TOO_MANY_MEMBERS;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_DAILY_TICKET;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_NO_ORDER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_IN_TOO_MANY_ROOMS;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_ORDER_INVALID_ORDER_STATUS;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SUBJECT_EXCHANGE_ROOM_MONEY_FAILED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_DELETED;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_OWNER;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_USER;
 
 @Slf4j
 @Primary
@@ -125,7 +100,8 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public long createRoom(String name, long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public long createRoom(String name, long userId,
+                           @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertUserHasBoughtAroom(userId, event);
         return defaultRoomLogic.createRoom(name, userId, event, pretixInformation);
     }
@@ -144,15 +120,17 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public long invitePersonToRoom(
-            long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit) {
+    public long invitePersonToRoom(long invitedUserId, long roomId,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                                   boolean force, boolean forceExit) {
         checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
         return defaultRoomLogic.invitePersonToRoom(invitedUserId, roomId, event, pretixInformation, force, forceExit);
     }
 
     @Override
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         checks.assertRoomNotFull(roomId, true);
         checks.assertUserHasNotBoughtAroom(invitedUserId, event);
         return defaultRoomLogic.inviteAccept(guestId, invitedUserId, roomId, event, pretixInformation);
@@ -1091,11 +1069,13 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
-    public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public void updateRoomCapacity(@NotNull RoomData roomData,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation) {
     }
 
     @Override
-    public void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
+    public void doSanityChecks(long roomId,
+                               @NotNull PretixInformation pretixInformation, @Nullable List<String> detectedErrors) {
         sanityChecks.doSanityChecks(
                 roomId,
                 this,

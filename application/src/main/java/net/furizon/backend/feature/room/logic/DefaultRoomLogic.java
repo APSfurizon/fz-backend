@@ -47,7 +47,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public long createRoom(String name, long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public long createRoom(String name, long userId,
+                           @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Creating a room for user {} on event {} with name '{}'", userId, event, name);
         //Get order id
         var r = query.fetchFirst(
@@ -113,8 +114,9 @@ public class DefaultRoomLogic implements RoomLogic {
     @Override
     @Transactional
     public long invitePersonToRoom(
-            long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit
-    ) {
+            long invitedUserId, long roomId,
+            @NotNull Event event, @NotNull PretixInformation pretixInformation,
+            boolean force, boolean forceExit) {
         log.info("Inviting user {} to room {} on event {}. Force = {}; forceExit = {}",
                 invitedUserId, roomId, event, force, forceExit);
 
@@ -170,7 +172,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Guest {} has accepted room invitation", guestId);
         //Deletes pending invitation for user in event
         command.execute(
@@ -420,8 +423,8 @@ public class DefaultRoomLogic implements RoomLogic {
         return true;
     }
 
-    private RoomGuest switchRooms(long targetUsrId, long sourceUsrId, long roomId,
-                                         boolean targetHasRoom, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    private RoomGuest switchRooms(long targetUsrId, long sourceUsrId, long roomId, boolean targetHasRoom,
+                                  @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("switchRooms() called with: "
                 + "targetUsrId={}; sourceUsrId={}; roomId={}; targetHasRoom={}; event = {}",
                 targetUsrId, sourceUsrId, roomId, targetHasRoom, event);
@@ -465,7 +468,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
     private boolean exchange(long targetUsrId, long sourceUsrId,
                              @Nullable Long sourceRoom, @Nullable Long targetRoom,
-                             @NotNull Event event, @NotNull PretixInformation pretixInformation, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
+                             @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                             BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
         log.info("[ROOM_EXCHANGE] DefaultRoomLogic: Exchange between users: {} -> {} on event {}",
                 sourceUsrId, targetUsrId, event);
         boolean result = true;
@@ -536,7 +540,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public void updateRoomCapacity(@NotNull RoomData roomData,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation) {
     }
 
     private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {

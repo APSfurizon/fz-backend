@@ -21,8 +21,11 @@ public interface RoomLogic {
     boolean setShowInNosecount(boolean showInNosecount, long roomId);
 
     //force = bypass invitation logic, forceExit = if the user is in another room, add him to the current one forcefully
-    long invitePersonToRoom(long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation, boolean force, boolean forceExit);
-    boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+    long invitePersonToRoom(long invitedUserId, long roomId,
+                            @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                            boolean force, boolean forceExit);
+    boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                         @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean inviteRefuse(long guestId);
     boolean inviteCancel(long guestId);
 
@@ -68,7 +71,8 @@ public interface RoomLogic {
     @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId);
     void computeNosecountExtraDays(@NotNull NosecountRoom room);
 
-    void updateRoomCapacity(@NotNull RoomData roomData, @NotNull Event event, @NotNull PretixInformation pretixInformation);
+    void updateRoomCapacity(@NotNull RoomData roomData,
+                            @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     void doSanityChecks(long roomId, @NotNull PretixInformation pretixInformation,
                         @Nullable List<String> detectedErrors);

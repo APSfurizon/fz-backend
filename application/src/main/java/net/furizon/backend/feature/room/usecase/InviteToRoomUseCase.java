@@ -67,7 +67,11 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
                 roomChecks.assertUserIsNotInRoom(targetUserId, event, false);
             }
 
-            long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, event, input.pretixInformation, force, forceExit);
+            long guestId = roomLogic.invitePersonToRoom(
+                    targetUserId, roomId,
+                    event, input.pretixInformation,
+                    force, forceExit
+            );
             toReturn.add(new RoomGuest(guestId, targetUserId, roomId, false));
         }
 
