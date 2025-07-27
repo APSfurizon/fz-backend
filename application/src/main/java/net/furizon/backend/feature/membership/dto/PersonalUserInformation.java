@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import net.furizon.jooq.generated.enums.IdType;
+import net.furizon.jooq.generated.enums.ShirtSize;
 
 import java.time.LocalDate;
 
@@ -107,6 +109,24 @@ public class PersonalUserInformation {
     private final String telegramUsername;
 
     //Those are intended to be primitive types
+    @NotNull
+    private final IdType idType;
+
+    @NotNull
+    @NotEmpty
+    private final String idNumber;
+
+    @NotNull
+    @NotEmpty
+    private final String idIssuer;
+
+    @NotNull
+    private final LocalDate idExpiry;
+
+    @NotNull
+    private final ShirtSize shirtSize;
+
+    //These are intended to be primitive types
     private final long id;
     private final long lastUpdatedEventId;
     private final long userId;

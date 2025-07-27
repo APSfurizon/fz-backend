@@ -4,10 +4,16 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.membership.mapper.MembershipInfoMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
@@ -43,6 +49,11 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
                             MEMBERSHIP_INFO.INFO_ALLERGIES,
                             MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID,
                             MEMBERSHIP_INFO.USER_ID,
+                            MEMBERSHIP_INFO.INFO_ID_TYPE,
+                            MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                            MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                            MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                            MEMBERSHIP_INFO.INFO_SHIRT_SIZE,
                             MEMBERSHIP_INFO.INFO_TELEGRAM_USERNAME
                         )
                         .from(MEMBERSHIP_INFO)
@@ -52,5 +63,20 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
         } catch (NoDataFoundException e) {
             return null;
         }
+    }
+
+    @Override
+    public @NotNull Map<Long, LocalDate> findAllUserIdsByExpiredId() {
+        return sqlQuery.fetch(
+            PostgresDSL
+                .select(
+                    MEMBERSHIP_INFO.USER_ID
+                ).from(MEMBERSHIP_INFO)
+                .where(MEMBERSHIP_INFO.INFO_ID_EXPIRY.lessThan(LocalDate.now()))
+        ).stream()
+        .map(r -> Pair.of(
+                r.get(MEMBERSHIP_INFO.USER_ID),
+                r.get(MEMBERSHIP_INFO.INFO_ID_EXPIRY))
+        ).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 }

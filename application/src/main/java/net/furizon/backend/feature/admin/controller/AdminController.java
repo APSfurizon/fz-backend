@@ -16,6 +16,7 @@ import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewFursuitBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewUserBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.EmptyRoomReminderUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.ExpiredIdReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
@@ -149,6 +150,18 @@ public class AdminController {
         log.info("Sent {} room not full emails", sent);
     }
 
+    @Operation(summary = "Remind user that their document has expired", description =
+        "Sends an email to all people who have an expired document uploaded in their personal "
+        + "user information that it's expired")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_ROOMS})
+    @GetMapping("/mail-reminders/expired-id")
+    public void remindExpiredDocuments(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(ExpiredIdReminderUseCase.class, pretixInformation.getCurrentEvent());
+        log.info("Sent {} expired documents emails", sent);
+    }
+
 
     /*
   ________   _______   ____  _____ _______ _____
@@ -173,7 +186,6 @@ public class AdminController {
                              .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                              .body(data);
     }
-
 
     @Operation(summary = "Gets the list of users from the specified data", description =
         "Obtains the list of DisplayUserData with their orderCode and orderSerial, from the provided search "
