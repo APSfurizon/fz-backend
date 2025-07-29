@@ -75,15 +75,25 @@ public class PersonalUserInformationValidator {
             );
         }
 
-        // We don't want to check when an user inserts it's documents if it's expired or not:
-        // Let's say the registrations for an event open soon and the user has not got yet a
-        // new document after the previous one has expired: We don't want to stop the user from joining.
-        // He will receive anyway manual mails regarding the status of his document
-        /*if (userInfo.getIdExpiry().isBefore(LocalDate.now())) {
+        if (userInfo.getTelegramUsername().isBlank()) {
             throw new ApiException(
-                    "Id Expired",
-                    AuthenticationCodes.ID_EXPIRED
+                    "Empty telegram username",
+                    AuthenticationCodes.TELEGRAM_USERNAME_EMPTY
             );
-        }*/
+        }
+
+        if (userInfo.getIdNumber().isBlank()) {
+            throw new ApiException(
+                    "empty ID Number",
+                    AuthenticationCodes.ID_NUMBER_EMPTY
+            );
+        }
+
+        if (userInfo.getIdIssuer().isBlank()) {
+            throw new ApiException(
+                    "empty ID Issuer",
+                    AuthenticationCodes.ID_ISSUER_EMPTY
+            );
+        }
     }
 }

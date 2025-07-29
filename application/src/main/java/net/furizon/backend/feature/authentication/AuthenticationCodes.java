@@ -21,6 +21,8 @@ public enum AuthenticationCodes {
     MEMBERSHIP_CARD_WAS_REGISTERED,
     MEMBERSHIP_NOT_FOUND,
     SESSION_NOT_YOURS, // Someone tried deleting someone else's session
-    ID_EXPIRED,
-    AGE_REQUIREMENT_FAIL
+    AGE_REQUIREMENT_FAIL,
+    TELEGRAM_USERNAME_EMPTY,
+    ID_NUMBER_EMPTY,
+    ID_ISSUER_EMPTY
 }
