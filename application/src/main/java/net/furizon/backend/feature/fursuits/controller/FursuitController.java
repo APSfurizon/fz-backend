@@ -283,7 +283,7 @@ public class FursuitController {
         @Valid @NotNull @RequestParam("species") final String species,
         @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
-        @RequestParam("user-id") @Nullable final Long userId,
+        @Nullable @RequestParam(value = "user-id", required = false) final Long userId,
         @RequestParam("show-owner") @NotNull final Boolean showOwner,
         @Nullable @RequestParam(value = "image", required = false) MultipartFile image
     ) {
