@@ -27,6 +27,7 @@
         <module>application</module>
         <module>jooq-common</module>
         <module>fz-jooq-utils</module>
+        <module>fz-localization</module>
     </modules>
     <properties>
         <java.version>23</java.version>

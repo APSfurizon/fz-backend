@@ -29,6 +29,8 @@ import net.furizon.backend.infrastructure.security.annotation.PermissionRequired
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -50,16 +54,19 @@ import java.util.Set;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final UseCaseExecutor executor;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final DeleteMediaFromDiskAction deleteMediaAction;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixConfig pretixConfig;
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixInformation pretixInformation;
+
+    @NotNull
+    private final MessageSource messageSource;
 
     /*
    _____ _______ _    _ ______ ______
@@ -71,8 +78,10 @@ public class AdminController {
      */
 
     @GetMapping("/ping")
-    public String ping() {
-        return "pong";
+    public Map<String, String> ping() {
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("greeting.message", new Object[]{}, locale);
+        return Map.of("message", message);
     }
 
     @GetMapping("/countdown")
