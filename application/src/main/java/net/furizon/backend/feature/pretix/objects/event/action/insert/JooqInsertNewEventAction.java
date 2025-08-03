@@ -30,7 +30,10 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     EVENTS.EVENT_DATE_FROM,
                     EVENTS.EVENT_IS_CURRENT,
                     EVENTS.EVENT_PUBLIC_URL,
-                    EVENTS.EVENT_NAMES_JSON
+                    EVENTS.EVENT_NAMES_JSON,
+                    EVENTS.EVENT_IS_LIVE,
+                    EVENTS.EVENT_TEST_MODE_ENABLED,
+                    EVENTS.EVENT_IS_PUBLIC
                 )
                 .values(
                     event.getSlug(),
@@ -41,7 +44,10 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     Optional
                         .ofNullable(event.getEventNames())
                         .map(jsonSerializer::serializeAsJson)
-                        .orElse(null)
+                        .orElse(null),
+                    event.isLive(),
+                    event.isTestModeEnabled(),
+                    event.isPublic()
                 ).returning(EVENTS.ID)
         ).getFirst().get(EVENTS.ID);
     }

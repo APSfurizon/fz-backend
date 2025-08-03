@@ -105,6 +105,21 @@ public class Events extends TableImpl<Record> {
      */
     public final TableField<Record, JSON> EVENT_NAMES_JSON = createField(DSL.name("event_names_json"), SQLDataType.JSON, this, "");
 
+    /**
+     * The column <code>public.events.event_is_live</code>.
+     */
+    public final TableField<Record, Boolean> EVENT_IS_LIVE = createField(DSL.name("event_is_live"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.events.event_test_mode_enabled</code>.
+     */
+    public final TableField<Record, Boolean> EVENT_TEST_MODE_ENABLED = createField(DSL.name("event_test_mode_enabled"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.events.event_is_public</code>.
+     */
+    public final TableField<Record, Boolean> EVENT_IS_PUBLIC = createField(DSL.name("event_is_public"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
     private Events(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
