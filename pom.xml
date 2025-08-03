@@ -24,9 +24,9 @@
     </scm>
     <modules>
         <!-- Add module names here -->
-        <module>application</module>
-        <module>jooq-common</module>
         <module>fz-jooq-utils</module>
+        <module>jooq-common</module>
+        <module>application</module>
     </modules>
     <properties>
         <java.version>23</java.version>
