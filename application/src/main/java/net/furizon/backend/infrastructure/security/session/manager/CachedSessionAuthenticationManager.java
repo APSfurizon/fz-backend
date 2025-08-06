@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMapper;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMapper;
@@ -46,6 +47,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     @NotNull private final SecurityConfig securityConfig;
 
     @NotNull private final PasswordEncoder encoder;
+
+    @NotNull private final TranslationService translationService;
 
     private final Cache<UUID, Pair<Session, Authentication>> sessionAuthenticationPairCache = Caffeine.newBuilder()
             .expireAfterAccess(30L, TimeUnit.MINUTES)
@@ -329,7 +332,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .limit(1)
         ).isPresent();
         if (samePw) {
-            throw new ApiException("The password is the same!", AuthenticationCodes.PW_CHAGE_SAME_PASSWORD);
+            throw new ApiException(translationService.error("authentication.reset.same_password"), AuthenticationCodes.PW_CHAGE_SAME_PASSWORD);
         }
 
         sqlCommand.execute(

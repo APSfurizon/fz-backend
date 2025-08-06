@@ -58,10 +58,17 @@ public class ApiException extends RuntimeException {
 
     public ApiException(
         @NotNull HttpStatus status,
-        @NotNull String message,
         ApiError @NotNull ... errors
     ) {
         this.status = status;
         this.errors = List.of(errors);
+    }
+
+    public ApiException(
+            @NotNull HttpStatus status,
+            String message
+    ) {
+        this.status = status;
+        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN.name()));
     }
 }

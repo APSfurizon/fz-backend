@@ -15,6 +15,7 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -49,6 +50,9 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
     @NotNull
     private final EmailSender sender;
 
+    @NotNull
+    private final TranslationService translationService;
+
     @Transactional
     @Override
     public @NotNull User executor(@NotNull RegisterUserUseCase.Input input) {
@@ -59,7 +63,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         final var authentication = sessionAuthenticationManager.findAuthenticationByEmail(regUserReq.getEmail());
         if (authentication != null) {
             throw new ApiException(
-                "User already exists with email: %s".formatted(regUserReq.getEmail()),
+                translationService.error("authentication.email.account_exists", new Object[] {regUserReq.getEmail()}),
                 AuthenticationCodes.EMAIL_ALREADY_REGISTERED
             );
         }

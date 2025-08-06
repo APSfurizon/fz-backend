@@ -6,6 +6,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -26,6 +27,7 @@ public class GeneralChecks {
     @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final OrderFinder orderFinder;
+    @NotNull private final TranslationService translationService;
 
     public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long userId,
                                                         @NotNull FurizonUser user,
@@ -50,13 +52,14 @@ public class GeneralChecks {
         if (userId != null && userId != user.getUserId()) {
             if (isAdminCached == null) {
                 isAdminCached = permissionFinder.userHasPermission(
-                        user.getUserId(),
-                        Objects.requireNonNull(permission)
+                    user.getUserId(),
+                    Objects.requireNonNull(permission)
                 );
             }
             if (!isAdminCached) {
                 log.error("User {} has no permission over userId {}", user.getUserId(), userId);
-                throw new ApiException("User is not an admin", GeneralResponseCodes.USER_IS_NOT_ADMIN);
+                throw new ApiException(translationService.error("common.user_does_not_have_permission"),
+                    GeneralResponseCodes.USER_IS_NOT_ADMIN);
             }
         }
         return id;
@@ -92,7 +95,7 @@ public class GeneralChecks {
     }
     public void assertTimeframeForEventNotPassed(@Nullable OffsetDateTime date, @Nullable Event event) {
         if (!isTimeframeForEventOk(date, event)) {
-            throw new ApiException("Editing timeframe has ended", GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
+            throw new ApiException(translationService.error("common.editing_expired"), GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
         }
     }
 
@@ -119,7 +122,9 @@ public class GeneralChecks {
         var r = orderFinder.isOrderDaily(userId, event);
         if (r.isPresent()) {
             log.error("User {} has bought an order for event {}!", userId, event);
-            throw new ApiException("User has already bought an order", GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
+            throw new ApiException(translationService.error("order.user_already_bought",
+                    new Object[] {translationService.getTranslationFromMap(event.getEventNames())}),
+                    GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
         }
     }
 
@@ -138,21 +143,24 @@ public class GeneralChecks {
     private void assertOrderStatusPaid(@NotNull OrderStatus status, long userId, @NotNull Event event) {
         if (status != OrderStatus.PAID) {
             log.error("Order for user {} on event {} is not paid", userId, event);
-            throw new ApiException("Order is not paid", GeneralResponseCodes.ORDER_NOT_PAID);
+            throw new ApiException(translationService.error("order.not_paid"),
+                GeneralResponseCodes.ORDER_NOT_PAID);
         }
     }
 
     public void assertOrderIsNotDailyPrint(boolean isDaily, long userId, @NotNull Event event) {
         if (isDaily) {
             log.error("User {} is trying to manage a room on event {}, but has a daily ticket!", userId, event);
-            throw new ApiException("User has a daily ticket", GeneralResponseCodes.USER_HAS_DAILY_TICKET);
+            throw new ApiException(translationService.error("order.is_daily"),
+                GeneralResponseCodes.USER_HAS_DAILY_TICKET);
         }
     }
 
     public void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {
         if (!r.isPresent()) {
             log.error("No order found for user {} on event {}", userId, event);
-            throw new ApiException("Order not found", GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(translationService.error("order.not_found"),
+                GeneralResponseCodes.ORDER_NOT_FOUND);
         }
     }
 }

@@ -6,6 +6,7 @@ import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -31,6 +32,9 @@ public class CreateLoginSessionValidation {
     @NotNull
     private final PasswordEncoder passwordEncoder;
 
+    @NotNull
+    private final TranslationService translationService;
+
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         String email = input.email();
         final Authentication authentication = sessionAuthenticationManager.findAuthenticationByEmail(email);
@@ -45,7 +49,7 @@ public class CreateLoginSessionValidation {
 
         if (authentication.getMailVerificationCreationMs() != null) {
             throw new ApiException(
-                "Email confirmation is still pending",
+                translationService.error("authentication.email.pending_confirmation"),
                 AuthenticationCodes.CONFIRMATION_STILL_PENDING
             );
         }

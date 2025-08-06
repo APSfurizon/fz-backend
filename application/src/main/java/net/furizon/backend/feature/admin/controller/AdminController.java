@@ -77,15 +77,15 @@ public class AdminController {
 
     @GetMapping("/ping")
     public Map<String, String> ping() {
-        String message = translationService.translate("admin.ping.message");
+        String message = translationService.message("admin.ping.message");
         return Map.of("message", message);
     }
 
     @GetMapping("/countdown")
-    public String countdown() {
+    public Map<String, String> countdown() {
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
         Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
-        return "Start time: " + bookingStart + "; Remaining time: " + remaining;
+        return Map.of("message", "Start time: " + bookingStart + "; Remaining time: " + remaining);
     }
 
     @Operation(summary = "Gets what an user can do in the admin panel", description =

@@ -17,6 +17,7 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -45,6 +46,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final TranslationService translationService;
 
     @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
 
@@ -162,8 +164,9 @@ public class UserBuysGenericSpot implements RoomLogic {
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity(roomCapacity);
         if (possibleRoomItemIds.isEmpty()) {
             log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). "
-                    + "RoomId = {}", roomCapacity, roomId);
-            throw new ApiException("Unsupported room capacity", RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
+                + "RoomId = {}", roomCapacity, roomId);
+            throw new ApiException(translationService.error("room.buy.fail.no_room_for_capacity",
+                new Object[] {roomCapacity}), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
@@ -182,7 +185,8 @@ public class UserBuysGenericSpot implements RoomLogic {
             log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: "
                     + "An error occurred while updating room position to order {}",
                     roomId, roomCapacity, order);
-            throw new ApiException("The room quota has ended", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+            throw new ApiException(translationService.error("room.buy.fail.quota_ended"),
+                    RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
         //Refetch order from pretix and update it in the db

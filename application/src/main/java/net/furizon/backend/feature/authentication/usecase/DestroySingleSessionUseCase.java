@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.requests.DestroySessionRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class DestroySingleSessionUseCase implements UseCase<DestroySingleSessionUseCase.Input, Boolean> {
     @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
     @NotNull private final PermissionFinder permissionFinder;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -35,7 +37,7 @@ public class DestroySingleSessionUseCase implements UseCase<DestroySingleSession
             && !permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_BAN_USERS)
         ) {
             throw new ApiException(
-                "User tried deleting someone else's session",
+                translationService.error("authentication.sessions.not_your_session"),
                 AuthenticationCodes.SESSION_NOT_YOURS
             );
         }

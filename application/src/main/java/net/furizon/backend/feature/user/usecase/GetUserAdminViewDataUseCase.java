@@ -23,6 +23,7 @@ import net.furizon.backend.feature.room.usecase.GetRoomInfoUseCase;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -54,6 +55,7 @@ public class GetUserAdminViewDataUseCase {
     @NotNull private final PersonalInfoFinder personalInfoFinder;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final ExchangeConfirmationFinder exchangeConfirmationFinder;
+    @NotNull private final TranslationService translationService;
 
     public @NotNull UserAdminViewData execute(
             @NotNull FurizonUser user,
@@ -66,7 +68,8 @@ public class GetUserAdminViewDataUseCase {
         Authentication auth = authenticationFinder.findAuthenticationByUserId(userId);
         User jooqUser = userFinder.findById(userId);
         if (privateInfo == null || auth == null || jooqUser == null) {
-            throw new ApiException("User not found", GeneralResponseCodes.USER_NOT_FOUND);
+            throw new ApiException(translationService.error("user.not_found"),
+                GeneralResponseCodes.USER_NOT_FOUND);
         }
 
         // Fetch all user's cards
