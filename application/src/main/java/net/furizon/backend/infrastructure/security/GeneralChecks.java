@@ -95,7 +95,8 @@ public class GeneralChecks {
     }
     public void assertTimeframeForEventNotPassed(@Nullable OffsetDateTime date, @Nullable Event event) {
         if (!isTimeframeForEventOk(date, event)) {
-            throw new ApiException(translationService.error("common.editing_expired"), GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
+            throw new ApiException(translationService.error("common.editing_expired"),
+                    GeneralResponseCodes.EDIT_TIMEFRAME_ENDED);
         }
     }
 
@@ -122,7 +123,7 @@ public class GeneralChecks {
         var r = orderFinder.isOrderDaily(userId, event);
         if (r.isPresent()) {
             log.error("User {} has bought an order for event {}!", userId, event);
-            throw new ApiException(translationService.error("order.user_already_bought",
+            throw new ApiException(translationService.error("order.user_already_bought_event",
                     new Object[] {translationService.getTranslationFromMap(event.getEventNames())}),
                     GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
         }

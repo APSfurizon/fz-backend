@@ -33,6 +33,7 @@ import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -75,6 +76,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final EmailSender emailSender;
+    @NotNull private final TranslationService translationService;
 
 
     //Buy or upgrade related stuff
@@ -260,7 +262,7 @@ public class UserBuysFullRoom implements RoomLogic {
         Long targetPrice = 0L;
         boolean targetHasPosition = targetPositionId != null && targetItemId != null;
         if (targetHasPosition) {
-            //Get how much the target user has paid for his room and how much does it costs now
+            //Get how much the target user has paid for his room and how much does it cost now
             //This works also if the target user has a NO_ROOM
             var tp = pretixPositionFinder.fetchPositionById(event, targetPositionId);
             if (!tp.isPresent()) {
@@ -321,7 +323,7 @@ public class UserBuysFullRoom implements RoomLogic {
         } else {
             if (targetHasPosition) {
                 //res = deletePretixPositionAction.invoke(event, targetPositionId);
-                //If we have to delete a position, we delay the deletion after the exchange is done to mantain quota
+                //If we have to delete a position, we delay the deletion after the exchange is done to maintain quota
                 toDeletePositionId = targetPositionId;
             }
         }
@@ -617,7 +619,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 targetUsrId, sourceUsrId, roomId, event, pretixInformation);
         try {
             OrderController.suspendWebhook();
-            log.info("[ORDER_TRANSFER] UserBuysFullRoom: Trasferring order {} -> {} on event {}",
+            log.info("[ORDER_TRANSFER] UserBuysFullRoom: Transferring order {} -> {} on event {}",
                     sourceUsrId, targetUsrId, event);
 
             //Fetch source order
@@ -629,8 +631,8 @@ public class UserBuysFullRoom implements RoomLogic {
             }
             String orderCode = sourceOrder.getCode();
 
-            //We're now gonna invalidate all previous payments and then create one "aggregate" manual
-            // payment which cannot be refunded. This is for preventing pretix admins from issueing a refund
+            //We're now going to invalidate all previous payments and then create one "aggregate" manual
+            // payment which cannot be refunded. This is for preventing pretix admins from issuing a refund
             // after the order has been transferred. If this happens, the original order buyer would get the money
             // instead of the new owner
 
@@ -766,7 +768,7 @@ public class UserBuysFullRoom implements RoomLogic {
             @Nullable Long originalItemId,
             @Nullable Long newItemId,
             @Nullable Long newItemPrice,
-            boolean originallyHadAroomPosition,
+            boolean originallyHadRoomPosition,
             @Nullable Long positionId,
             long addonToPositionId,
             long userId,
@@ -777,10 +779,10 @@ public class UserBuysFullRoom implements RoomLogic {
             boolean createTempAddonFirst
     ) {
         log.debug("[ROOM_BUY] buyOrUpgradeItem called with "
-                + "originalItemId={} newItemId={} newItemPrice={} originallyHadAroomPosition={} "
+                + "originalItemId={} newItemId={} newItemPrice={} originallyHadRoomPosition={} "
                 + "positionId={} addonToPositionId={} userId={} newRoomItemId={} orderCode={} "
                 + "event={} pretixInformation={} createTempAddonFirst={}",
-                originalItemId, newItemId, newItemPrice, originallyHadAroomPosition,
+                originalItemId, newItemId, newItemPrice, originallyHadRoomPosition,
                 positionId, addonToPositionId, userId, newRoomItemId, orderCode,
                 event, pretixInformation, createTempAddonFirst);
         if (newItemId == null || newItemPrice == null) {
@@ -798,14 +800,15 @@ public class UserBuysFullRoom implements RoomLogic {
         if (!q.get().isAvailable()) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: There's no available quota of item {}",
                     userId, newRoomItemId, event, newItemId);
-            throw new ApiException("New room quota has ended!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+            throw new ApiException(translationService.error("room.buy.fail.quota_ended"),
+                    RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
         //If quota is available, try getting the item
         PretixPosition tempPosition = null;
         Long posid = null;
         boolean res;
-        if (originallyHadAroomPosition && positionId != null) {
+        if (originallyHadRoomPosition && positionId != null) {
             //Create a temporary position to mantain our quota in case of rollback
             if (originalItemId != null) {
                 tempPosition = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
@@ -844,7 +847,8 @@ public class UserBuysFullRoom implements RoomLogic {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
                     + "An error occurred while pushing or updating order position {}",
                     userId, newRoomItemId, event, positionId);
-            throw new ApiException("Error while adding room to order", RoomErrorCodes.BUY_ROOM_ERROR_UPDATING_POSITION);
+            throw new ApiException(translationService.error("room.buy.fail_pretix_sync"),
+                    RoomErrorCodes.BUY_ROOM_ERROR_UPDATING_POSITION);
         }
 
         //Refetch how many items are remaining
@@ -1062,7 +1066,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
         List<UserDisplayDataWithExtraDays> guests = room.getGuests();
-        //Since the room extra days will depend on the owner and it's already set by the caller,
+        //Since the room extra days will depend on the owner, and it's already set by the caller,
         // we can just use it
         ExtraDays ownerExtraDays = Objects.requireNonNull(room.getRoomExtraDays());
         guests.forEach(g -> g.setExtraDays(ownerExtraDays));
