@@ -169,7 +169,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 }
             }
             return null;
-        }).filter(Objects::nonNull).toList() : Collections.emptyList();
+        }).filter(Objects::nonNull).sorted().toList() : Collections.emptyList();
 
         return new ListRoomPricesAvailabilityResponse(
                 order.getBoughtRoomData(pretixInformation),

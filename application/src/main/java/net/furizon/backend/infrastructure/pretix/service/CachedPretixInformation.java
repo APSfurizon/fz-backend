@@ -192,6 +192,7 @@ public class CachedPretixInformation implements PretixInformation {
             value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
             return value;
         } else {
+            //When reloading the event we already cache the various prices, so there always be a value present
             lock.readLock().lock();
             Long value = itemIdToPrice.getIfPresent(itemId);
             List<PretixProductBundle> bundles = itemIdToBundle.getIfPresent(itemId);
