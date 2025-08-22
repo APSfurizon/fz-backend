@@ -314,10 +314,10 @@ roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
-#roomListing()
+roomListing()
 
 
 #countdown()
 
 #fursuitCount()
-noseCount()
+#noseCount()

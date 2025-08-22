@@ -55,6 +55,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
+        boolean roomBuyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(event);
 
         //Check if we actually can buy or upgrade room
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
@@ -62,8 +63,10 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         //We will load data if the current room logic allows for buying/upgrade or room confirmation
         boolean canLoadData = editingTimeAllowed && (
                 roomLogic.isConfirmationSupported()
-                || roomLogic.isRoomBuyOrUpgradeSupported(event)
+                || roomBuyOrUpgradeSupported
         );
+
+        boolean loadAllItems = editingTimeAllowed && !roomBuyOrUpgradeSupported;
 
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
@@ -107,8 +110,9 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         //Fetch room guests
         Optional<Long> roomId = canLoadData ? roomFinder.getRoomIdFromOwnerUserId(userId, event)
                 : Optional.empty();
-        List<RoomGuest> guests = roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, false))
-                .orElse(null);
+        List<RoomGuest> guests = loadAllItems
+                ? null
+                : roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, false)).orElse(null);
 
 
         long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid;
@@ -116,12 +120,12 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         //Return empty list if not buyOrUpgradeSupported
         List<RoomAvailabilityInfoResponse> rooms = canLoadData ? roomItemIds.stream().map(itemId -> {
             //We exclude the current room
-            if (Objects.equals(itemId, pretixRoomItemId)) {
+            if (Objects.equals(itemId, pretixRoomItemId) && !loadAllItems) {
                 return null;
             }
             //Check for room capacity >= number of people already in room
             HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(itemId);
-            if (roomInfo != null && (guests == null || roomInfo.capacity() >= guests.size())) {
+            if (roomInfo != null && (loadAllItems || guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
                 // (actual check against how much the user has paid is done on the actual action)
                 long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false, true));
@@ -148,7 +152,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 }
                 long totalPrice = roomPrice + extraDaysPrice;
 
-                if (totalPrice >= totalPaid || disableUnupgradeFilter) {
+                if (totalPrice >= totalPaid || disableUnupgradeFilter || loadAllItems) {
                     //Fetch availability
                     PretixQuotaAvailability quota = getSmallestQuota(
                             pretixInformation, itemId, earlyItemId, lateItemId
