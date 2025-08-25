@@ -38,7 +38,10 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         long userId = input.userId;
         Event event = input.event;
         PretixInformation pretixInformation = input.pretixInformation;
+        //TODO keep in mind that we cache in pretixInformation just the current event's data. This means some stuff
+        // will not load if we try to get a room for a previous event
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, pretixInformation, roomLogic);
+        boolean loadAllowedActions = input.loadAllowedActions;
 
         OffsetDateTime endRoomEditingTime = roomConfig.getRoomChangesEndTime();
         boolean editingTimeAllowed = input.ignoreEditingTime
@@ -50,12 +53,12 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             isOwner = info.getRoomOwner().getUserId() == userId;
             long roomId = info.getRoomId();
             info.setUserIsOwner(isOwner);
-            info.setCanConfirm(isOwner && editingTimeAllowed
+            info.setCanConfirm(loadAllowedActions && isOwner && editingTimeAllowed
                                && !info.isConfirmed() && roomLogic.canConfirmRoom(roomId, event, pretixInformation));
-            info.setCanUnconfirm(isOwner && editingTimeAllowed
+            info.setCanUnconfirm(loadAllowedActions && isOwner && editingTimeAllowed
                                && info.isConfirmed() && roomLogic.canUnconfirmRoom(roomId, event, pretixInformation));
-            info.setConfirmationSupported(isOwner && roomLogic.isConfirmationSupported());
-            info.setUnconfirmationSupported(isOwner && roomLogic.isUnconfirmationSupported());
+            info.setConfirmationSupported(loadAllowedActions && isOwner && roomLogic.isConfirmationSupported());
+            info.setUnconfirmationSupported(loadAllowedActions && isOwner && roomLogic.isUnconfirmationSupported());
             roomLogic.updateRoomCapacity(info.getRoomData(), event, pretixInformation);
 
             List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
@@ -87,12 +90,12 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         Optional<Boolean> r = orderFinder.isOrderDaily(userId, event);
         boolean hasOrder = r.isPresent();
 
-        boolean canCreateRoom = editingTimeAllowed && hasOrder
+        boolean canCreateRoom = loadAllowedActions && editingTimeAllowed && hasOrder
                 && info == null && roomLogic.canCreateRoom(userId, event);
         boolean buyOrUpgradeSupported = roomLogic.isRoomBuyOrUpgradeSupported(event);
         boolean exchangeSupported = roomLogic.isExchangeRoomSupported(event);
 
-        boolean canExchange = editingTimeAllowed && isOwner && hasOrder && exchangeSupported
+        boolean canExchange = loadAllowedActions && editingTimeAllowed && isOwner && hasOrder && exchangeSupported
                 && exchangeConfirmationFinder.getExchangeStatusFromSourceUsrIdEvent(userId, event) == null;
         boolean canBuyOrUpgrade = canExchange && buyOrUpgradeSupported;
 
@@ -117,6 +120,7 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
             long userId,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation,
-            boolean ignoreEditingTime
+            boolean ignoreEditingTime,
+            boolean loadAllowedActions
     ) {}
 }

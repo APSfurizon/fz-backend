@@ -435,7 +435,8 @@ public class RoomController {
                     user.getUserId(),
                     pretixInformation.getCurrentEvent(),
                     pretixInformation,
-                    false
+                    false,
+                    true
             )
         );
     }

@@ -234,7 +234,7 @@ public class JooqOrderFinder implements OrderFinder {
             selectFrom()
             .where(ORDERS.USER_ID.eq(userId))
             .orderBy(ORDERS.EVENT_ID)
-        ).stream().map(e -> orderMapper.map(e, pretixService)).toList();
+        ).stream().map(e -> orderMapper.map(e, pretixService, false)).toList();
     }
 
     @Override
