@@ -61,6 +61,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_ACCOUNT_USERID;
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
@@ -93,6 +94,8 @@ public class CachedPretixInformation implements PretixInformation {
     // *** CACHE
     @NotNull
     private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
+    @NotNull
+    private final AtomicReference<List<Event>> otherEvents = new AtomicReference<>(null);
 
     //Event Struct
 
@@ -336,6 +339,13 @@ public class CachedPretixInformation implements PretixInformation {
             throw new IllegalStateException("No current event available");
         }
         return v;
+    }
+    @NotNull
+    public List<Event> getOtherEvents() {
+        lock.readLock().lock();
+        var v = otherEvents.get();
+        lock.readLock().unlock();
+        return v == null ? Collections.emptyList() : v;
     }
 
     @Override
@@ -640,6 +650,7 @@ public class CachedPretixInformation implements PretixInformation {
     private void invalidateEventsCache() {
         log.info("[PRETIX] Resetting event cache");
         currentEvent.set(null);
+        otherEvents.set(null);
     }
 
     private void invalidateEventStructCache() {
@@ -679,12 +690,12 @@ public class CachedPretixInformation implements PretixInformation {
 
 
     private void reloadEvents() {
-        useCaseExecutor
-            .execute(ReloadEventsUseCase.class, UseCaseInput.EMPTY)
-            .ifPresent(event -> {
-                log.info("[PRETIX] Setting an event as current = '{}'", event);
-                currentEvent.set(event);
-            });
+        var r = useCaseExecutor.execute(ReloadEventsUseCase.class, UseCaseInput.EMPTY);
+        r.getLeft().ifPresent(event -> {
+            log.info("[PRETIX] Setting an event as current = '{}'", event);
+            currentEvent.set(event);
+        });
+        otherEvents.set(r.getRight());
     }
 
     private void loadCurrentEventFromDb() {
@@ -702,10 +713,13 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     private void reloadEventStructure() {
-        Event event = getCurrentEvent();
-        reloadQuestions(event);
-        reloadProducts(event);
-        reloadQuotas(event);
+        Consumer<Event> reload = e -> {
+            reloadQuestions(e);
+            reloadProducts(e);
+            reloadQuotas(e);
+        };
+        reload.accept(getCurrentEvent());
+        getOtherEvents().stream().filter(e -> !e.equals(getCurrentEvent())).forEach(reload);
     }
 
     private void reloadQuestions(@NotNull Event event) {

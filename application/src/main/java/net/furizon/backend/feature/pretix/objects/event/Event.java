@@ -15,11 +15,12 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
+
 @Data
 @Slf4j
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
+@Builder(toBuilder = true)
 public class Event {
     private long id;
 
