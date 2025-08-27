@@ -286,11 +286,14 @@ public class UserBuysFullRoom implements RoomLogic {
         if (sourceItemId != null) {
             if (targetHasPosition) {
                 //Creates a temporary position with target's item to keep quota reserved while performing the exchange
-                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                PretixPosition pp = pushPretixPositionAction.invoke(
+                    event, createTempPositionFirst, true, 0L, //price is not important since it's the temp item
+                    new PushPretixPositionRequest(
                         targetOrderCode,
                         null,
                         targetItemId
-                ), createTempPositionFirst, pretixInformation, 0L); //price is not important since it's the temp item
+                    ), pretixInformation
+                );
                 if (pp == null) {
                     log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
                             + "res was false after create temporary position with item {}",
@@ -298,7 +301,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     return null;
                 }
                 toDeletePositionId = pp.getPositionId();
-                res = updatePretixPositionAction.invoke(event, targetPositionId, new UpdatePretixPositionRequest(
+                res = updatePretixPositionAction.invoke(event, targetPositionId, true, new UpdatePretixPositionRequest(
                         targetOrderCode,
                         sourceItemId,
                         sourcePrice
@@ -307,11 +310,14 @@ public class UserBuysFullRoom implements RoomLogic {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
                         + "Creating a new position should not be possible",
                         sourceUsrId, targetUsrId, event);
-                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                PretixPosition pp = pushPretixPositionAction.invoke(
+                    event, createTempPositionFirst, true, sourcePrice,
+                    new PushPretixPositionRequest(
                         targetOrderCode,
                         Objects.requireNonNull(targetAddonToPositionId),
                         sourceItemId
-                ).setPrice(sourcePrice), createTempPositionFirst, pretixInformation, sourcePrice);
+                    ).setPrice(sourcePrice), pretixInformation
+                );
                 res = pp != null;
                 if (res) {
                     targetPositionId = pp.getPositionId();
@@ -335,17 +341,20 @@ public class UserBuysFullRoom implements RoomLogic {
         Long targetPosid = null;
         if (targetItemId != null) {
             if (sourceHasPosition) {
-                res = updatePretixPositionAction.invoke(event, sourcePositionId, new UpdatePretixPositionRequest(
+                res = updatePretixPositionAction.invoke(event, sourcePositionId, true, new UpdatePretixPositionRequest(
                         sourceOrderCode,
                         targetItemId,
                         targetPrice
                 )) != null;
             } else {
-                PretixPosition pp = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                PretixPosition pp = pushPretixPositionAction.invoke(
+                    event, createTempPositionFirst, true, targetPrice,
+                    new PushPretixPositionRequest(
                         sourceOrderCode,
                         Objects.requireNonNull(sourceAddonToPositionId),
                         targetItemId
-                ).setPrice(targetPrice), createTempPositionFirst, pretixInformation, targetPrice);
+                    ).setPrice(targetPrice), pretixInformation
+                );
                 res = pp != null;
                 if (res) {
                     sourcePositionId = pp.getPositionId();
@@ -808,11 +817,14 @@ public class UserBuysFullRoom implements RoomLogic {
         if (originallyHadAroomPosition && positionId != null) {
             //Create a temporary position to mantain our quota in case of rollback
             if (originalItemId != null) {
-                tempPosition = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+                tempPosition = pushPretixPositionAction.invoke(
+                    event, createTempAddonFirst, true, 0L, //price is not important since it's the temp item
+                    new PushPretixPositionRequest(
                         orderCode,
                         null,
                         originalItemId
-                ), createTempAddonFirst, pretixInformation, 0L); //price is not important since it's the temp item
+                    ), pretixInformation
+                );
                 if (tempPosition == null) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
                             + "Unable to create temporary position for rollback with item {}",
@@ -820,7 +832,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     return null;
                 }
             }
-            res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+            res = updatePretixPositionAction.invoke(event, positionId, true, new UpdatePretixPositionRequest(
                     orderCode,
                     newItemId,
                     newItemPrice
@@ -829,11 +841,14 @@ public class UserBuysFullRoom implements RoomLogic {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
                     + "pushing new position should not be possible",
                     userId, newRoomItemId, event);
-            PretixPosition pos = pushPretixPositionAction.invoke(event, new PushPretixPositionRequest(
+            PretixPosition pos = pushPretixPositionAction.invoke(
+                event, createTempAddonFirst, true, newItemPrice,
+                new PushPretixPositionRequest(
                     orderCode,
                     addonToPositionId,
                     newItemId
-            ).setPrice(newItemPrice), createTempAddonFirst, pretixInformation, newItemPrice);
+                ).setPrice(newItemPrice), pretixInformation
+            );
             res = pos != null;
             if (res) {
                 positionId = pos.getPositionId();
@@ -880,7 +895,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
         boolean res;
         if (originallyHadAroomPosition) {
-            res = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+            res = updatePretixPositionAction.invoke(event, positionId, true, new UpdatePretixPositionRequest(
                     orderCode,
                     rollbackItemId,
                     rollbackPrice
