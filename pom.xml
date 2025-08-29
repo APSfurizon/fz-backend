@@ -76,6 +76,12 @@
             <artifactId>paseto4j-version4</artifactId>
             <version>${paseto4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>gg.jte</groupId>
+            <artifactId>jte-runtime</artifactId>
+            <version>3.1.15</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>

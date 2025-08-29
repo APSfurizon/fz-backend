@@ -171,8 +171,8 @@
                 <version>${jte.version}</version>
                 <configuration>
                     <!-- This is the directory where your .jte files are located. -->
-                    <!--targetDirectory>${project.build.directory}/jte-classes</targetDirectory-->
-                    <sourceDirectory>${project.basedir}/../templates/jte</sourceDirectory>
+                    <targetDirectory>${project.build.directory}/jte-classes</targetDirectory>
+                    <sourceDirectory>${project.build.sourceDirectory}/../resources/templates</sourceDirectory>
                     <contentType>Html</contentType>
                     <!--binaryStaticContent>true</binaryStaticContent-->
                 </configuration>

@@ -12,7 +12,8 @@ public class MessageConfig {
         ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
         source.setBasenames(
             "classpath:messages/messages",
-            "classpath:errors/errors"
+            "classpath:errors/errors",
+            "classpath:email/email"
         );
         source.setDefaultEncoding("UTF-8");
         source.setFallbackToSystemLocale(false);

@@ -20,6 +20,18 @@ public class TranslationService {
     @NotNull
     private final MessageSource messageSource;
 
+    public String translateFallback(String key, String fallback, Locale locale, @Nullable Object[] params) {
+        try {
+            return messageSource.getMessage(key, params, locale);
+        } catch (Throwable e) {
+            return fallback;
+        }
+    }
+
+    public String translateFallback(String key, String fallback, @Nullable Object[] params) {
+        return translateFallback(key, fallback, LocaleContextHolder.getLocale(), params);
+    }
+
     private String translate(String key, Locale locale, @Nullable Object[] params) {
         try {
             return messageSource.getMessage(key, params, locale);
@@ -63,6 +75,19 @@ public class TranslationService {
     }
 
     public String error(@PropertyKey(resourceBundle = "errors.errors") String key) {
+        return translate(key);
+    }
+
+    public String email(@PropertyKey(resourceBundle = "email.email") String key, Locale locale,
+                          @Nullable Object[] params) {
+        return translate(key, locale, params);
+    }
+
+    public String email(@PropertyKey(resourceBundle = "email.email") String key, @Nullable Object[] params) {
+        return translate(key, params);
+    }
+
+    public String email(@PropertyKey(resourceBundle = "email.email") String key) {
         return translate(key);
     }
 

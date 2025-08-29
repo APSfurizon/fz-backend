@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
+import net.furizon.backend.infrastructure.templating.JteContext;
+import net.furizon.backend.infrastructure.templating.JteLocalizer;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -42,6 +45,12 @@ public class EmailSenderService implements EmailSender {
 
     @NotNull
     private final TemplateEngine templateEngine;
+
+    @NotNull
+    private final JteLocalizer jteLocalizer;
+
+    @NotNull
+    private final TranslationService translationService;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -92,8 +101,7 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void send(@NotNull MailRequest request) throws MessagingException, MailException {
-        log.info("Sending email: {}", request);
-        mailSender.send(transformMailRequestToMimeMessages(request));
+        sendMany(request);
     }
 
     @Override
@@ -102,6 +110,11 @@ public class EmailSenderService implements EmailSender {
             return;
         }
         log.info("Sending emails: {}", Arrays.toString(requests));
+        for (MailRequest mr : requests) {
+            if (mr.getSubject() != null) {
+                mr.subject(translationService.translateFallback(mr.getSubject(), mr.getSubject(), null));
+            }
+        }
         mailSender.send(transformMailRequestsToMimeMessages(requests));
     }
 
@@ -176,7 +189,9 @@ public class EmailSenderService implements EmailSender {
         }
 
         TemplateOutput output = new StringOutput();
+        JteContext.init(this.jteLocalizer);
         templateEngine.render(message.getTemplate(), message.getParams(), output);
+        JteContext.dispose();
         return output.toString();
     }
 

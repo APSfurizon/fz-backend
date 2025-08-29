@@ -63,7 +63,8 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException(translationService.error("room.create_fail_no_order"), GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(translationService.error("room.create_fail_no_order"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
         //Actual creation of the room

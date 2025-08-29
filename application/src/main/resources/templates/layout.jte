@@ -1,10 +1,13 @@
-@param String link
+@import gg.jte.Content
+
+@param Content title
+@param Content content
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Reset the password of your account</title>
+    <title>${title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="supported-color-schemes" content="light dark">
@@ -21,12 +24,7 @@
 <div class="body">
     <div class="container">
         <img src="https://fzbe.furizon.net/res/furizon.png" alt="con_logo" title="con_logo" class="con-logo">
-        <div>
-            <h2 class="title">Reset the password of your account</h2>
-            <p class="main-content">Click the following link to reset the password of your account:</p>
-            <a href="${link}" class="link">${link}</a>
-            <p class="main-content">If you didn't request a password reset, you can simply ignore this email.</p>
-        </div>
+        ${content}
     </div>
 </div>
 </html>

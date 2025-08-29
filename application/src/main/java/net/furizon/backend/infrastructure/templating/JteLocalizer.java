@@ -1,19 +1,18 @@
 package net.furizon.backend.infrastructure.templating;
 
-import org.springframework.context.MessageSource;
-import java.util.Locale;
+import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.localization.TranslationService;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class JteLocalizer implements gg.jte.support.LocalizationSupport {
-    private final MessageSource messageSource;
-    private final Locale locale;
-
-    public JteLocalizer(MessageSource messageSource, Locale locale) {
-        this.messageSource = messageSource;
-        this.locale = locale;
-    }
+    @NotNull
+    private final TranslationService translationService;
 
     @Override
     public String lookup(String s) {
-        return messageSource.getMessage(s, new Object[] {}, locale);
+        return translationService.email(s, new Object[] {});
     }
 }

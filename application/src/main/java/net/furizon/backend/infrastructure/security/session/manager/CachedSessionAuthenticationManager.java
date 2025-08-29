@@ -332,7 +332,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .limit(1)
         ).isPresent();
         if (samePw) {
-            throw new ApiException(translationService.error("authentication.reset.same_password"), AuthenticationCodes.PW_CHAGE_SAME_PASSWORD);
+            throw new ApiException(translationService.error("authentication.reset.same_password"),
+                    AuthenticationCodes.PW_CHAGE_SAME_PASSWORD);
         }
 
         sqlCommand.execute(

@@ -2,9 +2,7 @@ package net.furizon.backend.feature.authentication;
 
 public class AuthenticationMailTexts {
 
-    public static final String SUBJECT_PW_RESET = "Password reset link for your account";
     public static final String SUBJECT_PW_CHANGED = "The password of your account has been changed";
-    public static final String SUBJECT_EMAIL_CONFIRM = "Confirm your account";
     public static final String SUBJECT_TOO_MANY_LOGIN_ATTEMPTS = "Account disabled - Too many login attempts";
     public static final String SUBJECT_MEMBERSHIP_FATAL_ERROR = "Membership card FATAL ERROR";
     public static final String SUBJECT_MEMBERSHIP_WARNING = "Membership card warning";

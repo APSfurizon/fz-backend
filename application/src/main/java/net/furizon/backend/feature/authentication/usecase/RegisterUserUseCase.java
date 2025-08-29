@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_EMAIL_CONFIRM;
 
 @Slf4j
 @Component
@@ -94,7 +93,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         sender.fireAndForget(
             new MailRequest()
                 .to(email)
-                .subject(SUBJECT_EMAIL_CONFIRM)
+                .subject(translationService.email("mail.email_confirm.title"))
                 .templateMessage(
                     TEMPLATE_EMAIL_CONFIRM, null,
                     MailVarPair.of(EmailVars.LINK, frontendConfig.getConfirmEmailUrl(confirmationId))

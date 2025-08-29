@@ -84,4 +84,9 @@ public class MailRequest {
         this.message = message;
         this.templateMessage = templateMessage;
     }
+
+    public MailRequest addParam(@NotNull String key, @NotNull Object value) {
+        this.templateMessage.addParam(key, value);
+        return this;
+    }
 }
