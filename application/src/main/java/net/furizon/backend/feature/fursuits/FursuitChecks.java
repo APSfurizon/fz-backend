@@ -43,8 +43,10 @@ public class FursuitChecks {
         assertUserHasPermissionOnFursuit(userId, fursuitId, isAdmin);
     }
 
-    public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId, @Nullable Event event, boolean isOwner) {
-        FursuitData data = fursuitFinder.getFursuit(fursuitId, event, isOwner);
+    public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId,
+                                                            @Nullable Event event, @Nullable Long userId,
+                                                            boolean isOwner) {
+        FursuitData data = fursuitFinder.getFursuit(fursuitId, event, userId, isOwner);
         assertFursuitExists(data);
         return data;
     }
