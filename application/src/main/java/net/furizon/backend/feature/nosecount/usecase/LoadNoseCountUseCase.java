@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,8 +131,16 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         });
 
 
+        roomless.sort(Comparator.comparing(u -> u.getUser().getFursonaName()));
+        List<NosecountHotel> hotels = hotelInternalNameToHotel.values()
+                .stream()
+                .sorted(Comparator.comparing(NosecountHotel::getInternalName))
+                .toList();
+        hotels.forEach(hotel -> hotel.getRoomTypes().sort(
+                Comparator.comparing(t -> t.getRoomData().getRoomCapacity())));
+
         return new NoseCountResponse(
-            hotelInternalNameToHotel.values().stream().toList(),
+            hotels,
             roomless,
             dailys
         );
