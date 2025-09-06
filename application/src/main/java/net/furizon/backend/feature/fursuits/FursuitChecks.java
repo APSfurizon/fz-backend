@@ -88,7 +88,7 @@ public class FursuitChecks {
     }
 
     public void assertUserHasNotReachedMaxFursuitBadges(long userId, @NotNull Order order) {
-        int max = fursuitConfig.getMaxExtraFursuits() + order.getExtraFursuits();
+        int max = fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits();
         int alreadyRegisteredSuits = fursuitFinder.countFursuitOfUserToEvent(userId, order);
         if (alreadyRegisteredSuits >= Math.min(max, (int) fursuitConfig.getMaxExtraFursuits())) {
             log.error("User {} has reached max fursuit badges. Max = {}", userId, max);
