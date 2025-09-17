@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_RESET;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_PW_RESET;
 
 @Slf4j
 @Component

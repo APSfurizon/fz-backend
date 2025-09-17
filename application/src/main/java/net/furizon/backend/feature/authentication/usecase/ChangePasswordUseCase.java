@@ -18,8 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_CHANGED;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_CHANGED;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_PW_CHANGED;
 
 @Slf4j
 @Component
@@ -55,7 +54,8 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
         if (resetPwId != null) {
             sessionAuthenticationManager.deletePasswordResetAttempt(resetPwId);
         }
-        sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED).subject(SUBJECT_PW_CHANGED));
+        sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED)
+                .subject(translationService.email("mail.password_changed.title")));
 
         return true;
     }

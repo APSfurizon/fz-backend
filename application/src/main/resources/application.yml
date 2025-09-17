@@ -84,6 +84,7 @@ frontend:
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
   user-page-url: ${FRONTEND_USER_PAGE_URL:}
+  reservation-page-url: ${FRONTEND_RESERVATION_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}

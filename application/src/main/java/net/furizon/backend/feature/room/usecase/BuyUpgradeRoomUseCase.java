@@ -13,6 +13,7 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_WAS_UPGRADED;
@@ -47,6 +49,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
     @NotNull private final TranslationService translationService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull BuyUpgradeRoomUseCase.Input input) {
@@ -150,7 +153,8 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             if (names != null) {
                 mailService.prepareAndSendBroadcastUpdate(
                         oldRoomId, TEMPLATE_ROOM_WAS_UPGRADED,
-                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)),
+                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                 );
             }
         }

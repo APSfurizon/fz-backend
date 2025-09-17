@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_EMAIL_CONFIRM;
 
 @Slf4j
 @Component

@@ -23,6 +23,7 @@ public class FrontendConfig {
     @Getter(AccessLevel.NONE)
     @NotNull private String confirmEmailUrl;
 
+    @NotNull private String reservationPageUrl;
     @NotNull private String badgePageUrl;
     @NotNull private String roomPageUrl;
     @NotNull private String userPageUrl;

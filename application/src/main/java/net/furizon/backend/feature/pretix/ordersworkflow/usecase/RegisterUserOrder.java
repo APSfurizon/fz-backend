@@ -15,6 +15,7 @@ import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
@@ -48,6 +49,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
     @NotNull private final EmailSender mailService;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
     @NotNull private final TranslationService translationService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull RegisterUserOrder.Input input) {
@@ -107,7 +109,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                     log.debug("[PRETIX] User {} already owned order {}", userId, input.code);
                     return true;
                 }
-                //We detected a duplicate order for an user.
+                //We detected a duplicate order for a user.
                 log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
                 //We update the duplicate "frontend" field for that order, so pretix admins can verify that this order
                 // was really tried to be claimed by the current user
@@ -136,7 +138,8 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                             mail, TEMPLATE_DUPLICATE_ORDER,
                             MailVarPair.of(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
                             MailVarPair.of(EmailVars.ORDER_CODE, prevOrderCode),
-                            MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode())
+                            MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode()),
+                            MailVarPair.of(EmailVars.LINK, frontendConfig.getReservationPageUrl())
                         ).subject(SUBJECT_ORDER_PROBLEM)
                     );
                 } else {

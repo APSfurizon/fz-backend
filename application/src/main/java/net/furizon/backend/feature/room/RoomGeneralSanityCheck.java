@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.LinkedList;
 import java.util.List;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
@@ -49,6 +51,7 @@ public class RoomGeneralSanityCheck {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final FrontendConfig frontendConfig;
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
         log.error(message, args);
@@ -58,11 +61,12 @@ public class RoomGeneralSanityCheck {
     }
 
     private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId,
-                                                                @NotNull String roomName, @NotNull String reason) {
+            @NotNull String roomName, @NotNull String reason) {
         return mailService.prepareBroadcastProblem(
                 roomId, TEMPLATE_SANITY_CHECK_DELETED,
                 MailVarPair.of(ROOM_NAME, roomName),
-                MailVarPair.of(SANITY_CHECK_REASON, reason)
+                MailVarPair.of(SANITY_CHECK_REASON, reason),
+                MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
         );
     }
     private List<MailRequest> prepareSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
@@ -177,7 +181,7 @@ public class RoomGeneralSanityCheck {
             String fursona = mail == null ? null : mail.getFursonaName();
             fursona = fursona == null ? "" : fursona;
 
-            //This (together with owner in room check) will also test if a owner has multiple rooms
+            //This (together with owner in room check) will also test if an owner has multiple rooms
             int roomNo = roomFinder.countRoomsWithUser(usrId, eventId);
             if (roomNo > 1) {
                 if (usrId == ownerId) {

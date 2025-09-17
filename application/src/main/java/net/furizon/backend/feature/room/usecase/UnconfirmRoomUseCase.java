@@ -7,6 +7,7 @@ import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_UNCONFIRMED;
@@ -30,6 +32,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull UnconfirmRoomUseCase.Input input) {
@@ -57,7 +60,8 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
                     if (name != null) {
                         mailService.prepareAndSendBroadcastUpdate(
                             roomId, TEMPLATE_ROOM_UNCONFIRMED,
-                            MailVarPair.of(ROOM_TYPE_NAME, name)
+                            MailVarPair.of(ROOM_TYPE_NAME, name),
+                            MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                         );
                     }
                 }
