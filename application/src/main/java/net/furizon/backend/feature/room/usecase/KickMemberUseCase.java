@@ -13,6 +13,7 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -34,6 +35,7 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
     @NotNull private final FrontendConfig frontendConfig;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Boolean executor(@NotNull KickMemberUseCase.Input input) {
@@ -56,13 +58,14 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
             UserEmailData data = userFinder.getMailDataForUser(requesterUserId);
             String roomName = roomFinder.getRoomName(roomId);
             if (data != null && roomName != null) {
-                roomName = roomName.replaceAll("[^a-zA-Z0-9 \\\\/+\\-!?$()=]", "");
-                mailService.prepareAndSendUpdate(new MailRequest(
+                String finalRoomName = roomName.replaceAll("[^a-zA-Z0-9 \\\\/+\\-!?$()=]", "");
+                mailService.prepareAndSendUpdate(translationService.withLocale(data.getLanguage(),
+                        () -> new MailRequest(
                         targetUserId, userFinder, TEMPLATE_KICKED_FROM_ROOM,
                         MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
-                        MailVarPair.of(ROOM_NAME, roomName),
+                        MailVarPair.of(ROOM_NAME, finalRoomName),
                         MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
-                ));
+                ).subject(translationService.email("mail.room_kicked_from.title"))));
             }
         }
         return res;

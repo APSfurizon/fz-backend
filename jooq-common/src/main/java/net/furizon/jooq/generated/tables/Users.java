@@ -101,6 +101,11 @@ public class Users extends TableImpl<Record> {
      */
     public final TableField<Record, Boolean> SHOW_IN_NOSECOUNT = createField(DSL.name("show_in_nosecount"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
 
+    /**
+     * The column <code>public.users.user_language</code>.
+     */
+    public final TableField<Record, String> USER_LANGUAGE = createField(DSL.name("user_language"), SQLDataType.VARCHAR(8).nullable(false), this, "");
+
     private Users(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

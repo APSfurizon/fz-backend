@@ -70,7 +70,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         validation.validate(regUserReq.getPersonalUserInformation());
         User user = createUserAction.invoke(
                 regUserReq.getFursonaName(),
-                regUserReq.getPersonalUserInformation().getResidenceCountry()
+                regUserReq.getPersonalUserInformation().getResidenceCountry(),
+                translationService.getLocale().toString()
         );
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),

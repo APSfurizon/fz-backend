@@ -108,6 +108,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)
@@ -296,7 +297,8 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
                 USERS.MEDIA_ID_PROPIC,
-                USERS.SHOW_IN_NOSECOUNT
+                USERS.SHOW_IN_NOSECOUNT,
+                USERS.USER_LANGUAGE
             )
             .from(USERS);
     }

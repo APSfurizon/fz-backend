@@ -13,9 +13,9 @@
 
     <artifactId>jooq-common</artifactId>
     <properties>
-        <jooq.codegen.jdbc>jdbc:postgresql://localhost:5432/fzon</jooq.codegen.jdbc>
+        <jooq.codegen.jdbc>jdbc:postgresql://localhost:5432/postgres</jooq.codegen.jdbc>
         <jooq.codegen.username>postgres</jooq.codegen.username>
-        <jooq.codegen.password>Andrea789!</jooq.codegen.password>
+        <jooq.codegen.password>postgres</jooq.codegen.password>
         <jooq.codegen.skip>false</jooq.codegen.skip>
     </properties>
 

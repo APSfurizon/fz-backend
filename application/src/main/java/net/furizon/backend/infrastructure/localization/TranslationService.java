@@ -110,4 +110,20 @@ public class TranslationService {
         return getTranslationFromMap(translationMap, true);
     }
 
+    public Locale getLocale() {
+        return LocaleContextHolder.getLocale();
+    }
+
+    public <T> T withLocale(Locale locale, InnerFunction<T> func) {
+        try {
+            LocaleContextHolder.setLocale(locale);
+            return func.run();
+        } finally {
+            LocaleContextHolder.resetLocaleContext();
+        }
+    }
+
+    public interface InnerFunction<T> {
+        T run();
+    }
 }

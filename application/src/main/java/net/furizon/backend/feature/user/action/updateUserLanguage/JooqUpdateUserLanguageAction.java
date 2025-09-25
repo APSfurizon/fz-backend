@@ -19,7 +19,7 @@ public class JooqUpdateUserLanguageAction implements UpdateUserLanguageAction {
     public boolean invoke(long userId, Locale userLocale) {
         return sqlCommand.execute(
                 PostgresDSL.update(USERS)
-                        .set(USERS.USER_LOCALE, userLocale.toString())
+                        .set(USERS.USER_LANGUAGE, userLocale.toString())
                         .where(USERS.USER_ID.eq(userId))
         ) > 0;
     }
