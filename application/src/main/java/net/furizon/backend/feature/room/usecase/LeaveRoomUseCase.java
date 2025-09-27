@@ -60,11 +60,15 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.prepareAndSendUpdate(new MailRequest(
-                        r.get(), userFinder, TEMPLATE_USER_LEFT_ROOM,
+                mailService.fireAndForget(
+                    new MailRequest(
+                        r.get(),
+                        userFinder,
+                        TEMPLATE_USER_LEFT_ROOM,
                         MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName()),
                         MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
-                ));
+                    ).subject("mail.room_user_left.title", data.getFursonaName())
+                );
             }
         }
         return res;

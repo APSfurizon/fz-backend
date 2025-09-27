@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.SUBJECT_FURSUIT_BADGE_UPLOAD;
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_FURSUIT_BADGE_UPLOAD;
 
 @Slf4j
@@ -36,16 +36,19 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
     @NotNull private final EmailSender emailSender;
     @NotNull private final BadgeConfig badgeConfig;
     @NotNull private final FrontendConfig frontendConfig;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Integer executor(@NotNull Event event) {
         int n = 0;
         log.info("Sending fursuit badge upload reminder emails");
 
-        String deadlineStr = "event starts";
+        final String deadlineStr;
         OffsetDateTime deadline = badgeConfig.getEditingDeadline();
         if (deadline != null) {
             deadlineStr = deadline.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else {
+            deadlineStr = "event starts";
         }
 
         //Obtain and group fursuits
@@ -75,8 +78,7 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
                     MailVarPair.of(EmailVars.LINK, frontendConfig.getBadgePageUrl()),
                     MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
                     MailVarPair.of(EmailVars.FURSUIT_NAME, suits)
-            );
-            mails[n].subject(SUBJECT_FURSUIT_BADGE_UPLOAD);
+            ).subject(translationService.email("mail.reminder_fursuit_badge_upload.title"));
             n++;
         }
         log.info("Firing fursuit badge upload reminder emails");

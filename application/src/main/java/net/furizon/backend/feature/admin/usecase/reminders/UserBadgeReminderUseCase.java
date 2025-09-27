@@ -10,7 +10,6 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +29,6 @@ public class UserBadgeReminderUseCase implements UseCase<Event, Integer> {
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final BadgeConfig badgeConfig;
-    @NotNull private final TranslationService translationService;
 
     @Value("${frontend.badge-page-url}")
     private String badgePageUrl;
@@ -52,12 +50,12 @@ public class UserBadgeReminderUseCase implements UseCase<Event, Integer> {
         MailRequest[] mails = new MailRequest[usrs.size()];
         for (UserEmailData usr : usrs) {
             log.info("Sending user badge upload reminder email to {}", usr.getEmail());
-            mails[n] = translationService.withLocale(usr.getLanguage(), () -> new MailRequest(
+            mails[n] = new MailRequest(
                     usr,
                     TEMPLATE_USER_BADGE_UPLOAD,
                     MailVarPair.of(EmailVars.LINK, badgePageUrl),
                     MailVarPair.of(EmailVars.DEADLINE, deadlineStr)
-            ).subject(SUBJECT_USER_BADGE_UPLOAD));
+            ).subject(SUBJECT_USER_BADGE_UPLOAD);
             n++;
         }
         log.info("Firing user badge upload reminder emails");

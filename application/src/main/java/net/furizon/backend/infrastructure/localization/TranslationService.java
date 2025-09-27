@@ -110,10 +110,22 @@ public class TranslationService {
         return getTranslationFromMap(translationMap, true);
     }
 
+    /**
+     * @return the current thread's locale
+     */
     public Locale getLocale() {
         return LocaleContextHolder.getLocale();
     }
 
+    /**
+     * Temporarily sets the thread's locale to the one provided,
+     * executes the provided method, then resets to the original one.
+     *
+     * @param locale the locale needed to execute the function
+     * @param func the method to run
+     * @param <T> the provided return type of {@code func}
+     * @return the valued computed from {@code func}
+     */
     public <T> T withLocale(Locale locale, InnerFunction<T> func) {
         try {
             LocaleContextHolder.setLocale(locale);

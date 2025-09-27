@@ -1,11 +1,6 @@
 package net.furizon.backend.feature.authentication;
 
 public class AuthenticationEmailTexts {
-
-    public static final String SUBJECT_TOO_MANY_LOGIN_ATTEMPTS = "Account disabled - Too many login attempts";
-    public static final String SUBJECT_MEMBERSHIP_FATAL_ERROR = "Membership card FATAL ERROR";
-    public static final String SUBJECT_MEMBERSHIP_WARNING = "Membership card warning";
-
     public static final String TEMPLATE_PW_RESET = "password_reset.jte";
     public static final String TEMPLATE_PW_CHANGED = "password_changed.jte";
     public static final String TEMPLATE_EMAIL_CONFIRM = "email_confirm.jte";

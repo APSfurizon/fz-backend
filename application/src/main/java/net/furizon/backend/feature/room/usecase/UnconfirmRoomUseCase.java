@@ -9,6 +9,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -59,7 +60,9 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
                     String name = names.get(LANG_PRETIX);
                     if (name != null) {
                         mailService.prepareAndSendBroadcastUpdate(
-                            roomId, TEMPLATE_ROOM_UNCONFIRMED,
+                            roomId,
+                            TEMPLATE_ROOM_UNCONFIRMED,
+                            TranslatableValue.ofEmail("mail.room_unconfirmed.title"),
                             MailVarPair.of(ROOM_TYPE_NAME, name),
                             MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                         );

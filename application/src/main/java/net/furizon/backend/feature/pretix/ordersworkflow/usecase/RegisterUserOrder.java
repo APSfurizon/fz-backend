@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.LANG_PRETIX;
-import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.SUBJECT_ORDER_PROBLEM;
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.TEMPLATE_DUPLICATE_ORDER;
 
 @Data
@@ -140,7 +139,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                             MailVarPair.of(EmailVars.ORDER_CODE, prevOrderCode),
                             MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode()),
                             MailVarPair.of(EmailVars.LINK, frontendConfig.getReservationPageUrl())
-                        ).subject(SUBJECT_ORDER_PROBLEM)
+                        ).subject("mail.order_duplicate_detected.title")
                     );
                 } else {
                     log.error("[PRETIX] Unable to send duplicate order mail to user {} with order {} ",

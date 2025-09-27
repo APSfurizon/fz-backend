@@ -16,6 +16,7 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -152,7 +153,9 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {
                 mailService.prepareAndSendBroadcastUpdate(
-                        oldRoomId, TEMPLATE_ROOM_WAS_UPGRADED,
+                        oldRoomId,
+                        TEMPLATE_ROOM_WAS_UPGRADED,
+                        TranslatableValue.ofEmail("mail.room_was_upgraded.title"),
                         MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)),
                         MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                 );

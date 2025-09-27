@@ -59,13 +59,14 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
             String roomName = roomFinder.getRoomName(roomId);
             if (data != null && roomName != null) {
                 String finalRoomName = roomName.replaceAll("[^a-zA-Z0-9 \\\\/+\\-!?$()=]", "");
-                mailService.prepareAndSendUpdate(translationService.withLocale(data.getLanguage(),
-                        () -> new MailRequest(
-                        targetUserId, userFinder, TEMPLATE_KICKED_FROM_ROOM,
-                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
-                        MailVarPair.of(ROOM_NAME, finalRoomName),
-                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
-                ).subject(translationService.email("mail.room_kicked_from.title"))));
+                mailService.fireAndForget(new MailRequest(
+                    targetUserId,
+                    userFinder,
+                    TEMPLATE_KICKED_FROM_ROOM,
+                    MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
+                    MailVarPair.of(ROOM_NAME, finalRoomName),
+                    MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
+                ).subject(translationService.email("mail.room_kicked_from.title")));
             }
         }
         return res;

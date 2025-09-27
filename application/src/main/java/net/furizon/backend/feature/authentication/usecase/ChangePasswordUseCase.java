@@ -55,7 +55,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
             sessionAuthenticationManager.deletePasswordResetAttempt(resetPwId);
         }
         sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED)
-                .subject(translationService.email("mail.password_changed.title")));
+                .subject("mail.password_changed.title"));
 
         return true;
     }

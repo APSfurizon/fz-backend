@@ -4,12 +4,6 @@ import net.furizon.backend.feature.room.dto.ExchangeAction;
 import org.jetbrains.annotations.NotNull;
 
 public class RoomEmailTexts {
-    public static final String SUBJECT_ROOM_PROBLEM = "There's a problem with your room reservation";
-    public static final String SUBJECT_ROOM_UPDATE = "There's an update regarding your room reservation";
-    public static final String SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED = "Full order exchange REFUND FAILED!!";
-    public static final String SUBJECT_EXCHANGE_ROOM_MONEY_FAILED = "Room exchange REFUND or PAYMENT FAILED!!";
-
-
     public static final String TEMPLATE_ROOM_HAS_NEW_OWNER = "room_has_new_owner.jte";
     public static final String TEMPLATE_ROOM_WAS_UPGRADED = "room_was_upgraded.jte";
     public static final String TEMPLATE_ROOM_CONFIRMED = "room_confirmed.jte";
@@ -26,7 +20,6 @@ public class RoomEmailTexts {
     public static final String TEMPLATE_SANITY_CHECK_DELETED = "sanity_check_deleted.jte";
     public static final String TEMPLATE_SANITY_CHECK_KICK_USER = "sanity_check_kick_user.jte";
     public static final String TEMPLATE_SANITY_CHECK_KICK_OWNER = "sanity_check_kick_owner.jte";
-
 
     public static final String SC_NO_OWNER = "No owner was found in your room!";
     public static final String SC_TOO_MANY_MEMBERS = "There are too many members in your room!";

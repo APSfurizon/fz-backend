@@ -7,13 +7,13 @@ import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.SUBJECT_MEMBERSHIP_FATAL_ERROR;
 import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
@@ -42,7 +42,7 @@ public class JooqDeleteMembershipCardAction implements DeleteMembershipCardActio
             orderCode = orderCode == null ? "-" : orderCode;
             emailSender.prepareAndSendForPermission(
                 Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                SUBJECT_MEMBERSHIP_FATAL_ERROR,
+                TranslatableValue.ofEmail("mail.membership_card_already_registered_but_others_registered.title"),
                 TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED,
                 MailVarPair.of(ORDER_CODE, orderCode),
                 MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),

@@ -93,7 +93,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         sender.fireAndForget(
             new MailRequest()
-                .to(email)
+                .to(translationService.getLocale(), email)
                 .subject(translationService.email("mail.email_confirm.title"))
                 .templateMessage(
                     TEMPLATE_EMAIL_CONFIRM, null,

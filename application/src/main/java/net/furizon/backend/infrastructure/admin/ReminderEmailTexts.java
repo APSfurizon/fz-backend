@@ -4,7 +4,6 @@ public class ReminderEmailTexts {
 
     public static final String SUBJECT_ORDER_LINK = "IMPORTANT! Your still need to confirm your order!";
     public static final String SUBJECT_USER_BADGE_UPLOAD = "Your still need to upload your propic!";
-    public static final String SUBJECT_FURSUIT_BADGE_UPLOAD = "Your still need to upload your fursuit(s) propic!";
     public static final String SUBJECT_ROOM_NOT_CREATED = "You have not created a room yet!";
     public static final String SUBJECT_ROOM_NOT_FULL = "You have not filled your room yet!";
     public static final String SUBJECT_EXPIRED_ID = "Your ID has expired";

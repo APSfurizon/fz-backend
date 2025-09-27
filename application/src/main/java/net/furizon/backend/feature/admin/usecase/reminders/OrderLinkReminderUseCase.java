@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -45,7 +46,8 @@ public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Inte
 
             log.info("Sending order linking reminder email to {}", buyerEmail);
             MailRequest mail = new MailRequest();
-            mail.to(buyerEmail);
+            Locale orderLocale = o.getBuyerLocale() == null ? Locale.UK : Locale.of(o.getBuyerLocale());
+            mail.to(orderLocale, buyerEmail);
             mail.subject(ReminderEmailTexts.SUBJECT_ORDER_LINK);
             mail.templateMessage(ReminderEmailTexts.TEMPLATE_ORDER_LINK, null,
                 MailVarPair.of(EmailVars.LINK, pretixConfig.getShop().getOrderUrl(o)),

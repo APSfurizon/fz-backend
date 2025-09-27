@@ -13,6 +13,7 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
@@ -64,6 +65,7 @@ public class RoomGeneralSanityCheck {
             @NotNull String roomName, @NotNull String reason) {
         return mailService.prepareBroadcastProblem(
                 roomId, TEMPLATE_SANITY_CHECK_DELETED,
+                TranslatableValue.ofEmail("mail.sanity_check_deleted.title"),
                 MailVarPair.of(ROOM_NAME, roomName),
                 MailVarPair.of(SANITY_CHECK_REASON, reason),
                 MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
@@ -71,18 +73,22 @@ public class RoomGeneralSanityCheck {
     }
     private List<MailRequest> prepareSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
                                                                @NotNull String roomName, @NotNull String reason) {
-        return mailService.prepareProblem(
+        return List.of(
                 new MailRequest(
-                        ownerId, userFinder, TEMPLATE_SANITY_CHECK_KICK_OWNER,
+                        ownerId,
+                        userFinder,
+                        TEMPLATE_SANITY_CHECK_KICK_OWNER,
                         MailVarPair.of(OTHER_FURSONA_NAME, fursonaName),
                         MailVarPair.of(ROOM_NAME, roomName),
                         MailVarPair.of(SANITY_CHECK_REASON, reason)
-                ),
+                ).subject("mail.sanity_check_kick_owner.title"),
                 new MailRequest(
-                        userId, userFinder, TEMPLATE_SANITY_CHECK_KICK_USER,
+                        userId,
+                        userFinder,
+                        TEMPLATE_SANITY_CHECK_KICK_USER,
                         MailVarPair.of(ROOM_NAME, roomName),
                         MailVarPair.of(SANITY_CHECK_REASON, reason)
-                )
+                ).subject("mail.sanity_check_kick_user.title")
         );
     }
 

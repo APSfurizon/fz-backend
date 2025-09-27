@@ -34,6 +34,7 @@ import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -57,8 +58,6 @@ import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.REFUND_MONEY;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SUBJECT_EXCHANGE_ROOM_MONEY_FAILED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED;
 
@@ -564,7 +563,7 @@ public class UserBuysFullRoom implements RoomLogic {
             if (!res) {
                 emailSender.prepareAndSendForPermission(
                     Permission.PRETIX_ADMIN,
-                    SUBJECT_EXCHANGE_ROOM_MONEY_FAILED,
+                    TranslatableValue.ofEmail("mail.exchange_room_failed_money.title"),
                     TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED,
                     MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
                     MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
@@ -680,7 +679,7 @@ public class UserBuysFullRoom implements RoomLogic {
                         sourceUsrId, targetUsrId, event, orderCode, leftToRefund);
                 emailSender.prepareAndSendForPermission(
                         Permission.PRETIX_ADMIN,
-                        SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED,
+                        TranslatableValue.ofEmail("mail.exchange_fullorder_failed_refund.title"),
                         TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED,
                         MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
                         MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
