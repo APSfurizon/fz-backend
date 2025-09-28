@@ -106,19 +106,19 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
                 }
 
                 if (sourceData != null) {
-                    String actionText = RoomEmailTexts.getActionText(input.req.getAction(), destRoom.isPresent());
+                    TranslatableValue action = RoomEmailTexts.getAction(input.req.getAction(), destRoom.isPresent());
                     mails.addAll(List.of(
                         new MailRequest(
                             destData,
                             TEMPLATE_EXCHANGE_COMPLETED,
-                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, action),
                             MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName()),
                             MailVarPair.of(LINK, frontendConfig.getReservationPageUrl())
                         ).subject("mail.exchange_completed.title"),
                         new MailRequest(
                             sourceData,
                             TEMPLATE_EXCHANGE_COMPLETED,
-                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, action),
                             MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
                             MailVarPair.of(LINK, frontendConfig.getReservationPageUrl())
                         ).subject("mail.exchange_completed.title")

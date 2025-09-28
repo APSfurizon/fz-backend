@@ -52,7 +52,7 @@ public class RoomEmailTexts {
     public static final TranslatableValue EXCHANGE_ROOM = TranslatableValue.ofEmail("room_exchange");
 
 
-    public static final TranslatableValue getActionText(@NotNull ExchangeAction action, boolean destHasRoom) {
+    public static final TranslatableValue getAction(@NotNull ExchangeAction action, boolean destHasRoom) {
         return switch (action) {
             case TRASFER_EXCHANGE_ROOM -> TRANSFER_FULL_ORDER;
             case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;

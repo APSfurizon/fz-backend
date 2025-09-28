@@ -62,7 +62,7 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
                 destHasRoom = r.isPresent() && r.get();
             }
             MailVarPair[] vars = {
-                MailVarPair.of(EXCHANGE_ACTION_TEXT, RoomEmailTexts.getActionText(action, destHasRoom)),
+                MailVarPair.of(EXCHANGE_ACTION_TEXT, RoomEmailTexts.getAction(action, destHasRoom)),
                 MailVarPair.of(ROOM_OWNER_FURSONA_NAME, sourceData.getFursonaName()),
                 MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
                 MailVarPair.of(LINK, transferExchangeConfirmationUrl + exchangeId),
