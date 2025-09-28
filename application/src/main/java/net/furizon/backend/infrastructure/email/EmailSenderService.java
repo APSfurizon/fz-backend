@@ -210,7 +210,19 @@ public class EmailSenderService implements EmailSender {
 
         TemplateOutput output = new StringOutput();
         JteContext.init(this.jteLocalizer);
-        templateEngine.render(message.getTemplate(), message.getParams(), output);
+        // Translate parameters
+        Map<String, Object> params = message.getParams().entrySet().stream().map((entry) -> {
+            final Object value;
+            if (entry.getValue() instanceof TranslatableValue translatableValue) {
+                value = translationService.translateFallback(translatableValue.getKey(),
+                        translatableValue.getKey(),
+                        translatableValue.getParams());
+            } else {
+                value = entry.getValue();
+            }
+            return Pair.of(entry.getKey(), value);
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (x, y) -> y));
+        templateEngine.render(message.getTemplate(), params, output);
         JteContext.dispose();
         return output.toString();
     }

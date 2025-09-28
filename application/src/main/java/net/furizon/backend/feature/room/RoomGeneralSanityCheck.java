@@ -62,7 +62,7 @@ public class RoomGeneralSanityCheck {
     }
 
     private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId,
-            @NotNull String roomName, @NotNull String reason) {
+            @NotNull String roomName, @NotNull TranslatableValue reason) {
         return mailService.prepareBroadcastProblem(
                 roomId, TEMPLATE_SANITY_CHECK_DELETED,
                 TranslatableValue.ofEmail("mail.sanity_check_deleted.title"),
@@ -72,7 +72,8 @@ public class RoomGeneralSanityCheck {
         );
     }
     private List<MailRequest> prepareSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
-                                                               @NotNull String roomName, @NotNull String reason) {
+                                                               @NotNull String roomName,
+                                                               @NotNull TranslatableValue reason) {
         return List.of(
                 new MailRequest(
                         ownerId,
@@ -92,6 +93,25 @@ public class RoomGeneralSanityCheck {
         );
     }
 
+    /**
+     * Checks the room for the following cases:
+     * <ol>
+     *     <li>Users in multiple rooms</li>
+     *     <li>Members exceed room maximum</li>
+     *     <li>Owner not in room</li>
+     *     <li>Owner has multiple rooms</li>
+     *     <li>Owner order status == canceled</li>
+     *     <li>Owner doesn't own a room</li>
+     *     <li>Owner has a daily ticket</li>
+     *     <li>User order status == canceled</li>
+     *     <li>User order is daily</li>
+     * </ol>
+     *
+     * @param roomId id of the room to check
+     * @param roomLogic room logic to use
+     * @param pretixInformation pretix service class
+     * @param detectedErrors list to store errors
+     */
     public void doSanityChecks(long roomId,
                                @NotNull RoomLogic roomLogic,
                                @NotNull PretixInformation pretixInformation,
@@ -100,17 +120,6 @@ public class RoomGeneralSanityCheck {
         final Event event = pretixInformation.getCurrentEvent();
         final long eventId = event.getId();
         List<MailRequest> mails = new LinkedList<>();
-
-        //The following checks are done:
-        //- User in multiple rooms
-        //- Members exceed room maximum
-        //- Owner not in room
-        //- Owner has multiple rooms
-        //- Owner order status == canceled
-        //- Owner doesn't own a room
-        //- Owner has a daily ticket
-        //- User order status == canceled
-        //- User order is daily
 
         //RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
         final List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);

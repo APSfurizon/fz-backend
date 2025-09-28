@@ -59,7 +59,7 @@ public class MailRequest {
         }
         for (MailVarPair var : vars) {
             if (var != null) {
-                msg = msg.addParam(var.var().getName(), var.value());
+                msg = msg.addParam(var.getKey().getName(), var.getValue());
             }
         }
         this.templateMessage = msg;
