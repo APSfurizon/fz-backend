@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.SUBJECT_EXPIRED_ID;
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_EXPIRED_ID;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
@@ -54,8 +53,7 @@ public class ExpiredIdReminderUseCase implements UseCase<Event, Integer> {
                     TEMPLATE_EXPIRED_ID,
                     MailVarPair.of(EmailVars.LINK, userPageUrl),
                     MailVarPair.of(EmailVars.DEADLINE, date)
-            );
-            mails[n].subject(SUBJECT_EXPIRED_ID);
+            ).subject("mail.reminder_id_expired.title");
             n++;
         }
         log.info("Firing expired id reminder emails");
