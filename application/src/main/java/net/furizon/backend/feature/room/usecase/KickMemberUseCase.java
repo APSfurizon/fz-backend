@@ -66,7 +66,7 @@ public class KickMemberUseCase implements UseCase<KickMemberUseCase.Input, Boole
                     MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
                     MailVarPair.of(ROOM_NAME, finalRoomName),
                     MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
-                ).subject(translationService.email("mail.room_kicked_from.title")));
+                ).subject("mail.room_kicked_from.title"));
             }
         }
         return res;

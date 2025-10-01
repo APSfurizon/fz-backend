@@ -78,7 +78,7 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
                     MailVarPair.of(EmailVars.LINK, frontendConfig.getBadgePageUrl()),
                     MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
                     MailVarPair.of(EmailVars.FURSUIT_NAME, suits)
-            ).subject(translationService.email("mail.reminder_fursuit_badge_upload.title"));
+            ).subject("mail.reminder_fursuit_badge_upload.title");
             n++;
         }
         log.info("Firing fursuit badge upload reminder emails");

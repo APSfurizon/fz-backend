@@ -335,6 +335,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ROOMS.ROOM_CONFIRMED,
                 ROOMS.SHOW_IN_NOSECOUNT,
                 ORDERS.USER_ID,
+                ORDERS.EVENT_ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                 ORDERS.ORDER_ROOM_INTERNAL_NAME,
