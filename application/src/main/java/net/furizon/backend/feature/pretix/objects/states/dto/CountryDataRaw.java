@@ -25,9 +25,10 @@ public class CountryDataRaw {
         Map<String, String> translatedDescription = supportedLanguages
                 .stream()
                 .map(language -> {
-                    var languageLocale = Locale.of(language, "");
+                    String[] localeParts = language.split("-");
+                    var languageLocale = Locale.of(localeParts[0], localeParts.length > 1 ? localeParts[1] : "");
                     return Map.entry(
-                        languageLocale.getLanguage(),
+                        languageLocale.toString().toLowerCase().replace("_", "-"),
                         countryLocale.getDisplayCountry(languageLocale)
                     );
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
