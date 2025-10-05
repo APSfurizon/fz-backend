@@ -257,6 +257,9 @@ public class CachedPretixInformation implements PretixInformation {
         lock.readLock().lock();
         var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
+        if (v == null) {
+            log.warn("Unable to fetch room name for id {}", roomPretixItemId);
+        }
         return v == null ? new HashMap<>() : v;
     }
 

@@ -518,6 +518,7 @@ public class JooqRoomFinder implements RoomFinder {
             PostgresDSL.select(
                 roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID,
                 ROOMS.ROOM_ID,
+                ROOMS.ROOM_CONFIRMED,
                 MEMBERSHIP_INFO.INFO_FIRST_NAME,
                 MEMBERSHIP_INFO.INFO_LAST_NAME,
                 MEMBERSHIP_INFO.INFO_BIRTHDAY,
@@ -573,6 +574,61 @@ public class JooqRoomFinder implements RoomFinder {
                 roomLogic,
                 pretixInformation
         )).toList();
+    }
+    @Override
+    public @NotNull List<HotelExportRow> exportRoomless(long eventId) {
+        return query.fetch(
+            PostgresDSL.select(
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
+                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
+                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
+                MEMBERSHIP_INFO.INFO_COUNTRY,
+                MEMBERSHIP_INFO.INFO_REGION,
+                MEMBERSHIP_INFO.INFO_CITY,
+                MEMBERSHIP_INFO.INFO_ZIP,
+                MEMBERSHIP_INFO.INFO_ADDRESS,
+                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
+                MEMBERSHIP_INFO.INFO_PHONE,
+                MEMBERSHIP_INFO.INFO_ID_TYPE,
+                MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                ORDERS.ORDER_CODE,
+                ORDERS.ORDER_REQUIRES_ATTENTION,
+                ORDERS.ORDER_INTERNAL_COMMENT
+            )
+            .from(USERS)
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(MEMBERSHIP_INFO.USER_ID.eq(USERS.USER_ID))
+            .innerJoin(AUTHENTICATIONS)
+            .on(AUTHENTICATIONS.USER_ID.eq(USERS.USER_ID))
+            .innerJoin(ORDERS)
+            .on(
+                ORDERS.USER_ID.eq(USERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+            .where(
+                USERS.USER_ID.notIn(
+                    PostgresDSL.select(ROOM_GUESTS.USER_ID)
+                    .from(ROOM_GUESTS)
+                    .innerJoin(ROOMS).on(
+                        ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                        .and(ROOM_GUESTS.CONFIRMED.isTrue())
+                    )
+                    .innerJoin(ORDERS).on(
+                        ROOMS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(eventId))
+                    )
+                )
+            )
+            .orderBy(USERS.USER_ID)
+        ).stream().map(HotelExportRowMapper::mapWithoutRoom).toList();
     }
 
     @Override
