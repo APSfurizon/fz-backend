@@ -155,6 +155,8 @@ badge:
     output-wrapper-badge-jte-filename: ${BADGE_EXPORT_OUTPUT_WRAPPER_JTE_FILENAME:badge_output.jte}
     user-badge-jte-filename: ${BADGE_EXPORT_USER_JTE_FILENAME:badge_user.jte}
     fursuit-badge-jte-filename: ${BADGE_EXPORT_FURSUIT_JTE_FILENAME:badge_fursuit.jte}
+    badge-dimension-width: ${BADGE_EXPORT_DIMENSION_W:56.90mm}
+    badge-dimension-height: ${BADGE_EXPORT_DIMENSION_H:88.90mm}
 
 reminders:
   cronjobs:

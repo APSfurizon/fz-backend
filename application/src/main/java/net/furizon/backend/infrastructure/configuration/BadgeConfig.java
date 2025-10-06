@@ -27,5 +27,8 @@ public class BadgeConfig {
         @NotNull private final String outputWrapperBadgeJteFilename;
         @NotNull private final String userBadgeJteFilename;
         @NotNull private final String fursuitBadgeJteFilename;
+
+        @NotNull private final String badgeDimensionWidth;
+        @NotNull private final String badgeDimensionHeight;
     }
 }
