@@ -39,8 +39,12 @@
             background-size: contain;
         }
 
+        div {
+            position: absolute;
+        }
         p {
             margin: 0;
+            position: absolute;
         }
         body {
             width: 100%;

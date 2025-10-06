@@ -91,7 +91,6 @@ def layerstoimage(layers: PSDImage):
 			style = ""
 			style += f'left: {getCorrectDimStr(layer.bbox[0], widthPx, widthCm)}; '
 			style += f'top: {getCorrectDimStr(layer.bbox[1], heightPx, heightCm)}; '
-			style += f'position: absolute; '
 			style += f'width: {getCorrectDimStr(layer.bbox[2] - layer.bbox[0], widthPx, widthCm)}; '
 			style += f'height: {getCorrectDimStr(layer.bbox[3] - layer.bbox[1], heightPx, heightCm)}; '
 			style += f'z-index: {zIndex}; '
