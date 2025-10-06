@@ -18,18 +18,19 @@
 
 
 <div class="page">
-    <p id="name" class="txt-len name-container" style="top: 56.40mm; z-index: 289; --chars: 12">
-        <span class="text-fit" id="nameValue">${fursonaName}</span>
+    <p id="name" class="txt-len name-container" style="top: 102.45mm; height: 5.59mm; z-index: 288; ">
+        <span class="text-fit" style="font-family: 'attendee-name-ttf'; color: #1c1c1bff; ">${fursonaName}</span>
     </p>
 
-    <p id="number" class="txt-len" style="top: 64mm; position: absolute; width: 100%; height: 3.30mm; z-index: 288; text-align: center;">
-        <span id="numberValue" style="font-family: 'main-text-font'; font-size: 4.94mm; color: #000000ff; ">${orderCode}</span>
+
+    <p id="number" class="txt-len" style="left: 3.35mm; top: 3.85mm; width: 11.77mm; height: 5.16mm; z-index: 289; ">
+        <span style="font-family: 'badge-number-ttf'; font-size: 6.06mm; color: #ffffffff; ">${orderCode}</span>
     </p>
 
-    <div id="background" class="${badgeLevel}" style="left: 0.00mm; top: 0.00mm; position: absolute; width: 56.90mm; height: 88.90mm; z-index: 287; background-repeat: no-repeat; background-size: contain"></div>
+    <div id="background" class="image ${badgeLevel}" style="left: 0.00mm; top: 0.00mm; position: absolute; width: 80.01mm; height: 124.80mm; z-index: 284;"></div>
 
-    <div id="flag" style="left: 22.44mm; top: 53.52mm; position: absolute; width: 12.11mm; height: 9.06mm; z-index: 282; background-repeat: no-repeat; background-size: contain; background-image: url('https://furpanel.furizon.net/static/flags/${locales}.svg'); "></div>
+    <div class="image" id="flag" style="left: 61.81mm; top: 3.39mm; width: 16.26mm; height: 12.28mm; z-index: 280; background-image: url('https://furpanel.furizon.net/static/flags/${locales}.svg'); "></div>
 
-    <div id="propic" style="left: 6.77mm; top: 3.47mm; position: absolute; width: 43.35mm; height: 43.35mm; z-index: 281; background-repeat: no-repeat; background-size: contain; background-image: url('https://furpanel.furizon.net/${imageUrl}'); "></div>
+    <div class="image" id="propic" style="left: 18.63mm; top: 53.09mm; width: 42.84mm; height: 42.67mm; z-index: 279; background-image: url('https://furpanel.furizon.net/${imageUrl}'); "></div>
 
 </div>
