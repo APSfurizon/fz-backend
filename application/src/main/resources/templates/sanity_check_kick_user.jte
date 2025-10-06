@@ -4,6 +4,6 @@
 @param String sanityCheckReason
 
 @template.layout(title = localize("mail.sanity_check_kick_user.title"), content = @`
-    <h2 class="title">${localize("mail.too_many_login_attempts.title")}</h2>
+    <h2 class="title">${localize("mail.sanity_check_kick_user.title")}</h2>
     <p class="main-content">${localize("mail.sanity_check_kick_user.description", fursonaName, roomName, sanityCheckReason)}</p>
 `)

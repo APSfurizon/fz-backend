@@ -7,6 +7,6 @@
 
 
 @template.layout(title = localize("mail.exchange_room_failed_money.title"), content = @`
-    <h2 class="title">${localize("mail.exchange_initialized.title"}</h2>
+    <h2 class="title">${localize("mail.exchange_initialized.title")}</h2>
     <p class="main-content">${localize("mail.exchange_room_failed_money.description", orderCode, fursonaName, otherfursonaName, eventName, refundMoney)}</p>
 `)
