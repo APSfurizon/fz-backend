@@ -2,23 +2,21 @@ package net.furizon.backend.infrastructure.localization;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import org.jetbrains.annotations.PropertyKey;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TranslationService {
-    @NotNull
-    private final MessageSource messageSource;
+    @NotNull private final MessageSource messageSource;
+    @NotNull private final PretixConfig pretixConfig;
 
     public String translateFallback(String key, String fallback, Locale locale, @Nullable Object[] params) {
         try {
@@ -115,6 +113,13 @@ public class TranslationService {
      */
     public Locale getLocale() {
         return LocaleContextHolder.getLocale();
+    }
+
+    public Set<Locale> getAvailableLanguages() {
+        return pretixConfig.getSupportedLanguages().stream()
+                .map(s -> s.split("-"))
+                .map(f -> Locale.of(f[0], f[1]))
+                .collect(Collectors.toSet());
     }
 
     /**

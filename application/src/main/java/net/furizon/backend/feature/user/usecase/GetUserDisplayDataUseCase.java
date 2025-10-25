@@ -26,7 +26,6 @@ public class GetUserDisplayDataUseCase implements
         UseCase<GetUserDisplayDataUseCase.Input, Optional<UserDisplayDataResponse>> {
     @NotNull private final UserFinder userFinder;
     @NotNull private final PermissionFinder permissionFinder;
-    @NotNull private final UpdateUserLanguageAction updateUserLanguageAction;
 
     @Override
     public @NotNull Optional<UserDisplayDataResponse> executor(@NotNull GetUserDisplayDataUseCase.Input input) {
@@ -35,9 +34,6 @@ public class GetUserDisplayDataUseCase implements
         Set<Permission> permissions = permissionFinder.getUserPermissions(input.userId);
         Optional<UserDisplayDataResponse> toReturn = Optional.ofNullable(userFound)
                 .map(userDisplayData -> new UserDisplayDataResponse(userFound, roles, permissions));
-        if (toReturn.isPresent()) {
-            updateUserLanguageAction.invoke(input.userId, LocaleContextHolder.getLocale());
-        }
         return toReturn;
     }
 

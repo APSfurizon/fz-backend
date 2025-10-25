@@ -82,7 +82,8 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                         FurizonUser.builder()
                             .userId(tokenMetadata.getUserId())
                             .sessionId(sessionId)
-                            .authentication(pair.getRight())
+                            .authentication(pair.getMiddle())
+                            .language(pair.getRight())
                             .build(),
                         null,
                         Collections.emptyList() // TODO -> Implement authorities

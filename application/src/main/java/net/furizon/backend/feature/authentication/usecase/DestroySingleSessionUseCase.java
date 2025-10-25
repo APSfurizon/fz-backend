@@ -13,10 +13,11 @@ import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
@@ -30,10 +31,10 @@ public class DestroySingleSessionUseCase implements UseCase<DestroySingleSession
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         UUID sessionId = UUID.fromString(input.dsr.getSessionId());
-        Pair<Session, Authentication> sessionData = sessionAuthenticationManager
+        Triple<Session, Authentication, Locale> sessionData = sessionAuthenticationManager
                 .findSessionWithAuthenticationById(sessionId);
         if (sessionData != null
-            && sessionData.getRight().getUserId() != input.user.getUserId()
+            && sessionData.getMiddle().getUserId() != input.user.getUserId()
             && !permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_BAN_USERS)
         ) {
             throw new ApiException(

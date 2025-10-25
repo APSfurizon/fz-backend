@@ -3,10 +3,12 @@ package net.furizon.backend.infrastructure.security.session.manager;
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.infrastructure.security.session.Session;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public interface SessionAuthenticationManager {
@@ -21,7 +23,7 @@ public interface SessionAuthenticationManager {
     //Read
     @NotNull List<Session> getUserSessions(long userId);
     int getUserSessionsCount(long userId);
-    @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId);
+    @Nullable Triple<Session, Authentication, Locale> findSessionWithAuthenticationById(UUID sessionId);
 
     @Nullable Authentication findAuthenticationByEmail(@NotNull String email);
     @Nullable Authentication findAuthenticationByUserId(long userId);

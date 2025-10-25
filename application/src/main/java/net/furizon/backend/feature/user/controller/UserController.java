@@ -2,6 +2,7 @@ package net.furizon.backend.feature.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +11,7 @@ import net.furizon.backend.feature.user.dto.SessionListResponse;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
-import net.furizon.backend.feature.user.usecase.GetUserAdminViewDataUseCase;
-import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
-import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
-import net.furizon.backend.feature.user.usecase.SearchUsersByIdsUseCase;
-import net.furizon.backend.feature.user.usecase.UpdateShowInNosecountUseCase;
+import net.furizon.backend.feature.user.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -60,6 +57,17 @@ public class UserController {
                         user.getUserId(),
                         pretixInformation.getCurrentEvent()
                 )
+        );
+    }
+
+    @PostMapping("/changeLanguage")
+    public boolean changeLanguage(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid ChangeUserLanguageUseCase.ApiInput targetLanguage
+    ) {
+        return executor.execute(
+                ChangeUserLanguageUseCase.class,
+                new ChangeUserLanguageUseCase.Input(user.getUserId(), targetLanguage)
         );
     }
 

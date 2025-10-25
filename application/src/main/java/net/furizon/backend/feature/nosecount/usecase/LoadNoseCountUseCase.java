@@ -152,6 +152,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                 obj.getUserId(),
                 obj.getFursonaName(),
                 obj.getUserLocale(),
+                obj.getUserLanguage().toString().replace("_", "-"),
                 obj.getMedia(),
                 obj.getSponsorship()
         );

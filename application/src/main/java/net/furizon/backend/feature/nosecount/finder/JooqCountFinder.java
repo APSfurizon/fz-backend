@@ -102,6 +102,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,

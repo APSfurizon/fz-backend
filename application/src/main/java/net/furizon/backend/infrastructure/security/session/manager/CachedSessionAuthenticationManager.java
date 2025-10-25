@@ -9,6 +9,7 @@ import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.mapper.JooqAuthenticationMapper;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.localization.TranslationUtil;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.Session;
 import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMapper;
@@ -16,6 +17,7 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectJoinStep;
@@ -25,10 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
@@ -50,7 +49,7 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @NotNull private final TranslationService translationService;
 
-    private final Cache<UUID, Pair<Session, Authentication>> sessionAuthenticationPairCache = Caffeine.newBuilder()
+    private final Cache<UUID, Triple<Session, Authentication, Locale>> sessionAuthenticationPairCache = Caffeine.newBuilder()
             .expireAfterAccess(30L, TimeUnit.MINUTES)
             .build();
 
@@ -165,8 +164,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
         );
     }
     @Override
-    public @Nullable Pair<Session, Authentication> findSessionWithAuthenticationById(UUID sessionId) {
-        Pair<Session, Authentication> res = sessionAuthenticationPairCache.getIfPresent(sessionId);
+    public @Nullable Triple<Session, Authentication, Locale> findSessionWithAuthenticationById(UUID sessionId) {
+        Triple<Session, Authentication, Locale> res = sessionAuthenticationPairCache.getIfPresent(sessionId);
         if (res == null) {
             res = sqlQuery.fetchFirst(
                 PostgresDSL.select(
@@ -182,7 +181,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     AUTHENTICATIONS.AUTHENTICATION_HASHED_PASSWORD,
                     AUTHENTICATIONS.AUTHENTICATION_FAILED_ATTEMPTS,
                     AUTHENTICATIONS.AUTHENTICATION_TOKEN,
-                    AUTHENTICATIONS.USER_ID
+                    AUTHENTICATIONS.USER_ID,
+                    USERS.USER_LANGUAGE
                 )
                 .from(SESSIONS)
                 .innerJoin(AUTHENTICATIONS)
@@ -191,12 +191,14 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     .and(SESSIONS.ID.eq(sessionId))
                     .and(AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION.isNull())
                     .and(AUTHENTICATIONS.AUTHENTICATION_DISABLED.isFalse())
-                )
+                ).innerJoin(USERS)
+                .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
             )
             .mapOrNull(record ->
-                Pair.of(
+                Triple.of(
                     JooqSessionMapper.map(record),
-                    JooqAuthenticationMapper.map(record)
+                    JooqAuthenticationMapper.map(record),
+                    TranslationUtil.parseLocale(record.get(USERS.USER_LANGUAGE))
                 )
             );
             if (res != null) {
