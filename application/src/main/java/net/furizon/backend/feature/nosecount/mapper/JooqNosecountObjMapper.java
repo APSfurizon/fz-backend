@@ -8,8 +8,6 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.jooq.generated.tables.Orders;
 import org.jooq.Record;
 
-import java.util.Locale;
-
 import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.ROOMS;
 import static net.furizon.jooq.generated.Tables.USERS;

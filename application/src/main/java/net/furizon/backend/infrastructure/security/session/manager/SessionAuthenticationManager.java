@@ -2,7 +2,6 @@ package net.furizon.backend.infrastructure.security.session.manager;
 
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.infrastructure.security.session.Session;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -16,7 +16,6 @@ import net.furizon.backend.infrastructure.security.session.mapper.JooqSessionMap
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +26,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
@@ -49,7 +52,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @NotNull private final TranslationService translationService;
 
-    private final Cache<UUID, Triple<Session, Authentication, Locale>> sessionAuthenticationPairCache = Caffeine.newBuilder()
+    private final Cache<UUID, Triple<Session, Authentication, Locale>> sessionAuthenticationPairCache = Caffeine
+            .newBuilder()
             .expireAfterAccess(30L, TimeUnit.MINUTES)
             .build();
 

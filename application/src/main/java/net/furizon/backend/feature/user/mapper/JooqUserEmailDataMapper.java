@@ -4,8 +4,6 @@ import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.infrastructure.localization.TranslationUtil;
 import org.jooq.Record;
 
-import java.util.Locale;
-
 import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 

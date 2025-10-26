@@ -32,5 +32,6 @@ public class ChangeUserLanguageUseCase implements UseCase<ChangeUserLanguageUseC
     }
 
     public record Input(long userId, ApiInput apiInput) {}
+
     public record ApiInput(@NotNull String languageCode) {}
 }

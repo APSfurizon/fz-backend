@@ -147,6 +147,7 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 ROOMS.ROOM_ID,
                 ROOMS.ROOM_NAME,
                 ROOMS.ROOM_CONFIRMED,
@@ -236,6 +237,7 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID
@@ -330,6 +332,7 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 ROOMS.ROOM_ID,
                 ROOMS.ROOM_NAME,
                 ROOMS.ROOM_CONFIRMED,
