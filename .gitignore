@@ -39,7 +39,7 @@ build/
 .env
 .env.local
 
-/jte-classes
+/generated-sources
 /data
 /prod
 /templates/jte/custom/gg
