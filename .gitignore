@@ -41,5 +41,6 @@ build/
 
 /generated-sources
 /data
+/data/logs
 /prod
 /templates/jte/custom/gg
