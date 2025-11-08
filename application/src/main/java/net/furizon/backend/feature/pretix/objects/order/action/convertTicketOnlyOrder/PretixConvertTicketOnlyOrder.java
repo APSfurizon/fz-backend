@@ -83,10 +83,11 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
 
             PretixPosition newPos = pushPretixPosition.invoke(
                     event,
-                    pushReq,
                     true,
-                    pretixInformation,
-                    PretixGenericUtils.fromStrPriceToLong(pretixPosition.getPrice())
+                    false,
+                    PretixGenericUtils.fromStrPriceToLong(pretixPosition.getPrice()),
+                    pushReq,
+                    pretixInformation
             );
 
             if (newPos == null) {
@@ -96,12 +97,17 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
             }
 
             long ticketPositionId = order.getTicketPositionId();
-            boolean updateRes = updatePretixPosition.invoke(event, ticketPositionId, new UpdatePretixPositionRequest(
+            boolean updateRes = updatePretixPosition.invoke(
+                event,
+                ticketPositionId,
+                false,
+                new UpdatePretixPositionRequest(
                     order.getCode(),
                     noRoomItemId,
                     PretixGenericUtils.fromPriceToString(0L, '.'),
                     Collections.emptyList()
-            )) != null;
+                )
+            ) != null;
 
             if (!updateRes) {
                 log.error("[PRETIX_TICKET_CONVERT] UpdatePretixPosition failed while converting order {}",

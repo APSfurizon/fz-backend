@@ -176,11 +176,16 @@ public class UserBuysGenericSpot implements RoomLogic {
 
         //Update room item with the correct one
         //Quota check is handled automatically by pretix when updating the item
-        PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+        PretixPosition position = updatePretixPositionAction.invoke(
+            event,
+            positionId,
+            true, //We WANT to check the quota
+            new UpdatePretixPositionRequest(
                 order.getCode(),
                 roomItemId,
                 0L
-        ));
+            )
+        );
         if (position == null) {
             log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: "
                     + "An error occurred while updating room position to order {}",
@@ -238,11 +243,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         long positionId = Objects.requireNonNull(order.getRoomPositionId());
 
         //Update room position on pretix
-        PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+        PretixPosition position = updatePretixPositionAction.invoke(
+            event,
+            positionId,
+            false, //We don't want to check quota for the noroom item
+            new UpdatePretixPositionRequest(
                 order.getCode(),
                 noRoomItemId,
                 0L
-        ));
+            )
+        );
         if (position == null) {
             log.error("[ROOM_UNCONFIRMATION] Room {}: An error occurred while updating room position to order {}",
                     roomId, order);

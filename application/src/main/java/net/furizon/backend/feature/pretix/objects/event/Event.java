@@ -34,6 +34,10 @@ public class Event {
 
     private boolean isCurrent;
 
+    private boolean isLive;
+    private boolean testModeEnabled;
+    private boolean isPublic;
+
     @NotNull
     private String publicUrl;
 
@@ -50,6 +54,11 @@ public class Event {
             this.slug = PretixGenericUtils.buildOrgEventSlug(eventSlug, organizerSlug);
             return this;
         }
+    }
+
+    //TODO: EventIds are sequential. Check around we don't leak from the API params if a hidden event exists
+    public boolean canBeShownToPublic() {
+        return isPublic && isLive /*&& !testModeEnabled*/;
     }
 
     @Nullable

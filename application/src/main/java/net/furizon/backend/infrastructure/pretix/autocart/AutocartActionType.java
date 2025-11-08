@@ -9,7 +9,8 @@ public enum AutocartActionType {
     BOOL('b'),
     INPUT('i'),
     TEXT_AREA('t'),
-    DROPDOWN('d');
+    DROPDOWN('d'),
+    RADIO('r');
 
     private final char value;
 }

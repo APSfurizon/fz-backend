@@ -32,6 +32,8 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
 
     @Override
     public @NotNull String executor(@NotNull Input input) {
+        BadgeConfig.Export exportConfig = badgeConfig.getExport();
+
         String orderCodes = null;
         String orderSerials = null;
         String userIds = null;
@@ -66,7 +68,7 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
         for (BadgeToPrint badge : badges) {
 
             String imageUrl = badge.getImageUrl();
-            imageUrl = imageUrl == null ? badgeConfig.getExport().getDefaultImageUrl() : imageUrl;
+            imageUrl = imageUrl == null ? exportConfig.getDefaultImageUrl() : imageUrl;
             String mimeType = badge.getImageMimeType();
             mimeType = mimeType == null ? "" : mimeType;
 
@@ -97,8 +99,8 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
 
             String html = customTemplateService.renderTemplate(
                 input.isFursuit
-                    ? badgeConfig.getExport().getFursuitBadgeJteFilename()
-                    : badgeConfig.getExport().getUserBadgeJteFilename(),
+                    ? exportConfig.getFursuitBadgeJteFilename()
+                    : exportConfig.getUserBadgeJteFilename(),
                 Map.ofEntries(
                     Map.entry(BadgeExportVar.USER_ID.getVarName(), badge.getUserId()),
                     Map.entry(BadgeExportVar.SERIAL_NUMBER.getVarName(), badge.getSerialNo()),
@@ -118,8 +120,12 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
         }
 
         return customTemplateService.renderTemplate(
-            badgeConfig.getExport().getOutputWrapperBadgeJteFilename(),
-            Map.of("renderedBadges", renderedBadges)
+                exportConfig.getOutputWrapperBadgeJteFilename(),
+            Map.of(
+                "renderedBadges", renderedBadges,
+                "pageWidth", exportConfig.getBadgeDimensionWidth(),
+                "pageHeight", exportConfig.getBadgeDimensionHeight()
+            )
         );
     }
 

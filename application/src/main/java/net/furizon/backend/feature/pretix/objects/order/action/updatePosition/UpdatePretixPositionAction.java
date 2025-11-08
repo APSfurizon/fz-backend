@@ -9,6 +9,7 @@ public interface UpdatePretixPositionAction {
     PretixPosition invoke(
             @NotNull Event event,
             long positionId,
+            boolean checkQuota,
             @NotNull final UpdatePretixPositionRequest position
     );
 }

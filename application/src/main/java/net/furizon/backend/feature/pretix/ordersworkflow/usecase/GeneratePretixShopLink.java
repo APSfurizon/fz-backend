@@ -34,6 +34,7 @@ import java.util.Set;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.BOOL;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.DROPDOWN;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.INPUT;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.RADIO;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.TEXT_AREA;
 
 @Component
@@ -113,6 +114,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
                 actions.add(new AutocartAction<>("cp_$_item_" + membershipCardId, true, BOOL));
             }
         }
+        actions.add(AutocartAction.withoutValue("id_is_business_0", RADIO));
 
         var generatedUrl = autocartLinkGenerator.generateUrl(actions);
         if (generatedUrl.isEmpty()) {

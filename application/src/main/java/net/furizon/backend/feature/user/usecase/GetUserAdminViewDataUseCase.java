@@ -85,6 +85,7 @@ public class GetUserAdminViewDataUseCase {
                         userId,
                         event,
                         pretixInformation,
+                        true,
                         true
                 )
         );
@@ -114,7 +115,8 @@ public class GetUserAdminViewDataUseCase {
                                 userId,
                                 e,
                                 pretixInformation,
-                                true
+                                true,
+                                false
                         )
                 );
                 if (!resp.isHasOrder()) {

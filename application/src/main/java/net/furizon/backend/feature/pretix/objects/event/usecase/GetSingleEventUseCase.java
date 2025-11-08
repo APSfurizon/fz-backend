@@ -19,9 +19,8 @@ public class GetSingleEventUseCase implements UseCase<Long, Event> {
     @Override
     public @NotNull Event executor(@NotNull Long eventId) {
         Event e = finder.findEventById(eventId);
-        if (e == null) {
-            throw new ApiException(translationService.error("common.event_not_found"),
-                GeneralResponseCodes.EVENT_NOT_FOUND);
+        if (e == null || !e.canBeShownToPublic()) {
+            throw new ApiException("Event not found", GeneralResponseCodes.EVENT_NOT_FOUND);
         }
         e.setPublicUrl("");
         return e;

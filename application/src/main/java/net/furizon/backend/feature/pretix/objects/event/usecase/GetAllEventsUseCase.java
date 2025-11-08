@@ -18,6 +18,7 @@ public class GetAllEventsUseCase implements UseCase<Integer, GetEventsResponse> 
     @Override
     public @NotNull GetEventsResponse executor(@NotNull Integer input) {
         List<Event> events = finder.getAllEvents();
+        events = events.stream().filter(Event::canBeShownToPublic).toList();
         events.forEach(event -> event.setPublicUrl(""));
         return new GetEventsResponse(events);
     }

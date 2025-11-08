@@ -32,47 +32,59 @@ public class JooqOrderMapper {
 
 
     @NotNull
-    public Order map(Record record, PretixInformation pretixInformation) {
+    public Order map(@NotNull final Record record, @NotNull final PretixInformation pretixInformation) {
+        return map(record, pretixInformation, true);
+    }
+
+    @NotNull
+    public Order map(@NotNull Record record, @NotNull PretixInformation pretixInformation, boolean loadAnswers) {
         try {
-            final var answerList = objectMapper.readValue(
-                record.get(ORDERS.ORDER_ANSWERS_JSON).data(),
-                pretixAnswerRef
-            );
             Long userId = record.get(ORDERS.USER_ID);
-            return Order.builder()
-                .code(record.get(ORDERS.ORDER_CODE))
-                .orderStatus(OrderStatus.values()[record.get(ORDERS.ORDER_STATUS)])
-                .sponsorship(Sponsorship.values()[record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)])
-                .extraDays(ExtraDays.values()[record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)])
-                .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
-                .pretixRoomItemId(record.get((ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)))
-                .roomCapacity(record.get(ORDERS.ORDER_ROOM_CAPACITY))
-                .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
-                .roomInternalName(record.get(ORDERS.ORDER_ROOM_INTERNAL_NAME))
-                .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))
-                .checkinSecret(record.get(ORDERS.ORDER_CHECKIN_SECRET))
-                .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
-                .buyerEmail(record.get(ORDERS.ORDER_BUYER_EMAIL))
-                .buyerPhone(record.get(ORDERS.ORDER_BUYER_PHONE))
-                .buyerUser(record.get(ORDERS.ORDER_BUYER_USER))
-                .buyerLocale(record.get(ORDERS.ORDER_BUYER_LOCALE))
-                .ticketPositionId(record.get(ORDERS.ORDER_TICKET_POSITION_ID))
-                .ticketPositionPosid(record.get(ORDERS.ORDER_TICKET_POSITION_POSITIONID))
-                .roomPositionId(record.get(ORDERS.ORDER_ROOM_POSITION_ID))
-                .roomPositionPosid(record.get(ORDERS.ORDER_ROOM_POSITION_POSITIONID))
-                .earlyPositionId(record.get(ORDERS.ORDER_EARLY_POSITION_ID))
-                .latePositionId(record.get(ORDERS.ORDER_LATE_POSITION_ID))
-                .extraFursuits(record.get(ORDERS.ORDER_EXTRA_FURSUITS))
-                .requireAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
-                .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
-                .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
-                .answers(answerList, pretixInformation)
-                .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
-                .orderOwnerUserId(userId)
-                .eventId(record.get(ORDERS.EVENT_ID))
-                .userFinder(userFinder)
-                .eventFinder(eventFinder)
-                .build();
+            var v = Order.builder()
+                    .code(record.get(ORDERS.ORDER_CODE))
+                    .orderStatus(OrderStatus.values()[record.get(ORDERS.ORDER_STATUS)])
+                    .sponsorship(Sponsorship.values()[record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)])
+                    .extraDays(ExtraDays.values()[record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)])
+                    .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
+                    .pretixRoomItemId(record.get((ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)))
+                    .roomCapacity(record.get(ORDERS.ORDER_ROOM_CAPACITY))
+                    .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
+                    .roomInternalName(record.get(ORDERS.ORDER_ROOM_INTERNAL_NAME))
+                    .pretixOrderSecret(record.get(ORDERS.ORDER_SECRET))
+                    .checkinSecret(record.get(ORDERS.ORDER_CHECKIN_SECRET))
+                    .hasMembership(record.get(ORDERS.HAS_MEMBERSHIP))
+                    .buyerEmail(record.get(ORDERS.ORDER_BUYER_EMAIL))
+                    .buyerPhone(record.get(ORDERS.ORDER_BUYER_PHONE))
+                    .buyerUser(record.get(ORDERS.ORDER_BUYER_USER))
+                    .buyerLocale(record.get(ORDERS.ORDER_BUYER_LOCALE))
+                    .ticketPositionId(record.get(ORDERS.ORDER_TICKET_POSITION_ID))
+                    .ticketPositionPosid(record.get(ORDERS.ORDER_TICKET_POSITION_POSITIONID))
+                    .roomPositionId(record.get(ORDERS.ORDER_ROOM_POSITION_ID))
+                    .roomPositionPosid(record.get(ORDERS.ORDER_ROOM_POSITION_POSITIONID))
+                    .earlyPositionId(record.get(ORDERS.ORDER_EARLY_POSITION_ID))
+                    .latePositionId(record.get(ORDERS.ORDER_LATE_POSITION_ID))
+                    .extraFursuits(record.get(ORDERS.ORDER_EXTRA_FURSUITS))
+                    .requireAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
+                    .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
+                    .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                    .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
+                    .orderOwnerUserId(userId)
+                    .eventId(record.get(ORDERS.EVENT_ID))
+                    .userFinder(userFinder)
+                    .eventFinder(eventFinder);
+
+            if (loadAnswers) {
+                // Keep in mind that only if the order is from the current event we can load the answers
+                final var answerList = objectMapper.readValue(
+                        record.get(ORDERS.ORDER_ANSWERS_JSON).data(),
+                        pretixAnswerRef
+                );
+                v.answers(answerList, pretixInformation);
+            } else {
+                v.emptyAnswers();
+            }
+
+            return v.build();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

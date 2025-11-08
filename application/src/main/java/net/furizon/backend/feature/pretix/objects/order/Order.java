@@ -332,10 +332,14 @@ public class Order {
             return this;
         }
 
-        public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
+        public OrderBuilder emptyAnswers() {
             this.answers = new HashMap<>();
             this.answerIdentifierToOptionId = new HashMap<>();
             this.answerIdentifierToOptionIdentifier = new HashMap<>();
+            return this;
+        }
+        public OrderBuilder answers(@NotNull List<PretixAnswer> answers, @NotNull PretixInformation pi) {
+            emptyAnswers();
             for (PretixAnswer answer : answers) {
                 long questionId = answer.getQuestionId();
                 var identifier = pi.getQuestionIdentifierFromId(questionId);

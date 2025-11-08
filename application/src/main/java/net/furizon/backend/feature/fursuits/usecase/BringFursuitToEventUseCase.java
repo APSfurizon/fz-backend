@@ -37,7 +37,7 @@ public class BringFursuitToEventUseCase implements UseCase<BringFursuitToEventUs
         // We cannot allow the editing of bringFursuitToEvent after the event has ended
         fursuitChecks.assertPermissionAndTimeframe(userId, input.fursuitId, null, badgeConfig.getEditingDeadline());
 
-        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(input.fursuitId, event, true);
+        FursuitData fursuit = fursuitChecks.getFursuitAndAssertItExists(input.fursuitId, event, userId, true);
         long ownerId = fursuit.getOwnerId();
 
         boolean res;

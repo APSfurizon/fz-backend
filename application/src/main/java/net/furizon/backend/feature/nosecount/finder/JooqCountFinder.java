@@ -87,6 +87,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
                 .and(ORDERS.ORDER_SPONSORSHIP_TYPE.greaterThan((short) 0))
+                .and(ORDERS.EVENT_ID.eq(eventId))
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))

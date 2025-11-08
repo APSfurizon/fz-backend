@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class HotelExportRow {
     @NotNull private final String roomTypeName;
+    private boolean roomConfirmed;
     private final long roomId;
     @NotNull private final String firstName;
     @NotNull private final String lastName;

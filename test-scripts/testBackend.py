@@ -59,7 +59,7 @@ def doDelete(url) -> Response:
     global session
     global HEADERS
     response = session.delete(url, headers=HEADERS, allow_redirects=False)
-    print(f"\n-------- GET {url} --------")
+    print(f"\n-------- DELETE {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
@@ -160,6 +160,8 @@ def linkOrder() -> Response:
     }
     return doPost(f'{BASE_URL_API}orders-workflow/link-order', json=json)
 
+def getBadge() -> Response:
+    return doGet(f'{BASE_URL_API}badge/')
 def uploadBadge() -> Response:
     #imageName = 'testImage2.png'
     imageName = 'testImageSmall.jpg'
@@ -310,14 +312,19 @@ login()
 
 #roomCreate()
 #roomGetInfo()
-roomConfirm()
+#roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
 
+#uploadBadge()
+#deleteBadge()
+
+getBadge()
+
 
 #countdown()
 
 #fursuitCount()
-noseCount()
+#noseCount()
