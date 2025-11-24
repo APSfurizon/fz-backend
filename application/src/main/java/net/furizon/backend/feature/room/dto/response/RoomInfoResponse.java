@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.room.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class RoomInfoResponse {
     @Nullable
@@ -20,6 +22,7 @@ public class RoomInfoResponse {
     private boolean canCreateRoom;
     private boolean buyOrUpgradeRoomSupported;
     private boolean canBuyOrUpgradeRoom;
+    private boolean exchangeSupported;
     private boolean canExchange;
 
     @Nullable

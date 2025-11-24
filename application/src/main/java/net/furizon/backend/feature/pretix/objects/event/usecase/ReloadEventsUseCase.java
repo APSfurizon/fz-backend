@@ -72,6 +72,9 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
                                 .isCurrent(isCurrentEvent)
                                 .dateTo(event.getDateTo())
                                 .dateFrom(event.getDateFrom())
+                                .isLive(event.isLive())
+                                .testModeEnabled(event.isTestMode())
+                                .isPublic(event.isPublic())
                                 .build();
 
                         long dbId = insertEventAction.invoke(newEvent);
@@ -88,6 +91,9 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
                         dbEvent.setDateTo(event.getDateTo());
                         dbEvent.setEventNames(event.getName());
                         dbEvent.setCurrent(isCurrentEvent);
+                        dbEvent.setLive(event.isLive());
+                        dbEvent.setTestModeEnabled(event.isTestMode());
+                        dbEvent.setPublic(event.isPublic());
                         updateEventAction.invoke(dbEvent);
                     }
 

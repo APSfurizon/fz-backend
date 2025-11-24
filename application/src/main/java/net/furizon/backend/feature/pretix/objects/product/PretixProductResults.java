@@ -27,6 +27,7 @@ public record PretixProductResults(
     @NotNull Set<Long> noRoomItemIds,
     @NotNull Map<HotelCapacityPair, Long> earlyDaysItemId,
     @NotNull Map<HotelCapacityPair, Long> lateDaysItemId,
+    @NotNull Map<Short, List<Long>> capacityToRoomItemIds,
     @NotNull Set<Long> tempAddons,
     @NotNull Set<Long> tempItems,
     @NotNull Map<Long, List<PretixProductBundle>> itemIdToBundle
@@ -47,6 +48,7 @@ public record PretixProductResults(
             new TreeSet<>(),
             new HashMap<>(),
             new HashMap<>(),
+            new TreeMap<>(),
             new HashSet<>(),
             new HashSet<>(),
             new HashMap<>()

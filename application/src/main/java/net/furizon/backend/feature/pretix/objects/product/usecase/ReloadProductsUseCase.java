@@ -16,6 +16,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @Component
@@ -48,15 +49,29 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     String s = identifier.substring(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
                     String[] sp = s.split("_");
                     ExtraDays ed = ExtraDays.get(Integer.parseInt(sp[0]));
-                    String hotelName = sp[1];
-                    String roomName = sp[2];
-                    short capacity = Short.parseShort(sp[3]);
                     result.extraDaysIdToDay().put(productId, ed);
-                    HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
-                    if (ed == ExtraDays.EARLY) {
-                        result.earlyDaysItemId().put(hcPair, productId);
-                    } else if (ed == ExtraDays.LATE) {
-                        result.lateDaysItemId().put(hcPair, productId);
+                    switch (sp.length) {
+                        case 1: {
+                            //Do nothing, we've already done in parsing
+                            break;
+                        }
+                        case 4: {
+                            String hotelName = sp[1];
+                            String roomName = sp[2];
+                            short capacity = Short.parseShort(sp[3]);
+                            HotelCapacityPair hcPair = new HotelCapacityPair(hotelName, roomName, capacity);
+                            if (ed == ExtraDays.EARLY) {
+                                result.earlyDaysItemId().put(hcPair, productId);
+                            } else if (ed == ExtraDays.LATE) {
+                                result.lateDaysItemId().put(hcPair, productId);
+                            }
+                            break;
+                        }
+                        default: {
+                            log.error("Invalid extra days identifier length: '{}' ({}) for item {}",
+                                      s, sp.length, productId);
+                            break;
+                        }
                     }
 
                 } else if (identifier.startsWith(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
@@ -75,6 +90,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         String roomName = sp[1];
                         short capacity = Short.parseShort(sp[2]);
                         result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
+                        result.capacityToRoomItemIds().computeIfAbsent(capacity, k -> new ArrayList<>()).add(productId);
                         Map<String, String> names = product.getCustomNames();
                         names = names.isEmpty() ? product.getNames() : names;
                         result.roomPretixItemIdToNames().put(productId, names);

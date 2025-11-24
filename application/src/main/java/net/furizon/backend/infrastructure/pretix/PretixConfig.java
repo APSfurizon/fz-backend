@@ -30,6 +30,7 @@ public class PretixConfig implements HttpConfig {
 
     private final boolean enableSync;
 
+    private final boolean healthcheckEnabled;
     private final int healthcheckRetries;
   
     @NotNull

@@ -6,9 +6,11 @@ import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -38,6 +40,7 @@ public class DefaultRoomLogic implements RoomLogic {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final SqlCommand command;
     @NotNull private final SqlQuery query;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
@@ -46,7 +49,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public long createRoom(String name, long userId, @NotNull Event event) {
+    public long createRoom(String name, long userId,
+                           @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Creating a room for user {} on event {} with name '{}'", userId, event, name);
         //Get order id
         var r = query.fetchFirst(
@@ -59,7 +63,8 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException("Order not found while creating a room", GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(translationService.error("room.create_fail_no_order"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
         //Actual creation of the room
@@ -76,7 +81,7 @@ public class DefaultRoomLogic implements RoomLogic {
             )
         ).getFirst().get(ROOMS.ROOM_ID);
         //Insertion of the owner in the room
-        this.invitePersonToRoom(userId, roomId, event, true, true);
+        this.invitePersonToRoom(userId, roomId, event, pretixInformation, true, true);
         return roomId;
     }
 
@@ -112,8 +117,9 @@ public class DefaultRoomLogic implements RoomLogic {
     @Override
     @Transactional
     public long invitePersonToRoom(
-            long invitedUserId, long roomId, @NotNull Event event, boolean force, boolean forceExit
-    ) {
+            long invitedUserId, long roomId,
+            @NotNull Event event, @NotNull PretixInformation pretixInformation,
+            boolean force, boolean forceExit) {
         log.info("Inviting user {} to room {} on event {}. Force = {}; forceExit = {}",
                 invitedUserId, roomId, event, force, forceExit);
 
@@ -127,7 +133,8 @@ public class DefaultRoomLogic implements RoomLogic {
             } else {
                 log.error("User {} is already in a room in event {}, but forceExit was equal to false",
                         invitedUserId, event);
-                throw new ApiException("User is already in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
+                throw new ApiException(translationService.error("room.user_in_a_room_already"),
+                        RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
             }
         }
 
@@ -169,7 +176,8 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     @Transactional
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId, @NotNull Event event) {
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Guest {} has accepted room invitation", guestId);
         //Deletes pending invitation for user in event
         command.execute(
@@ -233,10 +241,16 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean canConfirmRoom(long roomId, @NotNull Event event) {
+    public boolean canConfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         if (!isConfirmationSupported()) {
             return false;
         }
+
+        var confirmed = roomFinder.isRoomConfirmed(roomId);
+        if (confirmed.isEmpty() || confirmed.get()) {
+            return false;
+        }
+
         boolean everyonePaid = true;
         List<RoomGuest> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true);
         for (RoomGuest guest : guests) {
@@ -247,7 +261,7 @@ public class DefaultRoomLogic implements RoomLogic {
     }
 
     @Override
-    public boolean confirmRoom(long roomId) {
+    public boolean confirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Room {} has been confirmed!", roomId);
         //Deletes pending invitations
         command.execute(
@@ -267,23 +281,36 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean isUnconfirmationSupported() {
-        return false;
+        return true;
     }
 
     @Override
-    public boolean canUnconfirmRoom(long roomId) {
-        log.warn("DefaultRoomLogic does not implement canUnconfirmRoom! Default `false` value is returned");
-        return isUnconfirmationSupported();
+    public boolean canUnconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        if (!isUnconfirmationSupported()) {
+            return false;
+        }
+        var confirmed = roomFinder.isRoomConfirmed(roomId);
+        return confirmed.orElse(false);
     }
 
     @Override
-    public boolean unconfirmRoom(long roomId) {
+    public boolean unconfirmRoom(long roomId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.info("Room {} has been unconfirmed!", roomId);
         return command.execute(
             PostgresDSL.update(ROOMS)
                 .set(ROOMS.ROOM_CONFIRMED, false)
                 .where(ROOMS.ROOM_ID.eq(roomId))
         ) > 0;
+    }
+
+    @Override
+    public boolean isExchangeRoomSupported(@NotNull Event event) {
+        return true;
+    }
+
+    @Override
+    public boolean isExchangeFullOrderSupported(@NotNull Event event) {
+        return true;
     }
 
     public void logExchangeError(boolean result, int step, long destUserId, long sourceUserId, @NotNull Event event) {
@@ -302,7 +329,7 @@ public class DefaultRoomLogic implements RoomLogic {
                 + "targetUsrId={}; sourceUsrId={}; targetRoomId={}; sourceRoomId={}; event = {}",
                 targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event);
 
-        return exchange(targetUsrId, sourceUsrId, sourceRoomId, targetRoomId, event,
+        return exchange(targetUsrId, sourceUsrId, sourceRoomId, targetRoomId, event, pretixInformation,
             (targetGuest, sourceGuest) -> {
                 boolean result = true;
 
@@ -374,7 +401,7 @@ public class DefaultRoomLogic implements RoomLogic {
         log.debug("exchangeFullOrder() called with: "
                 + "targetUsrId={}; sourceUsrId={}; roomId={}; event = {}",
                 targetUsrId, sourceUsrId, roomId, event);
-        return exchange(targetUsrId, sourceUsrId, roomId, null, event,
+        return exchange(targetUsrId, sourceUsrId, roomId, null, event, pretixInformation,
             (targetGuest, sourceGuest) -> {
                 boolean result = command.execute(
                     PostgresDSL.update(ORDERS)
@@ -390,8 +417,18 @@ public class DefaultRoomLogic implements RoomLogic {
         );
     }
 
-    private RoomGuest switchRooms(long targetUsrId, long sourceUsrId, long roomId,
-                                         boolean targetHasRoom, @NotNull Event event) {
+    @Override
+    public boolean isRefundRoomSupported(@NotNull Event event) {
+        return true;
+    }
+
+    @Override
+    public boolean isRefundFullOrderSupported(@NotNull Event event) {
+        return true;
+    }
+
+    private RoomGuest switchRooms(long targetUsrId, long sourceUsrId, long roomId, boolean targetHasRoom,
+                                  @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("switchRooms() called with: "
                 + "targetUsrId={}; sourceUsrId={}; roomId={}; targetHasRoom={}; event = {}",
                 targetUsrId, sourceUsrId, roomId, targetHasRoom, event);
@@ -402,7 +439,7 @@ public class DefaultRoomLogic implements RoomLogic {
         sourceGuest = srcGuests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
         if (sourceGuest == null) {
             log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
-            throw new ApiException("No guest found", RoomErrorCodes.GUEST_NOT_FOUND);
+            throw new ApiException(translationService.error("room.guest.not_found"), RoomErrorCodes.GUEST_NOT_FOUND);
         }
 
         boolean res;
@@ -413,7 +450,7 @@ public class DefaultRoomLogic implements RoomLogic {
                 //Target is not in the room
                 res = this.kickFromRoom(sourceGuest.getGuestId());
                 logExchangeError(res, 0, targetUsrId, sourceUsrId, event);
-                res = this.invitePersonToRoom(targetUsrId, roomId, event, true, true) > 0L;
+                res = this.invitePersonToRoom(targetUsrId, roomId, event, pretixInformation, true, true) > 0L;
                 logExchangeError(res, 1, targetUsrId, sourceUsrId, event);
 
             } else if (targetGuest != null && targetGuest.isConfirmed()) {
@@ -423,7 +460,7 @@ public class DefaultRoomLogic implements RoomLogic {
                 //Target was invited to the room, but hasn't accepted yet
                 res = this.kickFromRoom(sourceGuest.getGuestId());
                 logExchangeError(res, 2, targetUsrId, sourceUsrId, event);
-                res = this.inviteAccept(targetGuest.getGuestId(), targetUsrId, roomId, event);
+                res = this.inviteAccept(targetGuest.getGuestId(), targetUsrId, roomId, event, pretixInformation);
                 logExchangeError(res, 3, targetUsrId, sourceUsrId, event);
 
             } else {
@@ -435,7 +472,8 @@ public class DefaultRoomLogic implements RoomLogic {
     }
     private boolean exchange(long targetUsrId, long sourceUsrId,
                              @Nullable Long sourceRoom, @Nullable Long targetRoom,
-                             @NotNull Event event, BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
+                             @NotNull Event event, @NotNull PretixInformation pretixInformation,
+                             BiFunction<RoomGuest, RoomGuest, Boolean> updateDbFnc) {
         log.info("[ROOM_EXCHANGE] DefaultRoomLogic: Exchange between users: {} -> {} on event {}",
                 sourceUsrId, targetUsrId, event);
         boolean result = true;
@@ -446,10 +484,10 @@ public class DefaultRoomLogic implements RoomLogic {
         boolean targetHasRoom = targetRoom != null;
 
         if (sourceHasRoom) {
-            sourceGuest = switchRooms(targetUsrId, sourceUsrId, sourceRoom, targetHasRoom, event);
+            sourceGuest = switchRooms(targetUsrId, sourceUsrId, sourceRoom, targetHasRoom, event, pretixInformation);
         }
         if (targetHasRoom) {
-            targetGuest = switchRooms(sourceUsrId, targetUsrId, targetRoom, sourceHasRoom, event);
+            targetGuest = switchRooms(sourceUsrId, targetUsrId, targetRoom, sourceHasRoom, event, pretixInformation);
         }
 
         if (targetGuest != null || sourceGuest != null) {
@@ -472,12 +510,12 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean refundRoom(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return refund(userId, event, pretixInformation);
+        return refund(userId, event);
     }
 
     @Override
     public boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return refund(userId, event, pretixInformation);
+        return refund(userId, event);
     }
 
     @Override
@@ -505,11 +543,17 @@ public class DefaultRoomLogic implements RoomLogic {
 
     }
 
-    private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    @Override
+    public void updateRoomCapacity(@NotNull RoomData roomData,
+                                   @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    }
+
+    private boolean refund(long userId, @NotNull Event event) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         if (!r.isPresent()) {
             log.error("No room found for user {} in event {} while refunding", userId, event);
-            throw new ApiException("No room find in exchange", RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(translationService.error("room.exchange.room_not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND);
         }
         return this.deleteRoom(r.get());
     }

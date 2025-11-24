@@ -10,6 +10,7 @@ import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
 import net.furizon.backend.infrastructure.configuration.MembershipConfig;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartAction;
 import net.furizon.backend.infrastructure.pretix.autocart.AutocartLinkGenerator;
@@ -33,6 +34,7 @@ import java.util.Set;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.BOOL;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.DROPDOWN;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.INPUT;
+import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.RADIO;
 import static net.furizon.backend.infrastructure.pretix.autocart.AutocartActionType.TEXT_AREA;
 
 @Component
@@ -46,6 +48,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
     @NotNull private final AutocartLinkGenerator autocartLinkGenerator;
     @NotNull private final MembershipConfig membershipConfig;
     @NotNull private final PretixConfig pretixConfig;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixShopLink.Input input) {
@@ -60,7 +63,8 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         boolean earlyBook = permissionFinder.userHasPermission(userId, Permission.EARLY_BOOK);
         if (bookingStart != null && bookingStart.isAfter(OffsetDateTime.now()) && !earlyBook) {
             log.error("User requested a shop link before opening date!");
-            throw new ApiException("Shop is not available yet!", OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
+            throw new ApiException(translationService.error("pretix.orders_flow.shop_not_open"),
+                    OrderWorkflowErrorCode.SHOP_NOT_OPENED_YET);
         }
 
         // Orders no check
@@ -110,6 +114,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
                 actions.add(new AutocartAction<>("cp_$_item_" + membershipCardId, true, BOOL));
             }
         }
+        actions.add(AutocartAction.withoutValue("id_is_business_0", RADIO));
 
         var generatedUrl = autocartLinkGenerator.generateUrl(actions);
         if (generatedUrl.isEmpty()) {

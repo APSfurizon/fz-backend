@@ -8,6 +8,7 @@ import net.furizon.backend.feature.room.dto.request.InviteToRoomRequest;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.InviteToRoomResponse;
+import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -66,7 +67,11 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
                 roomChecks.assertUserIsNotInRoom(targetUserId, event, false);
             }
 
-            long guestId = roomLogic.invitePersonToRoom(targetUserId, roomId, event, force, forceExit);
+            long guestId = roomLogic.invitePersonToRoom(
+                    targetUserId, roomId,
+                    event, input.pretixInformation,
+                    force, forceExit
+            );
             toReturn.add(new RoomGuest(guestId, targetUserId, roomId, false));
         }
 
@@ -76,6 +81,7 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
     public record Input(
             @NotNull FurizonUser user,
             @NotNull InviteToRoomRequest req,
-            @NotNull Event event
+            @NotNull Event event,
+            @NotNull PretixInformation pretixInformation
     ) {}
 }

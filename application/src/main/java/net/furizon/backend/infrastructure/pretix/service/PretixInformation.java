@@ -40,6 +40,11 @@ public interface PretixInformation {
     Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
     @Nullable
     HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
+
+    @NotNull List<Long> getRoomItemIdsForCapacity(short capacity);
+
+    @Nullable
+    HotelCapacityPair getBiggestRoomCapacity();
     @Nullable
     Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
                                            short capacity, @NotNull ExtraDays day);

@@ -6,5 +6,5 @@ import org.jetbrains.annotations.Nullable;
 
 public interface CreateUserAction {
     @NotNull
-    User invoke(@NotNull String fursonaName, @Nullable String locale);
+    User invoke(@NotNull String fursonaName, @Nullable String locale, @NotNull String language);
 }

@@ -17,9 +17,10 @@ public interface PushPretixPositionAction {
     @Nullable
     PretixPosition invoke(
             @NotNull Event event,
-            @NotNull PushPretixPositionRequest position,
             boolean createTempPositionFirst,
-            @Nullable PretixInformation pretixInformation,
-            @Nullable Long price
+            boolean checkQuota,
+            @Nullable Long price,
+            @NotNull PushPretixPositionRequest position,
+            @Nullable PretixInformation pretixInformation
     );
 }

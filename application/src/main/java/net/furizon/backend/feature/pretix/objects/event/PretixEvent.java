@@ -28,4 +28,11 @@ public class PretixEvent {
     @JsonProperty("public_url")
     @NotNull
     private final String publicUrl;
+
+    //Event visibility settings
+    private final boolean live;
+    @JsonProperty("testmode")
+    private final boolean testMode;
+    @JsonProperty("is_public")
+    private final boolean isPublic;
 }

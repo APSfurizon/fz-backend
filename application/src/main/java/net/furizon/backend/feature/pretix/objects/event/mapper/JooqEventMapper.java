@@ -44,6 +44,9 @@ public class JooqEventMapper {
                     })
                     .orElse(null)
             )
+            .isLive(record.get(EVENTS.EVENT_IS_LIVE))
+            .testModeEnabled(record.get(EVENTS.EVENT_TEST_MODE_ENABLED))
+            .isPublic(record.get(EVENTS.EVENT_IS_PUBLIC))
             .build();
     }
 }

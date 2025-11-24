@@ -1,0 +1,5 @@
+BEGIN;
+ALTER TABLE IF EXISTS events DROP COLUMN IF EXISTS event_is_live;
+ALTER TABLE IF EXISTS events DROP COLUMN IF EXISTS event_test_mode_enabled;
+ALTER TABLE IF EXISTS events DROP COLUMN IF EXISTS event_is_public;
+COMMIT;

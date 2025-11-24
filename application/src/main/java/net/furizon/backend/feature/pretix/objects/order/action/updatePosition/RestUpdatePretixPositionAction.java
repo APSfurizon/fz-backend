@@ -25,7 +25,10 @@ public class RestUpdatePretixPositionAction implements UpdatePretixPositionActio
     private final HttpClient pretixHttpClient;
 
     @Override
-    public PretixPosition invoke(@NotNull Event event, long positionId, @NotNull UpdatePretixPositionRequest position) {
+    public PretixPosition invoke(@NotNull Event event,
+                                 long positionId,
+                                 boolean checkQuota,
+                                 @NotNull UpdatePretixPositionRequest position) {
         log.info("Update position {} with item {} to order {} on event {}", positionId,
                 position.getItem(), position.getOrder(), event);
         final var pair = event.getOrganizerAndEventPair();
@@ -35,6 +38,7 @@ public class RestUpdatePretixPositionAction implements UpdatePretixPositionActio
                 .uriVariable("organizer", pair.getOrganizer())
                 .uriVariable("event", pair.getEvent())
                 .uriVariable("position", String.valueOf(positionId))
+                .queryParam("check_quotas", checkQuota ? "true" : "false")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(position)
                 .responseType(PretixPosition.class)

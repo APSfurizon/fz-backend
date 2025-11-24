@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.roles.dto.RoleResponse;
 import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.Role;
@@ -23,13 +24,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FetchRoleUseCase implements UseCase<Long, RoleResponse> {
     @NotNull private final PermissionFinder permissionFinder;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull RoleResponse executor(@NotNull Long input) {
         Role role = permissionFinder.getRoleFromId(input);
         if (role == null) {
             log.error("Role {} not found", input);
-            throw new ApiException("Role not found", GeneralResponseCodes.ROLE_NOT_FOUND);
+            throw new ApiException(translationService.error("roles.role_not_found"),
+                    GeneralResponseCodes.ROLE_NOT_FOUND);
         }
 
         Set<Permission> permissions = role.getPermissions(permissionFinder)

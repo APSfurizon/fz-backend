@@ -175,7 +175,8 @@ public class RoomController {
                 new InviteToRoomUseCase.Input(
                         user,
                         inviteToRoomRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -193,7 +194,8 @@ public class RoomController {
                 new InviteAcceptUseCase.Input(
                         user,
                         guestIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -285,7 +287,8 @@ public class RoomController {
                 new CanConfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -306,7 +309,8 @@ public class RoomController {
                 new CanUnconfirmRoomUseCase.Input(
                         user,
                         roomIdRequest,
-                        pretixInformation.getCurrentEvent()
+                        pretixInformation.getCurrentEvent(),
+                        pretixInformation
                 )
         );
     }
@@ -431,7 +435,8 @@ public class RoomController {
                     user.getUserId(),
                     pretixInformation.getCurrentEvent(),
                     pretixInformation,
-                    false
+                    false,
+                    true
             )
         );
     }

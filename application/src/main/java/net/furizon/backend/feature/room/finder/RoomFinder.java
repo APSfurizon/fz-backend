@@ -83,6 +83,7 @@ public interface RoomFinder {
     @NotNull List<HotelExportRow> exportHotel(long eventId,
                                               @NotNull RoomLogic roomLogic,
                                               @NotNull PretixInformation pretixInformation);
+    @NotNull List<HotelExportRow> exportRoomless(long eventId);
 
     @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId);
 }

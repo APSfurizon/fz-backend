@@ -7,7 +7,9 @@ import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_UNCONFIRMED;
@@ -30,6 +33,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull UnconfirmRoomUseCase.Input input) {
@@ -43,19 +47,26 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
                 input.roomReq == null ? null : input.roomReq.getRoomId()
         );
         checks.assertRoomConfirmed(roomId);
-        checks.assertRoomCanBeUnconfirmed(roomId, roomLogic);
+        //Following check should be done inside the confirmation method for performance reasons
+        //checks.assertRoomCanBeUnconfirmed(roomId, event, input.pretixInformation, roomLogic);
         checks.assertRoomFromCurrentEvent(roomId, event);
 
-        boolean res = roomLogic.unconfirmRoom(roomId);
+        Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
+        boolean res = roomLogic.unconfirmRoom(roomId, event, input.pretixInformation);
         if (res) {
-            Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
             if (roomItemId != null) {
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
-                if (names != null) {
-                    mailService.prepareAndSendBroadcastUpdate(
-                        roomId, TEMPLATE_ROOM_UNCONFIRMED,
-                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
-                    );
+                if (names != null && !names.isEmpty()) {
+                    String name = names.get(LANG_PRETIX);
+                    if (name != null) {
+                        mailService.prepareAndSendBroadcastUpdate(
+                            roomId,
+                            TEMPLATE_ROOM_UNCONFIRMED,
+                            TranslatableValue.ofEmail("mail.room_unconfirmed.title"),
+                            MailVarPair.of(ROOM_TYPE_NAME, name),
+                            MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
+                        );
+                    }
                 }
             }
         }

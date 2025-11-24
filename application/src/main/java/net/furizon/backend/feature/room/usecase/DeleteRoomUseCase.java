@@ -7,7 +7,9 @@ import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.room.dto.request.RoomIdRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_DELETED;
@@ -30,6 +33,7 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -52,8 +56,11 @@ public class DeleteRoomUseCase implements UseCase<DeleteRoomUseCase.Input, Boole
                 Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
                 if (names != null) {
                     mailService.prepareAndSendBroadcastUpdate(
-                            roomId, TEMPLATE_ROOM_DELETED,
-                            MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                            roomId,
+                            TEMPLATE_ROOM_DELETED,
+                            TranslatableValue.ofEmail("mail.room_deleted.title"),
+                            MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)),
+                            MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                     );
                 }
             }

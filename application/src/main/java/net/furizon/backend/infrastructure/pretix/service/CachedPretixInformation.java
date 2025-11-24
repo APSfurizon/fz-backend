@@ -47,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -148,6 +149,9 @@ public class CachedPretixInformation implements PretixInformation {
     //map (capacity, hotelName) -> lateExtraDays item id
     @NotNull
     private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
+    //map capacity -> List[id of room items with that capacity]
+    @NotNull
+    private final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
 
     //Countries
     @NotNull
@@ -188,6 +192,7 @@ public class CachedPretixInformation implements PretixInformation {
             value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
             return value;
         } else {
+            //When reloading the event we already cache the various prices, so there always be a value present
             lock.readLock().lock();
             Long value = itemIdToPrice.getIfPresent(itemId);
             List<PretixProductBundle> bundles = itemIdToBundle.getIfPresent(itemId);
@@ -223,12 +228,38 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
+    @Override
+    public @NotNull List<Long> getRoomItemIdsForCapacity(short capacity) {
+        lock.readLock().lock();
+        List<Long> v = roomCapacityToItemId.getIfPresent(capacity);
+        lock.readLock().unlock();
+        return v == null ? Collections.emptyList() : v;
+    }
+
+    @Override
+    public @Nullable HotelCapacityPair getBiggestRoomCapacity() {
+        HotelCapacityPair biggest = null;
+        short maxCapacity = 0;
+        lock.readLock().lock();
+        for (HotelCapacityPair p : roomIdToInfo.asMap().values()) {
+            if (p.capacity() > maxCapacity) {
+                maxCapacity = p.capacity();
+                biggest = p;
+            }
+        }
+        lock.readLock().unlock();
+        return biggest;
+    }
+
     @NotNull
     @Override
     public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
         lock.readLock().lock();
         var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
         lock.readLock().unlock();
+        if (v == null) {
+            log.warn("Unable to fetch room name for id {}", roomPretixItemId);
+        }
         return v == null ? new HashMap<>() : v;
     }
 
@@ -646,6 +677,7 @@ public class CachedPretixInformation implements PretixInformation {
         roomPretixItemIdToNames.invalidateAll();
         roomIdToEarlyExtraDayItemId.invalidateAll();
         roomIdToLateExtraDayItemId.invalidateAll();
+        roomCapacityToItemId.invalidateAll();
     }
 
 
@@ -737,6 +769,7 @@ public class CachedPretixInformation implements PretixInformation {
         roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
         roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
         roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
+        roomCapacityToItemId.putAll(products.capacityToRoomItemIds());
     }
 
     private void reloadQuotas(@NotNull Event event) {

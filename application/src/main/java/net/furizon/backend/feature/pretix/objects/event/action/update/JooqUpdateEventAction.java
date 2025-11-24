@@ -32,6 +32,9 @@ public class JooqUpdateEventAction implements UpdateEventAction {
                     .map(jsonSerializer::serializeAsJson)
                     .orElse(null))
                 .set(EVENTS.EVENT_DATE_TO, event.getDateTo())
+                .set(EVENTS.EVENT_IS_LIVE, event.isLive())
+                .set(EVENTS.EVENT_TEST_MODE_ENABLED, event.isTestModeEnabled())
+                .set(EVENTS.EVENT_IS_PUBLIC, event.isPublic())
                 .where(EVENTS.ID.eq(event.getId()))
         );
     }

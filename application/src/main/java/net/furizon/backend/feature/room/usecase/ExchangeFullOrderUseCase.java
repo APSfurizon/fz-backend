@@ -10,7 +10,9 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -19,6 +21,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_HAS_NEW_OWNER;
 
@@ -32,6 +35,7 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
     @NotNull private final RoomChecks roomChecks;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
@@ -63,8 +67,11 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
             UserEmailData data = userFinder.getMailDataForUser(destUserId);
             if (data != null) {
                 mailService.prepareAndSendBroadcastUpdate(
-                        roomId, TEMPLATE_ROOM_HAS_NEW_OWNER,
-                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName())
+                        roomId,
+                        TEMPLATE_ROOM_HAS_NEW_OWNER,
+                        TranslatableValue.ofEmail("mail.room_has_new_owner.title"),
+                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, data.getFursonaName()),
+                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                 );
             }
         }

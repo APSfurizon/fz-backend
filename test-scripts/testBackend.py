@@ -59,12 +59,15 @@ def doDelete(url) -> Response:
     global session
     global HEADERS
     response = session.delete(url, headers=HEADERS, allow_redirects=False)
-    print(f"\n-------- GET {url} --------")
+    print(f"\n-------- DELETE {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
     print(response.text)
     return response
+
+def reloadOrders() -> Response:
+    return doPost(f'{BASE_URL_API}cache/pretix/reload-orders')
 
 def register() -> Response:
     json = {
@@ -132,19 +135,33 @@ def login() -> Response:
 
     return req
 
+def markPersonalUserInformationAsUpdated() -> Response:
+    return doPost(f'{BASE_URL_API}membership/mark-personal-user-information-as-updated')
+
 def getMe() -> Response:
-    doGet(f'{BASE_URL_API}users/display/me')
+    return doGet(f'{BASE_URL_API}users/display/me')
 
 def testPermission() -> Response:
-    doGet(f'{BASE_URL_API}authentication/test')
+    return doGet(f'{BASE_URL_API}authentication/test')
 
 def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
-    doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
+    return doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
 def getOrderLink() -> Response:
-    doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
+    return doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
 
+def linkOrder() -> Response:
+    orderCode = "N0FM3"
+    orderSecret = "8cog2lc8fb8llvkk"
+    json = {
+        "orderCode": orderCode,
+        "orderSecret": orderSecret,
+    }
+    return doPost(f'{BASE_URL_API}orders-workflow/link-order', json=json)
+
+def getBadge() -> Response:
+    return doGet(f'{BASE_URL_API}badge/')
 def uploadBadge() -> Response:
     #imageName = 'testImage2.png'
     imageName = 'testImageSmall.jpg'
@@ -179,6 +196,9 @@ def countdown() -> Response:
 
 def fursuitCount() -> Response:
     return doGet(f'{BASE_URL_API}counts/fursuit')
+
+def noseCount() -> Response:
+    return doGet(f'{BASE_URL_API}counts/bopos')
 
 def usersAdminView(id: int) -> Response:
     return doGet(f'{BASE_URL_API}users/view/{id}')
@@ -240,12 +260,36 @@ def exportBadges() -> Response:
 def remindRoomNotFull() -> Response:
     return doGet(f'{BASE_URL_API}admin/mail-reminders/room-not-full')
 
+def roomCreate() -> Response:
+    json = {
+        "name": "Test Room"
+    }
+    return doPost(f'{BASE_URL_API}room/create', json=json)
+
+def roomDelete() -> Response:
+    return doPost(f'{BASE_URL_API}room/delete')
+
+def roomConfirm() -> Response:
+    return doPost(f'{BASE_URL_API}room/confirm')
+
+def roomUnconfirm() -> Response:
+    return doPost(f'{BASE_URL_API}room/unconfirm')
+
+def roomListing() -> Response:
+    return doGet(f'{BASE_URL_API}room/get-room-list-with-quota')
+
+def roomGetInfo() -> Response:
+    return doGet(f'{BASE_URL_API}room/info')
+
 #register()
 #confirmEmail()
 login()
 #getMe()
 #updateUserInfo()
+#markPersonalUserInformationAsUpdated()
 #getOrderLink()
+#linkOrder()
+#reloadOrders()
 #testPermission()
 #testInternalAuthorize()
 #uploadBadge()
@@ -264,8 +308,23 @@ login()
 #deleteRole(4)
 #exportBadges()
 #remindRoomNotFull()
-usersAdminView(1)
+#usersAdminView(1)
+
+#roomCreate()
+#roomGetInfo()
+#roomConfirm()
+#roomGetInfo()
+#roomUnconfirm()
+#roomGetInfo()
+#roomListing()
+
+#uploadBadge()
+#deleteBadge()
+
+getBadge()
+
 
 #countdown()
 
 #fursuitCount()
+#noseCount()

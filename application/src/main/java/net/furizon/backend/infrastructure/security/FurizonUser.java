@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Builder
@@ -74,4 +75,8 @@ public class FurizonUser implements UserDetails {
     public boolean isTwoFactorEnabled() {
         return authentication.is2FaEnabled();
     }
+
+    @NotNull
+    @Getter
+    private final Locale language;
 }

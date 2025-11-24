@@ -75,6 +75,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
@@ -86,6 +87,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
                 .and(ORDERS.ORDER_SPONSORSHIP_TYPE.greaterThan((short) 0))
+                .and(ORDERS.EVENT_ID.eq(eventId))
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
@@ -102,6 +104,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
@@ -125,23 +128,23 @@ public class JooqCountFinder implements CountsFinder {
                 .and(ORDERS.EVENT_ID.eq(eventId))
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
             )
-            //TODO check innerjoin with room: check event of the room
-            .leftJoin(ROOM_GUESTS)
+            .leftJoin(
+                ROOM_GUESTS
+                .innerJoin(ROOMS)
+                .on(
+                    ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                    .and(ROOMS.SHOW_IN_NOSECOUNT.isTrue())
+                )
+                .innerJoin(roomOwnerOrder)
+                .on(
+                    ROOMS.ORDER_ID.eq(roomOwnerOrder.ID)
+                    .and(roomOwnerOrder.EVENT_ID.eq(eventId))
+                )
+            )
             .on(
                 USERS.USER_ID.eq(ROOM_GUESTS.USER_ID)
                 .and(ROOM_GUESTS.CONFIRMED.isTrue())
             )
-            .leftJoin(ROOMS)
-            .on(
-                ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
-                .and(ROOMS.SHOW_IN_NOSECOUNT.isTrue())
-            )
-            .leftJoin(roomOwnerOrder)
-            .on(
-                ROOMS.ORDER_ID.eq(roomOwnerOrder.ID)
-                .and(roomOwnerOrder.EVENT_ID.eq(eventId)) //TODO check if this works
-            )
-
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .orderBy(ROOMS.ROOM_ID, ROOM_GUESTS.ROOM_GUEST_ID)
@@ -155,6 +158,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
