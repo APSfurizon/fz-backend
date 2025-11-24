@@ -63,9 +63,6 @@ public class AdminController {
     @NotNull
     private final PretixInformation pretixInformation;
 
-    @NotNull
-    private final TranslationService translationService;
-
     /*
    _____ _______ _    _ ______ ______
   / ____|__   __| |  | |  ____|  ____|
@@ -76,16 +73,18 @@ public class AdminController {
      */
 
     @GetMapping("/ping")
-    public Map<String, String> ping() {
-        String message = translationService.message("admin.ping.message");
-        return Map.of("message", message);
+    public String ping() {
+        return "pong";
     }
 
     @GetMapping("/countdown")
-    public Map<String, String> countdown() {
+    public String countdown() {
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        if (bookingStart == null) {
+            bookingStart = OffsetDateTime.now();
+        }
         Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
-        return Map.of("message", "Start time: " + bookingStart + "; Remaining time: " + remaining);
+        return "Start time: " + bookingStart + "; Remaining time: " + remaining;
     }
 
     @Operation(summary = "Gets what an user can do in the admin panel", description =
