@@ -1,11 +1,11 @@
 BEGIN;
 create type id_type as ENUM('driver_license', 'id_card', 'passport');
 create type shirt_size as ENUM('xs', 's', 'm', 'l', 'xl', 'xxl', '3xl');
-ALTER TABLE public.membership_info ADD info_id_type id_type;
-ALTER TABLE public.membership_info ADD info_id_number text;
-ALTER TABLE public.membership_info ADD info_id_issuer text;
-ALTER TABLE public.membership_info ADD info_shirt_size shirt_size;
-ALTER TABLE public.membership_info ADD info_id_expiry date;
+ALTER TABLE membership_info ADD info_id_type id_type;
+ALTER TABLE membership_info ADD info_id_number text;
+ALTER TABLE membership_info ADD info_id_issuer text;
+ALTER TABLE membership_info ADD info_shirt_size shirt_size;
+ALTER TABLE membership_info ADD info_id_expiry date;
 UPDATE membership_info SET info_id_type='id_card' WHERE info_id_type IS NULL;
 UPDATE membership_info SET info_id_number='' WHERE info_id_number IS NULL;
 UPDATE membership_info SET info_id_issuer='' WHERE info_id_issuer IS NULL;

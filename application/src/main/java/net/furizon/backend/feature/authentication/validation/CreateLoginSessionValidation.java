@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.usecase.LoginUserUseCase;
+import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -13,23 +16,19 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_TOO_MANY_LOGIN_ATTEMPTS;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS;
+import java.util.Objects;
+
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS;
 
 @Component
 @RequiredArgsConstructor
 public class CreateLoginSessionValidation {
-    @NotNull
-    private final SessionAuthenticationManager sessionAuthenticationManager;
-
-    @NotNull
-    private final SecurityConfig securityConfig;
-
-    @NotNull
-    private final EmailSender emailSender;
-
-    @NotNull
-    private final PasswordEncoder passwordEncoder;
+    @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
+    @NotNull private final SecurityConfig securityConfig;
+    @NotNull private final EmailSender emailSender;
+    @NotNull private final PasswordEncoder passwordEncoder;
+    @NotNull private final TranslationService translationService;
+    @NotNull private final UserFinder userFinder;
 
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         String email = input.email();
@@ -45,7 +44,7 @@ public class CreateLoginSessionValidation {
 
         if (authentication.getMailVerificationCreationMs() != null) {
             throw new ApiException(
-                "Email confirmation is still pending",
+                translationService.error("authentication.email.pending_confirmation"),
                 AuthenticationCodes.CONFIRMATION_STILL_PENDING
             );
         }
@@ -57,12 +56,13 @@ public class CreateLoginSessionValidation {
         if (!passwordMatches) {
             //Possible botnet bruteforce with race conditions, but cloudflare should protect us :pray:
             if (authentication.getFailedAttempts() > securityConfig.getMaxFailedLoginAttempts()) {
-                sessionAuthenticationManager.disableUser(authentication.getUserId());
+                UserEmailData data = Objects.requireNonNull(userFinder.getMailDataForUser(authentication.getUserId()));
+                sessionAuthenticationManager.disableUser(data.getUserId());
                 emailSender.fireAndForget(
                     new MailRequest()
-                        .to(email)
-                        .subject(SUBJECT_TOO_MANY_LOGIN_ATTEMPTS)
+                        .to(data.getLanguage(), data.getEmail())
                         .templateMessage(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS, null)
+                        .subject("mail.too_many_login_attempts.title")
                 );
                 throw createdAccountDisabledException();
             }

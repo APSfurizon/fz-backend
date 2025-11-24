@@ -8,6 +8,7 @@ import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.setBadge.SetFursuitBadgeAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
@@ -52,6 +53,8 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
     @NotNull private final BadgeFinder badgeFinder;
 
     @NotNull private final FursuitChecks fursuitChecks;
+
+    @NotNull private final TranslationService translationService;
 
     @Override
     @Transactional
@@ -120,7 +123,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
             return new MediaResponse(res.mediaDbId(), res.relativePath(), imageMetadata.getType());
         } catch (IOException e) {
             log.error("An error occurred while uploading a badge", e);
-            throw new ApiException("Unable to upload image", ImageCodes.ERROR_WHILE_UPLOADING);
+            throw new ApiException(translationService.error("badge.upload.fail"), ImageCodes.ERROR_WHILE_UPLOADING);
         }
     }
 

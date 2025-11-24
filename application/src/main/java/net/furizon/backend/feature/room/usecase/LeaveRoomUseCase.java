@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_USER_LEFT_ROOM;
 
@@ -31,6 +33,7 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks checks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull LeaveRoomUseCase.Input input) {
@@ -57,10 +60,15 @@ public class LeaveRoomUseCase implements UseCase<LeaveRoomUseCase.Input, Boolean
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.prepareAndSendUpdate(new MailRequest(
-                        r.get(), userFinder, TEMPLATE_USER_LEFT_ROOM,
-                        MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
-                ));
+                mailService.fireAndForget(
+                    new MailRequest(
+                        r.get(),
+                        userFinder,
+                        TEMPLATE_USER_LEFT_ROOM,
+                        MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName()),
+                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
+                    ).subject("mail.room_user_left.title", data.getFursonaName())
+                );
             }
         }
         return res;

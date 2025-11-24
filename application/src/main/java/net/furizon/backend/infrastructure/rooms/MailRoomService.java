@@ -7,11 +7,10 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -21,32 +20,20 @@ public class MailRoomService {
     @NotNull private final EmailSender emailSender;
     @NotNull private final RoomFinder roomFinder;
 
-    public List<MailRequest> prepareProblem(MailRequest... requests) {
-        for (MailRequest request : requests) {
-            request.subject(RoomEmailTexts.SUBJECT_ROOM_PROBLEM);
-        }
-        return new ArrayList<MailRequest>(Arrays.asList(requests));
-    }
-
-    public List<MailRequest> prepareUpdate(MailRequest... requests) {
-        for (MailRequest request : requests) {
-            request.subject(RoomEmailTexts.SUBJECT_ROOM_UPDATE);
-        }
-        return new ArrayList<MailRequest>(Arrays.asList(requests));
-    }
-
-    public List<MailRequest> prepareBroadcastProblem(long roomId, @NotNull String templateName, MailVarPair... vars) {
+    public List<MailRequest> prepareBroadcastProblem(long roomId, @NotNull String templateName,
+            TranslatableValue subject, MailVarPair... vars) {
         log.info("Sending broadcast problem to room: {}", roomId);
         List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true)
                 .stream().map(RoomGuest::getUserId).toList();
-        return emailSender.prepareForUsers(guests, RoomEmailTexts.SUBJECT_ROOM_PROBLEM, templateName, vars);
+        return emailSender.prepareForUsers(guests, subject, templateName, vars);
     }
 
-    public List<MailRequest> prepareBroadcastUpdate(long roomId, @NotNull String templateName, MailVarPair... vars) {
+    public List<MailRequest> prepareBroadcastUpdate(long roomId, @NotNull String templateName,
+                                                    TranslatableValue subject, MailVarPair... vars) {
         log.info("Sending broadcast update to room: {}", roomId);
         List<Long> guests = roomFinder.getRoomGuestsFromRoomId(roomId, true)
                 .stream().map(RoomGuest::getUserId).toList();
-        return emailSender.prepareForUsers(guests, RoomEmailTexts.SUBJECT_ROOM_UPDATE, templateName, vars);
+        return emailSender.prepareForUsers(guests, subject, templateName, vars);
     }
 
     //Wrappers of original method
@@ -60,18 +47,12 @@ public class MailRoomService {
         emailSender.fireAndForgetMany(requests);
     }
 
-
-    public void prepareAndSendProblem(MailRequest... requests) {
-        emailSender.fireAndForgetMany(prepareProblem(requests));
+    public void prepareAndSendBroadcastProblem(long roomId, @NotNull String templateName,
+                                               TranslatableValue subject, MailVarPair... vars) {
+        emailSender.fireAndForgetMany(prepareBroadcastProblem(roomId, templateName, subject, vars));
     }
-    public void prepareAndSendUpdate(MailRequest... requests) {
-        emailSender.fireAndForgetMany(prepareUpdate(requests));
-    }
-
-    public void prepareAndSendBroadcastProblem(long roomId, @NotNull String templateName, MailVarPair... vars) {
-        emailSender.fireAndForgetMany(prepareBroadcastProblem(roomId, templateName, vars));
-    }
-    public void prepareAndSendBroadcastUpdate(long roomId, @NotNull String templateName, MailVarPair... vars) {
-        emailSender.fireAndForgetMany(prepareBroadcastUpdate(roomId, templateName, vars));
+    public void prepareAndSendBroadcastUpdate(long roomId, @NotNull String templateName,
+                                              TranslatableValue subject, MailVarPair... vars) {
+        emailSender.fireAndForgetMany(prepareBroadcastUpdate(roomId, templateName, subject, vars));
     }
 }

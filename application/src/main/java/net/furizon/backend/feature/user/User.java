@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 @Data
 @RequiredArgsConstructor
 @Builder
@@ -22,4 +24,7 @@ public class User {
     private final Long propicId;
 
     private final boolean showInNoseCount;
+
+    @NotNull
+    private final Locale language;
 }

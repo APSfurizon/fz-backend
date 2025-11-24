@@ -10,8 +10,10 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.util.LinkedList;
 import java.util.List;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
@@ -49,6 +52,7 @@ public class RoomGeneralSanityCheck {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final FrontendConfig frontendConfig;
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
         log.error(message, args);
@@ -58,30 +62,56 @@ public class RoomGeneralSanityCheck {
     }
 
     private List<MailRequest> prepareSanityCheckMailRoomDeleted(long roomId,
-                                                                @NotNull String roomName, @NotNull String reason) {
+            @NotNull String roomName, @NotNull TranslatableValue reason) {
         return mailService.prepareBroadcastProblem(
                 roomId, TEMPLATE_SANITY_CHECK_DELETED,
+                TranslatableValue.ofEmail("mail.sanity_check_deleted.title"),
                 MailVarPair.of(ROOM_NAME, roomName),
-                MailVarPair.of(SANITY_CHECK_REASON, reason)
+                MailVarPair.of(SANITY_CHECK_REASON, reason),
+                MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
         );
     }
     private List<MailRequest> prepareSanityCheckMailUserKicked(long ownerId, long userId, @NotNull String fursonaName,
-                                                               @NotNull String roomName, @NotNull String reason) {
-        return mailService.prepareProblem(
+                                                               @NotNull String roomName,
+                                                               @NotNull TranslatableValue reason) {
+        return List.of(
                 new MailRequest(
-                        ownerId, userFinder, TEMPLATE_SANITY_CHECK_KICK_OWNER,
+                        ownerId,
+                        userFinder,
+                        TEMPLATE_SANITY_CHECK_KICK_OWNER,
                         MailVarPair.of(OTHER_FURSONA_NAME, fursonaName),
                         MailVarPair.of(ROOM_NAME, roomName),
                         MailVarPair.of(SANITY_CHECK_REASON, reason)
-                ),
+                ).subject("mail.sanity_check_kick_owner.title"),
                 new MailRequest(
-                        userId, userFinder, TEMPLATE_SANITY_CHECK_KICK_USER,
+                        userId,
+                        userFinder,
+                        TEMPLATE_SANITY_CHECK_KICK_USER,
                         MailVarPair.of(ROOM_NAME, roomName),
                         MailVarPair.of(SANITY_CHECK_REASON, reason)
-                )
+                ).subject("mail.sanity_check_kick_user.title")
         );
     }
 
+    /**
+     * Checks the room for the following cases:
+     * <ol>
+     *     <li>Users in multiple rooms</li>
+     *     <li>Members exceed room maximum</li>
+     *     <li>Owner not in room</li>
+     *     <li>Owner has multiple rooms</li>
+     *     <li>Owner order status == canceled</li>
+     *     <li>Owner doesn't own a room</li>
+     *     <li>Owner has a daily ticket</li>
+     *     <li>User order status == canceled</li>
+     *     <li>User order is daily</li>
+     * </ol>
+     *
+     * @param roomId id of the room to check
+     * @param roomLogic room logic to use
+     * @param pretixInformation pretix service class
+     * @param detectedErrors list to store errors
+     */
     public void doSanityChecks(long roomId,
                                @NotNull RoomLogic roomLogic,
                                @NotNull PretixInformation pretixInformation,
@@ -90,17 +120,6 @@ public class RoomGeneralSanityCheck {
         final Event event = pretixInformation.getCurrentEvent();
         final long eventId = event.getId();
         List<MailRequest> mails = new LinkedList<>();
-
-        //The following checks are done:
-        //- User in multiple rooms
-        //- Members exceed room maximum
-        //- Owner not in room
-        //- Owner has multiple rooms
-        //- Owner order status == canceled
-        //- Owner doesn't own a room
-        //- Owner has a daily ticket
-        //- User order status == canceled
-        //- User order is daily
 
         //RoomInfo info = roomFinder.getRoomInfoForUser(userId, input.event, input.pretixInformation);
         final List<RoomGuestResponse> guests = roomFinder.getRoomGuestResponseFromRoomId(roomId, event);
@@ -177,7 +196,7 @@ public class RoomGeneralSanityCheck {
             String fursona = mail == null ? null : mail.getFursonaName();
             fursona = fursona == null ? "" : fursona;
 
-            //This (together with owner in room check) will also test if a owner has multiple rooms
+            //This (together with owner in room check) will also test if an owner has multiple rooms
             int roomNo = roomFinder.countRoomsWithUser(usrId, eventId);
             if (roomNo > 1) {
                 if (usrId == ownerId) {

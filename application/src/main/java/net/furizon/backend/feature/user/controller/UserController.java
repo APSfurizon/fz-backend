@@ -10,6 +10,7 @@ import net.furizon.backend.feature.user.dto.SessionListResponse;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
+import net.furizon.backend.feature.user.usecase.ChangeUserLanguageUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserAdminViewDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
@@ -60,6 +61,17 @@ public class UserController {
                         user.getUserId(),
                         pretixInformation.getCurrentEvent()
                 )
+        );
+    }
+
+    @PostMapping("/changeLanguage")
+    public boolean changeLanguage(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @Valid ChangeUserLanguageUseCase.ApiInput targetLanguage
+    ) {
+        return executor.execute(
+                ChangeUserLanguageUseCase.class,
+                new ChangeUserLanguageUseCase.Input(user.getUserId(), targetLanguage)
         );
     }
 

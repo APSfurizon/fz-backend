@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.user.mapper;
 
 import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.infrastructure.localization.TranslationUtil;
 import org.jooq.Record;
 
 import static net.furizon.jooq.generated.Tables.USERS;
@@ -11,7 +12,8 @@ public class JooqUserEmailDataMapper {
         return new UserEmailData(
                 record.get(USERS.USER_ID),
                 record.get(AUTHENTICATIONS.AUTHENTICATION_EMAIL),
-                record.get(USERS.USER_FURSONA_NAME)
+                record.get(USERS.USER_FURSONA_NAME),
+                TranslationUtil.parseLocale(record.get(USERS.USER_LANGUAGE))
         );
     }
 }

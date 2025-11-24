@@ -13,7 +13,10 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.BuyUpgradeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_TYPE_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_ROOM_WAS_UPGRADED;
@@ -45,6 +49,8 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
     @NotNull private final RoomChecks roomChecks;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final TranslationService translationService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull BuyUpgradeRoomUseCase.Input input) {
@@ -67,8 +73,9 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         Long oldRoomId = null;
         if (Objects.equals(oldRoomItemId, newRoomItemId)) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Selected room is the one he already owned!",
-                    userId, newRoomItemId, event);
-            throw new ApiException("User tried upgrading to same room!", RoomErrorCodes.BUY_ROOM_SAME_ROOM);
+                userId, newRoomItemId, event);
+            throw new ApiException(translationService.error("room.upgrade.fail.same_room"),
+                RoomErrorCodes.BUY_ROOM_SAME_ROOM);
         }
         if (oldRoomPositionId != null) {
             //User may have NO_ROOM item so we have to do this double check
@@ -123,18 +130,20 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         long totalPaid = oldRoomPaid + earlyPaid + latePaid;
         if (totalPaid > newRoomTotal) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
-                    + "Selected room costs less than what was already paid ({} < {})",
-                    userId, newRoomItemId, event, newRoomPrice, oldRoomPaid);
-            throw new ApiException("New room costs less than what paid!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_COSTS_LESS);
+                + "Selected room costs less than what was already paid ({} < {})",
+                userId, newRoomItemId, event, newRoomPrice, oldRoomPaid);
+            throw new ApiException(translationService.error("room.upgrade.fail.price_change_negative"),
+                RoomErrorCodes.BUY_ROOM_NEW_ROOM_COSTS_LESS);
         }
 
         //Check room capacity
         List<RoomGuest> guests = oldRoomId == null ? null : roomFinder.getRoomGuestsFromRoomId(oldRoomId, true);
         if (guests != null && guests.size() > newRoomInfo.capacity()) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
-                    + "New room has capacity of {}, but {} were already present in the room",
-                    userId, newRoomItemId, event, newRoomInfo.capacity(), guests.size());
-            throw new ApiException("New room is too small!", RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
+                + "New room has capacity of {}, but {} were already present in the room",
+                userId, newRoomItemId, event, newRoomInfo.capacity(), guests.size());
+            throw new ApiException(translationService.error("room.upgrade.fail.too_small"),
+                RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
         boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, newRoomPrice, oldRoomPaid, userId, oldRoomId,
@@ -144,8 +153,11 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {
                 mailService.prepareAndSendBroadcastUpdate(
-                        oldRoomId, TEMPLATE_ROOM_WAS_UPGRADED,
-                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX))
+                        oldRoomId,
+                        TEMPLATE_ROOM_WAS_UPGRADED,
+                        TranslatableValue.ofEmail("mail.room_was_upgraded.title"),
+                        MailVarPair.of(ROOM_TYPE_NAME, names.get(LANG_PRETIX)),
+                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                 );
             }
         }

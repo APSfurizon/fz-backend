@@ -84,6 +84,7 @@ frontend:
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
   user-page-url: ${FRONTEND_USER_PAGE_URL:}
+  reservation-page-url: ${FRONTEND_RESERVATION_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -128,7 +129,7 @@ pretix:
   autocart:
     priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
     priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}
-  supported-languages: ${SUPPORTED_LANGUAGES:it,en}
+  supported-languages: ${SUPPORTED_LANGUAGES:it-IT,en-GB}
 
 storage:
   base-path: data/

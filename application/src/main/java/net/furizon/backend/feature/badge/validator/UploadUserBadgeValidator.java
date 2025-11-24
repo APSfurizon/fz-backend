@@ -7,6 +7,7 @@ import com.sksamuel.scrimage.metadata.Tag;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -28,15 +29,18 @@ public class UploadUserBadgeValidator {
 
     @NotNull private final BadgeConfig badgeConfig;
 
+    @NotNull private final TranslationService translationService;
+
     public SimpleImageMetadata invoke(@NotNull UploadBadgeUsecase.Input input) throws IOException {
         final byte[] imageBytes = input.image().getBytes();
         if (imageBytes.length > badgeConfig.getMaxSizeBytes()) {
-            throw new ApiException("Image is too large to be uploaded", ImageCodes.IMAGE_SIZE_TOO_BIG);
+            throw new ApiException(translationService.error("badge.upload.fail.file_too_big"),
+                    ImageCodes.IMAGE_SIZE_TOO_BIG);
         }
 
         final Optional<Format> format = FormatDetector.detect(imageBytes);
         if (format.isEmpty()) {
-            throw new ApiException("Invalid image", ImageCodes.IMAGE_INVALID);
+            throw new ApiException(translationService.error("badge.upload.fail.invalid"), ImageCodes.IMAGE_INVALID);
         }
 
         final List<Tag> metadata = Arrays.stream(ImageMetadata.fromBytes(imageBytes).tags()).toList();
@@ -62,7 +66,8 @@ public class UploadUserBadgeValidator {
             .getRawValue();
 
         if (imageWidth > badgeConfig.getMaxWidth() || imageHeight > badgeConfig.getMaxHeight()) {
-            throw new ApiException("Invalid image dimensions", ImageCodes.IMAGE_DIMENSION_TOO_BIG);
+            throw new ApiException(translationService.error("badge.upload.fail.size_too_big"),
+                    ImageCodes.IMAGE_DIMENSION_TOO_BIG);
         }
 
         return SimpleImageMetadata.builder()

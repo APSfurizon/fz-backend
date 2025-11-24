@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.states.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.states.CountryData;
+import net.furizon.backend.infrastructure.localization.TranslationUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,10 +26,10 @@ public class CountryDataRaw {
         Map<String, String> translatedDescription = supportedLanguages
                 .stream()
                 .map(language -> {
-                    var languageLocale = Locale.of(language, "");
+                    Locale locale = TranslationUtil.parseLocale(language);
                     return Map.entry(
-                        languageLocale.getLanguage(),
-                        countryLocale.getDisplayCountry(languageLocale)
+                            locale.toString().toLowerCase().replace("_", "-"),
+                        countryLocale.getDisplayCountry(locale)
                     );
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new CountryData(name, code, phonePrefix, translatedDescription);

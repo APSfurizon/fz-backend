@@ -20,6 +20,7 @@ import net.furizon.backend.feature.admin.usecase.reminders.ExpiredIdReminderUseC
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -50,15 +52,15 @@ import java.util.Set;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final UseCaseExecutor executor;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final DeleteMediaFromDiskAction deleteMediaAction;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixConfig pretixConfig;
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixInformation pretixInformation;
 
     /*
@@ -78,6 +80,9 @@ public class AdminController {
     @GetMapping("/countdown")
     public String countdown() {
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        if (bookingStart == null) {
+            bookingStart = OffsetDateTime.now();
+        }
         Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
         return "Start time: " + bookingStart + "; Remaining time: " + remaining;
     }

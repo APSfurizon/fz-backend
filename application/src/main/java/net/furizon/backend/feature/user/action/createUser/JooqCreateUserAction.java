@@ -17,23 +17,26 @@ public class JooqCreateUserAction implements CreateUserAction {
     @NotNull private final SqlCommand sqlCommand;
 
     @Override
-    public @NotNull User invoke(@NotNull String fursonaName, @Nullable String locale) {
+    public @NotNull User invoke(@NotNull String fursonaName, @Nullable String locale, @NotNull String language) {
         return sqlCommand.executeResult(
                 PostgresDSL.insertInto(
                         USERS,
                         USERS.USER_FURSONA_NAME,
-                        USERS.USER_LOCALE
+                        USERS.USER_LOCALE,
+                        USERS.USER_LANGUAGE
                     )
                     .values(
                         fursonaName,
-                        locale
+                        locale,
+                        language
                     )
                     .returning(
                         USERS.USER_ID,
                         USERS.USER_FURSONA_NAME,
                         USERS.USER_LOCALE,
                         USERS.MEDIA_ID_PROPIC,
-                        USERS.SHOW_IN_NOSECOUNT
+                        USERS.SHOW_IN_NOSECOUNT,
+                        USERS.USER_LANGUAGE
                     )
             )
             .stream()

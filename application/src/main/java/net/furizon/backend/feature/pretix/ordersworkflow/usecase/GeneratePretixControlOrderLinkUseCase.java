@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -18,6 +19,7 @@ public class GeneratePretixControlOrderLinkUseCase
         implements UseCase<GeneratePretixControlOrderLinkUseCase.Input, LinkResponse> {
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final OrderFinder orderFinder;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull LinkResponse executor(@NotNull GeneratePretixControlOrderLinkUseCase.Input input) {
@@ -27,7 +29,8 @@ public class GeneratePretixControlOrderLinkUseCase
                 input.pretixInformation
         );
         if (order == null) {
-            throw new ApiException("Order not found", GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(translationService.error("order.not_found"),
+                GeneralResponseCodes.ORDER_NOT_FOUND);
         }
         return new LinkResponse(pretixConfig.getShop().getOrderControlUrl(order));
     }

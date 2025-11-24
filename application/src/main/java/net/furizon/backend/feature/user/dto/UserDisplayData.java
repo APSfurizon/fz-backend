@@ -21,6 +21,9 @@ public class UserDisplayData {
     private final String locale;
 
     @Nullable
+    private final String language;
+
+    @Nullable
     private final MediaResponse propic;
 
     @Nullable

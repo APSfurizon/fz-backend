@@ -30,9 +30,9 @@ public class GetUserDisplayDataUseCase implements
         UserDisplayData userFound = userFinder.getDisplayUser(input.userId, input.event);
         List<Role> roles = permissionFinder.getRolesFromUserId(input.userId);
         Set<Permission> permissions = permissionFinder.getUserPermissions(input.userId);
-        return Optional.ofNullable(
-            userFound != null ? new UserDisplayDataResponse(userFound, roles, permissions) : null
-        );
+        Optional<UserDisplayDataResponse> toReturn = Optional.ofNullable(userFound)
+                .map(userDisplayData -> new UserDisplayDataResponse(userFound, roles, permissions));
+        return toReturn;
     }
 
     public record Input(long userId, @NotNull Event event) {}

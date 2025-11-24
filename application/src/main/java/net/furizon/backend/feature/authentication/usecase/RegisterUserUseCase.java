@@ -15,6 +15,7 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -24,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_EMAIL_CONFIRM;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_EMAIL_CONFIRM;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_EMAIL_CONFIRM;
 
 @Slf4j
 @Component
@@ -49,6 +49,9 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
     @NotNull
     private final EmailSender sender;
 
+    @NotNull
+    private final TranslationService translationService;
+
     @Transactional
     @Override
     public @NotNull User executor(@NotNull RegisterUserUseCase.Input input) {
@@ -59,7 +62,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         final var authentication = sessionAuthenticationManager.findAuthenticationByEmail(regUserReq.getEmail());
         if (authentication != null) {
             throw new ApiException(
-                "User already exists with email: %s".formatted(regUserReq.getEmail()),
+                translationService.error("authentication.email.account_exists", new Object[] {regUserReq.getEmail()}),
                 AuthenticationCodes.EMAIL_ALREADY_REGISTERED
             );
         }
@@ -67,7 +70,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         validation.validate(regUserReq.getPersonalUserInformation());
         User user = createUserAction.invoke(
                 regUserReq.getFursonaName(),
-                regUserReq.getPersonalUserInformation().getResidenceCountry()
+                regUserReq.getPersonalUserInformation().getResidenceCountry(),
+                translationService.getLocale().toString()
         );
         UUID confirmationId = sessionAuthenticationManager.createAuthentication(
             user.getId(),
@@ -89,8 +93,8 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
 
         sender.fireAndForget(
             new MailRequest()
-                .to(email)
-                .subject(SUBJECT_EMAIL_CONFIRM)
+                .to(translationService.getLocale(), email)
+                .subject("mail.email_confirm.title")
                 .templateMessage(
                     TEMPLATE_EMAIL_CONFIRM, null,
                     MailVarPair.of(EmailVars.LINK, frontendConfig.getConfirmEmailUrl(confirmationId))

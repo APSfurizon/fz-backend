@@ -10,6 +10,7 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -39,6 +40,7 @@ public class DefaultRoomLogic implements RoomLogic {
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final SqlCommand command;
     @NotNull private final SqlQuery query;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
@@ -61,7 +63,8 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException("Order not found while creating a room", GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(translationService.error("room.create_fail_no_order"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND);
         }
         long orderId = r.get().get(ORDERS.ID);
         //Actual creation of the room
@@ -130,7 +133,8 @@ public class DefaultRoomLogic implements RoomLogic {
             } else {
                 log.error("User {} is already in a room in event {}, but forceExit was equal to false",
                         invitedUserId, event);
-                throw new ApiException("User is already in a room", RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
+                throw new ApiException(translationService.error("room.user_in_a_room_already"),
+                        RoomErrorCodes.USER_ALREADY_IS_IN_A_ROOM);
             }
         }
 
@@ -435,7 +439,7 @@ public class DefaultRoomLogic implements RoomLogic {
         sourceGuest = srcGuests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
         if (sourceGuest == null) {
             log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
-            throw new ApiException("No guest found", RoomErrorCodes.GUEST_NOT_FOUND);
+            throw new ApiException(translationService.error("room.guest.not_found"), RoomErrorCodes.GUEST_NOT_FOUND);
         }
 
         boolean res;
@@ -506,12 +510,12 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean refundRoom(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return refund(userId, event, pretixInformation);
+        return refund(userId, event);
     }
 
     @Override
     public boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        return refund(userId, event, pretixInformation);
+        return refund(userId, event);
     }
 
     @Override
@@ -544,11 +548,12 @@ public class DefaultRoomLogic implements RoomLogic {
                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
     }
 
-    private boolean refund(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    private boolean refund(long userId, @NotNull Event event) {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         if (!r.isPresent()) {
             log.error("No room found for user {} in event {} while refunding", userId, event);
-            throw new ApiException("No room find in exchange", RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(translationService.error("room.exchange.room_not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND);
         }
         return this.deleteRoom(r.get());
     }
