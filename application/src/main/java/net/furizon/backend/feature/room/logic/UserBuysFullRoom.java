@@ -26,6 +26,7 @@ import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
 import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
+import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -88,6 +89,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
 
     //Exchange room related stuff
+    @NotNull private final ExchangeRoomAction exchangeRoomAction;
     @NotNull private final PretixPositionFinder pretixPositionFinder;
     @NotNull private final PushPretixPositionAction pushPretixPositionAction;
     @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
@@ -197,199 +199,6 @@ public class UserBuysFullRoom implements RoomLogic {
         return true;
     }
 
-    private record ExchangeResult(
-            long sourceBalance,
-            long targetBalance,
-            @Nullable Long sourcePositionId,
-            @Nullable Long targetPositionId,
-            @Nullable Long sourcePosid,
-            @Nullable Long targetPosid
-    ) {}
-
-    private @Nullable ExchangeResult exchangeSingleItem(
-            @Nullable Long sourceItemId,
-            @Nullable Long sourcePositionId,
-            @Nullable Long targetItemId,
-            @Nullable Long targetPositionId,
-            @Nullable Long sourceAddonToPositionId,
-            @Nullable Long targetAddonToPositionId,
-            long sourceUsrId,
-            long targetUsrId,
-            @NotNull String sourceOrderCode,
-            @NotNull String targetOrderCode,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation,
-            boolean createTempPositionFirst
-    ) {
-        log.info("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Exchanging i{} p{} a{} -> i{} p{} a{}",
-                sourceUsrId, targetUsrId, event, sourceItemId, sourcePositionId, sourceAddonToPositionId,
-                targetItemId, targetPositionId, targetAddonToPositionId);
-        log.debug("[ROOM_EXCHANGE] exchangeSingleItem called with params: "
-            + "sourceItemId={} sourcePositionId={} targetItemId={} targetPositionId={} "
-            + "sourceAddonToPositionId={} targetAddonToPositionId={} "
-            + "sourceUsrId={} targetUsrId={} sourceOrderCode={} targetOrderCode={} "
-            + "event={} pretixInformation={} createTempPositionFirst={}",
-            sourceItemId, sourcePositionId, targetItemId, targetPositionId,
-            sourceAddonToPositionId, targetAddonToPositionId,
-            sourceUsrId, targetUsrId, sourceOrderCode, targetOrderCode,
-            event, pretixInformation, createTempPositionFirst);
-
-        //Fetch source paid and price
-        long sourcePaid = 0L;
-        Long sourcePrice = 0L;
-        boolean sourceHasPosition = sourcePositionId != null && sourceItemId != null;
-        if (sourceHasPosition) {
-            //Fetch how much source has paid the product
-            var sp = pretixPositionFinder.fetchPositionById(event, sourcePositionId);
-            if (!sp.isPresent()) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source position for id {}",
-                        sourceUsrId, targetUsrId, event, sourceItemId);
-                return null;
-            }
-            sourcePaid = PretixGenericUtils.fromStrPriceToLong(sp.get().getPrice());
-            //Fetch how much source item costs (It can be different from how much user has paid!)
-            sourcePrice = pretixInformation.getItemPrice(sourceItemId, true, true);
-            if (sourcePrice == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No source room price for item {}",
-                        sourceUsrId, targetUsrId, event, sourceItemId);
-                return null;
-            }
-        }
-
-        //Fetch target paid and price
-        long targetPaid = 0L;
-        Long targetPrice = 0L;
-        boolean targetHasPosition = targetPositionId != null && targetItemId != null;
-        if (targetHasPosition) {
-            //Get how much the target user has paid for his room and how much does it cost now
-            //This works also if the target user has a NO_ROOM
-            var tp = pretixPositionFinder.fetchPositionById(event, targetPositionId);
-            if (!tp.isPresent()) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target position for id {}",
-                        sourceUsrId, targetUsrId, event, sourceItemId);
-                return null;
-            }
-            targetPaid = PretixGenericUtils.fromStrPriceToLong(tp.get().getPrice());
-
-            targetPrice = pretixInformation.getItemPrice(targetItemId, true, true);
-            if (targetPrice == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No target price for item {}",
-                        sourceUsrId, targetUsrId, event, targetItemId);
-                return null;
-            }
-        }
-
-        //We don't check for hasPosition but for the itemId != null, because NO_ROOM has an itemId but no positionId
-        //Update target
-        Long toDeletePositionId = null; //used for keeping quota reserved while performing the exchange
-        Long sourcePosid = null;
-        boolean res = true;
-        if (sourceItemId != null) {
-            if (targetHasPosition) {
-                //Creates a temporary position with target's item to keep quota reserved while performing the exchange
-                PretixPosition pp = pushPretixPositionAction.invoke(
-                    event, createTempPositionFirst, true, 0L, //price is not important since it's the temp item
-                    new PushPretixPositionRequest(
-                        targetOrderCode,
-                        null,
-                        targetItemId
-                    ), pretixInformation
-                );
-                if (pp == null) {
-                    log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
-                            + "res was false after create temporary position with item {}",
-                            sourceUsrId, targetUsrId, event, targetItemId);
-                    return null;
-                }
-                toDeletePositionId = pp.getPositionId();
-                res = updatePretixPositionAction.invoke(event, targetPositionId, true, new UpdatePretixPositionRequest(
-                        targetOrderCode,
-                        sourceItemId,
-                        sourcePrice
-                )) != null;
-            } else {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
-                        + "Creating a new position should not be possible",
-                        sourceUsrId, targetUsrId, event);
-                PretixPosition pp = pushPretixPositionAction.invoke(
-                    event, createTempPositionFirst, true, sourcePrice,
-                    new PushPretixPositionRequest(
-                        targetOrderCode,
-                        Objects.requireNonNull(targetAddonToPositionId),
-                        sourceItemId
-                    ).setPrice(sourcePrice), pretixInformation
-                );
-                res = pp != null;
-                if (res) {
-                    targetPositionId = pp.getPositionId();
-                    sourcePosid = pp.getPositionPosid();
-                }
-            }
-        } else {
-            if (targetHasPosition) {
-                //res = deletePretixPositionAction.invoke(event, targetPositionId);
-                //If we have to delete a position, we delay the deletion after the exchange is done to maintain quota
-                toDeletePositionId = targetPositionId;
-            }
-        }
-        if (!res) {
-            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after C/U/D target",
-                    sourceUsrId, targetUsrId, event);
-            return null;
-        }
-
-        //Update source
-        Long targetPosid = null;
-        if (targetItemId != null) {
-            if (sourceHasPosition) {
-                res = updatePretixPositionAction.invoke(event, sourcePositionId, true, new UpdatePretixPositionRequest(
-                        sourceOrderCode,
-                        targetItemId,
-                        targetPrice
-                )) != null;
-            } else {
-                PretixPosition pp = pushPretixPositionAction.invoke(
-                    event, createTempPositionFirst, true, targetPrice,
-                    new PushPretixPositionRequest(
-                        sourceOrderCode,
-                        Objects.requireNonNull(sourceAddonToPositionId),
-                        targetItemId
-                    ).setPrice(targetPrice), pretixInformation
-                );
-                res = pp != null;
-                if (res) {
-                    sourcePositionId = pp.getPositionId();
-                    targetPosid = pp.getPositionPosid();
-                }
-            }
-        } else {
-            if (sourceHasPosition) {
-                res = deletePretixPositionAction.invoke(event, sourcePositionId);
-            }
-        }
-        if (!res) {
-            log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: res was false after C/U/D source",
-                    sourceUsrId, targetUsrId, event);
-            return null;
-        }
-
-        if (toDeletePositionId != null) {
-            res = deletePretixPositionAction.invoke(event, toDeletePositionId);
-            if (!res) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
-                        + "res was false after deleting toDeletePositionId={}",
-                        sourceUsrId, targetUsrId, event, toDeletePositionId);
-                return null;
-            }
-        }
-
-        long sourceBalance = sourcePaid - targetPrice;
-        long targetBalance = targetPaid - sourcePrice;
-
-        return new ExchangeResult(
-                sourceBalance, targetBalance, sourcePositionId, targetPositionId, sourcePosid, targetPosid
-        );
-    }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
@@ -436,6 +245,31 @@ public class UserBuysFullRoom implements RoomLogic {
             Long targetLatePositionId = null;
             Long targetEarlyItemId = null;
             Long targetLateItemId = null;
+
+
+            exchangeRoomAction
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             //Get early and late data
             if (sourceOrder.hasRoom()) {
