@@ -1,12 +1,8 @@
 package net.furizon.backend.infrastructure.http.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.furizon.backend.infrastructure.http.client.dto.GenericErrorResponse;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
@@ -43,10 +39,10 @@ public class SimpleHttpClient implements HttpClient {
 
     @NotNull
     @Override
-    public <C extends HttpConfig, R, E> HttpResponse<R, E> send(
+    public <C extends HttpConfig, R> ResponseEntity<R> send(
             @NotNull final Class<C> configClass,
             @NotNull final HttpRequest<R> request) {
-        return send(configClass, request, null);
+        return send(configClass, request, Void.class).getResponseEntity();
     }
 
     @NotNull
@@ -54,7 +50,7 @@ public class SimpleHttpClient implements HttpClient {
     public <C extends HttpConfig, R, E> HttpResponse<R, E> send(
             @NotNull final Class<C> configClass,
             @NotNull final HttpRequest<R> request,
-            @Nullable final Class<E> errorClass
+            @NotNull final Class<E> errorClass
     ) {
         final HttpConfig config = httpConfigsMap.get(configClass);
         if (config == null) {
@@ -99,11 +95,10 @@ public class SimpleHttpClient implements HttpClient {
 
         MutableObject<E> errObj = new MutableObject<>();
         MutableObject<ClientHttpResponse> errorResponse = new MutableObject<>();
-        if (errorClass != null) {
+        if (!errorClass.equals(Void.class)) {
             v = v.onStatus(x -> !x.is2xxSuccessful(), (req, resp) -> {
                 InputStream body = resp.getBody();
-                ObjectMapper mapper = new ObjectMapper();
-                errObj.setValue(mapper.readValue(body, errorClass));
+                errObj.setValue(new ObjectMapper().readValue(body, errorClass));
                 errorResponse.setValue(resp);
             });
         }

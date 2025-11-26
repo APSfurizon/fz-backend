@@ -24,7 +24,7 @@ public class HttpResponse<R, E> {
         return Objects.requireNonNull(errorResponse);
     }
     @NotNull
-    public final E getErrObj() {
+    public final E getErrorEntity() {
         return Objects.requireNonNull(errObj);
     }
 
