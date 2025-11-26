@@ -12,4 +12,7 @@ public enum OrderWorkflowErrorCode {
     ORDER_EDITS_CLOSED, //Tried to generate a edit order url, but order editing is closed
     PERSONAL_USER_INFO_NOT_UPDATED, //The user has not updated his personal info or marked them as updated yet
     BELOW_MINIMUM_AGE, //The age of the user doesn't reach the minimum event's age
+    PAYMENT_INVALID_STATE, //An operation expected all payments to be confirmed but they weren't
+    REFUND_INVALID_STATE, //An operation expected all payments to be done but they weren't
+    POSITION_CANCELED //One of the positions of the order is canceled but it shouldn't
 }

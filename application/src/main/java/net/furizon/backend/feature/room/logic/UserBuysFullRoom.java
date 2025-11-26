@@ -48,19 +48,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.EVENT_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
+import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_ORDER_CODE;
 import static net.furizon.backend.infrastructure.email.EmailVars.REFUND_MONEY;
+import static net.furizon.backend.infrastructure.pretix.PretixGenericUtils.PRETIX_DATETIME_FORMAT;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_ROOM_FAILED_DB;
 
 @Slf4j
 @Primary
@@ -229,203 +231,95 @@ public class UserBuysFullRoom implements RoomLogic {
             final ExtraDays targetExtraDays = targetOrder.getExtraDays();
 
             //Get various items and positions
-            final long sourceTicketPosid = sourceOrder.getTicketPositionPosid();
             Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
-            Long sourceRoomPosid = sourceOrder.getRoomPositionPosid();
-            Long sourceRoomItemId = sourceOrder.getPretixRoomItemId();
             Long sourceEarlyPositionId = null;
             Long sourceLatePositionId = null;
-            Long sourceEarlyItemId = null;
-            Long sourceLateItemId = null;
-            final long targetTicketPosid = targetOrder.getTicketPositionPosid();
             Long targetRoomPositionId = targetOrder.getRoomPositionId();
-            Long targetRoomPosid = targetOrder.getRoomPositionPosid();
-            Long targetRoomItemId = targetOrder.getPretixRoomItemId();
             Long targetEarlyPositionId = null;
             Long targetLatePositionId = null;
-            Long targetEarlyItemId = null;
-            Long targetLateItemId = null;
-
-
-            exchangeRoomAction
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             //Get early and late data
             if (sourceOrder.hasRoom()) {
-                HotelCapacityPair sourcePair = new HotelCapacityPair(
-                        Objects.requireNonNull(sourceOrder.getHotelInternalName()),
-                        Objects.requireNonNull(sourceOrder.getRoomInternalName()),
-                        sourceOrder.getRoomCapacity()
-                );
                 if (sourceExtraDays.isEarly()) {
                     sourceEarlyPositionId = sourceOrder.getEarlyPositionId();
-                    sourceEarlyItemId = Objects.requireNonNull(
-                            pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.EARLY)
-                    );
                 }
                 if (sourceExtraDays.isLate()) {
                     sourceLatePositionId = sourceOrder.getLatePositionId();
-                    sourceLateItemId = Objects.requireNonNull(
-                            pretixInformation.getExtraDayItemIdForHotelCapacity(sourcePair, ExtraDays.LATE)
-                    );
                 }
             }
             if (targetOrder.hasRoom()) {
-                HotelCapacityPair targetPair = new HotelCapacityPair(
-                        Objects.requireNonNull(targetOrder.getHotelInternalName()),
-                        Objects.requireNonNull(targetOrder.getRoomInternalName()),
-                        targetOrder.getRoomCapacity()
-                );
                 if (targetExtraDays.isEarly()) {
                     targetEarlyPositionId = targetOrder.getEarlyPositionId();
-                    targetEarlyItemId = Objects.requireNonNull(
-                            pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.EARLY)
-                    );
                 }
                 if (targetExtraDays.isLate()) {
                     targetLatePositionId = targetOrder.getLatePositionId();
-                    targetLateItemId = Objects.requireNonNull(
-                            pretixInformation.getExtraDayItemIdForHotelCapacity(targetPair, ExtraDays.LATE)
-                    );
                 }
             }
 
             //Run checks on items and positions
-            if (targetRoomItemId == null && targetRoomPositionId == null) {
-                //If the target user doesn't have a room in his order, default it with NO_ROOM item
-                targetRoomItemId = (Long) pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
-            }
-            //Source user MUST have a room (we also assume caller has already checked it's not a NO_ROOM)
+            //Both source and target MUST have a room, otherwise
             if (sourceRoomPositionId == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomPositionId",
                         sourceUsrId, targetUsrId, event);
                 return false;
             }
-            if (sourceRoomItemId == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomItemId",
+            if (targetRoomPositionId == null) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No targetRoomPositionId",
                         sourceUsrId, targetUsrId, event);
                 return false;
             }
 
-            log.debug("[ROOM_EXCHANGE] Loaded params: "
-                + "sourceOrder=({}) targetOrder=({}) targetRoomItemId={} "
-                + "sourceEarlyPositionId={} sourceLatePositionId={} sourceEarlyItemId={} sourceLateItemId={} "
-                + "targetEarlyPositionId={} targetLatePositionId={} targetEarlyItemId={} targetLateItemId={}",
-                sourceOrder.toFullString(), targetOrder.toFullString(), targetRoomItemId,
-                sourceEarlyPositionId, sourceLatePositionId, sourceEarlyItemId, sourceLateItemId,
-                targetEarlyPositionId, targetLatePositionId, targetEarlyItemId, targetLateItemId);
 
-            long sourceBalance = 0L;
-            long targetBalance = 0L;
+            log.debug("[ROOM_EXCHANGE] Loaded params: sourceOrder=({}) targetOrder=({})",
+                sourceOrder.toFullString(), targetOrder.toFullString());
 
-            //Now that we have everything, update pretix and calc balances
-            ExchangeResult exchange;
-            //Exchange room
-            exchange = exchangeSingleItem(
-                    sourceRoomItemId, sourceRoomPositionId, targetRoomItemId, targetRoomPositionId,
-                    sourceTicketPosid, targetTicketPosid, sourceUsrId, targetUsrId,
-                    sourceOrderCode, targetOrderCode, event, pretixInformation, true);
-            if (exchange == null) {
-                return false;
-            }
-            sourceRoomPositionId = exchange.sourcePositionId;
-            targetRoomPositionId = exchange.targetPositionId;
-            sourceRoomPosid = exchange.sourcePosid == null ? sourceRoomPosid : exchange.sourcePosid;
-            targetRoomPosid = exchange.targetPosid == null ? targetRoomPosid : exchange.targetPosid;
-            sourceBalance += exchange.sourceBalance;
-            targetBalance += exchange.targetBalance;
-            //Exchange early
-            exchange = exchangeSingleItem(
-                    sourceEarlyItemId, sourceEarlyPositionId, targetEarlyItemId, targetEarlyPositionId,
-                    sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                    sourceOrderCode, targetOrderCode, event, pretixInformation, true);
-            if (exchange == null) {
-                return false;
-            }
-            sourceBalance += exchange.sourceBalance;
-            targetBalance += exchange.targetBalance;
-            //Exchange late
-            exchange = exchangeSingleItem(
-                    sourceLateItemId, sourceLatePositionId, targetLateItemId, targetLatePositionId,
-                    sourceRoomPosid, targetRoomPosid, sourceUsrId, targetUsrId,
-                    sourceOrderCode, targetOrderCode, event, pretixInformation, true);
-            if (exchange == null) {
-                return false;
-            }
-            sourceBalance += exchange.sourceBalance;
-            targetBalance += exchange.targetBalance;
+            final String comment =
+                      " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
+                    + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
+            final String paymentComment = "Payment" + comment;
+            final String refundComment = "Refund" + comment;
 
-            //If balance > 0 we need to issue a refund, otherwise a payment
-            String comment =
-                    " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
-                    + " happened on timestamp " + System.currentTimeMillis();
-            BiFunction<Long, String, Boolean> issuePaymentOrRefund = (balance, orderCode) -> {
-                if (balance > 0L) {
-                    var balanceForProvider = pretixBalanceForProviderFinder.get(orderCode, event, false);
-                    long total = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
-                    balance = Math.min(balance, total);
-                    if (balance <= 0L) { //Nothing to be refunded
-                        return true;
-                    }
-                    String amount = PretixGenericUtils.fromPriceToString(balance, '.');
-                    return issueRefundAction.invoke(event, orderCode, "Refund" + comment, amount);
-                } else if (balance < 0L) {
-                    String amount = PretixGenericUtils.fromPriceToString(balance * -1L, '.');
-                    return issuePaymentAction.invoke(event, orderCode, "Payment" + comment, amount);
-                } //Else balance == 0: do nothing, we're done
-                return false;
-            };
-            boolean res = true;
-            //Issue payments or refunds
-            res = issuePaymentOrRefund.apply(targetBalance, targetOrderCode);
-            defaultRoomLogic.logExchangeError(res, 103, targetUsrId, sourceUsrId, event);
-            res &= issuePaymentOrRefund.apply(sourceBalance, sourceOrderCode); //We want to execute this anyway
-            defaultRoomLogic.logExchangeError(res, 104, targetUsrId, sourceUsrId, event);
+            //Exchange rooms on pretix
+            boolean pretixRes = exchangeRoomAction.invoke(
+                sourceOrderCode,
+                sourceRoomPositionId,
+                sourceEarlyPositionId,
+                sourceLatePositionId,
 
-            if (!res) {
-                emailSender.prepareAndSendForPermission(
-                    Permission.PRETIX_ADMIN,
-                    TranslatableValue.ofEmail("mail.exchange_room_failed_money.title"),
-                    TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED,
-                    MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
-                    MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
-                    MailVarPair.of(EVENT_NAME, event.getSlug()),
-                    MailVarPair.of(ORDER_CODE, sourceOrderCode + "->" + targetOrderCode),
-                    MailVarPair.of(REFUND_MONEY,
-                            "Source balance = " + PretixGenericUtils.fromPriceToString(sourceBalance, '.')
-                            + "; Target balance = " + PretixGenericUtils.fromPriceToString(targetBalance, '.')
-                    )
-                );
-                res = true;
-            }
+                targetOrderCode,
+                targetRoomPositionId,
+                targetEarlyPositionId,
+                targetLatePositionId,
 
-            //Exchange rooms in db
-            res = res && defaultRoomLogic.exchangeRoom(
+                paymentComment,
+                refundComment,
+                event
+            );
+            defaultRoomLogic.logExchangeError(pretixRes, 104, targetUsrId, sourceUsrId, event);
+
+            //If successful, exchange rooms in db
+            boolean dbRes = false;
+            if (pretixRes) {
+                dbRes = defaultRoomLogic.exchangeRoom(
                     targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event, pretixInformation);
-            defaultRoomLogic.logExchangeError(res, 105, targetUsrId, sourceUsrId, event);
+                defaultRoomLogic.logExchangeError(dbRes, 105, targetUsrId, sourceUsrId, event);
 
-            if (res) {
+                if (!dbRes) {
+                    //Alert that room swap was successful in pretix, but not in our database
+                    emailSender.prepareAndSendForPermission(
+                        Permission.PRETIX_ADMIN,
+                        TranslatableValue.ofEmail("mail.exchange_room_failed_db.title"),
+                        TEMPLATE_EXCHANGE_ROOM_FAILED_DB,
+                        MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
+                        MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
+                        MailVarPair.of(ORDER_CODE, sourceOrderCode),
+                        MailVarPair.of(OTHER_ORDER_CODE, targetOrderCode)
+                    );
+                }
+            }
+
+            boolean res = dbRes;
+            if (dbRes) {
                 var pair = event.getOrganizerAndEventPair();
                 String eventName = pair.getEvent();
                 String organizerName = pair.getOrganizer();
@@ -441,7 +335,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 };
 
                 //Fully reload orders from pretix to the DB
-                res = res && fetchAndUpdateOrder.apply(targetOrderCode);
+                res = fetchAndUpdateOrder.apply(targetOrderCode);
                 defaultRoomLogic.logExchangeError(res, 106, targetUsrId, sourceUsrId, event);
                 res = res && fetchAndUpdateOrder.apply(sourceOrderCode);
                 defaultRoomLogic.logExchangeError(res, 107, targetUsrId, sourceUsrId, event);

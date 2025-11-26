@@ -12,7 +12,7 @@ public class RoomEmailTexts {
     public static final String TEMPLATE_ROOM_DELETED = "room_deleted.jte";
     public static final String TEMPLATE_EXCHANGE_INITIALIZED = "exchange_initialized.jte";
     public static final String TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED = "exchange_fullorder_failed_refund.jte";
-    public static final String TEMPLATE_EXCHANGE_ROOM_MONEY_FAILED = "exchange_room_failed_money.jte";
+    public static final String TEMPLATE_EXCHANGE_ROOM_FAILED_DB = "exchange_room_failed_db.jte";
     public static final String TEMPLATE_EXCHANGE_COMPLETED = "exchange_completed.jte";
     public static final String TEMPLATE_INVITE_ACCEPTED = "invite_accepted.jte";
     public static final String TEMPLATE_INVITE_REFUSE = "invite_refused.jte";
