@@ -4,7 +4,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface ExchangeRoomAction {
+public interface ExchangeRoomOnPretixAction {
     boolean invoke(
         @NotNull String sourceOrderCode,
         long sourceRoomPositionId,

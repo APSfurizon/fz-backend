@@ -1,10 +1,10 @@
-package net.furizon.backend.feature.room.action.exchangeRoom;
+package net.furizon.backend.feature.room.action.transferOrder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
-import net.furizon.backend.feature.room.dto.request.ExchangeRoomRequest;
+import net.furizon.backend.feature.room.dto.request.TransferOrderRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.http.client.dto.GenericErrorResponse;
@@ -27,7 +27,7 @@ import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RestExchangeRoom implements ExchangeRoomOnPretixAction {
+public class RestTransferOrder implements TransferPretixOrderAction {
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
     @NotNull
@@ -37,50 +37,40 @@ public class RestExchangeRoom implements ExchangeRoomOnPretixAction {
 
     @Override
     public boolean invoke(
-            @NotNull String sourceOrderCode,
-            long sourceRoomPositionId,
-            @Nullable Long sourceEarlyPositionId,
-            @Nullable Long sourceLatePositionId,
+        @NotNull String orderCode,
+        long positionId,
+        long questionId,
+        long newUserId,
 
-            @NotNull String destOrderCode,
-            long destRoomPositionId,
-            @Nullable Long destEarlyPositionId,
-            @Nullable Long destLatePositionId,
+        @Nullable String paymentComment,
+        @Nullable String refundComment,
 
-            @Nullable String manualPaymentComment,
-            @Nullable String manualRefundComment,
-            @NotNull Event event) {
-        log.info("Exchanging room using pretix plugin. "
-               + "srcOrderCode={}, srcRoomPositionId={}, srcEarlyPositionId={}, srcLatePositionId={};  "
-               + "dstOrderCode={}, dstRoomPositionId={}, dstEarlyPositionId={}, dstLatePositionId={}",
-                sourceOrderCode, sourceRoomPositionId, sourceEarlyPositionId, sourceLatePositionId,
-                destOrderCode, destRoomPositionId, destEarlyPositionId, destLatePositionId);
+        @NotNull Event event
+    ) {
+        log.info("Transferring order using pretix plugin. "
+               + "orderCode={}, positionId={}, questionId={}, newUserId={}",
+                orderCode, positionId, questionId, newUserId);
         final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
-                .method(HttpMethod.POST)
-                .overrideBasePath(pretixConfig.getShop().getBasePath())
-                .path("/{organizer}/{event}/fzbackendutils/api/exchange-rooms/")
-                .uriVariable("organizer", pair.getOrganizer())
-                .uriVariable("event", pair.getEvent())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(
-                    ExchangeRoomRequest.builder()
-                        .sourceOrderCode(sourceOrderCode)
-                        .sourceRoomPositionId(sourceRoomPositionId)
-                        .sourceEarlyPositionId(sourceEarlyPositionId)
-                        .sourceLatePositionId(sourceLatePositionId)
+            .method(HttpMethod.POST)
+            .overrideBasePath(pretixConfig.getShop().getBasePath())
+            .path("/{organizer}/{event}/fzbackendutils/api/transfer-order/")
+            .uriVariable("organizer", pair.getOrganizer())
+            .uriVariable("event", pair.getEvent())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                TransferOrderRequest.builder()
+                    .orderCode(orderCode)
+                    .positionId(positionId)
+                    .questionId(questionId)
+                    .newUserId(newUserId)
 
-                        .destOrderCode(destOrderCode)
-                        .destRoomPositionId(destRoomPositionId)
-                        .destEarlyPositionId(destEarlyPositionId)
-                        .destLatePositionId(destLatePositionId)
-
-                        .manualPaymentComment(manualPaymentComment)
-                        .manualRefundComment(manualRefundComment)
-                    .build()
-                )
-                .responseType(Void.class)
-                .build();
+                    .manualPaymentComment(paymentComment)
+                    .manualRefundComment(refundComment)
+                .build()
+            )
+            .responseType(Void.class)
+            .build();
         try {
             var response = pretixHttpClient.send(PretixConfig.class, request, GenericErrorResponse.class);
             if (response.isError()) {
@@ -88,10 +78,6 @@ public class RestExchangeRoom implements ExchangeRoomOnPretixAction {
                 String message = err.getError();
                 int code = response.getErrorResponse().getStatusCode().value();
                 return switch (code) {
-                    case FzBackendUtilsErrorCodes.STATUS_CODE_POSITION_CANCELED -> throw new ApiException(
-                            translationService.error("room.position_invalid", message),
-                            OrderWorkflowErrorCode.POSITION_CANCELED
-                    );
                     case FzBackendUtilsErrorCodes.STATUS_CODE_PAYMENT_STATUS_INVALID -> throw new ApiException(
                             translationService.error("pretix.orders_flow.payment_illegal_state", message),
                             OrderWorkflowErrorCode.PAYMENT_INVALID_STATE

@@ -12,21 +12,18 @@ import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.Push
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
-import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
-import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
-import net.furizon.backend.feature.pretix.objects.refund.action.yeetRefund.IssueRefundAction;
 import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
-import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixPositionFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
 import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
-import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomAction;
+import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomOnPretixAction;
+import net.furizon.backend.feature.room.action.transferOrder.TransferPretixOrderAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -36,7 +33,7 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
-import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -50,18 +47,15 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.EVENT_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_ORDER_CODE;
-import static net.furizon.backend.infrastructure.email.EmailVars.REFUND_MONEY;
 import static net.furizon.backend.infrastructure.pretix.PretixGenericUtils.PRETIX_DATETIME_FORMAT;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_FULLORDER_FAILED_DB;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_ROOM_FAILED_DB;
 
 @Slf4j
@@ -85,18 +79,17 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final DeletePretixPositionAction deletePretixPositionAction;
 
     //Transfer full order related stuff
+    @NotNull private final TransferPretixOrderAction transferOrderAction;
     @NotNull private final PretixRefundFinder pretixRefundFinder;
     @NotNull private final PretixPaymentFinder pretixPaymentFinder;
     @NotNull private final PushPretixAnswerAction pushPretixAnswerAction;
     @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
 
     //Exchange room related stuff
-    @NotNull private final ExchangeRoomAction exchangeRoomAction;
-    @NotNull private final PretixPositionFinder pretixPositionFinder;
+    @NotNull private final ExchangeRoomOnPretixAction exchangeRoomAction;
     @NotNull private final PushPretixPositionAction pushPretixPositionAction;
     @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
     @NotNull private final IssuePaymentAction issuePaymentAction;
-    @NotNull private final IssueRefundAction issueRefundAction;
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
@@ -230,7 +223,7 @@ public class UserBuysFullRoom implements RoomLogic {
             final ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
             final ExtraDays targetExtraDays = targetOrder.getExtraDays();
 
-            //Get various items and positions
+            //Get positions
             Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
             Long sourceEarlyPositionId = null;
             Long sourceLatePositionId = null;
@@ -256,8 +249,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
             }
 
-            //Run checks on items and positions
-            //Both source and target MUST have a room, otherwise
+            //Run checks on positions
+            //Both source and target MUST have a room. Reminder that without room they have NO_ROOM item
             if (sourceRoomPositionId == null) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: No sourceRoomPositionId",
                         sourceUsrId, targetUsrId, event);
@@ -276,7 +269,7 @@ public class UserBuysFullRoom implements RoomLogic {
             final String comment =
                       " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
                     + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
-            final String paymentComment = "Payment" + comment;
+            final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             final String refundComment = "Refund" + comment;
 
             //Exchange rooms on pretix
@@ -318,6 +311,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
             }
 
+            //Refresh order
             boolean res = dbRes;
             if (dbRes) {
                 var pair = event.getOrganizerAndEventPair();
@@ -365,90 +359,59 @@ public class UserBuysFullRoom implements RoomLogic {
                         sourceUsrId, targetUsrId, event, sourceUsrId);
                 return false;
             }
+            //Fetch extra data
             String orderCode = sourceOrder.getCode();
-
-            //We're now going to invalidate all previous payments and then create one "aggregate" manual
-            // payment which cannot be refunded. This is for preventing pretix admins from issuing a refund
-            // after the order has been transferred. If this happens, the original order buyer would get the money
-            // instead of the new owner
-
-            //Fetch payments and refunds of source order
-            List<PretixPayment> payments = pretixPaymentFinder.getPaymentsForOrder(event, orderCode);
-            List<PretixRefund> refunds = pretixRefundFinder.getRefundsForOrder(event, orderCode);
-            Map<String, Long> balanceForProvider =
-                    pretixBalanceForProviderFinder.get(payments, refunds, orderCode, event, false);
-
-            //Get total to refund
-            long total = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
-
-            //For each payment provider, issue a refund
-            for (PretixPayment payment : payments) {
-                if (payment.getState() == PretixPayment.PaymentState.CONFIRMED) {
-                    String provider = payment.getProvider();
-                    long balance = balanceForProvider.get(provider);
-                    long paymentAmount = PretixGenericUtils.fromStrPriceToLong(payment.getAmount());
-
-                    //If we're already done with refunding this provider, don't do it
-                    if (balance > 0L) {
-                        //Take the minimum between the payment and the left balance
-                        long toRefund = Math.min(balance, paymentAmount);
-                        //boolean success = refundPaymentAction.invoke(event, orderCode, payment.getId(), toRefund);
-                        boolean success = true; //TODO
-                        if (success) {
-                            balance -= toRefund;
-                        } else {
-                            log.warn("[ORDER_TRANSFER] {} -> {} on event {}:"
-                                            + "Unable to refund payment {} of order {} of "
-                                            + "{} amount of money. Balance = {}; paymentAmount = {}",
-                                    sourceUsrId, targetUsrId, event, payment.getId(),
-                                    orderCode, toRefund, balance, paymentAmount);
-                        }
-                    }
-                    balanceForProvider.put(provider, balance);
-                }
-            }
-            boolean res = true;
-
-            //If we missed something to refund, exit with error
-            long leftToRefund = balanceForProvider.values().stream().mapToLong(Long::longValue).sum();
-            if (leftToRefund > 0L) {
-                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to finish refunding order {}. Left = {}",
-                        sourceUsrId, targetUsrId, event, orderCode, leftToRefund);
-                emailSender.prepareAndSendForPermission(
-                        Permission.PRETIX_ADMIN,
-                        TranslatableValue.ofEmail("mail.exchange_fullorder_failed_refund.title"),
-                        TEMPLATE_EXCHANGE_FULLORDER_REFUND_FAILED,
-                        MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
-                        MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
-                        MailVarPair.of(EVENT_NAME, event.getSlug()),
-                        MailVarPair.of(ORDER_CODE, orderCode),
-                        MailVarPair.of(REFUND_MONEY, PretixGenericUtils.fromPriceToString(leftToRefund, '.'))
-                );
-                log.debug("SUBJECT_EXCHANGE_FULLORDER_REFUND_FAILED email sent");
-            } else {
-                //Create a new manual payment which cannot be refunded
-                res = issuePaymentAction.invoke(
-                        event,
-                        orderCode,
-                        "Payment was created for a order exchange between users " + sourceUsrId + " -> " + targetUsrId
-                                + " happened on timestamp " + System.currentTimeMillis()
-                                + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!",
-                        PretixGenericUtils.fromPriceToString(total, '.')
-                );
-                defaultRoomLogic.logExchangeError(res, 200, targetUsrId, sourceUsrId, event);
+            long positionId = sourceOrder.getTicketPositionId();
+            var questionId = pretixInformation.getQuestionIdFromIdentifier(PretixConst.QUESTIONS_ACCOUNT_USERID);
+            if (questionId.isEmpty()) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to find userId question",
+                        sourceUsrId, targetUsrId, event);
+                return false;
             }
 
-            //Update userId on order and push it to pretix
-            sourceOrder.setOrderOwnerUserId(targetUsrId);
-            res = res && pushPretixAnswerAction.invoke(sourceOrder, pretixInformation);
-            defaultRoomLogic.logExchangeError(res, 201, targetUsrId, sourceUsrId, event);
+            final String comment =
+                  " was created for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
+                + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
+            final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
+            final String refundComment = "Refund" + comment;
+
+
+            //Changes on pretix
+            boolean pretixRes = transferOrderAction.invoke(
+                orderCode,
+                positionId,
+                questionId.get(),
+                targetUsrId,
+
+                paymentComment,
+                refundComment,
+
+                event
+            );
+            defaultRoomLogic.logExchangeError(pretixRes, 201, targetUsrId, sourceUsrId, event);
 
             //Changes in DB
-            res = res && defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
-            defaultRoomLogic.logExchangeError(res, 202, targetUsrId, sourceUsrId, event);
+            boolean dbRes = false;
+            if (pretixRes) {
+                dbRes = defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
+                defaultRoomLogic.logExchangeError(dbRes, 202, targetUsrId, sourceUsrId, event);
 
-            //Refetch pretix order and store it in db
-            if (res) {
+                if (!dbRes) {
+                    //Alert that room swap was successful in pretix, but not in our database
+                    emailSender.prepareAndSendForPermission(
+                        Permission.PRETIX_ADMIN,
+                        TranslatableValue.ofEmail("mail.exchange_fullorder_failed_db.title"),
+                        TEMPLATE_EXCHANGE_FULLORDER_FAILED_DB,
+                        MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
+                        MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
+                        MailVarPair.of(ORDER_CODE, orderCode)
+                    );
+                }
+            }
+
+            //Refetch pretix order and update it in db
+            boolean res = dbRes;
+            if (dbRes) {
                 var pair = event.getOrganizerAndEventPair();
                 var order = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
                 if (!order.isPresent()) {
