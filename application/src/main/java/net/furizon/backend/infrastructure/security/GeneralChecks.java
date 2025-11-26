@@ -123,9 +123,10 @@ public class GeneralChecks {
         var r = orderFinder.isOrderDaily(userId, event);
         if (r.isPresent()) {
             log.error("User {} has bought an order for event {}!", userId, event);
-            throw new ApiException(translationService.error("order.user_already_bought_event",
-                    new Object[] {translationService.getTranslationFromMap(event.getEventNames())}),
-                    GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
+            throw new ApiException(translationService.error(
+                "order.user_already_bought_event",
+                translationService.getTranslationFromMap(event.getEventNames())
+            ), GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
         }
     }
 

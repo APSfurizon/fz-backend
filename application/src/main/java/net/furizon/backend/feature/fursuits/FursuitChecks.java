@@ -86,9 +86,10 @@ public class FursuitChecks {
         int alreadyRegisteredSuits = fursuitFinder.countFursuitsOfUser(userId);
         if (alreadyRegisteredSuits >= fursuitConfig.getMaxBackendFursuitsNo()) {
             log.error("User {} has reached fursuit limits! Congrats!!!", userId);
-            throw new ApiException(translationService.error("badge.fursuit.fail.limit_reached",
-                    new Object[] {fursuitConfig.getMaxBackendFursuitsNo()}),
-                    FursuitErrorCodes.TOO_MANY_FURSUITS_ARE_YOU_A_MILLIONAIRE);
+            throw new ApiException(translationService.error(
+                    "badge.fursuit.fail.limit_reached",
+                    fursuitConfig.getMaxBackendFursuitsNo()
+            ), FursuitErrorCodes.TOO_MANY_FURSUITS_ARE_YOU_A_MILLIONAIRE);
         }
     }
 

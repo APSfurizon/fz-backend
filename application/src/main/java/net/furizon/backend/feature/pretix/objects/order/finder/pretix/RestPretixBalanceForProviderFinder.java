@@ -54,12 +54,13 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
 
             } else if (state == PretixPayment.PaymentState.PENDING || state == PretixPayment.PaymentState.CREATED) {
                 log.error("No payments for order {} on event {} "
-                                + "can be in status PENDING or CREATED. Failed payment: {} {}",
+                        + "can be in status PENDING or CREATED. Failed payment: {} {}",
                         orderCode, event, payment.getId(), state);
                 if (crashOnInvalidState) {
-                    throw new ApiException(translationService.error("order.payment_illegal_state",
-                            new Object[]{payment.getId(), orderCode}),
-                            GeneralResponseCodes.ORDER_PAYMENTS_STILL_PENDING);
+                    throw new ApiException(translationService.error(
+                        "order.payment_illegal_state",
+                        payment.getId(), orderCode
+                    ), GeneralResponseCodes.ORDER_PAYMENTS_STILL_PENDING);
                 }
             }
         }
@@ -86,9 +87,10 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
                                 + "can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
                         orderCode, event, refund.getId(), state);
                 if (crashOnInvalidState) {
-                    throw new ApiException(translationService.error("order.refund_illegal_state",
-                            new Object[]{refund.getId(), orderCode}),
-                            GeneralResponseCodes.ORDER_REFUNDS_STILL_PENDING);
+                    throw new ApiException(translationService.error(
+                        "order.refund_illegal_state",
+                        refund.getId(), orderCode
+                    ), GeneralResponseCodes.ORDER_REFUNDS_STILL_PENDING);
                 }
             }
         }

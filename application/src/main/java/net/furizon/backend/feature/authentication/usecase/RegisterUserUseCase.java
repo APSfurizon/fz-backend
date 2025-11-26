@@ -62,7 +62,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserUseCase.Input, U
         final var authentication = sessionAuthenticationManager.findAuthenticationByEmail(regUserReq.getEmail());
         if (authentication != null) {
             throw new ApiException(
-                translationService.error("authentication.email.account_exists", new Object[] {regUserReq.getEmail()}),
+                translationService.error("authentication.email.account_exists", regUserReq.getEmail()),
                 AuthenticationCodes.EMAIL_ALREADY_REGISTERED
             );
         }

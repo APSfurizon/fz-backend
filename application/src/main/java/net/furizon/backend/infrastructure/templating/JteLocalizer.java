@@ -13,6 +13,6 @@ public class JteLocalizer implements gg.jte.support.LocalizationSupport {
 
     @Override
     public String lookup(String s) {
-        return translationService.email(s, new Object[] {});
+        return translationService.email(s);
     }
 }

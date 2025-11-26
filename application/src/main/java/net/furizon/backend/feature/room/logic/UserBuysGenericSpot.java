@@ -165,8 +165,10 @@ public class UserBuysGenericSpot implements RoomLogic {
         if (possibleRoomItemIds.isEmpty()) {
             log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). "
                 + "RoomId = {}", roomCapacity, roomId);
-            throw new ApiException(translationService.error("room.buy.fail.no_room_for_capacity",
-                new Object[] {roomCapacity}), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
+            throw new ApiException(translationService.error(
+                "room.buy.fail.no_room_for_capacity",
+                roomCapacity
+            ), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
