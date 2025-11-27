@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED;
 import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
@@ -147,8 +148,7 @@ public class UpdateOrderInDb {
                                         if (false) {
                                             emailSender.prepareAndSendForPermission(
                                                 Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                                TranslatableValue.ofEmail(
-                                                        "mail.membership_card_owner_changed_but_registered.title"),
+                                                TranslatableValue.ofEmail("mail.membership_card_owner_changed_but_registered.title"),
                                                 TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
                                                 MailVarPair.of(ORDER_CODE, order.getCode()),
                                                 MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
@@ -188,14 +188,16 @@ public class UpdateOrderInDb {
                                     // they already paid, if they add another item which costs more:
                                     // People were able to remove their membership card by adding a
                                     // room or a sponsorship
-                                    /*emailSender.prepareAndSendForPermission(
-                                        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                        SUBJECT_MEMBERSHIP_WARNING,
-                                        TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
-                                        MailVarPair.of(ORDER_CODE, order.getCode()),
-                                        MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                        MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
-                                    );*/
+                                    if (false) {
+                                        emailSender.prepareAndSendForPermission(
+                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                            TranslatableValue.ofEmail("mail.membership_card_already_registered.title"),
+                                            TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
+                                            MailVarPair.of(ORDER_CODE, order.getCode()),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
+                                        );
+                                    }
                                 }
                             }
                         }
@@ -218,7 +220,18 @@ public class UpdateOrderInDb {
                 if (order.getOrderStatus() != OrderStatus.PENDING) {
                     log.info("[PRETIX] Order {} is a 'ticket only' order. Converting it to ticket + room",
                         order.getCode());
-                    convertTicketOnlyOrderAction.invoke(order, pretixInformation, this);
+                    boolean result = convertTicketOnlyOrderAction.invoke(order, pretixInformation, this);
+                    if (!result) {
+                        log.error("[PRETIX] convertTicketOnlyOrderAction returned false: {}@{}",
+                                pretixOrder.getCode(), event.getSlug());
+                        emailSender.prepareAndSendForPermission(
+                                Permission.PRETIX_ADMIN,
+                                TranslatableValue.ofEmail("mail.order_unable_to_convert.title"),
+                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
+                                MailVarPair.of(ORDER_CODE, order.getCode())
+                        );
+                        order = null;
+                    }
                 } else {
                     log.warn("[PRETIX] Order {} is a 'ticket only' order, but we're skipping convertion "
                             + "because of its status: {}", order.getCode(), order.getOrderStatus());

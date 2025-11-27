@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.objects.order.dto;
+package net.furizon.backend.feature.pretix.objects.order.dto.request;
 
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;

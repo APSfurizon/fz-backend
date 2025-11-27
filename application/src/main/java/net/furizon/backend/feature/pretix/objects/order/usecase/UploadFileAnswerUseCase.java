@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.objects.order.dto.PretixFileUploadResponse;
+import net.furizon.backend.feature.pretix.objects.order.dto.response.PretixFileUploadResponse;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;

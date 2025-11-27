@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.pretix.objects.order.dto;
+package net.furizon.backend.feature.pretix.objects.order.dto.response;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
