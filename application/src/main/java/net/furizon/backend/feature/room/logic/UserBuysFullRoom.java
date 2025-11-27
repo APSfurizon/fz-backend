@@ -597,7 +597,7 @@ public class UserBuysFullRoom implements RoomLogic {
                             userId, newRoomItemId, event, orderCode, totalPrice, totalPaid);
                     emailSender.prepareAndSendForPermission(
                         Permission.PRETIX_ADMIN,
-                        TranslatableValue.ofEmail("mail.exchange_room_failed_db.title"),
+                        TranslatableValue.ofEmail("mail.room_upgade_failed_price.title"),
                         TEMPLATE_UPGRADE_FAILED_PRICE,
                         MailVarPair.of(ORDER_CODE, orderCode),
                         MailVarPair.of(REFUND_MONEY, totalPaid + " < " + totalPrice)
@@ -610,7 +610,7 @@ public class UserBuysFullRoom implements RoomLogic {
                             userId, newRoomItemId, event, order, refetchedOrder, refreshedOrder);
                     emailSender.prepareAndSendForPermission(
                             Permission.PRETIX_ADMIN,
-                            TranslatableValue.ofEmail("mail.exchange_room_failed_db.title"),
+                            TranslatableValue.ofEmail("mail.room_upgade_failed_position.title"),
                             TEMPLATE_UPGRADE_FAILED_POSITION,
                             MailVarPair.of(ORDER_CODE, orderCode)
                     );
