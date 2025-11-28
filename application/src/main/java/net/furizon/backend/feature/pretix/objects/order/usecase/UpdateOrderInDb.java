@@ -148,7 +148,8 @@ public class UpdateOrderInDb {
                                         if (false) {
                                             emailSender.prepareAndSendForPermission(
                                                 Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                                TranslatableValue.ofEmail("mail.membership_card_owner_changed_but_registered.title"),
+                                                TranslatableValue.ofEmail(
+                                                        "mail.membership_card_owner_changed_but_registered.title"),
                                                 TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
                                                 MailVarPair.of(ORDER_CODE, order.getCode()),
                                                 MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
@@ -195,7 +196,8 @@ public class UpdateOrderInDb {
                                             TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
                                             MailVarPair.of(ORDER_CODE, order.getCode()),
                                             MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
+                                            MailVarPair.of(
+                                                    MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
                                         );
                                     }
                                 }

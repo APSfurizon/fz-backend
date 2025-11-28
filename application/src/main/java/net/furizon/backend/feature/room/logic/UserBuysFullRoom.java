@@ -16,9 +16,7 @@ import net.furizon.backend.feature.pretix.objects.order.controller.OrderControll
 import net.furizon.backend.feature.pretix.objects.order.dto.request.ChangeOrderRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
 import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
-import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.order.dto.request.PushPretixPositionRequest;
-import net.furizon.backend.feature.pretix.objects.order.dto.request.UpdatePretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
@@ -39,7 +37,6 @@ import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
-import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -57,9 +54,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static net.furizon.backend.infrastructure.email.EmailVars.*;
+import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
+import static net.furizon.backend.infrastructure.email.EmailVars.REFUND_MONEY;
 import static net.furizon.backend.infrastructure.pretix.PretixGenericUtils.PRETIX_DATETIME_FORMAT;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_UPGRADE_FAILED_POSITION;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_UPGRADE_FAILED_PRICE;
 
 @Slf4j
 @Primary
@@ -284,7 +283,8 @@ public class UserBuysFullRoom implements RoomLogic {
             if (!dbRes) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Database update returned false!",
                         sourceUsrId, targetUsrId, event);
-                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+                throw new ApiException(translationService.error("common.server_error"),
+                        GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Exchange rooms on pretix
@@ -307,7 +307,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Pretix update returned false!",
                         sourceUsrId, targetUsrId, event);
                 //We're in a @Transactional. Throwing an exception makes it rollback database changes
-                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+                throw new ApiException(translationService.error("common.server_error"),
+                        GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Refresh order
@@ -373,11 +374,18 @@ public class UserBuysFullRoom implements RoomLogic {
             final String refundComment = "Refund" + comment;
 
             //Changes in DB
-            boolean dbRes = defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
+            boolean dbRes = defaultRoomLogic.exchangeFullOrder(
+                    targetUsrId,
+                    sourceUsrId,
+                    roomId,
+                    event,
+                    pretixInformation
+            );
             if (!dbRes) {
                 log.error("[ORDER_TRANSFER] {} -> {} on event {}: Database update returned false!",
                         sourceUsrId, targetUsrId, event);
-                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+                throw new ApiException(translationService.error("common.server_error"),
+                        GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Changes on pretix
@@ -396,7 +404,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 log.error("[ORDER_TRANSFER] {} -> {} on event {}: Pretix update returned false!",
                         sourceUsrId, targetUsrId, event);
                 //We're in a @Transactional. Throwing an exception makes it rollback database changes
-                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+                throw new ApiException(translationService.error("common.server_error"),
+                        GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Refetch pretix order and update it in db

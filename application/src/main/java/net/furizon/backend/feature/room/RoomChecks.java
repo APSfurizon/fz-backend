@@ -48,7 +48,8 @@ public class RoomChecks {
     public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId) {
         return getRoomGuestAssertPermissionCheckTimeframe(guestId, requesterUserId, isUserAdmin(requesterUserId));
     }
-    public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId, @Nullable Boolean isAdminCached) {
+    public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId,
+                                                                         @Nullable Boolean isAdminCached) {
         assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, guestId, isAdminCached);
         RoomGuest guest = getRoomGuestObjAndAssertItExists(guestId);
         assertIsGuestObjOwnerOrAdmin(guest, requesterUserId, isAdminCached);
@@ -57,14 +58,16 @@ public class RoomChecks {
     public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user) {
         return  getUserIdAssertPermissionCheckTimeframe(targetUserId, user, isUserAdmin(user.getUserId()));
     }
-    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user, @Nullable Boolean isAdminCached) {
+    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user,
+                                                        @Nullable Boolean isAdminCached) {
         assertInTimeframeToEditRoomsAllowAdmin(user.getUserId(), targetUserId, isAdminCached);
         return checks.getUserIdAndAssertPermission(targetUserId, user, null, isAdminCached);
     }
     public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId) {
         return getRoomIdAssertPermissionCheckTimeframe(userId, event, roomId, isUserAdmin(userId));
     }
-    public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId, @Nullable Boolean isAdminCached) {
+    public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId,
+                                                        @Nullable Boolean isAdminCached) {
         assertInTimeframeToEditRoomsAllowAdmin(userId, roomId, isAdminCached);
         return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdminCached);
     }
