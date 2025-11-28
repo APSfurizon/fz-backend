@@ -333,6 +333,7 @@ public class UserBuysGenericSpot implements RoomLogic {
                                     @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
                                     @Nullable Long newLateItemId,
                                     @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+                                    boolean disablePriceUpgradeChecks,
                                     @NotNull Order order,
                                     @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");

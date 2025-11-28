@@ -78,10 +78,14 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         generalChecks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
         generalChecks.assertOrderIsPaid(targetOrder, destUserId, event);
 
-        generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
-        generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
+        //At least for UserBuysFullRoom logic, this check is done already inside pretix
+        //generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+        //generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
+            //Copy pasted from before
+            generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+            generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
             return true;
         }
 

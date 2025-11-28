@@ -26,7 +26,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 
 public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, InviteToRoomResponse> {
-    @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomChecks roomChecks;
     @NotNull private final GeneralChecks generalChecks;
@@ -40,7 +39,7 @@ public class InviteToRoomUseCase implements UseCase<InviteToRoomUseCase.Input, I
         Set<Long> targetUserIds = input.req.getUserIds();
         Event event = input.event;
 
-        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
+        boolean isAdmin = roomChecks.isUserAdmin(requesterUserId);
         roomChecks.assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, input.req.getRoomId(), isAdmin);
         long roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(
                 requesterUserId,

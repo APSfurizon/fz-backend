@@ -23,6 +23,8 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +59,10 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         PretixInformation pretixInformation = input.pretixInformation;
         Event event = pretixInformation.getCurrentEvent();
 
-        long userId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getUserId(), input.user);
+        Long reqUserId = input.req.getUserId();
+        boolean isAdmin = roomChecks.isUserAdmin(input.user.getUserId());
+        long userId = roomChecks.getUserIdAssertPermissionCheckTimeframe(reqUserId, input.user, isAdmin);
+        boolean disableUnupgradeChecks = reqUserId != null && isAdmin;
         Order order = generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
 
         generalChecks.assertOrderIsPaid(order, userId, event);
@@ -128,7 +133,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         long earlyPaid = getPaid(earlyPositionId, event);
         long latePaid = getPaid(latePositionId, event);
         long totalPaid = oldRoomPaid + earlyPaid + latePaid;
-        if (totalPaid > newRoomTotal) {
+        if (totalPaid > newRoomTotal && !disableUnupgradeChecks) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
                 + "Selected room costs less than what was already paid ({} < {})",
                 userId, newRoomItemId, event, newRoomPrice, oldRoomPaid);
@@ -148,7 +153,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
 
         boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, newRoomPrice, oldRoomPaid, userId, oldRoomId,
                 newEarlyItemId, newRoomEarlyPrice, earlyPaid, newLateItemId,
-                newRoomLatePrice, latePaid, order, event, pretixInformation);
+                newRoomLatePrice, latePaid, disableUnupgradeChecks, order, event, pretixInformation);
         if (res && oldRoomId != null) {
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {

@@ -465,6 +465,7 @@ public class UserBuysFullRoom implements RoomLogic {
             @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            boolean disablePriceUpgradeChecks,
             @NotNull Order order,
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
@@ -591,7 +592,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 foundPositionIncoherence |= refreshedOrder.getEarlyPositionId() != null && newEarlyItemId == null;
                 foundPositionIncoherence |= refreshedOrder.getLatePositionId() != null && newLateItemId == null;
 
-                if (totalPaid < totalPrice) {
+                if (totalPaid < totalPrice && !disablePriceUpgradeChecks) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Order {}:"
                             + "Current price ({}) is less than what was previously paid ({})",
                             userId, newRoomItemId, event, orderCode, totalPrice, totalPaid);
