@@ -42,6 +42,7 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -197,6 +199,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
+    @Transactional
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
@@ -265,14 +268,24 @@ public class UserBuysFullRoom implements RoomLogic {
             }
 
 
-            log.debug("[ROOM_EXCHANGE] Loaded params: sourceOrder=({}) targetOrder=({})",
-                sourceOrder.toFullString(), targetOrder.toFullString());
+            log.debug("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
+                    + "Loaded params: sourceOrder=({}) targetOrder=({})",
+                    sourceUsrId, targetUsrId, event, sourceOrder.toFullString(), targetOrder.toFullString());
 
             final String comment =
                       " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
                     + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
             final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             final String refundComment = "Refund" + comment;
+
+            //Changes in DB
+            boolean dbRes = defaultRoomLogic.exchangeRoom(
+                    targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event, pretixInformation);
+            if (!dbRes) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Database update returned false!",
+                        sourceUsrId, targetUsrId, event);
+                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+            }
 
             //Exchange rooms on pretix
             boolean pretixRes = exchangeRoomAction.invoke(
@@ -290,52 +303,33 @@ public class UserBuysFullRoom implements RoomLogic {
                 refundComment,
                 event
             );
-            defaultRoomLogic.logExchangeError(pretixRes, 104, targetUsrId, sourceUsrId, event);
-
-            //If successful, exchange rooms in db
-            boolean dbRes = false;
-            if (pretixRes) {
-                dbRes = defaultRoomLogic.exchangeRoom(
-                    targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event, pretixInformation);
-                defaultRoomLogic.logExchangeError(dbRes, 105, targetUsrId, sourceUsrId, event);
-
-                if (!dbRes) {
-                    //Alert that room swap was successful in pretix, but not in our database
-                    emailSender.prepareAndSendForPermission(
-                        Permission.PRETIX_ADMIN,
-                        TranslatableValue.ofEmail("mail.exchange_room_failed_db.title"),
-                        TEMPLATE_EXCHANGE_ROOM_FAILED_DB,
-                        MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
-                        MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
-                        MailVarPair.of(ORDER_CODE, sourceOrderCode),
-                        MailVarPair.of(OTHER_ORDER_CODE, targetOrderCode)
-                    );
-                }
+            if (!pretixRes) {
+                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Pretix update returned false!",
+                        sourceUsrId, targetUsrId, event);
+                //We're in a @Transactional. Throwing an exception makes it rollback database changes
+                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Refresh order
-            boolean res = dbRes;
-            if (dbRes) {
-                var pair = event.getOrganizerAndEventPair();
-                String eventName = pair.getEvent();
-                String organizerName = pair.getOrganizer();
-                Function<String, Boolean> fetchAndUpdateOrder = (orderCode) -> {
-                    var order = pretixOrderFinder.fetchOrderByCode(organizerName, eventName, orderCode);
-                    if (!order.isPresent()) {
-                        log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
-                                + "Unable to refetch order {} from pretix",
-                                sourceUsrId, targetUsrId, event, orderCode);
-                        return false;
-                    }
-                    return updateOrderInDb.execute(order.get(), event, pretixInformation).isPresent();
-                };
+            var pair = event.getOrganizerAndEventPair();
+            String eventName = pair.getEvent();
+            String organizerName = pair.getOrganizer();
+            Function<String, Boolean> fetchAndUpdateOrder = (orderCode) -> {
+                var order = pretixOrderFinder.fetchOrderByCode(organizerName, eventName, orderCode);
+                if (!order.isPresent()) {
+                    log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: "
+                            + "Unable to refetch order {} from pretix",
+                            sourceUsrId, targetUsrId, event, orderCode);
+                    return false;
+                }
+                return updateOrderInDb.execute(order.get(), event, pretixInformation).isPresent();
+            };
 
-                //Fully reload orders from pretix to the DB
-                res = fetchAndUpdateOrder.apply(targetOrderCode);
-                defaultRoomLogic.logExchangeError(res, 106, targetUsrId, sourceUsrId, event);
-                res = res && fetchAndUpdateOrder.apply(sourceOrderCode);
-                defaultRoomLogic.logExchangeError(res, 107, targetUsrId, sourceUsrId, event);
-            }
+            //Fully reload orders from pretix to the DB
+            boolean res = fetchAndUpdateOrder.apply(targetOrderCode);
+            defaultRoomLogic.logExchangeError(res, 106, targetUsrId, sourceUsrId, event);
+            res = res && fetchAndUpdateOrder.apply(sourceOrderCode);
+            defaultRoomLogic.logExchangeError(res, 107, targetUsrId, sourceUsrId, event);
 
             return res;
         } finally {
@@ -344,6 +338,7 @@ public class UserBuysFullRoom implements RoomLogic {
     }
 
     @Override
+    @Transactional
     public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId,
                                      @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("[ORDER_TRANSFER] exchangeFullOrder called with params:"
@@ -377,6 +372,13 @@ public class UserBuysFullRoom implements RoomLogic {
             final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             final String refundComment = "Refund" + comment;
 
+            //Changes in DB
+            boolean dbRes = defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
+            if (!dbRes) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Database update returned false!",
+                        sourceUsrId, targetUsrId, event);
+                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
+            }
 
             //Changes on pretix
             boolean pretixRes = transferOrderAction.invoke(
@@ -390,40 +392,23 @@ public class UserBuysFullRoom implements RoomLogic {
 
                 event
             );
-            defaultRoomLogic.logExchangeError(pretixRes, 201, targetUsrId, sourceUsrId, event);
-
-            //Changes in DB
-            boolean dbRes = false;
-            if (pretixRes) {
-                dbRes = defaultRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
-                defaultRoomLogic.logExchangeError(dbRes, 202, targetUsrId, sourceUsrId, event);
-
-                if (!dbRes) {
-                    //Alert that room swap was successful in pretix, but not in our database
-                    emailSender.prepareAndSendForPermission(
-                        Permission.PRETIX_ADMIN,
-                        TranslatableValue.ofEmail("mail.exchange_fullorder_failed_db.title"),
-                        TEMPLATE_EXCHANGE_FULLORDER_FAILED_DB,
-                        MailVarPair.of(FURSONA_NAME, String.valueOf(sourceUsrId)),
-                        MailVarPair.of(OTHER_FURSONA_NAME, String.valueOf(targetUsrId)),
-                        MailVarPair.of(ORDER_CODE, orderCode)
-                    );
-                }
+            if (!pretixRes) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Pretix update returned false!",
+                        sourceUsrId, targetUsrId, event);
+                //We're in a @Transactional. Throwing an exception makes it rollback database changes
+                throw new ApiException(translationService.error("common.server_error"), GeneralResponseCodes.GENERIC_ERROR);
             }
 
             //Refetch pretix order and update it in db
-            boolean res = dbRes;
-            if (dbRes) {
-                var pair = event.getOrganizerAndEventPair();
-                var order = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
-                if (!order.isPresent()) {
-                    log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to refetch order {} from pretix",
-                            sourceUsrId, targetUsrId, event, orderCode);
-                    return false;
-                }
-                res = updateOrderInDb.execute(order.get(), event, pretixInformation).isPresent();
-                defaultRoomLogic.logExchangeError(res, 203, targetUsrId, sourceUsrId, event);
+            var pair = event.getOrganizerAndEventPair();
+            var order = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
+            if (!order.isPresent()) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to refetch order {} from pretix",
+                        sourceUsrId, targetUsrId, event, orderCode);
+                return false;
             }
+            boolean res = updateOrderInDb.execute(order.get(), event, pretixInformation).isPresent();
+            defaultRoomLogic.logExchangeError(res, 203, targetUsrId, sourceUsrId, event);
 
             return res;
         } finally {
