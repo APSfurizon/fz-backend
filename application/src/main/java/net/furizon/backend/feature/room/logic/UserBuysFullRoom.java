@@ -488,6 +488,8 @@ public class UserBuysFullRoom implements RoomLogic {
 
             ChangeOrderRequest req = new ChangeOrderRequest();
 
+            //We can deal with price toctou race conditions, if an admin changes the prices after we got them
+
             // Set up room item
             if (originallyHadAroomPosition) {
                 req.patchPosition(
@@ -495,6 +497,7 @@ public class UserBuysFullRoom implements RoomLogic {
                     ChangeOrderRequest.PatchPosition.builder()
                             .item(newRoomItemId)
                         .build()
+                        .setPrice(newRoomPrice)
                 );
             } else {
                 req.createPosition(
@@ -503,21 +506,28 @@ public class UserBuysFullRoom implements RoomLogic {
                             .addonTo(order.getTicketPositionPosid()) //Should not be needed
                             .item(newRoomItemId)
                         .build()
+                        .setPrice(newRoomPrice)
                 );
             }
 
             // Set up extra days
             if (order.hasRoom()) {
-                if (extraDays.isEarly() && earlyPositionId != null && newEarlyItemId != null) {
+                if (extraDays.isEarly() && earlyPositionId != null && newEarlyItemId != null && newEarlyPrice != null) {
                     req.patchPosition(
                         earlyPositionId,
-                        ChangeOrderRequest.PatchPosition.builder().item(newEarlyItemId).build()
+                        ChangeOrderRequest.PatchPosition.builder()
+                                .item(newEarlyItemId)
+                            .build()
+                            .setPrice(newEarlyPrice)
                     );
                 }
-                if (extraDays.isLate() && latePositionId != null && newLateItemId != null) {
+                if (extraDays.isLate() && latePositionId != null && newLateItemId != null && newLatePrice != null) {
                     req.patchPosition(
                         latePositionId,
-                        ChangeOrderRequest.PatchPosition.builder().item(newLateItemId).build()
+                        ChangeOrderRequest.PatchPosition.builder()
+                                .item(newLateItemId)
+                            .build()
+                            .setPrice(newLatePrice)
                     );
                 }
             }

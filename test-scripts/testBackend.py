@@ -278,8 +278,15 @@ def roomUnconfirm() -> Response:
 def roomListing() -> Response:
     return doGet(f'{BASE_URL_API}room/get-room-list-with-quota')
 
+def buyOrUpgradeRoom() -> Response:
+    json = {
+        "roomPretixItemId": 315
+    }
+    return doPost(f'{BASE_URL_API}room/buy-or-upgrade-room', json=json)
+
 def roomGetInfo() -> Response:
     return doGet(f'{BASE_URL_API}room/info')
+
 
 #register()
 #confirmEmail()
@@ -317,11 +324,12 @@ login()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
+buyOrUpgradeRoom()
 
 #uploadBadge()
 #deleteBadge()
 
-getBadge()
+# getBadge()
 
 
 #countdown()

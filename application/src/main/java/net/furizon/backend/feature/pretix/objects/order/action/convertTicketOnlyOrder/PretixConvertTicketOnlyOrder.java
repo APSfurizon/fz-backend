@@ -88,7 +88,7 @@ public class PretixConvertTicketOnlyOrder implements ConvertTicketOnlyOrderActio
                              final long newItemId,
                              @Nullable final Long newItemVariationId,
                              @NotNull Event.OrganizerAndEventPair pair) {
-        log.info("[PRETIX_TICKET_CONVERT] Converting 'ticket only' order {} to room + ticket."
+        log.info("[PRETIX_TICKET_CONVERT] Converting 'ticket only' order {} to room + ticket. "
                 + "PosId={}, ItemId={}, VarId={}", orderCode, positionId, newItemId, newItemVariationId);
 
         final var request = HttpRequest.<Void>create()
