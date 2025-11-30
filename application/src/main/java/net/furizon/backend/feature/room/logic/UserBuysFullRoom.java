@@ -8,21 +8,13 @@ import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixOrder;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.action.changeOrder.ChangeOrderAction;
-import net.furizon.backend.feature.pretix.objects.order.action.deletePosition.DeletePretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.action.pushAnswer.PushPretixAnswerAction;
-import net.furizon.backend.feature.pretix.objects.order.action.pushPosition.PushPretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.backend.feature.pretix.objects.order.dto.request.ChangeOrderRequest;
-import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
-import net.furizon.backend.feature.pretix.objects.payment.action.yeetPayment.IssuePaymentAction;
 import net.furizon.backend.feature.pretix.objects.order.dto.request.PushPretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
-import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.quota.QuotaException;
-import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
 import net.furizon.backend.feature.room.RoomGeneralSanityCheck;
 import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomOnPretixAction;
 import net.furizon.backend.feature.room.action.transferOrder.TransferPretixOrderAction;
@@ -76,23 +68,9 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final EmailSender emailSender;
     @NotNull private final TranslationService translationService;
 
-
-    //Buy or upgrade related stuff
     @NotNull private final ChangeOrderAction changeOrderAction;
-    @NotNull private final DeletePretixPositionAction deletePretixPositionAction;
-
-    //Transfer full order related stuff
     @NotNull private final TransferPretixOrderAction transferOrderAction;
-    @NotNull private final PretixRefundFinder pretixRefundFinder;
-    @NotNull private final PretixPaymentFinder pretixPaymentFinder;
-    @NotNull private final PushPretixAnswerAction pushPretixAnswerAction;
-    @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
-
-    //Exchange room related stuff
     @NotNull private final ExchangeRoomOnPretixAction exchangeRoomAction;
-    @NotNull private final PushPretixPositionAction pushPretixPositionAction;
-    @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
-    @NotNull private final IssuePaymentAction issuePaymentAction;
 
     @Override
     public boolean canCreateRoom(long userId, @NotNull Event event) {
