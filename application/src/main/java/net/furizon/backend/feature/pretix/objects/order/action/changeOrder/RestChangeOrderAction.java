@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.ArrayList;
+
 import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
 
 @Slf4j
@@ -41,9 +43,10 @@ public class RestChangeOrderAction implements ChangeOrderAction {
                 .responseType(Void.class)
                 .build();
         try {
-            var resp = pretixHttpClient.send(PretixConfig.class, request, String.class);
+            var resp = pretixHttpClient.send(PretixConfig.class, request, ArrayList.class);
             if (resp.isError()) {
-                String r = resp.getErrorEntity();
+                ArrayList<Object> rr = resp.getErrorEntity();
+                String r = rr.getFirst().toString();
                 if (r.toLowerCase().contains("quota")) {
                     throw new QuotaException(r);
                 }
