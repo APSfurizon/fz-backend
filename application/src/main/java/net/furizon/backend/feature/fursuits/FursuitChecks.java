@@ -31,18 +31,33 @@ public class FursuitChecks {
     @NotNull private final TranslationService translationService;
 
 
+    public boolean isAdmin(long userId) {
+        return permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+
+    }
+
     public void assertPermissionAndTimeframe(long userId, long fursuitId,
                                              @Nullable Event event, @Nullable OffsetDateTime deadline) {
-        boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+        assertPermissionAndTimeframe(
+            userId,
+            fursuitId,
+            event,
+            deadline,
+            isAdmin(userId)
+        );
+    }
+    public void assertPermissionAndTimeframe(long userId, long fursuitId,
+                                             @Nullable Event event, @Nullable OffsetDateTime deadline,
+                                             @Nullable Boolean isAdminCached) {
         generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
                 deadline,
                 event,
                 fursuitId,
                 userId,
                 null,
-                isAdmin
+                isAdminCached
         );
-        assertUserHasPermissionOnFursuit(userId, fursuitId, isAdmin);
+        assertUserHasPermissionOnFursuit(userId, fursuitId, isAdminCached);
     }
 
     public @NotNull FursuitData getFursuitAndAssertItExists(long fursuitId,
@@ -86,9 +101,10 @@ public class FursuitChecks {
         int alreadyRegisteredSuits = fursuitFinder.countFursuitsOfUser(userId);
         if (alreadyRegisteredSuits >= fursuitConfig.getMaxBackendFursuitsNo()) {
             log.error("User {} has reached fursuit limits! Congrats!!!", userId);
-            throw new ApiException(translationService.error("badge.fursuit.fail.limit_reached",
-                    new Object[] {fursuitConfig.getMaxBackendFursuitsNo()}),
-                    FursuitErrorCodes.TOO_MANY_FURSUITS_ARE_YOU_A_MILLIONAIRE);
+            throw new ApiException(translationService.error(
+                    "badge.fursuit.fail.limit_reached",
+                    fursuitConfig.getMaxBackendFursuitsNo()
+            ), FursuitErrorCodes.TOO_MANY_FURSUITS_ARE_YOU_A_MILLIONAIRE);
         }
     }
 

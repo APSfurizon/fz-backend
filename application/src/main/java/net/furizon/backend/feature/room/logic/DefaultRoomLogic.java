@@ -329,6 +329,11 @@ public class DefaultRoomLogic implements RoomLogic {
                 + "targetUsrId={}; sourceUsrId={}; targetRoomId={}; sourceRoomId={}; event = {}",
                 targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event);
 
+        if (targetRoomId == null && sourceRoomId == null) {
+            log.debug("Both source and target have no room. Returning with success");
+            return true;
+        }
+
         return exchange(targetUsrId, sourceUsrId, sourceRoomId, targetRoomId, event, pretixInformation,
             (targetGuest, sourceGuest) -> {
                 boolean result = true;
@@ -401,20 +406,23 @@ public class DefaultRoomLogic implements RoomLogic {
         log.debug("exchangeFullOrder() called with: "
                 + "targetUsrId={}; sourceUsrId={}; roomId={}; event = {}",
                 targetUsrId, sourceUsrId, roomId, event);
-        return exchange(targetUsrId, sourceUsrId, roomId, null, event, pretixInformation,
-            (targetGuest, sourceGuest) -> {
-                boolean result = command.execute(
-                    PostgresDSL.update(ORDERS)
-                    .set(ORDERS.USER_ID, targetUsrId)
-                    .where(
-                        ORDERS.USER_ID.eq(sourceUsrId)
-                        .and(ORDERS.EVENT_ID.eq(event.getId()))
-                    )
-                ) > 0;
-                logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
-                return result;
-            }
-        );
+        BiFunction<RoomGuest, RoomGuest, Boolean> updateDb = (targetGuest, sourceGuest) -> {
+            boolean result = command.execute(
+                PostgresDSL.update(ORDERS)
+                .set(ORDERS.USER_ID, targetUsrId)
+                .where(
+                    ORDERS.USER_ID.eq(sourceUsrId)
+                    .and(ORDERS.EVENT_ID.eq(event.getId()))
+                )
+            ) > 0;
+            logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
+            return result;
+        };
+        if (roomId < 0L) {
+            return updateDb.apply(null, null);
+        } else {
+            return exchange(targetUsrId, sourceUsrId, roomId, null, event, pretixInformation, updateDb);
+        }
     }
 
     @Override
@@ -528,6 +536,7 @@ public class DefaultRoomLogic implements RoomLogic {
             long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            boolean disablePriceUpgradeChecks,
             @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;

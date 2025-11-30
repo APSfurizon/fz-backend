@@ -8,7 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -22,7 +21,7 @@ public class TranslationService {
     @NotNull private final MessageSource messageSource;
     @NotNull private final PretixConfig pretixConfig;
 
-    public String translateFallback(String key, String fallback, Locale locale, @Nullable Object[] params) {
+    public String translateFallback(String key, String fallback, Locale locale, Object... params) {
         try {
             return messageSource.getMessage(key, params, locale);
         } catch (Throwable e) {
@@ -30,11 +29,11 @@ public class TranslationService {
         }
     }
 
-    public String translateFallback(String key, String fallback, @Nullable Object[] params) {
+    public String translateFallback(String key, String fallback, Object... params) {
         return translateFallback(key, fallback, LocaleContextHolder.getLocale(), params);
     }
 
-    private String translate(String key, Locale locale, @Nullable Object[] params) {
+    private String translate(String key, Locale locale, Object... params) {
         try {
             return messageSource.getMessage(key, params, locale);
         } catch (Throwable e) {
@@ -45,34 +44,17 @@ public class TranslationService {
         }
     }
 
-    private String translate(String key, @Nullable Object[] params) {
+    private String translate(String key, Object... params) {
         Locale locale = LocaleContextHolder.getLocale();
         return translate(key, locale, params);
     }
 
-    private String translate(String key) {
-        return translate(key, null);
-    }
-
-    public String message(@PropertyKey(resourceBundle = "messages.messages") String key, Locale locale,
-                        @Nullable Object[] params) {
-        return translate(key, locale, params);
-    }
-
-    public String message(@PropertyKey(resourceBundle = "messages.messages") String key, @Nullable Object[] params) {
-        return translate(key, params);
-    }
-
-    public String message(@PropertyKey(resourceBundle = "messages.messages") String key) {
-        return translate(key);
-    }
-
     public String error(@PropertyKey(resourceBundle = "errors.errors") String key, Locale locale,
-                        @Nullable Object[] params) {
+                        Object... params) {
         return translate(key, locale, params);
     }
 
-    public String error(@PropertyKey(resourceBundle = "errors.errors") String key, @Nullable Object[] params) {
+    public String error(@PropertyKey(resourceBundle = "errors.errors") String key, Object... params) {
         return translate(key, params);
     }
 
@@ -81,11 +63,11 @@ public class TranslationService {
     }
 
     public String email(@PropertyKey(resourceBundle = "email.email") String key, Locale locale,
-                          @Nullable Object[] params) {
+                          Object... params) {
         return translate(key, locale, params);
     }
 
-    public String email(@PropertyKey(resourceBundle = "email.email") String key, @Nullable Object[] params) {
+    public String email(@PropertyKey(resourceBundle = "email.email") String key, Object... params) {
         return translate(key, params);
     }
 

@@ -62,6 +62,7 @@ public interface RoomLogic {
                              @Nullable Long newLateItemId,
                              @Nullable Long newLatePrice,
                              @Nullable Long oldLatePaid,
+                             boolean disablePriceUpgradeChecks,
                              @NotNull Order order,
                              @NotNull Event event,
                              @NotNull PretixInformation pretixInformation

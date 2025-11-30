@@ -17,6 +17,7 @@ public enum EmailVars {
     SANITY_CHECK_REASON("sanityCheckReason"),
     EVENT_NAME("eventName"),
     ORDER_CODE("orderCode"),
+    OTHER_ORDER_CODE("otherOrderCode"),
     ORDER_OWNER_ID("orderOwnerId"),
     ORDER_PREV_OWNER_ID("orderPrevOwnerId"),
     DUPLICATE_ORDER_CODE("duplicateOrderCode"),

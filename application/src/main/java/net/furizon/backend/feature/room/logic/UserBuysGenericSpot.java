@@ -7,7 +7,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
+import net.furizon.backend.feature.pretix.objects.order.dto.request.UpdatePretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
@@ -165,8 +165,10 @@ public class UserBuysGenericSpot implements RoomLogic {
         if (possibleRoomItemIds.isEmpty()) {
             log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). "
                 + "RoomId = {}", roomCapacity, roomId);
-            throw new ApiException(translationService.error("room.buy.fail.no_room_for_capacity",
-                new Object[] {roomCapacity}), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
+            throw new ApiException(translationService.error(
+                "room.buy.fail.no_room_for_capacity",
+                roomCapacity
+            ), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
@@ -331,6 +333,7 @@ public class UserBuysGenericSpot implements RoomLogic {
                                     @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
                                     @Nullable Long newLateItemId,
                                     @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+                                    boolean disablePriceUpgradeChecks,
                                     @NotNull Order order,
                                     @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");

@@ -289,12 +289,16 @@ public class Order {
             Object o = answers.get(key);
             String out = switch (type.get()) {
                 case NUMBER -> Float.toString((float) o);
-                case STRING_ONE_LINE, FILE, COUNTRY_CODE, PHONE_NUMBER, STRING_MULTI_LINE, LIST_SINGLE_CHOICE ->
-                        (String) o;
                 case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
                 case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
                 case DATE, TIME -> o.toString();
                 case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
+                case STRING_ONE_LINE,
+                     FILE,
+                     COUNTRY_CODE,
+                     PHONE_NUMBER,
+                     STRING_MULTI_LINE,
+                     LIST_SINGLE_CHOICE -> (String) o;
             };
 
 

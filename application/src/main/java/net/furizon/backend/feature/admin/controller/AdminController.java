@@ -20,7 +20,6 @@ import net.furizon.backend.feature.admin.usecase.reminders.ExpiredIdReminderUseC
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
-import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.Map;
 import java.util.Set;
 
 @Slf4j

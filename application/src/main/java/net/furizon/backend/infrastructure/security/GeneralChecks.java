@@ -34,9 +34,18 @@ public class GeneralChecks {
                                                         @NotNull Permission permission,
                                                         @Nullable OffsetDateTime date,
                                                         @Nullable Event event) {
+
         boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), permission);
-        assertTimeframeForEventNotPassedAllowAdmin(date, event, userId, user.getUserId(), null, isAdmin);
-        return getUserIdAndAssertPermission(userId, user, permission, isAdmin);
+        return getUserIdAssertPermissionCheckTimeframe(userId, user, permission, date, event, isAdmin);
+    }
+    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long userId,
+                                                        @NotNull FurizonUser user,
+                                                        @NotNull Permission permission,
+                                                        @Nullable OffsetDateTime date,
+                                                        @Nullable Event event,
+                                                        @Nullable Boolean isAdminCached) {
+        assertTimeframeForEventNotPassedAllowAdmin(date, event, userId, user.getUserId(), null, isAdminCached);
+        return getUserIdAndAssertPermission(userId, user, permission, isAdminCached);
     }
 
     public long getUserIdAndAssertPermission(@Nullable Long userId,
@@ -51,10 +60,17 @@ public class GeneralChecks {
         long id = userId == null ? user.getUserId() : userId;
         if (userId != null && userId != user.getUserId()) {
             if (isAdminCached == null) {
-                isAdminCached = permissionFinder.userHasPermission(
-                    user.getUserId(),
-                    Objects.requireNonNull(permission)
-                );
+                //If no permission is specified, the user DOESN'T have it
+                if (permission == null) {
+                    log.error("getUserIdAndAssertPermission was called to check permission of user {} (FZusr: {}), "
+                            + "but no permission was provided! (permission == null)", userId, user.getUserId());
+                    isAdminCached = false;
+                } else {
+                    isAdminCached = permissionFinder.userHasPermission(
+                        user.getUserId(),
+                        permission
+                    );
+                }
             }
             if (!isAdminCached) {
                 log.error("User {} has no permission over userId {}", user.getUserId(), userId);
@@ -84,7 +100,13 @@ public class GeneralChecks {
                                                            @Nullable Boolean isAdminCached) {
         if (id != null) {
             if (isAdminCached == null) {
-                isAdminCached = permissionFinder.userHasPermission(userId, Objects.requireNonNull(permission));
+                if (permission == null) {
+                    log.error("assertTimeframeForEventNotPassedAllowAdmin was called to check permission of user {} "
+                            + "(id: {}), but no permission was provided! (permission == null)", userId, id);
+                    isAdminCached = false;
+                } else {
+                    isAdminCached = permissionFinder.userHasPermission(userId, Objects.requireNonNull(permission));
+                }
             }
             if (isAdminCached) {
                 return;
@@ -123,9 +145,10 @@ public class GeneralChecks {
         var r = orderFinder.isOrderDaily(userId, event);
         if (r.isPresent()) {
             log.error("User {} has bought an order for event {}!", userId, event);
-            throw new ApiException(translationService.error("order.user_already_bought_event",
-                    new Object[] {translationService.getTranslationFromMap(event.getEventNames())}),
-                    GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
+            throw new ApiException(translationService.error(
+                "order.user_already_bought_event",
+                translationService.getTranslationFromMap(event.getEventNames())
+            ), GeneralResponseCodes.ORDER_ALREADY_BOUGHT);
         }
     }
 

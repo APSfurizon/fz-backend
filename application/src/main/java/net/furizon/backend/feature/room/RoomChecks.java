@@ -41,31 +41,41 @@ public class RoomChecks {
     @NotNull private final RoomConfig roomConfig;
     @NotNull private final TranslationService translationService;
 
+    public boolean isUserAdmin(long userId) {
+        return permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
+    }
+
     public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId) {
-        boolean isAdmin = permissionFinder.userHasPermission(requesterUserId, Permission.CAN_MANAGE_ROOMS);
-        assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, guestId, isAdmin);
+        return getRoomGuestAssertPermissionCheckTimeframe(guestId, requesterUserId, isUserAdmin(requesterUserId));
+    }
+    public @NotNull RoomGuest getRoomGuestAssertPermissionCheckTimeframe(long guestId, long requesterUserId,
+                                                                         @Nullable Boolean isAdminCached) {
+        assertInTimeframeToEditRoomsAllowAdmin(requesterUserId, guestId, isAdminCached);
         RoomGuest guest = getRoomGuestObjAndAssertItExists(guestId);
-        assertIsGuestObjOwnerOrAdmin(guest, requesterUserId, isAdmin);
+        assertIsGuestObjOwnerOrAdmin(guest, requesterUserId, isAdminCached);
         return guest;
     }
     public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user) {
-        boolean isAdmin = permissionFinder.userHasPermission(user.getUserId(), Permission.CAN_MANAGE_ROOMS);
-        assertInTimeframeToEditRoomsAllowAdmin(user.getUserId(), targetUserId, isAdmin);
-        return checks.getUserIdAndAssertPermission(targetUserId, user, null, isAdmin);
+        return  getUserIdAssertPermissionCheckTimeframe(targetUserId, user, isUserAdmin(user.getUserId()));
+    }
+    public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long targetUserId, @NotNull FurizonUser user,
+                                                        @Nullable Boolean isAdminCached) {
+        assertInTimeframeToEditRoomsAllowAdmin(user.getUserId(), targetUserId, isAdminCached);
+        return checks.getUserIdAndAssertPermission(targetUserId, user, null, isAdminCached);
     }
     public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId) {
-        boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
-        assertInTimeframeToEditRoomsAllowAdmin(userId, roomId, isAdmin);
-        return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdmin);
+        return getRoomIdAssertPermissionCheckTimeframe(userId, event, roomId, isUserAdmin(userId));
+    }
+    public long getRoomIdAssertPermissionCheckTimeframe(long userId, @NotNull Event event, @Nullable Long roomId,
+                                                        @Nullable Boolean isAdminCached) {
+        assertInTimeframeToEditRoomsAllowAdmin(userId, roomId, isAdminCached);
+        return getRoomIdAndAssertPermissionsOnRoom(userId, event, roomId, isAdminCached);
     }
     public void assertInTimeframeToEditRoomsAllowAdmin(long userId,
                                                        @Nullable Long id,
                                                        @Nullable Boolean isAdminCached) {
         if (id != null) {
-            if (isAdminCached == null) {
-                isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
-            }
-            if (isAdminCached) {
+            if (isAdminCached != null ? isAdminCached : isUserAdmin(userId)) {
                 return;
             }
         }
@@ -154,7 +164,7 @@ public class RoomChecks {
                 if (isAdminCached == null) {
                     isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_ROOMS);
                 }
-                if (isAdminCached) {
+                if (isAdminCached != null ? isAdminCached : isUserAdmin(userId)) {
                     roomId = idRes;
                     if (!roomFinder.isRoomConfirmed(roomId).isPresent()) {
                         log.error("Room with id {} doesn't exist!", roomId);

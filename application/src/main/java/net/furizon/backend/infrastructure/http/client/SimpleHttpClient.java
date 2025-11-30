@@ -1,11 +1,15 @@
 package net.furizon.backend.infrastructure.http.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,8 +40,17 @@ public class SimpleHttpClient implements HttpClient {
     @NotNull
     @Override
     public <C extends HttpConfig, R> ResponseEntity<R> send(
-        @NotNull final Class<C> configClass,
-        @NotNull final HttpRequest<R> request
+            @NotNull final Class<C> configClass,
+            @NotNull final HttpRequest<R> request) {
+        return send(configClass, request, Void.class).getResponseEntity();
+    }
+
+    @NotNull
+    @Override
+    public <C extends HttpConfig, R, E> HttpResponse<R, E> send(
+            @NotNull final Class<C> configClass,
+            @NotNull final HttpRequest<R> request,
+            @NotNull final Class<E> errorClass
     ) {
         final HttpConfig config = httpConfigsMap.get(configClass);
         if (config == null) {
@@ -78,14 +91,25 @@ public class SimpleHttpClient implements HttpClient {
             throw new IllegalArgumentException("responseParameterizedType or responseType is required");
         }
 
-        if (request.getResponseParameterizedType() != null) {
-            return requestBodySpec
-                .retrieve()
-                .toEntity(request.getResponseParameterizedType());
-        } else {
-            return requestBodySpec
-                .retrieve()
-                .toEntity(request.getResponseType());
+        var v = requestBodySpec.retrieve();
+
+        MutableObject<E> errObj = new MutableObject<>();
+        MutableObject<ClientHttpResponse> errorResponse = new MutableObject<>();
+        if (!errorClass.equals(Void.class)) {
+            v = v.onStatus(x -> !x.is2xxSuccessful(), (req, resp) -> {
+                InputStream body = resp.getBody();
+                errObj.setValue(new ObjectMapper().readValue(body, errorClass));
+                errorResponse.setValue(resp);
+            });
         }
+
+        ResponseEntity<R> respObj = null;
+        if (request.getResponseParameterizedType() != null) {
+            respObj = v.toEntity(request.getResponseParameterizedType());
+        } else {
+            respObj = v.toEntity(request.getResponseType());
+        }
+
+        return new HttpResponse<R, E>(respObj, errorResponse.get(), errObj.get());
     }
 }

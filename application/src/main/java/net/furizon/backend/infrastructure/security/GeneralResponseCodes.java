@@ -14,4 +14,5 @@ public enum GeneralResponseCodes {
     ORDER_REFUNDS_STILL_PENDING,
     USER_HAS_DAILY_TICKET, //An order is of the type daily, thus it cannot attend the event in a room
     EDIT_TIMEFRAME_ENDED,
+    GENERIC_ERROR
 }

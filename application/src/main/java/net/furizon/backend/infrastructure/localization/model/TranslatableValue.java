@@ -23,9 +23,4 @@ public class TranslatableValue {
                                             @Nullable Object... params) {
         return new TranslatableValue(key, params);
     }
-
-    public static TranslatableValue ofMessage(@PropertyKey(resourceBundle = "messages.messages") String key,
-                                            @Nullable Object... params) {
-        return new TranslatableValue(key, params);
-    }
 }
