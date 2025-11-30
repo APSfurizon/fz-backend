@@ -50,6 +50,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -273,7 +275,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
             final String comment =
                       " was created for a room exchange between orders " + sourceOrderCode + " -> " + targetOrderCode
-                    + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
+                    + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now());
             final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             final String refundComment = "Refund" + comment;
 
@@ -369,7 +371,7 @@ public class UserBuysFullRoom implements RoomLogic {
 
             final String comment =
                   " was created for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
-                + " happened on " + PRETIX_DATETIME_FORMAT.format(LocalDate.now());
+                + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now());
             final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             final String refundComment = "Refund" + comment;
 
