@@ -329,6 +329,11 @@ public class DefaultRoomLogic implements RoomLogic {
                 + "targetUsrId={}; sourceUsrId={}; targetRoomId={}; sourceRoomId={}; event = {}",
                 targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event);
 
+        if (targetRoomId == null && sourceRoomId == null) {
+            log.debug("Both source and target have no room. Returning with success");
+            return true;
+        }
+
         return exchange(targetUsrId, sourceUsrId, sourceRoomId, targetRoomId, event, pretixInformation,
             (targetGuest, sourceGuest) -> {
                 boolean result = true;

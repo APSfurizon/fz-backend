@@ -280,12 +280,28 @@ def roomListing() -> Response:
 
 def buyOrUpgradeRoom() -> Response:
     json = {
-        "roomPretixItemId": 315
+        "roomPretixItemId": 310
     }
     return doPost(f'{BASE_URL_API}room/buy-or-upgrade-room', json=json)
 
 def roomGetInfo() -> Response:
     return doGet(f'{BASE_URL_API}room/info')
+
+def exchangeInit() -> Response:
+    json = {
+        "destUserId": 3,
+        #"action": "room"
+        "action": "order"
+    }
+    return doPost(f'{BASE_URL_API}room/exchange/init', json=json)
+
+def exchangeUpdate() -> Response:
+    json = {
+        "exchangeId": 1,
+        "confirm": True
+    }
+    return doPost(f'{BASE_URL_API}room/exchange/update', json=json)
+    
 
 
 #register()
@@ -324,7 +340,9 @@ login()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
-buyOrUpgradeRoom()
+#buyOrUpgradeRoom()
+#exchangeInit()
+exchangeUpdate()
 
 #uploadBadge()
 #deleteBadge()
