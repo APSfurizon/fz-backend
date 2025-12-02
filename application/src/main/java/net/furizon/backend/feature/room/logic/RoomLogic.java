@@ -4,6 +4,7 @@ import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +72,8 @@ public interface RoomLogic {
     //The logic of these two methods should be the same
     @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId);
     void computeNosecountExtraDays(@NotNull NosecountRoom room);
+
+    @Nullable Board getBoardForUser(long userId, long eventId);
 
     void updateRoomCapacity(@NotNull RoomData roomData,
                             @NotNull Event event, @NotNull PretixInformation pretixInformation);

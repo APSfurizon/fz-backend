@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -165,6 +166,7 @@ public class JooqOrderFinder implements OrderFinder {
                     .orderStatus(order.getOrderStatus())
                     .sponsorship(order.getSponsorship())
                     .extraDays(order.getExtraDays())
+                    .board(order.getBoard())
                     .isDailyTicket(isDaily);
 
             OffsetDateTime from = event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
@@ -260,6 +262,18 @@ public class JooqOrderFinder implements OrderFinder {
         ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
     }
 
+    @Override
+    public @Nullable Board getBoardOfUser(long userId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_BOARD)
+            .from(ORDERS)
+            .where(
+                ORDERS.USER_ID.eq(userId)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+        ).mapOrNull(r -> Board.getFromDbId(r.get(ORDERS.ORDER_BOARD)));
+    }
+
     private @NotNull SelectJoinStep<?> selectFrom() {
         return PostgresDSL.select(
                         ORDERS.ORDER_CODE,
@@ -267,6 +281,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_SPONSORSHIP_TYPE,
                         ORDERS.ORDER_EXTRA_DAYS_TYPE,
                         ORDERS.ORDER_DAILY_DAYS,
+                        ORDERS.ORDER_BOARD,
                         ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                         ORDERS.ORDER_ROOM_CAPACITY,
                         ORDERS.ORDER_HOTEL_INTERNAL_NAME,
@@ -284,6 +299,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_ROOM_POSITION_POSITIONID,
                         ORDERS.ORDER_EARLY_POSITION_ID,
                         ORDERS.ORDER_LATE_POSITION_ID,
+                        ORDERS.ORDER_BOARD_POSITION_ID,
                         ORDERS.ORDER_ANSWERS_JSON,
                         ORDERS.ORDER_EXTRA_FURSUITS,
                         ORDERS.ORDER_REQUIRES_ATTENTION,

@@ -13,6 +13,7 @@ import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusR
 import net.furizon.backend.feature.room.finder.ExchangeConfirmationFinder;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -51,6 +52,8 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
         RoomData targetRoomData = null;
         ExtraDays sourceExtraDays = null;
         ExtraDays targetExtraDays = null;
+        Board sourceBoard = null;
+        Board targetBoard = null;
         Boolean targetRoomHidden = null;
 
         long sourceUserId = status.getSourceUserId();
@@ -65,6 +68,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 );
                 sourceRoomData = sourceResp.getRoom();
                 sourceExtraDays = sourceResp.getExtraDays();
+                sourceBoard = sourceResp.getBoard();
 
                 OrderDataResponse targetResp = Objects.requireNonNull(
                         orderFinder.getOrderDataResponseFromUserEvent(targetUserId, event, pretixInformation)
@@ -73,6 +77,7 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 if (status.isTargetConfirmed() || !isSourceUser || input.internalRequest) {
                     targetRoomData = targetResp.getRoom();
                     targetExtraDays = targetResp.getExtraDays();
+                    targetBoard = targetResp.getBoard();
                 } else {
                     targetRoomHidden = targetResp.getRoom() != null;
                 }
@@ -96,9 +101,11 @@ public class GetExchangeConfirmationStatusInfoUseCase implements
                 .fullOrderExchange(orderData)
                 .sourceRoomExchange(sourceRoomData)
                 .sourceExtraDays(sourceExtraDays)
+                .sourceBoard(sourceBoard)
                 .targetRoomInfoHidden(targetRoomHidden)
                 .targetRoomExchange(targetRoomData)
                 .targetExtraDays(targetExtraDays)
+                .targetBoard(targetBoard)
                 .build();
     }
 

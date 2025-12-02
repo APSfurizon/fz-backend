@@ -11,6 +11,7 @@ import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -546,10 +547,12 @@ public class DefaultRoomLogic implements RoomLogic {
     public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
         return orderFinder.getExtraDaysOfUser(userId, eventId);
     }
+    @Override
+    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {}
 
     @Override
-    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
-
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return orderFinder.getBoardOfUser(userId, eventId);
     }
 
     @Override

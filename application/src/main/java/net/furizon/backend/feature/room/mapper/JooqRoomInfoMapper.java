@@ -3,6 +3,7 @@ package net.furizon.backend.feature.room.mapper;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,7 @@ public class JooqRoomInfoMapper {
                                @NotNull RoomLogic roomLogic,
                                long userId, long eventId) {
         ExtraDays extraDays = roomLogic.getExtraDaysForUser(userId, eventId);
+        Board board = roomLogic.getBoardForUser(userId, eventId);
         return RoomInfo.builder()
                 .roomId(record.get(ROOMS.ROOM_ID))
                 .roomName(record.get(ROOMS.ROOM_NAME))
@@ -27,6 +29,7 @@ public class JooqRoomInfoMapper {
                 .showInNosecount(record.get(ROOMS.SHOW_IN_NOSECOUNT))
                 .eventId(record.get(ORDERS.EVENT_ID))
                 .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
+                .board(board == null ? Board.NONE : board)
             .build();
     }
 }

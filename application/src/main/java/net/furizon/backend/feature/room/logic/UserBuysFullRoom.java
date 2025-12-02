@@ -29,6 +29,7 @@ import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -618,6 +619,11 @@ public class UserBuysFullRoom implements RoomLogic {
         // we can just use it
         ExtraDays ownerExtraDays = Objects.requireNonNull(room.getRoomExtraDays());
         guests.forEach(g -> g.setExtraDays(ownerExtraDays));
+    }
+
+    @Override
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return roomFinder.getBoardOfRoomOwner(userId, eventId);
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.ordersworkflow.dto;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -29,6 +30,9 @@ public class OrderDataResponse {
 
     @Nullable
     private ExtraDays extraDays;
+
+    @Nullable
+    private Board board;
 
     private boolean isDailyTicket;
     @Nullable
