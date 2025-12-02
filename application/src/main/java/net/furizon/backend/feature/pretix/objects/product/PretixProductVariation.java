@@ -22,12 +22,17 @@ public class PretixProductVariation {
     @JsonProperty("meta_data")
     private final Map<String, String> metadata;
 
+    // Price is automatically set by pretix according to the item/variation price
     @NotNull
     private final String price;
 
     @Nullable
     public String getIdentifier() {
         return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
+    }
+
+    public long getLongPrice() {
+        return PretixGenericUtils.fromStrPriceToLong(getPrice());
     }
 
     @NotNull

@@ -16,6 +16,7 @@ import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -56,6 +57,10 @@ public class Order {
     @NotNull
     private ExtraDays extraDays = ExtraDays.NONE;
 
+    @Builder.Default
+    @NotNull
+    private final Board board = Board.NONE;
+
     @NotNull
     private final Set<Integer> dailyDays;
 
@@ -93,6 +98,8 @@ public class Order {
     private Long earlyPositionId;
     @Nullable
     private Long latePositionId;
+    @Nullable
+    private Long boardPositionId;
 
     @Builder.Default
     private short extraFursuits = 0;

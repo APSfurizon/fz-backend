@@ -171,7 +171,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         Optional<PretixPosition> position = positionId == null
                 ? Optional.empty()
                 : positionFinder.fetchPositionById(event, positionId);
-        return position.map(p -> PretixGenericUtils.fromStrPriceToLong(p.getPrice())).orElse(0L);
+        return position.map(PretixPosition::getLongPrice).orElse(0L);
     }
 
     public record Input(

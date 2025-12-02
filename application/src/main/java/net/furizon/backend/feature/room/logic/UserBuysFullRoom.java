@@ -558,15 +558,15 @@ public class UserBuysFullRoom implements RoomLogic {
                 //Obtain price and check for different items
                 for (PretixPosition pos : pretixOrder.getPositions()) {
                     if (roomPositionId != null && pos.getPositionId() == roomPositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newRoomItemId;
                     }
                     if (earlyPositionId != null && newEarlyItemId != null && pos.getPositionId() == earlyPositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newEarlyItemId;
                     }
                     if (latePositionId != null && newLateItemId != null && pos.getPositionId() == latePositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newLateItemId;
                     }
                 }
