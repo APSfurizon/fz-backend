@@ -328,15 +328,15 @@ public class UserBuysGenericSpot implements RoomLogic {
         return false;
     }
     @Override
-    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice,
-                                    @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
-                                    @Nullable Long newEarlyItemId,
-                                    @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
-                                    @Nullable Long newLateItemId,
-                                    @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
-                                    boolean disablePriceUpgradeChecks,
-                                    @NotNull Order order,
-                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+            long userId, @Nullable Long roomId,
+            @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+            @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId, @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+            boolean disablePriceUpgradeChecks,
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
+    ) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");
         return false;
     }

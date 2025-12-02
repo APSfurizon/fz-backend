@@ -52,21 +52,14 @@ public interface RoomLogic {
     boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     boolean isRoomBuyOrUpgradeSupported(@NotNull Event event);
-    boolean buyOrUpgradeRoom(long newRoomItemId,
-                             long newRoomPrice,
-                             @Nullable Long oldRoomPaid,
-                             long userId,
-                             @Nullable Long roomId,
-                             @Nullable Long newEarlyItemId,
-                             @Nullable Long newEarlyPrice,
-                             @Nullable Long oldEarlyPaid,
-                             @Nullable Long newLateItemId,
-                             @Nullable Long newLatePrice,
-                             @Nullable Long oldLatePaid,
-                             boolean disablePriceUpgradeChecks,
-                             @NotNull Order order,
-                             @NotNull Event event,
-                             @NotNull PretixInformation pretixInformation
+    boolean buyOrUpgradeRoom(
+        long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+        long userId, @Nullable Long roomId,
+        @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+        @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+        @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId, @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+        boolean disablePriceUpgradeChecks,
+        @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     );
 
     //The logic of these two methods should be the same

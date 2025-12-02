@@ -434,36 +434,41 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean buyOrUpgradeRoom(
             long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
-            long userId,
-            @Nullable Long roomId,
+            long userId, @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId, @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
             boolean disablePriceUpgradeChecks,
-            @NotNull Order order,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     ) {
         try {
             OrderController.suspendWebhook();
-            log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
-                            + "User is buying or upgrading his room to r{} e{} l{}",
-                    userId, newRoomItemId, event, newRoomItemId, newEarlyItemId, newLateItemId);
+            log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
+                    + "User is buying or upgrading his room to r{} e{} l{} b{}/{}",
+                    userId, newRoomItemId, event,
+                    newRoomItemId, newEarlyItemId, newLateItemId, newBoardItemId, newBoardVariationId);
             log.debug("[ROOM_BUY] buyOrUpgradeRoom called with params: "
-                + "newRoomItemId={} newRoomPrice={} oldRoomPaid={} userId={} roomId={} "
+                + "newRoomItemId={} newRoomPrice={} oldRoomPaid={} "
+                + "userId={} roomId={} "
                 + "newEarlyItemId={} newEarlyPrice={} oldEarlyPaid={} "
                 + "newLateItemId={} newLatePrice={} oldLatePaid={} "
+                + "newBoardItemId={} newBoardVariationId={} newBoardPrice={} oldBoardPaid={} "
                 + "order=({}) evet={} pretixInformation={}",
-                newRoomItemId, newRoomPrice, oldRoomPaid, userId, roomId,
+                newRoomItemId, newRoomPrice, oldRoomPaid,
+                userId, roomId,
                 newEarlyItemId, newEarlyPrice, oldEarlyPaid,
                 newLateItemId, newLatePrice, oldLatePaid,
+                newBoardItemId, newBoardVariationId, newBoardPrice, oldBoardPaid,
                 order.toFullString(), event, pretixInformation
             );
             Long roomPositionId = order.getRoomPositionId();
             final boolean originallyHadAroomPosition = roomPositionId != null;
             final Long earlyPositionId = order.getEarlyPositionId();
             final Long latePositionId = order.getLatePositionId();
+            final Long boardPositionId = order.getBoardPositionId();
             final String orderCode = order.getCode();
             final ExtraDays extraDays = order.getExtraDays();
+            final Board board = order.getBoard();
 
             ChangeOrderRequest req = new ChangeOrderRequest();
 
@@ -489,8 +494,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 );
             }
 
-            // Set up extra days
             if (order.hasRoom()) {
+                // Set up extra days
                 if (extraDays.isEarly() && earlyPositionId != null && newEarlyItemId != null && newEarlyPrice != null) {
                     req.patchPosition(
                         earlyPositionId,
@@ -507,6 +512,18 @@ public class UserBuysFullRoom implements RoomLogic {
                                 .item(newLateItemId)
                             .build()
                             .setPrice(newLatePrice)
+                    );
+                }
+
+                // Board upgrade
+                if (board != Board.NONE && boardPositionId != null && newBoardItemId != null && newBoardVariationId != null && newBoardPrice != null) {
+                    req.patchPosition(
+                        boardPositionId,
+                        ChangeOrderRequest.PatchPosition.builder()
+                                .item(newBoardItemId)
+                                .variation(newBoardVariationId)
+                            .build()
+                            .setPrice(newBoardPrice)
                     );
                 }
             }
@@ -549,7 +566,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 Order refreshedOrder =  refreshedOrderOpt.get();
                 long totalPaid = (oldRoomPaid == null ? 0L : oldRoomPaid)
                                + (oldEarlyPaid == null ? 0L : oldEarlyPaid)
-                               + (oldLatePaid  == null ? 0L : oldLatePaid);
+                               + (oldLatePaid  == null ? 0L : oldLatePaid)
+                               + (oldBoardPaid == null ? 0L : oldBoardPaid);
                 if (!originallyHadAroomPosition) {
                     roomPositionId = refreshedOrder.getRoomPositionId();
                 }
@@ -570,10 +588,16 @@ public class UserBuysFullRoom implements RoomLogic {
                         totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newLateItemId;
                     }
+                    if (boardPositionId != null && newBoardItemId != null && newBoardVariationId != null && pos.getPositionId() == boardPositionId) {
+                        totalPrice += pos.getLongPrice();
+                        foundPositionIncoherence |= pos.getItemId() != newBoardItemId;
+                        foundPositionIncoherence |= !Objects.equals(pos.getVariationId(), newBoardVariationId);
+                    }
                 }
                 // Check if now we have an early/late position and previously we had not
                 foundPositionIncoherence |= refreshedOrder.getEarlyPositionId() != null && newEarlyItemId == null;
                 foundPositionIncoherence |= refreshedOrder.getLatePositionId() != null && newLateItemId == null;
+                foundPositionIncoherence |= refreshedOrder.getBoardPositionId() != null && (newBoardItemId == null || newBoardVariationId == null);
 
                 if (totalPaid < totalPrice && !disablePriceUpgradeChecks) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Order {}:"

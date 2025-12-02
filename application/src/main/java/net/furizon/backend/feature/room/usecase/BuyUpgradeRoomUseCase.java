@@ -18,6 +18,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
@@ -71,6 +72,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
         long newRoomItemId = input.req.getRoomPretixItemId();
         Long earlyPositionId = null;
         Long latePositionId = null;
+        Long boardPositionId = null;
         Long oldRoomItemId = order.getPretixRoomItemId();
         Long oldRoomPositionId = order.getRoomPositionId();
         Long oldRoomId = null;
@@ -90,10 +92,13 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                 }
                 earlyPositionId = order.getEarlyPositionId();
                 latePositionId = order.getLatePositionId();
+                boardPositionId = order.getBoardPositionId();
             }
         }
 
         ExtraDays extraDays = order.getExtraDays();
+        Board board = order.getBoard();
+
         HotelCapacityPair newRoomInfo = pretixInformation.getRoomInfoFromPretixItemId(newRoomItemId);
         if (newRoomInfo == null) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Unable to fetch capacity of new room",
@@ -124,13 +129,25 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
             newRoomLatePrice = Objects.requireNonNull(
                     pretixInformation.getItemPrice(newLateItemId, true, true));
         }
-        long newRoomTotal = newRoomPrice + newRoomEarlyPrice + newRoomLatePrice;
+        long newBoardPrice = 0L;
+        Long newBoardItemId = null;
+        Long newBoardVariationId = null;
+        if (board != Board.NONE) {
+            newBoardVariationId = Objects.requireNonNull(
+                    pretixInformation.getBoardVariationIdForHotelCapacity(newRoomInfo, board));
+            newBoardItemId = Objects.requireNonNull(
+                    pretixInformation.getFatherItemByVariationId(newBoardVariationId));
+            newBoardPrice = Objects.requireNonNull(
+                    pretixInformation.getVariationPrice(newBoardVariationId, true));
+        }
+        long newRoomTotal = newRoomPrice + newRoomEarlyPrice + newRoomLatePrice + newBoardPrice;
 
         //Get old room paid
         long oldRoomPaid = getPaid(oldRoomPositionId, event);
         long earlyPaid = getPaid(earlyPositionId, event);
         long latePaid = getPaid(latePositionId, event);
-        long totalPaid = oldRoomPaid + earlyPaid + latePaid;
+        long boardPaid = getPaid(boardPositionId, event);
+        long totalPaid = oldRoomPaid + earlyPaid + latePaid + boardPaid;
         if (totalPaid > newRoomTotal && !disableUnupgradeChecks) {
             log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
                 + "Selected room costs less than what was already paid ({} < {})",
@@ -149,9 +166,14 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                 RoomErrorCodes.BUY_ROOM_NEW_ROOM_LOW_CAPACITY);
         }
 
-        boolean res = roomLogic.buyOrUpgradeRoom(newRoomItemId, newRoomPrice, oldRoomPaid, userId, oldRoomId,
-                newEarlyItemId, newRoomEarlyPrice, earlyPaid, newLateItemId,
-                newRoomLatePrice, latePaid, disableUnupgradeChecks, order, event, pretixInformation);
+        boolean res = roomLogic.buyOrUpgradeRoom(
+                newRoomItemId, newRoomPrice, oldRoomPaid,
+                userId, oldRoomId,
+                newEarlyItemId, newRoomEarlyPrice, earlyPaid,
+                newLateItemId, newRoomLatePrice, latePaid,
+                newBoardItemId, newBoardVariationId, newBoardPrice, boardPaid,
+                disableUnupgradeChecks, order, event, pretixInformation
+        );
         if (res && oldRoomId != null) {
             Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
             if (names != null) {
