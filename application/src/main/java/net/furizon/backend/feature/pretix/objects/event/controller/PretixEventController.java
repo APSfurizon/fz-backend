@@ -6,6 +6,8 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.dto.GetEventsResponse;
 import net.furizon.backend.feature.pretix.objects.event.usecase.GetAllEventsUseCase;
 import net.furizon.backend.feature.pretix.objects.event.usecase.GetSingleEventUseCase;
+import net.furizon.backend.feature.pretix.objects.event.dto.SponsorshipNamesResponse;
+import net.furizon.backend.feature.pretix.objects.event.usecase.GetSponsorshipNamesUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,5 +37,13 @@ public class PretixEventController {
     @GetMapping("/{eventId}")
     public Event getSingleEvent(@PathVariable("eventId") @NotNull final Long eventId) {
         return executor.execute(GetSingleEventUseCase.class, eventId);
+    }
+
+    @GetMapping("/get-sponsorship-names/{eventId}")
+    public SponsorshipNamesResponse getSponsorshipNames(@PathVariable("eventId") @NotNull final Long eventId) {
+        return executor.execute(
+                GetSponsorshipNamesUseCase.class,
+                new GetSponsorshipNamesUseCase.Input(eventId, pretixInformation)
+        );
     }
 }

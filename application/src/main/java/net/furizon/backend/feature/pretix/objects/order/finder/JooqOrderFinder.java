@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;

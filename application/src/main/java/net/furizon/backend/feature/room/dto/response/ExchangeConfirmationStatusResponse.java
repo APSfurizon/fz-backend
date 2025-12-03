@@ -3,7 +3,7 @@ package net.furizon.backend.feature.room.dto.response;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.user.dto.UserDisplayData;

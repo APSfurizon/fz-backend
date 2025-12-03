@@ -154,6 +154,8 @@ public class CachedPretixInformation implements PretixInformation {
     //Sponsors
     @NotNull
     private final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+    @NotNull
+    private final Cache<Sponsorship, Set<Long>> sponsorshipTypeToIds = Caffeine.newBuilder().build();
 
     //Extra days
     @NotNull
@@ -531,6 +533,15 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
+    public Set<Long> getSponsorIds(@NotNull Sponsorship sponsorship) {
+        lock.readLock().lock();
+        var v = sponsorshipTypeToIds.getIfPresent(sponsorship);
+        lock.readLock().unlock();
+        return v == null ? Collections.emptySet() : v;
+    }
+
+    @NotNull
+    @Override
     public Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event) {
         lock.readLock().lock();
         try {
@@ -822,6 +833,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Sponsors
         sponsorshipIdToType.invalidateAll();
+        sponsorshipTypeToIds.invalidateAll();
 
         //Extra days
         extraDaysIdToDay.invalidateAll();
@@ -922,6 +934,7 @@ public class CachedPretixInformation implements PretixInformation {
 
         dailyIdToDay.putAll(products.dailyIdToDay());
         sponsorshipIdToType.putAll(products.sponsorshipIdToType());
+        sponsorshipTypeToIds.putAll(products.sponsorshipTypeToIds());
         extraDaysIdToDay.putAll(products.extraDaysIdToDay());
         roomIdToInfo.putAll(products.roomIdToInfo());
         itemIdToPrice.putAll(products.itemIdToPrice());

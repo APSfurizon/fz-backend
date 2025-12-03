@@ -17,7 +17,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -157,6 +159,9 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                                 (variation, strippedIdentifier, variationId) -> {
                                     Sponsorship ss = Sponsorship.getFromDbId(Short.parseShort(strippedIdentifier));
                                     result.sponsorshipIdToType().put(variationId, ss);
+                                    Set<Long> s = result.sponsorshipTypeToIds()
+                                                        .computeIfAbsent(ss, k -> new HashSet<>());
+                                    s.add(variationId);
                                 }
                             );
                             break;
