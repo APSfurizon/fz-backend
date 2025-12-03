@@ -646,7 +646,10 @@ public class JooqRoomFinder implements RoomFinder {
                 .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
             )
             .innerJoin(ORDERS)
-            .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+            .on(
+                ROOMS.ORDER_ID.eq(ORDERS.ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
         ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
     }
 
@@ -661,7 +664,10 @@ public class JooqRoomFinder implements RoomFinder {
                     .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
                 )
                 .innerJoin(ORDERS)
-                .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ORDERS.EVENT_ID.eq(eventId))
+                )
         ).mapOrNull(r -> Board.getFromDbId(r.get(ORDERS.ORDER_BOARD)));
     }
 }

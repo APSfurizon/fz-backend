@@ -148,6 +148,9 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     return doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
+def getOrderFullStatus() -> Response:
+    return doGet(f'{BASE_URL_API}orders-workflow/get-full-status')
+
 def getOrderLink() -> Response:
     return doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
 
@@ -267,6 +270,7 @@ def roomCreate() -> Response:
     return doPost(f'{BASE_URL_API}room/create', json=json)
 
 def roomDelete() -> Response:
+    json = {}
     return doPost(f'{BASE_URL_API}room/delete')
 
 def roomConfirm() -> Response:
@@ -331,8 +335,11 @@ login()
 #deleteRole(4)
 #exportBadges()
 #remindRoomNotFull()
-#usersAdminView(1)
 
+#getOrderFullStatus()
+
+
+#roomDelete()
 #roomCreate()
 #roomGetInfo()
 #roomConfirm()
@@ -340,13 +347,14 @@ login()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
-buyOrUpgradeRoom()
+#buyOrUpgradeRoom()
 #exchangeInit()
 #exchangeUpdate()
 
 #uploadBadge()
 #deleteBadge()
 
+#usersAdminView(1)
 # getBadge()
 
 

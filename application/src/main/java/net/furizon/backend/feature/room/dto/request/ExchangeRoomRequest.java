@@ -28,7 +28,7 @@ public class ExchangeRoomRequest {
     @Builder.Default
     private final List<Exchange> exchanges = new LinkedList<Exchange>();
 
-    public class ExchangeRoomRequestBuilder {
+    public static class ExchangeRoomRequestBuilder {
         public ExchangeRoomRequestBuilder exchange(@Nullable Long sourcePositionId, @Nullable Long destPositionId) {
             return exchange(new Exchange(sourcePositionId, destPositionId));
         }
