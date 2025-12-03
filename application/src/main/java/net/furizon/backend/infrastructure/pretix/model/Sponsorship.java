@@ -15,7 +15,8 @@ public enum Sponsorship {
     //These MUST be in "importance" order
     NONE((short)          0),
     SPONSOR((short)       1),
-    SUPER_SPONSOR((short) 2);
+    SUPER_SPONSOR((short) 2),
+    ULTRA_SPONSOR((short) 3);
 
     @Getter
     private final short dbId;

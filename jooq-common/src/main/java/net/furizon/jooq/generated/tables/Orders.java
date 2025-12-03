@@ -402,7 +402,7 @@ public class Orders extends TableImpl<Record> {
         return Arrays.asList(
             Internal.createCheck(this, DSL.name("order_board_check"), "(((order_board >= 0) AND (order_board <= 2)))", true),
             Internal.createCheck(this, DSL.name("orders_extra_days_check"), "(((order_extra_days_type >= 0) AND (order_extra_days_type <= 3)))", true),
-            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2)))", true),
+            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 3)))", true),
             Internal.createCheck(this, DSL.name("orders_status_check"), "(((order_status >= 0) AND (order_status <= 3)))", true)
         );
     }
