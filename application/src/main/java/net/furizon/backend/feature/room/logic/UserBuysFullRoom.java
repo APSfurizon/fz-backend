@@ -29,7 +29,6 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
-import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -446,7 +445,8 @@ public class UserBuysFullRoom implements RoomLogic {
             long userId, @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
-            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId, @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+                @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
             boolean disablePriceUpgradeChecks,
             @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     ) {
@@ -525,7 +525,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
 
                 // Board upgrade
-                if (board != Board.NONE && boardPositionId != null && newBoardItemId != null && newBoardVariationId != null && newBoardPrice != null) {
+                if (board != Board.NONE && boardPositionId != null
+                        && newBoardItemId != null && newBoardVariationId != null
+                        && newBoardPrice != null) {
                     req.patchPosition(
                         boardPositionId,
                         ChangeOrderRequest.PatchPosition.builder()
@@ -597,7 +599,9 @@ public class UserBuysFullRoom implements RoomLogic {
                         totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newLateItemId;
                     }
-                    if (boardPositionId != null && newBoardItemId != null && newBoardVariationId != null && pos.getPositionId() == boardPositionId) {
+                    if (boardPositionId != null
+                            && newBoardItemId != null && newBoardVariationId != null
+                            && pos.getPositionId() == boardPositionId) {
                         totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newBoardItemId;
                         foundPositionIncoherence |= !Objects.equals(pos.getVariationId(), newBoardVariationId);
@@ -606,7 +610,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 // Check if now we have an early/late position and previously we had not
                 foundPositionIncoherence |= refreshedOrder.getEarlyPositionId() != null && newEarlyItemId == null;
                 foundPositionIncoherence |= refreshedOrder.getLatePositionId() != null && newLateItemId == null;
-                foundPositionIncoherence |= refreshedOrder.getBoardPositionId() != null && (newBoardItemId == null || newBoardVariationId == null);
+                foundPositionIncoherence |= refreshedOrder.getBoardPositionId() != null
+                                            && (newBoardItemId == null || newBoardVariationId == null);
 
                 if (totalPaid < totalPrice && !disablePriceUpgradeChecks) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Order {}:"

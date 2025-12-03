@@ -3,7 +3,6 @@ package net.furizon.backend.feature.pretix.objects.product.finder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductVariation;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;

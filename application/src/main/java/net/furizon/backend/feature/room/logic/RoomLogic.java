@@ -59,7 +59,8 @@ public interface RoomLogic {
         long userId, @Nullable Long roomId,
         @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
         @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
-        @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId, @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+        @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+            @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
         boolean disablePriceUpgradeChecks,
         @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     );
