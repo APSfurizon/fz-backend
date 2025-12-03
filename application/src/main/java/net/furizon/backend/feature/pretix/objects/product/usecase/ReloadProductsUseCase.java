@@ -148,7 +148,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             product.forEachVariationByIdentifierPrefix(
                                 PretixConst.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
                                 (variation, strippedIdentifier, variationId) -> {
-                                    Sponsorship ss = Sponsorship.get(Integer.parseInt(strippedIdentifier));
+                                    Sponsorship ss = Sponsorship.getFromDbId(Short.parseShort(strippedIdentifier));
                                     result.variationIdToPrice().put(variationId, variation.getLongPrice());
                                     result.variationIdToFatherItemId().put(variationId, productId);
                                     result.sponsorshipIdToType().put(variationId, ss);

@@ -44,7 +44,7 @@ public class JooqOrderMapper {
             var v = Order.builder()
                     .code(record.get(ORDERS.ORDER_CODE))
                     .orderStatus(OrderStatus.values()[record.get(ORDERS.ORDER_STATUS)])
-                    .sponsorship(Sponsorship.values()[record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)])
+                    .sponsorship(Sponsorship.getFromDbId(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                     .extraDays(ExtraDays.values()[record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)])
                     .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
                     .board(Board.getFromDbId(record.get(ORDERS.ORDER_BOARD)))

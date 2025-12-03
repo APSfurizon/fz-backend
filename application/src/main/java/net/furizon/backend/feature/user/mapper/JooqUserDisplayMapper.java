@@ -29,7 +29,7 @@ public class JooqUserDisplayMapper {
                 .locale(record.get(USERS.USER_LOCALE))
                 .language(record.get(USERS.USER_LANGUAGE))
                 .propic(MediaResponseMapper.mapOrNull(record))
-                .sponsorship(sponsor != null ? Sponsorship.get(sponsor) : null)
+                .sponsorship(sponsor != null ? Sponsorship.getFromDbId(sponsor) : null)
             .build();
     }
 

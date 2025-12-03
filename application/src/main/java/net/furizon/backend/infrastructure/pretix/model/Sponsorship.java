@@ -1,18 +1,39 @@
 package net.furizon.backend.infrastructure.pretix.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
-@Getter
-@RequiredArgsConstructor
+import java.util.Map;
+import java.util.TreeMap;
+
+@Slf4j
+@AllArgsConstructor
 public enum Sponsorship {
-    NONE(""),
-    SPONSOR(""),
-    SUPER_SPONSOR(""); //These MUST be in "importance" order
+    //These MUST be in "importance" order
+    NONE((short)          0),
+    SPONSOR((short)       1),
+    SUPER_SPONSOR((short) 2);
 
-    private final String color; //TODO for frontend
+    @Getter
+    private final short dbId;
 
-    public static Sponsorship get(int ordinal) {
-        return Sponsorship.values()[ordinal];
+    private static final Map<Short, Sponsorship> DB_TABLE = new TreeMap<>();
+
+    static {
+        for (Sponsorship sponsor : Sponsorship.values()) {
+            if (DB_TABLE.containsKey(sponsor.getDbId())) {
+                throw new RuntimeException("DUPLICATE SPONSORSHIP DATABASE ID: " + sponsor.getDbId());
+            }
+            DB_TABLE.put(sponsor.getDbId(), sponsor);
+        }
+    }
+
+    @NotNull
+    public static Sponsorship getFromDbId(short dbId) {
+        Sponsorship s = DB_TABLE.get(dbId);
+        return s == null ? Sponsorship.NONE : s;
     }
 }

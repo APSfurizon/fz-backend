@@ -20,7 +20,7 @@ public class JooqNosecountObjMapper {
                 .userLocale(record.get(USERS.USER_LOCALE))
                 .userLanguage(TranslationUtil.parseLocale(record.get(USERS.USER_LANGUAGE)))
                 .media(MediaResponseMapper.mapOrNull(record))
-                .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
+                .sponsorship(Sponsorship.getFromDbId(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                 .extraDays(ExtraDays.get(record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)))
                 .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
                 .roomId(record.get(ROOMS.ROOM_ID))

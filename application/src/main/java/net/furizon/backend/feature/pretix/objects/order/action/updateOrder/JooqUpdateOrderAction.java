@@ -45,7 +45,7 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
             PostgresDSL
                 .update(ORDERS)
                 .set(ORDERS.ORDER_STATUS, (short) order.getOrderStatus().ordinal())
-                .set(ORDERS.ORDER_SPONSORSHIP_TYPE, (short) order.getSponsorship().ordinal())
+                .set(ORDERS.ORDER_SPONSORSHIP_TYPE, order.getSponsorship().getDbId())
                 .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, (short) order.getExtraDays().ordinal())
                 .set(ORDERS.ORDER_DAILY_DAYS, order.getDailyDaysBitmask())
                 .set(ORDERS.ORDER_BOARD, order.getBoard().getDbId())

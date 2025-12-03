@@ -34,7 +34,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
     ) {
         String code = order.getCode();
         short orderStatus = (short) order.getOrderStatus().ordinal();
-        short sponsorship = (short) order.getSponsorship().ordinal();
+        short sponsorship = order.getSponsorship().getDbId();
         short extraDays = (short) order.getExtraDays().ordinal();
         short board = order.getBoard().getDbId();
         long dailyDaysBitmask = order.getDailyDaysBitmask();

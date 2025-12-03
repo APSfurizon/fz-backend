@@ -35,7 +35,7 @@ public class JooqBadgeToPrintMapper {
                 .imageMimeType(record.get(MEDIA.MEDIA_TYPE))
                 .serialNo(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                 .orderCode(record.get(ORDERS.ORDER_CODE))
-                .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
+                .sponsorship(Sponsorship.getFromDbId(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                 .isDaily(record.get(ORDERS.ORDER_DAILY_DAYS) != 0L)
                 .fursuitId(withFursuit ? record.get(FURSUITS.FURSUIT_ID) : null)
                 .fursuitName(withFursuit ? record.get(FURSUITS.FURSUIT_NAME) : null)
