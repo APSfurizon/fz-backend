@@ -324,6 +324,7 @@ public class DefaultRoomLogic implements RoomLogic {
     @Transactional
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("exchangeRoom() called with: "

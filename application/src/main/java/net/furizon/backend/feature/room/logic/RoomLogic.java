@@ -42,7 +42,9 @@ public interface RoomLogic {
 
     boolean isExchangeRoomSupported(@NotNull Event event);
     boolean isExchangeFullOrderSupported(@NotNull Event event);
-    boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
+    boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                         @NotNull Order sourceOrder, @NotNull Order targetOrder,
+                         @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                          @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event,
                               @NotNull PretixInformation pretixInformation);

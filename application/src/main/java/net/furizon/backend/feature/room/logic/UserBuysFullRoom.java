@@ -20,6 +20,7 @@ import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomOnPretix
 import net.furizon.backend.feature.room.action.transferOrder.TransferPretixOrderAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
+import net.furizon.backend.feature.room.dto.request.ExchangeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
@@ -179,6 +180,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     @Transactional
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("[ROOM_EXCHANGE] called with params: "
@@ -188,31 +190,23 @@ public class UserBuysFullRoom implements RoomLogic {
             OrderController.suspendWebhook();
             log.info("[ROOM_EXCHANGE] UserBuysFullRoom: Exchange between users: {} -> {} on event {}",
                     sourceUsrId, targetUsrId, event);
-            //get orders
-            Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUsrId, event, pretixInformation);
-            Order targetOrder = orderFinder.findOrderByUserIdEvent(targetUsrId, event, pretixInformation);
-            if (sourceOrder == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Source has no order",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
-            if (targetOrder == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Target has no order",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
+
             final String sourceOrderCode = sourceOrder.getCode();
             final String targetOrderCode = targetOrder.getCode();
             final ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
             final ExtraDays targetExtraDays = targetOrder.getExtraDays();
+            final Board sourceBoard = sourceOrder.getBoard();
+            final Board targetBoard = targetOrder.getBoard();
 
             //Get positions
             Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
             Long sourceEarlyPositionId = null;
             Long sourceLatePositionId = null;
+            Long sourceBoardPositionId = null;
             Long targetRoomPositionId = targetOrder.getRoomPositionId();
             Long targetEarlyPositionId = null;
             Long targetLatePositionId = null;
+            Long targetBoardPositionId = null;
 
             //Get early and late data
             if (sourceOrder.hasRoom()) {
@@ -222,6 +216,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 if (sourceExtraDays.isLate()) {
                     sourceLatePositionId = sourceOrder.getLatePositionId();
                 }
+                if (sourceBoard != Board.NONE) {
+                    sourceBoardPositionId = sourceOrder.getBoardPositionId();
+                }
             }
             if (targetOrder.hasRoom()) {
                 if (targetExtraDays.isEarly()) {
@@ -229,6 +226,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
                 if (targetExtraDays.isLate()) {
                     targetLatePositionId = targetOrder.getLatePositionId();
+                }
+                if (targetBoard != Board.NONE) {
+                    targetBoardPositionId = targetOrder.getBoardPositionId();
                 }
             }
 
@@ -258,7 +258,11 @@ public class UserBuysFullRoom implements RoomLogic {
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeRoom(
-                    targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event, pretixInformation);
+                targetUsrId, sourceUsrId,
+                sourceOrder, targetOrder,
+                targetRoomId, sourceRoomId,
+                event, pretixInformation
+            );
             if (!dbRes) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Database update returned false!",
                         sourceUsrId, targetUsrId, event);
@@ -266,20 +270,25 @@ public class UserBuysFullRoom implements RoomLogic {
                         GeneralResponseCodes.GENERIC_ERROR);
             }
 
+
+
             //Exchange rooms on pretix
             boolean pretixRes = exchangeRoomAction.invoke(
-                sourceOrderCode,
-                sourceRoomPositionId,
-                sourceEarlyPositionId,
-                sourceLatePositionId,
+                ExchangeRoomRequest.builder()
+                        .sourceOrderCode(sourceOrderCode)
+                        .destOrderCode(targetOrderCode)
 
-                targetOrderCode,
-                targetRoomPositionId,
-                targetEarlyPositionId,
-                targetLatePositionId,
+                        .sourceRootPositionId(sourceRoomPositionId)
+                        .destRootPositionId(targetRoomPositionId)
 
-                paymentComment,
-                refundComment,
+                        .exchange(sourceRoomPositionId, targetRoomPositionId)
+                        .exchange(sourceEarlyPositionId, targetEarlyPositionId)
+                        .exchange(sourceLatePositionId, targetLatePositionId)
+                        .exchange(sourceBoardPositionId, targetBoardPositionId)
+
+                        .manualPaymentComment(paymentComment)
+                        .manualRefundComment(refundComment)
+                    .build(),
                 event
             );
             if (!pretixRes) {

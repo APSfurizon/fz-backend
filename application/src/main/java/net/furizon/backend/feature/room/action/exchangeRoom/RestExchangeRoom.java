@@ -36,25 +36,8 @@ public class RestExchangeRoom implements ExchangeRoomOnPretixAction {
     private final TranslationService translationService;
 
     @Override
-    public boolean invoke(
-            @NotNull String sourceOrderCode,
-            long sourceRoomPositionId,
-            @Nullable Long sourceEarlyPositionId,
-            @Nullable Long sourceLatePositionId,
-
-            @NotNull String destOrderCode,
-            long destRoomPositionId,
-            @Nullable Long destEarlyPositionId,
-            @Nullable Long destLatePositionId,
-
-            @Nullable String manualPaymentComment,
-            @Nullable String manualRefundComment,
-            @NotNull Event event) {
-        log.info("Exchanging room using pretix plugin. "
-               + "srcOrderCode={}, srcRoomPositionId={}, srcEarlyPositionId={}, srcLatePositionId={};  "
-               + "dstOrderCode={}, dstRoomPositionId={}, dstEarlyPositionId={}, dstLatePositionId={}",
-                sourceOrderCode, sourceRoomPositionId, sourceEarlyPositionId, sourceLatePositionId,
-                destOrderCode, destRoomPositionId, destEarlyPositionId, destLatePositionId);
+    public boolean invoke(@NotNull ExchangeRoomRequest exchange, @NotNull Event event) {
+        log.info("Exchanging room using pretix plugin. Req={}", exchange);
         final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
                 .method(HttpMethod.POST)
@@ -63,22 +46,7 @@ public class RestExchangeRoom implements ExchangeRoomOnPretixAction {
                 .uriVariable("organizer", pair.getOrganizer())
                 .uriVariable("event", pair.getEvent())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(
-                    ExchangeRoomRequest.builder()
-                        .sourceOrderCode(sourceOrderCode)
-                        .sourceRoomPositionId(sourceRoomPositionId)
-                        .sourceEarlyPositionId(sourceEarlyPositionId)
-                        .sourceLatePositionId(sourceLatePositionId)
-
-                        .destOrderCode(destOrderCode)
-                        .destRoomPositionId(destRoomPositionId)
-                        .destEarlyPositionId(destEarlyPositionId)
-                        .destLatePositionId(destLatePositionId)
-
-                        .manualPaymentComment(manualPaymentComment)
-                        .manualRefundComment(manualRefundComment)
-                    .build()
-                )
+                .body(exchange)
                 .responseType(Void.class)
                 .build();
         try {
