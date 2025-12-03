@@ -91,6 +91,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
 
         boolean res = roomLogic.exchangeRoom(
                 destUserId, sourceUserId,
+                sourceOrder, targetOrder,
                 destRoom.orElse(null), sourceRoom.orElse(null),
                 event, input.pretixInformation
         );

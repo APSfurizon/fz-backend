@@ -20,6 +20,11 @@ public class PretixConst {
 
     public static final String METADATA_EXTRA_DAYS_TAG_PREFIX = "extra_days_";
 
+    public static final String METADATA_BOARD_TAG_PREFIX = "board_";
+    public static final String METADATA_BOARD_ITEM_TAG_PREFIX = METADATA_BOARD_TAG_PREFIX + "item_";
+    public static final String METADATA_BOARD_HALF_VARIATIONS_TAG = "half";
+    public static final String METADATA_BOARD_FULL_VARIATIONS_TAG = "full";
+
     public static final String METADATA_ROOM_TYPE_TAG_PREFIX = "room_type_";
     public static final String METADATA_ROOM_NO_ROOM_ITEM = "no_room";
 

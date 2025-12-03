@@ -36,6 +36,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         short orderStatus = (short) order.getOrderStatus().ordinal();
         short sponsorship = (short) order.getSponsorship().ordinal();
         short extraDays = (short) order.getExtraDays().ordinal();
+        short board = order.getBoard().getDbId();
         long dailyDaysBitmask = order.getDailyDaysBitmask();
         Long pretixRoomItemId = order.getPretixRoomItemId();
         short roomCapacity = order.getRoomCapacity();
@@ -57,6 +58,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         Long roomPosid = order.getRoomPositionPosid();
         Long earlyPositionId = order.getEarlyPositionId();
         Long latePositionId = order.getLatePositionId();
+        Long boardPositionId = order.getBoardPositionId();
         Long userId = order.getOrderOwner() == null ? null : order.getOrderOwner().getId();
         long eventId = order.getOrderEvent().getId();
         short extraFursuits = order.getExtraFursuits();
@@ -95,6 +97,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_SPONSORSHIP_TYPE,
                     ORDERS.ORDER_EXTRA_DAYS_TYPE,
                     ORDERS.ORDER_DAILY_DAYS,
+                    ORDERS.ORDER_BOARD,
                     ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                     ORDERS.ORDER_ROOM_CAPACITY,
                     ORDERS.ORDER_HOTEL_INTERNAL_NAME,
@@ -112,6 +115,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_ROOM_POSITION_POSITIONID,
                     ORDERS.ORDER_EARLY_POSITION_ID,
                     ORDERS.ORDER_LATE_POSITION_ID,
+                    ORDERS.ORDER_BOARD_POSITION_ID,
                     ORDERS.ORDER_EXTRA_FURSUITS,
                     ORDERS.ORDER_REQUIRES_ATTENTION,
                     ORDERS.ORDER_CHECKIN_TEXT,
@@ -128,6 +132,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     sponsorship,
                     extraDays,
                     dailyDaysBitmask,
+                    board,
                     pretixRoomItemId,
                     roomCapacity,
                     hotelInternalName,
@@ -145,6 +150,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     roomPosid,
                     earlyPositionId,
                     latePositionId,
+                    boardPositionId,
                     extraFursuits,
                     requiresAttention,
                     checkinText,
@@ -160,6 +166,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_SPONSORSHIP_TYPE, sponsorship)
                 .set(ORDERS.ORDER_EXTRA_DAYS_TYPE, extraDays)
                 .set(ORDERS.ORDER_DAILY_DAYS, dailyDaysBitmask)
+                .set(ORDERS.ORDER_BOARD, board)
                 .set(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID, pretixRoomItemId)
                 .set(ORDERS.ORDER_ROOM_CAPACITY, roomCapacity)
                 .set(ORDERS.ORDER_HOTEL_INTERNAL_NAME, hotelInternalName)
@@ -177,6 +184,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_ROOM_POSITION_POSITIONID, roomPosid)
                 .set(ORDERS.ORDER_EARLY_POSITION_ID, earlyPositionId)
                 .set(ORDERS.ORDER_LATE_POSITION_ID, latePositionId)
+                .set(ORDERS.ORDER_BOARD_POSITION_ID, boardPositionId)
                 .set(ORDERS.ORDER_EXTRA_FURSUITS, extraFursuits)
                 .set(ORDERS.ORDER_REQUIRES_ATTENTION, requiresAttention)
                 .set(ORDERS.ORDER_CHECKIN_TEXT, checkinText)

@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,4 +84,8 @@ public class PretixPosition {
     @Nullable
     @JsonProperty("valid_until")
     private final OffsetDateTime validUntil;
+
+    public long getLongPrice() {
+        return PretixGenericUtils.fromStrPriceToLong(price);
+    }
 }

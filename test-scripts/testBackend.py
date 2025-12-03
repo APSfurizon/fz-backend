@@ -148,6 +148,9 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     return doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
+def getOrderFullStatus() -> Response:
+    return doGet(f'{BASE_URL_API}orders-workflow/get-full-status')
+
 def getOrderLink() -> Response:
     return doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
 
@@ -267,6 +270,7 @@ def roomCreate() -> Response:
     return doPost(f'{BASE_URL_API}room/create', json=json)
 
 def roomDelete() -> Response:
+    json = {}
     return doPost(f'{BASE_URL_API}room/delete')
 
 def roomConfirm() -> Response:
@@ -280,7 +284,7 @@ def roomListing() -> Response:
 
 def buyOrUpgradeRoom() -> Response:
     json = {
-        "roomPretixItemId": 315
+        "roomPretixItemId": 335
     }
     return doPost(f'{BASE_URL_API}room/buy-or-upgrade-room', json=json)
 
@@ -296,6 +300,7 @@ def exchangeInit() -> Response:
     return doPost(f'{BASE_URL_API}room/exchange/init', json=json)
 
 def exchangeUpdate() -> Response:
+    # INSERT INTO exchange_confirmation_status(exchange_id, target_user_id, source_user_id, target_confirmed, source_confirmed, event_id, expires_on, action_type) VALUES (1, 3, 1, true, false, 10, 999999999999999999, 0); 0 for room, 1 for order
     json = {
         "exchangeId": 1,
         "confirm": True
@@ -331,8 +336,11 @@ login()
 #deleteRole(4)
 #exportBadges()
 #remindRoomNotFull()
-#usersAdminView(1)
 
+#getOrderFullStatus()
+
+
+#roomDelete()
 #roomCreate()
 #roomGetInfo()
 #roomConfirm()
@@ -340,13 +348,14 @@ login()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
-buyOrUpgradeRoom()
+#buyOrUpgradeRoom()
 #exchangeInit()
-#exchangeUpdate()
+exchangeUpdate()
 
 #uploadBadge()
 #deleteBadge()
 
+#usersAdminView(1)
 # getBadge()
 
 

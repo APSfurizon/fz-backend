@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +46,10 @@ public class RoomInfo {
     @NotNull
     @Builder.Default
     private final ExtraDays extraDays = ExtraDays.NONE;
+
+    @NotNull
+    @Builder.Default
+    private final Board board = Board.NONE;
 
     @Nullable
     @Builder.Default

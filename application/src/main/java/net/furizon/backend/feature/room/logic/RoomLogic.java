@@ -4,6 +4,7 @@ import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.RoomData;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +42,9 @@ public interface RoomLogic {
 
     boolean isExchangeRoomSupported(@NotNull Event event);
     boolean isExchangeFullOrderSupported(@NotNull Event event);
-    boolean exchangeRoom(long targetUsrId, long sourceUsrId, @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
+    boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                         @NotNull Order sourceOrder, @NotNull Order targetOrder,
+                         @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                          @NotNull Event event, @NotNull PretixInformation pretixInformation);
     boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId, @NotNull Event event,
                               @NotNull PretixInformation pretixInformation);
@@ -51,26 +54,22 @@ public interface RoomLogic {
     boolean refundFullOrder(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation);
 
     boolean isRoomBuyOrUpgradeSupported(@NotNull Event event);
-    boolean buyOrUpgradeRoom(long newRoomItemId,
-                             long newRoomPrice,
-                             @Nullable Long oldRoomPaid,
-                             long userId,
-                             @Nullable Long roomId,
-                             @Nullable Long newEarlyItemId,
-                             @Nullable Long newEarlyPrice,
-                             @Nullable Long oldEarlyPaid,
-                             @Nullable Long newLateItemId,
-                             @Nullable Long newLatePrice,
-                             @Nullable Long oldLatePaid,
-                             boolean disablePriceUpgradeChecks,
-                             @NotNull Order order,
-                             @NotNull Event event,
-                             @NotNull PretixInformation pretixInformation
+    boolean buyOrUpgradeRoom(
+        long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+        long userId, @Nullable Long roomId,
+        @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+        @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+        @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+            @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+        boolean disablePriceUpgradeChecks,
+        @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     );
 
     //The logic of these two methods should be the same
     @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId);
     void computeNosecountExtraDays(@NotNull NosecountRoom room);
+
+    @Nullable Board getBoardForUser(long userId, long eventId);
 
     void updateRoomCapacity(@NotNull RoomData roomData,
                             @NotNull Event event, @NotNull PretixInformation pretixInformation);

@@ -19,6 +19,7 @@ import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
 import net.furizon.backend.feature.room.mapper.RoomInvitationResponseMapper;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -645,7 +646,28 @@ public class JooqRoomFinder implements RoomFinder {
                 .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
             )
             .innerJoin(ORDERS)
-            .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+            .on(
+                ROOMS.ORDER_ID.eq(ORDERS.ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
         ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
+    }
+
+    @Override
+    public @Nullable Board getBoardOfRoomOwner(long guestUserId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_BOARD)
+                .from(ROOM_GUESTS)
+                .innerJoin(ROOMS)
+                .on(
+                    ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                    .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
+                )
+                .innerJoin(ORDERS)
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ORDERS.EVENT_ID.eq(eventId))
+                )
+        ).mapOrNull(r -> Board.getFromDbId(r.get(ORDERS.ORDER_BOARD)));
     }
 }

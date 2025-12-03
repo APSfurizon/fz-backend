@@ -11,6 +11,7 @@ import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -323,6 +324,7 @@ public class DefaultRoomLogic implements RoomLogic {
     @Transactional
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("exchangeRoom() called with: "
@@ -533,11 +535,15 @@ public class DefaultRoomLogic implements RoomLogic {
 
     @Override
     public boolean buyOrUpgradeRoom(
-            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+            long userId, @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+                @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
             boolean disablePriceUpgradeChecks,
-            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
+    ) {
         log.warn("DefaultRoomLogic does not implement buying or upgrading room!");
         return false;
     }
@@ -546,10 +552,12 @@ public class DefaultRoomLogic implements RoomLogic {
     public @Nullable ExtraDays getExtraDaysForUser(long userId, long eventId) {
         return orderFinder.getExtraDaysOfUser(userId, eventId);
     }
+    @Override
+    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {}
 
     @Override
-    public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
-
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return orderFinder.getBoardOfUser(userId, eventId);
     }
 
     @Override

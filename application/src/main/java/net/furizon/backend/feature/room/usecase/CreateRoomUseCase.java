@@ -11,6 +11,8 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.pretix.model.Board;
+import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -48,6 +50,8 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
 
         RoomData roomData = roomFinder.getRoomDataForUser(userId, event, input.pretixInformation);
         UserDisplayData owner = userFinder.getDisplayUser(userId, event);
+        ExtraDays extraDays = roomLogic.getExtraDaysForUser(userId, event.getId());
+        Board board = roomLogic.getBoardForUser(userId, event.getId());
 
         return RoomInfo.builder()
                 .roomId(roomId)
@@ -58,6 +62,8 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
                 .canConfirm(roomLogic.canConfirmRoom(roomId, event, input.pretixInformation))
                 .roomData(Objects.requireNonNull(roomData))
                 .guests(new LinkedList<>())
+                .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
+                .board(board == null ? Board.NONE : board)
                 .build();
     }
 

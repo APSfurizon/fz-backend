@@ -8,8 +8,8 @@ import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductResults;
 import net.furizon.backend.feature.pretix.objects.product.finder.PretixProductFinder;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
-import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -42,7 +42,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     return;
                 }
                 long productId = product.getId();
-                result.itemIdToPrice().put(productId, PretixGenericUtils.fromStrPriceToLong(product.getPrice()));
+                result.itemIdToPrice().put(productId, product.getLongPrice());
                 result.itemIdToBundle().put(productId, product.getBundles());
 
                 if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
@@ -69,10 +69,46 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         }
                         default: {
                             log.error("Invalid extra days identifier length: '{}' ({}) for item {}",
-                                      s, sp.length, productId);
+                                    s, sp.length, productId);
                             break;
                         }
                     }
+
+                } else if (identifier.startsWith(PretixConst.METADATA_BOARD_ITEM_TAG_PREFIX)) {
+                    String s = identifier.substring(PretixConst.METADATA_BOARD_ITEM_TAG_PREFIX.length());
+                    String[] sp = s.split("_");
+                    result.boardItemIds().add(productId);
+                    HotelCapacityPair hcPair = sp.length == 3
+                            ? new HotelCapacityPair(sp[0], sp[1], Short.parseShort(sp[2])) : null;
+                    if (hcPair == null) {
+                        log.warn("Parse of pretix board data: HotelCapacityPair is null (sp.length = {})", sp.length);
+                    } else {
+                        result.boardCapacityToItemId().put(hcPair, productId);
+                    }
+                    product.forEachVariationByIdentifierPrefix(
+                        PretixConst.METADATA_BOARD_TAG_PREFIX,
+                        (variation, strippedIdentifier, variationId) -> {
+                            String[] ssp = strippedIdentifier.split("_");
+                            Board board = Board.fromPretixString(ssp[0]);
+                            result.variationIdToFatherItemId().put(variationId, productId);
+                            result.variationIdToPrice().put(variationId, variation.getLongPrice());
+                            result.boardVariationIdToType().put(variationId, board);
+                            if (hcPair != null) {
+                                switch (board) {
+                                    case HALF: {
+                                        result.halfBoardCapacityToVariationId().put(hcPair, variationId);
+                                        break;
+                                    }
+                                    case FULL: {
+                                        result.fullBoardCapacityToVariationId().put(hcPair, variationId);
+                                        break;
+                                    }
+                                    default: break;
+                                }
+                            }
+                        }
+                    );
+
 
                 } else if (identifier.startsWith(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX)) {
                     String s = identifier.substring(PretixConst.METADATA_EVENT_TICKET_DAILY_TAG_PREFIX.length());
@@ -111,9 +147,11 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                             result.sponsorshipItemIds().add(productId);
                             product.forEachVariationByIdentifierPrefix(
                                 PretixConst.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
-                                (variation, strippedIdentifier) -> {
+                                (variation, strippedIdentifier, variationId) -> {
                                     Sponsorship ss = Sponsorship.get(Integer.parseInt(strippedIdentifier));
-                                    result.sponsorshipIdToType().put(variation.getId(), ss);
+                                    result.variationIdToPrice().put(variationId, variation.getLongPrice());
+                                    result.variationIdToFatherItemId().put(variationId, productId);
+                                    result.sponsorshipIdToType().put(variationId, ss);
                                 }
                             );
                             break;

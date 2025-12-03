@@ -20,6 +20,7 @@ import net.furizon.backend.feature.room.action.exchangeRoom.ExchangeRoomOnPretix
 import net.furizon.backend.feature.room.action.transferOrder.TransferPretixOrderAction;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
+import net.furizon.backend.feature.room.dto.request.ExchangeRoomRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
@@ -28,7 +29,7 @@ import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
-import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -178,6 +179,7 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     @Transactional
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         log.debug("[ROOM_EXCHANGE] called with params: "
@@ -187,31 +189,23 @@ public class UserBuysFullRoom implements RoomLogic {
             OrderController.suspendWebhook();
             log.info("[ROOM_EXCHANGE] UserBuysFullRoom: Exchange between users: {} -> {} on event {}",
                     sourceUsrId, targetUsrId, event);
-            //get orders
-            Order sourceOrder = orderFinder.findOrderByUserIdEvent(sourceUsrId, event, pretixInformation);
-            Order targetOrder = orderFinder.findOrderByUserIdEvent(targetUsrId, event, pretixInformation);
-            if (sourceOrder == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Source has no order",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
-            if (targetOrder == null) {
-                log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Target has no order",
-                        sourceUsrId, targetUsrId, event);
-                return false;
-            }
+
             final String sourceOrderCode = sourceOrder.getCode();
             final String targetOrderCode = targetOrder.getCode();
             final ExtraDays sourceExtraDays = sourceOrder.getExtraDays();
             final ExtraDays targetExtraDays = targetOrder.getExtraDays();
+            final Board sourceBoard = sourceOrder.getBoard();
+            final Board targetBoard = targetOrder.getBoard();
 
             //Get positions
             Long sourceRoomPositionId = sourceOrder.getRoomPositionId();
             Long sourceEarlyPositionId = null;
             Long sourceLatePositionId = null;
+            Long sourceBoardPositionId = null;
             Long targetRoomPositionId = targetOrder.getRoomPositionId();
             Long targetEarlyPositionId = null;
             Long targetLatePositionId = null;
+            Long targetBoardPositionId = null;
 
             //Get early and late data
             if (sourceOrder.hasRoom()) {
@@ -221,6 +215,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 if (sourceExtraDays.isLate()) {
                     sourceLatePositionId = sourceOrder.getLatePositionId();
                 }
+                if (sourceBoard != Board.NONE) {
+                    sourceBoardPositionId = sourceOrder.getBoardPositionId();
+                }
             }
             if (targetOrder.hasRoom()) {
                 if (targetExtraDays.isEarly()) {
@@ -228,6 +225,9 @@ public class UserBuysFullRoom implements RoomLogic {
                 }
                 if (targetExtraDays.isLate()) {
                     targetLatePositionId = targetOrder.getLatePositionId();
+                }
+                if (targetBoard != Board.NONE) {
+                    targetBoardPositionId = targetOrder.getBoardPositionId();
                 }
             }
 
@@ -257,7 +257,11 @@ public class UserBuysFullRoom implements RoomLogic {
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeRoom(
-                    targetUsrId, sourceUsrId, targetRoomId, sourceRoomId, event, pretixInformation);
+                targetUsrId, sourceUsrId,
+                sourceOrder, targetOrder,
+                targetRoomId, sourceRoomId,
+                event, pretixInformation
+            );
             if (!dbRes) {
                 log.error("[ROOM_EXCHANGE] Exchange {} -> {} on event {}: Database update returned false!",
                         sourceUsrId, targetUsrId, event);
@@ -265,20 +269,25 @@ public class UserBuysFullRoom implements RoomLogic {
                         GeneralResponseCodes.GENERIC_ERROR);
             }
 
+
+
             //Exchange rooms on pretix
             boolean pretixRes = exchangeRoomAction.invoke(
-                sourceOrderCode,
-                sourceRoomPositionId,
-                sourceEarlyPositionId,
-                sourceLatePositionId,
+                ExchangeRoomRequest.builder()
+                        .sourceOrderCode(sourceOrderCode)
+                        .destOrderCode(targetOrderCode)
 
-                targetOrderCode,
-                targetRoomPositionId,
-                targetEarlyPositionId,
-                targetLatePositionId,
+                        .sourceRootPositionId(sourceRoomPositionId)
+                        .destRootPositionId(targetRoomPositionId)
 
-                paymentComment,
-                refundComment,
+                        .exchange(sourceRoomPositionId, targetRoomPositionId)
+                        .exchange(sourceEarlyPositionId, targetEarlyPositionId)
+                        .exchange(sourceLatePositionId, targetLatePositionId)
+                        .exchange(sourceBoardPositionId, targetBoardPositionId)
+
+                        .manualPaymentComment(paymentComment)
+                        .manualRefundComment(refundComment)
+                    .build(),
                 event
             );
             if (!pretixRes) {
@@ -433,36 +442,42 @@ public class UserBuysFullRoom implements RoomLogic {
     @Override
     public boolean buyOrUpgradeRoom(
             long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
-            long userId,
-            @Nullable Long roomId,
+            long userId, @Nullable Long roomId,
             @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
             @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+                @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
             boolean disablePriceUpgradeChecks,
-            @NotNull Order order,
-            @NotNull Event event,
-            @NotNull PretixInformation pretixInformation
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
     ) {
         try {
             OrderController.suspendWebhook();
-            log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}:"
-                            + "User is buying or upgrading his room to r{} e{} l{}",
-                    userId, newRoomItemId, event, newRoomItemId, newEarlyItemId, newLateItemId);
+            log.info("[ROOM_BUY] User {} buying roomItemId {} on event {}: "
+                    + "User is buying or upgrading his room to r{} e{} l{} b{}/{}",
+                    userId, newRoomItemId, event,
+                    newRoomItemId, newEarlyItemId, newLateItemId, newBoardItemId, newBoardVariationId);
             log.debug("[ROOM_BUY] buyOrUpgradeRoom called with params: "
-                + "newRoomItemId={} newRoomPrice={} oldRoomPaid={} userId={} roomId={} "
+                + "newRoomItemId={} newRoomPrice={} oldRoomPaid={} "
+                + "userId={} roomId={} "
                 + "newEarlyItemId={} newEarlyPrice={} oldEarlyPaid={} "
                 + "newLateItemId={} newLatePrice={} oldLatePaid={} "
+                + "newBoardItemId={} newBoardVariationId={} newBoardPrice={} oldBoardPaid={} "
                 + "order=({}) evet={} pretixInformation={}",
-                newRoomItemId, newRoomPrice, oldRoomPaid, userId, roomId,
+                newRoomItemId, newRoomPrice, oldRoomPaid,
+                userId, roomId,
                 newEarlyItemId, newEarlyPrice, oldEarlyPaid,
                 newLateItemId, newLatePrice, oldLatePaid,
+                newBoardItemId, newBoardVariationId, newBoardPrice, oldBoardPaid,
                 order.toFullString(), event, pretixInformation
             );
             Long roomPositionId = order.getRoomPositionId();
             final boolean originallyHadAroomPosition = roomPositionId != null;
             final Long earlyPositionId = order.getEarlyPositionId();
             final Long latePositionId = order.getLatePositionId();
+            final Long boardPositionId = order.getBoardPositionId();
             final String orderCode = order.getCode();
             final ExtraDays extraDays = order.getExtraDays();
+            final Board board = order.getBoard();
 
             ChangeOrderRequest req = new ChangeOrderRequest();
 
@@ -488,8 +503,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 );
             }
 
-            // Set up extra days
             if (order.hasRoom()) {
+                // Set up extra days
                 if (extraDays.isEarly() && earlyPositionId != null && newEarlyItemId != null && newEarlyPrice != null) {
                     req.patchPosition(
                         earlyPositionId,
@@ -506,6 +521,20 @@ public class UserBuysFullRoom implements RoomLogic {
                                 .item(newLateItemId)
                             .build()
                             .setPrice(newLatePrice)
+                    );
+                }
+
+                // Board upgrade
+                if (board != Board.NONE && boardPositionId != null
+                        && newBoardItemId != null && newBoardVariationId != null
+                        && newBoardPrice != null) {
+                    req.patchPosition(
+                        boardPositionId,
+                        ChangeOrderRequest.PatchPosition.builder()
+                                .item(newBoardItemId)
+                                .variation(newBoardVariationId)
+                            .build()
+                            .setPrice(newBoardPrice)
                     );
                 }
             }
@@ -548,7 +577,8 @@ public class UserBuysFullRoom implements RoomLogic {
                 Order refreshedOrder =  refreshedOrderOpt.get();
                 long totalPaid = (oldRoomPaid == null ? 0L : oldRoomPaid)
                                + (oldEarlyPaid == null ? 0L : oldEarlyPaid)
-                               + (oldLatePaid  == null ? 0L : oldLatePaid);
+                               + (oldLatePaid  == null ? 0L : oldLatePaid)
+                               + (oldBoardPaid == null ? 0L : oldBoardPaid);
                 if (!originallyHadAroomPosition) {
                     roomPositionId = refreshedOrder.getRoomPositionId();
                 }
@@ -558,21 +588,30 @@ public class UserBuysFullRoom implements RoomLogic {
                 //Obtain price and check for different items
                 for (PretixPosition pos : pretixOrder.getPositions()) {
                     if (roomPositionId != null && pos.getPositionId() == roomPositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newRoomItemId;
                     }
                     if (earlyPositionId != null && newEarlyItemId != null && pos.getPositionId() == earlyPositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newEarlyItemId;
                     }
                     if (latePositionId != null && newLateItemId != null && pos.getPositionId() == latePositionId) {
-                        totalPrice += PretixGenericUtils.fromStrPriceToLong(pos.getPrice());
+                        totalPrice += pos.getLongPrice();
                         foundPositionIncoherence |= pos.getItemId() != newLateItemId;
+                    }
+                    if (boardPositionId != null
+                            && newBoardItemId != null && newBoardVariationId != null
+                            && pos.getPositionId() == boardPositionId) {
+                        totalPrice += pos.getLongPrice();
+                        foundPositionIncoherence |= pos.getItemId() != newBoardItemId;
+                        foundPositionIncoherence |= !Objects.equals(pos.getVariationId(), newBoardVariationId);
                     }
                 }
                 // Check if now we have an early/late position and previously we had not
                 foundPositionIncoherence |= refreshedOrder.getEarlyPositionId() != null && newEarlyItemId == null;
                 foundPositionIncoherence |= refreshedOrder.getLatePositionId() != null && newLateItemId == null;
+                foundPositionIncoherence |= refreshedOrder.getBoardPositionId() != null
+                                            && (newBoardItemId == null || newBoardVariationId == null);
 
                 if (totalPaid < totalPrice && !disablePriceUpgradeChecks) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Order {}:"
@@ -618,6 +657,11 @@ public class UserBuysFullRoom implements RoomLogic {
         // we can just use it
         ExtraDays ownerExtraDays = Objects.requireNonNull(room.getRoomExtraDays());
         guests.forEach(g -> g.setExtraDays(ownerExtraDays));
+    }
+
+    @Override
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return roomFinder.getBoardOfRoomOwner(userId, eventId);
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.furizon.backend.feature.admin.mapper;
 
 import net.furizon.backend.feature.admin.dto.HotelExportRow;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.generated.tables.Orders;
@@ -27,6 +28,7 @@ public class HotelExportRowMapper {
         long userId = record.get(USERS.USER_ID);
         boolean roomConfirmed = !roomLogic.isConfirmationSupported() || record.get(ROOMS.ROOM_CONFIRMED);
         ExtraDays extraDays = roomLogic.getExtraDaysForUser(userId, eventId);
+        Board board = roomLogic.getBoardForUser(userId, eventId);
         return HotelExportRow.builder()
                 .roomConfirmed(roomConfirmed)
                 .roomTypeName(!roomConfirmed ? "Room not confirmed yet" : //This must be human-readable
@@ -63,6 +65,7 @@ public class HotelExportRowMapper {
                 .orderCode(record.get(ORDERS.ORDER_CODE))
                 .roomOwnerOrderCode(record.get(roomOwnerOrder.ORDER_CODE))
                 .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
+                .board(board == null ? Board.NONE : board)
                 .requiresAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
                 .comment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
             .build();

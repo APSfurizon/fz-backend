@@ -9,6 +9,7 @@ import net.furizon.backend.feature.pretix.objects.question.PretixOption;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuota;
 import net.furizon.backend.feature.pretix.objects.quota.PretixQuotaAvailability;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
@@ -32,7 +33,12 @@ public interface PretixInformation {
     @Nullable
     Long getItemPrice(long roomPretixItemId, boolean ignoreCache, boolean subtractBundlesPrice);
 
+    @Nullable
+    Long getVariationPrice(long variationId, boolean ignoreCache);
+
     @Nullable List<PretixProductBundle> getBundlesForItem(long itemId);
+
+    @Nullable Long getFatherItemByVariationId(long variationId);
 
     @NotNull
     Set<Long> getRoomPretixIds();
@@ -50,6 +56,13 @@ public interface PretixInformation {
                                            short capacity, @NotNull ExtraDays day);
     @Nullable
     Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
+
+    @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                                       short capacity, @NotNull Board board);
+
+    @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board);
+
+    @Nullable Long getBoardItemIdForHotelCapacity(@NotNull HotelCapacityPair pair);
 
     @NotNull
     List<PretixState> getStatesOfCountry(@NotNull String countryIsoCode);
@@ -85,8 +98,13 @@ public interface PretixInformation {
     Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event);
 
     @Nullable List<PretixQuota> getQuotaFromItemId(long itemId);
+
+    @Nullable List<PretixQuota> getQuotaFromVariationId(long variationId);
+
     @NotNull
     Optional<PretixQuotaAvailability> getSmallestAvailabilityFromItemId(long itemId);
+
+    @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromVariationId(long variationId);
 
     void resetCache();
 

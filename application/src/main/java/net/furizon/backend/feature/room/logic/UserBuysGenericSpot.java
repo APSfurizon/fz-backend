@@ -18,6 +18,7 @@ import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -289,6 +290,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         //TODO implement when pretix is updated
@@ -327,15 +329,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         return false;
     }
     @Override
-    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice,
-                                    @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
-                                    @Nullable Long newEarlyItemId,
-                                    @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
-                                    @Nullable Long newLateItemId,
-                                    @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
-                                    boolean disablePriceUpgradeChecks,
-                                    @NotNull Order order,
-                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+            long userId, @Nullable Long roomId,
+            @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+            @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+                @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+            boolean disablePriceUpgradeChecks,
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
+    ) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");
         return false;
     }
@@ -347,6 +350,11 @@ public class UserBuysGenericSpot implements RoomLogic {
 
     @Override
     public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
+    }
+
+    @Override
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return orderFinder.getBoardOfUser(userId, eventId);
     }
 
     @Override

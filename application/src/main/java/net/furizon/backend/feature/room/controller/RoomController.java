@@ -104,7 +104,7 @@ public class RoomController {
     @PostMapping("/delete")
     public boolean deleteRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @NotNull @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 DeleteRoomUseCase.class,
