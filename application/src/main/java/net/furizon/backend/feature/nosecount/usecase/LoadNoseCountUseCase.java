@@ -98,7 +98,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                                 Objects.requireNonNull(obj.getRoomCapacity()),
                                 itemId,
                                 obj.getRoomInternalName(),
-                                input.pretixInformation.getRoomNamesFromRoomPretixItemId(itemId)
+                                input.pretixInformation.getItemNames(itemId)
                             ), new ArrayList<>()
                         );
 

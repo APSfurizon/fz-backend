@@ -120,6 +120,12 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> quota
     @NotNull
     private final Cache<Long, List<PretixQuota>> variationIdToQuota = Caffeine.newBuilder().build();
+    //map id -> room names
+    @NotNull
+    private final Cache<Long, Map<String, String>> itemIdToNames = Caffeine.newBuilder().build();
+    //map id -> room names
+    @NotNull
+    private final Cache<Long, Map<String, String>> variationIdToNames = Caffeine.newBuilder().build();
 
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
@@ -163,9 +169,6 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> (capacity, hotelName, roomName)
     @NotNull
     private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
-    //map id -> room names
-    @NotNull
-    private final Cache<Long, Map<String, String>> roomPretixItemIdToNames = Caffeine.newBuilder().build();
     //map capacity -> List[id of room items with that capacity]
     @NotNull
     private final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
@@ -327,12 +330,24 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     @Override
-    public Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId) {
+    public Map<String, String> getItemNames(long itemId) {
         lock.readLock().lock();
-        var v = roomPretixItemIdToNames.getIfPresent(roomPretixItemId);
+        var v = itemIdToNames.getIfPresent(itemId);
         lock.readLock().unlock();
         if (v == null) {
-            log.warn("Unable to fetch room name for id {}", roomPretixItemId);
+            log.warn("Unable to fetch item name for id {}", itemId);
+        }
+        return v == null ? new HashMap<>() : v;
+    }
+
+    @NotNull
+    @Override
+    public Map<String, String> getVariationNames(long variationId) {
+        lock.readLock().lock();
+        var v = variationIdToNames.getIfPresent(variationId);
+        lock.readLock().unlock();
+        if (v == null) {
+            log.warn("Unable to fetch variation name for id {}", variationId);
         }
         return v == null ? new HashMap<>() : v;
     }
@@ -790,6 +805,8 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdToBundle.invalidateAll();
         itemIdToQuota.invalidateAll();
         variationIdToQuota.invalidateAll();
+        itemIdToNames.invalidateAll();
+        variationIdToNames.invalidateAll();
 
         //Questions
         questionUserId.set(-1L);
@@ -811,7 +828,6 @@ public class CachedPretixInformation implements PretixInformation {
 
         //Rooms
         roomIdToInfo.invalidateAll();
-        roomPretixItemIdToNames.invalidateAll();
         roomIdToEarlyExtraDayItemId.invalidateAll();
         roomIdToLateExtraDayItemId.invalidateAll();
         roomCapacityToItemId.invalidateAll();
@@ -912,7 +928,8 @@ public class CachedPretixInformation implements PretixInformation {
         variationIdToPrice.putAll(products.variationIdToPrice());
         itemIdToBundle.putAll(products.itemIdToBundle());
         variationIdToItem.putAll(products.variationIdToFatherItemId());
-        roomPretixItemIdToNames.putAll(products.roomPretixItemIdToNames());
+        itemIdToNames.putAll(products.itemIdToNames());
+        variationIdToNames.putAll(products.variationIdToNames());
         roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
         roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
         roomCapacityToItemId.putAll(products.capacityToRoomItemIds());

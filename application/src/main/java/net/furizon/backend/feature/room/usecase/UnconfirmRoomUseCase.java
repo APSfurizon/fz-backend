@@ -55,7 +55,7 @@ public class UnconfirmRoomUseCase implements UseCase<UnconfirmRoomUseCase.Input,
         boolean res = roomLogic.unconfirmRoom(roomId, event, input.pretixInformation);
         if (res) {
             if (roomItemId != null) {
-                Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
+                Map<String, String> names = pretixInformation.getItemNames(roomItemId);
                 if (names != null && !names.isEmpty()) {
                     String name = names.get(LANG_PRETIX);
                     if (name != null) {

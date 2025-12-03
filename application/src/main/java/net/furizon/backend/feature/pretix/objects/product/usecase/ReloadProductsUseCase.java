@@ -44,6 +44,18 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 long productId = product.getId();
                 result.itemIdToPrice().put(productId, product.getLongPrice());
                 result.itemIdToBundle().put(productId, product.getBundles());
+                Map<String, String> names = product.getCustomNames();
+                names = names.isEmpty() ? product.getNames() : names;
+                result.itemIdToNames().put(productId, names);
+
+                product.getVariations().forEach(variation -> {
+                    long variationId = variation.getId();
+                    result.variationIdToFatherItemId().put(variationId, productId);
+                    result.variationIdToPrice().put(variationId, variation.getLongPrice());
+                    Map<String, String> variationNames = variation.getCustomNames();
+                    variationNames = variationNames.isEmpty() ? variation.getNames() : variationNames;
+                    result.variationIdToNames().put(variationId, variationNames);
+                });
 
                 if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {
                     String s = identifier.substring(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX.length());
@@ -90,8 +102,6 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         (variation, strippedIdentifier, variationId) -> {
                             String[] ssp = strippedIdentifier.split("_");
                             Board board = Board.fromPretixString(ssp[0]);
-                            result.variationIdToFatherItemId().put(variationId, productId);
-                            result.variationIdToPrice().put(variationId, variation.getLongPrice());
                             result.boardVariationIdToType().put(variationId, board);
                             if (hcPair != null) {
                                 switch (board) {
@@ -127,9 +137,6 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                         short capacity = Short.parseShort(sp[2]);
                         result.roomIdToInfo().put(productId, new HotelCapacityPair(hotelName, roomName, capacity));
                         result.capacityToRoomItemIds().computeIfAbsent(capacity, k -> new ArrayList<>()).add(productId);
-                        Map<String, String> names = product.getCustomNames();
-                        names = names.isEmpty() ? product.getNames() : names;
-                        result.roomPretixItemIdToNames().put(productId, names);
                     }
 
 
@@ -149,8 +156,6 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                                 PretixConst.METADATA_SPONSORSHIP_VARIATIONS_TAG_PREFIX,
                                 (variation, strippedIdentifier, variationId) -> {
                                     Sponsorship ss = Sponsorship.getFromDbId(Short.parseShort(strippedIdentifier));
-                                    result.variationIdToPrice().put(variationId, variation.getLongPrice());
-                                    result.variationIdToFatherItemId().put(variationId, productId);
                                     result.sponsorshipIdToType().put(variationId, ss);
                                 }
                             );

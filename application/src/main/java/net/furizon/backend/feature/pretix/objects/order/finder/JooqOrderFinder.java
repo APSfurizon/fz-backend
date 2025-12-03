@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Optional;
-import java.util.Objects;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -185,7 +182,7 @@ public class JooqOrderFinder implements OrderFinder {
                                 roomCapacity,
                                 roomItemId,
                                 order.getRoomInternalName(),
-                                pretixService.getRoomNamesFromRoomPretixItemId(roomItemId)
+                                pretixService.getItemNames(roomItemId)
                         )
                 );
             }

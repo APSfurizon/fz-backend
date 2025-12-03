@@ -174,7 +174,7 @@ public class BuyUpgradeRoomUseCase implements UseCase<BuyUpgradeRoomUseCase.Inpu
                 disableUnupgradeChecks, order, event, pretixInformation
         );
         if (res && oldRoomId != null) {
-            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(newRoomItemId);
+            Map<String, String> names = pretixInformation.getItemNames(newRoomItemId);
             if (names != null) {
                 mailService.prepareAndSendBroadcastUpdate(
                         oldRoomId,

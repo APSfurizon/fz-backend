@@ -32,7 +32,7 @@ public class HotelExportRowMapper {
         return HotelExportRow.builder()
                 .roomConfirmed(roomConfirmed)
                 .roomTypeName(!roomConfirmed ? "Room not confirmed yet" : //This must be human-readable
-                    pretixInformation.getRoomNamesFromRoomPretixItemId(
+                    pretixInformation.getItemNames(
                         record.get(roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID)
                     ).entrySet().iterator().next().getValue()
                 )
