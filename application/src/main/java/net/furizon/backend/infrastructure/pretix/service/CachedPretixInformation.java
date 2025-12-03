@@ -36,6 +36,7 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.*;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -107,6 +108,9 @@ public class CachedPretixInformation implements PretixInformation {
     //map id -> quota
     @NotNull
     private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
+    //map id -> quota
+    @NotNull
+    private final Cache<Long, List<PretixQuota>> variationIdToQuota = Caffeine.newBuilder().build();
 
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
@@ -693,22 +697,38 @@ public class CachedPretixInformation implements PretixInformation {
         return v;
     }
 
-    //This is NOT cached!!
+    @Override
+    public @Nullable List<PretixQuota> getQuotaFromVariationId(long variationId) {
+        lock.readLock().lock();
+        var v = variationIdToQuota.getIfPresent(variationId);
+        lock.readLock().unlock();
+        return v;
+    }
+
     @Override
     public @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromItemId(long itemId) {
-        List<PretixQuota> quota = getQuotaFromItemId(itemId);
+        return getSmallestAvailabilityFromList(itemId, getQuotaFromItemId(itemId));
+    }
+    @Override
+    public @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromVariationId(long variationId) {
+        return getSmallestAvailabilityFromList(variationId, getQuotaFromItemId(variationId));
+    }
+    //This is NOT cached!!
+    @NotNull
+    private Optional<PretixQuotaAvailability> getSmallestAvailabilityFromList(long id,
+                                                                              @Nullable List<PretixQuota> quota) {
         if (quota == null || quota.isEmpty()) {
-            log.warn("Quota not found for item {}", itemId);
+            log.warn("Quota not found for item/variation {}", id);
             return Optional.of(new PretixQuotaAvailability(
-                    true,
-                    null,
-                    null,
-                    0L,
-                    0L,
-                    0L,
-                    0L,
-                    0L,
-                    0L));
+                true,
+                null,
+                null,
+                0L,
+                0L,
+                0L,
+                0L,
+                0L,
+                0L));
         }
         //We return only the smallest availability
         Event event = getCurrentEvent();
@@ -760,6 +780,7 @@ public class CachedPretixInformation implements PretixInformation {
         variationIdToItem.invalidateAll();
         itemIdToBundle.invalidateAll();
         itemIdToQuota.invalidateAll();
+        variationIdToQuota.invalidateAll();
 
         //Questions
         questionUserId.set(-1L);
@@ -894,15 +915,19 @@ public class CachedPretixInformation implements PretixInformation {
 
     private void reloadQuotas(@NotNull Event event) {
         List<PretixQuota> quotas = useCaseExecutor.execute(ReloadQuotaUseCase.class, event);
-        quotas.forEach(quota -> quota.getItems().forEach(i -> {
-            List<PretixQuota> existingQuota = itemIdToQuota.getIfPresent(i);
+        TriConsumer<PretixQuota, Long, Cache<Long, List<PretixQuota>>> store = (quota, id, cache) -> {
+            List<PretixQuota> existingQuota = cache.getIfPresent(id);
             //An item can be assigned to multiple quota
             if (existingQuota == null) {
                 existingQuota = new LinkedList<>();
-                itemIdToQuota.put(i, existingQuota);
+                cache.put(id, existingQuota);
             }
             existingQuota.add(quota);
-        }));
+        };
+        quotas.forEach(quota -> {
+            quota.getItems().forEach(id -> store.accept(quota, id, itemIdToQuota));
+            quota.getVariations().forEach(id -> store.accept(quota, id, variationIdToQuota));
+        });
     }
 
     @Override

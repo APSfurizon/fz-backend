@@ -15,6 +15,7 @@ import net.furizon.backend.feature.room.dto.response.RoomAvailabilityInfoRespons
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.RoomConfig;
@@ -70,23 +71,24 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
         // Fetch extraDays price
         long currentExtraDaysPaid = 0L;
+        long currentBoardPaid = 0L;
         Order order = loadAllItems ? null : generalChecks.getOrderAndAssertItExists(userId, event, pretixInformation);
         Long pretixRoomItemId = !loadAllItems && order.hasRoom() ? order.getPretixRoomItemId() : null;
 
 
         //Fetch extra days price
         ExtraDays extraDays = order == null ? null : order.getExtraDays();
+        Board board = order == null ? null : order.getBoard();
         short capacity = order == null ? -1 : order.getRoomCapacity();
         String hotelInternalName = null;
         String roomInternalName = null;
         if (order != null && order.hasRoom() && canLoadData) {
             hotelInternalName = Objects.requireNonNull(order.getHotelInternalName());
             roomInternalName = Objects.requireNonNull(order.getRoomInternalName());
+            HotelCapacityPair hcp = new HotelCapacityPair(hotelInternalName, roomInternalName, capacity);
             if (extraDays.isEarly()) {
                 long extraDayItemId = Objects.requireNonNull(
-                        pretixInformation.getExtraDayItemIdForHotelCapacity(
-                                hotelInternalName, roomInternalName, capacity, ExtraDays.EARLY
-                        )
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(hcp, ExtraDays.EARLY)
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(
                         pretixInformation.getItemPrice(extraDayItemId, false, true)
@@ -94,12 +96,18 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             }
             if (extraDays.isLate()) {
                 long extraDayItemId = Objects.requireNonNull(
-                        pretixInformation.getExtraDayItemIdForHotelCapacity(
-                                hotelInternalName, roomInternalName, capacity, ExtraDays.LATE
-                        )
+                        pretixInformation.getExtraDayItemIdForHotelCapacity(hcp, ExtraDays.LATE)
                 );
                 currentExtraDaysPaid += Objects.requireNonNull(
                         pretixInformation.getItemPrice(extraDayItemId, false, true)
+                );
+            }
+            if (board != Board.NONE) {
+                long boardVariationId = Objects.requireNonNull(
+                        pretixInformation.getBoardVariationIdForHotelCapacity(hcp, board)
+                );
+                currentBoardPaid += Objects.requireNonNull(
+                        pretixInformation.getVariationPrice(boardVariationId, false)
                 );
             }
         }
@@ -115,7 +123,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 : roomId.map(id -> roomFinder.getRoomGuestsFromRoomId(id, false)).orElse(null);
 
 
-        long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid;
+        long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid + currentBoardPaid;
         Set<Long> roomItemIds = pretixInformation.getRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
         List<RoomAvailabilityInfoResponse> rooms = canLoadData ? roomItemIds.stream().map(itemId -> {
@@ -130,8 +138,10 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                 // (actual check against how much the user has paid is done on the actual action)
                 long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false, true));
                 long extraDaysPrice = 0L;
+                long boardPrice = 0L;
                 Long earlyItemId = null;
                 Long lateItemId = null;
+                Long boardVariationId = null;
                 if (order != null && order.hasRoom()) {
                     if (extraDays.isEarly()) {
                         earlyItemId = Objects.requireNonNull(
@@ -149,13 +159,23 @@ public class ListRoomWithPricesAndQuotaUseCase implements
                                 pretixInformation.getItemPrice(lateItemId, false, true)
                         );
                     }
+                    if (board != Board.NONE) {
+                        boardVariationId = Objects.requireNonNull(
+                                pretixInformation.getBoardVariationIdForHotelCapacity(roomInfo, board)
+                        );
+                        boardPrice += Objects.requireNonNull(
+                                pretixInformation.getVariationPrice(boardVariationId, false)
+                        );
+                        //Zozzating for the internal getSmallestQuota method
+                        boardVariationId = -boardVariationId;
+                    }
                 }
-                long totalPrice = roomPrice + extraDaysPrice;
+                long totalPrice = roomPrice + extraDaysPrice + boardPrice;
 
                 if (totalPrice >= totalPaid || disableUnupgradeFilter || loadAllItems) {
                     //Fetch availability
                     PretixQuotaAvailability quota = getSmallestQuota(
-                            pretixInformation, itemId, earlyItemId, lateItemId
+                            pretixInformation, itemId, earlyItemId, lateItemId, boardVariationId
                     );
 
                     RoomData data = roomFinder.getRoomDataFromPretixItemId(itemId, pretixInformation);
@@ -178,15 +198,18 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         );
     }
 
+    // Zozzating: variation id are <0
     @Nullable
     private PretixQuotaAvailability getSmallestQuota(@NotNull PretixInformation pretixInformation, Long... items) {
         PretixQuotaAvailability ret = null;
         long minRemaining = Long.MAX_VALUE;
         for (Long item : items) {
             if (item != null) {
-                var r = pretixInformation.getSmallestAvailabilityFromItemId(item);
+                Optional<PretixQuotaAvailability> r = item < 0L
+                                                    ? pretixInformation.getSmallestAvailabilityFromVariationId(-item)
+                                                    : pretixInformation.getSmallestAvailabilityFromItemId(item);
                 if (!r.isPresent()) {
-                    log.warn("Unable to fetch quota for item {}", item);
+                    log.warn("Unable to fetch quota for item/variation {}", item);
                     return null;
                 }
                 PretixQuotaAvailability q = r.get();

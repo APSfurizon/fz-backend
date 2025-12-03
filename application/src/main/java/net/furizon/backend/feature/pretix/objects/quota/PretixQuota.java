@@ -10,4 +10,5 @@ public class PretixQuota {
     private final String name;
     private final long size;
     private final List<Long> items;
+    private final List<Long> variations;
 }
