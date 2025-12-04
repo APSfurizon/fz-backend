@@ -65,7 +65,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_ACCOUNT_USERID;
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
@@ -120,7 +119,22 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Override
     public @Nullable Long getItemPrice(long itemId, boolean ignoreCache, boolean subtractBundlesPrice) {
+        return getItemPrice(itemId, ignoreCache, subtractBundlesPrice, getCurrentEvent(), true);
+    }
+    @Override
+    public @Nullable Long getItemPrice(long itemId, boolean ignoreCache, boolean subtractBundlesPrice, @Nullable Event event) {
+        boolean isCurrentEvent = Objects.equals(event, getCurrentEvent());
+        return getItemPrice(itemId, ignoreCache, subtractBundlesPrice, event, isCurrentEvent);
+    }
+    private @Nullable Long getItemPrice(long itemId, boolean ignoreCache, boolean subtractBundlesPrice,
+                                       @Nullable Event event, boolean isCurrentEvent) {
+        // We trust that Event and isCurrentEvent are set correctly
+        PretixCache cache = isCurrentEvent ? currentEventCache : otherEventsCache;
         if (ignoreCache) {
+            if (event == null) {
+                log.error("[PRETIX] getItemPrice() fetch: Event is null");
+                return null;
+            }
             var v = productFinder.fetchProductById(getCurrentEvent(), itemId);
             if (!v.isPresent()) {
                 log.error("[PRETIX] getItemPrice() fetch: Product not found for id {}", itemId);
@@ -130,8 +144,8 @@ public class CachedPretixInformation implements PretixInformation {
             long value = product.getLongPrice();
             List<PretixProductBundle> bundles = product.getBundles();
             lock.writeLock().lock();
-            itemIdToPrice.put(itemId, value);
-            itemIdToBundle.put(itemId, bundles);
+            cache.itemIdToPrice.put(itemId, value);
+            cache.itemIdToBundle.put(itemId, bundles);
             lock.writeLock().unlock();
             if (subtractBundlesPrice) {
                 value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
@@ -140,8 +154,8 @@ public class CachedPretixInformation implements PretixInformation {
         } else {
             //When reloading the event we already cache the various prices, so there always be a value present
             lock.readLock().lock();
-            Long value = itemIdToPrice.getIfPresent(itemId);
-            List<PretixProductBundle> bundles = itemIdToBundle.getIfPresent(itemId);
+            Long value = cache.itemIdToPrice.getIfPresent(itemId);
+            List<PretixProductBundle> bundles = cache.itemIdToBundle.getIfPresent(itemId);
             lock.readLock().unlock();
             if (bundles != null && subtractBundlesPrice) {
                 value -= bundles.stream().mapToLong(PretixProductBundle::getTotalPrice).sum();
@@ -152,15 +166,30 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Override
     public @Nullable Long getVariationPrice(long variationId, boolean ignoreCache) {
+        return getVariationPrice(variationId, ignoreCache, getCurrentEvent(), true);
+    }
+    @Override
+    public @Nullable Long getVariationPrice(long variationId, boolean ignoreCache, @Nullable Event event) {
+        boolean isCurrentEvent = Objects.equals(event, getCurrentEvent());
+        return getVariationPrice(variationId, ignoreCache, event, isCurrentEvent);
+    }
+    private @Nullable Long getVariationPrice(long variationId, boolean ignoreCache,
+                                             @Nullable Event event, boolean isCurrentEvent) {
+        // We trust that Event and isCurrentEvent are set correctly
+        PretixCache cache = isCurrentEvent ? currentEventCache : otherEventsCache;
         if (ignoreCache) {
+            if (event == null) {
+                log.error("[PRETIX] getVariationPrice() fetch: Event is null");
+                return null;
+            }
             lock.readLock().lock();
-            Long itemId = variationIdToItem.getIfPresent(variationId);
+            Long itemId = cache.variationIdToItem.getIfPresent(variationId);
             lock.readLock().unlock();
             if (itemId == null) {
                 log.error("[PRETIX] getVariationPrice(): Product not found for variation id {}", variationId);
                 return null;
             }
-            var v = variationFinder.fetchVariationById(getCurrentEvent(), itemId, variationId);
+            var v = variationFinder.fetchVariationById(event, itemId, variationId);
             if (!v.isPresent()) {
                 log.error("[PRETIX] getVariationPrice() fetch: Product not found for item/variation {}/{}",
                           itemId, variationId);
@@ -169,13 +198,13 @@ public class CachedPretixInformation implements PretixInformation {
             PretixProductVariation variation = v.get();
             long value = variation.getLongPrice();
             lock.writeLock().lock();
-            variationIdToPrice.put(variationId, value);
+            cache.variationIdToPrice.put(variationId, value);
             lock.writeLock().unlock();
             return value;
         } else {
             //When reloading the event we already cache the various prices, so there always be a value present
             lock.readLock().lock();
-            Long value = variationIdToPrice.getIfPresent(variationId);
+            Long value = cache.variationIdToPrice.getIfPresent(variationId);
             lock.readLock().unlock();
             return value;
         }
@@ -206,18 +235,25 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Override
     public @NotNull List<Long> getRoomItemIdsForCapacity(short capacity) {
+        return getRoomItemIdsForCapacity(capacity, currentEventSpecificCache);
+    }
+    @Override
+    public @NotNull List<Long> getRoomItemIdsForCapacity(short capacity, long eventId) {
+        return getRoomItemIdsForCapacity(capacity, getSpecificCache(eventId));
+    }
+    private @NotNull List<Long> getRoomItemIdsForCapacity(short capacity, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        List<Long> v = roomCapacityToItemId.getIfPresent(capacity);
+        List<Long> v = cache.roomCapacityToItemId.getIfPresent(capacity);
         lock.readLock().unlock();
         return v == null ? Collections.emptyList() : v;
     }
 
     @Override
-    public @Nullable HotelCapacityPair getBiggestRoomCapacity() {
+    public @Nullable HotelCapacityPair getBiggestRoomCapacityOnCurrentEvent() {
         HotelCapacityPair biggest = null;
         short maxCapacity = 0;
         lock.readLock().lock();
-        for (HotelCapacityPair p : roomIdToInfo.asMap().values()) {
+        for (HotelCapacityPair p : currentEventCache.roomIdToInfo.asMap().values()) {
             if (p.capacity() > maxCapacity) {
                 maxCapacity = p.capacity();
                 biggest = p;
@@ -255,12 +291,27 @@ public class CachedPretixInformation implements PretixInformation {
     }
     @Nullable
     @Override
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                                            short capacity, @NotNull ExtraDays day, long eventId) {
+        return getExtraDayItemIdForHotelCapacity(new HotelCapacityPair(hotelName, roomInternalName, capacity), day, eventId);
+    }
+    @Nullable
+    @Override
     public Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day) {
+        return getExtraDayItemIdForHotelCapacity(pair, day, currentEventSpecificCache);
+    }
+    @Nullable
+    @Override
+    public Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day, long eventId) {
+        return getExtraDayItemIdForHotelCapacity(pair, day, getSpecificCache(eventId));
+    }
+    @Nullable
+    private Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day, @NotNull PretixEventSpecificCache cache) {
         Cache<HotelCapacityPair, Long> map = null;
         if (day == ExtraDays.EARLY) {
-            map = roomIdToEarlyExtraDayItemId;
+            map = cache.roomIdToEarlyExtraDayItemId;
         } else if (day == ExtraDays.LATE) {
-            map = roomIdToLateExtraDayItemId;
+            map = cache.roomIdToLateExtraDayItemId;
         }
         if (map == null) {
             return null;
@@ -270,6 +321,7 @@ public class CachedPretixInformation implements PretixInformation {
         lock.readLock().unlock();
         return ret;
     }
+
     @Nullable
     @Override
     public Long getBoardVariationIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
@@ -278,12 +330,27 @@ public class CachedPretixInformation implements PretixInformation {
     }
     @Nullable
     @Override
+    public Long getBoardVariationIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+                                                              short capacity, @NotNull Board board, long eventId) {
+        return getBoardVariationIdForHotelCapacity(new HotelCapacityPair(hotelName, roomInternalName, capacity), board, eventId);
+    }
+    @Nullable
+    @Override
     public Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board) {
+        return getBoardVariationIdForHotelCapacity(pair, board, currentEventSpecificCache);
+    }
+    @Nullable
+    @Override
+    public Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board, long eventId) {
+        return getBoardVariationIdForHotelCapacity(pair, board, getSpecificCache(eventId));
+    }
+    @Nullable
+    private Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board, @NotNull PretixEventSpecificCache cache) {
         Cache<HotelCapacityPair, Long> map = null;
         if (board == Board.HALF) {
-            map = halfBoardCapacityToVariationId;
+            map = cache.halfBoardCapacityToVariationId;
         } else if (board == Board.FULL) {
-            map = fullBoardCapacityToVariationId;
+            map = cache.fullBoardCapacityToVariationId;
         }
         if (map == null) {
             return null;
@@ -296,8 +363,17 @@ public class CachedPretixInformation implements PretixInformation {
     @Nullable
     @Override
     public Long getBoardItemIdForHotelCapacity(@NotNull HotelCapacityPair pair) {
+        return getBoardItemIdForHotelCapacity(pair, currentEventSpecificCache);
+    }
+    @Nullable
+    @Override
+    public Long getBoardItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, long eventId) {
+        return getBoardItemIdForHotelCapacity(pair, getSpecificCache(eventId));
+    }
+    @Nullable
+    private Long getBoardItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        Long ret = boardCapacityToItemId.getIfPresent(pair);
+        Long ret = cache.boardCapacityToItemId.getIfPresent(pair);
         lock.readLock().unlock();
         return ret;
     }
@@ -337,8 +413,17 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     @Override
     public Set<Long> getIdsForItemType(@NotNull CacheItemTypes type) {
+        return getIdsForItemType(type, currentEventSpecificCache);
+    }
+    @NotNull
+    @Override
+    public Set<Long> getIdsForItemType(@NotNull CacheItemTypes type, long eventId) {
+        return getIdsForItemType(type, getSpecificCache(eventId));
+    }
+    @NotNull
+    private Set<Long> getIdsForItemType(@NotNull CacheItemTypes type, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = itemIdsCache.getIfPresent(type);
+        var v = cache.itemIdsCache.getIfPresent(type);
         lock.readLock().unlock();
         return v == null ? new HashSet<>() : v;
     }
@@ -365,24 +450,45 @@ public class CachedPretixInformation implements PretixInformation {
 
     @Override
     public long getQuestionUserId() {
+        return getQuestionUserId(currentEventSpecificCache);
+    }
+    @Override
+    public long getQuestionUserId(long eventId) {
+        return getQuestionUserId(getSpecificCache(eventId));
+    }
+    private long getQuestionUserId(@NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = questionUserId.get();
+        var v = cache.questionUserId.get();
         lock.readLock().unlock();
         return v;
     }
 
     @Override
     public long getQuestionDuplicateData() {
+        return getQuestionDuplicateData(currentEventSpecificCache);
+    }
+    @Override
+    public long getQuestionDuplicateData(long eventId) {
+        return getQuestionDuplicateData(getSpecificCache(eventId));
+    }
+    private long getQuestionDuplicateData(@NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = questionDuplicateData.get();
+        var v = cache.questionDuplicateData.get();
         lock.readLock().unlock();
         return v;
     }
 
     @Override
     public long getQuestionUserNotes() {
+        return getQuestionUserNotes(currentEventSpecificCache);
+    }
+    @Override
+    public long getQuestionUserNotes(long eventId) {
+        return getQuestionUserNotes(getSpecificCache(eventId));
+    }
+    private long getQuestionUserNotes(@NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = questionUserNotes.get();
+        var v = cache.questionUserNotes.get();
         lock.readLock().unlock();
         return v;
     }
@@ -396,9 +502,21 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     @Override
     public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier) {
+        return getQuestionTypeFromIdentifier(identifier, currentEventSpecificCache);
+    }
+    @NotNull
+    @Override
+    public Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier, long eventId) {
+        return getQuestionTypeFromIdentifier(identifier, getSpecificCache(eventId));
+    }
+    @NotNull
+    private Optional<QuestionType> getQuestionTypeFromIdentifier(@NotNull String identifier, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var qid = questionIdToType.getIfPresent(questionIdentifierToId.getIfPresent(identifier));
-        var v = getFromCachesById(qid, currentEventCache.questionIdToType, otherEventsCache.questionIdToType);
+        Long qid = cache.questionIdentifierToId.getIfPresent(identifier);
+        if (qid == null) {
+            return Optional.empty();
+        }
+        QuestionType v = getFromCachesById(qid, currentEventCache.questionIdToType, otherEventsCache.questionIdToType);
         lock.readLock().unlock();
         return Optional.ofNullable(v);
     }
@@ -417,8 +535,17 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     @Override
     public Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier) {
+        return getQuestionIdFromIdentifier(identifier, currentEventSpecificCache);
+    }
+    @NotNull
+    @Override
+    public Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier, long eventId) {
+        return getQuestionIdFromIdentifier(identifier, getSpecificCache(eventId));
+    }
+    @NotNull
+    private Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = questionIdentifierToId.getIfPresent(identifier);
+        var v = cache.questionIdentifierToId.getIfPresent(identifier);
         lock.readLock().unlock();
         return Optional.ofNullable(v);
     }
@@ -426,8 +553,17 @@ public class CachedPretixInformation implements PretixInformation {
     @NotNull
     @Override
     public Set<Long> getSponsorIds(@NotNull Sponsorship sponsorship) {
+        return getSponsorIds(sponsorship, currentEventSpecificCache);
+    }
+    @NotNull
+    @Override
+    public Set<Long> getSponsorIds(@NotNull Sponsorship sponsorship, long eventId) {
+        return getSponsorIds(sponsorship, getSpecificCache(eventId));
+    }
+    @NotNull
+    private Set<Long> getSponsorIds(@NotNull Sponsorship sponsorship, @NotNull PretixEventSpecificCache cache) {
         lock.readLock().lock();
-        var v = sponsorshipTypeToIds.getIfPresent(sponsorship);
+        var v = cache.sponsorshipTypeToIds.getIfPresent(sponsorship);
         lock.readLock().unlock();
         return v == null ? Collections.emptySet() : v;
     }
@@ -632,6 +768,11 @@ public class CachedPretixInformation implements PretixInformation {
     @Override
     public @Nullable List<PretixQuota> getQuotaFromVariationId(long variationId) {
         return getFromCachesById(variationId, currentEventCache.variationIdToQuota, otherEventsCache.variationIdToQuota);
+    }
+
+    @NotNull
+    private PretixEventSpecificCache getSpecificCache(long eventId) {
+        return getCurrentEvent().getId() == eventId ? currentEventSpecificCache : Objects.requireNonNull(eventSpecificCache.getIfPresent(eventId));
     }
 
     @Nullable

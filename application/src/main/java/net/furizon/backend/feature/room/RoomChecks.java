@@ -312,7 +312,7 @@ public class RoomChecks {
     public void assertRoomLessThenBiggestCapacity(long roomId, boolean onlyConfirmed,
                                                   @NotNull PretixInformation pretixInformation) {
         List<RoomGuest> roomMates = roomFinder.getRoomGuestsFromRoomId(roomId, onlyConfirmed);
-        HotelCapacityPair p = pretixInformation.getBiggestRoomCapacity();
+        HotelCapacityPair p = pretixInformation.getBiggestRoomCapacityOnCurrentEvent();
 
         if (p == null) {
             log.error("Unable to get biggest room capacity");
