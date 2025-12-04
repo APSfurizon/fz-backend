@@ -11,6 +11,7 @@ import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
+import net.furizon.backend.feature.pretix.objects.event.usecase.GetSponsorshipNamesUseCase;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
@@ -63,6 +64,10 @@ public class GetUserAdminViewDataUseCase {
             @NotNull Event event,
             @NotNull PretixInformation pretixInformation
     ) {
+        var response = UserAdminViewData.builder();
+        //Fetch event list
+        List<Event> events = eventFinder.getAllEvents();
+
         // Fetch userData
         PersonalUserInformation privateInfo = personalInfoFinder.findByUserId(userId);
         Authentication auth = authenticationFinder.findAuthenticationByUserId(userId);
@@ -71,12 +76,18 @@ public class GetUserAdminViewDataUseCase {
             throw new ApiException(translationService.error("user.not_found"),
                 GeneralResponseCodes.USER_NOT_FOUND);
         }
+        response.personalInfo(privateInfo)
+                .email(auth.getEmail())
+                .banned(auth.isDisabled())
+                .showInNousecount(jooqUser.isShowInNoseCount());
 
         // Fetch all user's cards
         List<MembershipCard> cards = membershipCardFinder.getCardsOfUser(userId);
+        response.membershipCards(cards);
 
         // Fetch past orders
         List<Order> orders = orderFinder.findAllOrdersOfUser(userId, pretixInformation);
+        response.orders(orders);
 
         // Fetch current room data
         RoomInfoResponse roomInfo = executor.execute(
@@ -89,6 +100,7 @@ public class GetUserAdminViewDataUseCase {
                         true
                 )
         );
+        response.currentRoomdata(roomInfo);
         // Fetch running exchanges
         List<ExchangeConfirmationStatus> exchangesIds = exchangeConfirmationFinder.getAllExchangesOfUserInEvent(
                 userId,
@@ -106,8 +118,9 @@ public class GetUserAdminViewDataUseCase {
                     )
             );
         }).toList();
+        response.exchanges(exchanges);
         //Fetch previous rooms
-        List<RoomInfoResponse> prevRooms = eventFinder.getAllEvents().stream().map(e -> {
+        List<RoomInfoResponse> prevRooms = events.stream().map(e -> {
             if (!e.equals(event)) {
                 RoomInfoResponse resp = executor.execute(
                         GetRoomInfoUseCase.class,
@@ -143,6 +156,7 @@ public class GetUserAdminViewDataUseCase {
                 return null;
             }
         }).filter(Objects::nonNull).toList();
+        response.otherRooms(prevRooms);
 
         // Fetch badge + fursuit data
         FullInfoBadgeResponse badgeData = executor.execute(
@@ -152,24 +166,25 @@ public class GetUserAdminViewDataUseCase {
                         pretixInformation
                 )
         );
+        response.badgeData(badgeData);
 
         // Fetch roles and permissions
         List<Role> roles = permissionFinder.getRolesFromUserId(userId);
         Set<Permission> permissions = permissionFinder.getUserPermissions(userId);
+        response.roles(roles)
+                .permissions(permissions);
 
-        return UserAdminViewData.builder()
-                .personalInfo(privateInfo)
-                .membershipCards(cards)
-                .orders(orders)
-                .email(auth.getEmail())
-                .banned(auth.isDisabled())
-                .currentRoomdata(roomInfo)
-                .exchanges(exchanges)
-                .otherRooms(prevRooms)
-                .showInNousecount(jooqUser.isShowInNoseCount())
-                .badgeData(badgeData)
-                .roles(roles)
-                .permissions(permissions)
-            .build();
+        //Fetch sponsor names
+        orders.forEach(o -> {
+            long eventId = o.getEventId();
+            var names = executor.execute(
+                GetSponsorshipNamesUseCase.class,
+                new GetSponsorshipNamesUseCase.Input(eventId, pretixInformation)
+            );
+            response.sponsorNames(eventId, names);
+        });
+
+
+        return response.build();
     }
 }

@@ -14,6 +14,7 @@ import net.furizon.backend.feature.nosecount.usecase.LoadNoseCountUseCase;
 import net.furizon.backend.feature.nosecount.usecase.LoadSponsorCountUseCase;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
+import net.furizon.backend.feature.pretix.objects.event.usecase.GetSponsorshipNamesUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,7 +54,8 @@ public class CountsController {
         "By using the optional paramether `event-id` you can choose of which event "
         + "you can fetch the sponsor count. If you leave it blank or null, you will "
         + "obtain the one for the current event. Only users with a sponsorship level "
-        + "> NONE will be displayed from this endpoint")
+        + "> NONE will be displayed from this endpoint. The sponsor names displayed should "
+        + "be the ones returned in the sponsorNames field")
     @GetMapping("/sponsors")
     public SponsorCountResponse getSponsorCount(
             @RequestParam(value = "event-id", required = false) @Valid @Nullable Long eventId
@@ -61,10 +63,17 @@ public class CountsController {
         if (eventId == null) {
             eventId = pretixInformation.getCurrentEvent().getId();
         }
-        return executor.execute(
+        SponsorCountResponse resp = executor.execute(
                 LoadSponsorCountUseCase.class,
                 eventId
         );
+        resp.setSponsorNames(
+                executor.execute(
+                        GetSponsorshipNamesUseCase.class,
+                        new GetSponsorshipNamesUseCase.Input(eventId, pretixInformation)
+                )
+        );
+        return resp;
     }
 
     @Operation(summary = "Gets the nose count", description =

@@ -87,6 +87,9 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
             if (badge.getSponsorship() == Sponsorship.SUPER_SPONSOR) {
                 badgeLevel = PrintedBadgeLevel.SUPER_SPONSOR;
             }
+            if (badge.getSponsorship() == Sponsorship.ULTRA_SPONSOR) {
+                badgeLevel = PrintedBadgeLevel.ULTRA_SPONSOR;
+            }
             if (badge.isDaily()) {
                 badgeLevel = PrintedBadgeLevel.DAILY_BADGE;
             }

@@ -69,7 +69,7 @@ public class ConfirmRoomUseCase implements UseCase<ConfirmRoomUseCase.Input, Boo
         if (res) {
             Long roomItemId = roomFinder.getRoomItemIdFromRoomId(roomId);
             if (roomItemId != null) {
-                Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId);
+                Map<String, String> names = pretixInformation.getItemNames(roomItemId);
                 if (names != null && !names.isEmpty()) {
                     String name = names.get(LANG_PRETIX);
                     if (name != null) {

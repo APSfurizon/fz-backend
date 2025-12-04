@@ -61,7 +61,7 @@ public class EmptyRoomReminderUseCase implements UseCase<PretixInformation, Inte
                 continue;
             }
 
-            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(obj.getRoomPretixItemId());
+            Map<String, String> names = pretixInformation.getItemNames(obj.getRoomPretixItemId());
             String roomTypeName = names != null ? names.get(LANG_PRETIX) : "";
 
             if (obj.getRoomCount() > 0) {

@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.QuestionType;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +44,7 @@ public interface PretixInformation {
     @NotNull
     Set<Long> getRoomPretixIds();
     @NotNull
-    Map<String, String> getRoomNamesFromRoomPretixItemId(long roomPretixItemId);
+    Map<String, String> getItemNames(long itemId);
     @Nullable
     HotelCapacityPair getRoomInfoFromPretixItemId(long roomPretixItemId);
 
@@ -51,6 +52,9 @@ public interface PretixInformation {
 
     @Nullable
     HotelCapacityPair getBiggestRoomCapacity();
+
+    @NotNull Map<String, String> getVariationNames(long variationId);
+
     @Nullable
     Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
                                            short capacity, @NotNull ExtraDays day);
@@ -93,6 +97,8 @@ public interface PretixInformation {
 
     @NotNull
     Optional<Long> getQuestionIdFromIdentifier(@NotNull String identifier);
+
+    @NotNull Set<Long> getSponsorIds(@NotNull Sponsorship sponsorship);
 
     @NotNull
     Optional<Order> parseOrder(@NotNull PretixOrder pretixOrder, @NotNull Event event);

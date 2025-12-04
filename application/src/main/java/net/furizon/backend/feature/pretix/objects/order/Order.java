@@ -232,7 +232,7 @@ public class Order {
                 roomCapacity,
                 pretixRoomItemId,
                 roomInternalName,
-                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixRoomItemId)
+                pretixInformation.getItemNames(pretixRoomItemId)
         );
     }
 

@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order.finder;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;

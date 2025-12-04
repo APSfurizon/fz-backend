@@ -188,7 +188,7 @@ public class JooqRoomFinder implements RoomFinder {
                 pair == null ? 0 : pair.capacity(),
                 pretixItemId,
                 pair == null ? null : pair.roomInternalName(),
-                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixItemId)
+                pretixInformation.getItemNames(pretixItemId)
         );
     }
 

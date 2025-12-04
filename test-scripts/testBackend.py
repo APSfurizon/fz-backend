@@ -138,6 +138,9 @@ def login() -> Response:
 def markPersonalUserInformationAsUpdated() -> Response:
     return doPost(f'{BASE_URL_API}membership/mark-personal-user-information-as-updated')
 
+def getSponsorshipNames() -> Response:
+    return doGet(f'{BASE_URL_API}events/get-sponsorship-names/1')
+
 def getMe() -> Response:
     return doGet(f'{BASE_URL_API}users/display/me')
 
@@ -350,12 +353,14 @@ login()
 #roomListing()
 #buyOrUpgradeRoom()
 #exchangeInit()
-exchangeUpdate()
+#exchangeUpdate()
+#getSponsorshipNames()
+
 
 #uploadBadge()
 #deleteBadge()
 
-#usersAdminView(1)
+usersAdminView(1)
 # getBadge()
 
 

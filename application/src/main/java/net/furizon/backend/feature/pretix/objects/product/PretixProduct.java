@@ -46,7 +46,6 @@ public class PretixProduct {
     @NotNull
     public Map<String, String> getCustomNames() {
         return PretixGenericUtils.convertCustomNames(metadata.get(PretixConst.METADATA_IDENTIFIER_CUSTOM_NAME));
-
     }
 
     public void forEachVariationByIdentifierPrefix(

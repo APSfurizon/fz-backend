@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.mapper.JooqOrderMapper;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.OrderDataResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
+import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -24,9 +25,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Optional;
-import java.util.Objects;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -159,19 +157,23 @@ public class JooqOrderFinder implements OrderFinder {
         OrderDataResponse orderDataResponse = null;
         Order order = findOrderByUserIdEvent(userId, event, pretixService);
         if (order != null) {
+            Sponsorship sponsorship = order.getSponsorship();
             boolean isDaily = order.isDaily();
             var orderDataBuilder = OrderDataResponse.builder()
                     .code(order.getCode())
                     .checkinSecret(order.getCheckinSecret())
                     .orderStatus(order.getOrderStatus())
-                    .sponsorship(order.getSponsorship())
+                    .sponsorship(sponsorship)
                     .extraDays(order.getExtraDays())
                     .board(order.getBoard())
                     .isDailyTicket(isDaily);
 
+            var sponsorItemId = pretixService.getSponsorIds(sponsorship).stream().findFirst();
+            sponsorItemId.ifPresent(id -> orderDataBuilder.sponsorNames(pretixService.getVariationNames(id)));
+
             OffsetDateTime from = event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
             if (isDaily && from != null) {
-                orderDataBuilder = orderDataBuilder.dailyDays(
+                orderDataBuilder.dailyDays(
                         order.getDailyDays().stream().map(
                                 d -> from.plusDays(d).toLocalDate()
                         ).collect(Collectors.toSet())
@@ -180,12 +182,12 @@ public class JooqOrderFinder implements OrderFinder {
             if (order.hasRoom()) {
                 short roomCapacity = order.getRoomCapacity();
                 long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
-                orderDataBuilder = orderDataBuilder.room(
+                orderDataBuilder.room(
                         new RoomData(
                                 roomCapacity,
                                 roomItemId,
                                 order.getRoomInternalName(),
-                                pretixService.getRoomNamesFromRoomPretixItemId(roomItemId)
+                                pretixService.getItemNames(roomItemId)
                         )
                 );
             }

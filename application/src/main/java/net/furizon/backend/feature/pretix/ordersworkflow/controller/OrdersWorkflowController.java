@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.FullInfoResponse;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkOrderRequest;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.ManualLinkOrderRequest;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.SanityCheckResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.FullInfoResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.request.LinkOrderRequest;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.LinkResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.request.ManualLinkOrderRequest;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.SanityCheckResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GenerateFullStatusUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixControlOrderLinkUseCase;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GeneratePretixShopLink;
@@ -117,7 +117,8 @@ public class OrdersWorkflowController {
         + "Refer to its documentation for a full description. In the order object, `dailyDays` is a set of "
         + "indexes of the days the user has bought. `roomTypeNames` is a map language->name of the name "
         + "of the room. The order secret must be used to show a QR code in the frontend (only when a user "
-        + "actually requests it) used for the pretix checkin")
+        + "actually requests it) used for the pretix checkin. "
+        + "In the order field we also return the names of the current sponsor tier")
     @GetMapping("/get-full-status")
     public FullInfoResponse getFullStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user
