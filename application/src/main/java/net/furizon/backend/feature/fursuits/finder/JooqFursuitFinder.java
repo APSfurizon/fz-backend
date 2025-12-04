@@ -29,15 +29,17 @@ public class JooqFursuitFinder implements FursuitFinder {
     @Override
     public @NotNull List<FursuitData> getFursuitsOfUser(long userId, @Nullable Event event) {
         return sqlQuery.fetch(
-            selectDisplayFursuit(event)
+            selectDisplayFursuit(event, userId)
             .where(FURSUITS.USER_ID.eq(userId))
             .orderBy(FURSUITS.FURSUIT_ID)
         ).stream().map(r -> JooqFursuitDataMapper.map(r, event != null, true)).toList();
     }
     @Override
-    public @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event, boolean isOwner) {
+    public @Nullable FursuitData getFursuit(long fursuitId,
+                                            @Nullable Event event, @Nullable Long userId,
+                                            boolean isOwner) {
         return sqlQuery.fetchFirst(
-            selectDisplayFursuit(event)
+            selectDisplayFursuit(event, userId)
             .where(FURSUITS.FURSUIT_ID.eq(fursuitId))
         ).mapOrNull(r -> JooqFursuitDataMapper.map(r, event != null, isOwner));
     }
@@ -45,7 +47,7 @@ public class JooqFursuitFinder implements FursuitFinder {
     @Override
     public @NotNull List<FursuitData> getFursuitsWithoutPropic(@NotNull Event event) {
         return sqlQuery.fetch(
-            selectDisplayFursuit(null) //Event = null so we manually INNER join the order
+            selectDisplayFursuit(null, null) //Event = null so we manually INNER join the order
             .innerJoin(FURSUITS_ORDERS)
             .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
             .innerJoin(ORDERS)
@@ -102,7 +104,7 @@ public class JooqFursuitFinder implements FursuitFinder {
         ).isPresent();
     }
 
-    private @NotNull SelectOnConditionStep<?> selectDisplayFursuit(@Nullable Event event) {
+    private @NotNull SelectOnConditionStep<?> selectDisplayFursuit(@Nullable Event event, @Nullable Long userId) {
         SelectSelectStep<?> sel = event == null
             ? PostgresDSL.select(
                 MEDIA.MEDIA_ID,
@@ -134,15 +136,30 @@ public class JooqFursuitFinder implements FursuitFinder {
             .leftJoin(MEDIA)
             .on(MEDIA.MEDIA_ID.eq(FURSUITS.MEDIA_ID_PROPIC));
 
-        if (event != null) {
-            q = q.leftJoin(FURSUITS_ORDERS)
-                .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
-                .leftJoin(ORDERS)
+        if (event != null && userId != null) {
+            /*q = q.leftJoin(ORDERS)
+                .on(ORDERS.ID.eq(
+                    PostgresDSL.select(ORDERS.ID)
+                    .from(ORDERS)
+                    .innerJoin(FURSUITS_ORDERS)
+                    .on(
+                        FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                        .and(ORDERS.USER_ID.eq(userId))
+                        .and(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
+                    )
+                    .limit(1)
+                ));*/
+            q = q.leftJoin(
+                ORDERS
+                .innerJoin(FURSUITS_ORDERS)
                 .on(
-                    FURSUITS_ORDERS.FURSUIT_ID.isNotNull()
-                    .and(FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID))
+                    FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
                     .and(ORDERS.EVENT_ID.eq(event.getId()))
-                );
+                    .and(ORDERS.USER_ID.eq(userId))
+                )
+            )
+            .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID));
         }
 
         return q;

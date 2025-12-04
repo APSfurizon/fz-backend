@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.nosecount.mapper;
 
 import net.furizon.backend.feature.nosecount.dto.JooqNosecountObj;
+import net.furizon.backend.infrastructure.localization.TranslationUtil;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -17,8 +18,9 @@ public class JooqNosecountObjMapper {
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .userLocale(record.get(USERS.USER_LOCALE))
+                .userLanguage(TranslationUtil.parseLocale(record.get(USERS.USER_LANGUAGE)))
                 .media(MediaResponseMapper.mapOrNull(record))
-                .sponsorship(Sponsorship.get(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
+                .sponsorship(Sponsorship.getFromDbId(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                 .extraDays(ExtraDays.get(record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)))
                 .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
                 .roomId(record.get(ROOMS.ROOM_ID))

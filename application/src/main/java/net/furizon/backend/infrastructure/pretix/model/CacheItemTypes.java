@@ -7,6 +7,7 @@ public enum CacheItemTypes {
     ROOMS,
     NO_ROOM_ITEM,
     EXTRA_FURSUITS,
+    BOARDS,
     TEMP_ADDON,
     TEMP_ITEM
 }

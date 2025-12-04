@@ -19,7 +19,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.SUBJECT_USER_BADGE_UPLOAD;
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_USER_BADGE_UPLOAD;
 
 @Slf4j
@@ -38,24 +37,24 @@ public class UserBadgeReminderUseCase implements UseCase<Event, Integer> {
         int n = 0;
         log.info("Sending user badge upload reminder emails");
 
-        String deadlineStr = "event starts";
+        final String deadlineStr;
         OffsetDateTime deadline = badgeConfig.getEditingDeadline();
         if (deadline != null) {
             deadlineStr = deadline.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else {
+            deadlineStr = "event starts";
         }
 
         List<UserEmailData> usrs = userFinder.getMailDataForUsersWithNoPropic(event);
         MailRequest[] mails = new MailRequest[usrs.size()];
         for (UserEmailData usr : usrs) {
-
             log.info("Sending user badge upload reminder email to {}", usr.getEmail());
             mails[n] = new MailRequest(
-                usr,
-                TEMPLATE_USER_BADGE_UPLOAD,
-                MailVarPair.of(EmailVars.LINK, badgePageUrl),
-                MailVarPair.of(EmailVars.DEADLINE, deadlineStr)
-            );
-            mails[n].subject(SUBJECT_USER_BADGE_UPLOAD);
+                    usr,
+                    TEMPLATE_USER_BADGE_UPLOAD,
+                    MailVarPair.of(EmailVars.LINK, badgePageUrl),
+                    MailVarPair.of(EmailVars.DEADLINE, deadlineStr)
+            ).subject("mail.reminder_user_badge_upload.title");
             n++;
         }
         log.info("Firing user badge upload reminder emails");

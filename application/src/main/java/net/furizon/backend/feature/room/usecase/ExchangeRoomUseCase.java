@@ -10,8 +10,10 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.furizon.backend.infrastructure.email.EmailVars.EXCHANGE_ACTION_TEXT;
+import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_OWNER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_EXCHANGE_COMPLETED;
@@ -40,6 +43,7 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @NotNull private final RoomChecks roomChecks;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
     @Override
@@ -74,15 +78,20 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
         generalChecks.assertOrderIsPaid(sourceOrder, sourceUserId, event);
         generalChecks.assertOrderIsPaid(targetOrder, destUserId, event);
 
-        generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
-        generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
+        //At least for UserBuysFullRoom logic, this check is done already inside pretix
+        //generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+        //generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
 
         if (input.runOnlyChecks) {
+            //Copy pasted from before
+            generalChecks.assertPaymentAndRefundConfirmed(sourceOrder.getCode(), event);
+            generalChecks.assertPaymentAndRefundConfirmed(targetOrder.getCode(), event);
             return true;
         }
 
         boolean res = roomLogic.exchangeRoom(
                 destUserId, sourceUserId,
+                sourceOrder, targetOrder,
                 destRoom.orElse(null), sourceRoom.orElse(null),
                 event, input.pretixInformation
         );
@@ -93,24 +102,31 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
                 List<MailRequest> mails = new ArrayList<>(16);
                 if (sourceRoom.isPresent()) {
                     mails.addAll(mailService.prepareBroadcastUpdate(
-                            sourceRoom.get(), TEMPLATE_ROOM_HAS_NEW_OWNER,
-                            MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName())
+                            sourceRoom.get(),
+                            TEMPLATE_ROOM_HAS_NEW_OWNER,
+                            TranslatableValue.ofEmail("mail.room_has_new_owner.title"),
+                            MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName()),
+                            MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
                     ));
                 }
 
                 if (sourceData != null) {
-                    String actionText = RoomEmailTexts.getActionText(input.req.getAction(), destRoom.isPresent());
-                    mails.addAll(mailService.prepareUpdate(
+                    TranslatableValue action = RoomEmailTexts.getAction(input.req.getAction(), destRoom.isPresent());
+                    mails.addAll(List.of(
                         new MailRequest(
-                            destData, TEMPLATE_EXCHANGE_COMPLETED,
-                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
-                            MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName())
-                        ),
+                            destData,
+                            TEMPLATE_EXCHANGE_COMPLETED,
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, action),
+                            MailVarPair.of(OTHER_FURSONA_NAME, sourceData.getFursonaName()),
+                            MailVarPair.of(LINK, frontendConfig.getReservationPageUrl())
+                        ).subject("mail.exchange_completed.title"),
                         new MailRequest(
-                            sourceData, TEMPLATE_EXCHANGE_COMPLETED,
-                            MailVarPair.of(EXCHANGE_ACTION_TEXT, actionText),
-                            MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName())
-                        )
+                            sourceData,
+                            TEMPLATE_EXCHANGE_COMPLETED,
+                            MailVarPair.of(EXCHANGE_ACTION_TEXT, action),
+                            MailVarPair.of(OTHER_FURSONA_NAME, destData.getFursonaName()),
+                            MailVarPair.of(LINK, frontendConfig.getReservationPageUrl())
+                        ).subject("mail.exchange_completed.title")
                     ));
                 }
                 mailService.fireAndForgetMany(mails);

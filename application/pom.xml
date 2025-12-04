@@ -67,6 +67,11 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>net.furizon</groupId>
+            <artifactId>fz-localization</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
@@ -166,8 +171,8 @@
                 <version>${jte.version}</version>
                 <configuration>
                     <!-- This is the directory where your .jte files are located. -->
-                    <!--targetDirectory>${project.build.directory}/jte-classes</targetDirectory-->
-                    <sourceDirectory>${project.basedir}/../templates/jte</sourceDirectory>
+                    <sourceDirectory>${project.build.sourceDirectory}/../resources/templates</sourceDirectory>
+                    <targetDirectory>${project.build.directory}/generated-sources/jte</targetDirectory>
                     <contentType>Html</contentType>
                     <!--binaryStaticContent>true</binaryStaticContent-->
                 </configuration>
@@ -181,5 +186,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
     </build>
 </project>

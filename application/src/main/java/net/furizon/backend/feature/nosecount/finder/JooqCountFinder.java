@@ -75,6 +75,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
@@ -86,6 +87,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID.eq(ORDERS.USER_ID)
                 .and(USERS.SHOW_IN_NOSECOUNT.isTrue())
                 .and(ORDERS.ORDER_SPONSORSHIP_TYPE.greaterThan((short) 0))
+                .and(ORDERS.EVENT_ID.eq(eventId))
             )
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
@@ -102,6 +104,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
@@ -155,6 +158,7 @@ public class JooqCountFinder implements CountsFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,

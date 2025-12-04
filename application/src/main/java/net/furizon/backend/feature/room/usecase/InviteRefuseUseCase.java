@@ -53,10 +53,14 @@ public class InviteRefuseUseCase implements UseCase<InviteRefuseUseCase.Input, B
             UserEmailData data = userFinder.getMailDataForUser(targetUserId);
             var r = roomFinder.getOwnerUserIdFromRoomId(roomId);
             if (data != null && r.isPresent()) {
-                mailService.prepareAndSendUpdate(new MailRequest(
-                        r.get(), userFinder, TEMPLATE_INVITE_REFUSE,
+                mailService.fireAndForget(
+                    new MailRequest(
+                        r.get(),
+                        userFinder,
+                        TEMPLATE_INVITE_REFUSE,
                         MailVarPair.of(OTHER_FURSONA_NAME, data.getFursonaName())
-                ));
+                    ).subject("mail.invite_refused.title", data.getFursonaName())
+                );
             }
         }
         return res;

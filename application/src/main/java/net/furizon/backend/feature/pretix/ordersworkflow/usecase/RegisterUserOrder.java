@@ -15,10 +15,12 @@ import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -31,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.LANG_PRETIX;
-import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.SUBJECT_ORDER_PROBLEM;
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.TEMPLATE_DUPLICATE_ORDER;
 
 @Data
@@ -46,6 +47,8 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender mailService;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
+    @NotNull private final TranslationService translationService;
+    @NotNull private final FrontendConfig frontendConfig;
 
     @Override
     public @NotNull Boolean executor(@NotNull RegisterUserOrder.Input input) {
@@ -72,7 +75,8 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 if (!pretixOrder.isPresent()) {
                     log.error("[PRETIX] Registration of order {} failed: "
                             + "Order was not in the db and we were unable to fetch it from pretix", input.code);
-                    throw new ApiException("Unable to fetch order", OrderWorkflowErrorCode.ORDER_NOT_FOUND);
+                    throw new ApiException(translationService.error("pretix.orders_flow.order_fetch_fail"),
+                        OrderWorkflowErrorCode.ORDER_NOT_FOUND);
                 }
 
                 var o = updateOrderInDb.execute(pretixOrder.get(), event, pretixService);
@@ -80,28 +84,31 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                     log.error("[PRETIX] Registration of order {} failed: "
                             + "Order was not in the db and an error occurred in "
                             + "parsing or storing the newly fetched order", input.code);
-                    throw new ApiException("Unable to parse order", OrderWorkflowErrorCode.ORDER_NOT_FOUND);
+                    throw new ApiException(translationService.error("pretix.orders_flow.order_parse_fail"),
+                        OrderWorkflowErrorCode.ORDER_NOT_FOUND);
                 }
                 order = o.get();
             }
 
             //Check if secret matches
             if (input.checkSecret && !order.getPretixOrderSecret().equals(input.secret)) {
-                throw new ApiException("Invalid secret", OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH);
+                throw new ApiException(translationService.error("pretix.orders_flow.order_secret_check_fail"),
+                    OrderWorkflowErrorCode.ORDER_SECRET_NOT_MATCH);
             }
 
             //Check if user already owns an order
             Order prevOrder = orderFinder.findOrderByUserIdEvent(userId, event, pretixService);
             if (prevOrder != null) {
                 if (input.immediateErrorOnDuplicateOrder) {
-                    throw new ApiException("User already owns an order", OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
+                    throw new ApiException(translationService.error("pretix.orders_flow.order_multiple"),
+                        OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
                 }
                 //If the order the user owns is the same we're trying to claim, do nothing and return
                 if (prevOrder.getCode().equals(input.code)) {
                     log.debug("[PRETIX] User {} already owned order {}", userId, input.code);
                     return true;
                 }
-                //We detected a duplicate order for an user.
+                //We detected a duplicate order for a user.
                 log.error("[PRETIX] Registration of order {} failed: User already owns an order!", input.code);
                 //We update the duplicate "frontend" field for that order, so pretix admins can verify that this order
                 // was really tried to be claimed by the current user
@@ -130,16 +137,17 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                             mail, TEMPLATE_DUPLICATE_ORDER,
                             MailVarPair.of(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
                             MailVarPair.of(EmailVars.ORDER_CODE, prevOrderCode),
-                            MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode())
-                        ).subject(SUBJECT_ORDER_PROBLEM)
+                            MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode()),
+                            MailVarPair.of(EmailVars.LINK, frontendConfig.getReservationPageUrl())
+                        ).subject("mail.order_duplicate_detected.title")
                     );
                 } else {
                     log.error("[PRETIX] Unable to send duplicate order mail to user {} with order {} ",
-                            userId, input.code);
+                        userId, input.code);
                 }
 
-                throw new ApiException("Duplicate order for the same user!",
-                        OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
+                throw new ApiException(translationService.error("pretix.orders_flow.order_multiple"),
+                    OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE);
             }
 
             //If this order is already owned by someone who, for some reasons,
@@ -150,7 +158,7 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 if (ordersNoPrevOwner <= 1) {
                     log.error("[PRETIX] Registration of order {} failed: The order was already owned by {}",
                             input.code, prevOwnerId);
-                    throw new ApiException("Order already has an owner",
+                    throw new ApiException(translationService.error("pretix.orders_flow.order_already_claimed"),
                             OrderWorkflowErrorCode.ORDER_ALREADY_OWNED_BY_SOMEBODY_ELSE);
                 }
                 log.info("[PRETIX] Order {} was already owned by {} (who had multiple orders)."
@@ -164,7 +172,8 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
             if (!success) {
                 log.error("[PRETIX] Registration of order {} failed:"
                         + "An error occurred while pushing answers to pretix!", input.code);
-                throw new ApiException("Unable to push answers to pretix", OrderWorkflowErrorCode.SERVER_ERROR);
+                throw new ApiException(translationService.error("pretix.answer_push_fail"),
+                        OrderWorkflowErrorCode.SERVER_ERROR);
             }
 
             updateOrderAction.invoke(order, pretixService);

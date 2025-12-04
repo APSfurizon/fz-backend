@@ -16,6 +16,7 @@ import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -56,6 +57,10 @@ public class Order {
     @NotNull
     private ExtraDays extraDays = ExtraDays.NONE;
 
+    @Builder.Default
+    @NotNull
+    private final Board board = Board.NONE;
+
     @NotNull
     private final Set<Integer> dailyDays;
 
@@ -93,6 +98,8 @@ public class Order {
     private Long earlyPositionId;
     @Nullable
     private Long latePositionId;
+    @Nullable
+    private Long boardPositionId;
 
     @Builder.Default
     private short extraFursuits = 0;
@@ -225,7 +232,7 @@ public class Order {
                 roomCapacity,
                 pretixRoomItemId,
                 roomInternalName,
-                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixRoomItemId)
+                pretixInformation.getItemNames(pretixRoomItemId)
         );
     }
 
@@ -289,12 +296,16 @@ public class Order {
             Object o = answers.get(key);
             String out = switch (type.get()) {
                 case NUMBER -> Float.toString((float) o);
-                case STRING_ONE_LINE, FILE, COUNTRY_CODE, PHONE_NUMBER, STRING_MULTI_LINE, LIST_SINGLE_CHOICE ->
-                        (String) o;
                 case BOOLEAN -> ((boolean) o) ? "True" : "False"; //fuck python
                 case LIST_MULTIPLE_CHOICE -> String.join(", ", (String[]) o);
                 case DATE, TIME -> o.toString();
                 case DATE_TIME -> ((ZonedDateTime) o).format(PretixGenericUtils.PRETIX_DATETIME_FORMAT);
+                case STRING_ONE_LINE,
+                     FILE,
+                     COUNTRY_CODE,
+                     PHONE_NUMBER,
+                     STRING_MULTI_LINE,
+                     LIST_SINGLE_CHOICE -> (String) o;
             };
 
 

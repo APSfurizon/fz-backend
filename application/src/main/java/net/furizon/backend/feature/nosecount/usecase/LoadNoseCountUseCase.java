@@ -13,6 +13,7 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +43,13 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
     @NotNull private final PretixConfig pretixConfig;
     @NotNull private final RoomConfig roomConfig;
     private final RoomLogic roomLogic;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull NoseCountResponse executor(@NotNull LoadNoseCountUseCase.Input input) {
         if (input.event == null) {
-            throw new ApiException("Event is null", GeneralResponseCodes.EVENT_NOT_FOUND);
+            throw new ApiException(translationService.error("common.event_not_found"),
+                GeneralResponseCodes.EVENT_NOT_FOUND);
         }
         OffsetDateTime from = input.event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
 
@@ -94,7 +98,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                                 Objects.requireNonNull(obj.getRoomCapacity()),
                                 itemId,
                                 obj.getRoomInternalName(),
-                                input.pretixInformation.getRoomNamesFromRoomPretixItemId(itemId)
+                                input.pretixInformation.getItemNames(itemId)
                             ), new ArrayList<>()
                         );
 
@@ -130,8 +134,16 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         });
 
 
+        roomless.sort(Comparator.comparing(u -> u.getUser().getFursonaName()));
+        List<NosecountHotel> hotels = hotelInternalNameToHotel.values()
+                .stream()
+                .sorted(Comparator.comparing(NosecountHotel::getInternalName))
+                .toList();
+        hotels.forEach(hotel -> hotel.getRoomTypes().sort(
+                Comparator.comparing(t -> t.getRoomData().getRoomCapacity())));
+
         return new NoseCountResponse(
-            hotelInternalNameToHotel.values().stream().toList(),
+            hotels,
             roomless,
             dailys
         );
@@ -149,6 +161,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                 obj.getUserId(),
                 obj.getFursonaName(),
                 obj.getUserLocale(),
+                obj.getUserLanguage().toString().replace("_", "-"),
                 obj.getMedia(),
                 obj.getSponsorship()
         );

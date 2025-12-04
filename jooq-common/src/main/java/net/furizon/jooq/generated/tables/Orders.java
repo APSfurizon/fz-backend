@@ -234,6 +234,16 @@ public class Orders extends TableImpl<Record> {
      */
     public final TableField<Record, String> ORDER_CHECKIN_SECRET = createField(DSL.name("order_checkin_secret"), SQLDataType.VARCHAR(32).defaultValue(DSL.field(DSL.raw("NULL::character varying"), SQLDataType.VARCHAR)), this, "");
 
+    /**
+     * The column <code>public.orders.order_board</code>.
+     */
+    public final TableField<Record, Short> ORDER_BOARD = createField(DSL.name("order_board"), SQLDataType.SMALLINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.orders.order_board_position_id</code>.
+     */
+    public final TableField<Record, Long> ORDER_BOARD_POSITION_ID = createField(DSL.name("order_board_position_id"), SQLDataType.BIGINT, this, "");
+
     private Orders(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -390,8 +400,9 @@ public class Orders extends TableImpl<Record> {
     @Override
     public List<Check<Record>> getChecks() {
         return Arrays.asList(
+            Internal.createCheck(this, DSL.name("order_board_check"), "(((order_board >= 0) AND (order_board <= 2)))", true),
             Internal.createCheck(this, DSL.name("orders_extra_days_check"), "(((order_extra_days_type >= 0) AND (order_extra_days_type <= 3)))", true),
-            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 2)))", true),
+            Internal.createCheck(this, DSL.name("orders_sponsorship_check"), "(((order_sponsorship_type >= 0) AND (order_sponsorship_type <= 3)))", true),
             Internal.createCheck(this, DSL.name("orders_status_check"), "(((order_status >= 0) AND (order_status <= 3)))", true)
         );
     }

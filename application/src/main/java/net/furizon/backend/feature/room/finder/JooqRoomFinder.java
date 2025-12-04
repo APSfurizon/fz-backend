@@ -19,6 +19,7 @@ import net.furizon.backend.feature.room.mapper.JooqRoomInfoMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestMapper;
 import net.furizon.backend.feature.room.mapper.RoomGuestResponseMapper;
 import net.furizon.backend.feature.room.mapper.RoomInvitationResponseMapper;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -147,6 +148,7 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 ROOMS.ROOM_ID,
                 ROOMS.ROOM_NAME,
                 ROOMS.ROOM_CONFIRMED,
@@ -186,7 +188,7 @@ public class JooqRoomFinder implements RoomFinder {
                 pair == null ? 0 : pair.capacity(),
                 pretixItemId,
                 pair == null ? null : pair.roomInternalName(),
-                pretixInformation.getRoomNamesFromRoomPretixItemId(pretixItemId)
+                pretixInformation.getItemNames(pretixItemId)
         );
     }
 
@@ -236,6 +238,7 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID
@@ -330,11 +333,13 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 ROOMS.ROOM_ID,
                 ROOMS.ROOM_NAME,
                 ROOMS.ROOM_CONFIRMED,
                 ROOMS.SHOW_IN_NOSECOUNT,
                 ORDERS.USER_ID,
+                ORDERS.EVENT_ID,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_ROOM_PRETIX_ITEM_ID,
                 ORDERS.ORDER_ROOM_INTERNAL_NAME,
@@ -517,6 +522,7 @@ public class JooqRoomFinder implements RoomFinder {
             PostgresDSL.select(
                 roomOwnerOrder.ORDER_ROOM_PRETIX_ITEM_ID,
                 ROOMS.ROOM_ID,
+                ROOMS.ROOM_CONFIRMED,
                 MEMBERSHIP_INFO.INFO_FIRST_NAME,
                 MEMBERSHIP_INFO.INFO_LAST_NAME,
                 MEMBERSHIP_INFO.INFO_BIRTHDAY,
@@ -573,6 +579,61 @@ public class JooqRoomFinder implements RoomFinder {
                 pretixInformation
         )).toList();
     }
+    @Override
+    public @NotNull List<HotelExportRow> exportRoomless(long eventId) {
+        return query.fetch(
+            PostgresDSL.select(
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY,
+                MEMBERSHIP_INFO.INFO_BIRTH_REGION,
+                MEMBERSHIP_INFO.INFO_BIRTH_CITY,
+                MEMBERSHIP_INFO.INFO_COUNTRY,
+                MEMBERSHIP_INFO.INFO_REGION,
+                MEMBERSHIP_INFO.INFO_CITY,
+                MEMBERSHIP_INFO.INFO_ZIP,
+                MEMBERSHIP_INFO.INFO_ADDRESS,
+                MEMBERSHIP_INFO.INFO_PHONE_PREFIX,
+                MEMBERSHIP_INFO.INFO_PHONE,
+                MEMBERSHIP_INFO.INFO_ID_TYPE,
+                MEMBERSHIP_INFO.INFO_ID_NUMBER,
+                MEMBERSHIP_INFO.INFO_ID_ISSUER,
+                MEMBERSHIP_INFO.INFO_ID_EXPIRY,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                ORDERS.ORDER_CODE,
+                ORDERS.ORDER_REQUIRES_ATTENTION,
+                ORDERS.ORDER_INTERNAL_COMMENT
+            )
+            .from(USERS)
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(MEMBERSHIP_INFO.USER_ID.eq(USERS.USER_ID))
+            .innerJoin(AUTHENTICATIONS)
+            .on(AUTHENTICATIONS.USER_ID.eq(USERS.USER_ID))
+            .innerJoin(ORDERS)
+            .on(
+                ORDERS.USER_ID.eq(USERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+            .where(
+                USERS.USER_ID.notIn(
+                    PostgresDSL.select(ROOM_GUESTS.USER_ID)
+                    .from(ROOM_GUESTS)
+                    .innerJoin(ROOMS).on(
+                        ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                        .and(ROOM_GUESTS.CONFIRMED.isTrue())
+                    )
+                    .innerJoin(ORDERS).on(
+                        ROOMS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(eventId))
+                    )
+                )
+            )
+            .orderBy(USERS.USER_ID)
+        ).stream().map(HotelExportRowMapper::mapWithoutRoom).toList();
+    }
 
     @Override
     public @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId) {
@@ -585,7 +646,28 @@ public class JooqRoomFinder implements RoomFinder {
                 .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
             )
             .innerJoin(ORDERS)
-            .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+            .on(
+                ROOMS.ORDER_ID.eq(ORDERS.ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
         ).mapOrNull(r -> ExtraDays.get(r.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)));
+    }
+
+    @Override
+    public @Nullable Board getBoardOfRoomOwner(long guestUserId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ORDER_BOARD)
+                .from(ROOM_GUESTS)
+                .innerJoin(ROOMS)
+                .on(
+                    ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                    .and(ROOM_GUESTS.USER_ID.eq(guestUserId))
+                )
+                .innerJoin(ORDERS)
+                .on(
+                    ROOMS.ORDER_ID.eq(ORDERS.ID)
+                    .and(ORDERS.EVENT_ID.eq(eventId))
+                )
+        ).mapOrNull(r -> Board.getFromDbId(r.get(ORDERS.ORDER_BOARD)));
     }
 }

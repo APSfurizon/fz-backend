@@ -11,6 +11,7 @@ public enum PrintedBadgeLevel {
     JUNIOR_STAFF("badge-level-staff-junior"),
     DAILY_BADGE("badge-level-daily"),
     SUPER_SPONSOR("badge-level-sponsor-super"),
+    ULTRA_SPONSOR("badge-level-sponsor-ultra"),
     NORMAL_SPONSOR("badge-level-sponsor-normal"),
     NORMAL_BADGE("badge-level-normal"),
     ;

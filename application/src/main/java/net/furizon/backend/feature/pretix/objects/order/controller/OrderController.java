@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.pretix.objects.order.dto.OrderWebhookRequest;
+import net.furizon.backend.feature.pretix.objects.order.dto.request.OrderWebhookRequest;
 import net.furizon.backend.feature.pretix.objects.order.usecase.FetchSingleOrderUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
-import net.furizon.backend.feature.pretix.ordersworkflow.dto.LinkResponse;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.LinkResponse;
 import net.furizon.backend.feature.pretix.ordersworkflow.usecase.GetPayOrderLink;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
 import net.furizon.backend.feature.room.dto.ExchangeConfirmationStatus;
@@ -104,7 +104,7 @@ public class RoomController {
     @PostMapping("/delete")
     public boolean deleteRoom(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @NotNull @Valid @RequestBody final RoomIdRequest roomIdRequest
+            @Nullable @Valid @RequestBody final RoomIdRequest roomIdRequest
     ) {
         return executor.execute(
                 DeleteRoomUseCase.class,
@@ -447,7 +447,9 @@ public class RoomController {
         + "and: If the exchange is a full order exchange, it contains the order data of the source user "
         + "which is going to be transferred to the target user. If the exchange is a room exchange, it "
         + "contains for sure the roomData of the source user, and, if the target user has already "
-        + "confirmed or if the requester is the target user, the roomData of the target user.")
+        + "confirmed or if the requester is the target user, the roomData of the target user. "
+        + "If the exchange is a full order transfer, the fullOrderExchange field will also contain "
+        + "the sponsor names of the current sponsor tier")
     @GetMapping("/exchange/info")
     public ExchangeConfirmationStatusResponse getExchangeConfirmationStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user,

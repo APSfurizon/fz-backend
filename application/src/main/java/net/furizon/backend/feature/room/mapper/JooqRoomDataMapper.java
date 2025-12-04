@@ -17,7 +17,7 @@ public class JooqRoomDataMapper {
                 record.get(ORDERS.ORDER_ROOM_CAPACITY),
                 roomItemId,
                 record.get(ORDERS.ORDER_ROOM_INTERNAL_NAME),
-                roomItemId == null ? Map.of() : pretixInformation.getRoomNamesFromRoomPretixItemId(roomItemId)
+                roomItemId == null ? Map.of() : pretixInformation.getItemNames(roomItemId)
         );
     }
 }

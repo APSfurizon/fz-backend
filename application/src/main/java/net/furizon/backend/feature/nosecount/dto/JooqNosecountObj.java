@@ -8,12 +8,15 @@ import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 @Data
 @Builder
 public class JooqNosecountObj {
     private final long userId;
     @NotNull private final String fursonaName;
     @NotNull private final String userLocale;
+    @NotNull private final Locale userLanguage;
     @Nullable private final MediaResponse media;
     @NotNull private final Sponsorship sponsorship;
     @NotNull private final ExtraDays extraDays;

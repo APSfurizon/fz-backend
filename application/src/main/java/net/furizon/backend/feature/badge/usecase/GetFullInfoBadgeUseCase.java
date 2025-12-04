@@ -12,6 +12,7 @@ import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -34,6 +35,7 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
     @NotNull private final FursuitFinder fursuitFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull FullInfoBadgeResponse executor(@NotNull GetFullInfoBadgeUseCase.Input input) {
@@ -42,7 +44,7 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
 
         UserDisplayData userData = userFinder.getDisplayUser(userId, event);
         if (userData == null) {
-            throw new ApiException("User not found", GeneralResponseCodes.USER_NOT_FOUND);
+            throw new ApiException(translationService.error("user.not_found"), GeneralResponseCodes.USER_NOT_FOUND);
         }
         OffsetDateTime editingDeadline = badgeConfig.getEditingDeadline();
 

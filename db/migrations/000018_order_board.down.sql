@@ -1,0 +1,4 @@
+BEGIN;
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_board;
+ALTER TABLE IF EXISTS orders DROP COLUMN IF EXISTS order_board_position_id;
+COMMIT;

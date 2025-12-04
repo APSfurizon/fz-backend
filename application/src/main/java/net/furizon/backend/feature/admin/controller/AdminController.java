@@ -50,15 +50,15 @@ import java.util.Set;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final UseCaseExecutor executor;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final DeleteMediaFromDiskAction deleteMediaAction;
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixConfig pretixConfig;
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private final PretixInformation pretixInformation;
 
     /*
@@ -78,6 +78,9 @@ public class AdminController {
     @GetMapping("/countdown")
     public String countdown() {
         OffsetDateTime bookingStart = pretixConfig.getEvent().getPublicBookingStartTime();
+        if (bookingStart == null) {
+            bookingStart = OffsetDateTime.now();
+        }
         Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
         return "Start time: " + bookingStart + "; Remaining time: " + remaining;
     }

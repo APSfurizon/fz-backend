@@ -61,25 +61,23 @@ public class EmptyRoomReminderUseCase implements UseCase<PretixInformation, Inte
                 continue;
             }
 
-            Map<String, String> names = pretixInformation.getRoomNamesFromRoomPretixItemId(obj.getRoomPretixItemId());
+            Map<String, String> names = pretixInformation.getItemNames(obj.getRoomPretixItemId());
             String roomTypeName = names != null ? names.get(LANG_PRETIX) : "";
 
             if (obj.getRoomCount() > 0) {
-                MailRequest mr = new MailRequest(mail, ReminderEmailTexts.TEMPLATE_ROOM_NOT_FULL,
+                mails[n++] = new MailRequest(mail, ReminderEmailTexts.TEMPLATE_ROOM_NOT_FULL,
                         MailVarPair.of(EmailVars.LINK, frontendConfig.getRoomPageUrl()),
                         MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
                         MailVarPair.of(EmailVars.ROOM_TYPE_NAME, roomTypeName),
                         MailVarPair.of(EmailVars.ROOM_CAPACITY, String.valueOf(obj.getRoomCapacity())),
                         MailVarPair.of(EmailVars.ROOM_CURRENT_GUEST_NO, String.valueOf(obj.getRoomCount()))
-                );
-                mails[n++] = mr.subject(ReminderEmailTexts.SUBJECT_ROOM_NOT_FULL);
+                ).subject("mail.reminder_room_not_full.title");
             } else {
-                MailRequest mr = new MailRequest(mail, ReminderEmailTexts.TEMPLATE_ROOM_NOT_CREATED,
+                mails[n++] = new MailRequest(mail, ReminderEmailTexts.TEMPLATE_ROOM_NOT_CREATED,
                         MailVarPair.of(EmailVars.LINK, frontendConfig.getRoomPageUrl()),
                         MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
                         MailVarPair.of(EmailVars.ROOM_TYPE_NAME, roomTypeName)
-                );
-                mails[n++] = mr.subject(ReminderEmailTexts.SUBJECT_ROOM_NOT_CREATED);
+                ).subject("mail.reminder_room_not_created.title");
             }
         }
 

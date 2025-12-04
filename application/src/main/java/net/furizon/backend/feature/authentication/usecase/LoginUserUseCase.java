@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.validation.CreateLoginSessionValidation;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
@@ -29,11 +30,14 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
 
     private final SecurityConfig securityConfig;
 
+    private final TranslationService translationService;
+
     @Transactional
     @Override
     public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
         if (input.user != null) {
-            throw new ApiException("User is already logged in", AuthenticationCodes.ALREADY_LOGGED_IN);
+            throw new ApiException(translationService.error("authentication.login.already_logged_in"),
+                    AuthenticationCodes.ALREADY_LOGGED_IN);
         }
 
         final var userId = validation.validateAndGetUserId(input);

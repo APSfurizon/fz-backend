@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 @Data
 public class PretixProduct {
@@ -39,18 +39,21 @@ public class PretixProduct {
         return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
     }
 
+    public long getLongPrice() {
+        return PretixGenericUtils.fromStrPriceToLong(getPrice());
+    }
+
     @NotNull
     public Map<String, String> getCustomNames() {
         return PretixGenericUtils.convertCustomNames(metadata.get(PretixConst.METADATA_IDENTIFIER_CUSTOM_NAME));
-
     }
 
     public void forEachVariationByIdentifierPrefix(
-        String prefix,
-        BiConsumer<PretixProductVariation, String> callback
+        @NotNull String prefix,
+        @NotNull TriConsumer<PretixProductVariation, String, Long> callback
     ) {
         variations.stream()
             .filter(v -> v.isActive() && v.getIdentifier() != null && v.getIdentifier().startsWith(prefix))
-            .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length())));
+            .forEach(v -> callback.accept(v, v.getIdentifier().substring(prefix.length()), v.getId()));
     }
 }

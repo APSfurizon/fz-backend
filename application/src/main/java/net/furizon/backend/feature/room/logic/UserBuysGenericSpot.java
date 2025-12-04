@@ -7,7 +7,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
+import net.furizon.backend.feature.pretix.objects.order.dto.request.UpdatePretixPositionRequest;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixOrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.usecase.UpdateOrderInDb;
@@ -17,6 +17,8 @@ import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -45,6 +47,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final TranslationService translationService;
 
     @NotNull private final UpdatePretixPositionAction updatePretixPositionAction;
 
@@ -162,8 +165,11 @@ public class UserBuysGenericSpot implements RoomLogic {
         List<Long> possibleRoomItemIds = pretixInformation.getRoomItemIdsForCapacity(roomCapacity);
         if (possibleRoomItemIds.isEmpty()) {
             log.error("[ROOM_CONFIRMATION] Unable to fetch a possible room item for the current room capacity ({}). "
-                    + "RoomId = {}", roomCapacity, roomId);
-            throw new ApiException("Unsupported room capacity", RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
+                + "RoomId = {}", roomCapacity, roomId);
+            throw new ApiException(translationService.error(
+                "room.buy.fail.no_room_for_capacity",
+                roomCapacity
+            ), RoomErrorCodes.NO_ROOM_WITH_SPECIFIED_CAPACITY);
         }
         long roomItemId = possibleRoomItemIds.getFirst();
 
@@ -173,16 +179,22 @@ public class UserBuysGenericSpot implements RoomLogic {
 
         //Update room item with the correct one
         //Quota check is handled automatically by pretix when updating the item
-        PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+        PretixPosition position = updatePretixPositionAction.invoke(
+            event,
+            positionId,
+            true, //We WANT to check the quota
+            new UpdatePretixPositionRequest(
                 order.getCode(),
                 roomItemId,
                 0L
-        ));
+            )
+        );
         if (position == null) {
             log.error("[ROOM_CONFIRMATION] Room {} with capacity {}: "
                     + "An error occurred while updating room position to order {}",
                     roomId, roomCapacity, order);
-            throw new ApiException("The room quota has ended", RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
+            throw new ApiException(translationService.error("room.buy.fail.quota_ended"),
+                    RoomErrorCodes.BUY_ROOM_NEW_ROOM_QUOTA_ENDED);
         }
 
         //Refetch order from pretix and update it in the db
@@ -234,11 +246,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         long positionId = Objects.requireNonNull(order.getRoomPositionId());
 
         //Update room position on pretix
-        PretixPosition position = updatePretixPositionAction.invoke(event, positionId, new UpdatePretixPositionRequest(
+        PretixPosition position = updatePretixPositionAction.invoke(
+            event,
+            positionId,
+            false, //We don't want to check quota for the noroom item
+            new UpdatePretixPositionRequest(
                 order.getCode(),
                 noRoomItemId,
                 0L
-        ));
+            )
+        );
         if (position == null) {
             log.error("[ROOM_UNCONFIRMATION] Room {}: An error occurred while updating room position to order {}",
                     roomId, order);
@@ -273,6 +290,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
+                                @NotNull Order sourceOrder, @NotNull Order targetOrder,
                                 @Nullable Long targetRoomId, @Nullable Long sourceRoomId,
                                 @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         //TODO implement when pretix is updated
@@ -311,14 +329,16 @@ public class UserBuysGenericSpot implements RoomLogic {
         return false;
     }
     @Override
-    public boolean buyOrUpgradeRoom(long newRoomItemId, long newRoomPrice,
-                                    @Nullable Long oldRoomPaid, long userId, @Nullable Long roomId,
-                                    @Nullable Long newEarlyItemId,
-                                    @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
-                                    @Nullable Long newLateItemId,
-                                    @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
-                                    @NotNull Order order,
-                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public boolean buyOrUpgradeRoom(
+            long newRoomItemId, long newRoomPrice, @Nullable Long oldRoomPaid,
+            long userId, @Nullable Long roomId,
+            @Nullable Long newEarlyItemId, @Nullable Long newEarlyPrice, @Nullable Long oldEarlyPaid,
+            @Nullable Long newLateItemId, @Nullable Long newLatePrice, @Nullable Long oldLatePaid,
+            @Nullable Long newBoardItemId, @Nullable Long newBoardVariationId,
+                @Nullable Long newBoardPrice, @Nullable Long oldBoardPaid,
+            boolean disablePriceUpgradeChecks,
+            @NotNull Order order, @NotNull Event event, @NotNull PretixInformation pretixInformation
+    ) {
         log.warn("Buy or upgrade room not supported with UserBuysGenericSpot");
         return false;
     }
@@ -330,6 +350,11 @@ public class UserBuysGenericSpot implements RoomLogic {
 
     @Override
     public void computeNosecountExtraDays(@NotNull NosecountRoom room) {
+    }
+
+    @Override
+    public @Nullable Board getBoardForUser(long userId, long eventId) {
+        return orderFinder.getBoardOfUser(userId, eventId);
     }
 
     @Override

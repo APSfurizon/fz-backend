@@ -12,6 +12,8 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -35,11 +37,25 @@ public class ExportHotelUseCase implements UseCase<PretixInformation, String> {
 
     @Override
     public @NotNull String executor(@NotNull PretixInformation pretixInformation) {
+        long eventId = pretixInformation.getCurrentEvent().getId();
         List<HotelExportRow> rows = roomFinder.exportHotel(
-                pretixInformation.getCurrentEvent().getId(),
+                eventId,
                 roomLogic,
                 pretixInformation
         );
+        if (roomLogic.isConfirmationSupported()) {
+            log.info("Room confirmation is supported. Adding extra, roomless, people");
+            //TODO
+            // we may want to change this if a roomLogic supports confirmation, but we
+            // allow people buying a room without a ticket. I'm writing this at 23:20
+            // after 2 days of romics, so I have no mind to consider that logic
+            List<HotelExportRow> roomLess = roomFinder.exportRoomless(eventId);
+
+            List<HotelExportRow> hotel = rows;
+            rows = new ArrayList<HotelExportRow>(hotel.size() + roomLess.size());
+            rows.addAll(hotel);
+            rows.addAll(roomLess);
+        }
         log.debug("Export hotel row length: {}", rows.size());
         String out;
         try {

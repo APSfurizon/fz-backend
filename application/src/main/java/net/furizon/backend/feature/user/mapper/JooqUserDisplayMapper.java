@@ -27,8 +27,9 @@ public class JooqUserDisplayMapper {
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .locale(record.get(USERS.USER_LOCALE))
+                .language(record.get(USERS.USER_LANGUAGE))
                 .propic(MediaResponseMapper.mapOrNull(record))
-                .sponsorship(sponsor != null ? Sponsorship.get(sponsor) : null)
+                .sponsorship(sponsor != null ? Sponsorship.getFromDbId(sponsor) : null)
             .build();
     }
 

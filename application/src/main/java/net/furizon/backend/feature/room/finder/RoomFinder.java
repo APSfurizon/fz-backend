@@ -9,6 +9,7 @@ import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.response.RoomGuestResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInvitationResponse;
 import net.furizon.backend.feature.room.logic.RoomLogic;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
@@ -83,6 +84,9 @@ public interface RoomFinder {
     @NotNull List<HotelExportRow> exportHotel(long eventId,
                                               @NotNull RoomLogic roomLogic,
                                               @NotNull PretixInformation pretixInformation);
+    @NotNull List<HotelExportRow> exportRoomless(long eventId);
 
     @Nullable ExtraDays getExtraDaysOfRoomOwner(long guestUserId, long eventId);
+
+    @Nullable Board getBoardOfRoomOwner(long guestUserId, long eventId);
 }

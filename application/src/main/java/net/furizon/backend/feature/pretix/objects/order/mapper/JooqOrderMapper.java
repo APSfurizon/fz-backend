@@ -8,6 +8,7 @@ import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -43,9 +44,10 @@ public class JooqOrderMapper {
             var v = Order.builder()
                     .code(record.get(ORDERS.ORDER_CODE))
                     .orderStatus(OrderStatus.values()[record.get(ORDERS.ORDER_STATUS)])
-                    .sponsorship(Sponsorship.values()[record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)])
+                    .sponsorship(Sponsorship.getFromDbId(record.get(ORDERS.ORDER_SPONSORSHIP_TYPE)))
                     .extraDays(ExtraDays.values()[record.get(ORDERS.ORDER_EXTRA_DAYS_TYPE)])
                     .dailyDays(record.get(ORDERS.ORDER_DAILY_DAYS))
+                    .board(Board.getFromDbId(record.get(ORDERS.ORDER_BOARD)))
                     .pretixRoomItemId(record.get((ORDERS.ORDER_ROOM_PRETIX_ITEM_ID)))
                     .roomCapacity(record.get(ORDERS.ORDER_ROOM_CAPACITY))
                     .hotelInternalName(record.get(ORDERS.ORDER_HOTEL_INTERNAL_NAME))
@@ -63,6 +65,7 @@ public class JooqOrderMapper {
                     .roomPositionPosid(record.get(ORDERS.ORDER_ROOM_POSITION_POSITIONID))
                     .earlyPositionId(record.get(ORDERS.ORDER_EARLY_POSITION_ID))
                     .latePositionId(record.get(ORDERS.ORDER_LATE_POSITION_ID))
+                    .boardPositionId(record.get(ORDERS.ORDER_BOARD_POSITION_ID))
                     .extraFursuits(record.get(ORDERS.ORDER_EXTRA_FURSUITS))
                     .requireAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
                     .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))

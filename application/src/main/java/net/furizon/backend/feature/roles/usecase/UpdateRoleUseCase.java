@@ -11,6 +11,7 @@ import net.furizon.backend.feature.roles.action.updateRoleInfo.UpdateRoleInforma
 import net.furizon.backend.feature.roles.action.updateUserHasRole.UpdateUserHasRoleAction;
 import net.furizon.backend.feature.roles.dto.UpdateRoleRequest;
 import net.furizon.backend.feature.roles.dto.UpdateRoleToUserRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.dto.JooqPermission;
@@ -42,6 +43,7 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
     @NotNull private final AddUsersToRoleAction addUsersToRoleAction;
     @NotNull private final UpdateUserHasRoleAction updateUserHasRoleAction;
     @NotNull private final RemoveUsersFromRoleAction removeUsersFromRoleAction;
+    @NotNull private final TranslationService translationService;
 
     @Override
     @Transactional
@@ -140,7 +142,7 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
     private void throwDbError(boolean res, int step, long roleId, @NotNull UpdateRoleRequest req) {
         if (!res) {
             log.error("Error #{} updating role {} to '{}'", step, roleId, req);
-            throw new ApiException("Unable to update permission");
+            throw new ApiException(translationService.error("roles.update_fail", req.getRoleInternalName()));
         }
     }
 

@@ -59,7 +59,7 @@ def doDelete(url) -> Response:
     global session
     global HEADERS
     response = session.delete(url, headers=HEADERS, allow_redirects=False)
-    print(f"\n-------- GET {url} --------")
+    print(f"\n-------- DELETE {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
@@ -138,6 +138,9 @@ def login() -> Response:
 def markPersonalUserInformationAsUpdated() -> Response:
     return doPost(f'{BASE_URL_API}membership/mark-personal-user-information-as-updated')
 
+def getSponsorshipNames() -> Response:
+    return doGet(f'{BASE_URL_API}events/get-sponsorship-names/1')
+
 def getMe() -> Response:
     return doGet(f'{BASE_URL_API}users/display/me')
 
@@ -147,6 +150,9 @@ def testPermission() -> Response:
 def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     return doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
+
+def getOrderFullStatus() -> Response:
+    return doGet(f'{BASE_URL_API}orders-workflow/get-full-status')
 
 def getOrderLink() -> Response:
     return doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
@@ -160,6 +166,8 @@ def linkOrder() -> Response:
     }
     return doPost(f'{BASE_URL_API}orders-workflow/link-order', json=json)
 
+def getBadge() -> Response:
+    return doGet(f'{BASE_URL_API}badge/')
 def uploadBadge() -> Response:
     #imageName = 'testImage2.png'
     imageName = 'testImageSmall.jpg'
@@ -265,6 +273,7 @@ def roomCreate() -> Response:
     return doPost(f'{BASE_URL_API}room/create', json=json)
 
 def roomDelete() -> Response:
+    json = {}
     return doPost(f'{BASE_URL_API}room/delete')
 
 def roomConfirm() -> Response:
@@ -276,8 +285,32 @@ def roomUnconfirm() -> Response:
 def roomListing() -> Response:
     return doGet(f'{BASE_URL_API}room/get-room-list-with-quota')
 
+def buyOrUpgradeRoom() -> Response:
+    json = {
+        "roomPretixItemId": 335
+    }
+    return doPost(f'{BASE_URL_API}room/buy-or-upgrade-room', json=json)
+
 def roomGetInfo() -> Response:
     return doGet(f'{BASE_URL_API}room/info')
+
+def exchangeInit() -> Response:
+    json = {
+        "destUserId": 3,
+        #"action": "room"
+        "action": "order"
+    }
+    return doPost(f'{BASE_URL_API}room/exchange/init', json=json)
+
+def exchangeUpdate() -> Response:
+    # INSERT INTO exchange_confirmation_status(exchange_id, target_user_id, source_user_id, target_confirmed, source_confirmed, event_id, expires_on, action_type) VALUES (1, 3, 1, true, false, 10, 999999999999999999, 0); 0 for room, 1 for order
+    json = {
+        "exchangeId": 1,
+        "confirm": True
+    }
+    return doPost(f'{BASE_URL_API}room/exchange/update', json=json)
+    
+
 
 #register()
 #confirmEmail()
@@ -306,15 +339,29 @@ login()
 #deleteRole(4)
 #exportBadges()
 #remindRoomNotFull()
-#usersAdminView(1)
 
+#getOrderFullStatus()
+
+
+#roomDelete()
 #roomCreate()
 #roomGetInfo()
-roomConfirm()
+#roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
-roomListing()
+#roomListing()
+#buyOrUpgradeRoom()
+#exchangeInit()
+#exchangeUpdate()
+#getSponsorshipNames()
+
+
+#uploadBadge()
+#deleteBadge()
+
+usersAdminView(1)
+# getBadge()
 
 
 #countdown()

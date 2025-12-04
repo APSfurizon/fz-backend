@@ -6,6 +6,7 @@ import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
@@ -33,6 +34,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @NotNull private final GeneralChecks generalChecks;
 
     @NotNull private final FursuitChecks fursuitChecks;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -66,7 +68,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
             if (media != null) {
                 return deleteMediaFromDiskAction.invoke(media, true);
             } else {
-                throw new ApiException("Badge not found!", ImageCodes.BADGE_NOT_FOUND);
+                throw new ApiException(translationService.error("badge.not_found"), ImageCodes.BADGE_NOT_FOUND);
             }
         } catch (IOException e) {
             log.error("Exception while deleting a badge", e);

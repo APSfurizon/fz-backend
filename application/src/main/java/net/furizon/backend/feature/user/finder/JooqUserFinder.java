@@ -23,13 +23,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.ROLES;
+import static net.furizon.jooq.generated.Tables.ROOMS;
 import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 import static net.furizon.jooq.generated.Tables.USERS;
 import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
@@ -74,6 +74,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)
@@ -91,6 +92,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)
@@ -108,6 +110,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.select(
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE,
                 AUTHENTICATIONS.AUTHENTICATION_EMAIL
             )
             .from(USERS)
@@ -179,12 +182,18 @@ public class JooqUserFinder implements UserFinder {
             joinOrders = true;
             condition = condition.and(
                 searchFursonaQuery.field(USERS.USER_ID).notIn(
+                    //TODO find users inside the same room of the current user
                     PostgresDSL.select(ROOM_GUESTS.USER_ID)
                     .from(ROOM_GUESTS)
-                    .where(
-                        ROOM_GUESTS.CONFIRMED.isTrue()
-                    //TODO find users inside the same room of the current user
-                    //.and(ROOM_GUESTS.ROOM_ID.notEqual())
+                    .innerJoin(ROOMS)
+                    .on(
+                        ROOM_GUESTS.ROOM_ID.eq(ROOMS.ROOM_ID)
+                        .and(ROOM_GUESTS.CONFIRMED.isTrue())
+                    )
+                    .innerJoin(ORDERS)
+                    .on(
+                        ORDERS.ID.eq(ROOMS.ORDER_ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
                     )
                 )
                 .and(
@@ -296,7 +305,8 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
                 USERS.MEDIA_ID_PROPIC,
-                USERS.SHOW_IN_NOSECOUNT
+                USERS.SHOW_IN_NOSECOUNT,
+                USERS.USER_LANGUAGE
             )
             .from(USERS);
     }
@@ -319,6 +329,7 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_ID,
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
+                USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,

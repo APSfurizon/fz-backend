@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.action.updatePosition.UpdatePretixPositionAction;
-import net.furizon.backend.feature.pretix.objects.order.dto.PushPretixPositionRequest;
-import net.furizon.backend.feature.pretix.objects.order.dto.UpdatePretixPositionRequest;
+import net.furizon.backend.feature.pretix.objects.order.dto.request.PushPretixPositionRequest;
+import net.furizon.backend.feature.pretix.objects.order.dto.request.UpdatePretixPositionRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -34,12 +34,16 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
     @Override
     @Nullable
     public PretixPosition invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
-        return invoke(event, position, false, null, null);
+        return invoke(event, false, true, null, position, null);
     }
 
     @Override
-    public @Nullable PretixPosition invoke(@NotNull Event event, @NotNull PushPretixPositionRequest position,
-           boolean createTempPositionFirst, @Nullable PretixInformation pretixInformation, @Nullable Long itemPrice) {
+    public @Nullable PretixPosition invoke(@NotNull Event event,
+                                           boolean createTempPositionFirst,
+                                           boolean checkQuota,
+                                           @Nullable Long itemPrice,
+                                           @NotNull PushPretixPositionRequest position,
+                                           @Nullable PretixInformation pretixInformation) {
         if (createTempPositionFirst) {
             if (pretixInformation == null || itemPrice == null) {
                 log.error("PushPretixPosition invoke called with createTempPositionFirst == true,"
@@ -60,26 +64,26 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
             long originalAddonItemId = req.getItem();
             req.setItem(tempItem);
             req.setPrice(0L);
-            PretixPosition tempPosition = push(event, req);
+            PretixPosition tempPosition = push(event, false, req);
             if (tempPosition == null) {
                 log.error("PushPretixPosition failed while generating a temp position id: {}", tempItem);
                 return null;
             }
 
             long tempPosId = tempPosition.getPositionId();
-            return updatePretixPositionAction.invoke(event, tempPosId, new UpdatePretixPositionRequest(
+            return updatePretixPositionAction.invoke(event, tempPosId, checkQuota, new UpdatePretixPositionRequest(
                     position.getOrderCode(),
                     originalAddonItemId,
                     itemPrice
             ));
 
         } else {
-            return push(event, position);
+            return push(event, checkQuota, position);
         }
     }
 
     @Nullable
-    private PretixPosition push(@NotNull Event event, @NotNull PushPretixPositionRequest position) {
+    private PretixPosition push(@NotNull Event event, boolean checkQuota, @NotNull PushPretixPositionRequest position) {
         log.info("Pushing a new position ({}) to order {} on event {}",
                 position.getItem(), position.getOrderCode(), event);
         final var pair = event.getOrganizerAndEventPair();
@@ -88,6 +92,7 @@ public class RestPushPretixPositionAction implements PushPretixPositionAction {
                 .path("/organizers/{organizer}/events/{event}/orderpositions/")
                 .uriVariable("organizer", pair.getOrganizer())
                 .uriVariable("event", pair.getEvent())
+                .queryParam("check_quotas", checkQuota ? "true" : "false")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(position)
                 .responseType(PretixPosition.class)

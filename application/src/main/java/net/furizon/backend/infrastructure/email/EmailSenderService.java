@@ -9,8 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
+import net.furizon.backend.infrastructure.templating.JteContext;
+import net.furizon.backend.infrastructure.templating.JteLocalizer;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -22,7 +27,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,13 +51,19 @@ public class EmailSenderService implements EmailSender {
     @NotNull
     private final TemplateEngine templateEngine;
 
+    @NotNull
+    private final JteLocalizer jteLocalizer;
+
+    @NotNull
+    private final TranslationService translationService;
+
     @Value("${spring.mail.username}")
     private String from;
     @Value("${spring.mail.subject-prepend-text}")
     private String subjectPrependText;
 
     @Override
-    public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull String subject,
+    public List<MailRequest> prepareForRole(@NotNull String roleInternalName, @NotNull TranslatableValue subject,
                            @NotNull String templateName, MailVarPair... vars) {
 
         List<Long> users = permissionFinder.getUsersWithRoleInternalName(roleInternalName);
@@ -57,14 +71,14 @@ public class EmailSenderService implements EmailSender {
     }
 
     @Override
-    public List<MailRequest> prepareForPermission(@NotNull Permission permission, @NotNull String subject,
+    public List<MailRequest> prepareForPermission(@NotNull Permission permission, @NotNull TranslatableValue subject,
                                  @NotNull String templateName, MailVarPair... vars) {
         List<Long> users = permissionFinder.getUsersWithPermission(permission);
         return prepareForUsers(users, subject, templateName, vars);
     }
 
     @Override
-    public List<MailRequest> prepareForUsers(@NotNull List<Long> users, @NotNull String subject,
+    public List<MailRequest> prepareForUsers(@NotNull List<Long> users, @NotNull TranslatableValue subject,
                                              @NotNull String templateName, MailVarPair... vars) {
         List<MailRequest> reqs = new ArrayList<>(users.size() + 8);
         for (Long user : users) {
@@ -74,17 +88,17 @@ public class EmailSenderService implements EmailSender {
     }
 
     @Override
-    public void prepareAndSendForRole(@NotNull String roleInternalName, @NotNull String subject,
+    public void prepareAndSendForRole(@NotNull String roleInternalName, @NotNull TranslatableValue subject,
                                       @NotNull String templateName, MailVarPair... vars) {
         fireAndForgetMany(prepareForRole(roleInternalName, subject, templateName, vars));
     }
     @Override
-    public void prepareAndSendForPermission(@NotNull Permission permission, @NotNull String subject,
+    public void prepareAndSendForPermission(@NotNull Permission permission, @NotNull TranslatableValue subject,
                                             @NotNull String templateName, MailVarPair... vars) {
         fireAndForgetMany(prepareForPermission(permission, subject, templateName, vars));
     }
     @Override
-    public void prepareAndSendForUsers(@NotNull List<Long> users, @NotNull String subject,
+    public void prepareAndSendForUsers(@NotNull List<Long> users, @NotNull TranslatableValue subject,
                                        @NotNull String templateName, MailVarPair... vars) {
         fireAndForgetMany(prepareForUsers(users, subject, templateName, vars));
     }
@@ -92,8 +106,7 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void send(@NotNull MailRequest request) throws MessagingException, MailException {
-        log.info("Sending email: {}", request);
-        mailSender.send(transformMailRequestToMimeMessages(request));
+        sendMany(request);
     }
 
     @Override
@@ -102,6 +115,11 @@ public class EmailSenderService implements EmailSender {
             return;
         }
         log.info("Sending emails: {}", Arrays.toString(requests));
+        for (MailRequest mr : requests) {
+            if (mr.getSubject() != null) {
+                mr.subject(mr.getSubject());
+            }
+        }
         mailSender.send(transformMailRequestsToMimeMessages(requests));
     }
 
@@ -158,13 +176,28 @@ public class EmailSenderService implements EmailSender {
 
     private MimeMessage[] transformMailRequestToMimeMessages(@NotNull MailRequest request) {
         final var isTemplateMessage = request.getTemplateMessage() != null;
-        final var bodyMessage = isTemplateMessage ? convertTemplateToString(request) : request.getMessage();
-        if (bodyMessage == null) {
-            throw new RuntimeException("message is required");
-        }
-
+        // Group translated messages by locale
+        final Map<Locale, String> translatedBody = request.getTo().stream().collect(Collectors.toMap(
+                Pair::getLeft,
+                pair -> {
+                    final var bodyMessage = isTemplateMessage
+                            ? translationService.withLocale(pair.getLeft(), () -> convertTemplateToString(request))
+                            : request.getMessage();
+                    if (bodyMessage == null) {
+                        throw new RuntimeException("message is required for locale %s"
+                                .formatted(pair.getLeft().getDisplayLanguage()));
+                    }
+                    return bodyMessage;
+                }
+        ));
+        // Builds the MimeMessage with translated data for each recipient
         return request.getTo().stream()
-            .map(to -> buildMimeMessage(to, request.getSubject(), bodyMessage, isTemplateMessage))
+            .map(to -> buildMimeMessage(to.getRight(),
+                    translationService.email(request.getSubject().getKey(),
+                            to.getLeft(),
+                            request.getSubject().getParams()),
+                    translatedBody.get(to.getLeft()),
+                    isTemplateMessage))
             .toArray(MimeMessage[]::new);
     }
 
@@ -176,7 +209,21 @@ public class EmailSenderService implements EmailSender {
         }
 
         TemplateOutput output = new StringOutput();
-        templateEngine.render(message.getTemplate(), message.getParams(), output);
+        JteContext.init(this.jteLocalizer);
+        // Translate parameters
+        Map<String, Object> params = message.getParams().entrySet().stream().map((entry) -> {
+            final Object value;
+            if (entry.getValue() instanceof TranslatableValue translatableValue) {
+                value = translationService.translateFallback(translatableValue.getKey(),
+                        translatableValue.getKey(),
+                        translatableValue.getParams());
+            } else {
+                value = entry.getValue();
+            }
+            return Pair.of(entry.getKey(), value);
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (x, y) -> y));
+        templateEngine.render(message.getTemplate(), params, output);
+        JteContext.dispose();
         return output.toString();
     }
 

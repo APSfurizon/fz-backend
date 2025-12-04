@@ -7,6 +7,7 @@ import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.pretix.objects.payment.finder.PretixPaymentFinder;
 import net.furizon.backend.feature.pretix.objects.refund.PretixRefund;
 import net.furizon.backend.feature.pretix.objects.refund.finder.PretixRefundFinder;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class RestPretixBalanceForProviderFinder implements PretixBalanceForProviderFinder {
     @NotNull private final PretixRefundFinder pretixRefundFinder;
     @NotNull private final PretixPaymentFinder pretixPaymentFinder;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Map<String, Long> get(@NotNull String orderCode, @NotNull Event event,
@@ -52,11 +54,13 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
 
             } else if (state == PretixPayment.PaymentState.PENDING || state == PretixPayment.PaymentState.CREATED) {
                 log.error("No payments for order {} on event {} "
-                                + "can be in status PENDING or CREATED. Failed payment: {} {}",
+                        + "can be in status PENDING or CREATED. Failed payment: {} {}",
                         orderCode, event, payment.getId(), state);
                 if (crashOnInvalidState) {
-                    throw new ApiException("Payment found in illegal state",
-                            GeneralResponseCodes.ORDER_PAYMENTS_STILL_PENDING);
+                    throw new ApiException(translationService.error(
+                        "order.payment_illegal_state",
+                        payment.getId(), orderCode
+                    ), GeneralResponseCodes.ORDER_PAYMENTS_STILL_PENDING);
                 }
             }
         }
@@ -83,8 +87,10 @@ public class RestPretixBalanceForProviderFinder implements PretixBalanceForProvi
                                 + "can be in status CREATED, TRANSIT or EXTERNAL. Failed refund: {} {}",
                         orderCode, event, refund.getId(), state);
                 if (crashOnInvalidState) {
-                    throw new ApiException("Refund found in illegal state",
-                            GeneralResponseCodes.ORDER_REFUNDS_STILL_PENDING);
+                    throw new ApiException(translationService.error(
+                        "order.refund_illegal_state",
+                        refund.getId(), orderCode
+                    ), GeneralResponseCodes.ORDER_REFUNDS_STILL_PENDING);
                 }
             }
         }

@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.email;
 
 import jakarta.mail.MessagingException;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
@@ -14,7 +15,7 @@ public interface EmailSender {
     @NonBlocking
     List<MailRequest> prepareForRole(
         @NotNull String roleInternalName,
-        @NotNull String subject,
+        @NotNull TranslatableValue subject,
         @NotNull String templateName,
         MailVarPair... vars
     );
@@ -22,7 +23,7 @@ public interface EmailSender {
     @NonBlocking
     List<MailRequest> prepareForPermission(
         @NotNull Permission permission,
-        @NotNull String subject,
+        @NotNull TranslatableValue subject,
         @NotNull String templateName,
         MailVarPair... vars
     );
@@ -30,7 +31,7 @@ public interface EmailSender {
     @NonBlocking
     List<MailRequest> prepareForUsers(
             @NotNull List<Long> users,
-            @NotNull String subject,
+            @NotNull TranslatableValue subject,
             @NotNull String templateName,
             MailVarPair... vars
     );
@@ -38,21 +39,21 @@ public interface EmailSender {
     @NonBlocking
     void prepareAndSendForRole(
             @NotNull String roleInternalName,
-            @NotNull String subject,
+            @NotNull TranslatableValue subject,
             @NotNull String templateName,
             MailVarPair... vars
     );
     @NonBlocking
     void prepareAndSendForPermission(
             @NotNull Permission permission,
-            @NotNull String subject,
+            @NotNull TranslatableValue subject,
             @NotNull String templateName,
             MailVarPair... vars
     );
     @NonBlocking
     void prepareAndSendForUsers(
             @NotNull List<Long> users,
-            @NotNull String subject,
+            @NotNull TranslatableValue subject,
             @NotNull String templateName,
             MailVarPair... vars
     );

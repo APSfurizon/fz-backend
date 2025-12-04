@@ -84,6 +84,7 @@ frontend:
   badge-page-url: ${FRONTEND_BADGE_PAGE_URL:}
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
   user-page-url: ${FRONTEND_USER_PAGE_URL:}
+  reservation-page-url: ${FRONTEND_RESERVATION_PAGE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -129,7 +130,7 @@ pretix:
   autocart:
     priv-key-path: ${PRETIX_AUTOCART_KEY_PATH:priv-key-autocart.rsa}
     priv-key-password: ${PRETIX_AUTOCART_KEY_PASSWORD:}
-  supported-languages: ${SUPPORTED_LANGUAGES:it,en}
+  supported-languages: ${SUPPORTED_LANGUAGES:it-IT,en-GB}
 
 storage:
   base-path: data/
@@ -156,6 +157,8 @@ badge:
     output-wrapper-badge-jte-filename: ${BADGE_EXPORT_OUTPUT_WRAPPER_JTE_FILENAME:badge_output.jte}
     user-badge-jte-filename: ${BADGE_EXPORT_USER_JTE_FILENAME:badge_user.jte}
     fursuit-badge-jte-filename: ${BADGE_EXPORT_FURSUIT_JTE_FILENAME:badge_fursuit.jte}
+    badge-dimension-width: ${BADGE_EXPORT_DIMENSION_W:56.90mm}
+    badge-dimension-height: ${BADGE_EXPORT_DIMENSION_H:88.90mm}
 
 reminders:
   cronjobs:

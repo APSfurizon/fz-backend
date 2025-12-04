@@ -7,6 +7,7 @@ import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordReq
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.SUBJECT_PW_CHANGED;
-import static net.furizon.backend.feature.authentication.AuthenticationMailTexts.TEMPLATE_PW_CHANGED;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_PW_CHANGED;
 
 @Slf4j
 @Component
@@ -28,6 +28,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
     @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender sender;
+    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
@@ -36,12 +37,14 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
         if (userId == null) {
             if (resetPwId == null) {
-                throw new ApiException("User is not logged in and resetPwId is not specified");
+                throw new ApiException(
+                        translationService.error("authentication.reset.session_and_reset_not_valid"));
             }
 
             userId = sessionAuthenticationManager.getUserIdFromPasswordResetReqId(resetPwId);
             if (userId == null) {
-                throw new ApiException("ResetPwId not found", AuthenticationCodes.PW_RESET_NOT_FOUND);
+                throw new ApiException(translationService.error("authentication.reset.reset_not_valid"),
+                        AuthenticationCodes.PW_RESET_NOT_FOUND);
             }
         }
 
@@ -51,7 +54,8 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
         if (resetPwId != null) {
             sessionAuthenticationManager.deletePasswordResetAttempt(resetPwId);
         }
-        sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED).subject(SUBJECT_PW_CHANGED));
+        sender.fireAndForget(new MailRequest(userId, userFinder, TEMPLATE_PW_CHANGED)
+                .subject("mail.password_changed.title"));
 
         return true;
     }

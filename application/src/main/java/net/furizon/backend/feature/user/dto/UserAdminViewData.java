@@ -6,6 +6,7 @@ import lombok.Data;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.feature.pretix.objects.event.dto.SponsorshipNamesResponse;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.dto.response.ExchangeConfirmationStatusResponse;
 import net.furizon.backend.feature.room.dto.response.RoomInfoResponse;
@@ -14,6 +15,7 @@ import net.furizon.backend.infrastructure.security.permissions.Role;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,4 +59,25 @@ public class UserAdminViewData {
     private final List<Role> roles;
     @NotNull
     private final Set<Permission> permissions;
+
+    //Extra
+    @NotNull
+    private final List<SponsorNamesForEvent> sponsorNames;
+
+    @Data
+    private static class SponsorNamesForEvent {
+        private final long eventId;
+        @NotNull
+        private final SponsorshipNamesResponse sponsorNames;
+    }
+
+    public static class UserAdminViewDataBuilder {
+        public UserAdminViewDataBuilder sponsorNames(long eventId, @NotNull SponsorshipNamesResponse sponsorNames) {
+            if (this.sponsorNames == null) {
+                this.sponsorNames = new ArrayList<>();
+            }
+            this.sponsorNames.add(new SponsorNamesForEvent(eventId, sponsorNames));
+            return this;
+        }
+    }
 }
