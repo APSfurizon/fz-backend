@@ -24,7 +24,7 @@ import java.util.Set;
 
 public interface PretixInformation {
 
-    void reloadCacheAndOrders();
+    void reloadCacheAndOrders(boolean reloadPastEvents);
 
     @NotNull
     Event getCurrentEvent();
@@ -42,7 +42,7 @@ public interface PretixInformation {
     @Nullable Long getFatherItemByVariationId(long variationId);
 
     @NotNull
-    Set<Long> getRoomPretixIds();
+    Set<Long> getCurrentEventRoomPretixIds();
     @NotNull
     Map<String, String> getItemNames(long itemId);
     @Nullable
@@ -112,7 +112,7 @@ public interface PretixInformation {
 
     @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromVariationId(long variationId);
 
-    void resetCache();
+    void resetEventStructCache(boolean reloadPastEvents);
 
-    void reloadAllOrders();
+    void reloadCurrentEventOrders();
 }

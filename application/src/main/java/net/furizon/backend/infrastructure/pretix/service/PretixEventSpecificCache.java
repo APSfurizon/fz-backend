@@ -2,7 +2,6 @@ package net.furizon.backend.infrastructure.pretix.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Getter;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -12,50 +11,49 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Getter
 class PretixEventSpecificCache {
 
     //Contains tickets, memberships, sponsors, rooms
     @NotNull
-    private final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
+    final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
 
     //Questions
     @NotNull
-    private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
+    final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
     @NotNull
-    private final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
+    final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
     @NotNull
-    private final AtomicReference<Long> questionUserNotes = new AtomicReference<>(-1L);
+    final AtomicReference<Long> questionUserNotes = new AtomicReference<>(-1L);
     @NotNull
-    private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
+    final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
 
     //Sponsors
     @NotNull
-    private final Cache<Sponsorship, Set<Long>> sponsorshipTypeToIds = Caffeine.newBuilder().build();
+    final Cache<Sponsorship, Set<Long>> sponsorshipTypeToIds = Caffeine.newBuilder().build();
 
     //Extra days
     //map (capacity, hotelName, roomName) -> earlyExtraDays item id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();
+    final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();
     //map (capacity, hotelName, roomName) -> lateExtraDays item id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
+    final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
 
     //Rooms
     //map capacity -> List[id of room items with that capacity]
     @NotNull
-    private final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
+    final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
 
     //Board
     //map (capacity, hotelName, roomName) -> board main item id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> boardCapacityToItemId  = Caffeine.newBuilder().build();
+    final Cache<HotelCapacityPair, Long> boardCapacityToItemId  = Caffeine.newBuilder().build();
     //map (capacity, hotelName, roomName) -> half board variation id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> halfBoardCapacityToVariationId  = Caffeine.newBuilder().build();
+    final Cache<HotelCapacityPair, Long> halfBoardCapacityToVariationId  = Caffeine.newBuilder().build();
     //map (capacity, hotelName, roomName) -> full board variation id
     @NotNull
-    private final Cache<HotelCapacityPair, Long> fullBoardCapacityToVariationId  = Caffeine.newBuilder().build();
+    final Cache<HotelCapacityPair, Long> fullBoardCapacityToVariationId  = Caffeine.newBuilder().build();
 
     public void invalidate() {
         //General

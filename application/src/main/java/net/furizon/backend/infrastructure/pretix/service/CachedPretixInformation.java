@@ -119,22 +119,6 @@ public class CachedPretixInformation implements PretixInformation {
             .build();
 
     @Override
-    @PostConstruct
-    public void reloadCacheAndOrders() {
-        if (!pretixConfig.isEnableSync()) {
-            log.warn("[PRETIX] Pretix synchronization has been disabled");
-            loadCurrentEventFromDb();
-            return;
-        }
-        healthcheck.waitForPretix();
-        log.info("[PRETIX] Syncing pretix information and cache it");
-        long start = System.currentTimeMillis();
-        resetCache();
-        reloadAllOrders();
-        log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
-    }
-
-    @Override
     public @Nullable Long getItemPrice(long itemId, boolean ignoreCache, boolean subtractBundlesPrice) {
         if (ignoreCache) {
             var v = productFinder.fetchProductById(getCurrentEvent(), itemId);
@@ -713,48 +697,42 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public void resetCache() {
-        log.info("[PRETIX] Resetting cache for pretix information");
+    public void reloadCacheAndOrders(boolean reloadPastEvents) {
+        if (!pretixConfig.isEnableSync()) {
+            log.warn("[PRETIX] Pretix synchronization has been disabled");
+            loadCurrentEventFromDb();
+            return;
+        }
+        healthcheck.waitForPretix();
+        log.info("[PRETIX] Syncing pretix information and cache it");
+        long start = System.currentTimeMillis();
+        resetEventStructCache(reloadPastEvents);
+        reloadCurrentEventOrders();
+        log.info("[PRETIX] Reloading cache and orders required {} ms", System.currentTimeMillis() - start);
+    }
+
+    @Override
+    public void resetEventStructCache(boolean reloadPastEvents) {
+        log.info("[PRETIX] Resetting cache for event's pretix information");
 
         try {
             lock.writeLock().lock();
             invalidateEventsCache();
-            invalidateEventStructCache();
+            invalidateEventStructCache(reloadPastEvents);
 
             // reloading events
             reloadEvents();
-            reloadEventStructure();
+            reloadEventStructure(reloadPastEvents);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
+    //Events cache is always loaded together, so we must invalidate both as well
     private void invalidateEventsCache() {
-        log.info("[PRETIX] Resetting event cache");
         currentEvent.set(null);
         otherEvents.set(null);
     }
-
-    private void invalidateEventStructCache() {
-        log.info("[PRETIX] Resetting event's struct cache");
-
-
-
-//TODO
-
-
-
-
-
-
-
-
-
-
-
-    }
-
-
     private void reloadEvents() {
         var r = useCaseExecutor.execute(ReloadEventsUseCase.class, UseCaseInput.EMPTY);
         r.getLeft().ifPresent(event -> {
@@ -778,56 +756,81 @@ public class CachedPretixInformation implements PretixInformation {
         }
     }
 
-    private void reloadEventStructure() {
-        Consumer<Event> reload = e -> {
-            reloadQuestions(e);
-            reloadProducts(e);
-            reloadQuotas(e);
-        };
-        reload.accept(getCurrentEvent());
-        getOtherEvents().stream().filter(e -> !e.equals(getCurrentEvent())).forEach(reload);
+    private void invalidateEventStructCache(boolean pastEvents) {
+        log.info("[PRETIX] Resetting event's struct cache");
+        currentEventCache.invalidate();
+        currentEventSpecificCache.invalidate();
+        if (pastEvents) {
+            otherEventsCache.invalidate();
+            eventSpecificCache.asMap().values().forEach(PretixEventSpecificCache::invalidate);
+            eventSpecificCache.invalidateAll();
+        }
     }
 
-    private void reloadQuestions(@NotNull Event event) {
+    private void reloadEventStructure(boolean reloadPastEvents) {
+        TriConsumer<Event, PretixCache, PretixEventSpecificCache> reload = (e, cache, specificCache) -> {
+            reloadQuestions(e, cache, specificCache);
+            reloadProducts(e, cache, specificCache);
+            reloadQuotas(e, cache);
+        };
+        Event current = getCurrentEvent();
+        reload.accept(current, currentEventCache, currentEventSpecificCache);
+        if (reloadPastEvents) {
+            getOtherEvents().stream().filter(e -> !e.equals(current)).forEach(e -> {
+                long eventId = e.getId();
+                PretixEventSpecificCache specificCache = new PretixEventSpecificCache();
+                eventSpecificCache.put(eventId, specificCache);
+                reload.accept(e, otherEventsCache, specificCache);
+            });
+        }
+    }
+
+    private void reloadQuestions(@NotNull Event event,
+                                 @NotNull PretixCache mainCache,
+                                 @NotNull PretixEventSpecificCache eventSpecificCache) {
         List<PretixQuestion> questionList = useCaseExecutor.execute(ReloadQuestionsUseCase.class, event);
+        var questionIdentifierToId = eventSpecificCache.questionIdentifierToId;
         questionList.forEach(question -> {
             long questionId = question.getId();
             QuestionType questionType = question.getType();
             List<PretixOption> options = question.getOptions();
             String questionIdentifier = question.getIdentifier();
 
-            questionIdToType.put(questionId, questionType);
-            questionIdToIdentifier.put(questionId, questionIdentifier);
-            questionIdToOptions.put(questionId, options);
+            mainCache.questionIdToType.put(questionId, questionType);
+            mainCache.questionIdToIdentifier.put(questionId, questionIdentifier);
+            mainCache.questionIdToOptions.put(questionId, options);
             questionIdentifierToId.put(questionIdentifier, questionId);
         });
         // searching QUESTIONS_ACCOUNT_USERID
         Long accountUserId = questionIdentifierToId.getIfPresent(QUESTIONS_ACCOUNT_USERID);
         if (accountUserId != null) {
             log.info("[PRETIX] Question account user id found, setup it on value = '{}'", accountUserId);
-            questionUserId.set(accountUserId);
+            eventSpecificCache.questionUserId.set(accountUserId);
         } else {
             log.warn("[PRETIX] Question account user id not found");
         }
         Long duplicateData = questionIdentifierToId.getIfPresent(QUESTIONS_DUPLICATE_DATA);
         if (duplicateData != null) {
             log.info("[PRETIX] Question duplicate data found, setup it on value = '{}'", duplicateData);
-            questionDuplicateData.set(duplicateData);
+            eventSpecificCache.questionDuplicateData.set(duplicateData);
         } else {
             log.warn("[PRETIX] Question duplicate data not found");
         }
         Long userNotes = questionIdentifierToId.getIfPresent(QUESTIONS_USER_NOTES);
         if (userNotes != null) {
             log.info("[PRETIX] Question user  notes found, setup it on value = '{}'", userNotes);
-            questionUserNotes.set(userNotes);
+            eventSpecificCache.questionUserNotes.set(userNotes);
         } else {
             log.warn("[PRETIX] Question user notes not found");
         }
     }
 
-    private void reloadProducts(@NotNull Event event) {
+    private void reloadProducts(@NotNull Event event,
+                                @NotNull PretixCache mainCache,
+                                @NotNull PretixEventSpecificCache eventSpecificCache) {
         PretixProductResults products = useCaseExecutor.execute(ReloadProductsUseCase.class, event);
 
+        var itemIdsCache = eventSpecificCache.itemIdsCache;
         itemIdsCache.put(CacheItemTypes.TICKETS, products.ticketItemIds());
         itemIdsCache.put(CacheItemTypes.MEMBERSHIP_CARDS, products.membershipCardItemIds());
         itemIdsCache.put(CacheItemTypes.SPONSORSHIPS, products.sponsorshipItemIds());
@@ -838,27 +841,29 @@ public class CachedPretixInformation implements PretixInformation {
         itemIdsCache.put(CacheItemTypes.TEMP_ITEM, products.tempItems());
         itemIdsCache.put(CacheItemTypes.BOARDS, products.boardItemIds());
 
-        dailyIdToDay.putAll(products.dailyIdToDay());
-        sponsorshipIdToType.putAll(products.sponsorshipIdToType());
-        sponsorshipTypeToIds.putAll(products.sponsorshipTypeToIds());
-        extraDaysIdToDay.putAll(products.extraDaysIdToDay());
-        roomIdToInfo.putAll(products.roomIdToInfo());
-        itemIdToPrice.putAll(products.itemIdToPrice());
-        variationIdToPrice.putAll(products.variationIdToPrice());
-        itemIdToBundle.putAll(products.itemIdToBundle());
-        variationIdToItem.putAll(products.variationIdToFatherItemId());
-        itemIdToNames.putAll(products.itemIdToNames());
-        variationIdToNames.putAll(products.variationIdToNames());
-        roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
-        roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
-        roomCapacityToItemId.putAll(products.capacityToRoomItemIds());
-        boardCapacityToItemId.putAll(products.boardCapacityToItemId());
-        halfBoardCapacityToVariationId.putAll(products.halfBoardCapacityToVariationId());
-        fullBoardCapacityToVariationId.putAll(products.fullBoardCapacityToVariationId());
-        variationIdToBoard.putAll(products.boardVariationIdToType());
+        mainCache.dailyIdToDay.putAll(products.dailyIdToDay());
+        mainCache.sponsorshipIdToType.putAll(products.sponsorshipIdToType());
+        mainCache.extraDaysIdToDay.putAll(products.extraDaysIdToDay());
+        mainCache.roomIdToInfo.putAll(products.roomIdToInfo());
+        mainCache.itemIdToPrice.putAll(products.itemIdToPrice());
+        mainCache.variationIdToPrice.putAll(products.variationIdToPrice());
+        mainCache.itemIdToBundle.putAll(products.itemIdToBundle());
+        mainCache.variationIdToItem.putAll(products.variationIdToFatherItemId());
+        mainCache.itemIdToNames.putAll(products.itemIdToNames());
+        mainCache.variationIdToNames.putAll(products.variationIdToNames());
+        mainCache.variationIdToBoard.putAll(products.boardVariationIdToType());
+
+        eventSpecificCache.sponsorshipTypeToIds.putAll(products.sponsorshipTypeToIds());
+        eventSpecificCache.roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
+        eventSpecificCache.roomIdToLateExtraDayItemId.putAll(products.lateDaysItemId());
+        eventSpecificCache.roomCapacityToItemId.putAll(products.capacityToRoomItemIds());
+        eventSpecificCache.boardCapacityToItemId.putAll(products.boardCapacityToItemId());
+        eventSpecificCache.halfBoardCapacityToVariationId.putAll(products.halfBoardCapacityToVariationId());
+        eventSpecificCache.fullBoardCapacityToVariationId.putAll(products.fullBoardCapacityToVariationId());
     }
 
-    private void reloadQuotas(@NotNull Event event) {
+    private void reloadQuotas(@NotNull Event event,
+                              @NotNull PretixCache mainCache) {
         List<PretixQuota> quotas = useCaseExecutor.execute(ReloadQuotaUseCase.class, event);
         TriConsumer<PretixQuota, Long, Cache<Long, List<PretixQuota>>> store = (quota, id, cache) -> {
             List<PretixQuota> existingQuota = cache.getIfPresent(id);
@@ -869,6 +874,8 @@ public class CachedPretixInformation implements PretixInformation {
             }
             existingQuota.add(quota);
         };
+        var itemIdToQuota = mainCache.itemIdToQuota;
+        var variationIdToQuota = mainCache.variationIdToQuota;
         quotas.forEach(quota -> {
             quota.getItems().forEach(id -> store.accept(quota, id, itemIdToQuota));
             quota.getVariations().forEach(id -> store.accept(quota, id, variationIdToQuota));
@@ -876,14 +883,19 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
-    public void reloadAllOrders() {
+    public void reloadCurrentEventOrders() {
         var input = new ReloadOrdersUseCase.Input(getCurrentEvent(), this);
         useCaseExecutor.execute(ReloadOrdersUseCase.class, input);
+    }
+
+    @PostConstruct
+    private void startup() {
+        reloadCacheAndOrders(true);
     }
 
     @Scheduled(cron = "${pretix.cache-reload-cronjob}")
     private void cronReloadCache() {
         log.info("[PRETIX] Cronjob running");
-        reloadCacheAndOrders();
+        reloadCacheAndOrders(false);
     }
 }

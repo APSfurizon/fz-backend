@@ -16,64 +16,63 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 
-@Getter
 class PretixCache {
 
     //Event Struct
     //map id -> price * 100
     @NotNull
-    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
+    final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
     //map variation id -> price * 100
     @NotNull
-    private final Cache<Long, Long> variationIdToPrice = Caffeine.newBuilder().build();
+    final Cache<Long, Long> variationIdToPrice = Caffeine.newBuilder().build();
     //map variation id -> father item id
     @NotNull
-    private final Cache<Long, Long> variationIdToItem = Caffeine.newBuilder().build();
+    final Cache<Long, Long> variationIdToItem = Caffeine.newBuilder().build();
     //map id -> bundles
     @NotNull
-    private final Cache<Long, List<PretixProductBundle>> itemIdToBundle = Caffeine.newBuilder().build();
+    final Cache<Long, List<PretixProductBundle>> itemIdToBundle = Caffeine.newBuilder().build();
     //map id -> quota
     @NotNull
-    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
+    final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
     //map id -> quota
     @NotNull
-    private final Cache<Long, List<PretixQuota>> variationIdToQuota = Caffeine.newBuilder().build();
+    final Cache<Long, List<PretixQuota>> variationIdToQuota = Caffeine.newBuilder().build();
     //map id -> room names
     @NotNull
-    private final Cache<Long, Map<String, String>> itemIdToNames = Caffeine.newBuilder().build();
+    final Cache<Long, Map<String, String>> itemIdToNames = Caffeine.newBuilder().build();
     //map id -> room names
     @NotNull
-    private final Cache<Long, Map<String, String>> variationIdToNames = Caffeine.newBuilder().build();
+    final Cache<Long, Map<String, String>> variationIdToNames = Caffeine.newBuilder().build();
 
     //Questions
     @NotNull
-    private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
+    final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
     @NotNull
-    private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
+    final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
     @NotNull
-    private final Cache<Long, List<PretixOption>> questionIdToOptions = Caffeine.newBuilder().build();
+    final Cache<Long, List<PretixOption>> questionIdToOptions = Caffeine.newBuilder().build();
 
     //Tickets
     @NotNull
-    private final Cache<Long, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
+    final Cache<Long, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
 
     //Sponsors
     @NotNull
-    private final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
+    final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
 
     //Extra days
     @NotNull
-    private final Cache<Long, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
+    final Cache<Long, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
 
     //Rooms
     //map id -> (capacity, hotelName, roomName)
     @NotNull
-    private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
+    final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
 
     //Board
     // map id -> Board type
     @NotNull
-    private final Cache<Long, Board> variationIdToBoard = Caffeine.newBuilder().build();
+    final Cache<Long, Board> variationIdToBoard = Caffeine.newBuilder().build();
 
     public void invalidate() {
         //General
