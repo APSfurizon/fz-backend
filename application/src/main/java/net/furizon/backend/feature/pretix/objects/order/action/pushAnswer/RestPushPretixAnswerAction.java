@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order.action.pushAnswer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.dto.request.PushPretixAnswerRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
@@ -29,8 +30,9 @@ public class RestPushPretixAnswerAction implements PushPretixAnswerAction {
         @NotNull final Order order,
         @NotNull final PretixInformation pretixInformation
     ) {
-        log.info("Pushing new answers to order {} on event {}", order.getCode(), order.getOrderEvent());
-        final var pair = order.getOrderEvent().getOrganizerAndEventPair();
+        Event event = order.getOrderEvent();
+        log.info("Pushing new answers to order {} on event {}", order.getCode(), event);
+        final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
             .method(HttpMethod.PATCH)
             .path("/organizers/{organizer}/events/{event}/orderpositions/{position}/")

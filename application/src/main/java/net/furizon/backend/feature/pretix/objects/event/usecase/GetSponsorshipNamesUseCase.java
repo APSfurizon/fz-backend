@@ -14,13 +14,13 @@ public class GetSponsorshipNamesUseCase implements UseCase<GetSponsorshipNamesUs
 
     @Override
     public @NotNull SponsorshipNamesResponse executor(@NotNull GetSponsorshipNamesUseCase.Input input) {
-        //TODO add support for sponsor tiers from previous events
         PretixInformation pretix = input.pretixInformation;
+        long eventId = input.eventId;
         SponsorshipNamesResponse response = new SponsorshipNamesResponse();
 
         for (Sponsorship s : Sponsorship.values()) {
             if (s != Sponsorship.NONE) {
-                var variationId = pretix.getSponsorIds(s).stream().findFirst();
+                var variationId = pretix.getSponsorIds(s, eventId).stream().findFirst();
                 variationId.ifPresent(v -> response.sponsor(s, pretix.getVariationNames(v)));
             }
         }

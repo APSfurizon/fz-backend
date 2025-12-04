@@ -28,10 +28,11 @@ public interface PretixInformation {
 
     @NotNull Set<Long> getIdsForItemType(@NotNull CacheItemTypes type, long eventId);
 
+    @NotNull Set<Long> getIdsForItemType(@NotNull CacheItemTypes type);
+
+
     @NotNull
     Event getCurrentEvent();
-
-    long getQuestionUserId();
 
     @Nullable
     Long getItemPrice(long roomPretixItemId, boolean ignoreCache, boolean subtractBundlesPrice);
@@ -63,15 +64,13 @@ public interface PretixInformation {
 
     @NotNull Map<String, String> getVariationNames(long variationId);
 
-    @Nullable
-    Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
+    @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
                                            short capacity, @NotNull ExtraDays day);
 
     @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
                                                      short capacity, @NotNull ExtraDays day, long eventId);
 
-    @Nullable
-    Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
+    @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
 
     @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day, long eventId);
 
@@ -98,8 +97,7 @@ public interface PretixInformation {
 
     boolean isPhonePrefixValid(@NotNull String phonePrefix);
 
-    @NotNull
-    Set<Long> getIdsForItemType(@NotNull CacheItemTypes type);
+    long getQuestionUserId();
 
     long getQuestionUserId(long eventId);
 

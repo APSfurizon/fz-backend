@@ -493,7 +493,7 @@ public class JooqRoomFinder implements RoomFinder {
                 ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal())
                 .and(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID.isNotNull())
                 .and(ORDERS.ORDER_ROOM_PRETIX_ITEM_ID.notIn(
-                        pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM)
+                        pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM, eventId)
                 ))
             )
             .groupBy(ORDERS.USER_ID)
