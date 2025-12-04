@@ -1,15 +1,12 @@
 package net.furizon.backend.feature.pretix.objects.event.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.dto.SponsorshipNamesResponse;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
