@@ -99,99 +99,18 @@ public class CachedPretixInformation implements PretixInformation {
 
     // *** CACHE
     @NotNull
+    private PretixCache currentEventCache = new PretixCache();
+    @NotNull
+    private PretixEventSpecificCache currentEventSpecificCache = new PretixEventSpecificCache();
+    @NotNull
+    private PretixCache otherEventsCache = new PretixCache();
+    @NotNull
+    private final Cache<Long, PretixEventSpecificCache> eventSpecificCache = Caffeine.newBuilder().build();
+
+    @NotNull
     private final AtomicReference<Event> currentEvent = new AtomicReference<>(null);
     @NotNull
     private final AtomicReference<List<Event>> otherEvents = new AtomicReference<>(null);
-
-    //Event Struct
-
-    //map id -> price * 100
-    @NotNull
-    private final Cache<Long, Long> itemIdToPrice = Caffeine.newBuilder().build();
-    //map variation id -> price * 100
-    @NotNull
-    private final Cache<Long, Long> variationIdToPrice = Caffeine.newBuilder().build();
-    //map variation id -> father item id
-    @NotNull
-    private final Cache<Long, Long> variationIdToItem = Caffeine.newBuilder().build();
-    //map id -> bundles
-    @NotNull
-    private final Cache<Long, List<PretixProductBundle>> itemIdToBundle = Caffeine.newBuilder().build();
-    //map id -> quota
-    @NotNull
-    private final Cache<Long, List<PretixQuota>> itemIdToQuota = Caffeine.newBuilder().build();
-    //map id -> quota
-    @NotNull
-    private final Cache<Long, List<PretixQuota>> variationIdToQuota = Caffeine.newBuilder().build();
-    //map id -> room names
-    @NotNull
-    private final Cache<Long, Map<String, String>> itemIdToNames = Caffeine.newBuilder().build();
-    //map id -> room names
-    @NotNull
-    private final Cache<Long, Map<String, String>> variationIdToNames = Caffeine.newBuilder().build();
-
-    //Contains tickets, memberships, sponsors, rooms
-    @NotNull
-    private final Cache<CacheItemTypes, Set<Long>> itemIdsCache = Caffeine.newBuilder().build();
-
-    //Questions
-    @NotNull
-    private final AtomicReference<Long> questionUserId = new AtomicReference<>(-1L);
-    @NotNull
-    private final AtomicReference<Long> questionDuplicateData = new AtomicReference<>(-1L);
-    @NotNull
-    private final AtomicReference<Long> questionUserNotes = new AtomicReference<>(-1L);
-    @NotNull
-    private final Cache<Long, QuestionType> questionIdToType = Caffeine.newBuilder().build();
-    @NotNull
-    private final Cache<Long, String> questionIdToIdentifier = Caffeine.newBuilder().build();
-    @NotNull
-    private final Cache<Long, List<PretixOption>> questionIdToOptions = Caffeine.newBuilder().build();
-    @NotNull
-    private final Cache<String, Long> questionIdentifierToId = Caffeine.newBuilder().build();
-
-    //Tickets
-    @NotNull
-    private final Cache<Long, Integer> dailyIdToDay = Caffeine.newBuilder().build(); //map id -> day idx
-
-    //Sponsors
-    @NotNull
-    private final Cache<Long, Sponsorship> sponsorshipIdToType = Caffeine.newBuilder().build();
-    @NotNull
-    private final Cache<Sponsorship, Set<Long>> sponsorshipTypeToIds = Caffeine.newBuilder().build();
-
-    //Extra days
-    @NotNull
-    private final Cache<Long, ExtraDays> extraDaysIdToDay = Caffeine.newBuilder().build();
-    //map (capacity, hotelName, roomName) -> earlyExtraDays item id
-    @NotNull
-    private final Cache<HotelCapacityPair, Long> roomIdToEarlyExtraDayItemId = Caffeine.newBuilder().build();
-    //map (capacity, hotelName, roomName) -> lateExtraDays item id
-    @NotNull
-    private final Cache<HotelCapacityPair, Long> roomIdToLateExtraDayItemId = Caffeine.newBuilder().build();
-
-    //Rooms
-    //map id -> (capacity, hotelName, roomName)
-    @NotNull
-    private final Cache<Long, HotelCapacityPair> roomIdToInfo = Caffeine.newBuilder().build();
-    //map capacity -> List[id of room items with that capacity]
-    @NotNull
-    private final Cache<Short, List<Long>> roomCapacityToItemId = Caffeine.newBuilder().build();
-
-    //Board
-    //map (capacity, hotelName, roomName) -> board main item id
-    @NotNull
-    private final Cache<HotelCapacityPair, Long> boardCapacityToItemId  = Caffeine.newBuilder().build();
-    //map (capacity, hotelName, roomName) -> half board variation id
-    @NotNull
-    private final Cache<HotelCapacityPair, Long> halfBoardCapacityToVariationId  = Caffeine.newBuilder().build();
-    //map (capacity, hotelName, roomName) -> full board variation id
-    @NotNull
-    private final Cache<HotelCapacityPair, Long> fullBoardCapacityToVariationId  = Caffeine.newBuilder().build();
-    // map id -> Board type
-    @NotNull
-    private final Cache<Long, Board> variationIdToBoard = Caffeine.newBuilder().build();
-
 
     //Countries
     @NotNull
@@ -819,47 +738,20 @@ public class CachedPretixInformation implements PretixInformation {
     private void invalidateEventStructCache() {
         log.info("[PRETIX] Resetting event's struct cache");
 
-        //General
-        itemIdsCache.invalidateAll();
-        itemIdToPrice.invalidateAll();
-        variationIdToPrice.invalidateAll();
-        variationIdToItem.invalidateAll();
-        itemIdToBundle.invalidateAll();
-        itemIdToQuota.invalidateAll();
-        variationIdToQuota.invalidateAll();
-        itemIdToNames.invalidateAll();
-        variationIdToNames.invalidateAll();
 
-        //Questions
-        questionUserId.set(-1L);
-        questionUserNotes.set(-1L);
-        questionDuplicateData.set(-1L);
-        questionIdToType.invalidateAll();
-        questionIdToIdentifier.invalidateAll();
-        questionIdToOptions.invalidateAll();
-        questionIdentifierToId.invalidateAll();
 
-        //Tickets
-        dailyIdToDay.invalidateAll();
+//TODO
 
-        //Sponsors
-        sponsorshipIdToType.invalidateAll();
-        sponsorshipTypeToIds.invalidateAll();
 
-        //Extra days
-        extraDaysIdToDay.invalidateAll();
 
-        //Rooms
-        roomIdToInfo.invalidateAll();
-        roomIdToEarlyExtraDayItemId.invalidateAll();
-        roomIdToLateExtraDayItemId.invalidateAll();
-        roomCapacityToItemId.invalidateAll();
 
-        //Board
-        boardCapacityToItemId.invalidateAll();
-        halfBoardCapacityToVariationId.invalidateAll();
-        fullBoardCapacityToVariationId.invalidateAll();
-        variationIdToBoard.invalidateAll();
+
+
+
+
+
+
+
     }
 
 
