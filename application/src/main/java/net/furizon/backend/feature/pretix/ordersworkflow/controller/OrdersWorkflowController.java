@@ -117,7 +117,8 @@ public class OrdersWorkflowController {
         + "Refer to its documentation for a full description. In the order object, `dailyDays` is a set of "
         + "indexes of the days the user has bought. `roomTypeNames` is a map language->name of the name "
         + "of the room. The order secret must be used to show a QR code in the frontend (only when a user "
-        + "actually requests it) used for the pretix checkin")
+        + "actually requests it) used for the pretix checkin. "
+        + "In the order field we also return the names of the current sponsor tier")
     @GetMapping("/get-full-status")
     public FullInfoResponse getFullStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user

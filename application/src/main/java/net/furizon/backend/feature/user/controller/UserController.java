@@ -120,7 +120,8 @@ public class UserController {
         + "the endpoint `orders-workflow/generate-pretix-control-order-link` "
         + "which redirects the admin to the order's pretix control page. "
         + "When this page is loaded, a call to /admin/capabilities must be done to check which operations "
-        + "are currently permitted to the admin.")
+        + "are currently permitted to the admin. In the field sponsorNames there's a map for eventId/relative "
+        + "sponsorship names for each tier that should be used to display the sponsor names")
     @PermissionRequired(permissions = {Permission.CAN_VIEW_USER, Permission.CAN_MANAGE_USER_PUBLIC_INFO})
     @GetMapping("/view/{id}")
     public @NotNull UserAdminViewData getUserAdminViewData(
