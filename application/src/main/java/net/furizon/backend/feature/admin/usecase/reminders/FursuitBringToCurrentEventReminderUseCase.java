@@ -13,13 +13,10 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,30 +27,18 @@ import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLA
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
+public class FursuitBringToCurrentEventReminderUseCase implements UseCase<Event, Integer> {
     @NotNull private final FursuitFinder fursuitFinder;
-    @NotNull private final BadgeConfig badgeConfig;
     @NotNull private final FursuitReminder fursuitReminder;
-
 
     @Override
     public @NotNull Integer executor(@NotNull Event event) {
-        log.info("Sending fursuit badge upload reminder emails");
-
-        final String deadlineStr;
-        OffsetDateTime deadline = badgeConfig.getEditingDeadline();
-        if (deadline != null) {
-            deadlineStr = deadline.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        } else {
-            deadlineStr = "event starts";
-        }
-
+        log.info("Sending fursuit bring to current event reminder emails");
         return fursuitReminder.sendReminders(
                 fursuitFinder.getFursuitsWithoutPropic(event),
-                "badge upload",
+                "bring to current event",
                 "mail.reminder_fursuit_badge_upload.title",
-                TEMPLATE_FURSUIT_BADGE_UPLOAD,
-                MailVarPair.of(EmailVars.DEADLINE, deadlineStr)
+                TEMPLATE_FURSUIT_BADGE_UPLOAD
         );
     }
 }
