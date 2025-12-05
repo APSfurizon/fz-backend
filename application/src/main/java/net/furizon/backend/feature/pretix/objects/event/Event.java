@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
@@ -44,6 +45,10 @@ public class Event {
 
     @Nullable
     private Map<String, String> eventNames;
+
+    public String getLocalizedName(@NotNull TranslationService translationService) {
+        return translationService.getTranslationFromMap(eventNames);
+    }
 
     public static class EventBuilder {
         public EventBuilder slug(String fullSlug) {

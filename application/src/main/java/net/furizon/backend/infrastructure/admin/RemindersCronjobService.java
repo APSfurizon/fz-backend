@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.usecase.reminders.ExpiredIdReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.FursuitBringToCurrentEventReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -38,6 +39,14 @@ public class RemindersCronjobService {
         log.info("Remind fursuit badge upload cronjob is running");
         int sent = useCaseExecutor.execute(FursuitBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} fursuit badge upload emails", sent);
+    }
+
+    @Scheduled(cron = "${reminders.cronjobs.fursuit-bring-to-event}")
+    public void fursuitBringToEvent() {
+        log.info("Remind fursuit bring to current event cronjob is running");
+        int sent = useCaseExecutor.execute(FursuitBringToCurrentEventReminderUseCase.class,
+                pretixInformation.getCurrentEvent());
+        log.info("Sent {} fursuit bring to current event emails", sent);
     }
 
     @Scheduled(cron = "${reminders.cronjobs.expired-id}")

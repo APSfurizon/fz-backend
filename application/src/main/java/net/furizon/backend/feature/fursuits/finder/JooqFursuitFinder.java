@@ -5,6 +5,8 @@ import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.user.dto.UserEmailData;
+import net.furizon.backend.feature.user.mapper.JooqUserEmailDataMapper;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +18,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.FURSUITS;
 import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
+import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +62,40 @@ public class JooqFursuitFinder implements FursuitFinder {
             )
             .where(FURSUITS.MEDIA_ID_PROPIC.isNull())
         ).stream().map(r -> JooqFursuitDataMapper.map(r, false, false)).toList();
+    }
+
+    @Override
+    public @NotNull List<UserEmailData> getUsersNotBringingAnyFursuit(@NotNull Event event) {
+        return sqlQuery.fetch(
+            PostgresDSL.selectDistinct(
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
+            )
+            .from(USERS)
+            .innerJoin(AUTHENTICATIONS)
+            .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
+            .innerJoin(FURSUITS)
+            .on(FURSUITS.USER_ID.eq(USERS.USER_ID))
+            .innerJoin(ORDERS)
+            .on(
+                ORDERS.USER_ID.eq(USERS.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
+            )
+            .where(
+                USERS.USER_ID.notIn(
+                    PostgresDSL.select(ORDERS.USER_ID)
+                    .from(FURSUITS_ORDERS)
+                    .innerJoin(ORDERS)
+                    .on(
+                        FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                    )
+                )
+            )
+        ).stream().map(JooqUserEmailDataMapper::map).toList();
     }
 
     @Override

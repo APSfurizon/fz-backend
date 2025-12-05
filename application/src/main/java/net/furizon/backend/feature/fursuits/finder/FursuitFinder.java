@@ -3,6 +3,7 @@ package net.furizon.backend.feature.fursuits.finder;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.user.dto.UserEmailData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,8 @@ public interface FursuitFinder {
     @Nullable FursuitData getFursuit(long fursuitId, @Nullable Event event, @Nullable Long userId, boolean isOwner);
 
     @NotNull List<FursuitData> getFursuitsWithoutPropic(@NotNull Event event);
+
+    @NotNull List<UserEmailData> getUsersNotBringingAnyFursuit(@NotNull Event event);
 
     int countFursuitsOfUser(long userId);
 

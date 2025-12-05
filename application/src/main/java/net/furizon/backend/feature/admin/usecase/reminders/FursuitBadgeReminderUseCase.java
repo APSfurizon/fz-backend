@@ -2,28 +2,17 @@ package net.furizon.backend.feature.admin.usecase.reminders;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.user.dto.UserEmailData;
-import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.BadgeConfig;
-import net.furizon.backend.infrastructure.configuration.FrontendConfig;
-import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.EmailVars;
 import net.furizon.backend.infrastructure.email.MailVarPair;
-import net.furizon.backend.infrastructure.email.model.MailRequest;
-import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLATE_FURSUIT_BADGE_UPLOAD;
 
@@ -32,15 +21,12 @@ import static net.furizon.backend.infrastructure.admin.ReminderEmailTexts.TEMPLA
 @RequiredArgsConstructor
 public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
     @NotNull private final FursuitFinder fursuitFinder;
-    @NotNull private final UserFinder userFinder;
-    @NotNull private final EmailSender emailSender;
     @NotNull private final BadgeConfig badgeConfig;
-    @NotNull private final FrontendConfig frontendConfig;
-    @NotNull private final TranslationService translationService;
+    @NotNull private final FursuitReminder fursuitReminder;
+
 
     @Override
     public @NotNull Integer executor(@NotNull Event event) {
-        int n = 0;
         log.info("Sending fursuit badge upload reminder emails");
 
         final String deadlineStr;
@@ -51,39 +37,12 @@ public class FursuitBadgeReminderUseCase implements UseCase<Event, Integer> {
             deadlineStr = "event starts";
         }
 
-        //Obtain and group fursuits
-        List<FursuitData> fursuits = fursuitFinder.getFursuitsWithoutPropic(event);
-        Map<Long, List<FursuitData>> userToFursuits = new HashMap<>();
-        for (FursuitData fursuitData : fursuits) {
-            List<FursuitData> data = userToFursuits.computeIfAbsent(
-                    fursuitData.getOwnerId(),
-                    k -> new ArrayList<>(fursuits.size())
-            );
-            data.add(fursuitData);
-        }
-
-        //Obtain list of emails
-        List<UserEmailData> userEmails = userFinder.getMailDataForUsers(userToFursuits.keySet().stream().toList());
-        MailRequest[] mails = new MailRequest[userEmails.size()];
-        for (UserEmailData usr : userEmails) {
-
-            log.info("Sending fursuit badge upload reminder email to {}", usr.getEmail());
-            String suits = String.join(
-                ", ",
-                userToFursuits.get(usr.getUserId()).stream().map(s -> s.getFursuit().getName()).toList()
-            );
-            mails[n] = new MailRequest(
-                    usr,
-                    TEMPLATE_FURSUIT_BADGE_UPLOAD,
-                    MailVarPair.of(EmailVars.LINK, frontendConfig.getBadgePageUrl()),
-                    MailVarPair.of(EmailVars.DEADLINE, deadlineStr),
-                    MailVarPair.of(EmailVars.FURSUIT_NAME, suits)
-            ).subject("mail.reminder_fursuit_badge_upload.title");
-            n++;
-        }
-        log.info("Firing fursuit badge upload reminder emails");
-        emailSender.fireAndForgetMany(mails);
-
-        return n;
+        return fursuitReminder.sendReminders(
+                fursuitFinder.getFursuitsWithoutPropic(event),
+                "badge upload",
+                "mail.reminder_fursuit_badge_upload.title",
+                TEMPLATE_FURSUIT_BADGE_UPLOAD,
+                MailVarPair.of(EmailVars.DEADLINE, deadlineStr)
+        );
     }
 }

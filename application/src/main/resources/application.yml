@@ -165,6 +165,7 @@ reminders:
     order-linking: ${REMINDERS_CRONJOB_ORDER_LINKING:0 40 18 * * *}
     user-badge-upload: ${REMINDERS_USER_BADGE_UPLOAD:0 0 18 1 * *}
     fursuit-badge-upload: ${REMINDERS_FURSUIT_BADGE_UPLOAD:0 0 18 2 * *}
+    fursuit-bring-to-event: ${REMINDERS_FURSUIT_BADGE_UPLOAD:0 0 18 3 * *}
     expired-id: ${REMINDERS_CRONJOB_EXPIRED_ID:0 10 18 * * *}
 
 admin:

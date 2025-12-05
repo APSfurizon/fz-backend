@@ -266,6 +266,9 @@ def exportBadges() -> Response:
 def remindRoomNotFull() -> Response:
     return doGet(f'{BASE_URL_API}admin/mail-reminders/room-not-full')
 
+def reminderFursuitBringToEvent() -> Response:
+    return doGet(f'{BASE_URL_API}admin/mail-reminders/fursuit-bring-to-event')
+
 def roomCreate() -> Response:
     json = {
         "name": "Test Room"
@@ -340,12 +343,12 @@ login()
 #exportBadges()
 #remindRoomNotFull()
 
-getOrderFullStatus()
+#getOrderFullStatus()
 
 
 #roomDelete()
 #roomCreate()
-roomGetInfo()
+#roomGetInfo()
 #roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
@@ -354,7 +357,8 @@ roomGetInfo()
 #buyOrUpgradeRoom()
 #exchangeInit()
 #exchangeUpdate()
-getSponsorshipNames()
+#getSponsorshipNames()
+reminderFursuitBringToEvent()
 
 
 #uploadBadge()

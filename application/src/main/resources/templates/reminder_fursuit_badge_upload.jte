@@ -7,5 +7,5 @@
 @template.layout(title = localize("mail.reminder_fursuit_badge_upload.title"), content = @`
     <h2 class="title">${localize("mail.reminder_fursuit_badge_upload.title")}</h2>
     <p class="main-content">${localize("mail.reminder_fursuit_badge_upload.description", fursonaName, fursuitName, deadline)},</p>
-    <a href="${link}" class="link">${localize("mail.reminder_fursuit_badge_upload.upload_badge")}</a>
+    <a href="${link}" class="link">${localize("mail.reminder_fursuit_badge_upload.email_link")}</a>
 `)
