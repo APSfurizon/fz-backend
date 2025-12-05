@@ -18,8 +18,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.*;
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
+import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
@@ -75,18 +78,23 @@ public class JooqFursuitFinder implements FursuitFinder {
             .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
             .innerJoin(FURSUITS)
             .on(FURSUITS.USER_ID.eq(USERS.USER_ID))
-            .leftJoin(
-                ORDERS.innerJoin(FURSUITS_ORDERS)
-                .on(
-                    FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
-                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                )
-            )
+            .innerJoin(ORDERS)
             .on(
                 ORDERS.USER_ID.eq(USERS.USER_ID)
-                .and(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
             )
-            .where(ORDERS.ID.isNull())
+            .where(
+                USERS.USER_ID.notIn(
+                    PostgresDSL.select(ORDERS.USER_ID)
+                    .from(FURSUITS_ORDERS)
+                    .innerJoin(ORDERS)
+                    .on(
+                        FURSUITS_ORDERS.ORDER_ID.eq(ORDERS.ID)
+                        .and(ORDERS.EVENT_ID.eq(event.getId()))
+                    )
+                )
+            )
         ).stream().map(JooqUserEmailDataMapper::map).toList();
     }
 

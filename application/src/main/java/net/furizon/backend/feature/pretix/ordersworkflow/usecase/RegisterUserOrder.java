@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.Optional;
 
-import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.LANG_PRETIX;
 import static net.furizon.backend.infrastructure.pretix.PretixEmailTexts.TEMPLATE_DUPLICATE_ORDER;
 
 @Data
@@ -135,10 +134,12 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                     mailService.fireAndForget(
                         new MailRequest(
                             mail, TEMPLATE_DUPLICATE_ORDER,
-                            MailVarPair.of(EmailVars.EVENT_NAME, eventNames == null ? "" : eventNames.get(LANG_PRETIX)),
                             MailVarPair.of(EmailVars.ORDER_CODE, prevOrderCode),
                             MailVarPair.of(EmailVars.DUPLICATE_ORDER_CODE, order.getCode()),
-                            MailVarPair.of(EmailVars.LINK, frontendConfig.getReservationPageUrl())
+                            MailVarPair.of(EmailVars.LINK, frontendConfig.getReservationPageUrl()),
+                            MailVarPair.of(EmailVars.EVENT_NAME, eventNames == null
+                                                                 ? ""
+                                                                 : event.getLocalizedName(translationService))
                         ).subject("mail.order_duplicate_detected.title")
                     );
                 } else {

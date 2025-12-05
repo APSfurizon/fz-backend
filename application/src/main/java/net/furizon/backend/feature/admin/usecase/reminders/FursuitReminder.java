@@ -53,7 +53,7 @@ class FursuitReminder {
         //Send mails
         for (UserEmailData usr : userEmails) {
 
-            log.info("Sending fursuit {} reminder email to {}", logName, usr.getEmail());
+            log.debug("Sending fursuit {} reminder email to {}", logName, usr.getEmail());
             String suits = String.join(
                     ", ",
                     userToFursuits.get(usr.getUserId()).stream().map(s -> s.getFursuit().getName()).toList()

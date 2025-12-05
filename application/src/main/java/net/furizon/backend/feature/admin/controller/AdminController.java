@@ -18,6 +18,7 @@ import net.furizon.backend.feature.admin.usecase.export.PreviewUserBadgesUseCase
 import net.furizon.backend.feature.admin.usecase.reminders.EmptyRoomReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.ExpiredIdReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderUseCase;
+import net.furizon.backend.feature.admin.usecase.reminders.FursuitBringToCurrentEventReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
@@ -129,7 +130,7 @@ public class AdminController {
         log.info("Sent {} user badge upload emails", sent);
     }
 
-    @Operation(summary = "Remind user to link their orders", description =
+    @Operation(summary = "Remind user to upload their fursuit badge", description =
         "Sends an email to all people who have made a paid order which have not set a fursuit propic yet "
         + "for a fursuit they're bringing to the current event, reminding them to do so")
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
@@ -139,6 +140,19 @@ public class AdminController {
     ) {
         int sent = executor.execute(FursuitBadgeReminderUseCase.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} fursuit badge upload emails", sent);
+    }
+
+    @Operation(summary = "Remind user check bringToCurrentEvent on their fursuits", description =
+        "Sends an email to all people who have a fursuit registered on an account, have a paid order but "
+        + "no fursuit have bringToCurrentEvent set")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @GetMapping("/mail-reminders/fursuit-bring-to-event")
+    public void remindFursuitBringToEvent(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(FursuitBringToCurrentEventReminderUseCase.class,
+                pretixInformation.getCurrentEvent());
+        log.info("Sent {} fursuit bring to current event emails", sent);
     }
 
     @Operation(summary = "Remind user to create and full their rooms", description =
