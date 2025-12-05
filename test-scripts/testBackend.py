@@ -156,8 +156,8 @@ def pretixWebhook(orderCode: str, event: str, orga: str) -> Response:
         "notificationId": 0,
         "organizer": orga,
         "event": event,
-        "code": orderCode + generate_random_string(4),
-        #"code": orderCode,
+        #"code": orderCode + generate_random_string(4),
+        "code": orderCode,
         "action": "a"
     }
     return doPost(f'{BASE_URL}internal/orders/webhook', json=json, auth=HTTPBasicAuth('furizon', 'changeit'))

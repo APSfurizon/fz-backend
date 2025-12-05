@@ -10,7 +10,6 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.pretix.service.queue.PretixOrderFetchQueueService;
 import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
-import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
