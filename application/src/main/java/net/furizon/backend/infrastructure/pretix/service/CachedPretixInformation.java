@@ -772,7 +772,12 @@ public class CachedPretixInformation implements PretixInformation {
 
     @NotNull
     private PretixEventSpecificCache getSpecificCache(long eventId) {
-        return getCurrentEvent().getId() == eventId ? currentEventSpecificCache : Objects.requireNonNull(eventSpecificCache.getIfPresent(eventId));
+        var cache = getCurrentEvent().getId() == eventId ? currentEventSpecificCache : eventSpecificCache.getIfPresent(eventId);
+        if (cache == null) {
+            log.error("[PRETIX] getSpecificCache({}): Cache is null! Returning current event cache", eventId);
+            cache = currentEventSpecificCache;
+        }
+        return cache;
     }
 
     @Nullable

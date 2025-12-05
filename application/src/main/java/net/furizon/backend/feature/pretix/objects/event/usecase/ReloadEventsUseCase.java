@@ -96,10 +96,12 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                         dbEvent.setTestModeEnabled(event.isTestMode());
                         dbEvent.setPublic(event.isPublic());
                         updateEventAction.invoke(dbEvent);
-                    }
 
-                    if (dbEvent != null && dbEvent.isCurrent()) {
-                        currentEvent.set(dbEvent);
+                        if (isCurrentEvent) {
+                            currentEvent.set(dbEvent);
+                        } else {
+                            events.add(dbEvent);
+                        }
                     }
                 }
             );
