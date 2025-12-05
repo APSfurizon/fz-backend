@@ -283,7 +283,7 @@ public class Order {
         final var list = new ArrayList<PretixAnswer>();
         final var answers = getAnswers();
         for (String key : answers.keySet()) {
-            final var questionId = pretixInformation.getQuestionIdFromIdentifier(key);
+            final var questionId = pretixInformation.getQuestionIdFromIdentifier(key, eventId);
             if (questionId.isEmpty()) {
                 continue;
             }

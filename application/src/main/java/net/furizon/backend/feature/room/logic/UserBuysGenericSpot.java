@@ -361,7 +361,10 @@ public class UserBuysGenericSpot implements RoomLogic {
     public void updateRoomCapacity(@NotNull RoomData roomData,
                                    @NotNull Event event, @NotNull PretixInformation pretixInformation) {
         if (roomData.getRoomCapacity() <= 0) {
-            roomData.setRoomCapacity(Objects.requireNonNull(pretixInformation.getBiggestRoomCapacity()).capacity());
+            roomData.setRoomCapacity(
+                    Objects.requireNonNull(pretixInformation.getBiggestRoomCapacityOnCurrentEvent())
+                    .capacity()
+            );
         }
     }
 

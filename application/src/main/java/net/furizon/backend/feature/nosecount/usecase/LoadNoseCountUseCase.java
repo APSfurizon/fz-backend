@@ -51,9 +51,11 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
             throw new ApiException(translationService.error("common.event_not_found"),
                 GeneralResponseCodes.EVENT_NOT_FOUND);
         }
+        long eventId = input.event.getId();
+        PretixInformation pretix = input.pretixInformation;
         OffsetDateTime from = input.event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
 
-        Long noRoomItemId = (Long) input.pretixInformation.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM).toArray()[0];
+        Long noRoomItemId = (Long) pretix.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM, eventId).toArray()[0];
 
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
         List<UserDisplayDataWithExtraDays> roomless = new ArrayList<>();
@@ -61,7 +63,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         Map<Long, NosecountRoomType> roomPretixItemIdToRoomType = new HashMap<>();
         Map<String, NosecountHotel> hotelInternalNameToHotel = new HashMap<>();
 
-        List<JooqNosecountObj> data = countsFinder.getNosecount(input.event.getId());
+        List<JooqNosecountObj> data = countsFinder.getNosecount(eventId);
         for (JooqNosecountObj obj : data) {
 
             //Daily days furs
@@ -98,7 +100,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
                                 Objects.requireNonNull(obj.getRoomCapacity()),
                                 itemId,
                                 obj.getRoomInternalName(),
-                                input.pretixInformation.getItemNames(itemId)
+                                pretix.getItemNames(itemId)
                             ), new ArrayList<>()
                         );
 

@@ -25,7 +25,7 @@ public class SanityCheckService {
         log.info("Running rooms sanity checks");
 
         List<String> errors = new LinkedList<>();
-        pretixInformation.reloadCacheAndOrders();
+        pretixInformation.reloadCacheAndOrders(false);
         List<Long> roomIds = roomFinder.getRoomsForEvent(pretixInformation.getCurrentEvent().getId());
         for (long roomId : roomIds) {
             roomLogic.doSanityChecks(roomId, pretixInformation, errors);

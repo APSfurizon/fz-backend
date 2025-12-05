@@ -38,8 +38,6 @@ public class GetRoomInfoUseCase implements UseCase<GetRoomInfoUseCase.Input, Roo
         long userId = input.userId;
         Event event = input.event;
         PretixInformation pretixInformation = input.pretixInformation;
-        //TODO keep in mind that we cache in pretixInformation just the current event's data. This means some stuff
-        // will not load if we try to get a room for a previous event
         RoomInfo info = roomFinder.getRoomInfoForUser(userId, event, pretixInformation, roomLogic);
         boolean loadAllowedActions = input.loadAllowedActions;
 

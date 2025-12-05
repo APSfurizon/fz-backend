@@ -124,7 +124,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
 
 
         long totalPaid = (currentRoomPrice == null ? 0L : currentRoomPrice) + currentExtraDaysPaid + currentBoardPaid;
-        Set<Long> roomItemIds = pretixInformation.getRoomPretixIds();
+        Set<Long> roomItemIds = pretixInformation.getCurrentEventRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
         List<RoomAvailabilityInfoResponse> rooms = canLoadData ? roomItemIds.stream().map(itemId -> {
             //We exclude the current room

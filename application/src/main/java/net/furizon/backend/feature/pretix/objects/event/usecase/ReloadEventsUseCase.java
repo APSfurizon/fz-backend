@@ -15,10 +15,12 @@ import net.furizon.backend.infrastructure.pretix.PretixPagingUtil;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.usecase.UseCaseInput;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event>> {
+public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<Event>, List<Event>>> {
     private final OrganizersFinder organizersFinder;
     private final PretixEventFinder pretixEventFinder;
     private final EventFinder eventFinder;
@@ -44,9 +46,10 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
     @Transactional
     @NotNull
     @Override
-    public Optional<Event> executor(@NotNull UseCaseInput input) {
+    public Pair<Optional<Event>, List<Event>> executor(@NotNull UseCaseInput input) {
         AtomicReference<Event> currentEvent = new AtomicReference<>(null);
         List<PretixOrganizer> organizers = PretixPagingUtil.fetchAll(organizersFinder::getPagedOrganizers);
+        List<Event> events = new ArrayList<>();
         for (final PretixOrganizer organizer : organizers) {
             PretixPagingUtil.forEachElement(
                 paging -> pretixEventFinder.getPagedEvents(organizer.getSlug(), paging),
@@ -55,12 +58,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
 
                     Event dbEvent = eventFinder.findEventBySlug(
                             PretixGenericUtils.buildOrgEventSlug(event.getSlug(), organizer.getSlug()));
-                    boolean isCurrentEvent = pretixConfig
-                            .getDefaultOrganizer()
-                            .equals(organizer.getSlug())
-                        && pretixConfig
-                            .getDefaultEvent()
-                            .equals(event.getSlug());
+                    boolean isCurrentEvent = pretixConfig.getDefaultOrganizer().equals(organizer.getSlug())
+                                          && pretixConfig.getDefaultEvent().equals(event.getSlug());
 
 
                     if (dbEvent == null) {
@@ -83,6 +82,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
                         // in case if we won't find an existed current event
                         if (isCurrentEvent) {
                             currentEvent.set(newEvent);
+                        } else {
+                            events.add(newEvent);
                         }
                     } else {
                         //Update existing event
@@ -95,10 +96,12 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
                         dbEvent.setTestModeEnabled(event.isTestMode());
                         dbEvent.setPublic(event.isPublic());
                         updateEventAction.invoke(dbEvent);
-                    }
 
-                    if (dbEvent != null && dbEvent.isCurrent()) {
-                        currentEvent.set(dbEvent);
+                        if (isCurrentEvent) {
+                            currentEvent.set(dbEvent);
+                        } else {
+                            events.add(dbEvent);
+                        }
                     }
                 }
             );
@@ -119,6 +122,6 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Optional<Event
             }
         }
 
-        return Optional.ofNullable(currentEvent.get());
+        return Pair.of(Optional.ofNullable(currentEvent.get()), events);
     }
 }

@@ -168,7 +168,7 @@ public class JooqOrderFinder implements OrderFinder {
                     .board(order.getBoard())
                     .isDailyTicket(isDaily);
 
-            var sponsorItemId = pretixService.getSponsorIds(sponsorship).stream().findFirst();
+            var sponsorItemId = pretixService.getSponsorIds(sponsorship, event.getId()).stream().findFirst();
             sponsorItemId.ifPresent(id -> orderDataBuilder.sponsorNames(pretixService.getVariationNames(id)));
 
             OffsetDateTime from = event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());

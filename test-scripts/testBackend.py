@@ -340,12 +340,12 @@ login()
 #exportBadges()
 #remindRoomNotFull()
 
-#getOrderFullStatus()
+getOrderFullStatus()
 
 
 #roomDelete()
 #roomCreate()
-#roomGetInfo()
+roomGetInfo()
 #roomConfirm()
 #roomGetInfo()
 #roomUnconfirm()
@@ -354,13 +354,13 @@ login()
 #buyOrUpgradeRoom()
 #exchangeInit()
 #exchangeUpdate()
-#getSponsorshipNames()
+getSponsorshipNames()
 
 
 #uploadBadge()
 #deleteBadge()
 
-usersAdminView(1)
+#usersAdminView(1)
 # getBadge()
 
 

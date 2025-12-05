@@ -32,6 +32,8 @@ public class PretixConfig implements HttpConfig {
 
     private final boolean healthcheckEnabled;
     private final int healthcheckRetries;
+
+    private final String[] eventsExcludedFromCache;
   
     @NotNull
     private final String cacheReloadCronjob;
