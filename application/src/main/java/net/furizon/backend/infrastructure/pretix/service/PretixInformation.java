@@ -72,7 +72,8 @@ public interface PretixInformation {
 
     @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day);
 
-    @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day, long eventId);
+    @Nullable Long getExtraDayItemIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull ExtraDays day,
+                                                     long eventId);
 
     @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull String hotelName, @NotNull String roomInternalName,
                                                        short capacity, @NotNull Board board);
@@ -82,7 +83,8 @@ public interface PretixInformation {
 
     @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board);
 
-    @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board, long eventId);
+    @Nullable Long getBoardVariationIdForHotelCapacity(@NotNull HotelCapacityPair pair, @NotNull Board board,
+                                                       long eventId);
 
     @Nullable Long getBoardItemIdForHotelCapacity(@NotNull HotelCapacityPair pair);
 

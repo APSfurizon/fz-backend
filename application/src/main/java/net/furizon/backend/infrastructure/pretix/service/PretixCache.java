@@ -2,7 +2,6 @@ package net.furizon.backend.infrastructure.pretix.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Getter;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductBundle;
 import net.furizon.backend.feature.pretix.objects.question.PretixOption;

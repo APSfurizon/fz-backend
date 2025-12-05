@@ -100,15 +100,13 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
             UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);
             if (destData != null) {
                 List<MailRequest> mails = new ArrayList<>(16);
-                if (sourceRoom.isPresent()) {
-                    mails.addAll(mailService.prepareBroadcastUpdate(
-                            sourceRoom.get(),
-                            TEMPLATE_ROOM_HAS_NEW_OWNER,
-                            TranslatableValue.ofEmail("mail.room_has_new_owner.title"),
-                            MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName()),
-                            MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
-                    ));
-                }
+                sourceRoom.ifPresent(roomId -> mails.addAll(mailService.prepareBroadcastUpdate(
+                        roomId,
+                        TEMPLATE_ROOM_HAS_NEW_OWNER,
+                        TranslatableValue.ofEmail("mail.room_has_new_owner.title"),
+                        MailVarPair.of(ROOM_OWNER_FURSONA_NAME, destData.getFursonaName()),
+                        MailVarPair.of(LINK, frontendConfig.getRoomPageUrl())
+                )));
 
                 if (sourceData != null) {
                     TranslatableValue action = RoomEmailTexts.getAction(input.req.getAction(), destRoom.isPresent());
