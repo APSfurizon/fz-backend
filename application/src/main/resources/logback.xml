@@ -7,9 +7,9 @@
         <sift>
             <appender name="FILE-${logName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <file>data/logs/${logName}.log</file>
-                <layout class="ch.qos.logback.classic.PatternLayout">
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                     <pattern>%d [%thread] %-5level %mdc %logger{96}.%M\(line: %line\) - %msg%n</pattern>
-                </layout>
+                </encoder>
                 <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
                     <fileNamePattern>data/logs/${logName}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
                     <maxFileSize>32MB</maxFileSize>

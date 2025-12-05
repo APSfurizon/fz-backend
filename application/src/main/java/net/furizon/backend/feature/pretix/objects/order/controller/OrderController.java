@@ -6,13 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.dto.request.OrderWebhookRequest;
-import net.furizon.backend.feature.pretix.objects.order.usecase.FetchSingleOrderUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
+import net.furizon.backend.infrastructure.pretix.service.queue.PretixOrderFetchQueueService;
 import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
-import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,9 +29,10 @@ import java.util.concurrent.locks.ReentrantLock;
 @RequiredArgsConstructor
 public class OrderController {
     @NotNull
-    private final UseCaseExecutor useCaseExecutor;
-    @NotNull
     private final PretixInformation pretixService;
+    @NotNull
+    @Qualifier(PretixOrderFetchQueueService.CHANNEL_BEAN_NAME)
+    private final MessageChannel pretixWebhookQueue;
 
     private static final ReentrantLock WEBHOOK_MUTEX = new ReentrantLock(true);
 
@@ -40,7 +43,6 @@ public class OrderController {
     }
 
     private static final ResponseEntity<Void> OK = ResponseEntity.ok().build();
-    private static final ResponseEntity<Void> NOP = ResponseEntity.internalServerError().build();
 
     @Operation(
         summary = "A pretix order has changed",
@@ -51,28 +53,19 @@ public class OrderController {
     @PostMapping("/webhook")
     @InternalAuthorize
     public ResponseEntity<Void> pretixWebhook(@Valid @NotNull @RequestBody OrderWebhookRequest request) {
-        try {
-            WEBHOOK_MUTEX.lock();
-            log.info("[PRETIX WEBHOOK] Fetching order {}", request);
-            Event event = pretixService.getCurrentEvent();
+        log.info("[PRETIX WEBHOOK] Fetching order {}", request);
+        Event event = pretixService.getCurrentEvent();
 
-            String slug = PretixGenericUtils.buildOrgEventSlug(request.getEvent(), request.getOrganizer());
+        String slug = PretixGenericUtils.buildOrgEventSlug(request.getEvent(), request.getOrganizer());
 
-            if (!event.getSlug().equals(slug)) {
-                log.error("[PRETIX WEBHOOK] Webhook request is not for the current event!");
-                return ResponseEntity.internalServerError().build();
-            }
-
-            var res = useCaseExecutor.execute(FetchSingleOrderUseCase.class, new FetchSingleOrderUseCase.Input(
-                    event,
-                    request.getCode(),
-                    pretixService
-            ));
-            return OK;
-            //return res.isPresent() ? OK : NOP;
-        } finally {
-            WEBHOOK_MUTEX.unlock();
+        if (!event.getSlug().equals(slug)) {
+            log.error("[PRETIX WEBHOOK] Webhook request is not for the current event!");
+            return ResponseEntity.internalServerError().build();
         }
+
+        pretixWebhookQueue.send(MessageBuilder.withPayload(request.getCode()).build());
+
+        return OK;
     }
 
     //This is static for making a shitty and fast workaround for dependency loops

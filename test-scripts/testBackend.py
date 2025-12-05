@@ -151,6 +151,17 @@ def testInternalAuthorize() -> Response:
     doGet(f'{BASE_URL}internal/orders/ping')
     return doGet(f'{BASE_URL}internal/orders/ping', auth=HTTPBasicAuth('furizon', 'changeit'))
 
+def pretixWebhook(orderCode: str, event: str, orga: str) -> Response:
+    json = {
+        "notificationId": 0,
+        "organizer": orga,
+        "event": event,
+        #"code": orderCode + generate_random_string(4),
+        "code": orderCode,
+        "action": "a"
+    }
+    return doPost(f'{BASE_URL}internal/orders/webhook', json=json, auth=HTTPBasicAuth('furizon', 'changeit'))
+
 def getOrderFullStatus() -> Response:
     return doGet(f'{BASE_URL_API}orders-workflow/get-full-status')
 
@@ -317,7 +328,7 @@ def exchangeUpdate() -> Response:
 
 #register()
 #confirmEmail()
-login()
+#login()
 #getMe()
 #updateUserInfo()
 #markPersonalUserInformationAsUpdated()
@@ -358,7 +369,7 @@ login()
 #exchangeInit()
 #exchangeUpdate()
 #getSponsorshipNames()
-reminderFursuitBringToEvent()
+#reminderFursuitBringToEvent()
 
 
 #uploadBadge()
@@ -372,3 +383,5 @@ reminderFursuitBringToEvent()
 
 #fursuitCount()
 #noseCount()
+
+pretixWebhook("STOCAZZO", "polaris", "furizon")
