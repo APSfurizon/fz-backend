@@ -3,7 +3,6 @@ package net.furizon.backend.feature.pretix.objects.event;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
@@ -20,7 +19,6 @@ import java.util.Map;
 @Data
 @Slf4j
 @AllArgsConstructor
-@RequiredArgsConstructor
 @Builder(toBuilder = true)
 public class Event {
     private long id;

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -37,7 +36,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-@RequiredArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
