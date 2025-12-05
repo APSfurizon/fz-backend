@@ -24,11 +24,11 @@ import static net.furizon.backend.feature.authentication.AuthenticationEmailText
 @RequiredArgsConstructor
 public class CreateLoginSessionValidation {
     @NotNull private final SessionAuthenticationManager sessionAuthenticationManager;
-    @NotNull private final SecurityConfig securityConfig;
-    @NotNull private final EmailSender emailSender;
     @NotNull private final PasswordEncoder passwordEncoder;
-    @NotNull private final TranslationService translationService;
+    @NotNull private final EmailSender emailSender;
     @NotNull private final UserFinder userFinder;
+    @NotNull private final SecurityConfig securityConfig;
+    @NotNull private final TranslationService translationService;
 
     public long validateAndGetUserId(@NotNull LoginUserUseCase.Input input) {
         String email = input.email();

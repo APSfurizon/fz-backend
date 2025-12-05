@@ -32,7 +32,6 @@ public class LoginUserUseCase implements UseCase<LoginUserUseCase.Input, LoginRe
 
     private final TranslationService translationService;
 
-    @Transactional
     @Override
     public @NotNull LoginResponse executor(@NotNull LoginUserUseCase.Input input) {
         if (input.user != null) {

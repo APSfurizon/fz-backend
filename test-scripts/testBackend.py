@@ -123,6 +123,7 @@ def login() -> Response:
     global HEADERS
     json = {
         "email": ACCOUNT_EMAIL,
+        #"password": ACCOUNT_PWD + "staminchia"
         "password": ACCOUNT_PWD
     }
     req = doPost(f'{BASE_URL_API}authentication/login', json=json)
@@ -328,7 +329,7 @@ def exchangeUpdate() -> Response:
 
 #register()
 #confirmEmail()
-#login()
+login()
 #getMe()
 #updateUserInfo()
 #markPersonalUserInformationAsUpdated()
@@ -384,4 +385,4 @@ def exchangeUpdate() -> Response:
 #fursuitCount()
 #noseCount()
 
-pretixWebhook("STOCAZZO", "polaris", "furizon")
+#pretixWebhook("STOCAZZO", "polaris", "furizon")
