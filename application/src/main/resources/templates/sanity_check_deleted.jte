@@ -7,5 +7,5 @@
 @template.layout(title = localize("mail.sanity_check_deleted.title"), content = @`
     <h2 class="title">${localize("mail.sanity_check_deleted.title")}</h2>
     <p class="main-content">${localize("mail.sanity_check_deleted.description", fursonaName, roomName, sanityCheckReason)}</p>
-    <a href="${link}" class="link">${localize("mail.sanity_check_deleted.action.go_to_room")}</a>
+    <a href="${link}" class="link">${localize("mail.sanity_check_deleted.action.email_link")}</a>
 `)

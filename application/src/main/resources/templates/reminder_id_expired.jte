@@ -6,5 +6,5 @@
 @template.layout(title = localize("mail.reminder_id_expired.title"), content = @`
     <h2 class="title">${localize("mail.reminder_id_expired.title")}</h2>
     <p class="main-content">${localize("mail.reminder_id_expired.description", fursonaName, deadline)},</p>
-    <a href="${link}" class="link">${localize("mail.reminder_id_expired.action.update")}</a>
+    <a href="${link}" class="link">${localize("mail.reminder_id_expired.action.email_link")}</a>
 `)

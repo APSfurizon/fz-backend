@@ -11,8 +11,6 @@ public class RoomEmailTexts {
     public static final String TEMPLATE_ROOM_UNCONFIRMED = "room_unconfirmed.jte";
     public static final String TEMPLATE_ROOM_DELETED = "room_deleted.jte";
     public static final String TEMPLATE_EXCHANGE_INITIALIZED = "exchange_initialized.jte";
-    public static final String TEMPLATE_EXCHANGE_FULLORDER_FAILED_DB = "exchange_fullorder_failed_db.jte";
-    public static final String TEMPLATE_EXCHANGE_ROOM_FAILED_DB = "exchange_room_failed_db.jte";
     public static final String TEMPLATE_EXCHANGE_COMPLETED = "exchange_completed.jte";
     public static final String TEMPLATE_UPGRADE_FAILED_PRICE = "upgrade_failed_price.jte";
     public static final String TEMPLATE_UPGRADE_FAILED_POSITION = "upgrade_failed_position.jte";
