@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.JooqRoomNotFullRow;
 import net.furizon.backend.feature.room.finder.RoomFinder;
+import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.admin.ReminderEmailTexts;
@@ -31,6 +32,7 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.LANG_PRETI
 @Component
 @RequiredArgsConstructor
 public class EmptyRoomReminderUseCase implements UseCase<PretixInformation, Integer> {
+    @NotNull private final RoomLogic roomLogic;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender emailSender;
@@ -41,6 +43,11 @@ public class EmptyRoomReminderUseCase implements UseCase<PretixInformation, Inte
     public @NotNull Integer executor(@NotNull PretixInformation pretixInformation) {
         int n = 0;
         log.info("Sending room not full reminder emails");
+
+        if (roomLogic.isConfirmationSupported()) {
+            log.warn("Early exit from EmptyRoomReminder email: RoomLogic supports confirmation");
+            return 0;
+        }
 
         String deadlineStr = "event starts";
         OffsetDateTime deadline = roomConfig.getRoomChangesEndTime();

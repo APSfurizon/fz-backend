@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED;
 import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_ORDER_UNABLE_TO_CONVERT;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
 import static net.furizon.backend.infrastructure.email.EmailVars.ORDER_CODE;
@@ -144,20 +145,17 @@ public class UpdateOrderInDb {
                                         );
 
                                         String idInYear = String.valueOf(card.getIdInYear());
-                                        //TODO DISABLED TO PREVENT EMAIL MASS SPAMMING TO ADMINS
-                                        if (false) {
-                                            emailSender.prepareAndSendForPermission(
-                                                Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                                TranslatableValue.ofEmail(
-                                                        "mail.membership_card_owner_changed_but_registered.title"),
-                                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
-                                                MailVarPair.of(ORDER_CODE, order.getCode()),
-                                                MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                                MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
-                                                MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                                MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
-                                            );
-                                        }
+                                        emailSender.prepareAndSendForPermission(
+                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                            TranslatableValue.ofEmail(
+                                                    "mail.membership_card_owner_changed_but_registered.title"),
+                                            TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
+                                            MailVarPair.of(ORDER_CODE, order.getCode()),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
+                                            MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                        );
                                     }
                                 }
                             }
@@ -229,7 +227,7 @@ public class UpdateOrderInDb {
                         emailSender.prepareAndSendForPermission(
                                 Permission.PRETIX_ADMIN,
                                 TranslatableValue.ofEmail("mail.order_unable_to_convert.title"),
-                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
+                                TEMPLATE_ORDER_UNABLE_TO_CONVERT,
                                 MailVarPair.of(ORDER_CODE, order.getCode())
                         );
                         order = null;
