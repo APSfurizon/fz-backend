@@ -12,6 +12,7 @@ import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
@@ -20,7 +21,9 @@ import org.springframework.integration.dsl.MessageChannelSpec;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.QueueChannelSpec;
 import org.springframework.integration.filter.MessageFilter;
+import org.springframework.integration.scheduling.PollerMetadata;
 import org.springframework.messaging.Message;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,28 +44,36 @@ public class PretixOrderFetchQueueService {
 
     @Bean(CHANNEL_BEAN_NAME)
     public QueueChannelSpec pretixOrderQueueChannel() {
-        return MessageChannels.queue().datatype(String.class); // capacità max
+        //QueueChannel queue = new QueueChannel();
+        //ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        //scheduler.setPoolSize(1); // Crucial: sets the pool size to 1 thread
+        //scheduler.setThreadNamePrefix("pretix-queue-poller-");
+        //queue.setTaskScheduler(scheduler);
+        //return queue;
+        return MessageChannels.queue().datatype(String.class);
     }
 
     @Bean("pretixOrderQueueFlow")
     public IntegrationFlow channelFlow() {
-        return IntegrationFlow.from(CHANNEL_BEAN_NAME)
-                //.filter("pretixOrderQueueFilter")
+        return IntegrationFlow.from(pretixOrderQueueChannel())
                 .filter(pendingIds::add)
                 .handle(this::handleRequest)
                 .get();
     }
 
-    private void handleRequest(@NotNull Message<?> message) {
+
+    private synchronized void handleRequest(@NotNull Message<?> message) {
         String orderCode = (String) message.getPayload();
         pendingIds.remove(orderCode);
         Event event = pretixInformation.getCurrentEvent();
         log.info("[PRETIX_ORDER_QUEUE] Working on order {}", orderCode);
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        int x = 431321;
+        for (long i = 0L; i < 2999999990L; i++) {x = x / 2 * 3;} //About 10 secs of waiting time
+        //try {
+        //} catch (InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+        log.info("[PRETIX_ORDER_QUEUE] DONE order {} {}", orderCode, x);
         //try {
         //    OrderController.suspendWebhook();
         //    useCaseExecutor.execute(FetchSingleOrderUseCase.class, new FetchSingleOrderUseCase.Input(
