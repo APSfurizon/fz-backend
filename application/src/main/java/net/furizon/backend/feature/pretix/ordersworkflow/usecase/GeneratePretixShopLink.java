@@ -72,7 +72,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         int ordersNo = orderFinder.countOrdersOfUserOnEvent(userId, event);
         if (ordersNo > 0) {
             throw new ApiException(
-                    "You already made an order!",
+                    translationService.error("pretix.orders_flow.user_already_bought_event"),
                     OrderWorkflowErrorCode.ORDER_MULTIPLE_DONE
             );
         }
@@ -127,7 +127,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         // User has marked his personal info as updated check
         if (info.getLastUpdatedEventId() != event.getId()) {
             throw new ApiException(
-                "User has to first update his personal info or mark them as updated!",
+                translationService.error("pretix.orders_flow.personal_info_not_updated"),
                 OrderWorkflowErrorCode.PERSONAL_USER_INFO_NOT_UPDATED
             );
         }
@@ -141,7 +141,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         long minimumAge = membershipConfig.getMinimumAgeAtEventDate();
         if (age < minimumAge) {
             throw new ApiException(
-                    "You must be at least " + minimumAge + " years old to attend the event!",
+                    translationService.error("pretix.orders_flow.minimum_age", minimumAge),
                     OrderWorkflowErrorCode.BELOW_MINIMUM_AGE
             );
         }

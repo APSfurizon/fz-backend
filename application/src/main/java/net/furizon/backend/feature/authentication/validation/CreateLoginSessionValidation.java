@@ -76,14 +76,14 @@ public class CreateLoginSessionValidation {
 
     private ApiException createdAccountDisabledException() {
         return new ApiException(
-            "Not possible to login",
+            translationService.error("authentication.login.authentication_disabled"),
             AuthenticationCodes.AUTHENTICATION_IS_DISABLED
         );
     }
 
     private ApiException createInvalidCredentialsException() {
         return new ApiException(
-            "Invalid Credentials",
+            translationService.error("authentication.login.invalid_credentials"),
             AuthenticationCodes.INVALID_CREDENTIALS
         );
     }

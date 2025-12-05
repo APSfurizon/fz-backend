@@ -3,6 +3,7 @@ package net.furizon.backend.feature.membership.validation;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.authentication.AuthenticationCodes;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class PersonalUserInformationValidator {
     @Lazy
     private final PretixInformation pretixInformation;
+    @NotNull TranslationService translationService;
 
     public void validate(@NotNull PersonalUserInformation userInfo) {
 
@@ -23,21 +25,21 @@ public class PersonalUserInformationValidator {
 
         if (!pretixInformation.isCountryValid(birthCountry)) {
             throw new ApiException(
-                    "Invalid birth country: %s".formatted(birthCountry),
-                    AuthenticationCodes.COUNTRY_INVALID
+                translationService.error("user.personal_information.invalid_birth_country", birthCountry),
+                AuthenticationCodes.COUNTRY_INVALID
             );
         }
         if (birthCountryHasRegions) {
             if (birthRegion == null) {
                 throw new ApiException(
-                        "Birth region not provided for: %s".formatted(birthCountry),
-                        AuthenticationCodes.REGION_NOT_PROVIDED
+                    translationService.error("user.personal_information.expected_birth_region", birthCountry),
+                    AuthenticationCodes.REGION_NOT_PROVIDED
                 );
             }
             if (!pretixInformation.isRegionOfCountryValid(birthCountry, birthRegion)) {
                 throw new ApiException(
-                        "Invalid birth region: %s".formatted(birthRegion),
-                        AuthenticationCodes.REGION_INVALID
+                    translationService.error("user.personal_information.invalid_birth_region", birthRegion),
+                    AuthenticationCodes.REGION_INVALID
                 );
             }
         }
@@ -48,21 +50,21 @@ public class PersonalUserInformationValidator {
 
         if (!pretixInformation.isCountryValid(residenceCountry)) {
             throw new ApiException(
-                    "Invalid residence country: %s".formatted(residenceCountry),
-                    AuthenticationCodes.COUNTRY_INVALID
+                translationService.error("user.personal_information.invalid_residence_country", residenceCountry),
+                AuthenticationCodes.COUNTRY_INVALID
             );
         }
         if (residenceCountryHasRegions) {
             if (residenceRegion == null) {
                 throw new ApiException(
-                        "Residence region not provided for: %s".formatted(residenceCountry),
-                        AuthenticationCodes.REGION_NOT_PROVIDED
+                    translationService.error("user.personal_information.expected_residence_region", residenceCountry),
+                    AuthenticationCodes.REGION_NOT_PROVIDED
                 );
             }
             if (!pretixInformation.isRegionOfCountryValid(residenceCountry, residenceRegion)) {
                 throw new ApiException(
-                        "Invalid residence region: %s".formatted(residenceRegion),
-                        AuthenticationCodes.REGION_INVALID
+                    translationService.error("user.personal_information.invalid_residence_region", residenceRegion),
+                    AuthenticationCodes.REGION_INVALID
                 );
             }
         }
@@ -70,29 +72,29 @@ public class PersonalUserInformationValidator {
         String phonePrefix = userInfo.getPrefixPhoneNumber();
         if (!pretixInformation.isPhonePrefixValid(phonePrefix)) {
             throw new ApiException(
-                    "Invalid phone prefix: %s".formatted(phonePrefix),
-                    AuthenticationCodes.PHONE_PREFIX_INVALID
+                translationService.error("user.personal_information.invalid_phone_prefix", phonePrefix),
+                AuthenticationCodes.PHONE_PREFIX_INVALID
             );
         }
 
         if (userInfo.getTelegramUsername().isBlank()) {
             throw new ApiException(
-                    "Empty telegram username",
-                    AuthenticationCodes.TELEGRAM_USERNAME_EMPTY
+                translationService.error("user.personal_information.invalid_telegram_username"),
+                AuthenticationCodes.TELEGRAM_USERNAME_EMPTY
             );
         }
 
         if (userInfo.getIdNumber().isBlank()) {
             throw new ApiException(
-                    "empty ID Number",
-                    AuthenticationCodes.ID_NUMBER_EMPTY
+                translationService.error("user.personal_information.invalid_id_number"),
+                AuthenticationCodes.ID_NUMBER_EMPTY
             );
         }
 
         if (userInfo.getIdIssuer().isBlank()) {
             throw new ApiException(
-                    "empty ID Issuer",
-                    AuthenticationCodes.ID_ISSUER_EMPTY
+                translationService.error("user.personal_information.invalid_id_issuer"),
+                AuthenticationCodes.ID_ISSUER_EMPTY
             );
         }
 
