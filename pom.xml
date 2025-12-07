@@ -30,7 +30,7 @@
         <module>application</module>
     </modules>
     <properties>
-        <java.version>23</java.version>
+        <java.version>25</java.version>
         <lombok.version>1.18.42</lombok.version>
         <checkstyle.version>10.18.2</checkstyle.version>
         <spring.boot.version>3.5.8</spring.boot.version>

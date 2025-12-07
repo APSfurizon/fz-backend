@@ -1,5 +1,5 @@
 
-FROM amazoncorretto:23-alpine-jdk
+FROM amazoncorretto:25-alpine-jdk
 
 ENV APP_HOME=/app
 
