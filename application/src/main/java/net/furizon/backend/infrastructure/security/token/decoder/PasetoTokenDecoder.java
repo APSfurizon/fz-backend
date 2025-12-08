@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.security.token.decoder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.security.SecurityConfig;
 import net.furizon.backend.infrastructure.security.token.TokenMetadata;
@@ -41,7 +41,7 @@ public class PasetoTokenDecoder implements TokenDecoder {
             );
 
             return objectMapper.readValue(json, TokenMetadata.class);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             log.warn("Could read json: {}", ex.getMessage());
             throw new AuthenticationServiceException("Bad message", ex);
         } catch (PasetoException e) {

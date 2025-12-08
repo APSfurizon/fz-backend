@@ -1,8 +1,8 @@
 package net.furizon.backend.feature.pretix.objects.order.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -88,7 +88,7 @@ public class JooqOrderMapper {
             }
 
             return v.build();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.jackson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ public class SimpleJsonSerializer implements JsonSerializer {
     public @NotNull String serializeAsString(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }

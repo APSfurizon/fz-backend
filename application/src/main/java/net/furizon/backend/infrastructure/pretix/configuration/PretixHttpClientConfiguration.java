@@ -25,7 +25,7 @@ public class PretixHttpClientConfiguration {
     ) {
         final HttpComponentsClientHttpRequestFactory factory =
             new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
-        factory.setConnectTimeout(config.getConnectionTimeout());
+        factory.setConnectionRequestTimeout(config.getConnectionTimeout());
         return new SimpleHttpClient(
             RestClient.builder()
                 .requestFactory(factory)

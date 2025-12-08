@@ -1,7 +1,7 @@
 package net.furizon.jooq;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 import net.furizon.jooq.strategies.utils.EnumTypeDeserializer;
 import net.furizon.jooq.strategies.utils.EnumTypeSerializer;
 import org.jooq.EnumType;

@@ -1,8 +1,9 @@
 package net.furizon.backend.feature.pretix.objects.states.finder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.CollectionType;
+import tools.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.states.PretixState;
@@ -36,12 +37,17 @@ public class RestPretixStateFinder implements PretixStateFinder {
             "/anubhavshrimal/75f6183458db8c453306f93521e93d37/raw/CountryCodes.json";
 
 
-    private final ParameterizedTypeReference<PretixStateResponse> pretixStatesType =
+    private final ParameterizedTypeReference<@NotNull PretixStateResponse> pretixStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference<String> italyStatesType =
+    private final ParameterizedTypeReference<@NotNull String> italyStatesType =
             new ParameterizedTypeReference<>() {};
-    private final ParameterizedTypeReference<String> countriesType =
+    private final ParameterizedTypeReference<@NotNull String> countriesType =
             new ParameterizedTypeReference<>() {};
+
+    private final CollectionType typePretixState = TypeFactory.createDefaultInstance()
+                                                              .constructCollectionType(List.class, PretixState.class);
+    private final CollectionType typeCountry = TypeFactory.createDefaultInstance()
+                                                          .constructCollectionType(List.class, CountryDataRaw.class);
 
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
@@ -86,10 +92,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
             //Unfortunately, the response content type header is set to text/plain, and the RestClient
             //Won't interpret it as a json. This is a workaround
             if (res != null) {
-                return objectMapper.readValue(
-                        res,
-                        TypeFactory.defaultInstance().constructCollectionType(List.class, PretixState.class)
-                );
+                return objectMapper.readValue(res, typePretixState);
             } else {
                 log.error("Unable to fetch italian states. Returning an empty list");
                 return new LinkedList<>();
@@ -97,7 +100,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
-        } catch (final JsonProcessingException ex) {
+        } catch (final JacksonException ex) {
             log.error("Unable to decode italian states json");
             throw new RuntimeException(ex);
         }
@@ -119,10 +122,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
             //Unfortunately, the response content type header is set to text/plain, and the RestClient
             //Won't interpret it as a json. This is a workaround
             if (res != null) {
-                List<CountryDataRaw> countries = objectMapper.readValue(
-                        res,
-                        TypeFactory.defaultInstance().constructCollectionType(List.class, CountryDataRaw.class)
-                );
+                List<CountryDataRaw> countries = objectMapper.readValue(res, typeCountry);
                 return countries.stream()
                         .map(k -> (PretixState) k.toPhoneCountry(pretixConfig.getSupportedLanguages()))
                         .toList();
@@ -133,7 +133,7 @@ public class RestPretixStateFinder implements PretixStateFinder {
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
-        } catch (final JsonProcessingException ex) {
+        } catch (final JacksonException ex) {
             log.error("Unable to decode countries json");
             throw new RuntimeException(ex);
         }

@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,13 +27,13 @@ public class HttpRequest<R> {
     private final String path;
 
     @NotNull
-    private final MultiValueMap<String, String> headers;
+    private final HttpHeaders headers;
 
     @NotNull
     private final Map<String, ?> uriVariables;
 
     @NotNull
-    private final MultiValueMap<String, String> queryParams;
+    private final MultiValueMap<@NotNull String, @NotNull String> queryParams;
 
     @Nullable
     private final Object body;
@@ -44,7 +45,7 @@ public class HttpRequest<R> {
     private final Class<R> responseType;
 
     @Nullable
-    private final ParameterizedTypeReference<R> responseParameterizedType;
+    private final ParameterizedTypeReference<@NotNull R> responseParameterizedType;
 
     @Nullable
     @Getter(AccessLevel.NONE)
@@ -82,11 +83,11 @@ public class HttpRequest<R> {
         private String overrideBaseUrl = null;
         private String overrideBasePath = null;
         private boolean sendConfigHeaders = true;
-        private ParameterizedTypeReference<R> responseParameterizedType;
+        private ParameterizedTypeReference<@NotNull R> responseParameterizedType;
 
-        private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        private final HttpHeaders headers = new HttpHeaders();
         private final Map<String, String> uriVariables = new LinkedHashMap<>();
-        private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        private final MultiValueMap<@NotNull String, @NotNull String> queryParams = new LinkedMultiValueMap<>();
 
         public Builder<R> sendConfigHeaders(boolean sendConfigHeaders) {
             this.sendConfigHeaders = sendConfigHeaders;
@@ -118,7 +119,12 @@ public class HttpRequest<R> {
             return this;
         }
 
-        public Builder<R> headers(@NotNull final MultiValueMap<String, String> headers) {
+        public Builder<R> headers(@NotNull final MultiValueMap<@NotNull String, @NotNull String> headers) {
+            this.headers.putAll(headers);
+            return this;
+        }
+
+        public Builder<R> headers(@NotNull final HttpHeaders headers) {
             this.headers.putAll(headers);
             return this;
         }
@@ -133,7 +139,7 @@ public class HttpRequest<R> {
             return this;
         }
 
-        public Builder<R> queryParams(@NotNull final MultiValueMap<String, String> queryParams) {
+        public Builder<R> queryParams(@NotNull final MultiValueMap<@NotNull String, @NotNull String> queryParams) {
             this.queryParams.addAll(queryParams);
             return this;
         }
@@ -154,7 +160,7 @@ public class HttpRequest<R> {
         }
 
         public Builder<R> responseParameterizedType(
-            @NotNull final ParameterizedTypeReference<R> responseParameterizedType
+            @NotNull final ParameterizedTypeReference<@NotNull R> responseParameterizedType
         ) {
             this.responseParameterizedType = responseParameterizedType;
             return this;

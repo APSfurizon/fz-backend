@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.http.client;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -9,7 +10,7 @@ public interface HttpConfig {
     String getBaseUrl();
 
     @NotNull
-    default MultiValueMap<String, String> headers() {
+    default MultiValueMap<@NotNull String, @NotNull String> headers() {
         return new LinkedMultiValueMap<>();
     }
 
@@ -17,4 +18,6 @@ public interface HttpConfig {
     default String getBasePath() {
         return "";
     }
+
+    @NotNull HttpHeaders httpHeaders();
 }

@@ -1,9 +1,9 @@
 package net.furizon.backend.feature.admin.usecase.export;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.HotelExportRow;
 import net.furizon.backend.feature.room.finder.RoomFinder;
@@ -60,7 +60,7 @@ public class ExportHotelUseCase implements UseCase<PretixInformation, String> {
         String out;
         try {
             out = writer.writeValueAsString(rows);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
         return out;

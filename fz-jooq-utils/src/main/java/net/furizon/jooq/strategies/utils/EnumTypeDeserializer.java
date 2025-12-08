@@ -1,20 +1,16 @@
 package net.furizon.jooq.strategies.utils;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.deser.std.StdDeserializer;
 import org.jooq.EnumType;
 
-import java.io.IOException;
-
-public class EnumTypeDeserializer<E extends Enum<E> & EnumType> extends StdDeserializer<E>
-        implements ContextualDeserializer {
+public class EnumTypeDeserializer<E extends Enum<E> & EnumType> extends StdDeserializer<E> {
 
     private Class<E> enumType;
 
@@ -29,15 +25,16 @@ public class EnumTypeDeserializer<E extends Enum<E> & EnumType> extends StdDeser
     }
 
     @Override
-    public E deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-            throws IOException, JacksonException {
-        String value = jsonParser.getText();
+    public E deserialize(JsonParser jsonParser,
+                         DeserializationContext deserializationContext
+    ) throws JacksonException {
+        String value = jsonParser.getString();
         return enumType == null ? null : EnumType.lookupLiteral(enumType, value);
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(
-            DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(
+            DeserializationContext deserializationContext, BeanProperty beanProperty) throws DatabindException {
         JavaType type = deserializationContext.getContextualType();
         if (type == null && beanProperty != null) {
             type = beanProperty.getType();

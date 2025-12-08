@@ -25,7 +25,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+import static org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern;
+
 
 @Configuration
 @EnableMethodSecurity
@@ -38,7 +39,7 @@ public class SecurityConfiguration {
     private final SecurityConfig securityConfig;
 
     @Bean
-    public SecurityFilterChain internalFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain internalFilterChain(HttpSecurity http) {
         return http
             .securityMatcher("/internal/**")
             .cors(AbstractHttpConfigurer::disable)
@@ -59,7 +60,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         // Map the allowed endpoints
         return http
             .cors(customizer ->
@@ -68,22 +69,22 @@ public class SecurityConfiguration {
             .csrf(CsrfConfigurer::disable)
             .authorizeHttpRequests(customizer -> customizer
                 .requestMatchers(
-                    antMatcher(HttpMethod.GET, "/docs/**"),
-                    antMatcher(HttpMethod.GET, "/swagger-ui/**"),
-                    antMatcher(HttpMethod.GET, "/api/v1/events/**"),
-                    antMatcher(HttpMethod.GET, "/api/v1/counts/bopos"),
-                    antMatcher(HttpMethod.GET, "/api/v1/counts/fursuit"),
-                    antMatcher(HttpMethod.GET, "/api/v1/counts/sponsors"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/register"),
-                    antMatcher(HttpMethod.GET, "/api/v1/authentication/confirm-mail"),
-                    antMatcher(HttpMethod.GET, "/api/v1/authentication/pw/status"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/reset"),
-                    antMatcher(HttpMethod.POST, "/api/v1/authentication/pw/change"),
-                    antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
-                    antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
-                    antMatcher(HttpMethod.GET, "/api/v1/admin/countdown"),
-                    antMatcher(HttpMethod.GET, "/api/v1/admin/ping")
+                    pathPattern(HttpMethod.GET, "/docs/**"),
+                    pathPattern(HttpMethod.GET, "/swagger-ui/**"),
+                    pathPattern(HttpMethod.GET, "/api/v1/events/**"),
+                    pathPattern(HttpMethod.GET, "/api/v1/counts/bopos"),
+                    pathPattern(HttpMethod.GET, "/api/v1/counts/fursuit"),
+                    pathPattern(HttpMethod.GET, "/api/v1/counts/sponsors"),
+                    pathPattern(HttpMethod.POST, "/api/v1/authentication/login"),
+                    pathPattern(HttpMethod.POST, "/api/v1/authentication/register"),
+                    pathPattern(HttpMethod.GET, "/api/v1/authentication/confirm-mail"),
+                    pathPattern(HttpMethod.GET, "/api/v1/authentication/pw/status"),
+                    pathPattern(HttpMethod.POST, "/api/v1/authentication/pw/reset"),
+                    pathPattern(HttpMethod.POST, "/api/v1/authentication/pw/change"),
+                    pathPattern(HttpMethod.GET, "/api/v1/states/get-countries"),
+                    pathPattern(HttpMethod.GET, "/api/v1/states/by-country"),
+                    pathPattern(HttpMethod.GET, "/api/v1/admin/countdown"),
+                    pathPattern(HttpMethod.GET, "/api/v1/admin/ping")
                 )
                 .permitAll()
                 .anyRequest()

@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.http.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpHeaders;
+import tools.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class SimpleHttpClient implements HttpClient {
             .uri(builder.build(request.getUriVariables()))
             .headers((headers) -> {
                 if (request.sendConfigHeaders()) {
-                    headers.addAll(config.headers());
+                    headers.addAll(config.httpHeaders());
                 }
                 if (!request.getHeaders().isEmpty()) {
                     headers.addAll(request.getHeaders());

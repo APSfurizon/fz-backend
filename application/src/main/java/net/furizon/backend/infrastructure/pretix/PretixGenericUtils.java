@@ -1,8 +1,8 @@
 package net.furizon.backend.infrastructure.pretix;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ public class PretixGenericUtils {
 
         try {
             return OBJECT_MAPPER.readValue(customNames, CUSTOM_NAMES_TYPE_REFERENCE);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return Collections.emptyMap();
         }
     }

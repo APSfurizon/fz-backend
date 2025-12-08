@@ -1,11 +1,9 @@
 package net.furizon.jooq.strategies.utils;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import org.jooq.EnumType;
-
-import java.io.IOException;
 
 public class EnumTypeSerializer<E extends Enum<E> & EnumType> extends StdSerializer<E> {
 
@@ -18,7 +16,7 @@ public class EnumTypeSerializer<E extends Enum<E> & EnumType> extends StdSeriali
     }
 
     @Override
-    public void serialize(E e, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(E e, JsonGenerator jsonGenerator, SerializationContext serializerProvider) {
         jsonGenerator.writeString(e.getLiteral());
     }
 }

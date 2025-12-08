@@ -61,8 +61,20 @@ public class PretixConfig implements HttpConfig {
 
     @NotNull
     @Override
-    public MultiValueMap<String, String> headers() {
+    public MultiValueMap<@NotNull String, @NotNull String> headers() {
         return new LinkedMultiValueMap<>() {
+            {
+                add(HttpHeaders.HOST, shop.host); //Needed in prod, which talks locally with pretix
+                add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(api.key));
+                add(PretixConst.FZBACKENDUTILS_API_HEADER_NAME, api.fzbackendutilsToken);
+            }
+        };
+    }
+
+    @Override
+    @NotNull
+    public HttpHeaders httpHeaders() {
+        return new HttpHeaders() {
             {
                 add(HttpHeaders.HOST, shop.host); //Needed in prod, which talks locally with pretix
                 add(HttpHeaders.AUTHORIZATION, "Token %s".formatted(api.key));

@@ -1,8 +1,8 @@
 package net.furizon.backend.feature.pretix.objects.event.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -37,7 +37,7 @@ public class JooqEventMapper {
                     .map(it -> {
                         try {
                             return objectMapper.readValue(it.data(), typeRef);
-                        } catch (JsonProcessingException e) {
+                        } catch (JacksonException e) {
                             log.error("Could not parse event names", e);
                             throw new RuntimeException(e);
                         }

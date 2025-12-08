@@ -1,7 +1,7 @@
 package net.furizon.backend.infrastructure.pretix.autocart;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class AutocartLinkGenerator {
         String json;
         try {
             json = objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Error while generating json string for autocart data. Map: {}", data);
             return Optional.empty();
         }

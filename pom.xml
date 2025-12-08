@@ -33,7 +33,7 @@
         <java.version>25</java.version>
         <lombok.version>1.18.42</lombok.version>
         <checkstyle.version>10.18.2</checkstyle.version>
-        <spring.boot.version>3.5.8</spring.boot.version>
+        <spring.boot.version>4.0.0</spring.boot.version>
         <postgresql.version>42.7.8</postgresql.version>
         <jooq.version>3.20.9</jooq.version>
         <commons.lang.version>3.20.0</commons.lang.version>
@@ -46,8 +46,8 @@
         <org.jetbrains.version>26.0.2-1</org.jetbrains.version>
         <com.github.ben-manes.caffeine.version>3.2.3</com.github.ben-manes.caffeine.version>
         <org.zalando.version>3.12.3</org.zalando.version>
-        <org.springdoc.version>2.8.14</org.springdoc.version>
-        <com.fasterxml.jackson.core.version>2.20.1</com.fasterxml.jackson.core.version>
+        <org.springdoc.version>3.0.0</org.springdoc.version>
+        <tools.jackson.version>3.0.3</tools.jackson.version>
     </properties>
     <dependencies>
         <dependency>
