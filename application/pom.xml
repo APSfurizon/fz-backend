@@ -66,6 +66,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.furizon</groupId>
             <artifactId>jooq-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
@@ -88,7 +93,7 @@
         </dependency>
         <dependency>
             <groupId>org.zalando</groupId>
-            <artifactId>logbook-spring-boot-starter</artifactId>
+                <artifactId>logbook-spring-boot-starter</artifactId>
             <version>${org.zalando.version}</version>
         </dependency>
         <dependency>

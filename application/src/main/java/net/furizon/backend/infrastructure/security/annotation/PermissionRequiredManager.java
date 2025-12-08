@@ -1,6 +1,5 @@
 package net.furizon.backend.infrastructure.security.annotation;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -8,6 +7,7 @@ import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,7 +28,11 @@ public class PermissionRequiredManager implements AuthorizationManager<MethodInv
     @NotNull private final PermissionFinder permissionFinder;
 
     @Override
-    public AuthorizationResult authorize(Supplier<? extends @Nullable Authentication> authentication, MethodInvocation object) {
+    public AuthorizationResult authorize(@NotNull Supplier<? extends @Nullable Authentication> authentication,
+                                         MethodInvocation object) {
+        if (object == null) {
+            return null;
+        }
         final var annotation = AnnotationUtils.findAnnotation(object.getMethod(), PermissionRequired.class);
         if (annotation == null) {
             //log.error("Permission required annotation not found");

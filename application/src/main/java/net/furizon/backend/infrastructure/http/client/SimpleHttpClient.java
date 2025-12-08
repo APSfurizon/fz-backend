@@ -1,6 +1,5 @@
 package net.furizon.backend.infrastructure.http.client;
 
-import org.springframework.http.HttpHeaders;
 import tools.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
