@@ -142,6 +142,9 @@ def markPersonalUserInformationAsUpdated() -> Response:
 def getSponsorshipNames() -> Response:
     return doGet(f'{BASE_URL_API}events/get-sponsorship-names/1')
 
+def getMeAuth() -> Response:
+    return doGet(f'{BASE_URL_API}users/me')
+
 def getMe() -> Response:
     return doGet(f'{BASE_URL_API}users/display/me')
 
@@ -330,6 +333,7 @@ def exchangeUpdate() -> Response:
 #register()
 #confirmEmail()
 login()
+getMeAuth()
 getMe()
 #updateUserInfo()
 #markPersonalUserInformationAsUpdated()

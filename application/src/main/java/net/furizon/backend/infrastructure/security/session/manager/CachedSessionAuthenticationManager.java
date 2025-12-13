@@ -164,7 +164,9 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                 SESSIONS.USER_AGENT,
                 SESSIONS.CREATED_AT,
                 SESSIONS.MODIFIED_AT,
-                SESSIONS.EXPIRES_AT
+                SESSIONS.EXPIRES_AT,
+                SESSIONS.CREATED_BY_IP_ADDRESS,
+                SESSIONS.LAST_USED_BY_IP_ADDRESS
             )
             .from(SESSIONS)
             .where(SESSIONS.USER_ID.eq(userId))
