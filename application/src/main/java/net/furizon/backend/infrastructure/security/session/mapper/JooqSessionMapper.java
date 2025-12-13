@@ -11,11 +11,13 @@ public class JooqSessionMapper {
     @NotNull
     public static Session map(Record record) {
         return Session.builder()
-            .id(record.get(SESSIONS.ID))
-            .userAgent(record.get(SESSIONS.USER_AGENT))
-            .createdAt(record.get(SESSIONS.CREATED_AT))
-            .modifiedAt(record.get(SESSIONS.MODIFIED_AT))
-            .expiresAt(record.get(SESSIONS.EXPIRES_AT))
+                .id(record.get(SESSIONS.ID))
+                .userAgent(record.get(SESSIONS.USER_AGENT))
+                .createdAt(record.get(SESSIONS.CREATED_AT))
+                .modifiedAt(record.get(SESSIONS.MODIFIED_AT))
+                .expiresAt(record.get(SESSIONS.EXPIRES_AT))
+                .createdByIpAddress(record.get(SESSIONS.CREATED_BY_IP_ADDRESS))
+                .lastUsedByIpAddress(record.get(SESSIONS.LAST_USED_BY_IP_ADDRESS))
             .build();
     }
 }

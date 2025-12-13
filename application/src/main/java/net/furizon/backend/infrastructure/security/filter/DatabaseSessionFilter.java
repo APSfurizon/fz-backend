@@ -57,6 +57,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
             final var tokenMetadata = tokenDecoder.decode(
                 authHeader.replaceFirst("(?i)^Bearer ", "")
             );
+            long userId = tokenMetadata.getUserId();
             final var pair = sessionAuthenticationManager.findSessionWithAuthenticationById(
                 tokenMetadata.getSessionId()
             );
@@ -80,7 +81,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                 .setAuthentication(
                     new PreAuthenticatedAuthenticationToken(
                         FurizonUser.builder()
-                            .userId(tokenMetadata.getUserId())
+                            .userId(userId)
                             .sessionId(sessionId)
                             .authentication(pair.getMiddle())
                             .language(pair.getRight())
@@ -91,7 +92,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                 );
 
             final var clientIp = request.getRemoteAddr();
-            sessionExecutor.execute(() -> sessionAuthenticationManager.updateSession(sessionId, clientIp));
+            sessionExecutor.execute(() -> sessionAuthenticationManager.updateSession(session, clientIp, userId));
         } catch (AuthenticationException ex) {
             log.error("Authentication failed", ex);
             SecurityContextHolder.clearContext();

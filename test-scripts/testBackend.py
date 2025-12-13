@@ -346,37 +346,37 @@ getMe()
 #addFursuit()
 #updateBring()
 #exportHotel()
-listPermissions()
+#listPermissions()
 #listRoles()
 #crerateRole("-_____")
 #fetchRole(1)
 #updateRole(2)
 #deleteRole(4)
-exportBadges()
+#exportBadges()
 #remindRoomNotFull()
 
-getOrderFullStatus()
+#getOrderFullStatus()
 
 
 #roomDelete()
 #roomCreate()
 #roomGetInfo()
 #roomConfirm()
-roomGetInfo()
+#roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
 #roomListing()
 #buyOrUpgradeRoom()
 #exchangeInit()
 #exchangeUpdate()
-getSponsorshipNames()
+#getSponsorshipNames()
 #reminderFursuitBringToEvent()
 
 
 #uploadBadge()
 #deleteBadge()
 
-usersAdminView(1)
+#usersAdminView(1)
 # getBadge()
 
 

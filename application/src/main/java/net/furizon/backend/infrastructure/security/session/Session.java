@@ -16,6 +16,12 @@ public class Session {
     @NotNull
     private final UUID id;
 
+    @NotNull
+    private final String createdByIpAddress;
+
+    @NotNull
+    private final String lastUsedByIpAddress;
+
     @Nullable
     private final String userAgent;
 

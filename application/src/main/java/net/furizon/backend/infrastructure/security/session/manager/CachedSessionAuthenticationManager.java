@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,9 @@ import static net.furizon.jooq.generated.Tables.USERS;
 @Service
 @RequiredArgsConstructor
 public class CachedSessionAuthenticationManager implements SessionAuthenticationManager {
+    private static final long SESSION_AUTHENTICATION_CACHE = 30L;
+    private static final long SESSION_UPDATE_TIMEOUT = 30L;
+
     @NotNull private final SqlQuery sqlQuery;
     @NotNull private final SqlCommand sqlCommand;
 
@@ -52,15 +56,23 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @NotNull private final TranslationService translationService;
 
-    private final Cache<UUID, Triple<Session, Authentication, Locale>> sessionAuthenticationPairCache = Caffeine
-            .newBuilder()
-            .expireAfterAccess(30L, TimeUnit.MINUTES)
+    private final Cache<@NotNull UUID, Triple<Session, Authentication, Locale>> sessionAuthenticationPairCache =
+            Caffeine.newBuilder()
+            .expireAfterAccess(SESSION_AUTHENTICATION_CACHE, TimeUnit.MINUTES)
             .build();
 
     @Override
-    public boolean updateSession(@NotNull UUID sessionId, @NotNull String clientIp) {
-        final var now = OffsetDateTime.now();
-        final var expireAt = now.plusSeconds(securityConfig.getSession().getExpiration().getSeconds());
+    public boolean updateSession(@NotNull Session session, @NotNull String clientIp, long userId) {
+        UUID sessionId = session.getId();
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime lastModified = session.getModifiedAt();
+        if (ChronoUnit.MINUTES.between(now, lastModified) < SESSION_UPDATE_TIMEOUT
+                && session.getLastUsedByIpAddress().equals(clientIp)) {
+            log.debug("Skipping session object update for {} (user = {}, ip = {})", sessionId, userId, clientIp);
+            return true;
+        }
+
+        OffsetDateTime expireAt = now.plusSeconds(securityConfig.getSession().getExpiration().getSeconds());
         boolean res = sqlCommand.execute(
             PostgresDSL.update(SESSIONS)
             .set(SESSIONS.LAST_USED_BY_IP_ADDRESS, clientIp)
@@ -178,6 +190,8 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
                     SESSIONS.CREATED_AT,
                     SESSIONS.MODIFIED_AT,
                     SESSIONS.EXPIRES_AT,
+                    SESSIONS.CREATED_BY_IP_ADDRESS,
+                    SESSIONS.LAST_USED_BY_IP_ADDRESS,
                     AUTHENTICATIONS.AUTHENTICATION_ID,
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL,
                     AUTHENTICATIONS.AUTHENTICATION_EMAIL_VERIFICATION_CREATION,
