@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.SecurityUtils;
 import net.furizon.backend.infrastructure.security.session.exception.SessionExpiredException;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.security.token.decoder.TokenDecoder;
@@ -91,7 +92,7 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
                     )
                 );
 
-            final var clientIp = request.getRemoteAddr();
+            final var clientIp = SecurityUtils.getRealIp(request);
             sessionExecutor.execute(() -> sessionAuthenticationManager.updateSession(session, clientIp, userId));
         } catch (AuthenticationException ex) {
             log.error("Authentication failed", ex);

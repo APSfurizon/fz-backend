@@ -33,6 +33,7 @@ import net.furizon.backend.feature.authentication.usecase.UnbanUserUseCase;
 import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.SecurityUtils;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -71,7 +72,7 @@ public class AuthenticationController {
                 user,
                 loginRequest.getEmail(),
                 loginRequest.getPassword(),
-                httpServletRequest.getRemoteAddr(),
+                SecurityUtils.getRealIp(httpServletRequest),
                 userAgent
             )
         );
