@@ -30,7 +30,8 @@ HEADERS = {
     'Referer': 'http://localhost:3000/',
     #'content-type': 'application/json',
     'Origin': 'http://localhost:3000',
-    'Connection': 'keep-alive'
+    'Connection': 'keep-alive',
+    #"x-forwarded-for": "123456789abcdefghijklmnopqrstuvwxyz, 192.168.1.1"
 }
 
 session = requests.session()

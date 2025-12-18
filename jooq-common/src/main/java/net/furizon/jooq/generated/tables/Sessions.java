@@ -78,12 +78,12 @@ public class Sessions extends TableImpl<Record> {
     /**
      * The column <code>public.sessions.created_by_ip_address</code>.
      */
-    public final TableField<Record, String> CREATED_BY_IP_ADDRESS = createField(DSL.name("created_by_ip_address"), SQLDataType.VARCHAR(16).nullable(false), this, "");
+    public final TableField<Record, String> CREATED_BY_IP_ADDRESS = createField(DSL.name("created_by_ip_address"), SQLDataType.VARCHAR(40).nullable(false), this, "");
 
     /**
      * The column <code>public.sessions.last_used_by_ip_address</code>.
      */
-    public final TableField<Record, String> LAST_USED_BY_IP_ADDRESS = createField(DSL.name("last_used_by_ip_address"), SQLDataType.VARCHAR(16).nullable(false), this, "");
+    public final TableField<Record, String> LAST_USED_BY_IP_ADDRESS = createField(DSL.name("last_used_by_ip_address"), SQLDataType.VARCHAR(40).nullable(false), this, "");
 
     /**
      * The column <code>public.sessions.user_id</code>.

@@ -1,11 +1,12 @@
 package net.furizon.backend.infrastructure.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.furizon.jooq.generated.tables.Sessions;
 import org.jetbrains.annotations.NotNull;
 
 public class SecurityUtils {
 
-    public static final int MAX_IP_LENGTH = 40;
+    public static final int MAX_IP_LENGTH = Sessions.SESSIONS.CREATED_BY_IP_ADDRESS.getDataType().length();
     public static @NotNull String getRealIp(@NotNull HttpServletRequest request) {
         String ip = request.getHeader("x-forwarded-for");
         if (ip == null || ip.length() == 0) {
