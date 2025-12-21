@@ -78,6 +78,7 @@ public class BadgeController {
         FurizonUser destUser = FurizonUser.builder()
                 .userId(userId)
                 .sessionId(user.getSessionId())
+                .language(user.getLanguage())
                 .authentication(user.getAuthentication())
             .build();
         return useCaseExecutor.execute(
