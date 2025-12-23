@@ -222,6 +222,20 @@ public class CachedPretixInformation implements PretixInformation {
     }
 
     @Override
+    public boolean isInternalItem(long itemId) {
+        Boolean b = getFromCachesById(itemId,
+                currentEventCache.isInternalItem, otherEventsCache.isInternalItem);
+        return b == null ? false : b;
+    }
+
+    @Override
+    public boolean isInternalVariation(long variationId) {
+        Boolean b = getFromCachesById(variationId,
+                currentEventCache.isInternalVariation, otherEventsCache.isInternalVariation);
+        return b == null ? false : b;
+    }
+
+    @Override
     public @NotNull Set<Long> getCurrentEventRoomPretixIds() {
         lock.readLock().lock();
         Set<Long> v = new HashSet<Long>(currentEventCache.roomIdToInfo.asMap().keySet());
@@ -1036,6 +1050,8 @@ public class CachedPretixInformation implements PretixInformation {
         mainCache.itemIdToNames.putAll(products.itemIdToNames());
         mainCache.variationIdToNames.putAll(products.variationIdToNames());
         mainCache.variationIdToBoard.putAll(products.boardVariationIdToType());
+        mainCache.isInternalItem.putAll(products.isInternalItem());
+        mainCache.isInternalVariation.putAll(products.isInternalVariation());
 
         eventSpecificCache.sponsorshipTypeToIds.putAll(products.sponsorshipTypeToIds());
         eventSpecificCache.roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());

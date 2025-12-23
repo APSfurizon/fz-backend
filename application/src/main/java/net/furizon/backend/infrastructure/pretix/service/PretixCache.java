@@ -42,6 +42,11 @@ class PretixCache {
     //map id -> room names
     @NotNull
     final Cache<Long, Map<String, String>> variationIdToNames = Caffeine.newBuilder().build();
+    @NotNull
+    final Cache<Long, Boolean> isInternalItem = Caffeine.newBuilder().build();
+    @NotNull
+    final Cache<Long, Boolean> isInternalVariation = Caffeine.newBuilder().build();
+
 
     //Questions
     @NotNull
@@ -84,6 +89,8 @@ class PretixCache {
         variationIdToQuota.putAll(otherCache.variationIdToQuota.asMap());
         itemIdToNames.putAll(otherCache.itemIdToNames.asMap());
         variationIdToNames.putAll(otherCache.variationIdToNames.asMap());
+        isInternalItem.putAll(otherCache.isInternalItem.asMap());
+        isInternalVariation.putAll(otherCache.isInternalVariation.asMap());
 
         //Questions
         questionIdToType.putAll(otherCache.questionIdToType.asMap());
@@ -116,6 +123,8 @@ class PretixCache {
         variationIdToQuota.invalidateAll();
         itemIdToNames.invalidateAll();
         variationIdToNames.invalidateAll();
+        isInternalItem.invalidateAll();
+        isInternalVariation.invalidateAll();
 
         //Questions
         questionIdToType.invalidateAll();

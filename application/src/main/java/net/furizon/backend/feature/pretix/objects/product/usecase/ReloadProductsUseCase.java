@@ -49,6 +49,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 Map<String, String> names = product.getCustomNames();
                 names = names.isEmpty() ? product.getNames() : names;
                 result.itemIdToNames().put(productId, names);
+                result.isInternalItem().put(productId, product.isInternalItem());
 
                 product.getVariations().forEach(variation -> {
                     long variationId = variation.getId();
@@ -57,6 +58,7 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     Map<String, String> variationNames = variation.getCustomNames();
                     variationNames = variationNames.isEmpty() ? variation.getNames() : variationNames;
                     result.variationIdToNames().put(variationId, variationNames);
+                    result.isInternalVariation().put(variationId, variation.isInternalVariation());
                 });
 
                 if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {

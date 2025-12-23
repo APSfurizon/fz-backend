@@ -40,7 +40,9 @@ public record PretixProductResults(
     @NotNull Map<HotelCapacityPair, Long> boardCapacityToItemId,
     @NotNull Map<HotelCapacityPair, Long> halfBoardCapacityToVariationId,
     @NotNull Map<HotelCapacityPair, Long> fullBoardCapacityToVariationId,
-    @NotNull Map<Long, Board> boardVariationIdToType
+    @NotNull Map<Long, Board> boardVariationIdToType,
+    @NotNull Map<Long, Boolean> isInternalItem,
+    @NotNull Map<Long, Boolean> isInternalVariation
 ) {
     public PretixProductResults() {
         this(
@@ -70,7 +72,9 @@ public record PretixProductResults(
             new HashMap<>(),
             new HashMap<>(),
             new HashMap<>(),
-            new TreeMap<>()
+            new TreeMap<>(),
+            new HashMap<>(),
+            new HashMap<>()
         );
     }
 }

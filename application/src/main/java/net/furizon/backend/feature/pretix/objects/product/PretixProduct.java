@@ -43,6 +43,11 @@ public class PretixProduct {
         return PretixGenericUtils.fromStrPriceToLong(getPrice());
     }
 
+    public boolean isInternalItem() {
+        String s = metadata.get(PretixConst.METADATA_IDENTIFIER_INTERNAL_ITEM);
+        return s == null ? false : s.equalsIgnoreCase("true");
+    }
+
     @NotNull
     public Map<String, String> getCustomNames() {
         return PretixGenericUtils.convertCustomNames(metadata.get(PretixConst.METADATA_IDENTIFIER_CUSTOM_NAME));

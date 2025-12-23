@@ -132,6 +132,11 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (Objects.equals(itemId, pretixRoomItemId) && !loadAllItems) {
                 return null;
             }
+            //We exclude internal rooms (EG staff rooms)
+            if (pretixInformation.isInternalItem(itemId) && !loadAllItems) {
+                return null;
+            }
+
             //Check for room capacity >= number of people already in room
             HotelCapacityPair roomInfo = pretixInformation.getRoomInfoFromPretixItemId(itemId);
             if (roomInfo != null && (loadAllItems || guests == null || roomInfo.capacity() >= guests.size())) {

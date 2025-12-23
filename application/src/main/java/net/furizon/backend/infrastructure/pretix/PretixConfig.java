@@ -1,10 +1,8 @@
 package net.furizon.backend.infrastructure.pretix;
 
 import lombok.Data;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
-import org.bouncycastle.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;

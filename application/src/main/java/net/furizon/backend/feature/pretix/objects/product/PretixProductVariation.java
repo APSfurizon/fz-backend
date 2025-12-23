@@ -31,6 +31,11 @@ public class PretixProductVariation {
         return metadata.get(PretixConst.METADATA_IDENTIFIER_ITEM);
     }
 
+    public boolean isInternalVariation() {
+        String s = metadata.get(PretixConst.METADATA_IDENTIFIER_INTERNAL_ITEM);
+        return s == null ? false : s.equalsIgnoreCase("true");
+    }
+
     public long getLongPrice() {
         return PretixGenericUtils.fromStrPriceToLong(getPrice());
     }

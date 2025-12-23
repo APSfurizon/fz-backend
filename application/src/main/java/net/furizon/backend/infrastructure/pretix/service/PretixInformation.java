@@ -48,6 +48,10 @@ public interface PretixInformation {
 
     @Nullable Long getFatherItemByVariationId(long variationId);
 
+    boolean isInternalItem(long itemId);
+
+    boolean isInternalVariation(long variationId);
+
     @NotNull
     Set<Long> getCurrentEventRoomPretixIds();
     @NotNull
