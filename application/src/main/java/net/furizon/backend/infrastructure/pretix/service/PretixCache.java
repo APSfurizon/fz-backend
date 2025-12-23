@@ -73,6 +73,39 @@ class PretixCache {
     @NotNull
     final Cache<Long, Board> variationIdToBoard = Caffeine.newBuilder().build();
 
+
+    public void importCache(@NotNull PretixCache otherCache) {
+        //General
+        itemIdToPrice.putAll(otherCache.itemIdToPrice.asMap());
+        variationIdToPrice.putAll(otherCache.variationIdToPrice.asMap());
+        variationIdToItem.putAll(otherCache.variationIdToItem.asMap());
+        itemIdToBundle.putAll(otherCache.itemIdToBundle.asMap());
+        itemIdToQuota.putAll(otherCache.itemIdToQuota.asMap());
+        variationIdToQuota.putAll(otherCache.variationIdToQuota.asMap());
+        itemIdToNames.putAll(otherCache.itemIdToNames.asMap());
+        variationIdToNames.putAll(otherCache.variationIdToNames.asMap());
+
+        //Questions
+        questionIdToType.putAll(otherCache.questionIdToType.asMap());
+        questionIdToIdentifier.putAll(otherCache.questionIdToIdentifier.asMap());
+        questionIdToOptions.putAll(otherCache.questionIdToOptions.asMap());
+
+        //Tickets
+        dailyIdToDay.putAll(otherCache.dailyIdToDay.asMap());
+
+        //Sponsors
+        sponsorshipIdToType.putAll(otherCache.sponsorshipIdToType.asMap());
+
+        //Extra days
+        extraDaysIdToDay.putAll(otherCache.extraDaysIdToDay.asMap());
+
+        //Rooms
+        roomIdToInfo.putAll(otherCache.roomIdToInfo.asMap());
+
+        //Board
+        variationIdToBoard.putAll(otherCache.variationIdToBoard.asMap());
+    }
+
     public void invalidate() {
         //General
         itemIdToPrice.invalidateAll();

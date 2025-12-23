@@ -1,8 +1,10 @@
 package net.furizon.backend.infrastructure.pretix;
 
 import lombok.Data;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.infrastructure.http.client.HttpConfig;
+import org.bouncycastle.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -69,6 +71,16 @@ public class PretixConfig implements HttpConfig {
                 add(PretixConst.FZBACKENDUTILS_API_HEADER_NAME, api.fzbackendutilsToken);
             }
         };
+    }
+
+    public boolean isEventExcludedFromCache(@NotNull net.furizon.backend.feature.pretix.objects.event.Event event) {
+        final String eventSlug = event.getSlug();
+        for (String excluded : eventsExcludedFromCache) {
+            if (excluded.equalsIgnoreCase(eventSlug)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Data

@@ -942,6 +942,7 @@ public class CachedPretixInformation implements PretixInformation {
 
     private void reloadEventStructure(boolean reloadPastEvents) {
         TriConsumer<Event, PretixCache, PretixEventSpecificCache> reload = (e, cache, specificCache) -> {
+            log.debug("[PRETIX] Reloading event {}", e);
             reloadQuestions(e, cache, specificCache);
             reloadProducts(e, cache, specificCache);
             reloadQuotas(e, cache);
@@ -949,12 +950,22 @@ public class CachedPretixInformation implements PretixInformation {
         Event current = getCurrentEvent();
         reload.accept(current, currentEventCache, currentEventSpecificCache);
         if (reloadPastEvents) {
-            getOtherEvents().stream().filter(e -> !e.equals(current)).forEach(e -> {
-                long eventId = e.getId();
-                PretixEventSpecificCache specificCache = new PretixEventSpecificCache();
-                eventSpecificCache.put(eventId, specificCache);
-                reload.accept(e, otherEventsCache, specificCache);
-            });
+            PretixCache cache = new PretixCache();
+            getOtherEvents()
+                .stream()
+                .filter(e -> !e.equals(current) && !pretixConfig.isEventExcludedFromCache(e))
+                .forEach(e -> {
+                    long eventId = e.getId();
+                    PretixEventSpecificCache specificCache = new PretixEventSpecificCache();
+                    cache.invalidate();
+                    try {
+                        reload.accept(e, cache, specificCache);
+                        eventSpecificCache.put(eventId, specificCache);
+                        otherEventsCache.importCache(cache);
+                    } catch  (Exception ex) {
+                        log.warn("[PRETIX] Exception while loading event {}. Exception details:", e, ex);
+                    }
+                });
         }
     }
 
