@@ -196,10 +196,12 @@ public class JooqUserFinder implements UserFinder {
                         .and(ORDERS.EVENT_ID.eq(event.getId()))
                     )
                 )
-                .and(
-                    ORDERS.ORDER_ROOM_CAPACITY.isNull()
-                    .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
-                )
+            //The following is commented out because we actually want
+            // people with bought rooms but not in a room to be serchable
+            //.and(
+            //    ORDERS.ORDER_ROOM_CAPACITY.isNull()
+            //    .or(ORDERS.ORDER_ROOM_CAPACITY.lessOrEqual((short) 0))
+            //)
             );
         }
 
