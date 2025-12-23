@@ -613,7 +613,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 foundPositionIncoherence |= refreshedOrder.getBoardPositionId() != null
                                             && (newBoardItemId == null || newBoardVariationId == null);
 
-                if (totalPaid < totalPrice && !disablePriceUpgradeChecks) {
+                if (totalPrice < totalPaid && !disablePriceUpgradeChecks) {
                     log.error("[ROOM_BUY] User {} buying roomItemId {} on event {}: Order {}:"
                             + "Current price ({}) is less than what was previously paid ({})",
                             userId, newRoomItemId, event, orderCode, totalPrice, totalPaid);
@@ -622,7 +622,7 @@ public class UserBuysFullRoom implements RoomLogic {
                         TranslatableValue.ofEmail("mail.room_upgade_failed_price.title"),
                         TEMPLATE_UPGRADE_FAILED_PRICE,
                         MailVarPair.of(ORDER_CODE, orderCode),
-                        MailVarPair.of(REFUND_MONEY, totalPaid + " < " + totalPrice)
+                        MailVarPair.of(REFUND_MONEY, totalPrice + " < " + totalPaid)
                     );
                 }
                 if (foundPositionIncoherence) {
