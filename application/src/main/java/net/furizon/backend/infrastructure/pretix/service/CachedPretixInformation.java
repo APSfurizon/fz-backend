@@ -831,7 +831,7 @@ public class CachedPretixInformation implements PretixInformation {
     }
     @Override
     public @NotNull Optional<PretixQuotaAvailability> getSmallestAvailabilityFromVariationId(long variationId) {
-        return getSmallestAvailabilityFromList(variationId, getQuotaFromItemId(variationId));
+        return getSmallestAvailabilityFromList(variationId, getQuotaFromVariationId(variationId));
     }
     //This is NOT cached!!
     @NotNull
@@ -854,6 +854,7 @@ public class CachedPretixInformation implements PretixInformation {
         Event event = getCurrentEvent();
         PretixQuotaAvailability availability = null;
         for (PretixQuota q : quota) {
+            log.debug("Quota {}: Items={} Variations={}", q.getId(), q.getItems(), q.getVariations());
             var a = quotaFinder.getAvailability(event, q.getId());
             if (a.isPresent()) {
                 PretixQuotaAvailability av = a.get();

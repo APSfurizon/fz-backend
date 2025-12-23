@@ -127,6 +127,7 @@ public class ListRoomWithPricesAndQuotaUseCase implements
         Set<Long> roomItemIds = pretixInformation.getCurrentEventRoomPretixIds();
         //Return empty list if not buyOrUpgradeSupported
         List<RoomAvailabilityInfoResponse> rooms = canLoadData ? roomItemIds.stream().map(itemId -> {
+            log.debug("Loading quota and price for room item {}", itemId);
             //We exclude the current room
             if (Objects.equals(itemId, pretixRoomItemId) && !loadAllItems) {
                 return null;
@@ -136,40 +137,53 @@ public class ListRoomWithPricesAndQuotaUseCase implements
             if (roomInfo != null && (loadAllItems || guests == null || roomInfo.capacity() >= guests.size())) {
                 //Check for roomPrice > old room roomPrice
                 // (actual check against how much the user has paid is done on the actual action)
-                long roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false, true));
+                long roomPrice = 0L;
                 long extraDaysPrice = 0L;
                 long boardPrice = 0L;
                 Long earlyItemId = null;
                 Long lateItemId = null;
                 Long boardVariationId = null;
+
+                // Fetch item/variation ids
                 if (order != null && order.hasRoom()) {
                     if (extraDays.isEarly()) {
                         earlyItemId = Objects.requireNonNull(
                                 pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.EARLY)
-                        );
-                        extraDaysPrice += Objects.requireNonNull(
-                                pretixInformation.getItemPrice(earlyItemId, false, true)
                         );
                     }
                     if (extraDays.isLate()) {
                         lateItemId = Objects.requireNonNull(
                                 pretixInformation.getExtraDayItemIdForHotelCapacity(roomInfo, ExtraDays.LATE)
                         );
-                        extraDaysPrice += Objects.requireNonNull(
-                                pretixInformation.getItemPrice(lateItemId, false, true)
-                        );
                     }
                     if (board != Board.NONE) {
                         boardVariationId = Objects.requireNonNull(
                                 pretixInformation.getBoardVariationIdForHotelCapacity(roomInfo, board)
                         );
-                        boardPrice += Objects.requireNonNull(
-                                pretixInformation.getVariationPrice(boardVariationId, false)
-                        );
                         //Zozzating for the internal getSmallestQuota method
                         boardVariationId = -boardVariationId;
                     }
                 }
+                log.debug("Fetching quota and price: Room={} Early={} Late={} Board={}",
+                        itemId, earlyItemId, lateItemId, boardVariationId);
+
+                // Fetch item prices
+                if (earlyItemId != null) {
+                    extraDaysPrice += Objects.requireNonNull(
+                            pretixInformation.getItemPrice(earlyItemId, false, true)
+                    );
+                }
+                if (lateItemId != null) {
+                    extraDaysPrice += Objects.requireNonNull(
+                            pretixInformation.getItemPrice(lateItemId, false, true)
+                    );
+                }
+                if (boardVariationId != null) {
+                    boardPrice += Objects.requireNonNull(
+                            pretixInformation.getVariationPrice(-boardVariationId, false)
+                    );
+                }
+                roomPrice = Objects.requireNonNull(pretixInformation.getItemPrice(itemId, false, true));
                 long totalPrice = roomPrice + extraDaysPrice + boardPrice;
 
                 if (totalPrice >= totalPaid || disableUnupgradeFilter || loadAllItems) {
