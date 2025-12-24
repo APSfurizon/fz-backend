@@ -174,8 +174,8 @@ def getOrderLink() -> Response:
     return doGet(f'{BASE_URL_API}orders-workflow/generate-pretix-shop-link')
 
 def linkOrder() -> Response:
-    orderCode = "N0FM3"
-    orderSecret = "8cog2lc8fb8llvkk"
+    orderCode = "P0SBM"
+    orderSecret = "rslmm34hdqawqddi"
     json = {
         "orderCode": orderCode,
         "orderSecret": orderSecret,
@@ -339,7 +339,7 @@ login()
 #updateUserInfo()
 #markPersonalUserInformationAsUpdated()
 #getOrderLink()
-#linkOrder()
+linkOrder()
 #reloadOrders()
 #testPermission()
 #testInternalAuthorize()
@@ -370,7 +370,7 @@ login()
 #roomGetInfo()
 #roomUnconfirm()
 #roomGetInfo()
-roomListing()
+#roomListing()
 #buyOrUpgradeRoom()
 #exchangeInit()
 #exchangeUpdate()

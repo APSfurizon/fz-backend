@@ -114,13 +114,13 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 String prevOrderCode = prevOrder.getCode();
                 UserEmailData mail = userFinder.getMailDataForUser(userId);
                 if (mail != null) {
-                    var v = order.getAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA); //TODO check if works
+                    var v = order.getAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA);
                     String prevDuplicateData = v.map(o -> (String) o).orElse("");
                     prevDuplicateData +=
-                              "\n----------------------------\n"
-                            + "\nUserId: " + userId
-                            + "\nFursona name: " + mail == null ? "-" : mail.getFursonaName()
-                            + "\nUser email: " + mail == null ? "-" : mail.getEmail()
+                            (prevDuplicateData.isEmpty() ? "" : "\n----------------------------\n")
+                            + "UserId: " + userId
+                            + "\nFursona name: " + (mail == null ? "-" : mail.getFursonaName())
+                            + "\nUser email: " + (mail == null ? "-" : mail.getEmail())
                             + "\nOriginal order code: " + prevOrderCode;
                     order.setAnswer(PretixConst.QUESTIONS_DUPLICATE_DATA, prevDuplicateData);
                     boolean success = pushPretixAnswerAction.invoke(order, pretixService);
