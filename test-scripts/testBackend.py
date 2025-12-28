@@ -315,9 +315,9 @@ def roomGetInfo() -> Response:
 
 def exchangeInit() -> Response:
     json = {
-        "destUserId": 3,
-        #"action": "room"
-        "action": "order"
+        "destUserId": 2,
+        "action": "room"
+        #"action": "order"
     }
     return doPost(f'{BASE_URL_API}room/exchange/init', json=json)
 
@@ -339,7 +339,7 @@ login()
 #updateUserInfo()
 #markPersonalUserInformationAsUpdated()
 #getOrderLink()
-linkOrder()
+#linkOrder()
 #reloadOrders()
 #testPermission()
 #testInternalAuthorize()
@@ -372,7 +372,7 @@ linkOrder()
 #roomGetInfo()
 #roomListing()
 #buyOrUpgradeRoom()
-#exchangeInit()
+exchangeInit()
 #exchangeUpdate()
 #getSponsorshipNames()
 #reminderFursuitBringToEvent()

@@ -61,7 +61,8 @@ public class AutocartLinkGenerator {
             return Optional.empty();
         }
 
-        byte[] encodedDataBytes = encoder.encode(json.getBytes(StandardCharsets.UTF_8));
+        byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
+        byte[] encodedDataBytes = encoder.encode(jsonBytes);
         String encodedData = new String(encodedDataBytes, StandardCharsets.UTF_8);
 
 
