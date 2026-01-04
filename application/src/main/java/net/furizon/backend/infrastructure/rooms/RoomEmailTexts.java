@@ -54,8 +54,8 @@ public class RoomEmailTexts {
 
     public static final TranslatableValue getAction(@NotNull ExchangeAction action, boolean destHasRoom) {
         return switch (action) {
-            case TRASFER_EXCHANGE_ROOM -> TRANSFER_FULL_ORDER;
-            case TRASFER_FULL_ORDER -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
+            case TRASFER_EXCHANGE_ROOM -> destHasRoom ? EXCHANGE_ROOM : TRANSFER_ROOM;
+            case TRASFER_FULL_ORDER -> TRANSFER_FULL_ORDER;
         };
     }
 
