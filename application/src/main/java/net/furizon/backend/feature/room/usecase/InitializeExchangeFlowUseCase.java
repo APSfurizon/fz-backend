@@ -52,6 +52,8 @@ public class InitializeExchangeFlowUseCase implements UseCase<InitializeExchange
 
         log.info("Init {} exchange: {} -> {}", action, sourceUserId, destUserId);
         long exchangeId  = createExchangeObjAction.invoke(destUserId, sourceUserId, action, event);
+        log.debug("Created exchange with id {} between {} -> {} (type: {})",
+                exchangeId, sourceUserId, destUserId, action);
 
         UserEmailData destData = userFinder.getMailDataForUser(destUserId);
         UserEmailData sourceData = userFinder.getMailDataForUser(sourceUserId);

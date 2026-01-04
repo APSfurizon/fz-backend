@@ -13,13 +13,16 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.rooms.MailRoomService;
 import net.furizon.backend.infrastructure.rooms.RoomEmailTexts;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -44,14 +47,28 @@ public class ExchangeRoomUseCase implements UseCase<ExchangeRoomUseCase.Input, B
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final MailRoomService mailService;
     @NotNull private final FrontendConfig frontendConfig;
+    @NotNull private final TranslationService translationService;
 
     //IMPORTANT: This useCase doesn't care about the confirmation flow. It should be done prior to this call!
+    // Also: Keep in mind that this doesn't verify that target really wants an exchange, it validates only source
     @Override
     public @NotNull Boolean executor(@NotNull ExchangeRoomUseCase.Input input) {
         log.info("[ROOM_EXCHANGE] User {} is trying a room exchange", input.user.getUserId());
-        long sourceUserId = roomChecks.getUserIdAssertPermissionCheckTimeframe(input.req.getSourceUserId(), input.user);
-        long destUserId = input.req.getDestUserId();
         Event event = input.pretixInformation.getCurrentEvent();
+
+        long reqUserId = input.user.getUserId();
+        long destUserId = input.req.getDestUserId();
+        long sourceUserId = input.req.getSourceUserId() == null ? reqUserId : input.req.getSourceUserId();
+        boolean isAdmin = roomChecks.isUserAdmin(reqUserId);
+
+        if (reqUserId != destUserId && reqUserId != sourceUserId && !isAdmin) {
+            log.error("User is not an admin! It cannot operate on exchange {} owned by {} -> {}",
+                    input.req.getAction(), sourceUserId, destUserId);
+            throw new ApiException(translationService.error("room.edit_denied"),
+                    GeneralResponseCodes.USER_IS_NOT_ADMIN);
+        }
+        roomChecks.assertInTimeframeToEditRoomsAllowAdmin(reqUserId, input.req.getSourceUserId(), isAdmin);
+
 
         generalChecks.assertUserHasOrderAndItsNotDaily(sourceUserId, event);
         generalChecks.assertUserHasOrderAndItsNotDaily(destUserId, event);
