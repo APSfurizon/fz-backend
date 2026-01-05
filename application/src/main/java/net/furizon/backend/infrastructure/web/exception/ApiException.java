@@ -20,7 +20,7 @@ public class ApiException extends RuntimeException {
 
     public ApiException(@NotNull String message) {
         this.status = HttpStatus.BAD_REQUEST;
-        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN.name()));
+        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN));
     }
 
     public ApiException(
@@ -28,7 +28,7 @@ public class ApiException extends RuntimeException {
             @NotNull Enum<?> code
     ) {
         this.status = HttpStatus.BAD_REQUEST;
-        this.errors = List.of(new ApiError(message, code.name()));
+        this.errors = List.of(new ApiError(message, code));
     }
 
     public ApiException(
@@ -66,9 +66,17 @@ public class ApiException extends RuntimeException {
 
     public ApiException(
             @NotNull HttpStatus status,
+            @NotNull List<ApiError> errors
+    ) {
+        this.status = status;
+        this.errors = errors;
+    }
+
+    public ApiException(
+            @NotNull HttpStatus status,
             String message
     ) {
         this.status = status;
-        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN.name()));
+        this.errors = List.of(new ApiError(message, ApiCommonErrorCode.UNKNOWN));
     }
 }
