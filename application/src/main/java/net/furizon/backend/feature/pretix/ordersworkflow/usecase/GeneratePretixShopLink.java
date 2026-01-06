@@ -135,7 +135,7 @@ public class GeneratePretixShopLink implements UseCase<GeneratePretixShopLink.In
         // User has the correct age check
         LocalDate birthday = info.getBirthday();
         //If event doesn't have a start date set, we default to the current date
-        LocalDate date = event.getDateFrom() == null ? LocalDate.now() : event.getDateFrom().toLocalDate();
+        LocalDate date = event.getPretixDateFrom() == null ? LocalDate.now() : event.getPretixDateFrom().toLocalDate();
 
         long age = ChronoUnit.YEARS.between(birthday, date);
         long minimumAge = membershipConfig.getMinimumAgeAtEventDate();

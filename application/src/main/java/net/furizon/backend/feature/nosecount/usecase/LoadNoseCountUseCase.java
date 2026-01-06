@@ -14,7 +14,6 @@ import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
 import net.furizon.backend.infrastructure.localization.TranslationService;
-import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -40,7 +39,6 @@ import java.util.TreeMap;
 @RequiredArgsConstructor
 public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input, NoseCountResponse> {
     @NotNull private final CountsFinder countsFinder;
-    @NotNull private final PretixConfig pretixConfig;
     @NotNull private final RoomConfig roomConfig;
     private final RoomLogic roomLogic;
     @NotNull private final TranslationService translationService;
@@ -53,7 +51,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         }
         long eventId = input.event.getId();
         PretixInformation pretix = input.pretixInformation;
-        OffsetDateTime from = input.event.getDateFromExcludeEarly(pretixConfig.getEvent().isIncludeEarlyInDailyCount());
+        OffsetDateTime from = input.event.getCorrectDateFrom();
 
         Long noRoomItemId = (Long) pretix.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM, eventId).toArray()[0];
 

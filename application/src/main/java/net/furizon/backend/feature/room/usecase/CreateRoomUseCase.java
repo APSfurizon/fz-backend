@@ -62,7 +62,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomUseCase.Input, RoomI
                 .canConfirm(roomLogic.canConfirmRoom(roomId, event, input.pretixInformation))
                 .roomData(Objects.requireNonNull(roomData))
                 .guests(new LinkedList<>())
-                .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
+                .checkinoutDates(event, extraDays == null ? ExtraDays.NONE : extraDays)
                 .board(board == null ? Board.NONE : board)
                 .build();
     }

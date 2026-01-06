@@ -86,7 +86,7 @@ public class GeneralChecks {
             return true;
         }
         OffsetDateTime now = OffsetDateTime.now();
-        OffsetDateTime eventEnd = event == null ? null : event.getDateTo();
+        OffsetDateTime eventEnd = event == null ? null : event.getCorrectDateTo();
         if (now.isAfter(date) && (eventEnd == null || now.isBefore(eventEnd))) {
             return false;
         }

@@ -177,7 +177,7 @@ public class JooqRoomFinder implements RoomFinder {
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
             .limit(1)
-        ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation, roomLogic, userId, event.getId()));
+        ).mapOrNull(k -> JooqRoomInfoMapper.map(k, pretixInformation, roomLogic, event, userId));
     }
 
     @Override
@@ -361,7 +361,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(USERS.USER_ID.eq(ORDERS.USER_ID))
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-        ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService, roomLogic, event.getId())).toList();
+        ).stream().map(k -> RoomInvitationResponseMapper.map(k, pretixService, roomLogic, event)).toList();
     }
 
     @NotNull

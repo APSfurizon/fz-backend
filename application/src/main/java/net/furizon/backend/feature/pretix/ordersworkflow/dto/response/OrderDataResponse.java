@@ -46,4 +46,13 @@ public class OrderDataResponse {
 
     @Nullable
     private RoomData room;
+    @Nullable
+    private LocalDate checkinDate;
+    @Nullable
+    private LocalDate checkoutDate;
+
+    @Nullable
+    private LocalDate noRoomTicketFromDate;
+    @Nullable
+    private LocalDate noRoomTicketToDate;
 }

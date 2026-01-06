@@ -37,8 +37,8 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                 )
                 .values(
                     event.getSlug(),
-                    event.getDateTo(),
-                    event.getDateFrom(),
+                    event.getPretixDateTo(),
+                    event.getPretixDateFrom(),
                     event.isCurrent(),
                     event.getPublicUrl(),
                     Optional

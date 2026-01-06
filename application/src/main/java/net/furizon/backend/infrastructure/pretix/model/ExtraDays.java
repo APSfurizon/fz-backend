@@ -8,6 +8,7 @@ public enum ExtraDays {
 
     public static final long EARLY_DAYS_NO = 1L;
     public static final long LATE_DAYS_NO = 1L;
+    public static final long CHECKOUT_DAYS_NO = 1L;
 
     public boolean isEarly() {
         return (this.ordinal() & 0b01) != 0;

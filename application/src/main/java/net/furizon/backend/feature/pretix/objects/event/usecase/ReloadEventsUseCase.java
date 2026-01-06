@@ -49,6 +49,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
     public Pair<Optional<Event>, List<Event>> executor(@NotNull UseCaseInput input) {
         AtomicReference<Event> currentEvent = new AtomicReference<>(null);
         List<PretixOrganizer> organizers = PretixPagingUtil.fetchAll(organizersFinder::getPagedOrganizers);
+        boolean includesCheckout = pretixConfig.getEvent().isDateToIncludesCheckout();
+        boolean includesEarly = pretixConfig.getEvent().isDateFromIncludesEarly();
         List<Event> events = new ArrayList<>();
         for (final PretixOrganizer organizer : organizers) {
             PretixPagingUtil.forEachElement(
@@ -69,8 +71,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                                 .publicUrl(event.getPublicUrl())
                                 .eventNames(event.getName())
                                 .isCurrent(isCurrentEvent)
-                                .dateTo(event.getDateTo())
-                                .dateFrom(event.getDateFrom())
+                                .dateFrom(event.getDateFrom(), includesEarly)
+                                .dateTo(event.getDateTo(), includesCheckout)
                                 .isLive(event.isLive())
                                 .testModeEnabled(event.isTestMode())
                                 .isPublic(event.isPublic())
@@ -88,8 +90,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                     } else {
                         //Update existing event
                         dbEvent.setPublicUrl(event.getPublicUrl());
-                        dbEvent.setDateFrom(event.getDateFrom());
-                        dbEvent.setDateTo(event.getDateTo());
+                        dbEvent.setDateFrom(event.getDateFrom(), includesEarly);
+                        dbEvent.setDateTo(event.getDateTo(), includesCheckout);
                         dbEvent.setEventNames(event.getName());
                         dbEvent.setCurrent(isCurrentEvent);
                         dbEvent.setLive(event.isLive());

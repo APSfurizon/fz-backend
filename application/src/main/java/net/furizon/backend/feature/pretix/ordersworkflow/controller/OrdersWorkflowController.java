@@ -118,7 +118,11 @@ public class OrdersWorkflowController {
         + "indexes of the days the user has bought. `roomTypeNames` is a map language->name of the name "
         + "of the room. The order secret must be used to show a QR code in the frontend (only when a user "
         + "actually requests it) used for the pretix checkin. "
-        + "In the order field we also return the names of the current sponsor tier")
+        + "Inside the OrderDataResponse object there are checkin/out dates which *may* be populated "
+        + "only if an user has bought a room, containing precomputed values. There are also "
+        + "`noRoomTicketFromDate` and `noRoomTicketToDate` for users who have bought a normal ticket but no "
+        + "room, containing dates when their ticket will allow to access convention spaces. "
+        + "In the order field we also return the names of the current sponsor tier. ")
     @GetMapping("/get-full-status")
     public FullInfoResponse getFullStatus(
             @AuthenticationPrincipal @NotNull final FurizonUser user
