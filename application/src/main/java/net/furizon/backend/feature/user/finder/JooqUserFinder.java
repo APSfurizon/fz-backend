@@ -144,7 +144,7 @@ public class JooqUserFinder implements UserFinder {
         Condition condition = PostgresDSL.trueCondition();
         boolean leftJoinOrders = false;
         boolean joinMembershipCards = false;
-        boolean joinBanStatus = false;
+        boolean joinAuthentication = false;
         boolean joinOrders = false;
 
         var searchFursonaQuerySelect = selectUser();
@@ -153,6 +153,7 @@ public class JooqUserFinder implements UserFinder {
             String[] sp = inputQuery.split("\\s+");
             String s = String.join("%", sp);
             searchFursonaQueryCondition = PostgresDSL.concat(
+                PostgresDSL.concat(AUTHENTICATIONS.AUTHENTICATION_EMAIL, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FIRST_NAME, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_LAST_NAME, " "),
                 MEMBERSHIP_INFO.INFO_FIRST_NAME //First name repeated two times so both A B and B A return results
@@ -163,7 +164,10 @@ public class JooqUserFinder implements UserFinder {
             //}
             searchFursonaQuerySelect = searchFursonaQuerySelect
                     .innerJoin(MEMBERSHIP_INFO)
-                    .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID));
+                    .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+                    .innerJoin(AUTHENTICATIONS)
+                    .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID));
+
         } else {
             searchFursonaQueryCondition =
                 USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%")
@@ -228,7 +232,7 @@ public class JooqUserFinder implements UserFinder {
         }
 
         if (filterBanStatus != null) {
-            joinBanStatus = true;
+            joinAuthentication = true;
             condition = condition.and(
                 AUTHENTICATIONS.AUTHENTICATION_DISABLED.eq(filterBanStatus)
             );
@@ -260,7 +264,7 @@ public class JooqUserFinder implements UserFinder {
             .leftJoin(MEDIA)
             .on(searchFursonaQuery.field(USERS.MEDIA_ID_PROPIC).eq(MEDIA.MEDIA_ID));
 
-        if (joinBanStatus) {
+        if (joinAuthentication) {
             query = query
                 .innerJoin(AUTHENTICATIONS)
                 .on(searchFursonaQuery.field(USERS.USER_ID).eq(AUTHENTICATIONS.USER_ID));
