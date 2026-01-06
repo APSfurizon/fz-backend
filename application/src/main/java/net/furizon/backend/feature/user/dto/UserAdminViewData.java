@@ -73,10 +73,14 @@ public class UserAdminViewData {
 
     public static class UserAdminViewDataBuilder {
         public UserAdminViewDataBuilder sponsorNames(long eventId, @NotNull SponsorshipNamesResponse sponsorNames) {
+            emptySponsorNames();
+            this.sponsorNames.add(new SponsorNamesForEvent(eventId, sponsorNames));
+            return this;
+        }
+        public UserAdminViewDataBuilder emptySponsorNames() {
             if (this.sponsorNames == null) {
                 this.sponsorNames = new ArrayList<>();
             }
-            this.sponsorNames.add(new SponsorNamesForEvent(eventId, sponsorNames));
             return this;
         }
     }

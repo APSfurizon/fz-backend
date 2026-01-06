@@ -175,6 +175,7 @@ public class GetUserAdminViewDataUseCase {
                 .permissions(permissions);
 
         //Fetch sponsor names
+        response.emptySponsorNames();
         orders.forEach(o -> {
             long eventId = o.getEventId();
             var names = executor.execute(
