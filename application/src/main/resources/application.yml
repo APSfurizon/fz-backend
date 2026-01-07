@@ -56,7 +56,7 @@ springdoc:
     enabled: ${DOCS_ENABLED:false}
 
 security:
-  unverified-email-expire-hours: ${SECURITY_UNVERIFIED_EMAIL_EXPIRE_HRS:4}
+  unverified-email-expire-hours: ${SECURITY_UNVERIFIED_EMAIL_EXPIRE_HRS:24}
   unverified-password-reset-expire-hours: ${SECURITY_PASSWORD_RESET_EXPIRE_HRS:2}
   delete-unverified-cronjob: ${SECURITY_DELETE_UNVERIFIED_CRONJOB:0 */15 * * * *}
   password-salt: ${SECURITY_HASHED_PASSWORD_SALT:changeit}
