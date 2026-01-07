@@ -82,8 +82,9 @@ public class AdminController {
         if (bookingStart == null) {
             bookingStart = OffsetDateTime.now();
         }
-        Duration remaining = Duration.between(bookingStart, OffsetDateTime.now());
-        return "Start time: " + bookingStart + "; Remaining time: " + remaining;
+        OffsetDateTime now = OffsetDateTime.now();
+        Duration remaining = Duration.between(bookingStart, now);
+        return "Start time: " + bookingStart + "; Server time: " + now + "; Remaining time: " + remaining;
     }
 
     @Operation(summary = "Gets what an user can do in the admin panel", description =
