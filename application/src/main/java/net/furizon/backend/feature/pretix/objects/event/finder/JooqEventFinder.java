@@ -53,7 +53,9 @@ public class JooqEventFinder implements EventFinder {
                 EVENTS.EVENT_NAMES_JSON,
                 EVENTS.EVENT_IS_LIVE,
                 EVENTS.EVENT_TEST_MODE_ENABLED,
-                EVENTS.EVENT_IS_PUBLIC
+                EVENTS.EVENT_IS_PUBLIC,
+                EVENTS.EVENT_GEO_LAT,
+                EVENTS.EVENT_GEO_LON
             )
             .from(EVENTS);
     }

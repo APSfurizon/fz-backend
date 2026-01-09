@@ -78,6 +78,8 @@ public class GenerateFullStatusUseCase implements UseCase<GenerateFullStatusUseC
                 .exchangeSupported(exchangeSupported)
                 .canExchange(canExchange)
                 .eventNames(event.getEventNames())
+                .geoLatitude(event.getGeoLatitude())
+                .geoLongitude(event.getGeoLongitude())
                 .order(orderDataResponse)
                 .errors(errors)
             .build();

@@ -33,7 +33,9 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                     EVENTS.EVENT_NAMES_JSON,
                     EVENTS.EVENT_IS_LIVE,
                     EVENTS.EVENT_TEST_MODE_ENABLED,
-                    EVENTS.EVENT_IS_PUBLIC
+                    EVENTS.EVENT_IS_PUBLIC,
+                    EVENTS.EVENT_GEO_LAT,
+                    EVENTS.EVENT_GEO_LON
                 )
                 .values(
                     event.getSlug(),
@@ -47,7 +49,9 @@ public class JooqInsertNewEventAction implements InsertNewEventAction {
                         .orElse(null),
                     event.isLive(),
                     event.isTestModeEnabled(),
-                    event.isPublic()
+                    event.isPublic(),
+                    event.getGeoLatitude(),
+                    event.getGeoLongitude()
                 ).returning(EVENTS.ID)
         ).getFirst().get(EVENTS.ID);
     }

@@ -49,6 +49,8 @@ public class JooqEventMapper {
             .isLive(record.get(EVENTS.EVENT_IS_LIVE))
             .testModeEnabled(record.get(EVENTS.EVENT_TEST_MODE_ENABLED))
             .isPublic(record.get(EVENTS.EVENT_IS_PUBLIC))
+            .geoLatitude(record.get(EVENTS.EVENT_GEO_LAT))
+            .geoLongitude(record.get(EVENTS.EVENT_GEO_LON))
             .build();
     }
 }

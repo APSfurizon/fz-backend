@@ -62,6 +62,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                             PretixGenericUtils.buildOrgEventSlug(event.getSlug(), organizer.getSlug()));
                     boolean isCurrentEvent = pretixConfig.getDefaultOrganizer().equals(organizer.getSlug())
                                           && pretixConfig.getDefaultEvent().equals(event.getSlug());
+                    Double geoLon = event.getGeoLongitude() == null ? null : event.getGeoLongitude().doubleValue();
+                    Double geoLat = event.getGeoLatitude() == null ? null : event.getGeoLatitude().doubleValue();
 
 
                     if (dbEvent == null) {
@@ -76,6 +78,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                                 .isLive(event.isLive())
                                 .testModeEnabled(event.isTestMode())
                                 .isPublic(event.isPublic())
+                                .geoLongitude(geoLon)
+                                .geoLatitude(geoLat)
                                 .build();
 
                         long dbId = insertEventAction.invoke(newEvent);
@@ -97,6 +101,8 @@ public class ReloadEventsUseCase implements UseCase<UseCaseInput, Pair<Optional<
                         dbEvent.setLive(event.isLive());
                         dbEvent.setTestModeEnabled(event.isTestMode());
                         dbEvent.setPublic(event.isPublic());
+                        dbEvent.setGeoLatitude(geoLat);
+                        dbEvent.setGeoLongitude(geoLon);
                         updateEventAction.invoke(dbEvent);
 
                         if (isCurrentEvent) {

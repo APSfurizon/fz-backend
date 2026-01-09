@@ -5,7 +5,9 @@ package net.furizon.jooq.generated.tables;
 
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.processing.Generated;
 
@@ -18,6 +20,7 @@ import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -38,6 +41,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -119,6 +123,16 @@ public class Events extends TableImpl<Record> {
      * The column <code>public.events.event_is_public</code>.
      */
     public final TableField<Record, Boolean> EVENT_IS_PUBLIC = createField(DSL.name("event_is_public"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.events.event_geo_lat</code>.
+     */
+    public final TableField<Record, Double> EVENT_GEO_LAT = createField(DSL.name("event_geo_lat"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.events.event_geo_lon</code>.
+     */
+    public final TableField<Record, Double> EVENT_GEO_LON = createField(DSL.name("event_geo_lon"), SQLDataType.DOUBLE, this, "");
 
     private Events(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -272,6 +286,14 @@ public class Events extends TableImpl<Record> {
      */
     public UsersPath ordersUsersId() {
         return orders().users();
+    }
+
+    @Override
+    public List<Check<Record>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("event_geo_lat_check"), "(((event_geo_lat >= ('-90'::integer)::double precision) AND (event_geo_lat <= (90)::double precision)))", true),
+            Internal.createCheck(this, DSL.name("event_geo_lon_check"), "(((event_geo_lon >= ('-180'::integer)::double precision) AND (event_geo_lon <= (180)::double precision)))", true)
+        );
     }
 
     @Override

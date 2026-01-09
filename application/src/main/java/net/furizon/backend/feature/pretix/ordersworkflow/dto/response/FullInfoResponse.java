@@ -22,6 +22,10 @@ public class FullInfoResponse {
 
     @Nullable
     private final Map<String, String> eventNames;
+    @Nullable
+    private Double geoLatitude;
+    @Nullable
+    private Double geoLongitude;
 
     private final boolean hasActiveMembershipForEvent;
 

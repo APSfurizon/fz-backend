@@ -29,6 +29,13 @@ public class PretixEvent {
     @NotNull
     private final String publicUrl;
 
+    @Nullable
+    @JsonProperty("geo_lat")
+    private final Float geoLatitude;
+    @Nullable
+    @JsonProperty("geo_lon")
+    private final Float geoLongitude;
+
     //Event visibility settings
     private final boolean live;
     @JsonProperty("testmode")

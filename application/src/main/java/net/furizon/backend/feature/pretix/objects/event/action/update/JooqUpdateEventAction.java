@@ -35,6 +35,8 @@ public class JooqUpdateEventAction implements UpdateEventAction {
                 .set(EVENTS.EVENT_IS_LIVE, event.isLive())
                 .set(EVENTS.EVENT_TEST_MODE_ENABLED, event.isTestModeEnabled())
                 .set(EVENTS.EVENT_IS_PUBLIC, event.isPublic())
+                .set(EVENTS.EVENT_GEO_LAT, event.getGeoLatitude())
+                .set(EVENTS.EVENT_GEO_LON, event.getGeoLongitude())
                 .where(EVENTS.ID.eq(event.getId()))
         );
     }

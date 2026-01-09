@@ -52,6 +52,12 @@ public class Event {
     @Nullable
     private Map<String, String> eventNames;
 
+    @Nullable
+    private Double geoLatitude;
+    @Nullable
+    private Double geoLongitude;
+
+
     public @NotNull String getLocalizedName(@NotNull TranslationService translationService) {
         return translationService.getTranslationFromMap(eventNames);
     }

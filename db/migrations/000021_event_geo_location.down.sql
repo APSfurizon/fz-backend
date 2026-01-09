@@ -1,0 +1,9 @@
+BEGIN;
+
+ALTER TABLE events DROP CONSTRAINT IF EXISTS event_geo_lat_check;
+ALTER TABLE events DROP CONSTRAINT IF EXISTS event_geo_lon_check;
+
+ALTER TABLE IF EXISTS events DROP COLUMN IF EXISTS event_geo_lat;
+ALTER TABLE IF EXISTS events DROP COLUMN IF EXISTS event_geo_lon;
+
+COMMIT;
