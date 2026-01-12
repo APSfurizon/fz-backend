@@ -26,10 +26,12 @@ import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCa
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +76,11 @@ public class AdminController {
     @GetMapping("/ping")
     public String ping() {
         return "pong";
+    }
+
+    @GetMapping("/exception")
+    public void exception() {
+        throw new ApiException("Exception", GeneralResponseCodes.GENERIC_ERROR);
     }
 
     @GetMapping("/countdown")

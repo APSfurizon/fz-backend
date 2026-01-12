@@ -111,7 +111,8 @@ def updateUserInfo() -> Response:
             "prefixPhoneNumber": "+39",
             "phoneNumber": "3331234567",
             "sex":"M",
-            "gender":"CisMan"
+            "gender":"CisMan",
+            "shirtSize": "m"
     }
     return doPost(f'{BASE_URL_API}membership/update-personal-user-information', json=json) 
 
@@ -329,14 +330,15 @@ def exchangeUpdate() -> Response:
     }
     return doPost(f'{BASE_URL_API}room/exchange/update', json=json)
     
-
+def exception() -> Response:
+    return doGet(f'{BASE_URL_API}admin/exception')
 
 #register()
 #confirmEmail()
 login()
 #getMeAuth()
 #getMe()
-#updateUserInfo()
+updateUserInfo()
 #markPersonalUserInformationAsUpdated()
 #getOrderLink()
 #linkOrder()
@@ -346,6 +348,7 @@ login()
 #uploadBadge()
 #deleteBadge()
 #runDeleteDanglingBadges()
+#exception()
 #addFursuit()
 #addFursuit()
 #addFursuit()
@@ -372,7 +375,7 @@ login()
 #roomGetInfo()
 #roomListing()
 #buyOrUpgradeRoom()
-exchangeInit()
+#exchangeInit()
 #exchangeUpdate()
 #getSponsorshipNames()
 #reminderFursuitBringToEvent()
