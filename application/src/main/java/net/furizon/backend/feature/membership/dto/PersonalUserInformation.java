@@ -100,10 +100,6 @@ public class PersonalUserInformation {
     @Size(max = 1000)
     private final String allergies;
 
-    @Nullable
-    @Size(max = 1000)
-    private final String note;
-
     @NotNull
     @Pattern(regexp = "^@?[a-zA-Z0-9_]{5,32}$")
     private final String telegramUsername;
