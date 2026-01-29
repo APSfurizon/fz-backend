@@ -37,6 +37,7 @@ public interface SessionAuthenticationManager {
     void disableUser(long userId);
     void renableUser(long userId);
 
+    void changeEmail(long userId, @NotNull String mail);
     void changePassword(long userId, @NotNull String password);
     @Nullable Long getUserIdFromPasswordResetReqId(@Nullable UUID pwResetId);
     boolean deletePasswordResetAttempt(@NotNull UUID pwResetId);
