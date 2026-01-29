@@ -13,7 +13,10 @@ public class ChangePasswordRequest {
     @Nullable
     private UUID resetPwId;
 
-    // NOTICE: All passwords needs to be named "password" to be
+    @Nullable
+    private Long userId;
+
+    // NOTICE: All passwords fields needs to be named "password" to be
     // mathced by net.furizon.backend.infrastructure.configuration.LogbookFilterConfiguration
     // and be hidden in logs
     @NotNull
