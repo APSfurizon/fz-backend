@@ -9,6 +9,8 @@ import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.session.manager.SessionAuthenticationManager;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
@@ -29,9 +31,11 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
     @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender sender;
     @NotNull private final TranslationService translationService;
+    @NotNull private final GeneralChecks generalChecks;
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
+        Long reqUserId = input.req.getTargetUserId();
         Long userId = input.user == null ? null : input.user.getUserId();
         UUID resetPwId = input.req.getResetPwId();
 
@@ -46,6 +50,12 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
                 throw new ApiException(translationService.error("authentication.reset.reset_not_valid"),
                         AuthenticationCodes.PW_RESET_NOT_FOUND);
             }
+        } else {
+            userId = generalChecks.getUserIdAndAssertPermission(
+                    reqUserId,
+                    input.user,
+                    Permission.CAN_MANAGE_USER_LOGIN
+            );
         }
 
         log.info("Changing password for user {}", userId);

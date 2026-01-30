@@ -341,6 +341,15 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
     }
 
     @Override
+    public void changeEmail(long userId, @NotNull String mail) {
+        sqlCommand.execute(
+            PostgresDSL.update(AUTHENTICATIONS)
+            .set(AUTHENTICATIONS.AUTHENTICATION_EMAIL, mail)
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
+        );
+        invalidateCache(userId);
+    }
+    @Override
     public void changePassword(long userId, @NotNull String password) {
         String pwEncoded = encoder.encode(securityConfig.getPasswordSalt() + password);
 

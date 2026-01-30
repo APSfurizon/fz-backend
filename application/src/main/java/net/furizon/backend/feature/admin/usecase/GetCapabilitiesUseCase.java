@@ -22,6 +22,7 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
         return CapabilitiesResponse.builder()
                 .canUpgradeUser(p.contains(Permission.CAN_UPGRADE_USERS))
                 .canBanUsers(p.contains(Permission.CAN_BAN_USERS))
+                .canChangeLoginData(p.contains(Permission.CAN_MANAGE_USER_LOGIN))
                 .canManageMembershipCards(p.contains(Permission.CAN_MANAGE_MEMBERSHIP_CARDS))
                 .canRefreshPretixCache(p.contains(Permission.CAN_REFRESH_PRETIX_CACHE))
                 .canRemindOrderLinking(p.contains(Permission.PRETIX_ADMIN))
