@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
+import net.furizon.backend.feature.authentication.dto.requests.ChangeMailRequest;
 import net.furizon.backend.feature.authentication.dto.requests.ChangePasswordRequest;
 import net.furizon.backend.feature.authentication.dto.requests.DestroySessionRequest;
 import net.furizon.backend.feature.authentication.dto.requests.EmailRequest;
@@ -20,6 +21,7 @@ import net.furizon.backend.feature.authentication.dto.responses.LoginResponse;
 import net.furizon.backend.feature.authentication.dto.responses.LogoutUserResponse;
 import net.furizon.backend.feature.authentication.dto.responses.RegisterUserResponse;
 import net.furizon.backend.feature.authentication.usecase.BanUserUseCase;
+import net.furizon.backend.feature.authentication.usecase.ChangeEmailUseCase;
 import net.furizon.backend.feature.authentication.usecase.ChangePasswordUseCase;
 import net.furizon.backend.feature.authentication.usecase.ConfirmEmailUseCase;
 import net.furizon.backend.feature.authentication.usecase.DestroyAllSessionsUseCase;
@@ -114,12 +116,30 @@ public class AuthenticationController {
         return RegisterUserResponse.SUCCESS;
     }
 
+    @Operation(summary = "Changes the user's email", description =
+        "This method is currently reserved for admin usage only. It immediately changes the specified userId's email "
+        + "to the one in the request. To perform the operation he must have the `CAN_MANAGE_USER_LOGIN` "
+        + "permission, verifiable with the `canChangeLoginData` field of the `capabilities` admin endpoint")
+    @PostMapping("/mail/change")
+    public void changeMail(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestBody final ChangeMailRequest req
+    ) {
+        executor.execute(
+                ChangeEmailUseCase.class,
+                new ChangeEmailUseCase.Input(user, req)
+        );
+    }
+
     @Operation(summary = "Changes the user's password", description =
         "This method can be used both for changing the password of an already "
         + "logged in user and both for resetting the password after a password "
         + "reset flow. If the user is already logged in, you MUST omit the "
         + "`resetPwId` parameter of the body, if instead the user is resetting "
-        + "his password (so he's not logged in) that parameter is *mandatory*")
+        + "his password (so he's not logged in) that parameter is *mandatory*. "
+        + "An admin can change the password of an user by specifying its userId in the field "
+        + "`targetUserId`. To perform the operation he must have the `CAN_MANAGE_USER_LOGIN` "
+        + "permission, verifiable with the `canChangeLoginData` field of the `capabilities` admin endpoint")
     @PostMapping("/pw/change")
     public void changePw(
             @AuthenticationPrincipal @Nullable final FurizonUser user,

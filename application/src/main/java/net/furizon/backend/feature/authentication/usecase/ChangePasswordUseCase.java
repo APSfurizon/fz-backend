@@ -35,7 +35,7 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
-        Long reqUserId = input.req.getUserId();
+        Long reqUserId = input.req.getTargetUserId();
         Long userId = input.user == null ? null : input.user.getUserId();
         UUID resetPwId = input.req.getResetPwId();
 

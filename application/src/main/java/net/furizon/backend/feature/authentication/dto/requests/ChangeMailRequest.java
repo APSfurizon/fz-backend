@@ -11,7 +11,7 @@ import static net.furizon.backend.feature.authentication.Const.EMAIL_REGEX;
 @Data
 public class ChangeMailRequest {
     @Nullable
-    private Long userId;
+    private Long targetUserId;
 
     @NotNull
     @NotEmpty

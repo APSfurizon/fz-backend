@@ -14,7 +14,7 @@ public class ChangePasswordRequest {
     private UUID resetPwId;
 
     @Nullable
-    private Long userId;
+    private Long targetUserId;
 
     // NOTICE: All passwords fields needs to be named "password" to be
     // mathced by net.furizon.backend.infrastructure.configuration.LogbookFilterConfiguration

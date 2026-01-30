@@ -8,6 +8,7 @@ import lombok.Data;
 public class CapabilitiesResponse {
     private final boolean canUpgradeUser;
     private final boolean canBanUsers;
+    private final boolean canChangeLoginData;
     private final boolean canManageMembershipCards;
     private final boolean canRefreshPretixCache;
     private final boolean canRemindOrderLinking;

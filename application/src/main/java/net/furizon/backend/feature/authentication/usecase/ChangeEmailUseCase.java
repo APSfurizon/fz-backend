@@ -35,11 +35,11 @@ public class ChangeEmailUseCase implements UseCase<ChangeEmailUseCase.Input, Boo
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         //KEEP IN MIND! We currently ONLY support changing email as an admin!!!
-        if (input.req.getUserId() == null) {
+        if (input.req.getTargetUserId() == null) {
             throw new ApiException("Only admin email change is currently supported");
         }
         long userId = generalChecks.getUserIdAndAssertPermission(
-                input.req.getUserId(),
+                input.req.getTargetUserId(),
                 input.user,
                 Permission.CAN_MANAGE_USER_LOGIN
         );
