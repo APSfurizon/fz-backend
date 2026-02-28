@@ -154,6 +154,8 @@ public class JooqUserFinder implements UserFinder {
             String s = String.join("%", sp);
             searchFursonaQueryCondition = PostgresDSL.concat(
                 PostgresDSL.concat(AUTHENTICATIONS.AUTHENTICATION_EMAIL, " "),
+                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FISCAL_CODE, " "),
+                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_ID_NUMBER, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FIRST_NAME, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_LAST_NAME, " "),
                 MEMBERSHIP_INFO.INFO_FIRST_NAME //First name repeated two times so both A B and B A return results
