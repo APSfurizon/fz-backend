@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.user.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
@@ -12,9 +13,11 @@ import net.furizon.backend.feature.user.mapper.JooqUserMapper;
 import net.furizon.backend.feature.user.objects.SearchUserResult;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
+import org.jooq.SelectConnectByStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
+import static net.furizon.jooq.generated.Tables.FURSUITS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
@@ -49,12 +53,32 @@ public class JooqUserFinder implements UserFinder {
             .mapOrNull(JooqUserMapper::map);
     }
 
-    @NotNull
+
+
     @Override
-    public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
+    public @NotNull List<UserDisplayData> getDisplayUserByMembershipDbId(Set<Long> ids, @NotNull Event event) {
         return sqlQuery.fetch(
             selectJoinDisplayUser(event.getId())
-            .where(USERS.USER_ID.in(ids))
+            .innerJoin(MEMBERSHIP_CARDS)
+            .on(
+                MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
+                .and(MEMBERSHIP_CARDS.CARD_DB_ID.in(ids))
+            )
+        ).stream().map(JooqUserDisplayMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull List<UserDisplayData> getDisplayUserByMembershipNo(Set<String> numbers, @NotNull Event event) {
+        //Shitty hack until this PR gets approved https://github.com/jOOQ/jOOQ/issues/5871
+        Condition cond = numbers.stream().reduce((Condition) PostgresDSL.falseCondition(), (c, n) -> {
+            Pair<Short, Integer> p = MembershipCard.fromNumber(n);
+            return c.or(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(p.getLeft()).and(MEMBERSHIP_CARDS.ID_IN_YEAR.eq(p.getRight())));
+        }, Condition::or);
+        return sqlQuery.fetch(
+            selectJoinDisplayUser(event.getId())
+            .innerJoin(MEMBERSHIP_CARDS)
+            .on(MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID))
+            .where(cond)
         ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
@@ -65,6 +89,46 @@ public class JooqUserFinder implements UserFinder {
             selectJoinDisplayUser(event.getId())
             .where(USERS.USER_ID.eq(userId))
         ).mapOrNull(JooqUserDisplayMapper::map);
+    }
+    @NotNull
+    @Override
+    public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
+        return sqlQuery.fetch(
+            selectJoinDisplayUser(event.getId())
+            .where(USERS.USER_ID.in(ids))
+        ).stream().map(JooqUserDisplayMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull List<UserDisplayData> getDisplayUserByFursuitIds(Set<Long> ids, @NotNull Event event,
+                                                                     boolean hideOwners) {
+        var q = selectJoinDisplayUser(event.getId())
+                .innerJoin(FURSUITS)
+                .on(
+                    FURSUITS.USER_ID.eq(USERS.USER_ID)
+                    .and(FURSUITS.FURSUIT_ID.in(ids))
+                );
+        SelectConnectByStep<?> x = q;
+        if (hideOwners) {
+            x = q.where(FURSUITS.SHOW_OWNER.eq(PostgresDSL.trueCondition()));
+        }
+        return sqlQuery.fetch(x).stream().map(JooqUserDisplayMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull List<UserDisplayData> getDisplayUserByOrderCode(Set<String> codes, @NotNull Event event) {
+        return sqlQuery.fetch(
+            selectJoinDisplayUser(event.getId())
+            .where(ORDERS.ORDER_CODE.in(codes))
+        ).stream().map(JooqUserDisplayMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull List<UserDisplayData> getDisplayUserByOrderSerial(Set<Long> serials, @NotNull Event event) {
+        return sqlQuery.fetch(
+            selectJoinDisplayUser(event.getId())
+            .where(ORDERS.ORDER_SERIAL_IN_EVENT.in(serials))
+        ).stream().map(JooqUserDisplayMapper::map).toList();
     }
 
     @Nullable

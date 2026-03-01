@@ -14,8 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,8 +26,8 @@ public class SearchUserInEventUseCase implements UseCase<SearchUserInEventUseCas
         Event event = input.pretixService.getCurrentEvent();
         boolean isAdminSearch = input.isAdminSearch;
         if (isAdminSearch) {
-            Set<Permission> permissions = permissionFinder.getUserPermissions(input.user.getUserId());
-            if (!permissions.contains(Permission.CAN_SEE_ADMIN_PAGES)) {
+            var v = permissionFinder.userHasPermission(input.user.getUserId(), Permission.CAN_SEE_ADMIN_PAGES);
+            if (!v) {
                 log.warn("User {} had isAdminSearch=true, but he doesn't have the correct permissions",
                         input.user.getUserId());
                 isAdminSearch = false;

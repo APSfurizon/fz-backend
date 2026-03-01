@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.user.usecase;
+package net.furizon.backend.feature.user.usecase.retrival;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,20 +11,18 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GetSelectedUsersByIdsUseCase implements UseCase<GetSelectedUsersByIdsUseCase.Input, SearchUsersResponse> {
+public class GetUsersByUserIdUseCase implements UseCase<GetUsersByUserIdUseCase.Input, SearchUsersResponse> {
     @NotNull private final UserFinder userFinder;
 
     @Override
-    public @NotNull SearchUsersResponse executor(@NotNull GetSelectedUsersByIdsUseCase.Input input) {
-        final Set<Long> parsedIds = Arrays.stream(input.userIds).map(Long::parseLong).collect(Collectors.toSet());
+    public @NotNull SearchUsersResponse executor(@NotNull GetUsersByUserIdUseCase.Input input) {
+        final Set<Long> parsedIds = Set.of(input.userIds);
         final List<UserDisplayData> result = userFinder.getDisplayUserByIds(parsedIds, input.event);
         return new SearchUsersResponse(result.stream().map(data ->
                 new SearchUserResult(data.getUserId(), data.getFursonaName(), data.getPropic()))
@@ -32,7 +30,7 @@ public class GetSelectedUsersByIdsUseCase implements UseCase<GetSelectedUsersByI
     }
 
     public record Input(
-            @NotNull String[] userIds,
+            Long[] userIds,
             @NotNull Event event
     ) {}
 }
