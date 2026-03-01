@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
@@ -43,8 +45,22 @@ public class MembershipCard {
         this.userOwnerId = userOwnerId;
         this.createdForOrderId = createdForOrderId;
         this.isRegistered = isRegistered;
+        this.cardNo = toNumber(issueYear, idInYear);
+    }
 
+    @NotNull
+    public static String toNumber(short issueYear, int idInYear) {
         int year = (int) issueYear % 100;
-        cardNo = String.format("%02d%02d%03d", year, year + 1, idInYear);
+        return String.format("%02d%02d%03d", year, year + 1, idInYear);
+    }
+    @NotNull
+    public static Pair<Short, Integer> fromNumber(@NotNull String cardNo) {
+        if (cardNo.length() < 7) {
+            throw new IllegalArgumentException("Expected length for a card number is 7");
+        }
+        return Pair.of(
+            (short) (Integer.parseInt(cardNo.substring(0, 2)) + 2000), //problem for the 100yo me
+            Integer.parseInt(cardNo.substring(4, 7))
+        );
     }
 }
