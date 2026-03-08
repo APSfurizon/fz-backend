@@ -202,13 +202,13 @@ public class SearchUserController {
 
     @PermissionRequired(permissions = {Permission.CAN_SEE_ADMIN_PAGES})
     @Operation(summary = "Search users by the membership card number")
-    @GetMapping("/by-membership-no")
+    @GetMapping("/by-membership-number")
     public SearchUsersResponse searchByMembershipCardNo(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @Valid
             @jakarta.validation.constraints.NotNull
             @Size(min = 1)
-            @RequestParam("no")
+            @RequestParam("number")
             final String[] ids
     ) {
         for (String s : ids) {
