@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.roles.action.addPermissoins.AddPermissionsAction;
-import net.furizon.backend.feature.roles.action.addUsers.AddUsersToRoleAction;
+import net.furizon.backend.feature.roles.action.addUsers.AddUserToRoleAction;
 import net.furizon.backend.feature.roles.action.deletePermissions.DeletePermissionsAction;
-import net.furizon.backend.feature.roles.action.removeUsers.RemoveUsersFromRoleAction;
+import net.furizon.backend.feature.roles.action.removeUsers.RemoveUserFromRoleAction;
 import net.furizon.backend.feature.roles.action.updateRoleInfo.UpdateRoleInformationAction;
 import net.furizon.backend.feature.roles.action.updateUserHasRole.UpdateUserHasRoleAction;
-import net.furizon.backend.feature.roles.dto.UpdateRoleRequest;
-import net.furizon.backend.feature.roles.dto.UpdateRoleToUserRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -40,9 +40,9 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
     @NotNull private final UpdateRoleInformationAction updateRoleInfoAction;
     @NotNull private final DeletePermissionsAction deletePermissionsAction;
     @NotNull private final AddPermissionsAction addPermissionsAction;
-    @NotNull private final AddUsersToRoleAction addUsersToRoleAction;
+    @NotNull private final AddUserToRoleAction addUsersToRoleAction;
     @NotNull private final UpdateUserHasRoleAction updateUserHasRoleAction;
-    @NotNull private final RemoveUsersFromRoleAction removeUsersFromRoleAction;
+    @NotNull private final RemoveUserFromRoleAction removeUsersFromRoleAction;
     @NotNull private final TranslationService translationService;
 
     @Override
@@ -121,12 +121,12 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
         }
         if (!toDeleteUsers.isEmpty()) {
             log.info("User {} is removing users '{}' from role {}", userId, toDeleteUsers, roleId);
-            res = removeUsersFromRoleAction.invoke(roleId, toDeleteUsers);
+            res = removeUsersFromRoleAction.invokeMultiple(roleId, toDeleteUsers);
             throwDbError(res, 4, roleId, req);
         }
         if (!toAddUsers.isEmpty()) {
             log.info("User {} is adding users '{}' to role {}", userId, toAddUsers, roleId);
-            res = addUsersToRoleAction.invoke(roleId, toAddUsers, input.event);
+            res = addUsersToRoleAction.invokeMultiple(roleId, toAddUsers, input.event);
             throwDbError(res, 5, roleId, req);
         }
 

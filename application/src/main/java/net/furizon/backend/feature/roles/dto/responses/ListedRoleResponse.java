@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.roles.dto;
+package net.furizon.backend.feature.roles.dto.responses;
 
 import lombok.Builder;
 import lombok.Data;

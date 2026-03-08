@@ -1,8 +1,8 @@
 package net.furizon.backend.infrastructure.security.permissions.finder;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.roles.dto.ListedRoleResponse;
-import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.ListedRoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.UserHasRoleResponse;
 import net.furizon.backend.feature.roles.mapper.ListedRoleMapper;
 import net.furizon.backend.feature.roles.mapper.UserHasRoleMapper;
 import net.furizon.backend.infrastructure.security.permissions.Permission;

@@ -1,6 +1,6 @@
 package net.furizon.backend.feature.roles.mapper;
 
-import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.UserHasRoleResponse;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import org.jooq.Record;
 
