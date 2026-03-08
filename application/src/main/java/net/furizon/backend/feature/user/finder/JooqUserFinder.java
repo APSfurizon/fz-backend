@@ -215,18 +215,19 @@ public class JooqUserFinder implements UserFinder {
         Condition searchFursonaQueryCondition;
         if (isAdminSearch) {
             String[] sp = inputQuery.split("\\s+");
-            String s = String.join("%", sp);
+            final String s = String.join("%", sp);
             searchFursonaQueryCondition = PostgresDSL.concat(
-                PostgresDSL.concat(AUTHENTICATIONS.AUTHENTICATION_EMAIL, " "),
-                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FISCAL_CODE, " "),
-                PostgresDSL.concat(MEMBERSHIP_INFO.INFO_ID_NUMBER, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_FIRST_NAME, " "),
                 PostgresDSL.concat(MEMBERSHIP_INFO.INFO_LAST_NAME, " "),
                 MEMBERSHIP_INFO.INFO_FIRST_NAME //First name repeated two times so both A B and B A return results
             ).likeIgnoreCase("%" + s + "%");
             //for (String ss : sp) {
+            final String likeQuery = "%" + inputQuery + "%";
             searchFursonaQueryCondition = searchFursonaQueryCondition
-                                          .or(USERS.USER_FURSONA_NAME.likeIgnoreCase("%" + inputQuery + "%"));
+                    .or(USERS.USER_FURSONA_NAME.likeIgnoreCase(likeQuery))
+                    .or(AUTHENTICATIONS.AUTHENTICATION_EMAIL.likeIgnoreCase(likeQuery))
+                    .or(MEMBERSHIP_INFO.INFO_ID_NUMBER.likeIgnoreCase(likeQuery))
+                    .or(MEMBERSHIP_INFO.INFO_FISCAL_CODE.likeIgnoreCase(likeQuery));
             //}
             searchFursonaQuerySelect = searchFursonaQuerySelect
                     .innerJoin(MEMBERSHIP_INFO)
