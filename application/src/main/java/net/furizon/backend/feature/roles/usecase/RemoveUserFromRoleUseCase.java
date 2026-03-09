@@ -25,8 +25,8 @@ public class RemoveUserFromRoleUseCase implements UseCase<RemoveUserFromRoleUseC
 
         log.info("User {} is removing user {} from role {}", reqUser.getUserId(), destUserId, roleId);
 
-        if (permissionFinder.userHasRole(destUserId, roleId)) {
-            log.warn("User {} already has role {}", destUserId, roleId);
+        if (!permissionFinder.userHasRole(destUserId, roleId)) {
+            log.warn("User {} doesn't have role {}", destUserId, roleId);
             return true;
         }
 
