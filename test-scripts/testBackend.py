@@ -346,6 +346,19 @@ def searchByOrderSerial(id: int) -> Response:
 def searchByOrderCode(id: str) -> Response:
     return doGet(f'{BASE_URL_API}users/search/current-event/by-order-code?orders={id}')
 
+def addUserToRole(userId: int, roleId: int, temp: bool) -> Response:
+    json = {
+        "userId": userId,
+        "tempRole": temp
+    }
+    return doPost(f'{BASE_URL_API}roles/{roleId}/add-user', json=json)
+def removeUserFromRole(userId: int, roleId: int) -> Response:
+    json = {
+        "userId": userId
+    }
+    return doPost(f'{BASE_URL_API}roles/{roleId}/remove-user', json=json)
+    
+
 #register()
 #confirmEmail()
 login()
@@ -380,7 +393,9 @@ login()
 #searchByMemberShipDbid(10)
 #searchByUserId(1)
 #searchByOrderSerial(1)
-searchByOrderCode("T07EZ")
+#searchByOrderCode("T07EZ")
+#addUserToRole(5, 1, True)
+removeUserFromRole(5, 1)
 
 #getOrderFullStatus()
 
