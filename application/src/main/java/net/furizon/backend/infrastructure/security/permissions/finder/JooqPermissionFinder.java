@@ -138,6 +138,7 @@ public class JooqPermissionFinder implements PermissionFinder {
                 USERS.USER_LOCALE,
                 USERS.USER_LANGUAGE,
                 MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_STORE_METHOD,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
                 USER_HAS_ROLE.TEMP_EVENT_ID
