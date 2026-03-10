@@ -2,7 +2,7 @@ package net.furizon.backend.feature.roles.action.updateUserHasRole;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.roles.dto.UpdateRoleToUserRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.RowN;

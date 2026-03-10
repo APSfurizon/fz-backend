@@ -182,11 +182,7 @@ public class JooqOrderFinder implements OrderFinder {
             sponsorItemId.ifPresent(id -> orderDataBuilder.sponsorNames(pretixService.getVariationNames(id)));
 
             if (isDaily && from != null) {
-                orderDataBuilder.dailyDays(
-                        order.getDailyDays().stream().map(
-                                d -> from.plusDays(d).toLocalDate()
-                        ).collect(Collectors.toSet())
-                );
+                orderDataBuilder.dailyDays(order.getDailyDaysDates());
             }
             if (hasRoom) {
                 short roomCapacity = order.getRoomCapacity();

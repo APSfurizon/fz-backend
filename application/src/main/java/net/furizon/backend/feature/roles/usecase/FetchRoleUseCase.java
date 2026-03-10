@@ -2,8 +2,8 @@ package net.furizon.backend.feature.roles.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.roles.dto.RoleResponse;
-import net.furizon.backend.feature.roles.dto.UserHasRoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.RoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.UserHasRoleResponse;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;

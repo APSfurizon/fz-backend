@@ -1,6 +1,6 @@
 package net.furizon.backend.feature.roles.mapper;
 
-import net.furizon.backend.feature.roles.dto.ListedRoleResponse;
+import net.furizon.backend.feature.roles.dto.responses.ListedRoleResponse;
 import org.jooq.Field;
 import org.jooq.Record;
 
