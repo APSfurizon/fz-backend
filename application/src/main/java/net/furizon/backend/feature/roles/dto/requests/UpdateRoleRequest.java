@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.roles.dto;
+package net.furizon.backend.feature.roles.dto.requests;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;

@@ -40,7 +40,17 @@ public interface UserFinder {
     UserDisplayData getDisplayUser(long userId, @NotNull Event event);
 
     @NotNull
+    List<UserDisplayData> getDisplayUserByOrderCode(Set<String> codes, @NotNull Event event);
+    @NotNull
+    List<UserDisplayData> getDisplayUserByOrderSerial(Set<Long> serials, @NotNull Event event);
+    @NotNull
     List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event);
+    @NotNull
+    List<UserDisplayData> getDisplayUserByMembershipDbId(Set<Long> ids, @NotNull Event event);
+    @NotNull
+    List<UserDisplayData> getDisplayUserByMembershipNo(Set<String> numbers, @NotNull Event event);
+    @NotNull
+    List<UserDisplayData> getDisplayUserByFursuitIds(Set<Long> ids, @NotNull Event event, boolean hideOwners);
 
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
 

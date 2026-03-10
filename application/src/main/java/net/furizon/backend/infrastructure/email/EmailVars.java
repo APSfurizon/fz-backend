@@ -26,6 +26,7 @@ public enum EmailVars {
     REFUND_MONEY("refundMoney"),
     LINK("link"),
     DEADLINE("deadline"),
+    EMAIL("email"),
     ;
 
     @Getter

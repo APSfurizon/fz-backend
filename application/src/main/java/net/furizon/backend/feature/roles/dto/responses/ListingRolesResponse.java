@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.roles.dto;
+package net.furizon.backend.feature.roles.dto.responses;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

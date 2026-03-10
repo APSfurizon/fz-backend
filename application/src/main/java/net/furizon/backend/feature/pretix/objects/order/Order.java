@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Data
@@ -184,6 +185,19 @@ public class Order {
         }
         return ret;
     }
+    @NotNull
+    public Set<LocalDate> getDailyDaysDates() {
+        return getDailyDaysDates(getOrderEvent());
+    }
+    @NotNull
+    public Set<LocalDate> getDailyDaysDates(@NotNull Event event) {
+        var from = event.getCorrectDateFrom();
+        if (from == null) {
+            return Collections.emptySet();
+        }
+        return dailyDays.stream().map(d -> from.plusDays(d).toLocalDate()).collect(Collectors.toSet());
+    }
+
 
     //we can't use roomPositionId to validate, since it IS set even when we have a NO_ROOM item
     public boolean hasRoom() {

@@ -2,7 +2,7 @@ package net.furizon.backend.feature.roles.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.roles.dto.ListingRolesResponse;
+import net.furizon.backend.feature.roles.dto.responses.ListingRolesResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;

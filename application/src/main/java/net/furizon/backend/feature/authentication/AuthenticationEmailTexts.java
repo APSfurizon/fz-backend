@@ -4,6 +4,7 @@ public class AuthenticationEmailTexts {
     public static final String TEMPLATE_PW_RESET = "password_reset.jte";
     public static final String TEMPLATE_PW_CHANGED = "password_changed.jte";
     public static final String TEMPLATE_EMAIL_CONFIRM = "email_confirm.jte";
+    public static final String TEMPLATE_EMAIL_CHANGE = "email_change.jte";
     public static final String TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS = "too_many_login_attempts.jte";
     public static final String TEMPLATE_ORDER_UNABLE_TO_CONVERT = "order_unable_to_convert.jte";
     public static final String TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED =

@@ -5,16 +5,20 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.roles.dto.CreateRoleRequest;
-import net.furizon.backend.feature.roles.dto.ListingPermissionsResponse;
-import net.furizon.backend.feature.roles.dto.ListingRolesResponse;
-import net.furizon.backend.feature.roles.dto.RoleIdResponse;
-import net.furizon.backend.feature.roles.dto.RoleResponse;
-import net.furizon.backend.feature.roles.dto.UpdateRoleRequest;
+import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
+import net.furizon.backend.feature.roles.dto.requests.CreateRoleRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
+import net.furizon.backend.feature.roles.dto.responses.ListingPermissionsResponse;
+import net.furizon.backend.feature.roles.dto.responses.ListingRolesResponse;
+import net.furizon.backend.feature.roles.dto.responses.RoleIdResponse;
+import net.furizon.backend.feature.roles.dto.responses.RoleResponse;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleRequest;
+import net.furizon.backend.feature.roles.usecase.AddUserToRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.FetchRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.ListRolesUseCase;
+import net.furizon.backend.feature.roles.usecase.RemoveUserFromRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.UpdateRoleUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -130,5 +134,43 @@ public class RolesController {
     ) {
         log.info("User {} is deleting role {}", user.getUserId(), roleId);
         return executor.execute(DeleteRoleUseCase.class, roleId);
+    }
+
+    @Operation(summary = "Adds user to specified role")
+    @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
+    @PostMapping("/{roleId}/add-user")
+    public boolean addUserToRole(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @PathVariable("roleId") @NotNull final Long roleId,
+            @Valid @NotNull @RequestBody final UpdateRoleToUserRequest request
+    ) {
+        return executor.execute(
+                AddUserToRoleUseCase.class,
+                new AddUserToRoleUseCase.Input(
+                        user,
+                        roleId,
+                        request,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Removes user from specified role")
+    @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
+    @PostMapping("/{roleId}/remove-user")
+    public boolean removeUserFromRole(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @PathVariable("roleId") @NotNull final Long roleId,
+            @Valid @NotNull @RequestBody final UserIdRequest request
+    ) {
+        return executor.execute(
+                RemoveUserFromRoleUseCase.class,
+                new RemoveUserFromRoleUseCase.Input(
+                        user,
+                        roleId,
+                        request.getUserId(),
+                        pretixInformation.getCurrentEvent()
+                )
+        );
     }
 }

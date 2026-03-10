@@ -22,6 +22,7 @@ public enum Permission {
     CAN_REFRESH_PRETIX_CACHE(102L),
     CAN_MANAGE_RAW_UPLOADS(103L),
     CAN_MANAGE_USER_PUBLIC_INFO(104L),
+    CAN_MANAGE_USER_LOGIN(106L),
     CAN_VIEW_USER(105L),
 
     //Normal user permissions

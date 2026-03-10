@@ -1,7 +1,7 @@
 package net.furizon.backend.feature.roles.action.updateUserHasRole;
 
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.backend.feature.roles.dto.UpdateRoleToUserRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

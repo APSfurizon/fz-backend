@@ -333,12 +333,38 @@ def exchangeUpdate() -> Response:
 def exception() -> Response:
     return doGet(f'{BASE_URL_API}admin/exception')
 
+def searchByFursuitId(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/by-fursuit-id?id={id}')
+def searchByMemberShipNumber(id: str) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/by-membership-number?number={id}')
+def searchByMemberShipDbid(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/by-membership-dbid?id={id}')
+def searchByUserId(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/by-user-id?id={id}')
+def searchByOrderSerial(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/current-event/by-order-serial?orders={id}')
+def searchByOrderCode(id: str) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/current-event/by-order-code?orders={id}')
+
+def addUserToRole(userId: int, roleId: int, temp: bool) -> Response:
+    json = {
+        "userId": userId,
+        "tempRole": temp
+    }
+    return doPost(f'{BASE_URL_API}roles/{roleId}/add-user', json=json)
+def removeUserFromRole(userId: int, roleId: int) -> Response:
+    json = {
+        "userId": userId
+    }
+    return doPost(f'{BASE_URL_API}roles/{roleId}/remove-user', json=json)
+    
+
 #register()
 #confirmEmail()
 login()
 #getMeAuth()
 #getMe()
-updateUserInfo()
+#updateUserInfo()
 #markPersonalUserInformationAsUpdated()
 #getOrderLink()
 #linkOrder()
@@ -362,6 +388,14 @@ updateUserInfo()
 #deleteRole(4)
 #exportBadges()
 #remindRoomNotFull()
+#searchByFursuitId(4)
+#searchByMemberShipNumber("2526001")
+#searchByMemberShipDbid(10)
+#searchByUserId(1)
+#searchByOrderSerial(1)
+#searchByOrderCode("T07EZ")
+#addUserToRole(5, 1, True)
+removeUserFromRole(5, 1)
 
 #getOrderFullStatus()
 
