@@ -140,6 +140,11 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>${com.drewnoakes.metadata-extractor.version}</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
