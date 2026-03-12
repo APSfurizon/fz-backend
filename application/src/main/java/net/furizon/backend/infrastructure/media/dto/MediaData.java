@@ -3,13 +3,10 @@ package net.furizon.backend.infrastructure.media.dto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
-import net.furizon.jooq.generated.tables.Media;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
-import org.springframework.context.annotation.Bean;
 
 import java.util.Objects;
 

@@ -144,6 +144,12 @@ storage:
   media-path: static/
   full-media-path: ${storage.base-public-path}${storage.media-path}
   delete-dangling-media-cronjob: ${STORAGE_DELETE_DANGLING_MEDIA_CRONJOB:0 30 4 * * *}
+  s3:
+    access-key: ${S3_ACCESS_KEY:changeme}
+    secret-key: ${S3_SECRET_KEY:changeme}
+    endpoint: ${S3_ENDPOINT:}
+    region: ${S3_REGION:changeme}
+    bucket: ${S3_BUCKET:changeme}
 
 
 image:
