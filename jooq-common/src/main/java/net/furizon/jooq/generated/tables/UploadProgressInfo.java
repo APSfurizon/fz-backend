@@ -13,11 +13,9 @@ import javax.annotation.processing.Generated;
 
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
-import net.furizon.jooq.generated.enums.UploadProgressInfoType;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -37,7 +35,6 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
-import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -78,22 +75,22 @@ public class UploadProgressInfo extends TableImpl<Record> {
     /**
      * The column <code>public.upload_progress_info.s3_upload_id</code>.
      */
-    public final TableField<Record, String> S3_UPLOAD_ID = createField(DSL.name("s3_upload_id"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> S3_UPLOAD_ID = createField(DSL.name("s3_upload_id"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.upload_progress_info.creation_ts</code>.
+     * The column <code>public.upload_progress_info.key_name</code>.
      */
-    public final TableField<Record, OffsetDateTime> CREATION_TS = createField(DSL.name("creation_ts"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<Record, String> KEY_NAME = createField(DSL.name("key_name"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.upload_progress_info.expire_ts</code>.
+     */
+    public final TableField<Record, OffsetDateTime> EXPIRE_TS = createField(DSL.name("expire_ts"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.upload_progress_info.size</code>.
      */
     public final TableField<Record, Long> SIZE = createField(DSL.name("size"), SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>public.upload_progress_info.upload_type</code>.
-     */
-    public final TableField<Record, UploadProgressInfoType> UPLOAD_TYPE = createField(DSL.name("upload_type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(UploadProgressInfoType.class), this, "");
 
     /**
      * The column <code>public.upload_progress_info.uploader_user_id</code>.
@@ -188,6 +185,11 @@ public class UploadProgressInfo extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.UPLOAD_PROGRESS_INFO_ONE_UPLOAD_PER_USER);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.UPLOAD_PROGRESS_INFO__UPLOAD_PROGRESS_INFO_USER);
     }
@@ -202,13 +204,6 @@ public class UploadProgressInfo extends TableImpl<Record> {
             _users = new UsersPath(this, Keys.UPLOAD_PROGRESS_INFO__UPLOAD_PROGRESS_INFO_USER, null);
 
         return _users;
-    }
-
-    @Override
-    public List<Check<Record>> getChecks() {
-        return Arrays.asList(
-            Internal.createCheck(this, DSL.name("upload_progress_info_type_check"), "((((s3_upload_id IS NULL) AND (upload_type = 'PRESIGNED'::upload_progress_info_type)) OR ((s3_upload_id IS NOT NULL) AND (upload_type = 'PRESIGNED_MULTIPART'::upload_progress_info_type))))", true)
-        );
     }
 
     @Override

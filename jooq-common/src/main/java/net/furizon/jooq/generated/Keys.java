@@ -84,6 +84,7 @@ public class Keys {
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
     public static final UniqueKey<Record> SESSIONS_PKEY = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("sessions_pkey"), new TableField[] { Sessions.SESSIONS.ID }, true);
     public static final UniqueKey<Record> UPLOAD_EXIF_PKEY = Internal.createUniqueKey(UploadExif.UPLOAD_EXIF, DSL.name("upload_exif_pkey"), new TableField[] { UploadExif.UPLOAD_EXIF.ID }, true);
+    public static final UniqueKey<Record> UPLOAD_PROGRESS_INFO_ONE_UPLOAD_PER_USER = Internal.createUniqueKey(UploadProgressInfo.UPLOAD_PROGRESS_INFO, DSL.name("upload_progress_info_one_upload_per_user"), new TableField[] { UploadProgressInfo.UPLOAD_PROGRESS_INFO.UPLOADER_USER_ID }, true);
     public static final UniqueKey<Record> UPLOAD_PROGRESS_INFO_PKEY = Internal.createUniqueKey(UploadProgressInfo.UPLOAD_PROGRESS_INFO, DSL.name("upload_progress_info_pkey"), new TableField[] { UploadProgressInfo.UPLOAD_PROGRESS_INFO.ID }, true);
     public static final UniqueKey<Record> UPLOAD_VIDEO_DATA_PKEY = Internal.createUniqueKey(UploadVideoData.UPLOAD_VIDEO_DATA, DSL.name("upload_video_data_pkey"), new TableField[] { UploadVideoData.UPLOAD_VIDEO_DATA.ID }, true);
     public static final UniqueKey<Record> UPLOADS_PKEY = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_pkey"), new TableField[] { Uploads.UPLOADS.ID }, true);
