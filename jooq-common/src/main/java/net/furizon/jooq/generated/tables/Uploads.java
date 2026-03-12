@@ -16,6 +16,7 @@ import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import net.furizon.jooq.generated.enums.UploadStatus;
+import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.generated.tables.Events.EventsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.UploadExif.UploadExifPath;
@@ -123,6 +124,11 @@ public class Uploads extends TableImpl<Record> {
      * The column <code>public.uploads.hash</code>.
      */
     public final TableField<Record, UUID> HASH = createField(DSL.name("hash"), SQLDataType.UUID, this, "");
+
+    /**
+     * The column <code>public.uploads.upload_type</code>.
+     */
+    public final TableField<Record, UploadType> UPLOAD_TYPE = createField(DSL.name("upload_type"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("'UNKNOWN'::upload_type"), SQLDataType.VARCHAR)).asEnumDataType(UploadType.class), this, "");
 
     /**
      * The column <code>public.uploads.media_id</code>.

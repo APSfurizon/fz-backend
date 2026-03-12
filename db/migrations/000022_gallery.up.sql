@@ -2,6 +2,7 @@ BEGIN;
 
 create type upload_status as ENUM('PENDING', 'APPROVED', 'REJECTED');
 create type upload_repost_permissions as ENUM('PHOTOGRAPHER_DISCRETION', 'CC_BY_NC_ND', 'CC_BY_NC', 'CC_BY_ND', 'CC_BY', 'PUBLIC_DOMAIN', 'ALL_RIGHTS_RESERVED');
+create type upload_type as ENUM('IMAGE', 'VIDEO', 'UNKNOWN');
 
 CREATE TABLE IF NOT EXISTS uploads
 (
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS uploads
     resolution_width          int4                                                                                                                     NULL,
     resolution_heigth         int4                                                                                                                     NULL,
     hash                      uuid                                                                                                                     NULL,
+    upload_type               upload_type                                                                                                              NOT NULL DEFAULT 'UNKNOWN',
     media_id                  int8                                                                                                                     NOT NULL,
     thumbnail_media_id        int8                                                                                                                     NULL,
     rendered_media_id         int8                                                                                                                     NULL,
