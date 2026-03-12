@@ -26,6 +26,9 @@ import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Sessions;
+import net.furizon.jooq.generated.tables.UploadExif;
+import net.furizon.jooq.generated.tables.UploadVideoData;
+import net.furizon.jooq.generated.tables.Uploads;
 import net.furizon.jooq.generated.tables.UserHasRole;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -141,6 +144,21 @@ public class Public extends SchemaImpl {
     public final Sessions SESSIONS = Sessions.SESSIONS;
 
     /**
+     * The table <code>public.upload_exif</code>.
+     */
+    public final UploadExif UPLOAD_EXIF = UploadExif.UPLOAD_EXIF;
+
+    /**
+     * The table <code>public.upload_video_data</code>.
+     */
+    public final UploadVideoData UPLOAD_VIDEO_DATA = UploadVideoData.UPLOAD_VIDEO_DATA;
+
+    /**
+     * The table <code>public.uploads</code>.
+     */
+    public final Uploads UPLOADS = Uploads.UPLOADS;
+
+    /**
      * The table <code>public.user_has_role</code>.
      */
     public final UserHasRole USER_HAS_ROLE = UserHasRole.USER_HAS_ROLE;
@@ -183,6 +201,9 @@ public class Public extends SchemaImpl {
             Rooms.ROOMS,
             SchemaMigrations.SCHEMA_MIGRATIONS,
             Sessions.SESSIONS,
+            UploadExif.UPLOAD_EXIF,
+            UploadVideoData.UPLOAD_VIDEO_DATA,
+            Uploads.UPLOADS,
             UserHasRole.USER_HAS_ROLE,
             Users.USERS
         );

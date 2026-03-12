@@ -23,6 +23,9 @@ import net.furizon.jooq.generated.tables.RoomGuests;
 import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Sessions;
+import net.furizon.jooq.generated.tables.UploadExif;
+import net.furizon.jooq.generated.tables.UploadVideoData;
+import net.furizon.jooq.generated.tables.Uploads;
 import net.furizon.jooq.generated.tables.UserHasRole;
 import net.furizon.jooq.generated.tables.Users;
 
@@ -79,6 +82,10 @@ public class Keys {
     public static final UniqueKey<Record> ROOMS_PKEY = Internal.createUniqueKey(Rooms.ROOMS, DSL.name("rooms_pkey"), new TableField[] { Rooms.ROOMS.ROOM_ID }, true);
     public static final UniqueKey<Record> SCHEMA_MIGRATIONS_PKEY = Internal.createUniqueKey(SchemaMigrations.SCHEMA_MIGRATIONS, DSL.name("schema_migrations_pkey"), new TableField[] { SchemaMigrations.SCHEMA_MIGRATIONS.VERSION }, true);
     public static final UniqueKey<Record> SESSIONS_PKEY = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("sessions_pkey"), new TableField[] { Sessions.SESSIONS.ID }, true);
+    public static final UniqueKey<Record> UPLOAD_EXIF_PKEY = Internal.createUniqueKey(UploadExif.UPLOAD_EXIF, DSL.name("upload_exif_pkey"), new TableField[] { UploadExif.UPLOAD_EXIF.ID }, true);
+    public static final UniqueKey<Record> UPLOAD_VIDEO_DATA_PKEY = Internal.createUniqueKey(UploadVideoData.UPLOAD_VIDEO_DATA, DSL.name("upload_video_data_pkey"), new TableField[] { UploadVideoData.UPLOAD_VIDEO_DATA.ID }, true);
+    public static final UniqueKey<Record> UPLOADS_PKEY = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_pkey"), new TableField[] { Uploads.UPLOADS.ID }, true);
+    public static final UniqueKey<Record> UPLOADS_UNIQUE_HASH = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_unique_hash"), new TableField[] { Uploads.UPLOADS.HASH }, true);
     public static final UniqueKey<Record> USER_HAS_ROLE_PK = Internal.createUniqueKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_pk"), new TableField[] { UserHasRole.USER_HAS_ROLE.USER_ID, UserHasRole.USER_HAS_ROLE.ROLE_ID }, true);
     public static final UniqueKey<Record> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.USER_ID }, true);
 
@@ -106,6 +113,14 @@ public class Keys {
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_ROOMS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_rooms_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.ROOM_ID }, Keys.ROOMS_PKEY, new TableField[] { Rooms.ROOMS.ROOM_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> ROOM_GUESTS__ROOM_GUESTS_USERS_FK = Internal.createForeignKey(RoomGuests.ROOM_GUESTS, DSL.name("room_guests_users_fk"), new TableField[] { RoomGuests.ROOM_GUESTS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> ROOMS__ROOMS_ORDERS_ID = Internal.createForeignKey(Rooms.ROOMS, DSL.name("rooms_orders_id"), new TableField[] { Rooms.ROOMS.ORDER_ID }, Keys.ORDERS_PKEY, new TableField[] { Orders.ORDERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOAD_EXIF__UPLOAD_EXIF_UPLOAD_ID = Internal.createForeignKey(UploadExif.UPLOAD_EXIF, DSL.name("upload_exif_upload_id"), new TableField[] { UploadExif.UPLOAD_EXIF.UPLOAD_ID }, Keys.UPLOADS_PKEY, new TableField[] { Uploads.UPLOADS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOAD_VIDEO_DATA__UPLOAD_VIDEO_DATA_UPLOAD_ID = Internal.createForeignKey(UploadVideoData.UPLOAD_VIDEO_DATA, DSL.name("upload_video_data_upload_id"), new TableField[] { UploadVideoData.UPLOAD_VIDEO_DATA.UPLOAD_ID }, Keys.UPLOADS_PKEY, new TableField[] { Uploads.UPLOADS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_EVENT_ID = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_event_id"), new TableField[] { Uploads.UPLOADS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_MEDIA_ID = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_media_id"), new TableField[] { Uploads.UPLOADS.MEDIA_ID }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_ORIGINAL_USER = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_original_user"), new TableField[] { Uploads.UPLOADS.ORIGINAL_UPLOADER_USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_PHOTOGRAPHER_USER = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_photographer_user"), new TableField[] { Uploads.UPLOADS.PHOTOGRAPHER_USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_RENDERED_MEDIA_ID = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_rendered_media_id"), new TableField[] { Uploads.UPLOADS.RENDERED_MEDIA_ID }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> UPLOADS__UPLOADS_THUMBNAIL_MEDIA_ID = Internal.createForeignKey(Uploads.UPLOADS, DSL.name("uploads_thumbnail_media_id"), new TableField[] { Uploads.UPLOADS.THUMBNAIL_MEDIA_ID }, Keys.MEDIA_PKEY, new TableField[] { Media.MEDIA.MEDIA_ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_EVENT_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_event_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.TEMP_EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_ROLE_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_role_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.ROLE_ID }, Keys.ROLES_PK, new TableField[] { Roles.ROLES.ROLE_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> USER_HAS_ROLE__USER_HAS_ROLE_USER_FK = Internal.createForeignKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_user_fk"), new TableField[] { UserHasRole.USER_HAS_ROLE.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);

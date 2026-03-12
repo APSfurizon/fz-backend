@@ -13,6 +13,7 @@ import javax.annotation.processing.Generated;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
+import net.furizon.jooq.generated.tables.Uploads.UploadsPath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
 import org.jetbrains.annotations.Nullable;
@@ -185,6 +186,45 @@ public class Media extends TableImpl<Record> {
             _fursuits = new FursuitsPath(this, null, Keys.FURSUITS__FURSUITS_MEDIA_FK.getInverseKey());
 
         return _fursuits;
+    }
+
+    private transient UploadsPath _uploadsMediaId;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table, via the <code>uploads_media_id</code> key
+     */
+    public UploadsPath uploadsMediaId() {
+        if (_uploadsMediaId == null)
+            _uploadsMediaId = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_MEDIA_ID.getInverseKey());
+
+        return _uploadsMediaId;
+    }
+
+    private transient UploadsPath _uploadsRenderedMediaId;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table, via the <code>uploads_rendered_media_id</code> key
+     */
+    public UploadsPath uploadsRenderedMediaId() {
+        if (_uploadsRenderedMediaId == null)
+            _uploadsRenderedMediaId = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_RENDERED_MEDIA_ID.getInverseKey());
+
+        return _uploadsRenderedMediaId;
+    }
+
+    private transient UploadsPath _uploadsThumbnailMediaId;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table, via the <code>uploads_thumbnail_media_id</code> key
+     */
+    public UploadsPath uploadsThumbnailMediaId() {
+        if (_uploadsThumbnailMediaId == null)
+            _uploadsThumbnailMediaId = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_THUMBNAIL_MEDIA_ID.getInverseKey());
+
+        return _uploadsThumbnailMediaId;
     }
 
     private transient UsersPath _users;

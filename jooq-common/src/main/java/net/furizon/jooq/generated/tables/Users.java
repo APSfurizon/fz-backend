@@ -22,6 +22,7 @@ import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
+import net.furizon.jooq.generated.tables.Uploads.UploadsPath;
 import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 
 import org.jetbrains.annotations.Nullable;
@@ -312,6 +313,32 @@ public class Users extends TableImpl<Record> {
             _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__ROOM_GUESTS_USERS_FK.getInverseKey());
 
         return _roomGuests;
+    }
+
+    private transient UploadsPath _uploadsOriginalUser;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table, via the <code>uploads_original_user</code> key
+     */
+    public UploadsPath uploadsOriginalUser() {
+        if (_uploadsOriginalUser == null)
+            _uploadsOriginalUser = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_ORIGINAL_USER.getInverseKey());
+
+        return _uploadsOriginalUser;
+    }
+
+    private transient UploadsPath _uploadsPhotographerUser;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table, via the <code>uploads_photographer_user</code> key
+     */
+    public UploadsPath uploadsPhotographerUser() {
+        if (_uploadsPhotographerUser == null)
+            _uploadsPhotographerUser = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_PHOTOGRAPHER_USER.getInverseKey());
+
+        return _uploadsPhotographerUser;
     }
 
     private transient UserHasRolePath _userHasRole;

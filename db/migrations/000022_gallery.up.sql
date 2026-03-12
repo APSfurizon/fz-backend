@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS uploads
     file_size                 int8                                                                                                                     NOT NULL DEFAULT -1, -- We let users directly upload to S3. We later post process everything async. If size = -1, we haven't post processed yet the file
     resolution_width          int4                                                                                                                     NULL,
     resolution_heigth         int4                                                                                                                     NULL,
-    hash                      int8                                                                                                                     NULL,
+    hash                      uuid                                                                                                                     NULL,
     media_id                  int8                                                                                                                     NOT NULL,
     thumbnail_media_id        int8                                                                                                                     NULL,
     rendered_media_id         int8                                                                                                                     NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS upload_video_data
     upload_id          int8                                                                                                                     NOT NULL,
     video_codec        varchar(128)                                                                                                             NULL,
     audio_codec        varchar(128)                                                                                                             NULL,
-    length             int4                                                                                                                     NULL,
+    duration           int4                                                                                                                     NULL,
     framerate          varchar(128)                                                                                                             NULL,
     audio_frequency    varchar(128)                                                                                                             NULL,
     CONSTRAINT upload_video_data_pkey PRIMARY KEY (id),

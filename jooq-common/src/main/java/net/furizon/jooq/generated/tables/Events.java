@@ -16,6 +16,7 @@ import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.ExchangeConfirmationStatus.ExchangeConfirmationStatusPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
+import net.furizon.jooq.generated.tables.Uploads.UploadsPath;
 import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 import net.furizon.jooq.generated.tables.Users.UsersPath;
 
@@ -256,6 +257,19 @@ public class Events extends TableImpl<Record> {
             _orders = new OrdersPath(this, null, Keys.ORDERS__ORDERS_EVENTS_ID.getInverseKey());
 
         return _orders;
+    }
+
+    private transient UploadsPath _uploads;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.uploads</code>
+     * table
+     */
+    public UploadsPath uploads() {
+        if (_uploads == null)
+            _uploads = new UploadsPath(this, null, Keys.UPLOADS__UPLOADS_EVENT_ID.getInverseKey());
+
+        return _uploads;
     }
 
     private transient UserHasRolePath _userHasRole;
