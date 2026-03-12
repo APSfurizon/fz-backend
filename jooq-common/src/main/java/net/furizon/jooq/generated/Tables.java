@@ -24,6 +24,7 @@ import net.furizon.jooq.generated.tables.Rooms;
 import net.furizon.jooq.generated.tables.SchemaMigrations;
 import net.furizon.jooq.generated.tables.Sessions;
 import net.furizon.jooq.generated.tables.UploadExif;
+import net.furizon.jooq.generated.tables.UploadProgressInfo;
 import net.furizon.jooq.generated.tables.UploadVideoData;
 import net.furizon.jooq.generated.tables.Uploads;
 import net.furizon.jooq.generated.tables.UserHasRole;
@@ -132,6 +133,11 @@ public class Tables {
      * The table <code>public.upload_exif</code>.
      */
     public static final UploadExif UPLOAD_EXIF = UploadExif.UPLOAD_EXIF;
+
+    /**
+     * The table <code>public.upload_progress_info</code>.
+     */
+    public static final UploadProgressInfo UPLOAD_PROGRESS_INFO = UploadProgressInfo.UPLOAD_PROGRESS_INFO;
 
     /**
      * The table <code>public.upload_video_data</code>.

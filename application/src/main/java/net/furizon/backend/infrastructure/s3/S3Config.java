@@ -13,4 +13,7 @@ public class S3Config {
     @NotNull private final String secretKey;
     @NotNull private final String region;
     @NotNull private final String bucket;
+
+    private final long multipartSize;
+    private final long presignExpirationMins;
 }

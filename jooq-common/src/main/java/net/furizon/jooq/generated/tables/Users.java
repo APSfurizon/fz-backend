@@ -22,6 +22,7 @@ import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
+import net.furizon.jooq.generated.tables.UploadProgressInfo.UploadProgressInfoPath;
 import net.furizon.jooq.generated.tables.Uploads.UploadsPath;
 import net.furizon.jooq.generated.tables.UserHasRole.UserHasRolePath;
 
@@ -313,6 +314,19 @@ public class Users extends TableImpl<Record> {
             _roomGuests = new RoomGuestsPath(this, null, Keys.ROOM_GUESTS__ROOM_GUESTS_USERS_FK.getInverseKey());
 
         return _roomGuests;
+    }
+
+    private transient UploadProgressInfoPath _uploadProgressInfo;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.upload_progress_info</code> table
+     */
+    public UploadProgressInfoPath uploadProgressInfo() {
+        if (_uploadProgressInfo == null)
+            _uploadProgressInfo = new UploadProgressInfoPath(this, null, Keys.UPLOAD_PROGRESS_INFO__UPLOAD_PROGRESS_INFO_USER.getInverseKey());
+
+        return _uploadProgressInfo;
     }
 
     private transient UploadsPath _uploadsOriginalUser;

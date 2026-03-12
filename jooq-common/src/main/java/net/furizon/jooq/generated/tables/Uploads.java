@@ -113,12 +113,12 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.resolution_width</code>.
      */
-    public final TableField<Record, Integer> RESOLUTION_WIDTH = createField(DSL.name("resolution_width"), SQLDataType.INTEGER, this, "");
+    public final TableField<Record, Integer> RESOLUTION_WIDTH = createField(DSL.name("resolution_width"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>public.uploads.resolution_heigth</code>.
      */
-    public final TableField<Record, Integer> RESOLUTION_HEIGTH = createField(DSL.name("resolution_heigth"), SQLDataType.INTEGER, this, "");
+    public final TableField<Record, Integer> RESOLUTION_HEIGTH = createField(DSL.name("resolution_heigth"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>public.uploads.hash</code>.
