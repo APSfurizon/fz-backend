@@ -185,3 +185,8 @@ reminders:
 admin:
   custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}
   jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}
+
+gallery:
+  max-limited-uploads-per-event: ${GALLERY_MAX_USER_UPLOADS_PER_EVENT:100}
+  max-limited-upload-size: ${GALLERY_MAX_FILE_SIZE:33554432} #32 MB
+  max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB

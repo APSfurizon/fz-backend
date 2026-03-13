@@ -16,4 +16,5 @@ public class MultipartCreationResponse {
     @NotNull private final List<String> presignedUrls;
     private final long chunkSize;
     private final long fileSize;
+
 }

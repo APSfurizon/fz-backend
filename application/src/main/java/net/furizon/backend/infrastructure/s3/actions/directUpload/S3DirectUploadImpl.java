@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.s3.actions.directUpload;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.s3.S3Config;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.nio.file.Path;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class S3DirectUploadImpl implements S3DirectUpload {
@@ -27,6 +29,7 @@ public class S3DirectUploadImpl implements S3DirectUpload {
 
     @Override
     public void upload(@NotNull String key, @NotNull Path path) {
+        log.info("Uploading file {} to bucket {}", path, s3Config.getBucket());
         s3.putObject(getReq(key), path);
     }
 }

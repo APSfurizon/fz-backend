@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS uploads
     upload_timestamp          timestamptz                                                                                                              NOT NULL DEFAULT NOW(),
     shot_timestamp            timestamptz                                                                                                              NULL,
     status                    upload_status                                                                                                            NOT NULL DEFAULT 'PENDING',
+    original_file_name        varchar(128)                                                                                                             NOT NULL,
     file_size                 int8                                                                                                                     NOT NULL DEFAULT -1, -- We let users directly upload to S3. We later post process everything async. If size = -1, we haven't post processed yet the file
     resolution_width          int4                                                                                                                     NOT NULL DEFAULT 0,
     resolution_heigth         int4                                                                                                                     NOT NULL DEFAULT 0,

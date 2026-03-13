@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
@@ -40,6 +42,22 @@ public class PretixGenericUtils {
         } catch (JsonProcessingException e) {
             return Collections.emptyMap();
         }
+    }
+
+    // From https://stackoverflow.com/a/3758880
+    public static String humanReadableByteCountBin(long bytes) {
+        long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+        if (absB < 1024L) {
+            return bytes + " B";
+        }
+        long value = absB;
+        CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+            value >>= 10L;
+            ci.next();
+        }
+        value *= Long.signum(bytes);
+        return String.format("%.1f %ciB", value / 1024.0, ci.current());
     }
 
     public static final DateTimeFormatter PRETIX_DATETIME_FORMAT = new DateTimeFormatterBuilder()

@@ -83,6 +83,9 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
             partNo++;
         }
 
+        log.info("Starting multipath upload for file {}. File size: {}, partsNo: {}, uploadId {}",
+                fileName, size, partNo - 1, uploadId);
+
         return MultipartCreationResponse.builder()
                 .uploadKey(fileName)
                 .uploadId(uploadId)
@@ -96,6 +99,7 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
     @NotNull
     @Override
     public String completeMultipart(@NotNull String uploadId, @NotNull String fileName, @NotNull List<String> etags) {
+        log.info("Completing multipart upload. UploadId: {}, key {}, partsNo: {}", uploadId, fileName, etags.size());
         List<CompletedPart> completedParts = new ArrayList<>(etags.size());
         int i = 1;
         for (String etag : etags) {
@@ -124,6 +128,7 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
     }
 
     public void abortUpload(@NotNull String uploadId, @NotNull String fileName) {
+        log.info("Aborting multipart upload. UploadId: {}, key: {}", uploadId, fileName);
         AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()
                 .bucket(s3Config.getBucket())
                 .key(fileName)
@@ -144,6 +149,8 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
         ListPartsIterable paginatedResponses = s3.listPartsPaginator(listPartsRequest);
         List<Integer> uploadedParts = new ArrayList<>();
         paginatedResponses.parts().forEach(paginatedPart -> uploadedParts.add(paginatedPart.partNumber()));
+        log.info("Listing parts for uploadId: {}, key: {}. Uploaded so far: {}",
+                uploadId, fileName, uploadedParts.size());
         return uploadedParts;
     }
 }

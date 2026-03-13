@@ -106,6 +106,11 @@ public class Uploads extends TableImpl<Record> {
     public final TableField<Record, UploadStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("'PENDING'::upload_status"), SQLDataType.VARCHAR)).asEnumDataType(UploadStatus.class), this, "");
 
     /**
+     * The column <code>public.uploads.original_file_name</code>.
+     */
+    public final TableField<Record, String> ORIGINAL_FILE_NAME = createField(DSL.name("original_file_name"), SQLDataType.VARCHAR(128).nullable(false), this, "");
+
+    /**
      * The column <code>public.uploads.file_size</code>.
      */
     public final TableField<Record, Long> FILE_SIZE = createField(DSL.name("file_size"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("'-1'::integer"), SQLDataType.BIGINT)), this, "");

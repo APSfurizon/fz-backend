@@ -1,6 +1,7 @@
 package net.furizon.backend.infrastructure.s3.actions.directDownload;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.s3.S3Config;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class S3DirectDownloadImpl implements S3DirectDownload {
@@ -26,6 +28,7 @@ public class S3DirectDownloadImpl implements S3DirectDownload {
     private Object download(@NotNull String key,
                             @NotNull ResponseTransformer<GetObjectResponse, ?> responseTransformer)
             throws NoSuchKeyException {
+        log.info("Getting object for key {}", key);
         return s3.getObject(request ->
             request
                 .bucket(s3Config.getBucket())
