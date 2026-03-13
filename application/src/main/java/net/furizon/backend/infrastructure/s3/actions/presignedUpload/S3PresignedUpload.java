@@ -10,5 +10,7 @@ public interface S3PresignedUpload {
 
     @NotNull String completeMultipart(@NotNull String uploadId, @NotNull String fileName, @NotNull List<String> etags);
 
+    void abortUpload(@NotNull String uploadId, @NotNull String fileName);
+
     @NotNull List<Integer> listParts(@NotNull String uploadId, @NotNull String fileName);
 }

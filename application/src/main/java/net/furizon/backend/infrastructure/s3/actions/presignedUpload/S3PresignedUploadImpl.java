@@ -127,6 +127,7 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
         return response.checksumSHA1();
     }
 
+    @Override
     public void abortUpload(@NotNull String uploadId, @NotNull String fileName) {
         log.info("Aborting multipart upload. UploadId: {}, key: {}", uploadId, fileName);
         AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()

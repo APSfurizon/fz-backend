@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import static net.furizon.jooq.generated.tables.Uploads.UPLOADS;
+import static net.furizon.jooq.generated.Tables.UPLOADS;
 
 @Component
 @RequiredArgsConstructor

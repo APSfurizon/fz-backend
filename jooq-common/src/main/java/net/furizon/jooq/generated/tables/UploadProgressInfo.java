@@ -4,7 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -85,7 +85,7 @@ public class UploadProgressInfo extends TableImpl<Record> {
     /**
      * The column <code>public.upload_progress_info.expire_ts</code>.
      */
-    public final TableField<Record, OffsetDateTime> EXPIRE_TS = createField(DSL.name("expire_ts"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<Record, LocalDateTime> EXPIRE_TS = createField(DSL.name("expire_ts"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.upload_progress_info.size</code>.

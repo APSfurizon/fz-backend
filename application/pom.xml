@@ -146,6 +146,12 @@
             <version>${software.amazon.awssdk.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

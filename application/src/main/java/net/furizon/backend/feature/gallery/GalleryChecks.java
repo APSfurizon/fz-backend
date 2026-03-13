@@ -2,12 +2,15 @@ package net.furizon.backend.feature.gallery;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.configuration.GalleryConfig;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
+import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
@@ -29,6 +32,7 @@ public class GalleryChecks {
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final UploadFinder uploadFinder;
     @NotNull private final GalleryConfig galleryConfig;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final TranslationService translationService;
 
     private void assertUploadFound(@Nullable Object obj) {
@@ -41,6 +45,12 @@ public class GalleryChecks {
     }
 
     public void assertUploadEnabledOnEvent(@NotNull Event event) {
+        assertUploadEnabledOnEvent(event, null);
+    }
+    public void assertUploadEnabledOnEvent(@NotNull Event event, @Nullable Boolean isAdminCached) {
+        if (isAdminCached != null && isAdminCached) {
+            return;
+        }
         OffsetDateTime start = event.getCorrectDateFrom();
         if (start != null) {
             LocalDateTime now = LocalDateTime.now();
@@ -56,6 +66,12 @@ public class GalleryChecks {
     }
 
     public void assertUserNotBannedFromGallery(long userId) {
+        assertUserNotBannedFromGallery(userId, null);
+    }
+    public void assertUserNotBannedFromGallery(long userId, @Nullable Boolean isAdminCached) {
+        if (isAdminCached != null && isAdminCached) {
+            return;
+        }
         boolean banned = permissionFinder.userHasPermission(userId, Permission.UPLOADS_BANNED_FROM_UPLOADING);
         if (banned) {
             log.error("User {} is banned from uploading", userId);
@@ -66,9 +82,22 @@ public class GalleryChecks {
         }
     }
 
+    public void assertUserNotReachedUploadNumberLimitAdmin(long reqUserId,
+                                                           @Nullable Long userId,
+                                                           @NotNull Event event) {
+        int uploadsNo = uploadFinder.countUserUploadsOnEvent(reqUserId, event);
+        if (userId != null && userId != reqUserId) {
+            uploadsNo += uploadFinder.countUserUploadsOnEvent(userId, event);
+        }
+        assertUserNotReachedUploadNumberLimit(reqUserId, event, uploadsNo);
+    }
     public void assertUserNotReachedUploadNumberLimit(long userId, @NotNull Event event) {
-        final int limit = galleryConfig.getMaxLimitedUploadsPerEvent();
+        //We don't need to count pending uploads since BY DATABASE CONSTRAINT only one is allowed per user
         int uploadsNo = uploadFinder.countUserUploadsOnEvent(userId, event);
+        assertUserNotReachedUploadNumberLimit(userId, event, uploadsNo);
+    }
+    public void assertUserNotReachedUploadNumberLimit(long userId, @NotNull Event event, int uploadsNo) {
+        final int limit = galleryConfig.getMaxLimitedUploadsPerEvent();
         if (uploadsNo > limit) {
             if (!permissionFinder.userHasPermission(userId, Permission.UPLOADS_UNLIMITED_NUMBER_UPLOADER)) {
                 log.error("User {} has reached the maximum number of uploads ({}) on event {}", userId, limit, event);
@@ -152,5 +181,34 @@ public class GalleryChecks {
                 );
             }
         }
+    }
+
+    public long fullUploadChecksAndGetUserId(@NotNull FurizonUser user, @NotNull StartUploadRequest req) {
+        boolean isAdmin = permissionFinder.userHasPermission(
+                user.getUserId(),
+                Permission.UPLOADS_CAN_MANAGE_UPLOADS
+        );
+        long userId = generalChecks.getUserIdAndAssertPermission(
+                req.getUserId(),
+                user,
+                Permission.UPLOADS_CAN_MANAGE_UPLOADS,
+                isAdmin
+        );
+
+        //Retrieve specific event from db
+        Event event = generalChecks.getEventAndAssertItExists(req.getEventId());
+        if (!isAdmin) {
+            //Check for event upload enabled
+            assertUploadEnabledOnEvent(event);
+            //Check if user has order on event
+            generalChecks.assertOrderIsPaid(userId, event);
+            //Check ban status
+            assertUserNotBannedFromGallery(userId);
+        }
+        //Check for upload limit reached
+        assertUserNotReachedUploadNumberLimitAdmin(user.getUserId(), req.getUserId(), event);
+        //Check for file size
+        assertUserCanUploadFileSize(user.getUserId(), req.getFileSize());
+        return userId;
     }
 }
