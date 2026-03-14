@@ -32,7 +32,9 @@ public enum UploadType implements DeserializableJooqEnum, EnumType {
 
     VIDEO("VIDEO"),
 
-    UNKNOWN("UNKNOWN");
+    UNKNOWN("UNKNOWN"),
+
+    UNPROCESSED("UNPROCESSED");
 
     private final String literal;
 

@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.usecase;
+package net.furizon.backend.feature.gallery.usecase.uploadProgress;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +9,12 @@ import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
 import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
+import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.s3.S3Config;
 import net.furizon.backend.infrastructure.s3.actions.presignedUpload.S3PresignedUpload;
 import net.furizon.backend.infrastructure.s3.dto.MultipartCreationResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,7 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
     @NotNull private final UploadProgressFinder uploadProgressFinder;
     @NotNull private final S3PresignedUpload s3PresignedUpload;
     @NotNull private final GalleryChecks galleryChecks;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final S3Config s3Config;
 
     @Override
@@ -38,7 +41,13 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
         StartUploadRequest req = input.req;
         FurizonUser user = input.user;
 
-        long userId = galleryChecks.fullUploadChecksAndGetUserId(user, req);
+        Event event = generalChecks.getEventAndAssertItExists(req.getEventId());
+        long userId = galleryChecks.fullUploadChecksAndGetUserId(
+                user,
+                req.getUserId(),
+                event,
+                req.getFileSize()
+        );
         //We don't need to check if the event is equal between start and stop uploading, since
         // we're gonna make the same checks also on completion time
 

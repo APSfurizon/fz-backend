@@ -83,12 +83,12 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.original_uploader_user_id</code>.
      */
-    public final TableField<Record, Long> ORIGINAL_UPLOADER_USER_ID = createField(DSL.name("original_uploader_user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> ORIGINAL_UPLOADER_USER_ID = createField(DSL.name("original_uploader_user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.uploads.photographer_user_id</code>.
      */
-    public final TableField<Record, Long> PHOTOGRAPHER_USER_ID = createField(DSL.name("photographer_user_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> PHOTOGRAPHER_USER_ID = createField(DSL.name("photographer_user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.uploads.upload_timestamp</code>.
@@ -113,7 +113,7 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.file_size</code>.
      */
-    public final TableField<Record, Long> FILE_SIZE = createField(DSL.name("file_size"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("'-1'::integer"), SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> FILE_SIZE = createField(DSL.name("file_size"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.uploads.resolution_width</code>.
@@ -133,7 +133,7 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.upload_type</code>.
      */
-    public final TableField<Record, UploadType> UPLOAD_TYPE = createField(DSL.name("upload_type"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("'UNKNOWN'::upload_type"), SQLDataType.VARCHAR)).asEnumDataType(UploadType.class), this, "");
+    public final TableField<Record, UploadType> UPLOAD_TYPE = createField(DSL.name("upload_type"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("'UNPROCESSED'::upload_type"), SQLDataType.VARCHAR)).asEnumDataType(UploadType.class), this, "");
 
     /**
      * The column <code>public.uploads.media_id</code>.
@@ -163,7 +163,7 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.event_id</code>.
      */
-    public final TableField<Record, Long> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> EVENT_ID = createField(DSL.name("event_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private Uploads(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

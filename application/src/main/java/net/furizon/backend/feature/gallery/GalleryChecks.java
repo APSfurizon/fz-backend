@@ -3,7 +3,6 @@ package net.furizon.backend.feature.gallery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
-import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -112,7 +111,7 @@ public class GalleryChecks {
             if (!permissionFinder.userHasPermission(userId, Permission.UPLOADS_UNLIMITED_NUMBER_UPLOADER)) {
                 log.error("User {} has reached the maximum number of uploads ({}) on event {}", userId, limit, event);
                 throw new ApiException(
-                        translationService.error("gallery.upload_no_limit", limit),
+                        translationService.error("gallery.upload.no_limit", limit),
                         GalleryErrorCodes.UPLOADS_TOO_MANY_UPLOADS
                 );
             }
@@ -184,7 +183,7 @@ public class GalleryChecks {
                 log.error("User {} has uploaded a file to big ({}). Limit: {}",  userId, fileSize, biggest);
                 throw new ApiException(
                         translationService.error(
-                                "gallery.upload_too_big",
+                                "gallery.upload.too_big",
                                 PretixGenericUtils.humanReadableByteCountBin(biggest)
                         ),
                         ImageCodes.IMAGE_SIZE_TOO_BIG
@@ -193,20 +192,21 @@ public class GalleryChecks {
         }
     }
 
-    public long fullUploadChecksAndGetUserId(@NotNull FurizonUser user, @NotNull StartUploadRequest req) {
+    public long fullUploadChecksAndGetUserId(@NotNull FurizonUser user,
+                                             @Nullable Long userIdFromReqBody,
+                                             @NotNull Event event,
+                                             long fileSize) {
         boolean isAdmin = permissionFinder.userHasPermission(
                 user.getUserId(),
                 Permission.UPLOADS_CAN_MANAGE_UPLOADS
         );
         long userId = generalChecks.getUserIdAndAssertPermission(
-                req.getUserId(),
+                userIdFromReqBody,
                 user,
                 Permission.UPLOADS_CAN_MANAGE_UPLOADS,
                 isAdmin
         );
 
-        //Retrieve specific event from db
-        Event event = generalChecks.getEventAndAssertItExists(req.getEventId());
         if (!isAdmin) {
             //Check for event upload enabled
             assertUploadEnabledOnEvent(event);
@@ -216,9 +216,9 @@ public class GalleryChecks {
             assertUserNotBannedFromGallery(userId);
         }
         //Check for upload limit reached
-        assertUserNotReachedUploadNumberLimitAdmin(user.getUserId(), req.getUserId(), event);
+        assertUserNotReachedUploadNumberLimitAdmin(user.getUserId(), userIdFromReqBody, event);
         //Check for file size
-        assertUserCanUploadFileSize(user.getUserId(), req.getFileSize());
+        assertUserCanUploadFileSize(user.getUserId(), fileSize);
         return userId;
     }
 }

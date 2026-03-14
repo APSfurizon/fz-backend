@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.usecase;
+package net.furizon.backend.feature.gallery.usecase.uploadProgress;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

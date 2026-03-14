@@ -12,6 +12,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.UPLOAD_PROGRESS_INFO;
 
@@ -29,6 +30,15 @@ public class JooqUploadProgressFinder implements UploadProgressFinder {
             .where(UPLOAD_PROGRESS_INFO.UPLOADER_USER_ID.eq(userId))
             .limit(1)
         ).map(record -> record.get(UPLOAD_PROGRESS_INFO.ID));
+    }
+
+    @Override
+    public @NotNull List<UploadProgress> getExpiredUploadProgress() {
+        return query.fetch(
+            selectUploadProgress()
+            .from(UPLOAD_PROGRESS_INFO)
+            .where(UPLOAD_PROGRESS_INFO.EXPIRE_TS.lessThan(LocalDateTime.now()))
+        ).stream().map(UploadProgressMapper::map).toList();
     }
 
     @Override
