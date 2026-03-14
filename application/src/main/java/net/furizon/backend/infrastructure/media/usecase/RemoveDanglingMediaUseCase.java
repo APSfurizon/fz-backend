@@ -8,9 +8,13 @@ import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaAction;
 import net.furizon.backend.infrastructure.media.action.PhysicallyDeleteMediaAction;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
+import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
+import net.furizon.backend.infrastructure.s3.actions.listObjects.S3ListObjects;
+import net.furizon.backend.infrastructure.s3.actions.objectExists.S3KeyExists;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +35,10 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
     @NotNull private final MediaFinder mediaFinder;
     @NotNull private final StorageConfig storageConfig;
 
+    @NotNull private final S3KeyExists s3KeyExists;
+    @NotNull private final S3ListObjects s3ListObjects;
+    @NotNull private final S3DeleteUpload s3DeleteUpload;
+
     @Override
     public @NotNull Long executor(@NotNull Integer uselessInput) {
         List<MediaData> medias = new LinkedList<>(mediaFinder.findAll());
@@ -50,7 +58,8 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
             }
 
             //Delete media db object without local file
-            if (media.getStoreMethod() == StoreMethod.DISK) {
+            StoreMethod storeMethod = media.getStoreMethod();
+            if (storeMethod == StoreMethod.DISK) {
                 if (!Files.exists(Paths.get(basePath, media.getPath()))) {
                     log.info("[DANGLING MEDIA] Deleting media without local file: {}", media);
                     dbDeleteIds.add(media.getId());
@@ -58,16 +67,31 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
                 }
                 continue;
             }
+            if (storeMethod == StoreMethod.S3_REMOTE) {
+                if (!s3KeyExists.invoke(media.getPath())) {
+                    log.info("[DANGLING MEDIA] Deleting media without s3 remote file: {}", media);
+                    dbDeleteIds.add(media.getId());
+                    deleted++;
+                }
+                continue;
+            }
         }
 
-        //Find media on disk which are not present in the db and deletes them
+        //Find stored media which are not present in the db and deletes them
         //Build set of every path
-        Set<String> allFiles = new HashSet<>();
+        Set<String> allMediaOnDiskPaths = new HashSet<>();
+        Set<String> allMediaOnRemoteS3Keys = new HashSet<>();
         medias.forEach(media -> {
-            if (media.getStoreMethod() == StoreMethod.DISK) {
-                allFiles.add(media.getPath());
+            StoreMethod storeMethod = media.getStoreMethod();
+            switch (storeMethod) {
+                case DISK -> allMediaOnDiskPaths.add(media.getPath());
+                case S3_REMOTE -> allMediaOnRemoteS3Keys.add(media.getPath());
+                default -> {
+                }
             }
         });
+
+        // DISK STORAGE
         //Get paths
         int basePathLength = basePath.length();
         Path mediaPath = Paths.get(storageConfig.getFullMediaPath());
@@ -75,7 +99,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
         try (Stream<Path> files = Files.find(mediaPath, Integer.MAX_VALUE, (path, attr) -> attr.isRegularFile())) {
             files.forEach(path -> {
                 //If in the DB we don't have a file with the given normalized path. We also remove the base path
-                if (!allFiles.contains(path.normalize().toString().substring(basePathLength))) {
+                if (!allMediaOnDiskPaths.contains(path.normalize().toString().substring(basePathLength))) {
                     try {
                         log.info("[DANGLING MEDIA] Deleting file without db object: {}", path);
                         Files.deleteIfExists(path);
@@ -88,6 +112,20 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
         } catch (IOException e) {
             log.error("[DANGLING MEDIA] Error while listing files: {}", e.getMessage());
         }
+
+        // S3 REMOTE STORAGE
+        s3ListObjects.forEach(s3Object -> {
+            String key = s3Object.key();
+            if (!allMediaOnRemoteS3Keys.contains(key)) {
+                try {
+                    log.info("[DANGLING MEDIA] Deleting s3 remote object without db object: {}", key);
+                    s3DeleteUpload.delete(key);
+                } catch (S3Exception e) {
+                    log.error("[DANGLING MEDIA] Error while deleting s3 remote object {} not present in db: {}",
+                            key, e.getMessage());
+                }
+            }
+        });
 
         log.debug("[DANGLING MEDIA] Removing from db ids: {}", dbDeleteIds);
         deleteMediaAction.deleteFromDb(dbDeleteIds.stream().toList());
