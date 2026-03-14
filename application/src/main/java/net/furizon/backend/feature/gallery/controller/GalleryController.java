@@ -7,7 +7,11 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
+import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
+import net.furizon.backend.feature.gallery.usecase.AbortUploadUseCase;
+import net.furizon.backend.feature.gallery.usecase.ListUploadUseCase;
+import net.furizon.backend.feature.gallery.usecase.StartUploadUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
@@ -53,7 +57,13 @@ public class GalleryController {
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody final StartUploadRequest req
     ) {
-
+        return executor.execute(
+                StartUploadUseCase.class,
+                new StartUploadUseCase.Input(
+                        req,
+                        user
+                )
+        );
     }
 
     @Operation(summary = "Aborts an upload process", description =
@@ -67,7 +77,13 @@ public class GalleryController {
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody final S3UploadRequest req
     ) {
-
+        return executor.execute(
+                AbortUploadUseCase.class,
+                new AbortUploadUseCase.Input(
+                        req,
+                        user
+                )
+        );
     }
 
     @Operation(summary = "Completes the upload process", description =
@@ -93,10 +109,16 @@ public class GalleryController {
 
     @Operation(summary = "Get the list of parts uploaded so far")
     @PostMapping("/upload/status")
-    public boolean statusUpload(
+    public ListUploadPartsResponse statusUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody final S3UploadRequest req
     ) {
-
+        return executor.execute(
+                ListUploadUseCase.class,
+                new ListUploadUseCase.Input(
+                        req,
+                        user
+                )
+        );
     }
 }

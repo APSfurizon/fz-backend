@@ -1,11 +1,13 @@
 package net.furizon.backend.feature.gallery.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class UploadProgress {
     private final long uploadReqId;
     @NotNull private final String uploadId;

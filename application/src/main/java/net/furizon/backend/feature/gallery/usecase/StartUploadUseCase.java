@@ -3,11 +3,15 @@ package net.furizon.backend.feature.gallery.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.GalleryChecks;
+import net.furizon.backend.feature.gallery.action.addUploadProgress.AddUploadProgressAction;
 import net.furizon.backend.feature.gallery.action.deleteUploadProgress.DeleteUploadProgressAction;
+import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
 import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
+import net.furizon.backend.infrastructure.s3.S3Config;
 import net.furizon.backend.infrastructure.s3.actions.presignedUpload.S3PresignedUpload;
+import net.furizon.backend.infrastructure.s3.dto.MultipartCreationResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.apache.commons.io.FilenameUtils;
@@ -22,9 +26,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, StartUploadResponse> {
     @NotNull private final DeleteUploadProgressAction deleteUploadProgress;
+    @NotNull private final AddUploadProgressAction addUploadProgress;
     @NotNull private final UploadProgressFinder uploadProgressFinder;
     @NotNull private final S3PresignedUpload s3PresignedUpload;
     @NotNull private final GalleryChecks galleryChecks;
+    @NotNull private final S3Config s3Config;
 
     @Override
     @Transactional
@@ -43,20 +49,35 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
         final String key = UUID.randomUUID().toString() + "." + extension;
 
         //Fetch any previous upload attempts
-        Long prevAttemptId = uploadProgressFinder.getUploadingProgressIdByUser(userId);
-        if (prevAttemptId != null) {
-            log.info("Detected previous upload attempt from user {}. Deleting {}", userId, prevAttemptId);
+        UploadProgress prevAttempt = uploadProgressFinder.getUploadProgressByUser(userId);
+        if (prevAttempt != null) {
+            log.info("Detected previous upload attempt from user {}. Deleting {} and aborting {}",
+                    userId, prevAttempt.getUploadReqId(), prevAttempt.getUploadId());
             //If it exists, delete it
-            deleteUploadProgress.invoke(prevAttemptId);
+            deleteUploadProgress.invoke(prevAttempt.getUploadReqId());
+            //Abort previous upload
+            s3PresignedUpload.abortUpload(prevAttempt.getUploadId(), prevAttempt.getS3Key());
         }
 
-        //Abort previous upload
-        s3PresignedUpload.abortUpload();
         // Create new multipart upload
-
+        MultipartCreationResponse multipart = s3PresignedUpload.startMultipart(key, req.getFileSize());
         //Create new upload attempt in db
+        long reqId = addUploadProgress.invoke(
+                multipart.getUploadId(),
+                key,
+                multipart.getExpiration(),
+                req.getFileSize(),
+                userId
+        );
 
-        return null;
+        var res = StartUploadResponse.builder()
+                .uploadReqId(reqId)
+                .s3Endpoint(s3Config.getEndpoint())
+                .s3Bucket(s3Config.getBucket())
+                .multipartCreationResponse(multipart)
+            .build();
+        log.info("User {} has created a new multipart upload: {}", userId, res);
+        return res;
     }
 
     public record Input(

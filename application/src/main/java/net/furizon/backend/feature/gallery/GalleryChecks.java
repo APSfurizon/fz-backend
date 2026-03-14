@@ -2,8 +2,10 @@ package net.furizon.backend.feature.gallery;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
+import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.configuration.GalleryConfig;
 import net.furizon.backend.infrastructure.localization.TranslationService;
@@ -29,6 +31,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class GalleryChecks {
+    @NotNull private final UploadProgressFinder uploadProgressFinder;
     @NotNull private final PermissionFinder permissionFinder;
     @NotNull private final UploadFinder uploadFinder;
     @NotNull private final GalleryConfig galleryConfig;
@@ -42,6 +45,13 @@ public class GalleryChecks {
                 translationService.error("gallery.not_found", GalleryErrorCodes.UPLOADS_NOT_FOUND)
             );
         }
+    }
+
+    @NotNull
+    public UploadProgress getUploadProgressAndAssertItExists(long uploadReqId, long userId) {
+        var res = uploadProgressFinder.getUploadProgressByReqIdUser(uploadReqId, userId);
+        assertUploadFound(res);
+        return res;
     }
 
     public void assertUploadEnabledOnEvent(@NotNull Event event) {

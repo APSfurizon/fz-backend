@@ -2,6 +2,7 @@ package net.furizon.backend.feature.gallery.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
+import net.furizon.backend.feature.gallery.mapper.UploadProgressMapper;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,30 @@ public class JooqUploadProgressFinder implements UploadProgressFinder {
             .from(UPLOAD_PROGRESS_INFO)
             .where(UPLOAD_PROGRESS_INFO.UPLOADER_USER_ID.eq(userId))
             .limit(1)
-        ).map(record -> record.get(UPLOAD_PROGRESS_INFO.ID));
+        ).map(UploadProgressMapper::map);
+    }
+
+    @Override
+    public @Nullable UploadProgress getUploadProgressByReqId(long reqId) {
+        return query.fetchSingle(
+            selectUploadProgress()
+            .from(UPLOAD_PROGRESS_INFO)
+            .where(UPLOAD_PROGRESS_INFO.ID.eq(reqId))
+            .limit(1)
+        ).map(UploadProgressMapper::map);
+    }
+
+    @Override
+    public @Nullable UploadProgress getUploadProgressByReqIdUser(long reqId, long userId) {
+        return query.fetchSingle(
+            selectUploadProgress()
+            .from(UPLOAD_PROGRESS_INFO)
+            .where(
+                UPLOAD_PROGRESS_INFO.ID.eq(reqId)
+                .and(UPLOAD_PROGRESS_INFO.UPLOADER_USER_ID.eq(userId))
+            )
+            .limit(1)
+        ).map(UploadProgressMapper::map);
     }
 
 

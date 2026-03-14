@@ -17,11 +17,11 @@ public class JooqDeleteUploadProgress implements DeleteUploadProgressAction {
     private final SqlCommand command;
 
     @Override
-    public boolean invoke(long uploadProgressId) {
-        log.info("Deleting upload progress with id {}", uploadProgressId);
+    public boolean invoke(long uploadReqId) {
+        log.info("Deleting upload progress with id {}", uploadReqId);
         return command.execute(
                 PostgresDSL.delete(UPLOAD_PROGRESS_INFO)
-                .where(UPLOAD_PROGRESS_INFO.ID.eq(uploadProgressId))
+                .where(UPLOAD_PROGRESS_INFO.ID.eq(uploadReqId))
         ) > 0;
     }
 }
