@@ -10,4 +10,6 @@ public interface UploadFinder {
     @Nullable Long getUploaderUserId(long uploadId);
 
     @Nullable Long getOriginalUploaderUserId(long uploadId);
+
+    @Nullable Long getMainMediaIdFromUploadId(long uploadId);
 }

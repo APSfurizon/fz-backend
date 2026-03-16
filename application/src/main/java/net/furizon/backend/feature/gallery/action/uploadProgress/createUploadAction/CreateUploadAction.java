@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.action.createUploadAction;
+package net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction;
 
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.pretix.objects.event.Event;

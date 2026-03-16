@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.GalleryChecks;
 import net.furizon.backend.feature.gallery.GalleryErrorCodes;
-import net.furizon.backend.feature.gallery.action.createUploadAction.CreateUploadAction;
-import net.furizon.backend.feature.gallery.action.deleteUploadProgress.DeleteUploadProgressAction;
+import net.furizon.backend.feature.gallery.action.processor.submitJob.GalleryProcessorSubmitJobAction;
+import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.CreateUploadAction;
+import net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadProgress.DeleteUploadProgressAction;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
@@ -29,6 +30,7 @@ import org.springframework.util.MimeTypeUtils;
 public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Input, GalleryUpload> {
     @NotNull private final CreateUploadAction createUploadAction;
     @NotNull private final DeleteUploadProgressAction deleteUploadProgress;
+    @NotNull private final GalleryProcessorSubmitJobAction galleryProcessorSubmitJobAction;
     @NotNull private final S3PresignedUpload s3PresignedUpload;
     @NotNull private final S3DeleteUpload s3DeleteUpload;
     @NotNull private final GalleryChecks galleryChecks;
@@ -75,18 +77,23 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
             user.getUserId(),
             userId,
             req.getFileName(),
-                req.getFileSize(),
-                req.getUploadRepostPermissions(),
-                event,
-                upload.getS3Key(),
-                MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
-                StoreMethod.S3_REMOTE
+            req.getFileSize(),
+            req.getUploadRepostPermissions(),
+            event,
+            upload.getS3Key(),
+            MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
+            StoreMethod.S3_REMOTE
 
         );
 
         deleteUploadProgress.invoke(upload.getUploadReqId());
 
         //Launch processor job
+        try {
+            galleryProcessorSubmitJobAction.invoke(ret.getId(), upload.getS3Key());
+        } catch (Exception e) {
+            log.warn("Upload {}: Unable to submit job to processor",  upload.getUploadReqId());
+        }
 
         return ret;
     }

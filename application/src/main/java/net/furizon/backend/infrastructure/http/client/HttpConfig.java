@@ -24,4 +24,8 @@ public interface HttpConfig {
     default Pair<String, String> basicAuth() {
         return null;
     }
+
+    default int getConnectionTimeout() {
+        return 20;
+    }
 }

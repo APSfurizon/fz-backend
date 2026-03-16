@@ -2,7 +2,7 @@ package net.furizon.backend.feature.gallery.usecase.uploadProgress;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.gallery.action.deleteUploadProgress.DeleteUploadProgressAction;
+import net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadProgress.DeleteUploadProgressAction;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
 import net.furizon.backend.infrastructure.s3.actions.presignedUpload.S3PresignedUpload;

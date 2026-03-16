@@ -45,4 +45,13 @@ public class JooqUploadFinder implements UploadFinder {
             .where(UPLOADS.ID.eq(uploadId))
         ).map(r -> r.get(UPLOADS.ORIGINAL_UPLOADER_USER_ID));
     }
+
+    @Override
+    public @Nullable Long getMainMediaIdFromUploadId(long uploadId) {
+        return query.fetchSingle(
+            PostgresDSL.select(UPLOADS.MEDIA_ID)
+            .from(UPLOADS)
+            .where(UPLOADS.ID.eq(uploadId))
+        ).map(r -> r.get(UPLOADS.MEDIA_ID));
+    }
 }

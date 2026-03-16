@@ -202,6 +202,11 @@ public class UploadExif extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.UPLOAD_EXIF_ONLY_ONE_PER_UPLOAD);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.UPLOAD_EXIF__UPLOAD_EXIF_UPLOAD_ID);
     }

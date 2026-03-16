@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.action.addUploadProgress;
+package net.furizon.backend.feature.gallery.action.uploadProgress.addUploadProgress;
 
 import org.jetbrains.annotations.NotNull;
 

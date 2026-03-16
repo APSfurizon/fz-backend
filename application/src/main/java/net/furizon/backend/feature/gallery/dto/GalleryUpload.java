@@ -11,7 +11,7 @@ import net.furizon.jooq.generated.enums.UploadType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -19,8 +19,8 @@ public class GalleryUpload {
     private final long id;
     @NotNull private final UserDisplayData photographer;
 
-    @NotNull private final LocalDateTime uploadDate;
-    @Nullable private final LocalDateTime shotDate;
+    @NotNull private final OffsetDateTime uploadDate;
+    @Nullable private final OffsetDateTime shotDate;
 
     @NotNull private final UploadStatus status;
 

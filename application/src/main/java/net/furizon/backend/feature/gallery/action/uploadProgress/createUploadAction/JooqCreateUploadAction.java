@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.action.createUploadAction;
+package net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 import static net.furizon.jooq.generated.tables.Uploads.UPLOADS;
@@ -87,7 +88,7 @@ public class JooqCreateUploadAction implements CreateUploadAction {
         return GalleryUpload.builder()
                 .id(uploadId)
                 .photographer(Objects.requireNonNull(userFinder.getDisplayUser(photographerUserId, event)))
-                .uploadDate(LocalDateTime.now())
+                .uploadDate(OffsetDateTime.now())
                 .status(UploadStatus.PENDING) //TODO find a way to plug the actual default coming from the db
                 .fileName(fileName)
                 .fileSize(fileSize)

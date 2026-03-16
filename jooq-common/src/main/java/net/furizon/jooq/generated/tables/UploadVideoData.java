@@ -187,6 +187,11 @@ public class UploadVideoData extends TableImpl<Record> {
     }
 
     @Override
+    public List<UniqueKey<Record>> getUniqueKeys() {
+        return Arrays.asList(Keys.UPLOAD_VIDEO_DATA_ONLY_ONE_PER_UPLOAD);
+    }
+
+    @Override
     public List<ForeignKey<Record, ?>> getReferences() {
         return Arrays.asList(Keys.UPLOAD_VIDEO_DATA__UPLOAD_VIDEO_DATA_UPLOAD_ID);
     }

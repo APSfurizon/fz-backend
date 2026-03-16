@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS upload_exif
     aperture           varchar(128)                                                                                                             NULL,
     iso                varchar(128)                                                                                                             NULL,
     CONSTRAINT upload_exif_pkey PRIMARY KEY (id),
+    CONSTRAINT upload_exif_only_one_per_upload UNIQUE (upload_id),
     CONSTRAINT upload_exif_upload_id FOREIGN KEY (upload_id) REFERENCES uploads (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -73,6 +74,7 @@ CREATE TABLE IF NOT EXISTS upload_video_data
     framerate          varchar(128)                                                                                                             NULL,
     audio_frequency    varchar(128)                                                                                                             NULL,
     CONSTRAINT upload_video_data_pkey PRIMARY KEY (id),
+    CONSTRAINT upload_video_data_only_one_per_upload UNIQUE (upload_id),
     CONSTRAINT upload_video_data_upload_id FOREIGN KEY (upload_id) REFERENCES uploads (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 

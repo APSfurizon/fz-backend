@@ -5,16 +5,19 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
+import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorJob;
 import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
+import net.furizon.backend.feature.gallery.usecase.processor.JobCompletedWebhookUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.AbortUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.CompleteUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.ListUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.StartUploadUseCase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -124,6 +127,16 @@ public class GalleryController {
                         req,
                         user
                 )
+        );
+    }
+
+    @Operation(summary = "Internal webhook for gallery processor, to notify completed jobs")
+    @PostMapping("/job/completed")
+    @InternalAuthorize
+    public boolean jobDone(@Valid @NotNull @RequestBody GalleryProcessorJob job) {
+        return executor.execute(
+                JobCompletedWebhookUseCase.class,
+                job
         );
     }
 }

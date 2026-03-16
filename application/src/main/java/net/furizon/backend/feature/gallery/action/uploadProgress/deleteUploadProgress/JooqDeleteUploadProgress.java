@@ -1,4 +1,4 @@
-package net.furizon.backend.feature.gallery.action.deleteUploadProgress;
+package net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadProgress;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
