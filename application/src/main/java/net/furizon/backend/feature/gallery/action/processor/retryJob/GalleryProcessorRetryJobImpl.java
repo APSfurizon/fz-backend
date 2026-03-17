@@ -31,7 +31,7 @@ public class GalleryProcessorRetryJobImpl implements GalleryProcessorRetryJobAct
         final var request = HttpRequest.<GalleryProcessorJob>create()
                 .method(HttpMethod.POST)
                 .path("/job/{jobId}/retry")
-                .queryParam("jobId", String.valueOf(reqId))
+                .uriVariable("jobId", String.valueOf(reqId))
                 .responseType(GalleryProcessorJob.class)
                 .build();
 

@@ -36,34 +36,38 @@ public class PollGalleryProcessorUseCase implements UseCase<Integer, Integer> {
         List<Long> toSubmit = new ArrayList<>((unprocessed.size() / 2) + 1);
         List<Long> toRetry = new ArrayList<>(toSubmit.size());
         for (long uploadId : unprocessed) {
-            pollNo++;
-            var j = galleryProcessorJobFinder.getJobByReqId(uploadId);
-            if (j.isEmpty()) {
-                log.warn("[GALLERY PROCESSOR] getJobByReqId returned null for {}", uploadId);
-                toSubmit.add(uploadId);
-                continue;
-            }
-
-            GalleryProcessorJob job = j.get();
-            switch (job.getStatus()) {
-                case NOT_FOUND -> {
-                    log.warn("[GALLERY PROCESSOR] No gallery processor job found for upload id {}", uploadId);
+            try {
+                pollNo++;
+                var j = galleryProcessorJobFinder.getJobByReqId(uploadId);
+                if (j.isEmpty()) {
+                    log.warn("[GALLERY PROCESSOR] getJobByReqId returned null for {}", uploadId);
                     toSubmit.add(uploadId);
+                    continue;
                 }
-                case FAILED -> {
-                    log.warn("[GALLERY PROCESSOR] Job {} has failed. Retrying", uploadId);
-                    toRetry.add(uploadId);
-                }
-                case DONE -> {
-                    log.info("[GALLERY PROCESSOR] Job {} completed!", uploadId);
-                    try {
-                        galleryProcessorHandleJobAction.invoke(job);
-                    } catch (Exception e) {
-                        log.error("[GALLERY PROCESSOR] Gallery processor job execution failed for job {}", uploadId, e);
+
+                GalleryProcessorJob job = j.get();
+                switch (job.getStatus()) {
+                    case NOT_FOUND -> {
+                        log.warn("[GALLERY PROCESSOR] No gallery processor job found for upload id {}", uploadId);
+                        toSubmit.add(uploadId);
+                    }
+                    case FAILED -> {
+                        log.warn("[GALLERY PROCESSOR] Job {} has failed. Retrying", uploadId);
+                        toRetry.add(uploadId);
+                    }
+                    case DONE -> {
+                        log.info("[GALLERY PROCESSOR] Job {} completed!", uploadId);
+                        try {
+                            galleryProcessorHandleJobAction.invoke(job);
+                        } catch (Exception e) {
+                            log.error("[GALLERY PROCESSOR] Gallery processor job execution failed for job {}", uploadId, e);
+                        }
+                    }
+                    default -> {
                     }
                 }
-                default -> {
-                }
+            } catch (Exception e) {
+                log.warn("[GALLERY PROCESSOR] exception while requesting job {}", uploadId, e);
             }
         }
 

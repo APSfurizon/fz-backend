@@ -3,7 +3,6 @@ package net.furizon.backend.feature.gallery.action.processor.handleJob;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.gallery.action.uploads.deleteUpload.DeleteUploadAction;
 import net.furizon.backend.feature.gallery.action.uploads.updateUploadMetadata.UpdateUploadMetadataAction;
 import net.furizon.backend.feature.gallery.action.uploads.upsertImageMetadata.UpsertImageMetadataAction;
 import net.furizon.backend.feature.gallery.action.uploads.upsertVideoMetadata.UpsertVideoMetadataAction;
@@ -28,6 +27,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+
 public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobAction {
     @NotNull private final UpdateUploadMetadataAction updateUploadMetadataAction;
     @NotNull private final UpdateMediaMimeTypeAction updateMediaMimeTypeAction;
@@ -60,6 +60,9 @@ public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobA
                 s3DeleteUpload.delete(job.getFile());
             }
         }
+
+        //TODO check if a file with the same hash already exists.
+        // If yes, delete the file and notify the user by email
 
         //Update metadata
         res = res && updateUploadMetadataAction.invoke(job);

@@ -79,7 +79,8 @@ public class SimpleHttpClient implements HttpClient {
                     if (!request.getHeaders().isEmpty()) {
                         headers.addAll(request.getHeaders());
                     }
-                    Pair<String, String> basicAuth = request.isBasicAuthSet() ? request.getBasicAuth() : config.basicAuth();
+                    Pair<String, String> basicAuth = request.isBasicAuthSet()
+                            ? request.getBasicAuth() : config.basicAuth();
                     if (basicAuth != null) {
                         headers.setBasicAuth(basicAuth.getLeft(), basicAuth.getRight());
                     }

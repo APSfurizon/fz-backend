@@ -12,6 +12,7 @@ import org.jooq.Record;
 import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 import org.jooq.Table;
+import org.jooq.impl.QOM;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
+
 
 @Component
 @RequiredArgsConstructor

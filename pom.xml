@@ -35,7 +35,7 @@
         <checkstyle.version>10.18.2</checkstyle.version>
         <spring.boot.version>3.5.11</spring.boot.version>
         <postgresql.version>42.7.8</postgresql.version>
-        <jooq.version>3.20.9</jooq.version>
+        <jooq.version>3.19.30</jooq.version>
         <commons.lang.version>3.20.0</commons.lang.version>
         <guava.version>33.5.0-jre</guava.version>
         <uuid.creator.version>6.0.0</uuid.creator.version>

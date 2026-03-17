@@ -30,7 +30,7 @@ public class GalleryProcessorJobFinderImpl implements GalleryProcessorJobFinder 
         final var request = HttpRequest.<GalleryProcessorJob>create()
                 .method(HttpMethod.GET)
                 .path("/job/{jobId}")
-                .queryParam("jobId", String.valueOf(reqId))
+                .uriVariable("jobId", String.valueOf(reqId))
                 .responseType(GalleryProcessorJob.class)
                 .build();
 

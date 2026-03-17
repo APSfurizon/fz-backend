@@ -48,32 +48,41 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
 
         long deleted = 0L;
         for (MediaData media : medias) {
-            //Delete unreferenced media db objects
-            if (!referencedMediaIds.contains(media.getId())) {
-                log.info("[DANGLING MEDIA] Deleting unreferenced db media: {}", media);
-                physicallyDeleteMediaAction.invoke(media, false);
-                dbDeleteIds.add(media.getId());
-                deleted++;
-                continue;
-            }
+            try {
+                StoreMethod storeMethod = media.getStoreMethod();
+                //Delete unreferenced media db objects
+                if (!referencedMediaIds.contains(media.getId())) {
+                    log.info("[DANGLING MEDIA] Deleting unreferenced db media: {}", media);
+                    switch (storeMethod) {
+                        case StoreMethod.DISK -> physicallyDeleteMediaAction.invoke(media, false);
+                        case StoreMethod.S3_REMOTE -> s3DeleteUpload.delete(media.getPath());
+                        default -> {
+                        }
+                    }
+                    dbDeleteIds.add(media.getId());
+                    deleted++;
+                    continue;
+                }
 
-            //Delete media db object without local file
-            StoreMethod storeMethod = media.getStoreMethod();
-            if (storeMethod == StoreMethod.DISK) {
-                if (!Files.exists(Paths.get(basePath, media.getPath()))) {
-                    log.info("[DANGLING MEDIA] Deleting media without local file: {}", media);
-                    dbDeleteIds.add(media.getId());
-                    deleted++;
+                //Delete media db object without local file
+                if (storeMethod == StoreMethod.DISK) {
+                    if (!Files.exists(Paths.get(basePath, media.getPath()))) {
+                        log.info("[DANGLING MEDIA] Deleting media without local file: {}", media);
+                        dbDeleteIds.add(media.getId());
+                        deleted++;
+                    }
+                    continue;
                 }
-                continue;
-            }
-            if (storeMethod == StoreMethod.S3_REMOTE) {
-                if (!s3KeyExists.invoke(media.getPath())) {
-                    log.info("[DANGLING MEDIA] Deleting media without s3 remote file: {}", media);
-                    dbDeleteIds.add(media.getId());
-                    deleted++;
+                if (storeMethod == StoreMethod.S3_REMOTE) {
+                    if (!s3KeyExists.invoke(media.getPath())) {
+                        log.info("[DANGLING MEDIA] Deleting media without s3 remote file: {}", media);
+                        dbDeleteIds.add(media.getId());
+                        deleted++;
+                    }
+                    continue;
                 }
-                continue;
+            } catch (Exception e) {
+                log.warn("[DANGLING MEDIA] Error while checking for media {}", media);
             }
         }
 
