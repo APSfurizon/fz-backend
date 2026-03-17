@@ -61,9 +61,6 @@ public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobA
             }
         }
 
-        //TODO check if a file with the same hash already exists.
-        // If yes, delete the file and notify the user by email
-
         //Update metadata
         res = res && updateUploadMetadataAction.invoke(job);
 

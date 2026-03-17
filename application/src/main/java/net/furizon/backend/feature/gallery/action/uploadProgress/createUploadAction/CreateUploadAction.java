@@ -18,6 +18,7 @@ public interface CreateUploadAction {
             @NotNull Event event,
             @NotNull String mediaPath,
             @NotNull String mediaMimeType,
-            @NotNull StoreMethod mediaStoreMethod
+            @NotNull StoreMethod mediaStoreMethod,
+            @NotNull String md5Hash
     );
 }

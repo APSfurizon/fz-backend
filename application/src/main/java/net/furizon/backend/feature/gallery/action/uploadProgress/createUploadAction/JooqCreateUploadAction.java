@@ -13,6 +13,7 @@ import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
+import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import static net.furizon.jooq.generated.tables.Uploads.UPLOADS;
 
@@ -47,8 +49,10 @@ public class JooqCreateUploadAction implements CreateUploadAction {
             @NotNull Event event,
             @NotNull String mediaPath,
             @NotNull String mediaMimeType,
-            @NotNull StoreMethod mediaStoreMethod
+            @NotNull StoreMethod mediaStoreMethod,
+            @NotNull String md5Hash
     ) {
+
 
         long mediaId = addMediaAction.invoke(
                 mediaPath,
@@ -65,7 +69,8 @@ public class JooqCreateUploadAction implements CreateUploadAction {
                 UPLOADS.FILE_SIZE,
                 UPLOADS.REPOST_PERMISSIONS,
                 UPLOADS.EVENT_ID,
-                UPLOADS.MEDIA_ID
+                UPLOADS.MEDIA_ID,
+                UPLOADS.HASH
             ).values(
                 uploaderUserId,
                 photographerUserId,
@@ -73,7 +78,8 @@ public class JooqCreateUploadAction implements CreateUploadAction {
                 fileSize,
                 repostPermissions,
                 event.getId(),
-                mediaId
+                mediaId,
+                hashToUuid(md5Hash)
             )
             .returning(UPLOADS.ID)
         ).getFirst().map(record -> record.get(UPLOADS.ID));
@@ -99,5 +105,19 @@ public class JooqCreateUploadAction implements CreateUploadAction {
                 .repostPermissions(repostPermissions)
                 .event(event)
             .build();
+    }
+
+    @NotNull
+    public static UUID hashToUuid(@NotNull String md5) {
+        byte[] digest = Hex.decode(md5);
+        long msb = 0L;
+        long lsb = 0L;
+        for (int i = 0; i < 8; i++) {
+            msb = (msb << 8) | (digest[i] & 0xffL);
+        }
+        for (int i = 8; i < 16; i++) {
+            lsb = (lsb << 8) | (digest[i] & 0xffL);
+        }
+        return new UUID(msb, lsb);
     }
 }

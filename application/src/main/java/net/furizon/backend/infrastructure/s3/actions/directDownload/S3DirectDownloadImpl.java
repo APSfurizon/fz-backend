@@ -12,8 +12,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @Slf4j
 @Component
@@ -38,8 +41,20 @@ public class S3DirectDownloadImpl implements S3DirectDownload {
     }
 
     @Override
-    public void toFile(@NotNull String key, @NotNull Path file) throws NoSuchKeyException {
-        download(key, ResponseTransformer.toFile(file));
+    public void toFile(@NotNull String key, @NotNull Path file) throws NoSuchKeyException, IOException {
+        toFile(key, file, false);
+    }
+    @Override
+    public void toFile(@NotNull String key, @NotNull Path file, boolean replaceExisting) throws NoSuchKeyException, IOException {
+        if (replaceExisting) {
+            try (InputStream stream = toInputStream(key)) {
+                Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw e;
+            }
+        } else {
+            download(key, ResponseTransformer.toFile(file));
+        }
     }
 
     @Override

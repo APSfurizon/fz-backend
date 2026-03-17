@@ -10,6 +10,7 @@ import net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadPro
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
+import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.StoreMethod;
@@ -33,6 +34,7 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
     @NotNull private final GalleryProcessorSubmitJobAction galleryProcessorSubmitJobAction;
     @NotNull private final S3PresignedUpload s3PresignedUpload;
     @NotNull private final S3DeleteUpload s3DeleteUpload;
+    @NotNull private final UploadFinder uploadFinder;
     @NotNull private final GalleryChecks galleryChecks;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final TranslationService translationService;
@@ -71,6 +73,18 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
             );
         }
 
+        Long hashCollision = uploadFinder.getUploadIdByHashOnEvent(md5, event.getId());
+        if (hashCollision != null) {
+            log.error("Upload {} (uId {}): Duplicate upload detected for hash {}. "
+                    + "Deleting the newly made upload",
+                    req.getUploadReqId(), upload.getUploadId(), md5);
+            s3DeleteUpload.delete(upload.getS3Key());
+            deleteUploadProgress.invoke(upload.getUploadReqId());
+            throw new ApiException(
+                    translationService.error("gallery.upload.duplicated"),
+                    GalleryErrorCodes.UPLOADS_DUPLICATE
+            );
+        }
 
         //Create media object in the db
         GalleryUpload ret = createUploadAction.invoke(
@@ -82,7 +96,8 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
             event,
             upload.getS3Key(),
             MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
-            StoreMethod.S3_REMOTE
+            StoreMethod.S3_REMOTE,
+            md5
         );
 
         deleteUploadProgress.invoke(upload.getUploadReqId());

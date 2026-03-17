@@ -17,5 +17,9 @@ public interface UploadFinder {
 
     @Nullable String getMainMediaFilenameFromUploadId(long uploadId);
 
+    @Nullable Long getUploadIdByHash(@NotNull String hash);
+
+    @Nullable Long getUploadIdByHashOnEvent(@NotNull String hash, long eventId);
+
     @NotNull List<Long> getUnprocessedUploadIds();
 }

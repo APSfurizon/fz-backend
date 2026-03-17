@@ -17,7 +17,6 @@ public class GalleryProcessorUploadData {
     private int resolutionHeight;
     @Nullable private OffsetDateTime shotTimestamp;
 
-    private UUID hash;
     private long fileSize;
     @NotNull private String mimeType;
 

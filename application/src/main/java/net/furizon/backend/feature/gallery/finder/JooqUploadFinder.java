@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.gallery.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -69,6 +70,26 @@ public class JooqUploadFinder implements UploadFinder {
                 .and(UPLOADS.ID.eq(uploadId))
             )
         ).map(r -> r.get(MEDIA.MEDIA_PATH));
+    }
+
+    @Override
+    public @Nullable Long getUploadIdByHash(@NotNull String hash) {
+        return query.fetchSingle(
+            PostgresDSL.select(UPLOADS.ID)
+            .from(UPLOADS)
+            .where(UPLOADS.HASH.eq(JooqCreateUploadAction.hashToUuid(hash)))
+        ).map(r -> r.get(UPLOADS.MEDIA_ID));
+    }
+    @Override
+    public @Nullable Long getUploadIdByHashOnEvent(@NotNull String hash, long eventId) {
+        return query.fetchSingle(
+            PostgresDSL.select(UPLOADS.ID)
+            .from(UPLOADS)
+            .where(
+                UPLOADS.HASH.eq(JooqCreateUploadAction.hashToUuid(hash))
+                .and(UPLOADS.EVENT_ID.eq(eventId))
+            )
+        ).map(r -> r.get(UPLOADS.MEDIA_ID));
     }
 
 

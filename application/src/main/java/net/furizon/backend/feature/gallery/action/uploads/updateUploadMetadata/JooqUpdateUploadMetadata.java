@@ -30,7 +30,6 @@ public class JooqUpdateUploadMetadata implements UpdateUploadMetadataAction {
             .set(UPLOADS.RESOLUTION_WIDTH, data.getResolutionWidth())
             .set(UPLOADS.RESOLUTION_HEIGTH, data.getResolutionHeight())
             .set(UPLOADS.SHOT_TIMESTAMP, data.getShotTimestamp())
-            .set(UPLOADS.HASH, data.getHash())
             .set(UPLOADS.FILE_SIZE, data.getFileSize())
             .where(UPLOADS.ID.eq(job.getId()))
         ) > 0;

@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS uploads
     file_size                 int8                                                                                                                     NOT NULL,
     resolution_width          int4                                                                                                                     NOT NULL DEFAULT 0,
     resolution_heigth         int4                                                                                                                     NOT NULL DEFAULT 0,
-    hash                      uuid                                                                                                                     NULL,
+    hash                      uuid                                                                                                                     NOT NULL,
     upload_type               upload_type                                                                                                              NOT NULL DEFAULT 'UNPROCESSED',
     media_id                  int8                                                                                                                     NOT NULL,
     thumbnail_media_id        int8                                                                                                                     NULL,

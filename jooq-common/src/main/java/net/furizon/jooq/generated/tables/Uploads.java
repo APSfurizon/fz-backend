@@ -128,7 +128,7 @@ public class Uploads extends TableImpl<Record> {
     /**
      * The column <code>public.uploads.hash</code>.
      */
-    public final TableField<Record, UUID> HASH = createField(DSL.name("hash"), SQLDataType.UUID, this, "");
+    public final TableField<Record, UUID> HASH = createField(DSL.name("hash"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.uploads.upload_type</code>.

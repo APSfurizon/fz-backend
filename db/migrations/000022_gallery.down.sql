@@ -10,6 +10,7 @@ DROP TYPE IF EXISTS upload_status;
 DROP TYPE IF EXISTS upload_type;
 
 ALTER TABLE IF EXISTS media DROP CONSTRAINT IF EXISTS media_store_method_check;
+DELETE FROM media WHERE media_store_method > 0;
 ALTER TABLE IF EXISTS media ADD CONSTRAINT media_store_method_check CHECK (((media_store_method >= 0) AND (media_store_method <= 0)));
 
 COMMIT;
