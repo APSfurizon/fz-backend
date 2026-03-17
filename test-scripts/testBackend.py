@@ -381,7 +381,7 @@ def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, event
         "eventId": eventId,
         "uploadRepostPermissions": "CC_BY_NC_ND",
         "etags": etags,
-        "sha1Hash": hash
+        "md5Hash": hash
     }
     return doPost(f'{BASE_URL_API}gallery/upload/complete', json=json)
 def uploadFileToGallery_listParts(reqId: int) -> Response:
@@ -389,6 +389,11 @@ def uploadFileToGallery_listParts(reqId: int) -> Response:
         "uploadReqId": reqId
     }
     return doGet(f'{BASE_URL_API}gallery/upload/status', json=json)
+def uploadFileToGallery_abort(reqId: int) -> Response:
+    json = {
+        "uploadReqId": reqId
+    }
+    return doPost(f'{BASE_URL_API}gallery/upload/abort', json=json)
 def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
     path = filePath + "/" + fileName
     fileSize = os.path.getsize(path)
@@ -405,28 +410,21 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
     chunkSize = ret["chunkSize"]
     presignedUrls = ret["presignedUrls"]
     
-    #globalSha = hashlib.md5()
     md5 = [0] * len(presignedUrls)
     etags = [0] * len(presignedUrls)
     
     with open(path, 'rb') as f:
         for i, url in enumerate(presignedUrls):
             chunk = f.read(chunkSize)
-            #globalSha.update(chunk)
-            headers = {
-                #"x-amz-sdk-checksum-algorithm": "SHA1",
-                #"x-amz-checksum-sha1": base64.b64encode(hashlib.sha1(chunk).digest()).decode("UTF-8")
-            }
-            ret = doPut(url, data=chunk, extraHeaders=headers)
+            ret = doPut(url, data=chunk)
             etags[i] = ret.headers["etag"]
             md5[i] = hashlib.md5(chunk).digest()
             
-    #finalHash = base64.b64encode(globalSha.digest()).decode("UTF-8")
     finalHash = hashlib.md5(b"".join(md5)).hexdigest()
     
-    uploadFileToGallery_listParts(reqId)
-    
-    uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
+    #uploadFileToGallery_listParts(reqId)
+    #uploadFileToGallery_abort(reqId)
+    #uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
 
 #register()
 #confirmEmail()

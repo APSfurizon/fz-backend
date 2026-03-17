@@ -16,7 +16,7 @@ public class CompleteUploadRequest {
     @NotNull private final UploadRepostPermissions uploadRepostPermissions;
 
     @NotNull private final List<String> etags;
-    @NotNull private final String sha1Hash;
+    @NotNull private final String md5Hash;
 
     @Nullable private final Long userId; //For admins
 }

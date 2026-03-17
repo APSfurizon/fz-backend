@@ -50,7 +50,6 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                 CreateMultipartUploadRequest.builder()
                         .bucket(bucket)
                         .key(fileName)
-                        //.checksumAlgorithm("SHA1")
                         .build()
         );
 
@@ -66,7 +65,6 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                     .bucket(bucket)
                     .key(fileName)
                     .uploadId(uploadId)
-                    //.checksumAlgorithm("SHA1")
                     .contentLength(contentLength)
                     .partNumber(partNo)
                     .build();
@@ -121,14 +119,12 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                 .bucket(s3Config.getBucket())
                 .key(fileName)
                 .uploadId(uploadId)
-                //.checksumType("CRC64NVME")
-                //.checksumSHA1(sha1)
                 .multipartUpload(completedUpload)
                 .build();
 
         CompleteMultipartUploadResponse response = s3.completeMultipartUpload(completeRequest);
         String etag = response.eTag();
-        return response.eTag().substring(etag.indexOf('-'));
+        return response.eTag().substring(etag.charAt(0) == '"' ? 1 : 0, etag.indexOf('-'));
     }
 
     @Override

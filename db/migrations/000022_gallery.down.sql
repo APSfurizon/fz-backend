@@ -9,5 +9,8 @@ DROP TYPE IF EXISTS upload_repost_permissions;
 DROP TYPE IF EXISTS upload_status;
 DROP TYPE IF EXISTS upload_type;
 
+ALTER TABLE IF EXISTS media DROP CONSTRAINT IF EXISTS media_store_method_check;
+ALTER TABLE IF EXISTS media ADD CONSTRAINT media_store_method_check CHECK (((media_store_method >= 0) AND (media_store_method <= 0)));
+
 COMMIT;
 

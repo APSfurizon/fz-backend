@@ -53,16 +53,16 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
         UploadProgress upload = galleryChecks.getUploadProgressAndAssertItExists(req.getUploadReqId(), userId);
 
         log.info("Completing multipart upload {} with uploadId {}", req.getUploadReqId(), upload.getUploadId());
-        String sha1 = s3PresignedUpload.completeMultipart(
+        String md5 = s3PresignedUpload.completeMultipart(
                 upload.getUploadId(),
                 upload.getS3Key(),
                 req.getEtags()
         );
 
-        if (!sha1.equals(req.getSha1Hash())) {
-            log.error("Upload {} (uId {}): sha1 hash mismatch! S3 returned {} while req contained {}. "
+        if (!md5.equals(req.getMd5Hash())) {
+            log.error("Upload {} (uId {}): md5 hash mismatch! S3 returned {} while req contained {}. "
                     + "Deleting the newly made upload",
-                    req.getUploadReqId(), upload.getUploadId(), sha1, req.getSha1Hash());
+                    req.getUploadReqId(), upload.getUploadId(), md5, req.getMd5Hash());
             s3DeleteUpload.delete(upload.getS3Key());
             deleteUploadProgress.invoke(upload.getUploadReqId());
             throw new ApiException(
@@ -83,7 +83,6 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
             upload.getS3Key(),
             MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
             StoreMethod.S3_REMOTE
-
         );
 
         deleteUploadProgress.invoke(upload.getUploadReqId());

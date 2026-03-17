@@ -50,7 +50,8 @@ public class GalleryController {
         + "the size specified in `chunkSize`, otherwise the upload will be rejected by s3. The last chunk "
         + "can be less the size of chunkSize, no padding is needed. If you have any error, you can call the "
         + "`/upload/abort` endpoint. Instead, once the uploading of all chunks is successful, call "
-        + "`/upload/complete`. Check its docs for understanding its parameters.")
+        + "`/upload/complete`. Check its docs for understanding its parameters. To upload each single chunk, "
+        + "just do a PUT request towards the presigned url.")
     @PostMapping("/upload")
     public @NotNull StartUploadResponse startUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -86,18 +87,24 @@ public class GalleryController {
     }
 
     @Operation(summary = "Completes the upload process", description =
-        "While you upload the various parts to s3, you have to build a sha1 hash of the whole file. "
+        "While you upload the various parts to s3, you have to md5 the single chunks (more on that later). "
         + "Moreover, after each upload s3 will reply with a string etag. You have to store them together "
         + "with the part number it's coming from and send them here in an ordered list, in the "
         + "`etags` field. Since you already know the number of chunks (it's signedUrls.length()), I suggest "
         + "pre allocating an array of strings of that size, and then for each response do a "
         + "`arr[partNo - 1] = eTag`. In this way you save yourself from a lot of problems, like concurrent access "
-        + "to the list. Together with the etag list and the base64 encoded sha1, you have to send again the eventId "
+        + "to the list. Together with the etag list and the hex encoded md5, you have to send again the eventId "
         + "you're uploading the media to, the filename and the permission the user is giving to the repost of the "
         + "media. If everything goes correctly and the hash is correct, the object of the media is returned. Some "
         + "fields will still be missing since some processing is done async. If, while uploading the parts, you lose "
         + "the context and you need to understand again which parts you've uploaded so far, "
-        + "use the `/upload/status` endpoint")
+        + "use the `/upload/status` endpoint. Regarding the md5 hash: On each chunk, you have to compute a md5 "
+        + "of it and store his raw-bytes digest. After you're done with uploading the various chunks you have to "
+        + "append the various digests (in the same part order, I suggest an array solution like the etags) together "
+        + "and compute an extra md5 of all of the appended digest. The hexdigest of dist must be sent in the "
+        + "`md5hash` field of the request. I can understand that this process is not trivial, so I "
+        + "suggest to take a look at the `uploadFileToGallery` function of the `testBackend.py` file you can find "
+        + "in this repository.")
     @PostMapping("/upload/complete")
     public GalleryUpload completeUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,

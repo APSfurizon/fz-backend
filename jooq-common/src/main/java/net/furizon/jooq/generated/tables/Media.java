@@ -242,7 +242,7 @@ public class Media extends TableImpl<Record> {
     @Override
     public List<Check<Record>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("media_store_method_check"), "(((media_store_method >= 0) AND (media_store_method <= 0)))", true)
+            Internal.createCheck(this, DSL.name("media_store_method_check"), "(((media_store_method >= 0) AND (media_store_method <= 2)))", true)
         );
     }
 

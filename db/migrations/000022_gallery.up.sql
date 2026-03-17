@@ -78,5 +78,8 @@ CREATE TABLE IF NOT EXISTS upload_video_data
     CONSTRAINT upload_video_data_upload_id FOREIGN KEY (upload_id) REFERENCES uploads (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+ALTER TABLE IF EXISTS media DROP CONSTRAINT IF EXISTS media_store_method_check;
+ALTER TABLE IF EXISTS media ADD CONSTRAINT media_store_method_check CHECK (((media_store_method >= 0) AND (media_store_method <= 2)));
+
 COMMIT;
 
