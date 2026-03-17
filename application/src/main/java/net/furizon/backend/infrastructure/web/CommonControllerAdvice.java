@@ -30,7 +30,7 @@ public class CommonControllerAdvice {
     @NotNull
     private final TranslationService translationService;
 
-    /*@ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class)
     ResponseEntity<HttpErrorResponse> handleException(
             @NotNull Exception ex,
             @NotNull HttpServletRequest request
@@ -39,7 +39,7 @@ public class CommonControllerAdvice {
                 .status(HttpStatus.ALREADY_REPORTED)
                 .body(HttpErrorResponse.builder()
                 .errors(List.of()).requestId((String) request.getAttribute(MDC_CORRELATION_ID)).build());
-    }*/
+    }
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<HttpErrorResponse> handleApiException(

@@ -43,47 +43,61 @@ public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobA
     @Override
     @Transactional
     public boolean invoke(@NotNull GalleryProcessorJob job) {
-        GalleryProcessorUploadData data = job.getResult();
-        if (data == null) {
-            return false;
-        }
         boolean res = true;
         long id = job.getId();
         log.info("Updating metadata for job {}", id);
 
+        Long mainMediaId = uploadFinder.getMainMediaIdFromUploadId(id);
         if (job.getType() == UploadType.UNKNOWN) {
             log.error("File type for job {} is unknown. Deleting the file", id);
-            deleteMediaAction.deleteFromDb(List.of(id));
-            //deleteUploadAction.invoke(id); ON CASCADE
+
+            if (mainMediaId != null) {
+                deleteMediaAction.deleteFromDb(List.of(mainMediaId));
+                //deleteUploadAction.invoke(id); ON CASCADE
+            }
             String fileName = job.getFile();
             if (fileName != null) {
                 s3DeleteUpload.delete(job.getFile());
             }
         }
-
-        //Update metadata
-        res = res && updateUploadMetadataAction.invoke(job);
+        GalleryProcessorUploadData data = job.getResult();
+        if (data == null) {
+            log.error("Data is null for job {}", id);
+            return false;
+        }
 
         //Update mime type of main media object
-        Long mainMediaId = uploadFinder.getMainMediaIdFromUploadId(id);
         res = res && mainMediaId != null && updateMediaMimeTypeAction.invoke(mainMediaId, data.getMimeType());
 
         //Create media object for thumbnail
+        Long thumbnailMediaId = null;
         String extraMediaMimeType = data.getExtraMediaMimeType();
-        res = res && addMediaAction.invoke(
-            data.getThumbnailMediaName(),
-            extraMediaMimeType,
-            StoreMethod.S3_REMOTE
-        ) >= 0L;
+        if (res) {
+            thumbnailMediaId = addMediaAction.invoke(
+                data.getThumbnailMediaName(),
+                extraMediaMimeType,
+                StoreMethod.S3_REMOTE
+            );
+            res = thumbnailMediaId >= 0L;
+        }
         //Eventually create media object for rendered
+        Long renderMediaId = null;
         String renderMediaName = data.getRenderedMediaName();
-        if (renderMediaName != null) {
-            res = res && addMediaAction.invoke(
+        if (renderMediaName != null && res) {
+            renderMediaId = addMediaAction.invoke(
                 renderMediaName,
                 extraMediaMimeType,
                 StoreMethod.S3_REMOTE
-            ) >= 0L;
+            );
+            res = renderMediaId >= 0L;
         }
+
+        //Update metadata
+        res = res && updateUploadMetadataAction.invoke(
+            job,
+            thumbnailMediaId,
+            renderMediaId
+        );
 
         //create/update objects for the photo and video metadata
         UploadImageMetadata photoMetadata = data.getPhotoMetadata();

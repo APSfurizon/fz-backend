@@ -36,32 +36,32 @@ public class JooqUploadFinder implements UploadFinder {
 
     @Override
     public @Nullable Long getUploaderUserId(long uploadId) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(UPLOADS.PHOTOGRAPHER_USER_ID)
             .from(UPLOADS)
             .where(UPLOADS.ID.eq(uploadId))
-        ).map(r -> r.get(UPLOADS.PHOTOGRAPHER_USER_ID));
+        ).mapOrNull(r -> r.get(UPLOADS.PHOTOGRAPHER_USER_ID));
     }
     @Override
     public @Nullable Long getOriginalUploaderUserId(long uploadId) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(UPLOADS.ORIGINAL_UPLOADER_USER_ID)
             .from(UPLOADS)
             .where(UPLOADS.ID.eq(uploadId))
-        ).map(r -> r.get(UPLOADS.ORIGINAL_UPLOADER_USER_ID));
+        ).mapOrNull(r -> r.get(UPLOADS.ORIGINAL_UPLOADER_USER_ID));
     }
 
     @Override
     public @Nullable Long getMainMediaIdFromUploadId(long uploadId) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(UPLOADS.MEDIA_ID)
             .from(UPLOADS)
             .where(UPLOADS.ID.eq(uploadId))
-        ).map(r -> r.get(UPLOADS.MEDIA_ID));
+        ).mapOrNull(r -> r.get(UPLOADS.MEDIA_ID));
     }
     @Override
     public @Nullable String getMainMediaFilenameFromUploadId(long uploadId) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(MEDIA.MEDIA_PATH)
             .from(MEDIA)
             .innerJoin(UPLOADS)
@@ -69,27 +69,27 @@ public class JooqUploadFinder implements UploadFinder {
                 MEDIA.MEDIA_ID.eq(UPLOADS.MEDIA_ID)
                 .and(UPLOADS.ID.eq(uploadId))
             )
-        ).map(r -> r.get(MEDIA.MEDIA_PATH));
+        ).mapOrNull(r -> r.get(MEDIA.MEDIA_PATH));
     }
 
     @Override
     public @Nullable Long getUploadIdByHash(@NotNull String hash) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(UPLOADS.ID)
             .from(UPLOADS)
             .where(UPLOADS.HASH.eq(JooqCreateUploadAction.hashToUuid(hash)))
-        ).map(r -> r.get(UPLOADS.MEDIA_ID));
+        ).mapOrNull(r -> r.get(UPLOADS.MEDIA_ID));
     }
     @Override
     public @Nullable Long getUploadIdByHashOnEvent(@NotNull String hash, long eventId) {
-        return query.fetchSingle(
+        return query.fetchFirst(
             PostgresDSL.select(UPLOADS.ID)
             .from(UPLOADS)
             .where(
                 UPLOADS.HASH.eq(JooqCreateUploadAction.hashToUuid(hash))
                 .and(UPLOADS.EVENT_ID.eq(eventId))
             )
-        ).map(r -> r.get(UPLOADS.MEDIA_ID));
+        ).mapOrNull(r -> r.get(UPLOADS.ID));
     }
 
 

@@ -1,5 +1,5 @@
 import os
-import base64
+import json
 import hashlib
 import requests
 from requests import Response
@@ -424,7 +424,33 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
     
     #uploadFileToGallery_listParts(reqId)
     #uploadFileToGallery_abort(reqId)
-    #uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
+    uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
+def galleryProcessorWebhook() -> Response:
+    data = {
+        'id': 7,
+        'file': '34a97c44-ecf3-41a8-965c-3d82989f31e2.MOV',
+        'status': 'DONE',
+        'type': 'VIDEO',
+        'result': {
+            'resolutionWidth': 1920,
+            'resolutionHeight': 1440,
+            'shotTimestamp': "2026-02-23T22:59:52Z",
+            'fileSize': 47154973,
+            'mimeType': 'video/quicktime',
+            'extraMediaMimeType': 'image/webp',
+            'thumbnailMediaName': 'thumb_34a97c44-ecf3-41a8-965c-3d82989f31e2.webp',
+            'renderedMediaName': 'rend_34a97c44-ecf3-41a8-965c-3d82989f31e2.webp',
+            'photoMetadata': None,
+            'videoMetadata': {
+                'audioFrequency': '48.000 kHz',
+                'videoCodec': 'hevc',
+                'audioCodec': 'pcm_s16le',
+                'framerate': '29,97 fps',
+                'duration': 20385
+            }
+        }
+    }
+    return doPost(f'{BASE_URL_API}gallery/job/completed', json=data)
 
 #register()
 #confirmEmail()
@@ -440,7 +466,7 @@ login()
 #testInternalAuthorize()
 #uploadBadge()
 #deleteBadge()
-runDeleteDanglingBadges()
+#runDeleteDanglingBadges()
 #exception()
 #addFursuit()
 #addFursuit()
@@ -463,7 +489,9 @@ runDeleteDanglingBadges()
 #searchByOrderCode("T07EZ")
 #addUserToRole(5, 1, True)
 #removeUserFromRole(5, 1)
-#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "IMG_3736.MOV", 10)
+#testInternalAuthorize()
+uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
+#galleryProcessorWebhook()
 
 #getOrderFullStatus()
 

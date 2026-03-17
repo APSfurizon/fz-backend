@@ -137,14 +137,4 @@ public class GalleryController {
                 )
         );
     }
-
-    @Operation(summary = "Internal webhook for gallery processor, to notify completed jobs")
-    @PostMapping("/job/completed")
-    @InternalAuthorize
-    public boolean jobDone(@Valid @NotNull @RequestBody GalleryProcessorJob job) {
-        return executor.execute(
-                JobCompletedWebhookUseCase.class,
-                job
-        );
-    }
 }
