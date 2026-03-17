@@ -3,6 +3,7 @@ package net.furizon.backend.feature.gallery.action.processor.handleJob;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.gallery.action.uploads.deleteUpload.DeleteUploadAction;
 import net.furizon.backend.feature.gallery.action.uploads.updateUploadMetadata.UpdateUploadMetadataAction;
 import net.furizon.backend.feature.gallery.action.uploads.upsertImageMetadata.UpsertImageMetadataAction;
 import net.furizon.backend.feature.gallery.action.uploads.upsertVideoMetadata.UpsertVideoMetadataAction;
@@ -13,11 +14,16 @@ import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorUploadD
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.action.AddMediaAction;
+import net.furizon.backend.infrastructure.media.action.DeleteMediaAction;
 import net.furizon.backend.infrastructure.media.action.UpdateMediaMimeTypeAction;
+import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import net.furizon.jooq.generated.enums.UploadType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,7 +33,9 @@ public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobA
     @NotNull private final UpdateMediaMimeTypeAction updateMediaMimeTypeAction;
     @NotNull private final UpsertImageMetadataAction upsertImageMetadataAction;
     @NotNull private final UpsertVideoMetadataAction upsertVideoMetadataAction;
+    @NotNull private final DeleteMediaAction deleteMediaAction;
     @NotNull private final AddMediaAction addMediaAction;
+    @NotNull private final S3DeleteUpload s3DeleteUpload;
 
     @NotNull private final UploadFinder uploadFinder;
 
@@ -42,6 +50,16 @@ public class GalleryProcessorHandleJobImpl implements GalleryProcessorHandleJobA
         boolean res = true;
         long id = job.getId();
         log.info("Updating metadata for job {}", id);
+
+        if (job.getType() == UploadType.UNKNOWN) {
+            log.error("File type for job {} is unknown. Deleting the file", id);
+            deleteMediaAction.deleteFromDb(List.of(id));
+            //deleteUploadAction.invoke(id); ON CASCADE
+            String fileName = job.getFile();
+            if (fileName != null) {
+                s3DeleteUpload.delete(job.getFile());
+            }
+        }
 
         //Update metadata
         res = res && updateUploadMetadataAction.invoke(job);

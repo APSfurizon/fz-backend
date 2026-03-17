@@ -20,6 +20,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.NoSuchUploadException;
 
 import java.util.UUID;
 
@@ -65,7 +67,12 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
             //If it exists, delete it
             deleteUploadProgress.invoke(prevAttempt.getUploadReqId());
             //Abort previous upload
-            s3PresignedUpload.abortUpload(prevAttempt.getUploadId(), prevAttempt.getS3Key());
+            try {
+                s3PresignedUpload.abortUpload(prevAttempt.getUploadId(), prevAttempt.getS3Key());
+            } catch (NoSuchKeyException | NoSuchUploadException e) {
+                log.warn("Unable to abort previous upload for uploadId {} key {} reqId {}: {}",
+                    prevAttempt.getUploadId(), prevAttempt.getS3Key(), prevAttempt.getUploadReqId(), e.getMessage());
+            }
         }
 
         // Create new multipart upload

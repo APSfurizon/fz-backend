@@ -150,7 +150,8 @@ storage:
     endpoint: ${S3_ENDPOINT:}
     region: ${S3_REGION:changeme}
     bucket: ${S3_BUCKET:changeme}
-    multipart-size: ${S3_MULTIPART_PART_SIZE:4194304} #4 MB
+    bucket-path-style: ${S3_BUCKET_PATH_STYLE:false}
+    multipart-size: ${S3_MULTIPART_PART_SIZE:6291456} #6 MB
     presign-expiration-mins: ${S3_PRESIGN_EXPIRATION_MINS:15}
 
 
@@ -162,7 +163,7 @@ image:
 badge:
   storage-path: ${image.base-path}${BADGE_STORAGE_PATH:badges}
   full-storage-path: ${storage.full-media-path}${badge.storage-path}
-  max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:8388608} #8 MB
+  max-size-bytes: ${BADGE_IMAGE_MAX_SIZE_BYTES:4194304} #4 MB
   max-width: ${BADGE_IMAGE_MAX_WIDTH:512}
   max-height: ${BADGE_IMAGE_MAX_HEIGHT:512}
   editing-deadline: ${BADGE_EDITING_DEADLINE:}
@@ -195,3 +196,4 @@ gallery:
     endpoint: ${GALLERY_JOB_PROCESSOR_ENDPOINT:http://127.0.0.1:8082/}
     username: ${GALLERY_JOB_PROCESSOR_USERNAME:user}
     password: ${GALLERY_JOB_PROCESSOR_PASSWORD:password}
+    poll-interval: ${GALLERY_JOB_PROCESSOR_POLL_INTERVAL:10}

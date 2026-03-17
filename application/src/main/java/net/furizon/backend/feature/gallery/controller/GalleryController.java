@@ -20,10 +20,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/gallery")
@@ -95,11 +92,11 @@ public class GalleryController {
         + "`etags` field. Since you already know the number of chunks (it's signedUrls.length()), I suggest "
         + "pre allocating an array of strings of that size, and then for each response do a "
         + "`arr[partNo - 1] = eTag`. In this way you save yourself from a lot of problems, like concurrent access "
-        + "to the list. Together with the etag list and the sha1, you have to send again the eventId you're uploading "
-        + "the media to, the filename and the permission the user is giving to the repost of the media. "
-        + "If everything goes correctly and the hash is correct, the object of the media is returned. Some fields "
-        + "will still be missing since some processing is done async. If, while uploading the parts, you lose the "
-        + "context and you need to understand again which parts you've uploaded so far, "
+        + "to the list. Together with the etag list and the base64 encoded sha1, you have to send again the eventId "
+        + "you're uploading the media to, the filename and the permission the user is giving to the repost of the "
+        + "media. If everything goes correctly and the hash is correct, the object of the media is returned. Some "
+        + "fields will still be missing since some processing is done async. If, while uploading the parts, you lose "
+        + "the context and you need to understand again which parts you've uploaded so far, "
         + "use the `/upload/status` endpoint")
     @PostMapping("/upload/complete")
     public GalleryUpload completeUpload(
@@ -116,7 +113,7 @@ public class GalleryController {
     }
 
     @Operation(summary = "Get the list of parts uploaded so far")
-    @PostMapping("/upload/status")
+    @GetMapping("/upload/status")
     public ListUploadPartsResponse statusUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
             @Valid @NotNull @RequestBody final S3UploadRequest req

@@ -4,6 +4,8 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface UploadFinder {
     int countUserUploadsOnEvent(long userId, @NotNull Event event);
 
@@ -12,4 +14,8 @@ public interface UploadFinder {
     @Nullable Long getOriginalUploaderUserId(long uploadId);
 
     @Nullable Long getMainMediaIdFromUploadId(long uploadId);
+
+    @Nullable String getMainMediaFilenameFromUploadId(long uploadId);
+
+    @NotNull List<Long> getUnprocessedUploadIds();
 }

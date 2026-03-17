@@ -50,7 +50,7 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                 CreateMultipartUploadRequest.builder()
                         .bucket(bucket)
                         .key(fileName)
-                        .checksumAlgorithm("sha1")
+                        //.checksumAlgorithm("SHA1")
                         .build()
         );
 
@@ -66,7 +66,8 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                     .bucket(bucket)
                     .key(fileName)
                     .uploadId(uploadId)
-                    .contentLength(contentLength) //TODO we assume there's no min part limit for the last chunk TEST!!
+                    //.checksumAlgorithm("SHA1")
+                    .contentLength(contentLength)
                     .partNumber(partNo)
                     .build();
 
@@ -120,11 +121,14 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                 .bucket(s3Config.getBucket())
                 .key(fileName)
                 .uploadId(uploadId)
+                //.checksumType("CRC64NVME")
+                //.checksumSHA1(sha1)
                 .multipartUpload(completedUpload)
                 .build();
 
         CompleteMultipartUploadResponse response = s3.completeMultipartUpload(completeRequest);
-        return response.checksumSHA1();
+        String etag = response.eTag();
+        return response.eTag().substring(etag.indexOf('-'));
     }
 
     @Override

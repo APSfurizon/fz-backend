@@ -1,3 +1,6 @@
+import os
+import base64
+import hashlib
 import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
@@ -46,10 +49,10 @@ def doPost(url, json=None, data=None, auth=None, files=None) -> Response:
     print(response.headers)
     print(response.text)
     return response
-def doGet(url, auth=None) -> Response:
+def doGet(url, auth=None, json=None, data=None) -> Response:
     global session
     global HEADERS
-    response = session.get(url, headers=HEADERS, allow_redirects=False, auth=auth)
+    response = session.get(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
     print(f"\n-------- GET {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -61,6 +64,17 @@ def doDelete(url) -> Response:
     global HEADERS
     response = session.delete(url, headers=HEADERS, allow_redirects=False)
     print(f"\n-------- DELETE {url} --------")
+    print(response.status_code)
+    print(response.cookies.items())
+    print(response.headers)
+    print(response.text)
+    return response
+def doPut(url, data=None, extraHeaders=None) -> Response:
+    global session
+    global HEADERS
+    extraHeaders = HEADERS if extraHeaders is None else {**HEADERS, **extraHeaders}
+    response = session.put(url, headers=extraHeaders, allow_redirects=False, data=data)
+    print(f"\n-------- PUT {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
@@ -358,6 +372,61 @@ def removeUserFromRole(userId: int, roleId: int) -> Response:
     }
     return doPost(f'{BASE_URL_API}roles/{roleId}/remove-user', json=json)
     
+    
+def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, eventId: int, etags: list, hash: str) -> Response:
+    json = {
+        "uploadReqId": reqId,
+        "fileName": fileName,
+        "fileSize": fileSize,
+        "eventId": eventId,
+        "uploadRepostPermissions": "CC_BY_NC_ND",
+        "etags": etags,
+        "sha1Hash": hash
+    }
+    return doPost(f'{BASE_URL_API}gallery/upload/complete', json=json)
+def uploadFileToGallery_listParts(reqId: int) -> Response:
+    json = {
+        "uploadReqId": reqId
+    }
+    return doGet(f'{BASE_URL_API}gallery/upload/status', json=json)
+def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
+    path = filePath + "/" + fileName
+    fileSize = os.path.getsize(path)
+    json = {
+        "fileName": fileName,
+        "fileSize": fileSize,
+        "eventId": eventId
+    }
+    ret = doPost(f'{BASE_URL_API}gallery/upload', json=json)
+    
+    ret = ret.json()
+    reqId = ret["uploadReqId"]
+    ret = ret["multipartCreationResponse"]
+    chunkSize = ret["chunkSize"]
+    presignedUrls = ret["presignedUrls"]
+    
+    #globalSha = hashlib.md5()
+    md5 = [0] * len(presignedUrls)
+    etags = [0] * len(presignedUrls)
+    
+    with open(path, 'rb') as f:
+        for i, url in enumerate(presignedUrls):
+            chunk = f.read(chunkSize)
+            #globalSha.update(chunk)
+            headers = {
+                #"x-amz-sdk-checksum-algorithm": "SHA1",
+                #"x-amz-checksum-sha1": base64.b64encode(hashlib.sha1(chunk).digest()).decode("UTF-8")
+            }
+            ret = doPut(url, data=chunk, extraHeaders=headers)
+            etags[i] = ret.headers["etag"]
+            md5[i] = hashlib.md5(chunk).digest()
+            
+    #finalHash = base64.b64encode(globalSha.digest()).decode("UTF-8")
+    finalHash = hashlib.md5(b"".join(md5)).hexdigest()
+    
+    uploadFileToGallery_listParts(reqId)
+    
+    uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
 
 #register()
 #confirmEmail()
@@ -395,7 +464,8 @@ login()
 #searchByOrderSerial(1)
 #searchByOrderCode("T07EZ")
 #addUserToRole(5, 1, True)
-removeUserFromRole(5, 1)
+#removeUserFromRole(5, 1)
+uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "IMG_3736.MOV", 10)
 
 #getOrderFullStatus()
 
