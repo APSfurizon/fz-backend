@@ -29,7 +29,7 @@ public class JooqEventMapper {
 
 
     @NotNull
-    private Event map_(Record record) {
+    public Event mapInternal(Record record) {
         return Event.builder()
             .id(record.get(EVENTS.ID))
             .slug(record.get(EVENTS.EVENT_SLUG))
@@ -58,7 +58,7 @@ public class JooqEventMapper {
     }
 
     public static Event map(Record record) {
-        return MAPPER.map_(record);
+        return MAPPER.mapInternal(record);
     }
 
     @PostConstruct

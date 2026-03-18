@@ -452,6 +452,9 @@ def galleryProcessorWebhook() -> Response:
     }
     return doPost(f'{BASE_URL_API}gallery/job/completed', json=data)
 
+def getUpload(uploadId: int) -> Response:
+    return doGet(f'{BASE_URL_API}gallery/pub/{uploadId}')
+
 #register()
 #confirmEmail()
 login()
@@ -490,8 +493,9 @@ login()
 #addUserToRole(5, 1, True)
 #removeUserFromRole(5, 1)
 #testInternalAuthorize()
-uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
+#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
 #galleryProcessorWebhook()
+getUpload(13)
 
 #getOrderFullStatus()
 
