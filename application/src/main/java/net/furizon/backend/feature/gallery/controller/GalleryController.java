@@ -4,28 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
-import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorJob;
-import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
-import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
-import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
-import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
-import net.furizon.backend.feature.gallery.dto.response.ListUploadsResponse;
-import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
-import net.furizon.backend.feature.gallery.usecase.DeleteUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
-import net.furizon.backend.feature.gallery.usecase.processor.JobCompletedWebhookUseCase;
-import net.furizon.backend.feature.gallery.usecase.uploadProgress.AbortUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.uploadProgress.CompleteUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.uploadProgress.ListUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.uploadProgress.StartUploadUseCase;
+import net.furizon.backend.feature.gallery.dto.response.*;
+import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
-import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -98,6 +84,43 @@ public class GalleryController {
                 )
         );
     }
+
+    @Operation(summary = "List all the events with photos, with extra gallery-related information", description =
+        "This endpoint should be used to display a list of events with their small gallery card. "
+        + "Together with the event, this returns the number of photos per each event, and the medias "
+        + "which have been selected as cover for this event. You have two sizes of the media, "
+        + "a square small thumbnail and a bigger one. Use it depending on your needs. "
+        + "Keep in mind that there may be no cover photo selected at all, so the frontend should fallback "
+        + "to a default icon if neither of the twos are present. By specifying the query param `photographerUserId` "
+        + "you can filter the results to just the events a photographer has uploaded to, and the counts will be only "
+        + "on his photos.")
+    @GetMapping("/pub/events")
+    public @NotNull ListGalleryEventsResponse listEvents(
+        @RequestParam @Nullable @Valid @Positive final Long photographerUserId
+    ) {
+        return executor.execute(
+            ListGalleryEventsUseCase.class,
+            photographerUserId == null ? -1L : photographerUserId
+        );
+    }
+
+    @Operation(summary = "Fetch the specified event, together with extra gallery-related information", description =
+        "This endpoint behaves the same as `GET /pub/events`. Please look at his documentation. "
+        + "The idea behind this single fetch is to have a big event card to show if a particular event is selected")
+    @GetMapping("/pub/events/{eventId}")
+    public @NotNull GalleryEvent listEvents(
+            @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
+            @PathVariable @NotNull @Valid @Positive final Long eventId
+    ) {
+        return executor.execute(
+                FetchGalleryEventUseCase.class,
+                new FetchGalleryEventUseCase.Input(
+                        photographerUserId,
+                        eventId
+                )
+        );
+    }
+
 
     @Operation(summary = "List the uploads made by the current logged in user", description =
         "This is an endpoint which simply wraps `GET /pub/list`. Look at its description "

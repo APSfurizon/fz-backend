@@ -2,6 +2,7 @@ package net.furizon.backend.feature.gallery.finder;
 
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
+import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,4 +50,10 @@ public interface UploadFinder {
 
     @NotNull
     JooqUploadFinder.FullUploadObjSelected selectFullUploadObj();
+
+    @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId);
+
+    @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId);
+
+    @NotNull JooqUploadFinder.GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId);
 }

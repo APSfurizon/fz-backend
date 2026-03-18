@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
+import net.furizon.backend.feature.gallery.dto.GalleryEvent;
+import net.furizon.backend.feature.gallery.mapper.GalleryEventMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryPreviewMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -301,6 +303,110 @@ public class JooqUploadFinder implements UploadFinder {
                 render,
                 thumbnail,
                 userPropic
+        );
+    }
+
+    @Override
+    public @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId) {
+        var q = selectGalleryEventObj(photographerId);
+        return query.fetchFirst(
+                q.query
+                .where(EVENTS.ID.eq(eventId))
+            )
+            .mapOrNull(r -> GalleryEventMapper.map(r, q.media, q.render, q.thumbnail, q.countField, q.countTable));
+    }
+    @Override
+    public @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId) {
+        var q = selectGalleryEventObj(photographerId);
+        return query.fetch(
+                q.query
+                .orderBy(EVENTS.EVENT_DATE_FROM, EVENTS.EVENT_DATE_TO, EVENTS.ID)
+            )
+            .stream()
+            .map(r -> GalleryEventMapper.map(r, q.media, q.render, q.thumbnail, q.countField, q.countTable))
+            .toList();
+    }
+
+    public record GalleryEventObjSelected(
+        SelectOnConditionStep<Record> query,
+        Table<?> media,
+        Table<?> render,
+        Table<?> thumbnail,
+        Field<Integer> countField,
+        Table<Record2<Long, Integer>> countTable
+    ) {}
+
+    @Override
+    public @NotNull GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId) {
+        Table<?> media = MEDIA.as("main_media");
+        Table<?> render = MEDIA.as("render_media");
+        Table<?> thumbnail = MEDIA.as("thumbnail_media");
+
+        var countField = PostgresDSL.field("countField", Integer.class);
+        var countTable =
+            PostgresDSL.select(
+                UPLOADS.EVENT_ID,
+                PostgresDSL.countDistinct(UPLOADS.ID).as(countField)
+            )
+            .from(UPLOADS)
+            .where(
+                (photographerId == null ? PostgresDSL.trueCondition() : UPLOADS.PHOTOGRAPHER_USER_ID.eq(photographerId))
+                .and(UPLOADS.STATUS.eq(UploadStatus.PENDING))
+            )
+            .groupBy(UPLOADS.EVENT_ID)
+            .asTable("countTable");
+
+        var q = PostgresDSL.select(
+                    EVENTS.ID,
+                    EVENTS.EVENT_SLUG,
+                    EVENTS.EVENT_DATE_TO,
+                    EVENTS.EVENT_DATE_FROM,
+                    EVENTS.EVENT_IS_CURRENT,
+                    EVENTS.EVENT_PUBLIC_URL,
+                    EVENTS.EVENT_NAMES_JSON,
+                    EVENTS.EVENT_IS_LIVE,
+                    EVENTS.EVENT_TEST_MODE_ENABLED,
+                    EVENTS.EVENT_IS_PUBLIC,
+                    EVENTS.EVENT_GEO_LAT,
+                    EVENTS.EVENT_GEO_LON,
+                    countTable.field(countField),
+                    media.field(MEDIA.MEDIA_ID),
+                    media.field(MEDIA.MEDIA_PATH),
+                    media.field(MEDIA.MEDIA_TYPE),
+                    media.field(MEDIA.MEDIA_STORE_METHOD),
+                    thumbnail.field(MEDIA.MEDIA_ID),
+                    thumbnail.field(MEDIA.MEDIA_PATH),
+                    thumbnail.field(MEDIA.MEDIA_TYPE),
+                    thumbnail.field(MEDIA.MEDIA_STORE_METHOD),
+                    render.field(MEDIA.MEDIA_ID),
+                    render.field(MEDIA.MEDIA_PATH),
+                    render.field(MEDIA.MEDIA_TYPE),
+                    render.field(MEDIA.MEDIA_STORE_METHOD)
+                )
+                .from(EVENTS)
+                .innerJoin(countTable)
+                .on(EVENTS.ID.eq(countTable.field(UPLOADS.EVENT_ID)))
+                .leftJoin(
+                    UPLOADS
+                    .innerJoin(media)
+                    .on(UPLOADS.MEDIA_ID.eq(media.field(MEDIA.MEDIA_ID)))
+                    .leftJoin(thumbnail)
+                    .on(UPLOADS.THUMBNAIL_MEDIA_ID.eq(thumbnail.field(MEDIA.MEDIA_ID)))
+                    .leftJoin(render)
+                    .on(UPLOADS.RENDERED_MEDIA_ID.eq(render.field(MEDIA.MEDIA_ID)))
+                )
+                .on(
+                    UPLOADS.EVENT_ID.eq(EVENTS.ID)
+                    .and(UPLOADS.IS_SELECTED.eq(PostgresDSL.trueCondition()))
+                );
+
+        return new GalleryEventObjSelected(
+                q,
+                media,
+                render,
+                thumbnail,
+                countField,
+                countTable
         );
     }
 }

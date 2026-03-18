@@ -468,6 +468,12 @@ def listUploads(fromId: int = None, photographerId: int = None, eventId: int = N
     return doGet(url)
 def deleteUpload(uploadId: int) -> Response:
     return doDelete(f'{BASE_URL_API}gallery/manage/{uploadId}')
+def getGalleryEvents() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/events')
+    return doGet(f'{BASE_URL_API}gallery/pub/events?photographerUserId=2')
+def getGalleryEvent() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/events/10')
+    return doGet(f'{BASE_URL_API}gallery/pub/events/10?photographerUserId=2')
 
 #register()
 #confirmEmail()
@@ -516,7 +522,9 @@ login()
     #eventId = 10
 #)
 #myUploads()
-deleteUpload(16)
+#deleteUpload(16)
+#getGalleryEvents()
+getGalleryEvent()
 
 #getOrderFullStatus()
 
