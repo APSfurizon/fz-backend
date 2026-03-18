@@ -79,7 +79,7 @@ public class GetUserAdminViewDataUseCase {
         response.personalInfo(privateInfo)
                 .email(auth.getEmail())
                 .banned(auth.isDisabled())
-                .showInNousecount(jooqUser.isShowInNoseCount());
+                .showInNosecount(jooqUser.isShowInNoseCount());
 
         // Fetch all user's cards
         List<MembershipCard> cards = membershipCardFinder.getCardsOfUser(userId);

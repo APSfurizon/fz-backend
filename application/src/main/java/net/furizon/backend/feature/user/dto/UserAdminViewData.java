@@ -50,7 +50,7 @@ public class UserAdminViewData {
     private final List<RoomInfoResponse> otherRooms;
 
     //Badge + Fursuits + bringing in current event
-    private final boolean showInNousecount;
+    private final boolean showInNosecount;
     @NotNull
     private final FullInfoBadgeResponse badgeData;
 

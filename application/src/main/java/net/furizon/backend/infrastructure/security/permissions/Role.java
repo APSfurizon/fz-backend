@@ -11,12 +11,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Data
+
 public class Role {
     private final long roleId;
-    @Nullable private final String displayName;
+
     @NotNull private final String internalName;
+    @Nullable private final String displayName;
+
+    private final boolean showInAdminCount;
+
     private final long roleAdmincountPriority;
-    private final boolean showInNosecount;
 
     @Getter(AccessLevel.NONE)
     private List<JooqPermission> permissions = null;
