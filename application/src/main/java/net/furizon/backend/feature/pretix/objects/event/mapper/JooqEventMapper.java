@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.event.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -20,13 +21,15 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 @Component
 @RequiredArgsConstructor
 public class JooqEventMapper {
+    private static JooqEventMapper MAPPER = null;
+
     private final TypeReference<Map<String, String>> typeRef = new TypeReference<>() {};
     private final PretixConfig pretixConfig;
     private final ObjectMapper objectMapper;
 
 
     @NotNull
-    public Event map(Record record) {
+    private Event map_(Record record) {
         return Event.builder()
             .id(record.get(EVENTS.ID))
             .slug(record.get(EVENTS.EVENT_SLUG))
@@ -52,5 +55,14 @@ public class JooqEventMapper {
             .geoLatitude(record.get(EVENTS.EVENT_GEO_LAT))
             .geoLongitude(record.get(EVENTS.EVENT_GEO_LON))
             .build();
+    }
+
+    public static Event map(Record record) {
+        return MAPPER.map_(record);
+    }
+
+    @PostConstruct
+    public void init() {
+        MAPPER = this;
     }
 }

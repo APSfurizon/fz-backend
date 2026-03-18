@@ -17,6 +17,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class GalleryUpload {
     private final long id;
+    private final long originalUploader;
     @NotNull private final UserDisplayData photographer;
 
     @NotNull private final OffsetDateTime uploadDate;
@@ -30,8 +31,8 @@ public class GalleryUpload {
     private final int height;
     @NotNull private final UploadType type;
 
-    @NotNull private final MediaResponse media;
-    @Nullable private final MediaResponse renderedMedia;
+    @NotNull private final MediaResponse downloadMedia;
+    @NotNull private final MediaResponse displayMedia;
     @Nullable private final MediaResponse thumbnailMedia;
 
     private boolean isSelected;

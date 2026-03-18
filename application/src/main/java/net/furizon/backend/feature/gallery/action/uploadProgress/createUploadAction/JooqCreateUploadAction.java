@@ -92,6 +92,7 @@ public class JooqCreateUploadAction implements CreateUploadAction {
 
         return GalleryUpload.builder()
                 .id(uploadId)
+                .originalUploader(uploaderUserId)
                 .photographer(Objects.requireNonNull(userFinder.getDisplayUser(photographerUserId, event)))
                 .uploadDate(OffsetDateTime.now())
                 .status(UploadStatus.PENDING) //TODO find a way to plug the actual default coming from the db
@@ -100,7 +101,8 @@ public class JooqCreateUploadAction implements CreateUploadAction {
                 .width(0)
                 .height(0)
                 .type(UploadType.UNPROCESSED)
-                .media(media)
+                .downloadMedia(media)
+                .displayMedia(media)
                 .isSelected(false)
                 .repostPermissions(repostPermissions)
                 .event(event)

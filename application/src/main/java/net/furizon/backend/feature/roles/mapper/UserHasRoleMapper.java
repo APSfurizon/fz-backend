@@ -10,7 +10,7 @@ public class UserHasRoleMapper {
     public static UserHasRoleResponse map(Record record) {
         return new UserHasRoleResponse(
                 record.get(USER_HAS_ROLE.TEMP_EVENT_ID) != null,
-                JooqUserDisplayMapper.map(record, false)
+                JooqUserDisplayMapper.map(record, false, null)
         );
     }
 }

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.finder;
 
+import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,4 +23,8 @@ public interface UploadFinder {
     @Nullable Long getUploadIdByHashOnEvent(@NotNull String hash, long eventId);
 
     @NotNull List<Long> getUnprocessedUploadIds();
+
+    @Nullable GalleryUpload getUploadById(long uploadId);
+
+    JooqUploadFinder.FullUploadObjSelected selectFullUploadObj();
 }

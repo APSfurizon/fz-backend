@@ -19,14 +19,12 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 public class JooqEventFinder implements EventFinder {
     private final SqlQuery query;
 
-    private final JooqEventMapper mapper;
-
     @Override
     public @Nullable Event findEventBySlug(@NotNull String slug) {
         return query.fetchFirst(
             selectEvent()
             .where(EVENTS.EVENT_SLUG.eq(slug))
-        ).mapOrNull(mapper::map);
+        ).mapOrNull(JooqEventMapper::map);
     }
 
     @Override
@@ -34,12 +32,12 @@ public class JooqEventFinder implements EventFinder {
         return query.fetchFirst(
             selectEvent()
             .where(EVENTS.ID.eq(id))
-        ).mapOrNull(mapper::map);
+        ).mapOrNull(JooqEventMapper::map);
     }
 
     @Override
     public @NotNull List<Event> getAllEvents() {
-        return query.fetch(selectEvent()).stream().map(mapper::map).toList();
+        return query.fetch(selectEvent()).stream().map(JooqEventMapper::map).toList();
     }
 
     private @NotNull SelectJoinStep<?> selectEvent() {

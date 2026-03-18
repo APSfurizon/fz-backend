@@ -6,18 +6,37 @@ import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record;
+import org.jooq.Table;
+import org.jooq.TableField;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
 
 public class MediaResponseMapper {
     @Nullable
     public static MediaResponse mapOrNull(Record record) {
-        Long mediaId = record.get(MEDIA.MEDIA_ID);
-        String mediaPath = record.get(MEDIA.MEDIA_PATH);
-        String mediaType = record.get(MEDIA.MEDIA_TYPE);
-        Integer storage = record.get(MEDIA.MEDIA_STORE_METHOD);
+        return mapOrNull(record, null);
+    }
+    @Nullable
+    public static MediaResponse mapOrNull(Record record, @Nullable Table<?> table) {
+        Long mediaId;
+        String mediaPath;
+        String mediaType;
+        Integer storage;
+
+        if (table == null) {
+            mediaId = record.get(MEDIA.MEDIA_ID);
+            mediaPath = record.get(MEDIA.MEDIA_PATH);
+            mediaType = record.get(MEDIA.MEDIA_TYPE);
+            storage = record.get(MEDIA.MEDIA_STORE_METHOD);
+        } else {
+            mediaId = record.get(table.field(MEDIA.MEDIA_ID));
+            mediaPath = record.get(table.field(MEDIA.MEDIA_PATH));
+            mediaType = record.get(table.field(MEDIA.MEDIA_TYPE));
+            storage = record.get(table.field(MEDIA.MEDIA_STORE_METHOD));
+        }
 
         if (mediaId == null || mediaPath == null || mediaType == null || storage == null) {
             return null;
@@ -31,12 +50,12 @@ public class MediaResponseMapper {
     }
 
     @NotNull
+    public static MediaResponse map(Record record, @Nullable Table<?> table) {
+        return Objects.requireNonNull(mapOrNull(record, table));
+    }
+    @NotNull
     public static MediaResponse map(Record record) {
-        return new MediaResponse(
-                record.get(MEDIA.MEDIA_ID),
-                MediaData.getFullPath(record),
-                record.get(MEDIA.MEDIA_TYPE)
-        );
+        return Objects.requireNonNull(mapOrNull(record));
     }
 
     @NotNull

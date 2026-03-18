@@ -2,18 +2,22 @@ package net.furizon.backend.feature.gallery.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
+import net.furizon.backend.feature.gallery.dto.GalleryUpload;
+import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Record;
+import org.jooq.SelectOnConditionStep;
+import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static net.furizon.jooq.generated.Tables.MEDIA;
-import static net.furizon.jooq.generated.Tables.UPLOADS;
+import static net.furizon.jooq.generated.Tables.*;
 
 @Component
 @RequiredArgsConstructor
@@ -100,5 +104,118 @@ public class JooqUploadFinder implements UploadFinder {
             .from(UPLOADS)
             .where(UPLOADS.UPLOAD_TYPE.eq(UploadType.UNPROCESSED))
         ).stream().map(r -> r.get(UPLOADS.ID)).toList();
+    }
+
+    @Override
+    public @Nullable GalleryUpload getUploadById(long uploadId) {
+        FullUploadObjSelected q = selectFullUploadObj();
+        return query.fetchFirst(
+                q.query.where(UPLOADS.ID.eq(uploadId))
+        ).mapOrNull(r -> GalleryUploadMapper.map(
+                r,
+                q.media,
+                q.render,
+                q.thumbnail,
+                q.userPropic
+        ));
+    }
+
+    public record FullUploadObjSelected(
+            SelectOnConditionStep<Record> query,
+            Table<?> media,
+            Table<?> render,
+            Table<?> thumbnail,
+            Table<?> userPropic
+    ) {}
+
+    @Override
+    public FullUploadObjSelected selectFullUploadObj() {
+        Table<?> media = MEDIA.as("main_media");
+        Table<?> render = MEDIA.as("render_media");
+        Table<?> thumbnail = MEDIA.as("thumbnail_media");
+        Table<?> userPropic = MEDIA.as("propic");
+        var query = PostgresDSL.select(
+                        UPLOADS.ID,
+                        UPLOADS.ORIGINAL_UPLOADER_USER_ID,
+                        UPLOADS.UPLOAD_TIMESTAMP,
+                        UPLOADS.SHOT_TIMESTAMP,
+                        UPLOADS.STATUS,
+                        UPLOADS.ORIGINAL_FILE_NAME,
+                        UPLOADS.FILE_SIZE,
+                        UPLOADS.RESOLUTION_WIDTH,
+                        UPLOADS.RESOLUTION_HEIGTH,
+                        UPLOADS.UPLOAD_TYPE,
+                        UPLOADS.IS_SELECTED,
+                        UPLOADS.REPOST_PERMISSIONS,
+                        USERS.USER_ID,
+                        USERS.USER_FURSONA_NAME,
+                        USERS.USER_LOCALE,
+                        USERS.USER_LANGUAGE,
+                        userPropic.field(MEDIA.MEDIA_ID),
+                        userPropic.field(MEDIA.MEDIA_PATH),
+                        userPropic.field(MEDIA.MEDIA_TYPE),
+                        userPropic.field(MEDIA.MEDIA_STORE_METHOD),
+                        EVENTS.ID,
+                        EVENTS.EVENT_SLUG,
+                        EVENTS.EVENT_DATE_TO,
+                        EVENTS.EVENT_DATE_FROM,
+                        EVENTS.EVENT_IS_CURRENT,
+                        EVENTS.EVENT_PUBLIC_URL,
+                        EVENTS.EVENT_NAMES_JSON,
+                        EVENTS.EVENT_IS_LIVE,
+                        EVENTS.EVENT_TEST_MODE_ENABLED,
+                        EVENTS.EVENT_IS_PUBLIC,
+                        EVENTS.EVENT_GEO_LAT,
+                        EVENTS.EVENT_GEO_LON,
+                        media.field(MEDIA.MEDIA_ID),
+                        media.field(MEDIA.MEDIA_PATH),
+                        media.field(MEDIA.MEDIA_TYPE),
+                        media.field(MEDIA.MEDIA_STORE_METHOD),
+                        thumbnail.field(MEDIA.MEDIA_ID),
+                        thumbnail.field(MEDIA.MEDIA_PATH),
+                        thumbnail.field(MEDIA.MEDIA_TYPE),
+                        thumbnail.field(MEDIA.MEDIA_STORE_METHOD),
+                        render.field(MEDIA.MEDIA_ID),
+                        render.field(MEDIA.MEDIA_PATH),
+                        render.field(MEDIA.MEDIA_TYPE),
+                        render.field(MEDIA.MEDIA_STORE_METHOD),
+                        UPLOAD_EXIF.CAMERA_MAKER,
+                        UPLOAD_EXIF.CAMERA_MODEL,
+                        UPLOAD_EXIF.LENS_MAKER,
+                        UPLOAD_EXIF.LENS_MODEL,
+                        UPLOAD_EXIF.FOCAL,
+                        UPLOAD_EXIF.SHUTTER,
+                        UPLOAD_EXIF.APERTURE,
+                        UPLOAD_EXIF.ISO,
+                        UPLOAD_VIDEO_DATA.VIDEO_CODEC,
+                        UPLOAD_VIDEO_DATA.AUDIO_CODEC,
+                        UPLOAD_VIDEO_DATA.AUDIO_FREQUENCY,
+                        UPLOAD_VIDEO_DATA.DURATION,
+                        UPLOAD_VIDEO_DATA.FRAMERATE
+                )
+                .from(UPLOADS)
+                .innerJoin(USERS)
+                .on(UPLOADS.PHOTOGRAPHER_USER_ID.eq(USERS.USER_ID))
+                .innerJoin(userPropic)
+                .on(USERS.MEDIA_ID_PROPIC.eq(userPropic.field(MEDIA.MEDIA_ID)))
+                .innerJoin(EVENTS)
+                .on(UPLOADS.EVENT_ID.eq(EVENTS.ID))
+                .innerJoin(media)
+                .on(USERS.MEDIA_ID_PROPIC.eq(media.field(MEDIA.MEDIA_ID)))
+                .leftJoin(thumbnail)
+                .on(USERS.MEDIA_ID_PROPIC.eq(thumbnail.field(MEDIA.MEDIA_ID)))
+                .leftJoin(render)
+                .on(USERS.MEDIA_ID_PROPIC.eq(render.field(MEDIA.MEDIA_ID)))
+                .leftJoin(UPLOAD_EXIF)
+                .on(UPLOAD_EXIF.UPLOAD_ID.eq(UPLOADS.ID))
+                .leftJoin(UPLOAD_VIDEO_DATA)
+                .on(UPLOAD_VIDEO_DATA.UPLOAD_ID.eq(UPLOADS.ID));
+        return new FullUploadObjSelected(
+                query,
+                media,
+                render,
+                thumbnail,
+                userPropic
+        );
     }
 }
