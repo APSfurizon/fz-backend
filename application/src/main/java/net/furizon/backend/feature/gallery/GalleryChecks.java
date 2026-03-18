@@ -37,7 +37,7 @@ public class GalleryChecks {
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final TranslationService translationService;
 
-    private void assertUploadFound(@Nullable Object obj) {
+    public void assertUploadFound(@Nullable Object obj) {
         if (obj == null) {
             log.error("Upload not found");
             throw new ApiException(
@@ -129,7 +129,7 @@ public class GalleryChecks {
         }
     }
     public void assertUserCanDeleteUpload(long userId, long uploadId) {
-        Long uploaderId = uploadFinder.getUploaderUserId(uploadId);
+        Long uploaderId = uploadFinder.getPhotographerUserId(uploadId);
         assertUploadFound(uploaderId);
         if (uploaderId != userId) {
             boolean admin = permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_FULLY_DELETE_UPLOADS);

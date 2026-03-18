@@ -3,26 +3,30 @@ package net.furizon.backend.feature.gallery.finder;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.pretix.objects.event.Event;
-import net.furizon.jooq.generated.enums.UploadStatus;
-import net.furizon.jooq.generated.enums.UploadType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Record12;
 import org.jooq.SelectOnConditionStep;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface UploadFinder {
     int countUserUploadsOnEvent(long userId, @NotNull Event event);
 
-    @Nullable Long getUploaderUserId(long uploadId);
+    @Nullable Long getPhotographerUserId(long uploadId);
 
     @Nullable Long getOriginalUploaderUserId(long uploadId);
 
     @Nullable Long getMainMediaIdFromUploadId(long uploadId);
 
     @Nullable String getMainMediaFilenameFromUploadId(long uploadId);
+
+    @Nullable Long getThumbnailMediaIdFromUploadId(long uploadId);
+
+    @Nullable String getThumbnailMediaFilenameFromUploadId(long uploadId);
+
+    @Nullable Long getRenderMediaIdFromUploadId(long uploadId);
+
+    @Nullable String getRenderMediaFilenameFromUploadId(long uploadId);
 
     @Nullable Long getUploadIdByHash(@NotNull String hash);
 

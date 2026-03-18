@@ -41,7 +41,7 @@ public class JooqUploadFinder implements UploadFinder {
     }
 
     @Override
-    public @Nullable Long getUploaderUserId(long uploadId) {
+    public @Nullable Long getPhotographerUserId(long uploadId) {
         return query.fetchFirst(
             PostgresDSL.select(UPLOADS.PHOTOGRAPHER_USER_ID)
             .from(UPLOADS)
@@ -57,26 +57,49 @@ public class JooqUploadFinder implements UploadFinder {
         ).mapOrNull(r -> r.get(UPLOADS.ORIGINAL_UPLOADER_USER_ID));
     }
 
-    @Override
-    public @Nullable Long getMainMediaIdFromUploadId(long uploadId) {
+    private @Nullable Long getMediaIdFromUploadId(long uploadId, @NotNull TableField<Record, Long> field) {
         return query.fetchFirst(
-            PostgresDSL.select(UPLOADS.MEDIA_ID)
+            PostgresDSL.select(field)
             .from(UPLOADS)
             .where(UPLOADS.ID.eq(uploadId))
-        ).mapOrNull(r -> r.get(UPLOADS.MEDIA_ID));
+        ).mapOrNull(r -> r.get(field));
     }
-    @Override
-    public @Nullable String getMainMediaFilenameFromUploadId(long uploadId) {
+    private @Nullable String getMediaFilenameFromUploadId(long uploadId, @NotNull TableField<Record, Long> field) {
         return query.fetchFirst(
             PostgresDSL.select(MEDIA.MEDIA_PATH)
             .from(MEDIA)
             .innerJoin(UPLOADS)
             .on(
-                MEDIA.MEDIA_ID.eq(UPLOADS.MEDIA_ID)
+                MEDIA.MEDIA_ID.eq(field)
                 .and(UPLOADS.ID.eq(uploadId))
             )
         ).mapOrNull(r -> r.get(MEDIA.MEDIA_PATH));
     }
+    @Override
+    public @Nullable Long getMainMediaIdFromUploadId(long uploadId) {
+        return getMediaIdFromUploadId(uploadId, UPLOADS.MEDIA_ID);
+    }
+    @Override
+    public @Nullable String getMainMediaFilenameFromUploadId(long uploadId) {
+        return getMediaFilenameFromUploadId(uploadId, UPLOADS.MEDIA_ID);
+    }
+    @Override
+    public @Nullable Long getThumbnailMediaIdFromUploadId(long uploadId) {
+        return getMediaIdFromUploadId(uploadId, UPLOADS.THUMBNAIL_MEDIA_ID);
+    }
+    @Override
+    public @Nullable String getThumbnailMediaFilenameFromUploadId(long uploadId) {
+        return getMediaFilenameFromUploadId(uploadId, UPLOADS.THUMBNAIL_MEDIA_ID);
+    }
+    @Override
+    public @Nullable Long getRenderMediaIdFromUploadId(long uploadId) {
+        return getMediaIdFromUploadId(uploadId, UPLOADS.RENDERED_MEDIA_ID);
+    }
+    @Override
+    public @Nullable String getRenderMediaFilenameFromUploadId(long uploadId) {
+        return getMediaFilenameFromUploadId(uploadId, UPLOADS.RENDERED_MEDIA_ID);
+    }
+
 
     @Override
     public @Nullable Long getUploadIdByHash(@NotNull String hash) {

@@ -16,6 +16,7 @@ import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadsResponse;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
+import net.furizon.backend.feature.gallery.usecase.DeleteUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
 import net.furizon.backend.feature.gallery.usecase.processor.JobCompletedWebhookUseCase;
@@ -113,6 +114,26 @@ public class GalleryController {
                         fromUploadId,
                         user.getUserId(),
                         eventId,
+                        user
+                )
+        );
+    }
+
+
+    @Operation(summary = "Permanently deletes the specified upload", description =
+        "Keep in mind that only the media's photographer or a user with the "
+        + "`UPLOADS_CAN_FULLY_DELETE_UPLOADS` permission can delete an upload. "
+        + "For the latter, you can get the permissions of the user in the "
+        + "`GET /users/display/me` request.")
+    @DeleteMapping("/manage/{uploadId}")
+    public boolean deleteUpload(
+        @PathVariable @NotNull @Valid @Positive final Long uploadId,
+        @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                DeleteUploadUseCase.class,
+                new DeleteUploadUseCase.Input(
+                        uploadId,
                         user
                 )
         );

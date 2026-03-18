@@ -466,6 +466,8 @@ def listUploads(fromId: int = None, photographerId: int = None, eventId: int = N
         url += f"eventId={eventId}&"
     url += "a=0"
     return doGet(url)
+def deleteUpload(uploadId: int) -> Response:
+    return doDelete(f'{BASE_URL_API}gallery/manage/{uploadId}')
 
 #register()
 #confirmEmail()
@@ -513,7 +515,8 @@ login()
     #photographerId = 1,
     #eventId = 10
 #)
-myUploads()
+#myUploads()
+deleteUpload(16)
 
 #getOrderFullStatus()
 
