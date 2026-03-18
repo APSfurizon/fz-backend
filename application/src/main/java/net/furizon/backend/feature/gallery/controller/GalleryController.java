@@ -1,10 +1,12 @@
 package net.furizon.backend.feature.gallery.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorJob;
@@ -12,8 +14,10 @@ import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
+import net.furizon.backend.feature.gallery.dto.response.ListUploadsResponse;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
 import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
+import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
 import net.furizon.backend.feature.gallery.usecase.processor.JobCompletedWebhookUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.AbortUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.CompleteUploadUseCase;
@@ -22,7 +26,6 @@ import net.furizon.backend.feature.gallery.usecase.uploadProgress.StartUploadUse
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.InternalAuthorize;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,6 +67,52 @@ public class GalleryController {
                 FetchUploadUseCase.class,
                 new FetchUploadUseCase.Input(
                         uploadId,
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "List, filter and search all uploads", description =
+        "This endpoint is meant to create the page with the list of uploads, where an "
+        + "user will later click on one of them and it opens up (by calling `GET /pub/{uploadId}`). "
+        + "The objects returned here are smaller than the one for the exact upload fetch, they only "
+        + "contain few parameters, which are all explained in the previously mentioned method. "
+        + "Keep in mind that since post processing is async, a newly uploaded media may not have "
+        + "a thumbnail yet, so the reference could be null. In that instance, frontend should "
+        + "be display a default icon.")
+    @GetMapping("/pub/list")
+    public @NotNull ListUploadsResponse listUploads(
+            @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
+            @RequestParam @Nullable @Valid @Positive final Long eventId,
+            @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
+            @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
+    ) {
+        return executor.execute(
+                ListUploadsUseCase.class,
+                new ListUploadsUseCase.Input(
+                        fromUploadId,
+                        photographerUserId,
+                        eventId,
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "List the uploads made by the current logged in user", description =
+        "This is an endpoint which simply wraps `GET /pub/list`. Look at its description "
+        + "to understand how it works and how you should use it.")
+    @GetMapping("/my-uploads")
+    public @NotNull ListUploadsResponse listMyUploads(
+            @RequestParam @Nullable @Valid @Positive final Long eventId,
+            @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                ListUploadsUseCase.class,
+                new ListUploadsUseCase.Input(
+                        fromUploadId,
+                        user.getUserId(),
+                        eventId,
                         user
                 )
         );

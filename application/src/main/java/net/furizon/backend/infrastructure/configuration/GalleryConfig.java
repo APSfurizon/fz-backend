@@ -13,6 +13,9 @@ public class GalleryConfig implements HttpConfig {
     private final long maxLimitedUploadSize;
     private final long maxLimitedBigUploadSize;
 
+    private final long listingBatchSize;
+    private final long adminApprovalBatchSize;
+
     @NotNull
     private final JobProcessor jobProcessor;
 

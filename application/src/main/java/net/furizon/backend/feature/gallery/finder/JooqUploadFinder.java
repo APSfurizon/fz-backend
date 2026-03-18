@@ -3,15 +3,17 @@ package net.furizon.backend.feature.gallery.finder;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
+import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
+import net.furizon.backend.feature.gallery.mapper.GalleryPreviewMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -120,6 +122,65 @@ public class JooqUploadFinder implements UploadFinder {
         ));
     }
 
+    @Override
+    public @NotNull List<GalleryUploadPreview> listPreview(
+            @Nullable Long photographerId,
+            @Nullable Long eventId,
+            @Nullable Long reqUserId,
+            boolean isReqUserAnAdmin,
+            long fromId,
+            long limit
+    ) {
+        Condition condition = UPLOADS.ID.greaterThan(fromId);
+
+        if (reqUserId == null) {
+            condition = condition.and(UPLOADS.STATUS.eq(UploadStatus.APPROVED));
+        } else {
+            if (!isReqUserAnAdmin) {
+                condition = condition.and(
+                   UPLOADS.STATUS.eq(UploadStatus.APPROVED)
+                   .or(UPLOADS.PHOTOGRAPHER_USER_ID.eq(reqUserId))
+               );
+            }
+        }
+
+        if (photographerId != null) {
+            condition = condition.and(UPLOADS.PHOTOGRAPHER_USER_ID.eq(photographerId));
+        }
+        if (eventId != null) {
+            condition = condition.and(UPLOADS.EVENT_ID.eq(eventId));
+        }
+
+        return query.fetch(
+            selectPreviewUploadObj()
+            .where(condition)
+            .orderBy(UPLOADS.ID)
+            .limit(limit)
+        ).stream().map(GalleryPreviewMapper::map).toList();
+    }
+
+    @Override
+    public @NotNull SelectOnConditionStep<?> selectPreviewUploadObj() {
+        return PostgresDSL.select(
+                UPLOADS.ID,
+                UPLOADS.PHOTOGRAPHER_USER_ID,
+                UPLOADS.UPLOAD_TIMESTAMP,
+                UPLOADS.STATUS,
+                UPLOADS.ORIGINAL_FILE_NAME,
+                UPLOADS.UPLOAD_TYPE,
+                UPLOADS.IS_SELECTED,
+                UPLOADS.EVENT_ID,
+                //USERS.USER_FURSONA_NAME,
+                MEDIA.MEDIA_ID,
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_STORE_METHOD
+            )
+            .from(UPLOADS)
+            .leftJoin(MEDIA)
+            .on(UPLOADS.THUMBNAIL_MEDIA_ID.eq(MEDIA.MEDIA_ID));
+    }
+
     public record FullUploadObjSelected(
             SelectOnConditionStep<Record> query,
             Table<?> media,
@@ -129,6 +190,7 @@ public class JooqUploadFinder implements UploadFinder {
     ) {}
 
     @Override
+    @NotNull
     public FullUploadObjSelected selectFullUploadObj() {
         Table<?> media = MEDIA.as("main_media");
         Table<?> render = MEDIA.as("render_media");

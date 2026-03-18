@@ -454,6 +454,18 @@ def galleryProcessorWebhook() -> Response:
 
 def getUpload(uploadId: int) -> Response:
     return doGet(f'{BASE_URL_API}gallery/pub/{uploadId}')
+def myUploads() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/my-uploads')
+def listUploads(fromId: int = None, photographerId: int = None, eventId: int = None) -> Response:
+    url = f'{BASE_URL_API}gallery/pub/list?'
+    if fromId is not None:
+        url += f"fromUploadId={fromId}&"
+    if photographerId is not None:
+        url += f"photographerUserId={photographerId}&"
+    if eventId is not None:
+        url += f"eventId={eventId}&"
+    url += "a=0"
+    return doGet(url)
 
 #register()
 #confirmEmail()
@@ -495,7 +507,13 @@ login()
 #testInternalAuthorize()
 #uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
 #galleryProcessorWebhook()
-getUpload(13)
+#getUpload(13)
+#listUploads(
+    #fromId = 0,
+    #photographerId = 1,
+    #eventId = 10
+#)
+myUploads()
 
 #getOrderFullStatus()
 
