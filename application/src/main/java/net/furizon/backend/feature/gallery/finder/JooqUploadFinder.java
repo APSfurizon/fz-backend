@@ -2,13 +2,16 @@ package net.furizon.backend.feature.gallery.finder;
 
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
+import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.mapper.GalleryEventMapper;
+import net.furizon.backend.feature.gallery.mapper.GalleryPhotographerMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryPreviewMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
@@ -351,7 +354,7 @@ public class JooqUploadFinder implements UploadFinder {
             .from(UPLOADS)
             .where(
                 (photographerId == null ? PostgresDSL.trueCondition() : UPLOADS.PHOTOGRAPHER_USER_ID.eq(photographerId))
-                .and(UPLOADS.STATUS.eq(UploadStatus.PENDING))
+                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
             )
             .groupBy(UPLOADS.EVENT_ID)
             .asTable("countTable");
@@ -389,16 +392,16 @@ public class JooqUploadFinder implements UploadFinder {
                 .leftJoin(
                     UPLOADS
                     .innerJoin(media)
-                    .on(UPLOADS.MEDIA_ID.eq(media.field(MEDIA.MEDIA_ID)))
+                    .on(
+                        UPLOADS.MEDIA_ID.eq(media.field(MEDIA.MEDIA_ID))
+                        .and(UPLOADS.IS_SELECTED.eq(PostgresDSL.trueCondition()))
+                    )
                     .leftJoin(thumbnail)
                     .on(UPLOADS.THUMBNAIL_MEDIA_ID.eq(thumbnail.field(MEDIA.MEDIA_ID)))
                     .leftJoin(render)
                     .on(UPLOADS.RENDERED_MEDIA_ID.eq(render.field(MEDIA.MEDIA_ID)))
                 )
-                .on(
-                    UPLOADS.EVENT_ID.eq(EVENTS.ID)
-                    .and(UPLOADS.IS_SELECTED.eq(PostgresDSL.trueCondition()))
-                );
+                .on(UPLOADS.EVENT_ID.eq(EVENTS.ID));
 
         return new GalleryEventObjSelected(
                 q,
@@ -407,6 +410,90 @@ public class JooqUploadFinder implements UploadFinder {
                 thumbnail,
                 countField,
                 countTable
+        );
+    }
+
+    @Override
+    public @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId, @Nullable Long eventId) {
+        var q = selectGalleryPhotographerObj(eventId);
+        return query.fetchFirst(
+                q.query
+                .where(q.countTable.field(UPLOADS.PHOTOGRAPHER_USER_ID).eq(photographerId))
+        )
+        .mapOrNull(r -> GalleryPhotographerMapper.map(r, q.countField, q.countTable, q.officialPhotographer));
+    }
+    @Override
+    public @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId) {
+        var q = selectGalleryPhotographerObj(eventId);
+        return query.fetch(
+                q.query
+                .orderBy(
+                    q.officialPhotographer.desc(),
+                    q.countTable.field(q.countField).desc(),
+                    USERS.USER_FURSONA_NAME,
+                    USERS.USER_ID
+                )
+        )
+        .stream()
+        .map(r -> GalleryPhotographerMapper.map(r, q.countField, q.countTable, q.officialPhotographer))
+        .toList();
+    }
+
+
+    public record GalleryPhotographerObjSelected(
+            SelectOnConditionStep<?> query,
+            Field<Integer> countField,
+            Table<Record2<Long, Integer>> countTable,
+            Field<Boolean> officialPhotographer
+    ) {}
+
+    @Override
+    public GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId) {
+        var officialPhotographer = PostgresDSL.field("officialPhotographer", Boolean.class);
+        var countField = PostgresDSL.field("countField", Integer.class);
+        var countTable =
+            PostgresDSL.select(
+                UPLOADS.PHOTOGRAPHER_USER_ID,
+                PostgresDSL.countDistinct(UPLOADS.ID).as(countField)
+            )
+            .from(UPLOADS)
+            .where(
+                (eventId == null ? PostgresDSL.trueCondition() : UPLOADS.EVENT_ID.eq(eventId))
+                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
+            )
+            .groupBy(UPLOADS.PHOTOGRAPHER_USER_ID)
+            .asTable("countTable");
+        var q = PostgresDSL.select(
+                    USERS.USER_ID,
+                    USERS.USER_FURSONA_NAME,
+                    USERS.USER_LOCALE,
+                    USERS.USER_LANGUAGE,
+                    MEDIA.MEDIA_ID,
+                    MEDIA.MEDIA_PATH,
+                    MEDIA.MEDIA_TYPE,
+                    MEDIA.MEDIA_STORE_METHOD,
+                    countTable.field(countField),
+                    USER_HAS_ROLE.ROLE_ID.isNotNull().as(officialPhotographer)
+                )
+                .from(USERS)
+                .innerJoin(countTable)
+                .on(USERS.USER_ID.eq(countTable.field(UPLOADS.PHOTOGRAPHER_USER_ID)))
+                .leftJoin(MEDIA)
+                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
+                .leftJoin(
+                    USER_HAS_ROLE
+                    .innerJoin(PERMISSION)
+                    .on(
+                        PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                        .and(PERMISSION.PERMISSION_VALUE.eq(Permission.UPLOADS_OFFICIAL_UPLOADER.getValue()))
+                    )
+                )
+                .on(USER_HAS_ROLE.USER_ID.eq(USERS.USER_ID));
+        return new GalleryPhotographerObjSelected(
+                q,
+                countField,
+                countTable,
+                officialPhotographer
         );
     }
 }

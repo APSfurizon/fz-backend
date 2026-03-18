@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.finder;
 
+import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
@@ -56,4 +57,10 @@ public interface UploadFinder {
     @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId);
 
     @NotNull JooqUploadFinder.GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId);
+
+    @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId, @Nullable Long eventId);
+
+    @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId);
+
+    JooqUploadFinder.GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId);
 }

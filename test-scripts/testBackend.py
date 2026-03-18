@@ -474,6 +474,12 @@ def getGalleryEvents() -> Response:
 def getGalleryEvent() -> Response:
     #return doGet(f'{BASE_URL_API}gallery/pub/events/10')
     return doGet(f'{BASE_URL_API}gallery/pub/events/10?photographerUserId=2')
+def getGalleryPhotographers() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/pub/photographers')
+    #return doGet(f'{BASE_URL_API}gallery/pub/photographers?eventId=10')
+def getGalleryPhotographer() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/photographers/1')
+    return doGet(f'{BASE_URL_API}gallery/pub/photographers/1?eventId=9')
 
 #register()
 #confirmEmail()
@@ -524,7 +530,9 @@ login()
 #myUploads()
 #deleteUpload(16)
 #getGalleryEvents()
-getGalleryEvent()
+#getGalleryEvent()
+#getGalleryPhotographers()
+getGalleryPhotographer()
 
 #getOrderFullStatus()
 

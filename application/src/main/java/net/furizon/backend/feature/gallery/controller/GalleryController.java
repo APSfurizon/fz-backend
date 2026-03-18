@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
+import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.response.*;
 import net.furizon.backend.feature.gallery.usecase.*;
@@ -104,11 +105,27 @@ public class GalleryController {
         );
     }
 
+    @Operation(summary = "List all the photographers with photos, with extra gallery-related information", description =
+        "This endpoint should be used to display a list of photographers with their propic and photo number. "
+        + "Like the `pub/events` endpoint, only photographers with actual photos are displayed. The field "
+        + "`isOfficialPhotographer` is true if the photographer is recognized as an official account. "
+        + "Frontend should display a small tag according to that, so users can understand which are the official "
+        + "accounts. Photographer list is already ordered")
+    @GetMapping("/pub/photographers")
+    public @NotNull ListGalleryPhotographersResponse listPhotographers(
+            @RequestParam @Nullable @Valid @Positive final Long eventId
+    ) {
+        return executor.execute(
+                ListGalleryPhotographersUseCase.class,
+                eventId == null ? -1L : eventId
+        );
+    }
+
     @Operation(summary = "Fetch the specified event, together with extra gallery-related information", description =
         "This endpoint behaves the same as `GET /pub/events`. Please look at his documentation. "
         + "The idea behind this single fetch is to have a big event card to show if a particular event is selected")
     @GetMapping("/pub/events/{eventId}")
-    public @NotNull GalleryEvent listEvents(
+    public @NotNull GalleryEvent fetchEvent(
             @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
             @PathVariable @NotNull @Valid @Positive final Long eventId
     ) {
@@ -117,6 +134,22 @@ public class GalleryController {
                 new FetchGalleryEventUseCase.Input(
                         photographerUserId,
                         eventId
+                )
+        );
+    }
+
+    @Operation(summary = "Fetch the specified photographer, together with extra gallery-related information",
+        description = "This endpoint behaves the same as `GET /pub/photographers`. Please look at his documentation.")
+    @GetMapping("/pub/photographers/{photographerUserId}")
+    public @NotNull GalleryPhotographer fetchPhotographer(
+            @RequestParam @Nullable @Valid @Positive final Long eventId,
+            @PathVariable @NotNull @Valid @Positive final Long photographerUserId
+    ) {
+        return executor.execute(
+                FetchGalleryPhotogapherUseCase.class,
+                new FetchGalleryPhotogapherUseCase.Input(
+                        eventId,
+                        photographerUserId
                 )
         );
     }

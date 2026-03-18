@@ -37,7 +37,7 @@ public interface UserFinder {
     List<UserEmailData> getMailDataForUsers(@NotNull List<Long> userIds);
 
     @Nullable
-    UserDisplayData getDisplayUser(long userId, @NotNull Event event);
+    UserDisplayData getDisplayUser(long userId, @Nullable Event event);
 
     @NotNull
     List<UserDisplayData> getDisplayUserByOrderCode(Set<String> codes, @NotNull Event event);
@@ -53,6 +53,8 @@ public interface UserFinder {
     List<UserDisplayData> getDisplayUserByFursuitIds(Set<Long> ids, @NotNull Event event, boolean hideOwners);
 
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
+
+    SelectJoinStep<?> selectJoinDisplayUser();
 
     SelectJoinStep<?> selectDisplayUser();
 }

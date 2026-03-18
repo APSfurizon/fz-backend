@@ -13,11 +13,11 @@ import org.jooq.Table;
 public class GalleryEventMapper {
     public static @NotNull GalleryEvent map(
             @NotNull Record r,
-            Table<?> media,
-            Table<?> render,
-            Table<?> thumbnail,
-            Field<Integer> countField,
-            Table<Record2<Long, Integer>> countTable
+            @NotNull Table<?> media,
+            @NotNull Table<?> render,
+            @NotNull Table<?> thumbnail,
+            @NotNull Field<Integer> countField,
+            @NotNull Table<Record2<Long, Integer>> countTable
     ) {
         MediaResponse downloadMedia = MediaResponseMapper.mapOrNull(r, media);
         MediaResponse displayMedia = MediaResponseMapper.mapOrNull(r, render);
