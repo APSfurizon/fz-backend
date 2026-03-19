@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.jooq.generated.enums.UploadStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -27,12 +28,19 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
 
     @Override
     public @NotNull ListUploadsResponse executor(@NotNull ListUploadsUseCase.Input input) {
+
         Long userId = input.user == null ? null : input.user.getUserId();
+        boolean isAdmin = userId == null
+                ? false
+                : permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_MANAGE_UPLOADS);
+        UploadStatus status = isAdmin ? input.uploadStatus : null;
+
         List<GalleryUploadPreview> resp = uploadFinder.listPreview(
             input.photographerId,
             input.eventId,
+            status,
             userId,
-            userId == null ? false : permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_MANAGE_UPLOADS),
+            isAdmin,
             input.from == null ? 0L : input.from,
             galleryConfig.getListingBatchSize()
         );
@@ -43,6 +51,7 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
             @Nullable Long from,
             @Nullable Long photographerId,
             @Nullable Long eventId,
+            @Nullable UploadStatus uploadStatus,
             @Nullable FurizonUser user
     ) {}
 }

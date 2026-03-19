@@ -14,6 +14,7 @@ import net.furizon.backend.feature.gallery.dto.response.*;
 import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import net.furizon.jooq.generated.enums.UploadStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,11 +68,17 @@ public class GalleryController {
         + "contain few parameters, which are all explained in the previously mentioned method. "
         + "Keep in mind that since post processing is async, a newly uploaded media may not have "
         + "a thumbnail yet, so the reference could be null. In that instance, frontend should "
-        + "be display a default icon.")
+        + "be display a default icon. You can freely filter over photographers and events, by "
+        + "their id. An user with the permission `UPLOADS_CAN_MANAGE_UPLOADS` can also filter "
+        + "by the status of the upload. If the param is specified, but the user doesn't have "
+        + "the correct permission, the parameter is simply ignored. However, if an user has "
+        + "that permission and no uploadStatus is defined, he will see all the results, in "
+        + "any possible status.")
     @GetMapping("/pub/list")
     public @NotNull ListUploadsResponse listUploads(
             @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
             @RequestParam @Nullable @Valid @Positive final Long eventId,
+            @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
             @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
@@ -81,6 +88,7 @@ public class GalleryController {
                         fromUploadId,
                         photographerUserId,
                         eventId,
+                        uploadStatus,
                         user
                 )
         );
@@ -162,6 +170,7 @@ public class GalleryController {
     public @NotNull ListUploadsResponse listMyUploads(
             @RequestParam @Nullable @Valid @Positive final Long eventId,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
+            @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
         return executor.execute(
@@ -170,6 +179,7 @@ public class GalleryController {
                         fromUploadId,
                         user.getUserId(),
                         eventId,
+                        uploadStatus,
                         user
                 )
         );

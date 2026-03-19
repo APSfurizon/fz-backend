@@ -154,6 +154,7 @@ public class JooqUploadFinder implements UploadFinder {
     public @NotNull List<GalleryUploadPreview> listPreview(
             @Nullable Long photographerId,
             @Nullable Long eventId,
+            @Nullable UploadStatus uploadStatus,
             @Nullable Long reqUserId,
             boolean isReqUserAnAdmin,
             long fromId,
@@ -161,15 +162,19 @@ public class JooqUploadFinder implements UploadFinder {
     ) {
         Condition condition = UPLOADS.ID.greaterThan(fromId);
 
-        if (reqUserId == null) {
-            condition = condition.and(UPLOADS.STATUS.eq(UploadStatus.APPROVED));
-        } else {
-            if (!isReqUserAnAdmin) {
-                condition = condition.and(
-                   UPLOADS.STATUS.eq(UploadStatus.APPROVED)
-                   .or(UPLOADS.PHOTOGRAPHER_USER_ID.eq(reqUserId))
-               );
+        if (uploadStatus == null || !isReqUserAnAdmin) {
+            if (reqUserId == null) {
+                condition = condition.and(UPLOADS.STATUS.eq(UploadStatus.APPROVED));
+            } else {
+                if (!isReqUserAnAdmin) {
+                    condition = condition.and(
+                        UPLOADS.STATUS.eq(UploadStatus.APPROVED)
+                        .or(UPLOADS.PHOTOGRAPHER_USER_ID.eq(reqUserId))
+                    );
+                }
             }
+        } else {
+            condition = condition.and(UPLOADS.STATUS.eq(uploadStatus));
         }
 
         if (photographerId != null) {

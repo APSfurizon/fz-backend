@@ -5,6 +5,7 @@ import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.jooq.generated.enums.UploadStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectOnConditionStep;
@@ -41,6 +42,7 @@ public interface UploadFinder {
     @NotNull List<GalleryUploadPreview> listPreview(
             @Nullable Long photographerId,
             @Nullable Long eventId,
+            @Nullable UploadStatus uploadStatus,
             @Nullable Long reqUserId,
             boolean isReqUserAnAdmin,
             long fromId,
