@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.finder;
 
+import net.furizon.backend.feature.admin.dto.ShirtExportRow;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
@@ -51,6 +52,8 @@ public interface UserFinder {
     List<UserDisplayData> getDisplayUserByMembershipNo(Set<String> numbers, @NotNull Event event);
     @NotNull
     List<UserDisplayData> getDisplayUserByFursuitIds(Set<Long> ids, @NotNull Event event, boolean hideOwners);
+
+    List<ShirtExportRow> exportShirts(long eventId);
 
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
 

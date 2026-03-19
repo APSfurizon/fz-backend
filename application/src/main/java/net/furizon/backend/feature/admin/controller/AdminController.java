@@ -10,9 +10,10 @@ import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.admin.dto.GenerateBadgeRequest;
 import net.furizon.backend.feature.admin.dto.PreviewFursuitBadgeResponse;
 import net.furizon.backend.feature.admin.dto.PreviewUserBadgeResponse;
-import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
 import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.ExportHotelUseCase;
+import net.furizon.backend.feature.admin.usecase.export.ExportShirtUseCase;
+import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewFursuitBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.export.PreviewUserBadgesUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.EmptyRoomReminderUseCase;
@@ -206,6 +207,21 @@ public class AdminController {
         log.info("User {} is exporting hotel users list", user.getUserId());
         String data = executor.execute(ExportHotelUseCase.class, pretixInformation);
         String fileName = "hotel-user-list-" + System.currentTimeMillis() + ".csv";
+        return ResponseEntity.ok()
+                             .contentType(new MediaType("text", "csv"))
+                             .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                             .body(data);
+    }
+
+    @Operation(summary = "Exports the list of users with their shirt size")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @GetMapping(value = "/export/shirt-user-list")
+    public ResponseEntity<String> exportShirts(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        log.info("User {} is exporting shirt users list", user.getUserId());
+        String data = executor.execute(ExportShirtUseCase.class, pretixInformation);
+        String fileName = "shirt-user-list-" + System.currentTimeMillis() + ".csv";
         return ResponseEntity.ok()
                              .contentType(new MediaType("text", "csv"))
                              .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")

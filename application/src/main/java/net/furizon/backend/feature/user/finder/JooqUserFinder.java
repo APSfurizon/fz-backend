@@ -1,6 +1,8 @@
 package net.furizon.backend.feature.user.finder;
 
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.admin.dto.ShirtExportRow;
+import net.furizon.backend.feature.admin.mapper.ShirtExportRowMapper;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.User;
@@ -369,6 +371,30 @@ public class JooqUserFinder implements UserFinder {
                 finalQuery.field(USERS.USER_FURSONA_NAME)
             )
         ).stream().map(JooqSearchUserMapper::map).toList();
+    }
+
+    @Override
+    public List<ShirtExportRow> exportShirts(long eventId) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                ORDERS.ORDER_CODE,
+                ORDERS.ORDER_SERIAL_IN_EVENT,
+                ORDERS.ORDER_SPONSORSHIP_TYPE,
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_SHIRT_SIZE,
+                MEMBERSHIP_INFO.USER_ID,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL
+            )
+            .from(ORDERS)
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(
+                ORDERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID)
+                .and(ORDERS.EVENT_ID.eq(eventId))
+            )
+            .innerJoin(AUTHENTICATIONS)
+            .on(AUTHENTICATIONS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+        ).stream().map(ShirtExportRowMapper::map).toList();
     }
 
     private SelectJoinStep<?> selectUser() {
