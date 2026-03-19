@@ -15,6 +15,7 @@ import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.*;
@@ -148,6 +149,44 @@ public class JooqUploadFinder implements UploadFinder {
                 q.thumbnail,
                 q.userPropic
         ));
+    }
+
+    @Override
+    public @NotNull List<GalleryUploadPreview> adminBatchApprovalRetrival(
+            long fromId,
+            long limit,
+            List<Pair<Long, Long>> reservedRanges
+    ) {
+        Condition condition = UPLOADS.ID.greaterOrEqual(fromId)
+                              .and(UPLOADS.STATUS.eq(UploadStatus.PENDING));
+
+        for (var range : reservedRanges) {
+            condition = condition.and(
+                UPLOADS.ID.lessThan(range.getLeft())
+                .or(UPLOADS.ID.greaterThan(range.getRight()))
+            );
+        }
+
+        Table<?> eventPhotographer = PostgresDSL.select(
+                        UPLOADS.EVENT_ID,
+                        UPLOADS.PHOTOGRAPHER_USER_ID
+                )
+                .from(UPLOADS)
+                .where(condition)
+                .orderBy(UPLOADS.ID)
+                .limit(1)
+                .asTable("eventPhotographer");
+
+        return query.fetch(
+            selectPreviewUploadObj()
+            .where(
+                condition
+                .and(UPLOADS.EVENT_ID.eq(eventPhotographer.field(UPLOADS.EVENT_ID)))
+                .and(UPLOADS.PHOTOGRAPHER_USER_ID.eq(eventPhotographer.field(UPLOADS.PHOTOGRAPHER_USER_ID)))
+            )
+            .orderBy(UPLOADS.ID)
+            .limit(limit)
+        ).stream().map(GalleryPreviewMapper::map).toList();
     }
 
     @Override
@@ -499,6 +538,39 @@ public class JooqUploadFinder implements UploadFinder {
                 countField,
                 countTable,
                 officialPhotographer
+        );
+    }
+
+    @Override
+    public @Nullable Long getFirstPendingUpload(long startFrom) {
+        Field<Long> firstPending = PostgresDSL.field("firstPending", Long.class);
+        return query.fetchFirst(
+            PostgresDSL.select(
+                PostgresDSL.coalesce(
+                    PostgresDSL.select(UPLOADS.ID)
+                    .from(UPLOADS)
+                    .where(
+                        UPLOADS.STATUS.eq(UploadStatus.PENDING)
+                        .and(UPLOADS.ID.greaterOrEqual(startFrom))
+                    )
+                    .orderBy(UPLOADS.ID.asc())
+                    .limit(1),
+                    PostgresDSL.select(UPLOADS.ID)
+                    .from(UPLOADS)
+                    .where(UPLOADS.ID.greaterOrEqual(startFrom))
+                    .orderBy(UPLOADS.ID.desc())
+                    .limit(1)
+                ).as(firstPending)
+            )
+        ).mapOrNull(r -> r.get(firstPending));
+    }
+
+    @Override
+    public int countPendingUploads() {
+        return query.count(
+            PostgresDSL.select(UPLOADS.ID)
+            .from(UPLOADS)
+            .where(UPLOADS.STATUS.eq(UploadStatus.PENDING))
         );
     }
 }

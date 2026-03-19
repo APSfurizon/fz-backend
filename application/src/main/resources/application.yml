@@ -193,7 +193,9 @@ gallery:
   max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB
   delete-upload-progress-interval: ${GALLERY_DELETE_UPLOAD_PROGRESS_INTERVAL_MINS:15}
   listing-batch-size: ${GALLERY_LISTING_BATCH_SIZE:300}
-  admin-approval-batch-size: ${GALLERY_ADMIN_APPROVAL_BATCH_SIZE:90}
+  admin-approval:
+    batch-size: ${GALLERY_ADMIN_APPROVAL_BATCH_SIZE:90}
+    reservation-batch-mins: ${GALLERY_ADMIN_APPROVAL_RESERVATION_MINS:20}
   job-processor:
     endpoint: ${GALLERY_JOB_PROCESSOR_ENDPOINT:http://127.0.0.1:8082/}
     username: ${GALLERY_JOB_PROCESSOR_USERNAME:user}

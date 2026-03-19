@@ -13,6 +13,8 @@ import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.response.*;
 import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -200,6 +202,34 @@ public class GalleryController {
                 DeleteUploadUseCase.class,
                 new DeleteUploadUseCase.Input(
                         uploadId,
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "Request a new approval batch of pending medias", description =
+        "This method is intended for admin use only. It returns a batch of medias who still "
+        + "need to be approved, so an admin can approve or reject them (or change event and photographer). "
+        + "To not let different admins compete between each other, once you receive a batch you have a lock "
+        + "on it for a couple of minutes. Other admins will not receive the same photos as yours during this time. "
+        + "Each time you request a new batch, you left behind any unapproved or unrejected photo so far and continue "
+        + "up in the list. If you want to restart from the first pending upload you can pass the parameter "
+        + "`firstRequest` set on true (if you don't specify it, by default it's assumed false). Per each batch, "
+        + "uploads belongs only to one single uploader on one single event. Orders of uploads is not always "
+        + "respected. Receiving an empty upload list means that the upload process it's done *for now*, of course "
+        + "users can still upload new medias. The results are the same as you can find them in the "
+        + "`GET `/pub/list`, so read its docs to understand the single object. This method returns "
+        + "the event card as well, the photographer display data and how many uploads are still pending.")
+    @PermissionRequired(permissions = {Permission.UPLOADS_CAN_MANAGE_UPLOADS})
+    @GetMapping("/manage/approval-batch")
+    public AdminBatchApprovalResponse getApprovalBatch(
+        @RequestParam @Nullable @Valid final Boolean firstRequest,
+        @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                AdminBatchListUseCase.class,
+                new AdminBatchListUseCase.Input(
+                        firstRequest == null ? false : firstRequest,
                         user
                 )
         );

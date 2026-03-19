@@ -6,6 +6,7 @@ import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.generated.enums.UploadStatus;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectOnConditionStep;
@@ -39,6 +40,12 @@ public interface UploadFinder {
 
     @Nullable GalleryUpload getUploadById(long uploadId);
 
+    @NotNull List<GalleryUploadPreview> adminBatchApprovalRetrival(
+            long fromId,
+            long limit,
+            List<Pair<Long, Long>> reservedRanges
+    );
+
     @NotNull List<GalleryUploadPreview> listPreview(
             @Nullable Long photographerId,
             @Nullable Long eventId,
@@ -65,4 +72,8 @@ public interface UploadFinder {
     @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId);
 
     JooqUploadFinder.GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId);
+
+    @Nullable Long getFirstPendingUpload(long startFrom);
+
+    int countPendingUploads();
 }
