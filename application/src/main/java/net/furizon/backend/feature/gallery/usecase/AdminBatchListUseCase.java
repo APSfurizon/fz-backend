@@ -10,8 +10,11 @@ import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.GalleryConfig;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @Component
@@ -35,16 +39,23 @@ public class AdminBatchListUseCase implements UseCase<AdminBatchListUseCase.Inpu
     @NotNull
     private final GalleryConfig galleryConfig;
 
+    @NotNull
+    private final TranslationService translationService;
+
     private long firstPendingMediaId = -1L;
+
+    private final ReentrantLock mutex = new ReentrantLock(true);
 
     public AdminBatchListUseCase(
         @NotNull final UploadFinder uploadFinder,
         @NotNull final UserFinder userFinder,
-        @NotNull final GalleryConfig galleryConfig
+        @NotNull final GalleryConfig galleryConfig,
+        @NotNull final TranslationService translationService
     ) {
         this.uploadFinder = uploadFinder;
         this.userFinder = userFinder;
         this.galleryConfig = galleryConfig;
+        this.translationService = translationService;
 
         userToLastRanges =  Caffeine.newBuilder()
                 .expireAfterWrite(galleryConfig.getAdminApproval().getReservationBatchMins(), TimeUnit.MINUTES)
@@ -60,43 +71,67 @@ public class AdminBatchListUseCase implements UseCase<AdminBatchListUseCase.Inpu
         log.info("User {} is asking for a new upload approval batch (firstReq = {})",
                 userId, firstRequest);
 
-        // Try to first get results using the last user point
-        List<GalleryUploadPreview> res = getResults(userId, firstRequest);
-        // If we didn't had any results, try restarting the process to fill holes
-        if (res.isEmpty()) {
-            log.debug("getResults returned 0 results. Trying again with first request = true");
-            res = getResults(userId, true);
+        GalleryUploadPreview firstRes = null;
+        List<GalleryUploadPreview> res = null;
+        try {
+            lock();
+            // Try to first get results using the last user point
+            res = getResults(userId, firstRequest);
+            // If we didn't had any results, try restarting the process to fill holes
+            if (res.isEmpty()) {
+                log.debug("getResults returned 0 results. Trying again with first request = true");
+                res = getResults(userId, true);
+            }
+
+            //Then take the results and compute the new user ranges, replace the old ones
+            //We assume that the list is already ordered by id
+            if (res.isEmpty()) {
+                log.debug("getResults returned AGAIN 0 results. emptying user cache, approval is done");
+                userToLastRanges.invalidate(userId);
+            } else {
+                List<Pair<Long, Long>> ranges = new ArrayList<>();
+                firstRes = res.getFirst();
+                long lastId = firstRes.getId();
+                long startId = lastId;
+                for (GalleryUploadPreview upload : res) {
+                    long currentId = upload.getId();
+                    if (currentId - lastId > 1L) { //if they're not contiguous
+                        ranges.add(Pair.of(startId, lastId));
+                        startId = lastId;
+                    }
+
+                    lastId = currentId;
+                }
+                ranges.add(Pair.of(startId, lastId));
+                log.debug("Updating user {} cache with {} new reserved ranges", userId, ranges.size());
+                userToLastRanges.put(userId, ranges);
+            }
+        } finally {
+            unlock();
         }
 
-        //Then take the results and compute the new user ranges, replace the old ones
-        //We assume that the list is already ordered by id
-        GalleryUploadPreview firstRes = null;
-        if (res.isEmpty()) {
-            log.debug("getResults returned AGAIN 0 results. emptying user cache, approval is done");
-            userToLastRanges.invalidate(userId);
-        } else {
-            List<Pair<Long, Long>> ranges = new ArrayList<>();
-            firstRes = res.getFirst();
-            long lastId = firstRes.getId();
-            long startId = lastId;
-            for (GalleryUploadPreview upload : res) {
-                long currentId = upload.getId();
-                if (currentId - lastId > 1L) { //if they're not contiguous
-                    ranges.add(Pair.of(startId, lastId));
-                    startId = lastId;
-                }
-
-                lastId = currentId;
-            }
-            ranges.add(Pair.of(startId, lastId));
-            log.debug("Updating user {} cache with {} new reserved ranges", userId, ranges.size());
-            userToLastRanges.put(userId, ranges);
+        if (res == null) {
+            log.error("Res was null!");
+            throw new ApiException(
+                translationService.error("common.server_error"),
+                GeneralResponseCodes.GENERIC_ERROR
+            );
         }
 
         GalleryEvent event = firstRes == null ? null : uploadFinder.getGalleryEvent(firstRes.getEventId(), null);
         UserDisplayData user = firstRes == null ? null : userFinder.getDisplayUser(firstRes.getPhotographerUserId(),
                                                          event == null ? null : event.getEvent());
         return new AdminBatchApprovalResponse(res, user, event, uploadFinder.countPendingUploads());
+    }
+
+    private void lock() {
+        log.debug("Acquiring AdminBatchListUseCase mutex");
+        mutex.lock();
+        log.debug("AdminBatchListUseCase mutex acquired");
+    }
+    private void unlock() {
+        log.debug("Releasing AdminBatchListUseCase mutex");
+        mutex.unlock();
     }
 
     private List<GalleryUploadPreview> getResults(long userId, boolean firstRequest) {
