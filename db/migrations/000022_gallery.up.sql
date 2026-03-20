@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS uploads
     repost_permissions        upload_repost_permissions                                                                                                NOT NULL,
     event_id                  int8                                                                                                                     NOT NULL,
     CONSTRAINT uploads_pkey PRIMARY KEY (id),
-    CONSTRAINT uploads_unique_hash UNIQUE(hash),
+    CONSTRAINT uploads_unique_hash UNIQUE(hash, event_id),
     CONSTRAINT uploads_photographer_user FOREIGN KEY (photographer_user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE CASCADE, -- We don't want upload to be deleted if an user deletes his profile
     CONSTRAINT uploads_original_user FOREIGN KEY (original_uploader_user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE CASCADE, -- We don't want upload to be deleted if an user deletes his profile
     CONSTRAINT uploads_media_id FOREIGN KEY (media_id) REFERENCES media (media_id) ON DELETE CASCADE ON UPDATE CASCADE, -- If file media is deleted, it's fine to delete everything else. Thumbnail cleanup happens automatically

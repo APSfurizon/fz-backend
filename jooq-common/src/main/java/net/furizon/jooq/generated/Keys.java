@@ -89,7 +89,7 @@ public class Keys {
     public static final UniqueKey<Record> UPLOAD_VIDEO_DATA_ONLY_ONE_PER_UPLOAD = Internal.createUniqueKey(UploadVideoData.UPLOAD_VIDEO_DATA, DSL.name("upload_video_data_only_one_per_upload"), new TableField[] { UploadVideoData.UPLOAD_VIDEO_DATA.UPLOAD_ID }, true);
     public static final UniqueKey<Record> UPLOAD_VIDEO_DATA_PKEY = Internal.createUniqueKey(UploadVideoData.UPLOAD_VIDEO_DATA, DSL.name("upload_video_data_pkey"), new TableField[] { UploadVideoData.UPLOAD_VIDEO_DATA.ID }, true);
     public static final UniqueKey<Record> UPLOADS_PKEY = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_pkey"), new TableField[] { Uploads.UPLOADS.ID }, true);
-    public static final UniqueKey<Record> UPLOADS_UNIQUE_HASH = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_unique_hash"), new TableField[] { Uploads.UPLOADS.HASH }, true);
+    public static final UniqueKey<Record> UPLOADS_UNIQUE_HASH = Internal.createUniqueKey(Uploads.UPLOADS, DSL.name("uploads_unique_hash"), new TableField[] { Uploads.UPLOADS.HASH, Uploads.UPLOADS.EVENT_ID }, true);
     public static final UniqueKey<Record> USER_HAS_ROLE_PK = Internal.createUniqueKey(UserHasRole.USER_HAS_ROLE, DSL.name("user_has_role_pk"), new TableField[] { UserHasRole.USER_HAS_ROLE.USER_ID, UserHasRole.USER_HAS_ROLE.ROLE_ID }, true);
     public static final UniqueKey<Record> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.USER_ID }, true);
 
