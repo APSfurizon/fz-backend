@@ -480,6 +480,14 @@ def getGalleryPhotographers() -> Response:
 def getGalleryPhotographer() -> Response:
     #return doGet(f'{BASE_URL_API}gallery/pub/photographers/1')
     return doGet(f'{BASE_URL_API}gallery/pub/photographers/1?eventId=9')
+def adminUpdateUpload(uploadIds: list, status: str=None, photographerId: int=None, eventId: int=None) -> Response:
+    json = {
+        "uploadIds": uploadIds,
+        "newStatus": status,
+        "newPhotographerUserId": photographerId,
+        "newEventId": eventId
+    }
+    return doPost(f'{BASE_URL_API}gallery/manage/update', json=json)
 
 #register()
 #confirmEmail()
@@ -532,7 +540,13 @@ login()
 #getGalleryEvents()
 #getGalleryEvent()
 #getGalleryPhotographers()
-getGalleryPhotographer()
+#getGalleryPhotographer()
+#adminUpdateUpload(
+#    uploadIds=[13],
+#    #status="APPROVED",
+#    #photographerId=23,
+#    eventId=91
+#)
 
 #getOrderFullStatus()
 

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
+import net.furizon.backend.feature.gallery.dto.request.AdminUpdateUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.*;
 import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -230,6 +231,32 @@ public class GalleryController {
                 AdminBatchListUseCase.class,
                 new AdminBatchListUseCase.Input(
                         firstRequest == null ? false : firstRequest,
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "Updates status, eventId, photographerId to a set of uploads", description =
+        "This method is for admin use only, the user must have the `UPLOADS_CAN_MANAGE_UPLOADS` permission "
+        + "to perform this operation. We don't permit on purpose users changing any information on an uploaded "
+        + "media (like the eventId), only an administrator can perform this. The operation of changing information "
+        + "on the various uploads can be done in bulk, just specify more ids in the list you want to change. "
+        + "This endpoint actually verifies that new photographer and event exists. It also checks that you "
+        + "specify at least one of the parameter you want to change (this implies that you must specify "
+        + "only the info you really want to update).")
+    @PermissionRequired(permissions = {Permission.UPLOADS_CAN_MANAGE_UPLOADS})
+    @PostMapping("/manage/update")
+    public boolean updateUploads(
+        @NotNull @Valid @RequestBody final AdminUpdateUploadRequest request,
+        @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                AdminUpdateUploadUseCase.class,
+                new AdminUpdateUploadUseCase.Input(
+                        request.getUploadIds(),
+                        request.getNewStatus(),
+                        request.getNewPhotographerUserId(),
+                        request.getNewEventId(),
                         user
                 )
         );
