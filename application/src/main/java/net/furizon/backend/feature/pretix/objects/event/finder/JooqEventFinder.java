@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +36,18 @@ public class JooqEventFinder implements EventFinder {
             selectEvent()
             .where(EVENTS.ID.eq(id))
         ).mapOrNull(eventMapper::mapInternal);
+    }
+
+    @Override
+    public @NotNull List<Event> getAttendedEvents(long userId) {
+        return query.fetch(
+            selectEvent()
+            .innerJoin(ORDERS)
+            .on(
+                ORDERS.EVENT_ID.eq(EVENTS.ID)
+                .and(ORDERS.USER_ID.eq(userId))
+            )
+        ).stream().map(eventMapper::mapInternal).toList();
     }
 
     @Override

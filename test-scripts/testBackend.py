@@ -158,6 +158,9 @@ def markPersonalUserInformationAsUpdated() -> Response:
 def getSponsorshipNames() -> Response:
     return doGet(f'{BASE_URL_API}events/get-sponsorship-names/1')
 
+def getAttendedEvents() -> Response:
+    return doGet(f'{BASE_URL_API}events/attended')
+
 def getMeAuth() -> Response:
     return doGet(f'{BASE_URL_API}users/me')
 
@@ -547,6 +550,7 @@ login()
 #    #photographerId=23,
 #    eventId=91
 #)
+getAttendedEvents()
 
 #getOrderFullStatus()
 
