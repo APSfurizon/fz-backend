@@ -62,8 +62,8 @@ public class GalleryChecks {
         }
         OffsetDateTime start = event.getCorrectDateFrom();
         if (start != null) {
-            LocalDateTime now = LocalDateTime.now();
-            boolean canUpload = now.isAfter(start.toLocalDateTime());
+            OffsetDateTime now = OffsetDateTime.now();
+            boolean canUpload = now.isAfter(start);
             log.error("Cannot upload on event {} before {}",  event, start);
             if (!canUpload) {
                 throw new ApiException(
@@ -144,17 +144,38 @@ public class GalleryChecks {
 
     }
 
-    public void assertUserCanUploadFileSize(long userId, long fileSize) {
-        final long[] sizes = {
+    public long[] getUploadFileSizeMbArr() {
+        final long[] size = {
             galleryConfig.getMaxLimitedUploadSize(),
             galleryConfig.getMaxLimitedBigUploadSize(),
             Long.MAX_VALUE
         };
+        return size;
+    }
+    public Permission[] getUploadFileSizePermissionsArr() {
         final Permission[] permissions = {
             null,
             Permission.UPLOADS_BIG_FILE_SIZE_UPLOADER,
             Permission.UPLOADS_UNLIMITED_FILE_SIZE_UPLOADER
         };
+        return permissions;
+    }
+    public long getBiggestFileSize(@NotNull Set<Permission> userPermissions, long[] sizes, Permission[] permissions) {
+        long biggest = sizes[0];
+        for (Permission p : userPermissions) {
+            for (int i = 0; i < permissions.length; i++) {
+                long size = sizes[i];
+                if (p == permissions[i] && size > biggest) {
+                    biggest = size;
+                }
+            }
+        }
+        return biggest;
+    }
+
+    public void assertUserCanUploadFileSize(long userId, long fileSize) {
+        long[] sizes = getUploadFileSizeMbArr();
+        Permission[] permissions = getUploadFileSizePermissionsArr();
 
         List<Permission> permissionsList = new ArrayList<>(permissions.length);
         for (int i = 0; i < sizes.length; i++) {
@@ -166,16 +187,7 @@ public class GalleryChecks {
 
         if (!permissionsList.isEmpty()) {
             Set<Permission> userPermissions = permissionFinder.getUserPermissions(userId);
-
-            long biggest = sizes[0];
-            for (Permission p : userPermissions) {
-                for (int i = 0; i < permissions.length; i++) {
-                    long size = sizes[i];
-                    if (p == permissions[i] && size > biggest) {
-                        biggest = size;
-                    }
-                }
-            }
+            long biggest = getBiggestFileSize(userPermissions, sizes, permissions);
 
             //if at least one element is contained, it returns true
             boolean userHasAnyPermission = userPermissions.removeAll(permissionsList);

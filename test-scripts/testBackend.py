@@ -428,6 +428,8 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
     #uploadFileToGallery_listParts(reqId)
     #uploadFileToGallery_abort(reqId)
     uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
+def getUploadLimits() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/upload/limits')
 def galleryProcessorWebhook() -> Response:
     data = {
         'id': 7,
@@ -550,7 +552,8 @@ login()
 #    #photographerId=23,
 #    eventId=91
 #)
-getAttendedEvents()
+#getAttendedEvents()
+getUploadLimits()
 
 #getOrderFullStatus()
 

@@ -1,8 +1,10 @@
 package net.furizon.backend.feature.gallery.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
@@ -10,6 +12,8 @@ import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
 import net.furizon.backend.feature.gallery.dto.request.StartUploadRequest;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadPartsResponse;
 import net.furizon.backend.feature.gallery.dto.response.StartUploadResponse;
+import net.furizon.backend.feature.gallery.dto.response.UploadLimitsResponse;
+import net.furizon.backend.feature.gallery.usecase.GetUploadLimitsUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.AbortUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.CompleteUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.uploadProgress.ListUploadUseCase;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,6 +34,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class GalleryUploadController {
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+
+    @Operation(summary = "Get upload limits of the user", description =
+        "By default this method takes the current logged in user. An admin "
+        + "with the `UPLOADS_CAN_MANAGE_UPLOADS` permission can specify "
+        + "an optional userId to get info regarding him. Keep in mind "
+        + "that if an admin is planning to upload a file in behalf of another user, "
+        + "the limits might be a bit different, so don't rely on this endpoint for that "
+        + "usecase. This endpoint returns: a list of event together with the number of uploads "
+        + "the user has done on that specific event; a boolean to show if the user "
+        + "is banned from making new uploads; the maximum number of medias an user can upload "
+        + "per each single event (if == null it means unlimited uploads); the maximum file size "
+        + "an user can upload (if == null, it means unlimited file size); a list of allowed mime types; "
+        + "a list of allowed file extensions")
+    @GetMapping("/limits")
+    public @NotNull UploadLimitsResponse getUploadLimits(
+            @RequestParam @Nullable @Valid @Positive final Long userId,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                GetUploadLimitsUseCase.class,
+                new GetUploadLimitsUseCase.Input(
+                        userId,
+                        user
+                )
+        );
+    }
 
     @Operation(summary = "Starts an upload process", description =
         "The upload process will go through a multipart upload with presigned "
