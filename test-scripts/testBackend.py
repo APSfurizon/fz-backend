@@ -388,10 +388,7 @@ def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, event
     }
     return doPost(f'{BASE_URL_API}gallery/upload/complete', json=json)
 def uploadFileToGallery_listParts(reqId: int) -> Response:
-    json = {
-        "uploadReqId": reqId
-    }
-    return doGet(f'{BASE_URL_API}gallery/upload/status', json=json)
+    return doGet(f'{BASE_URL_API}gallery/upload/status/{reqId}')
 def uploadFileToGallery_abort(reqId: int) -> Response:
     json = {
         "uploadReqId": reqId
