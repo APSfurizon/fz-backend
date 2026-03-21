@@ -491,10 +491,17 @@ def adminUpdateUpload(uploadIds: list, status: str=None, photographerId: int=Non
     }
     return doPost(f'{BASE_URL_API}gallery/manage/update', json=json)
 def bulkDownloadStart(uploadIds: list) -> Response:
+    return doGet(f'{BASE_URL_API}gallery/bulk-download?ids={",".join(str(id) for id in uploadIds)}')
+def selectUpload(uploadId: int) -> Response:
     json = {
-        "ids": uploadIds
+        "uploadId": uploadId
     }
-    return doPost(f'{BASE_URL_API}gallery/bulk-download', json=json)
+    return doPost(f'{BASE_URL_API}gallery/manage/select', json=json)
+def deselectUpload(uploadId: int) -> Response:
+    json = {
+        "uploadId": uploadId
+    }
+    return doPost(f'{BASE_URL_API}gallery/manage/deselect', json=json)
 
 #register()
 #confirmEmail()
@@ -556,7 +563,9 @@ login()
 #)
 #getAttendedEvents()
 #getUploadLimits()
-bulkDownloadStart([13, 14, 15, 16])
+#bulkDownloadStart([13, 14, 15, 16])
+#selectUpload(16)
+deselectUpload(16)
 
 #getOrderFullStatus()
 

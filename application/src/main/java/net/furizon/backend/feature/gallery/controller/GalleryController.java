@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
-import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadRequest;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadResponse;
 import net.furizon.backend.feature.gallery.dto.request.AdminUpdateUploadRequest;
+import net.furizon.backend.feature.gallery.dto.request.UploadIdRequest;
 import net.furizon.backend.feature.gallery.dto.response.AdminBatchApprovalResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryEventsResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryPhotographersResponse;
@@ -21,12 +21,14 @@ import net.furizon.backend.feature.gallery.usecase.AdminBatchListUseCase;
 import net.furizon.backend.feature.gallery.usecase.AdminUpdateUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.BulkGalleryDownloadUseCase;
 import net.furizon.backend.feature.gallery.usecase.DeleteUploadUseCase;
+import net.furizon.backend.feature.gallery.usecase.DeselectUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.FetchGalleryEventUseCase;
 import net.furizon.backend.feature.gallery.usecase.FetchGalleryPhotogapherUseCase;
 import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListGalleryEventsUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListGalleryPhotographersUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
+import net.furizon.backend.feature.gallery.usecase.SelectUploadUseCase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/gallery")
@@ -212,22 +215,22 @@ public class GalleryController {
     }
 
     @Operation(summary = "Request a bulk download of multiple uploads", description =
-        "By sending via POST the array of upload ids an user wants to bulk download, this endpoint "
+        "By sending via GET the array of upload ids an user wants to bulk download, this endpoint "
         + "will reply with an object containing a `url` and a `body`. The frontend will then "
-        + "POST the specified url passing as request body the literal content returned by this endpoint. "
+        + "**POST** the specified url passing as request body the literal content returned by this endpoint. "
         + "The server will reply with the stream of a generated zip file containing all the requested uploads. "
         + "Keep in mind that the link returned by this endpoint eventually expires. Keep in mind that a single user "
         + "can have only one concurrent download in progress (it's verified by the final server). Only approved "
         + "uploads can be downloaded, invalid uploadIds or uploads in other status will be ignored")
-    @PostMapping("/bulk-download")
+    @GetMapping("/bulk-download")
     public @NotNull BulkDownloadResponse bulkDownloadInit(
-            @NotNull @Valid @RequestBody final BulkDownloadRequest request,
+            @NotNull @Valid @RequestParam final List<Long> ids,
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
         return executor.execute(
                 BulkGalleryDownloadUseCase.class,
                 new BulkGalleryDownloadUseCase.Input(
-                        new HashSet<>(request.getIds()),
+                        new HashSet<>(ids),
                         user
                 )
         );
@@ -302,6 +305,44 @@ public class GalleryController {
                         request.getNewStatus(),
                         request.getNewPhotographerUserId(),
                         request.getNewEventId(),
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "Marks the specified upload as selected for its event", description =
+        "The event is obtained automatically. Every other upload previously marked as selected "
+        + "for the same event of this upload, is automatically unmarked. This endpoint is meant "
+        + "to let an admin (with permission `UPLOADS_CAN_MANAGE_UPLOADS`) chose which upload should "
+        + "appear as the event's card image")
+    @PermissionRequired(permissions = {Permission.UPLOADS_CAN_MANAGE_UPLOADS})
+    @PostMapping("/manage/select")
+    public boolean selectUpload(
+            @NotNull @Valid @RequestBody final UploadIdRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                SelectUploadUseCase.class,
+                new SelectUploadUseCase.Input(
+                        request.getUploadId(),
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "Unmarks the specified upload as selected for its event", description =
+        "Only users with permission `UPLOADS_CAN_MANAGE_UPLOADS` can perform this action. Check "
+        + "`POST /manage/select` for more information.")
+    @PermissionRequired(permissions = {Permission.UPLOADS_CAN_MANAGE_UPLOADS})
+    @PostMapping("/manage/deselect")
+    public boolean deselectUpload(
+            @NotNull @Valid @RequestBody final UploadIdRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                DeselectUploadUseCase.class,
+                new DeselectUploadUseCase.Input(
+                        request.getUploadId(),
                         user
                 )
         );
