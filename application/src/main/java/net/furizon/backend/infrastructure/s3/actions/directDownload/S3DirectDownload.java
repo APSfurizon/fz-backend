@@ -10,7 +10,9 @@ import java.nio.file.Path;
 public interface S3DirectDownload {
     void toFile(@NotNull String key, @NotNull Path file) throws NoSuchKeyException, IOException;
 
-    void toFile(@NotNull String key, @NotNull Path file, boolean replaceExisting) throws NoSuchKeyException, IOException;
+    void toFile(@NotNull String key,
+                @NotNull Path file,
+                boolean replaceExisting) throws NoSuchKeyException, IOException;
 
     byte[] toBytes(@NotNull String key) throws NoSuchKeyException;
     InputStream toInputStream(@NotNull String key) throws NoSuchKeyException;

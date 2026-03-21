@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.gallery.usecase;
 
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.gallery.dto.response.ListGalleryEventsResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryPhotographersResponse;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;

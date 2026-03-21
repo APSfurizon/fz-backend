@@ -7,10 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Record;
 import org.jooq.Table;
-import org.jooq.TableField;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
 

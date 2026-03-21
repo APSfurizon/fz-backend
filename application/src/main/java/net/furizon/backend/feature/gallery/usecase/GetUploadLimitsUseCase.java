@@ -67,8 +67,8 @@ public class GetUploadLimitsUseCase implements UseCase<GetUploadLimitsUseCase.In
                     OffsetDateTime start = e.getCorrectDateFrom();
                     return start == null ? true : now.isAfter(start);
                 })
-                //A bit inefficient making multiple queries, but I think it's fine. The alternative is making a modified call
-                // like uploadFinder.getGalleryEvents(photographerId)
+                //A bit inefficient making multiple queries, but I think it's fine.
+                // The alternative is making a modified call like uploadFinder.getGalleryEvents(photographerId)
                 .map(e -> new UploadLimitsResponse.EventUploadNo(e, uploadFinder.countUserUploadsOnEvent(userId, e)))
                 .filter(e -> uploadPerEventLimit == null ? true : e.getUploadedCount() < uploadPerEventLimit)
                 .toList();

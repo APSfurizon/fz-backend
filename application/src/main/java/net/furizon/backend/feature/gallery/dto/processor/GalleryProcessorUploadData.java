@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Data
 @Builder

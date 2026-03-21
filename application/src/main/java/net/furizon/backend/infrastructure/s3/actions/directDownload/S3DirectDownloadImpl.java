@@ -45,7 +45,9 @@ public class S3DirectDownloadImpl implements S3DirectDownload {
         toFile(key, file, false);
     }
     @Override
-    public void toFile(@NotNull String key, @NotNull Path file, boolean replaceExisting) throws NoSuchKeyException, IOException {
+    public void toFile(@NotNull String key,
+                       @NotNull Path file,
+                       boolean replaceExisting) throws NoSuchKeyException, IOException {
         if (replaceExisting) {
             try (InputStream stream = toInputStream(key)) {
                 Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);

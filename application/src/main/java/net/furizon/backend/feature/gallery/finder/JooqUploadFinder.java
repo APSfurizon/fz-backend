@@ -8,7 +8,11 @@ import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
-import net.furizon.backend.feature.gallery.mapper.*;
+import net.furizon.backend.feature.gallery.mapper.BulkDownloadFileMapper;
+import net.furizon.backend.feature.gallery.mapper.GalleryEventMapper;
+import net.furizon.backend.feature.gallery.mapper.GalleryPhotographerMapper;
+import net.furizon.backend.feature.gallery.mapper.GalleryPreviewMapper;
+import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -18,15 +22,27 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record2;
+import org.jooq.SelectOnConditionStep;
+import org.jooq.Table;
+import org.jooq.TableField;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
 
-import static net.furizon.jooq.generated.Tables.*;
+import static net.furizon.jooq.generated.Tables.EVENTS;
+import static net.furizon.jooq.generated.Tables.MEDIA;
+import static net.furizon.jooq.generated.Tables.PERMISSION;
+import static net.furizon.jooq.generated.Tables.UPLOADS;
+import static net.furizon.jooq.generated.Tables.UPLOAD_EXIF;
+import static net.furizon.jooq.generated.Tables.UPLOAD_VIDEO_DATA;
+import static net.furizon.jooq.generated.Tables.USERS;
+import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor

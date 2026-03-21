@@ -20,7 +20,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -121,7 +126,8 @@ public class BulkGalleryDownloadUseCase implements UseCase<BulkGalleryDownloadUs
             @NotNull Function<BulkDownloadFile, String> nameGetter,
             @NotNull BiConsumer<BulkDownloadFile, String> nameSetter
     ) {
-        files.forEach(f -> nameSetter.accept(f, nameGetter.apply(f).replaceAll("[^\\p{L}\\p{N}\\p{M}_\\-'()\\[\\]. ]", "")));
+        files.forEach(f ->
+                nameSetter.accept(f, nameGetter.apply(f).replaceAll("[^\\p{L}\\p{N}\\p{M}_\\-'()\\[\\]. ]", "")));
     }
 
     private final void prependIdToNames(

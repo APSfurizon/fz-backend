@@ -2,14 +2,11 @@ package net.furizon.backend.feature.gallery.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
-import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
-import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;

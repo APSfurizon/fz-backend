@@ -60,7 +60,8 @@ public class PollGalleryProcessorUseCase implements UseCase<Integer, Integer> {
                         try {
                             galleryProcessorHandleJobAction.invoke(job);
                         } catch (Exception e) {
-                            log.error("[GALLERY PROCESSOR] Gallery processor job execution failed for job {}", uploadId, e);
+                            log.error("[GALLERY PROCESSOR] Gallery processor job execution failed for job {}",
+                                    uploadId, e);
                         }
                     }
                     default -> {

@@ -15,7 +15,6 @@ import org.jooq.Record;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
 
