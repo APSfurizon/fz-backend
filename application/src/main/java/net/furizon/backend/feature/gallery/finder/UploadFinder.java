@@ -4,6 +4,7 @@ import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectOnConditionStep;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UploadFinder {
     int countUserUploadsOnEvent(long userId, @NotNull Event event);
@@ -76,4 +78,6 @@ public interface UploadFinder {
     @Nullable Long getFirstPendingUpload(long startFrom);
 
     int countPendingUploads();
+
+    @NotNull List<BulkDownloadFile> getBulkDownloadableFiles(Set<Long> ids);
 }

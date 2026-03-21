@@ -67,7 +67,7 @@ public class GalleryUploadController {
         + "links for each single part. Reference: "
         + "https://aws.amazon.com/it/blogs/compute/uploading-large-objects-to-amazon-s3-using-multipart-upload-and-transfer-acceleration/"
         + "You need to provide us the original file name which must match the regex "
-        + "`^[\\p{L}\\p{N}\\p{M}_\\-\"'()\\[\\]. ]{2,63}$`, the file size and the event id "
+        + "`^[\\p{L}\\p{N}\\p{M}_\\-'()\\[\\]. ]{2,63}$`, the file size and the event id "
         + "the user is planning to upload the event to. We will check now if the user can "
         + "actually upload the file to the event (IE uploads open for the said event, "
         + "size of the file is ok, user has not reach the upload quantity limit). "

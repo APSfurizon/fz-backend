@@ -21,6 +21,16 @@ public class GalleryConfig implements HttpConfig {
     @NotNull
     private final JobProcessor jobProcessor;
 
+    @NotNull
+    private final BatchDownload batchDownload;
+
+    @Data
+    public static class BatchDownload {
+        private final long expiryMins;
+        @NotNull private final String hmacKey;
+        @NotNull private final String downloadUrl;
+    }
+
     @Data
     public static class AdminApproval {
         private final long batchSize;

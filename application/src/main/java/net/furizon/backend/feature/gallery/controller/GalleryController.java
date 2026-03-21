@@ -10,8 +10,13 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadRequest;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadResponse;
 import net.furizon.backend.feature.gallery.dto.request.AdminUpdateUploadRequest;
-import net.furizon.backend.feature.gallery.dto.response.*;
+import net.furizon.backend.feature.gallery.dto.response.AdminBatchApprovalResponse;
+import net.furizon.backend.feature.gallery.dto.response.ListGalleryEventsResponse;
+import net.furizon.backend.feature.gallery.dto.response.ListGalleryPhotographersResponse;
+import net.furizon.backend.feature.gallery.dto.response.ListUploadsResponse;
 import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -19,7 +24,17 @@ import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/gallery")
@@ -183,6 +198,20 @@ public class GalleryController {
                         user.getUserId(),
                         eventId,
                         uploadStatus,
+                        user
+                )
+        );
+    }
+
+    @PostMapping("/bulk-download")
+    public @NotNull BulkDownloadResponse bulkDownloadInit(
+            @NotNull @Valid @RequestBody final BulkDownloadRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                BulkGalleryDownloadUseCase.class,
+                new BulkGalleryDownloadUseCase.Input(
+                        new HashSet<>(request.getIds()),
                         user
                 )
         );

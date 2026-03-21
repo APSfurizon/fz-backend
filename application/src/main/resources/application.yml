@@ -193,6 +193,10 @@ gallery:
   max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB
   delete-upload-progress-interval: ${GALLERY_DELETE_UPLOAD_PROGRESS_INTERVAL_MINS:15}
   listing-batch-size: ${GALLERY_LISTING_BATCH_SIZE:300}
+  batch-download:
+    download-url: ${GALLERY_BATCH_DOWNLOAD_URL:http://127.0.0.1:8083/d?mac=}
+    expiry-mins: ${GALLERY_BATCH_DOWNLOAD_EXPIRY_MINS:5}
+    hmac-key: ${GALLERY_BATCH_DOWNLOAD_HMAC_KEY:changeme}
   admin-approval:
     batch-size: ${GALLERY_ADMIN_APPROVAL_BATCH_SIZE:90}
     reservation-batch-mins: ${GALLERY_ADMIN_APPROVAL_RESERVATION_MINS:20}

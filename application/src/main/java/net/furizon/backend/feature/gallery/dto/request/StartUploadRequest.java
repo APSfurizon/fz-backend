@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 @Data
 public class StartUploadRequest {
     @NotEmpty
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-\"'()\\[\\]. ]{2,63}$")
+    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-'()\\[\\]. ]{2,63}$")
     private String fileName;
     @NotNull
     private final Long fileSize;

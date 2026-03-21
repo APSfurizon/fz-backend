@@ -490,6 +490,11 @@ def adminUpdateUpload(uploadIds: list, status: str=None, photographerId: int=Non
         "newEventId": eventId
     }
     return doPost(f'{BASE_URL_API}gallery/manage/update', json=json)
+def bulkDownloadStart(uploadIds: list) -> Response:
+    json = {
+        "ids": uploadIds
+    }
+    return doPost(f'{BASE_URL_API}gallery/bulk-download', json=json)
 
 #register()
 #confirmEmail()
@@ -550,7 +555,8 @@ login()
 #    eventId=91
 #)
 #getAttendedEvents()
-getUploadLimits()
+#getUploadLimits()
+bulkDownloadStart([13, 14, 15, 16])
 
 #getOrderFullStatus()
 

@@ -1,16 +1,16 @@
 package net.furizon.backend.feature.gallery.finder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction.JooqCreateUploadAction;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
-import net.furizon.backend.feature.gallery.mapper.GalleryEventMapper;
-import net.furizon.backend.feature.gallery.mapper.GalleryPhotographerMapper;
-import net.furizon.backend.feature.gallery.mapper.GalleryPreviewMapper;
-import net.furizon.backend.feature.gallery.mapper.GalleryUploadMapper;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
+import net.furizon.backend.feature.gallery.mapper.*;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
@@ -24,6 +24,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static net.furizon.jooq.generated.Tables.*;
 
@@ -32,6 +33,12 @@ import static net.furizon.jooq.generated.Tables.*;
 public class JooqUploadFinder implements UploadFinder {
     @NotNull
     private final SqlQuery query;
+
+    @NotNull
+    private final ObjectMapper objectMapper;
+
+    @NotNull
+    private final TranslationService translationService;
 
     @Override
     public int countUserUploadsOnEvent(long userId, @NotNull Event event) {
@@ -572,5 +579,32 @@ public class JooqUploadFinder implements UploadFinder {
             .from(UPLOADS)
             .where(UPLOADS.STATUS.eq(UploadStatus.PENDING))
         );
+    }
+
+    @Override
+    public @NotNull List<BulkDownloadFile> getBulkDownloadableFiles(Set<Long> ids) {
+        return query.fetch(
+            PostgresDSL.select(
+                MEDIA.MEDIA_PATH,
+                UPLOADS.ORIGINAL_FILE_NAME,
+                UPLOADS.UPLOAD_TIMESTAMP,
+                UPLOADS.FILE_SIZE,
+                EVENTS.EVENT_NAMES_JSON,
+                EVENTS.ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_ID
+            )
+            .from(UPLOADS)
+            .innerJoin(MEDIA)
+            .on(UPLOADS.MEDIA_ID.eq(MEDIA.MEDIA_ID))
+            .innerJoin(EVENTS)
+            .on(UPLOADS.EVENT_ID.eq(EVENTS.ID))
+            .innerJoin(USERS)
+            .on(UPLOADS.PHOTOGRAPHER_USER_ID.eq(USERS.USER_ID))
+            .where(
+                UPLOADS.ID.in(ids)
+                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
+            )
+        ).stream().map(r -> BulkDownloadFileMapper.map(r, objectMapper, translationService)).toList();
     }
 }
