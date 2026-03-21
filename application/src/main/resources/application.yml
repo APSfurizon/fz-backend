@@ -195,7 +195,7 @@ gallery:
   listing-batch-size: ${GALLERY_LISTING_BATCH_SIZE:300}
   batch-download:
     download-url: ${GALLERY_BATCH_DOWNLOAD_URL:http://127.0.0.1:8083/d?mac=}
-    expiry-mins: ${GALLERY_BATCH_DOWNLOAD_EXPIRY_MINS:5}
+    expire-mins: ${GALLERY_BATCH_DOWNLOAD_EXPIRE_MINS:5}
     hmac-key: ${GALLERY_BATCH_DOWNLOAD_HMAC_KEY:changeme}
   admin-approval:
     batch-size: ${GALLERY_ADMIN_APPROVAL_BATCH_SIZE:90}

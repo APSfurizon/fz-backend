@@ -12,7 +12,6 @@ import net.furizon.backend.infrastructure.configuration.GalleryConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.apache.hc.client5.http.utils.Hex;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -20,9 +19,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -89,7 +86,7 @@ public class BulkGalleryDownloadUseCase implements UseCase<BulkGalleryDownloadUs
 
         BulkDownloadPayload payload = new BulkDownloadPayload(
                 files,
-                OffsetDateTime.now().plusMinutes(batchDownloadConfig.getExpiryMins()).toInstant().toEpochMilli(),
+                OffsetDateTime.now().plusMinutes(batchDownloadConfig.getExpireMins()).toInstant().toEpochMilli(),
                 input.user.getUserId()
         );
         String b64Str;

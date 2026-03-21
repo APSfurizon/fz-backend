@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 public class BulkDownloadPayload {
     @NotNull List<BulkDownloadFile> files;
-    private final long expiryMs;
+    private final long expireMs;
     private final long userId;
 }

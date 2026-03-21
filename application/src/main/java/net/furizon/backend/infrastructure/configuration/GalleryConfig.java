@@ -26,7 +26,7 @@ public class GalleryConfig implements HttpConfig {
 
     @Data
     public static class BatchDownload {
-        private final long expiryMins;
+        private final long expireMins;
         @NotNull private final String hmacKey;
         @NotNull private final String downloadUrl;
     }
