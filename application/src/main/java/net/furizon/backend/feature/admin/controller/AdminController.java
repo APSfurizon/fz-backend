@@ -199,7 +199,8 @@ public class AdminController {
      */
 
     @Operation(summary = "Exports the list of user for the hotel")
-    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER},
+                        mode = PermissionRequiredMode.ANY)
     @GetMapping(value = "/export/hotel-user-list")
     public ResponseEntity<String> exportHotel(
             @AuthenticationPrincipal @NotNull final FurizonUser user
@@ -214,7 +215,8 @@ public class AdminController {
     }
 
     @Operation(summary = "Exports the list of users with their shirt size")
-    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_VIEW_USER},
+                        mode = PermissionRequiredMode.ANY)
     @GetMapping(value = "/export/shirt-user-list")
     public ResponseEntity<String> exportShirts(
             @AuthenticationPrincipal @NotNull final FurizonUser user
