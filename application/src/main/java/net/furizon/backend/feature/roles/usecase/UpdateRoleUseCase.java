@@ -102,8 +102,8 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
         //Uptade role data
         res = updateRoleInfoAction.invoke(
             roleId,
-            req.getRoleInternalName(),
-            req.getRoleDisplayName(),
+            req.getInternalName(),
+            req.getDisplayName(),
             req.getRoleAdmincountPriority(),
             req.getShowInAdminCount()
         );
@@ -142,7 +142,7 @@ public class UpdateRoleUseCase implements UseCase<UpdateRoleUseCase.Input, Boole
     private void throwDbError(boolean res, int step, long roleId, @NotNull UpdateRoleRequest req) {
         if (!res) {
             log.error("Error #{} updating role {} to '{}'", step, roleId, req);
-            throw new ApiException(translationService.error("roles.update_fail", req.getRoleInternalName()));
+            throw new ApiException(translationService.error("roles.update_fail", req.getInternalName()));
         }
     }
 

@@ -13,8 +13,8 @@ import java.util.Set;
 public class UpdateRoleRequest {
     @NotNull
     @Pattern(regexp = "^[A-Za-z0-9_\\-]{3,64}$")
-    private final String roleInternalName;
-    @Nullable private final String roleDisplayName;
+    private final String internalName;
+    @Nullable private final String displayName;
 
     @NotNull private final Boolean showInAdminCount;
 

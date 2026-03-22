@@ -94,6 +94,11 @@ public class DatabaseSessionFilter extends OncePerRequestFilter {
 
             final var clientIp = SecurityUtils.getRealIp(request);
             sessionExecutor.execute(() -> sessionAuthenticationManager.updateSession(session, clientIp, userId));
+        } catch (SessionAuthenticationException ex) {
+            log.error("SessionAuthenticationException: {}", ex.getMessage());
+            SecurityContextHolder.clearContext();
+            authenticationFailureHandler.onAuthenticationFailure(request, response, ex);
+            return;
         } catch (AuthenticationException ex) {
             log.error("Authentication failed", ex);
             SecurityContextHolder.clearContext();
