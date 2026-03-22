@@ -41,5 +41,7 @@ public interface PermissionFinder {
 
     boolean userHasPermission(long userId, @NotNull Permission permission);
 
+    @NotNull List<Role> searchRolesByName(@NotNull String name);
+
     @NotNull List<ListedRoleResponse> listPermissions();
 }

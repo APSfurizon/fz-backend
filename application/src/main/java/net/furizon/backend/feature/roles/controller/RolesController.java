@@ -2,23 +2,26 @@ package net.furizon.backend.feature.roles.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.usecase.UserIdRequest;
 import net.furizon.backend.feature.roles.dto.requests.CreateRoleRequest;
 import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
+import net.furizon.backend.feature.roles.dto.requests.UpdateRoleRequest;
 import net.furizon.backend.feature.roles.dto.responses.ListingPermissionsResponse;
 import net.furizon.backend.feature.roles.dto.responses.ListingRolesResponse;
 import net.furizon.backend.feature.roles.dto.responses.RoleIdResponse;
 import net.furizon.backend.feature.roles.dto.responses.RoleResponse;
-import net.furizon.backend.feature.roles.dto.requests.UpdateRoleRequest;
+import net.furizon.backend.feature.roles.dto.responses.RolesResponse;
 import net.furizon.backend.feature.roles.usecase.AddUserToRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.CreateRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.DeleteRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.FetchRoleUseCase;
 import net.furizon.backend.feature.roles.usecase.ListRolesUseCase;
 import net.furizon.backend.feature.roles.usecase.RemoveUserFromRoleUseCase;
+import net.furizon.backend.feature.roles.usecase.SearchRoleByNameUseCase;
 import net.furizon.backend.feature.roles.usecase.UpdateRoleUseCase;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -69,6 +73,17 @@ public class RolesController {
             @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
         return executor.execute(ListRolesUseCase.class, user);
+    }
+
+    @Operation(summary = "Search for roles by internal and display name", description =
+        "Check `GET /roles/` for more info regarding what we're returning")
+    @PermissionRequired(permissions = {Permission.CAN_UPGRADE_USERS})
+    @GetMapping("/search")
+    public @NotNull RolesResponse searchRoles(
+            @RequestParam @NotEmpty @Valid final String query,
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        return executor.execute(SearchRoleByNameUseCase.class, query);
     }
 
     @Operation(summary = "Creates a new role", description =

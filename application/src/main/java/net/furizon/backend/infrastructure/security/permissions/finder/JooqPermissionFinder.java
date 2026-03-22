@@ -229,6 +229,19 @@ public class JooqPermissionFinder implements PermissionFinder {
     }
 
     @Override
+    public @NotNull List<Role> searchRolesByName(@NotNull String name) {
+        final String likeQuery = "%" + name + "%";
+        return sqlQuery.fetch(
+            selectRole()
+            .where(
+                ROLES.INTERNAL_NAME.likeIgnoreCase(likeQuery)
+                .or(ROLES.DISPLAY_NAME.likeIgnoreCase(likeQuery))
+            )
+            .orderBy(ROLES.INTERNAL_NAME)
+        ).stream().map(JooqRoleMapper::map).toList();
+    }
+
+    @Override
     public @NotNull List<ListedRoleResponse> listPermissions() {
         Field<Boolean> tempRole = PostgresDSL.field("temp_role", Boolean.class);
         Field<Integer> permissionCount = PostgresDSL.field("permissions", Integer.class);
