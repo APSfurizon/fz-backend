@@ -57,7 +57,13 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
         //Extract file extension
         final String extension = FilenameUtils.getExtension(req.getFileName());
         //Generate new s3 key for the file
-        final String key = UUID.randomUUID().toString() + "." + extension;
+        final String key = String.format(
+                "%03d_%05d_%s.%s",
+                event.getId(),
+                userId,
+                UUID.randomUUID().toString(),
+                extension
+        );
 
         //Fetch any previous upload attempts
         UploadProgress prevAttempt = uploadProgressFinder.getUploadProgressByUser(userId);
