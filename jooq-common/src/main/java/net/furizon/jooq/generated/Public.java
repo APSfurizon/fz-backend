@@ -18,6 +18,7 @@ import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
+import net.furizon.jooq.generated.tables.OneTimeNotifications;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
 import net.furizon.jooq.generated.tables.ResetPasswordRequests;
@@ -101,6 +102,11 @@ public class Public extends SchemaImpl {
     public final MembershipInfo MEMBERSHIP_INFO = MembershipInfo.MEMBERSHIP_INFO;
 
     /**
+     * The table <code>public.one_time_notifications</code>.
+     */
+    public final OneTimeNotifications ONE_TIME_NOTIFICATIONS = OneTimeNotifications.ONE_TIME_NOTIFICATIONS;
+
+    /**
      * The table <code>public.orders</code>.
      */
     public final Orders ORDERS = Orders.ORDERS;
@@ -175,6 +181,7 @@ public class Public extends SchemaImpl {
             Media.MEDIA,
             MembershipCards.MEMBERSHIP_CARDS,
             MembershipInfo.MEMBERSHIP_INFO,
+            OneTimeNotifications.ONE_TIME_NOTIFICATIONS,
             Orders.ORDERS,
             Permission.PERMISSION,
             ResetPasswordRequests.RESET_PASSWORD_REQUESTS,

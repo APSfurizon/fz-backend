@@ -15,6 +15,7 @@ import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
+import net.furizon.jooq.generated.tables.OneTimeNotifications;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
 import net.furizon.jooq.generated.tables.ResetPasswordRequests;
@@ -84,6 +85,11 @@ public class Tables {
      * The table <code>public.membership_info</code>.
      */
     public static final MembershipInfo MEMBERSHIP_INFO = MembershipInfo.MEMBERSHIP_INFO;
+
+    /**
+     * The table <code>public.one_time_notifications</code>.
+     */
+    public static final OneTimeNotifications ONE_TIME_NOTIFICATIONS = OneTimeNotifications.ONE_TIME_NOTIFICATIONS;
 
     /**
      * The table <code>public.orders</code>.

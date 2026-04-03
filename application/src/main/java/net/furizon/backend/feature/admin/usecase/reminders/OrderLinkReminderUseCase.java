@@ -47,7 +47,7 @@ public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Inte
             log.info("Sending order linking reminder email to {}", buyerEmail);
             MailRequest mail = new MailRequest();
             Locale orderLocale = o.getBuyerLocale() == null ? Locale.UK : Locale.of(o.getBuyerLocale());
-            mail.to(orderLocale, buyerEmail);
+            mail.to(orderLocale, buyerEmail, null);
             mail.subject("mail.reminder_order_link.title");
             mail.templateMessage(ReminderEmailTexts.TEMPLATE_ORDER_LINK, null,
                 MailVarPair.of(EmailVars.LINK, pretixConfig.getShop().getOrderUrl(o)),

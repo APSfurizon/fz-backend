@@ -8,6 +8,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.email.action.storeNotifications.StoreNotificationSentAction;
+import net.furizon.backend.infrastructure.email.finder.EmailNotificationFinder;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
@@ -16,7 +18,9 @@ import net.furizon.backend.infrastructure.security.permissions.finder.Permission
 import net.furizon.backend.infrastructure.templating.JteContext;
 import net.furizon.backend.infrastructure.templating.JteLocalizer;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.mail.MailException;
@@ -24,12 +28,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,9 +38,13 @@ import java.util.stream.Collectors;
 public class EmailSenderService implements EmailSender {
     @NotNull
     private final UserFinder userFinder;
-
     @NotNull
     private final PermissionFinder permissionFinder;
+    @NotNull
+    private final EmailNotificationFinder emailNotificationFinder;
+
+    @NotNull
+    private final StoreNotificationSentAction storeNotificationSentAction;
 
     @NotNull
     private final JavaMailSender mailSender;
@@ -88,6 +92,61 @@ public class EmailSenderService implements EmailSender {
     }
 
     @Override
+    public void prepareAndSendNotificationForRole(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull String roleInternalName, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(
+            filterUserForNotification(
+                prepareForRole(roleInternalName, subject, templateName, vars),
+                notificationType,
+                notificationIdentifier
+            ),
+            (mime, reqs) -> storeNotificationSent(
+                    notificationType,
+                    notificationIdentifier,
+                    reqs
+            )
+        );
+    }
+    @Override
+    public void prepareAndSendNotificationForPermission(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull Permission permission, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(
+            filterUserForNotification(
+                prepareForPermission(permission, subject, templateName, vars),
+                notificationType,
+                notificationIdentifier
+            ),
+            (mime, reqs) -> storeNotificationSent(
+                    notificationType,
+                    notificationIdentifier,
+                    reqs
+            )
+        );
+    }
+    @Override
+    public void prepareAndSendNotificationForUsers(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull List<Long> users, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars) {
+        fireAndForgetMany(
+            filterUserForNotification(
+                prepareForUsers(users, subject, templateName, vars),
+                notificationType,
+                notificationIdentifier
+            ),
+            (mime, reqs) -> storeNotificationSent(
+                    notificationType,
+                    notificationIdentifier,
+                    reqs
+            )
+        );
+    }
+
+    @Override
     public void prepareAndSendForRole(@NotNull String roleInternalName, @NotNull TranslatableValue subject,
                                       @NotNull String templateName, MailVarPair... vars) {
         fireAndForgetMany(prepareForRole(roleInternalName, subject, templateName, vars));
@@ -111,6 +170,12 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void sendMany(MailRequest... requests) throws MessagingException, MailException {
+        sendMany(null, requests);
+    }
+
+    @Override
+    public void sendMany(@Nullable BiConsumer<MimeMessage[], MailRequest[]> callback,
+                         MailRequest... requests) throws MessagingException, MailException {
         if (requests.length == 0) {
             return;
         }
@@ -120,7 +185,11 @@ public class EmailSenderService implements EmailSender {
                 mr.subject(mr.getSubject());
             }
         }
-        mailSender.send(transformMailRequestsToMimeMessages(requests));
+        var mimeMessages = transformMailRequestsToMimeMessages(requests);
+        mailSender.send(mimeMessages);
+        if (callback != null) {
+            callback.accept(mimeMessages, requests);
+        }
     }
 
     @Override
@@ -145,13 +214,18 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void fireAndForgetMany(MailRequest... requests) {
+        fireAndForgetMany(null, requests);
+    }
+    @Override
+    public void fireAndForgetMany(@Nullable BiConsumer<MimeMessage[], MailRequest[]> callback,
+                                  MailRequest... requests) {
         if (requests.length == 0) {
             return;
         }
         asyncTaskExecutor.execute(() -> {
             try {
                 log.debug("Sending emails in async mode");
-                sendMany(requests);
+                sendMany(callback, requests);
             } catch (MessagingException ex) {
                 log.error("Couldn't send message", ex);
             }
@@ -160,10 +234,15 @@ public class EmailSenderService implements EmailSender {
 
     @Override
     public void fireAndForgetMany(List<MailRequest> requests) {
+        fireAndForgetMany(requests, null);
+    }
+    @Override
+    public void fireAndForgetMany(List<MailRequest> requests,
+                                  @Nullable BiConsumer<MimeMessage[], MailRequest[]> callback) {
         if (requests.isEmpty()) {
             return;
         }
-        fireAndForgetMany(toArray(requests));
+        fireAndForgetMany(callback, toArray(requests));
     }
 
     private MimeMessage[] transformMailRequestsToMimeMessages(@NotNull MailRequest... requests) {
@@ -178,7 +257,7 @@ public class EmailSenderService implements EmailSender {
         final var isTemplateMessage = request.getTemplateMessage() != null;
         // Group translated messages by locale
         final Map<Locale, String> translatedBody = request.getTo().stream().collect(Collectors.toMap(
-                Pair::getLeft,
+                Triple::getLeft,
                 pair -> {
                     final var bodyMessage = isTemplateMessage
                             ? translationService.withLocale(pair.getLeft(), () -> convertTemplateToString(request))
@@ -192,12 +271,15 @@ public class EmailSenderService implements EmailSender {
         ));
         // Builds the MimeMessage with translated data for each recipient
         return request.getTo().stream()
-            .map(to -> buildMimeMessage(to.getRight(),
+            .map(to -> buildMimeMessage(
+                    to.getMiddle(),
                     translationService.email(request.getSubject().getKey(),
                             to.getLeft(),
                             request.getSubject().getParams()),
                     translatedBody.get(to.getLeft()),
-                    isTemplateMessage))
+                    isTemplateMessage
+                )
+            )
             .toArray(MimeMessage[]::new);
     }
 
@@ -253,5 +335,52 @@ public class EmailSenderService implements EmailSender {
 
     private @NotNull MailRequest[] toArray(@NotNull List<MailRequest> requests) {
         return requests.toArray(new MailRequest[requests.size()]);
+    }
+
+    private @NotNull List<MailRequest> filterUserForNotification(@NotNull List<MailRequest> requests,
+                                                                 @NotNull NotificationType notificationType,
+                                                                 @NotNull String notificationIdentifier) {
+        Set<Long> notificationAlreadyReceived = emailNotificationFinder.findUserIdsByNotification(
+                notificationType,
+                notificationIdentifier
+        );
+        List<MailRequest> out = new ArrayList<>(requests.size());
+        for (MailRequest request : requests) {
+            List<Triple<@NotNull Locale, @NotNull String, @Nullable Long>> to = new ArrayList<>(request.getTo());
+            boolean shouldRemoveAll = true;
+            boolean hasModified = false;
+            for (var user : request.getTo()) {
+                if (notificationAlreadyReceived.contains(user.getRight())) {
+                    to.remove(user);
+                    hasModified = true;
+                } else {
+                    shouldRemoveAll = false;
+                }
+            }
+            if (shouldRemoveAll) {
+                continue;
+            }
+            if (hasModified) {
+                out.add(new MailRequest(to, request.getSubject(), request.getMessage(), request.getTemplateMessage()));
+            } else {
+                out.add(request);
+            }
+        }
+        return out;
+    }
+
+    private void storeNotificationSent(@NotNull NotificationType notificationType,
+                                       @NotNull String notificationIdentifier,
+                                       MailRequest... requests) {
+        storeNotificationSentAction.invoke(
+                Arrays.stream(requests)
+                        .map(MailRequest::getTo)
+                        .flatMap(Collection::stream)
+                        .map(Triple::getRight)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet()),
+                notificationType,
+                notificationIdentifier
+        );
     }
 }

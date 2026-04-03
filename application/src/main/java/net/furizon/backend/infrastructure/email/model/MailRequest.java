@@ -1,14 +1,12 @@
 package net.furizon.backend.infrastructure.email.model;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import net.furizon.backend.feature.user.dto.UserEmailData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.PropertyKey;
@@ -21,17 +19,17 @@ import java.util.Objects;
 @Setter(AccessLevel.NONE)
 @NoArgsConstructor
 public class MailRequest {
-    private List<Pair<Locale, String>> to;
+    private List<Triple<@NotNull Locale, @NotNull String, @Nullable Long>> to;
     private TranslatableValue subject;
     private String message;
     private TemplateMessage templateMessage;
 
-    public MailRequest to(@NotNull final List<Pair<Locale, String>> to) {
+    public MailRequest to(@NotNull final List<Triple<@NotNull Locale, @NotNull String, @Nullable Long>> to) {
         this.to = to;
         return this;
     }
-    public MailRequest to(@NotNull final Locale language, @NotNull final String to) {
-        this.to = List.of(Pair.of(language, to));
+    public MailRequest to(@NotNull final Locale language, @NotNull final String to, @Nullable Long userId) {
+        this.to = List.of(Triple.of(language, to, userId));
         return this;
     }
     public MailRequest subject(@NotNull final TranslatableValue subject) {
@@ -67,13 +65,13 @@ public class MailRequest {
     }
 
     public MailRequest(@NotNull List<UserEmailData> emailData, @NotNull String templateName, MailVarPair... vars) {
-        to = emailData.stream().map(ued -> Pair.of(ued.getLanguage(), ued.getEmail())).toList();
+        to = emailData.stream().map(ued -> Triple.of(ued.getLanguage(), ued.getEmail(), ued.getUserId())).toList();
         String fursonas = String.join(", ", emailData.stream().map(UserEmailData::getFursonaName).toList());
         templateMessage(templateName, fursonas, vars);
     }
 
     public MailRequest(@NotNull UserEmailData emailData, @NotNull String templateName, MailVarPair... vars) {
-        to = List.of(Pair.of(emailData.getLanguage(), emailData.getEmail()));
+        to = List.of(Triple.of(emailData.getLanguage(), emailData.getEmail(), emailData.getUserId()));
         templateMessage(templateName, emailData.getFursonaName(), vars);
     }
 
@@ -86,7 +84,8 @@ public class MailRequest {
         this(Objects.requireNonNull(finder.getMailDataForUser(userId)), templateName, vars);
     }
 
-    public MailRequest(@NotNull List<Pair<Locale, String>> to, @NotNull TranslatableValue subject,
+    public MailRequest(@NotNull List<Triple<@NotNull Locale, @NotNull String, @Nullable Long>> to,
+                       @NotNull TranslatableValue subject,
                        @Nullable String message, @Nullable TemplateMessage templateMessage) {
         this.to = to;
         this.subject = subject;

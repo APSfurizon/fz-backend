@@ -1,15 +1,18 @@
 package net.furizon.backend.infrastructure.email;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.mail.MailException;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface EmailSender {
     @NonBlocking
@@ -35,6 +38,21 @@ public interface EmailSender {
             @NotNull String templateName,
             MailVarPair... vars
     );
+
+    void prepareAndSendNotificationForRole(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull String roleInternalName, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars);
+
+    void prepareAndSendNotificationForPermission(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull Permission permission, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars);
+
+    void prepareAndSendNotificationForUsers(
+            @NotNull NotificationType notificationType, @NotNull String notificationIdentifier,
+            @NotNull List<Long> users, @NotNull TranslatableValue subject,
+            @NotNull String templateName, MailVarPair... vars);
 
     @NonBlocking
     void prepareAndSendForRole(
@@ -62,6 +80,10 @@ public interface EmailSender {
     void send(MailRequest request) throws MessagingException, MailException;
     @Blocking
     void sendMany(MailRequest... requests) throws MessagingException, MailException;
+
+    void sendMany(@Nullable BiConsumer<MimeMessage[], MailRequest[]> callback,
+                  MailRequest... requests) throws MessagingException, MailException;
+
     @Blocking
     void sendMany(List<MailRequest> requests) throws MessagingException, MailException;
 
@@ -69,6 +91,13 @@ public interface EmailSender {
     void fireAndForget(MailRequest request);
     @NonBlocking
     void fireAndForgetMany(MailRequest... requests);
+
+    void fireAndForgetMany(@Nullable BiConsumer<MimeMessage[], MailRequest[]> callback,
+                           MailRequest... requests);
+
     @NonBlocking
     void fireAndForgetMany(List<MailRequest> requests);
+
+    void fireAndForgetMany(List<MailRequest> requests,
+                           @Nullable BiConsumer<MimeMessage[], MailRequest[]> callback);
 }

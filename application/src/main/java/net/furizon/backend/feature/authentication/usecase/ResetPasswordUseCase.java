@@ -49,7 +49,7 @@ public class ResetPasswordUseCase implements UseCase<EmailRequest, Boolean> {
 
         sender.fireAndForget(
             new MailRequest()
-                .to(translationService.getLocale(), email)
+                .to(translationService.getLocale(), email, null)
                 .subject("mail.password_reset.title")
                 .templateMessage(
                     TemplateMessage.of(TEMPLATE_PW_RESET)

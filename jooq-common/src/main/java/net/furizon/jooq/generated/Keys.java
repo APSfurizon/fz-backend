@@ -15,6 +15,7 @@ import net.furizon.jooq.generated.tables.FursuitsOrders;
 import net.furizon.jooq.generated.tables.Media;
 import net.furizon.jooq.generated.tables.MembershipCards;
 import net.furizon.jooq.generated.tables.MembershipInfo;
+import net.furizon.jooq.generated.tables.OneTimeNotifications;
 import net.furizon.jooq.generated.tables.Orders;
 import net.furizon.jooq.generated.tables.Permission;
 import net.furizon.jooq.generated.tables.ResetPasswordRequests;
@@ -66,6 +67,7 @@ public class Keys {
     public static final UniqueKey<Record> CARDS_PKEY = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("cards_pkey"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.CARD_DB_ID }, true);
     public static final UniqueKey<Record> MEMBERSHIP_CARDS_ONLY_ONE_ID_PER_YEAR = Internal.createUniqueKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("membership_cards_only_one_id_per_year"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.ISSUE_YEAR, MembershipCards.MEMBERSHIP_CARDS.ID_IN_YEAR }, true);
     public static final UniqueKey<Record> MEMBERSHIP_INFO_ID_PKEY = Internal.createUniqueKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_id_pkey"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.ID }, true);
+    public static final UniqueKey<Record> ONE_TIME_NOTIFICATIONS_PKEY = Internal.createUniqueKey(OneTimeNotifications.ONE_TIME_NOTIFICATIONS, DSL.name("one_time_notifications_pkey"), new TableField[] { OneTimeNotifications.ONE_TIME_NOTIFICATIONS.DB_ID }, true);
     public static final UniqueKey<Record> ORDER_ONLY_ONE_SERIAL_PER_EVENT = Internal.createUniqueKey(Orders.ORDERS, DSL.name("order_only_one_serial_per_event"), new TableField[] { Orders.ORDERS.EVENT_ID, Orders.ORDERS.ORDER_SERIAL_IN_EVENT }, true);
     public static final UniqueKey<Record> ORDERS_ONE_ORDER_PER_EVENT = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_one_order_per_event"), new TableField[] { Orders.ORDERS.USER_ID, Orders.ORDERS.EVENT_ID }, true);
     public static final UniqueKey<Record> ORDERS_PKEY = Internal.createUniqueKey(Orders.ORDERS, DSL.name("orders_pkey"), new TableField[] { Orders.ORDERS.ID }, true);
@@ -99,6 +101,7 @@ public class Keys {
     public static final ForeignKey<Record, Record> MEMBERSHIP_CARDS__MEMBERSHIP_CARDS_ORDER_FK = Internal.createForeignKey(MembershipCards.MEMBERSHIP_CARDS, DSL.name("membership_cards_order_fk"), new TableField[] { MembershipCards.MEMBERSHIP_CARDS.CREATED_FOR_ORDER }, Keys.ORDERS_PKEY, new TableField[] { Orders.ORDERS.ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> MEMBERSHIP_INFO__MEMBERSHIP_INFO_UPDATED_EVENT_ID = Internal.createForeignKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_updated_event_id"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.LAST_UPDATED_EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK = Internal.createForeignKey(MembershipInfo.MEMBERSHIP_INFO, DSL.name("membership_info_users_fk"), new TableField[] { MembershipInfo.MEMBERSHIP_INFO.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
+    public static final ForeignKey<Record, Record> ONE_TIME_NOTIFICATIONS__ONE_TIME_NOTIFICATIONS_DEST_USER_ID = Internal.createForeignKey(OneTimeNotifications.ONE_TIME_NOTIFICATIONS, DSL.name("one_time_notifications_dest_user_id"), new TableField[] { OneTimeNotifications.ONE_TIME_NOTIFICATIONS.DEST_USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_EVENTS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_events_id"), new TableField[] { Orders.ORDERS.EVENT_ID }, Keys.EVENT_PKEY, new TableField[] { Events.EVENTS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> ORDERS__ORDERS_USERS_ID = Internal.createForeignKey(Orders.ORDERS, DSL.name("orders_users_id"), new TableField[] { Orders.ORDERS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.USER_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
     public static final ForeignKey<Record, Record> PERMISSION__PERMISSION_ROLE_FK = Internal.createForeignKey(Permission.PERMISSION, DSL.name("permission_role_fk"), new TableField[] { Permission.PERMISSION.ROLE_ID }, Keys.ROLES_PK, new TableField[] { Roles.ROLES.ROLE_ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE);
