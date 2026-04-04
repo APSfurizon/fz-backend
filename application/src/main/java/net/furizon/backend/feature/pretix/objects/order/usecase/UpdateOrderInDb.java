@@ -18,6 +18,7 @@ import net.furizon.backend.feature.pretix.objects.payment.PretixPayment;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
+import net.furizon.backend.infrastructure.email.NotificationType;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
@@ -134,28 +135,41 @@ public class UpdateOrderInDb {
                                                     cardOwnerId, orderOwnerId);
                                         }
 
-                                    } else { //Otherwise, send an error email to web admins
-                                        log.error("[PRETIX] Order {} has already generated the membeship card {}/{}. "
-                                                        + "Order owner has changed ({} -> {}), "
-                                                        + "but membership card was already registered!!"
-                                                        + "Manual fix is needed!!! +++",
-                                                order.getCode(),
-                                                card.getCardId(), card.getIdInYear(),
-                                                cardOwnerId, orderOwnerId
-                                        );
+                                    } else {
+                                        //Check if the new owner has already a card. If yes, we're fine,
+                                        // the previous card remains with the previous order.
+                                        // Otherwise, send an error email to web admins
+                                        if (membershipCardFinder.userHasMembershipCardForEvent(orderOwnerId, event)) {
+                                            log.error("[PRETIX] Order {} has already generated "
+                                                            + "the membeship card {}/{}. "
+                                                            + "Order owner has changed ({} -> {}), "
+                                                            + "but membership card was already registered!!"
+                                                            + "Manual fix is needed!!! +++",
+                                                    order.getCode(),
+                                                    card.getCardId(), card.getIdInYear(),
+                                                    cardOwnerId, orderOwnerId
+                                            );
 
-                                        String idInYear = String.valueOf(card.getIdInYear());
-                                        emailSender.prepareAndSendForPermission(
-                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                            TranslatableValue.ofEmail(
-                                                    "mail.membership_card_owner_changed_but_registered.title"),
-                                            TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
-                                            MailVarPair.of(ORDER_CODE, order.getCode()),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
-                                            MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
-                                        );
+                                            String idInYear = String.valueOf(card.getIdInYear());
+                                            emailSender.prepareAndSendNotificationForPermission(
+                                                NotificationType.ADMIN_ORDER_OWNER_CHANGED_BUT_CARD_REGISTERED,
+                                                generateOrderOwnerChangedNotificationId(
+                                                        order.getOrderEvent(),
+                                                        card.getCardId(),
+                                                        cardOwnerId,
+                                                        orderOwnerId
+                                                ),
+                                                Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                                TranslatableValue.ofEmail(
+                                                        "mail.membership_card_owner_changed_but_registered.title"),
+                                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
+                                                MailVarPair.of(ORDER_CODE, order.getCode()),
+                                                MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                                MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
+                                                MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                                MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                            );
+                                        }
                                     }
                                 }
                             }
@@ -182,22 +196,17 @@ public class UpdateOrderInDb {
                                                     + "No operation is going to be performed.",
                                             order.getCode(), card.getCardId(), card.getIdInYear());
 
-                                    //TODO momentanerly disabled to prevent email mass spamming until we
-                                    // solve a bug with pretix configuration: users can remove an item
-                                    // they already paid, if they add another item which costs more:
-                                    // People were able to remove their membership card by adding a
-                                    // room or a sponsorship
-                                    if (false) {
-                                        emailSender.prepareAndSendForPermission(
-                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                            TranslatableValue.ofEmail("mail.membership_card_already_registered.title"),
-                                            TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
-                                            MailVarPair.of(ORDER_CODE, order.getCode()),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(
-                                                    MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
-                                        );
-                                    }
+                                    emailSender.prepareAndSendNotificationForPermission(
+                                        NotificationType.ADMIN_ORDER_CARD_REMOVED_BUT_CARD_REGISTERED,
+                                        generateCardRemovedFromOrderNotificationId(order, card.getCardId()),
+                                        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                        TranslatableValue.ofEmail("mail.membership_card_already_registered.title"),
+                                        TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
+                                        MailVarPair.of(ORDER_CODE, order.getCode()),
+                                        MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                        MailVarPair.of(
+                                                MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
+                                    );
                                 }
                             }
                         }
@@ -243,4 +252,21 @@ public class UpdateOrderInDb {
             OrderController.resumeWebhook();
         }
     }
+
+    private @NotNull String generateOrderOwnerChangedNotificationId(
+        @NotNull Event event,
+        long cardId,
+        long prevOwner,
+        long newOwner
+    ) {
+        return String.format("-%03d-%07d-%06d-%06d-", event.getId(), cardId, prevOwner, newOwner);
+    }
+
+    private @NotNull String generateCardRemovedFromOrderNotificationId(
+            @NotNull Order order,
+            long cardId
+    ) {
+        return String.format("-%03d-%s-%07d-", order.getOrderEvent().getId(), order.getCode(), cardId);
+    }
+
 }
