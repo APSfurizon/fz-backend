@@ -20,9 +20,12 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
+
+import java.util.Arrays;
 
 
 @Slf4j
@@ -61,7 +64,9 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
                 req.getEtags()
         );
 
-        if (!md5.equals(req.getMd5Hash())) {
+        byte[] s3Md5 =  Hex.decode(md5);
+        byte[] reqMd5 = Hex.decode(req.getMd5Hash());
+        if (!Arrays.equals(s3Md5, reqMd5)) {
             log.error("Upload {} (uId {}): md5 hash mismatch! S3 returned {} while req contained {}. "
                     + "Deleting the newly made upload",
                     req.getUploadReqId(), upload.getUploadId(), md5, req.getMd5Hash());
