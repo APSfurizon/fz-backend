@@ -19,6 +19,7 @@ import net.furizon.jooq.generated.tables.Fursuits.FursuitsPath;
 import net.furizon.jooq.generated.tables.Media.MediaPath;
 import net.furizon.jooq.generated.tables.MembershipCards.MembershipCardsPath;
 import net.furizon.jooq.generated.tables.MembershipInfo.MembershipInfoPath;
+import net.furizon.jooq.generated.tables.OneTimeNotifications.OneTimeNotificationsPath;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
 import net.furizon.jooq.generated.tables.Roles.RolesPath;
 import net.furizon.jooq.generated.tables.RoomGuests.RoomGuestsPath;
@@ -288,6 +289,19 @@ public class Users extends TableImpl<Record> {
             _membershipInfo = new MembershipInfoPath(this, null, Keys.MEMBERSHIP_INFO__MEMBERSHIP_INFO_USERS_FK.getInverseKey());
 
         return _membershipInfo;
+    }
+
+    private transient OneTimeNotificationsPath _oneTimeNotifications;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.one_time_notifications</code> table
+     */
+    public OneTimeNotificationsPath oneTimeNotifications() {
+        if (_oneTimeNotifications == null)
+            _oneTimeNotifications = new OneTimeNotificationsPath(this, null, Keys.ONE_TIME_NOTIFICATIONS__ONE_TIME_NOTIFICATIONS_DEST_USER_ID.getInverseKey());
+
+        return _oneTimeNotifications;
     }
 
     private transient OrdersPath _orders;

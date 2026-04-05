@@ -9,10 +9,10 @@ public class JooqRoleMapper {
     public static Role map(Record record) {
         return new Role(
                 record.get(ROLES.ROLE_ID),
-                record.get(ROLES.DISPLAY_NAME),
                 record.get(ROLES.INTERNAL_NAME),
-                record.get(ROLES.ROLE_ADMINCOUNT_PRIORITY),
-                record.get(ROLES.SHOW_IN_NOSECOUNT)
+                record.get(ROLES.DISPLAY_NAME),
+                record.get(ROLES.SHOW_IN_NOSECOUNT),
+                record.get(ROLES.ROLE_ADMINCOUNT_PRIORITY)
         );
     }
 }

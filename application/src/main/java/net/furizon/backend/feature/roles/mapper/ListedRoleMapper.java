@@ -18,9 +18,9 @@ public class ListedRoleMapper {
     ) {
         return ListedRoleResponse.builder()
                 .roleId(record.get(ROLES.ROLE_ID))
-                .roleInternalName(record.get(ROLES.INTERNAL_NAME))
-                .roleDisplayName(record.get(ROLES.DISPLAY_NAME))
-                .showInNosecount(record.get(ROLES.SHOW_IN_NOSECOUNT))
+                .internalName(record.get(ROLES.INTERNAL_NAME))
+                .displayName(record.get(ROLES.DISPLAY_NAME))
+                .showInAdminCount(record.get(ROLES.SHOW_IN_NOSECOUNT))
                 .permanentUsersNumber(record.get(permanentUsers).longValue())
                 .temporaryUsersNumber(record.get(tempUsers).longValue())
                 .permissionsNumber(record.get(permissionCount))

@@ -10,10 +10,10 @@ import org.jetbrains.annotations.Nullable;
 public class ListedRoleResponse {
     private final long roleId;
 
-    @NotNull private final String roleInternalName;
-    @Nullable private final String roleDisplayName;
+    @NotNull private final String internalName;
+    @Nullable private final String displayName;
 
-    private final boolean showInNosecount;
+    private final boolean showInAdminCount;
 
     private final long permanentUsersNumber;
     private final long temporaryUsersNumber;

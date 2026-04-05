@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.admin.usecase;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GetCapabilitiesUseCase implements UseCase<FurizonUser, CapabilitiesResponse> {
@@ -18,6 +20,7 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
 
     @Override
     public @NotNull CapabilitiesResponse executor(@NotNull FurizonUser input) {
+        log.info("User {} is checking his capabilities", input.getUserId());
         Set<Permission> p = permissionFinder.getUserPermissions(input.getUserId());
         return CapabilitiesResponse.builder()
                 .canUpgradeUser(p.contains(Permission.CAN_UPGRADE_USERS))
@@ -29,10 +32,17 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
                 .canRemindBadgeUploads(p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO))
                 .canRemindFursuitBringToEvent(p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO))
                 .canViewUsers(
-                        p.contains(Permission.CAN_VIEW_USER)
-                        && p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                        p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                        && p.contains(Permission.CAN_VIEW_USER)
                 )
-                .canExportHotelList(p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO))
+                .canExportHotelList(
+                        p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                        || p.contains(Permission.CAN_VIEW_USER)
+                )
+                .canExportShirtList(
+                        p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
+                        || p.contains(Permission.CAN_VIEW_USER)
+                )
                 .canExportBadges(
                         p.contains(Permission.CAN_MANAGE_USER_PUBLIC_INFO)
                         || p.contains(Permission.CAN_VIEW_USER)

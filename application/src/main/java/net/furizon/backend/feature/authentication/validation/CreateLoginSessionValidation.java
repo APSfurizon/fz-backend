@@ -60,7 +60,7 @@ public class CreateLoginSessionValidation {
                 sessionAuthenticationManager.disableUser(data.getUserId());
                 emailSender.fireAndForget(
                     new MailRequest()
-                        .to(data.getLanguage(), data.getEmail())
+                        .to(data.getLanguage(), data.getEmail(), data.getUserId())
                         .templateMessage(TEMPLATE_TOO_MANY_LOGIN_ATTEMPTS, null)
                         .subject("mail.too_many_login_attempts.title")
                 );

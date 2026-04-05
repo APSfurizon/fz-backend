@@ -40,14 +40,27 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
         short year = event.getMembershipYear(membershipYearUtils);
 
         return sqlQuery.count(
-                PostgresDSL
-                        .select(MEMBERSHIP_CARDS.CARD_DB_ID)
-                        .from(MEMBERSHIP_CARDS)
-                        .where(
-                                MEMBERSHIP_CARDS.USER_ID.eq(userId)
-                                    .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
-                        )
+            PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)
+            .from(MEMBERSHIP_CARDS)
+            .where(
+                MEMBERSHIP_CARDS.USER_ID.eq(userId)
+                .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+            )
         );
+    }
+
+    @Override
+    public boolean userHasMembershipCardForEvent(long userId, @NotNull Event event) {
+        short year = event.getMembershipYear(membershipYearUtils);
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)
+            .from(MEMBERSHIP_CARDS)
+            .where(
+                MEMBERSHIP_CARDS.USER_ID.eq(userId)
+                .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+            )
+            .limit(1)
+        ).isPresent();
     }
 
     @Nullable

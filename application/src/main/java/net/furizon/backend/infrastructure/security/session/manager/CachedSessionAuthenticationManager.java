@@ -20,7 +20,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectJoinStep;
-import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -230,25 +229,17 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
 
     @Override
     public @Nullable Authentication findAuthenticationByEmail(@NotNull String email) {
-        try {
-            return sqlQuery.fetchFirst(
-                selectAuthentication()
-                .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.equalIgnoreCase(email))
-            ).mapOrNull(JooqAuthenticationMapper::map);
-        } catch (NoDataFoundException e) {
-            return null;
-        }
+        return sqlQuery.fetchFirst(
+            selectAuthentication()
+            .where(AUTHENTICATIONS.AUTHENTICATION_EMAIL.equalIgnoreCase(email))
+        ).mapOrNull(JooqAuthenticationMapper::map);
     }
     @Override
     public @Nullable Authentication findAuthenticationByUserId(long userId) {
-        try {
-            return sqlQuery.fetchFirst(
-                selectAuthentication()
-                .where(AUTHENTICATIONS.USER_ID.eq(userId))
-            ).mapOrNull(JooqAuthenticationMapper::map);
-        } catch (NoDataFoundException e) {
-            return null;
-        }
+        return sqlQuery.fetchFirst(
+            selectAuthentication()
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
+        ).mapOrNull(JooqAuthenticationMapper::map);
     }
     private @NotNull SelectJoinStep<?> selectAuthentication() {
         return PostgresDSL.select(

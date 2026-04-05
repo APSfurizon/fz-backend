@@ -1,9 +1,9 @@
 package net.furizon.backend.infrastructure.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import net.furizon.backend.feature.authentication.Authentication;
-import net.minidev.json.annotate.JsonIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

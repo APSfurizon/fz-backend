@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface MembershipCardFinder {
     int countCardsPerUserPerEvent(long userId, @NotNull Event event);
+    boolean userHasMembershipCardForEvent(long userId, @NotNull Event event);
     @Nullable MembershipCard getMembershipCardByOrderId(long orderId);
     @Nullable MembershipCard getMembershipCardByCardId(long cardId);
 

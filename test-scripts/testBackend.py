@@ -245,6 +245,8 @@ def usersAdminView(id: int) -> Response:
 
 def exportHotel() -> Response:
     return doGet(f'{BASE_URL_API}admin/export/hotel-user-list')
+def exportShirts() -> Response:
+    return doGet(f'{BASE_URL_API}admin/export/shirt-user-list')
 
 def listPermissions() -> Response:
     return doGet(f'{BASE_URL_API}roles/permissions')
@@ -517,6 +519,7 @@ login()
 #addFursuit()
 #updateBring()
 #exportHotel()
+exportShirts()
 #listPermissions()
 #listRoles()
 #crerateRole("-_____")
@@ -533,6 +536,7 @@ login()
 #searchByOrderCode("T07EZ")
 #addUserToRole(5, 1, True)
 #removeUserFromRole(5, 1)
+
 #testInternalAuthorize()
 #uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
 #galleryProcessorWebhook()

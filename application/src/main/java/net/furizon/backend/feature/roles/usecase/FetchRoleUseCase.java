@@ -47,7 +47,7 @@ public class FetchRoleUseCase implements UseCase<Long, RoleResponse> {
                 .internalName(role.getInternalName())
                 .displayName(role.getDisplayName())
                 .roleAdmincountPriority(role.getRoleAdmincountPriority())
-                .showInAdminCount(role.isShowInNosecount())
+                .showInAdminCount(role.isShowInAdminCount())
                 .enabledPermissions(permissions)
                 .users(users)
             .build();

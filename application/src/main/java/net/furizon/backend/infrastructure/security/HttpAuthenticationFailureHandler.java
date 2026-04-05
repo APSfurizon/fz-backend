@@ -1,6 +1,5 @@
 package net.furizon.backend.infrastructure.security;
 
-import com.google.common.base.Charsets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static net.furizon.backend.infrastructure.web.Web.Constants.Mdc.MDC_CORRELATION_ID;
@@ -34,7 +34,7 @@ public class HttpAuthenticationFailureHandler implements AuthenticationFailureHa
     ) throws IOException {
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setCharacterEncoding(Charsets.UTF_8.name());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         final var builder = HttpErrorResponse
             .builder()
             .requestId((String) request.getAttribute(MDC_CORRELATION_ID));
