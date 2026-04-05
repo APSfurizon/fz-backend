@@ -20,7 +20,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectJoinStep;
-import org.jooq.exception.NoDataFoundException;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
