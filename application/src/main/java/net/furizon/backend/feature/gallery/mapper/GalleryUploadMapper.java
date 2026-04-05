@@ -25,6 +25,7 @@ public class GalleryUploadMapper {
         MediaResponse thumbnailMedia = MediaResponseMapper.mapOrNull(r, thumbnail);
 
         UploadType type = r.get(UPLOADS.UPLOAD_TYPE);
+        displayMedia = displayMedia == null ? (type == UploadType.IMAGE ? downloadMedia : displayMedia) : displayMedia;
 
         return GalleryUpload.builder()
                 .id(r.get(UPLOADS.ID))
@@ -39,7 +40,7 @@ public class GalleryUploadMapper {
                 .height(r.get(UPLOADS.RESOLUTION_HEIGTH))
                 .type(type)
                 .downloadMedia(downloadMedia)
-                .displayMedia(displayMedia == null ? (type == UploadType.IMAGE ? downloadMedia : displayMedia) : displayMedia)
+                .displayMedia(displayMedia)
                 .thumbnailMedia(thumbnailMedia)
                 .isSelected(r.get(UPLOADS.IS_SELECTED))
                 .repostPermissions(r.get(UPLOADS.REPOST_PERMISSIONS))
