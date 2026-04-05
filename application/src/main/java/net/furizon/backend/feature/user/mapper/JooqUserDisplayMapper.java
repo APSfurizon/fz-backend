@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
+import org.jooq.Table;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -17,32 +18,32 @@ import static net.furizon.jooq.generated.Tables.USERS;
 public class JooqUserDisplayMapper {
     @NotNull
     public static UserDisplayData map(Record record) {
-        return map(record, true);
+        return map(record, true, null);
     }
 
     @NotNull
-    public static UserDisplayData map(Record record, boolean withOrder) {
+    public static UserDisplayData map(Record record, boolean withOrder, Table<?> mediaTable) {
         Short sponsor = withOrder ? record.get(ORDERS.ORDER_SPONSORSHIP_TYPE) : null;
         return UserDisplayData.builder()
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .locale(record.get(USERS.USER_LOCALE))
                 .language(record.get(USERS.USER_LANGUAGE))
-                .propic(MediaResponseMapper.mapOrNull(record))
+                .propic(MediaResponseMapper.mapOrNull(record, mediaTable))
                 .sponsorship(sponsor != null ? Sponsorship.getFromDbId(sponsor) : null)
             .build();
     }
 
     public static UserDisplayDataWithOrderCode mapWithOrderCode(Record record) {
         return new UserDisplayDataWithOrderCode(
-                map(record, true),
+                map(record, true, null),
                 record.get(ORDERS.ORDER_CODE)
         );
     }
 
     public static UserDisplayDataWithOrderCodeAndSerial mapWithOrderCodeSerial(Record record) {
         return new UserDisplayDataWithOrderCodeAndSerial(
-                map(record, true),
+                map(record, true, null),
                 record.get(ORDERS.ORDER_CODE),
                 record.get(ORDERS.ORDER_SERIAL_IN_EVENT)
         );

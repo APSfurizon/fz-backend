@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -47,6 +49,10 @@ public class HttpRequest<R> {
     private final ParameterizedTypeReference<R> responseParameterizedType;
 
     @Nullable
+    private final Pair<String, String> basicAuth;
+    private final boolean basicAuthSet;
+
+    @Nullable
     @Getter(AccessLevel.NONE)
     private final String overrideBaseUrl;
     @NotNull public String overrideBaseUrl() {
@@ -82,6 +88,8 @@ public class HttpRequest<R> {
         private String overrideBaseUrl = null;
         private String overrideBasePath = null;
         private boolean sendConfigHeaders = true;
+        private Pair<String, String> basicAuth = null;
+        private boolean basicAuthSet = false;
         private ParameterizedTypeReference<R> responseParameterizedType;
 
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -154,26 +162,40 @@ public class HttpRequest<R> {
         }
 
         public Builder<R> responseParameterizedType(
-            @NotNull final ParameterizedTypeReference<R> responseParameterizedType
+                @NotNull final ParameterizedTypeReference<R> responseParameterizedType
         ) {
             this.responseParameterizedType = responseParameterizedType;
             return this;
         }
 
+        //We allow null auth config on purpose
+        public Builder<R> basicAuth(@Nullable final Pair<String, String> basicAuth) {
+            this.basicAuth = basicAuth;
+            this.basicAuthSet = true;
+            return this;
+        }
+        public Builder<R> basicAuth(@NotNull final String username, @NotNull final String password) {
+            this.basicAuth = new ImmutablePair<>(username, password);
+            basicAuthSet =  true;
+            return this;
+        }
+
         public HttpRequest<R> build() {
             return new HttpRequest<>(
-                method,
-                path,
-                headers,
-                uriVariables,
-                queryParams,
-                body,
-                contentType,
-                responseType,
-                responseParameterizedType,
-                overrideBaseUrl,
-                overrideBasePath,
-                sendConfigHeaders
+                    method,
+                    path,
+                    headers,
+                    uriVariables,
+                    queryParams,
+                    body,
+                    contentType,
+                    responseType,
+                    responseParameterizedType,
+                    basicAuth,
+                    basicAuthSet,
+                    overrideBaseUrl,
+                    overrideBasePath,
+                    sendConfigHeaders
             );
         }
     }

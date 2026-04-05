@@ -83,7 +83,8 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.GET, "/api/v1/states/get-countries"),
                     antMatcher(HttpMethod.GET, "/api/v1/states/by-country"),
                     antMatcher(HttpMethod.GET, "/api/v1/admin/countdown"),
-                    antMatcher(HttpMethod.GET, "/api/v1/admin/ping")
+                    antMatcher(HttpMethod.GET, "/api/v1/admin/ping"),
+                    antMatcher(HttpMethod.GET, "/api/v1/gallery/pub/**")
                 )
                 .permitAll()
                 .anyRequest()
