@@ -7,7 +7,9 @@ import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDirectDownloadFile;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
+import net.furizon.backend.feature.gallery.mapper.BulkDirectDownloadFileMapper;
 import net.furizon.backend.feature.gallery.mapper.BulkDownloadFileMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryEventMapper;
 import net.furizon.backend.feature.gallery.mapper.GalleryPhotographerMapper;
@@ -622,5 +624,25 @@ public class JooqUploadFinder implements UploadFinder {
                 .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
             )
         ).stream().map(r -> BulkDownloadFileMapper.map(r, objectMapper, translationService)).toList();
+    }
+
+    @Override
+    public @NotNull List<BulkDirectDownloadFile> getBulkDirectDownloadableFiles(Set<Long> ids) {
+        return query.fetch(
+            PostgresDSL.select(
+                MEDIA.MEDIA_PATH,
+                MEDIA.MEDIA_STORE_METHOD,
+                UPLOADS.ORIGINAL_FILE_NAME,
+                UPLOADS.UPLOAD_TIMESTAMP,
+                UPLOADS.FILE_SIZE
+            )
+            .from(UPLOADS)
+            .innerJoin(MEDIA)
+            .on(UPLOADS.MEDIA_ID.eq(MEDIA.MEDIA_ID))
+            .where(
+                UPLOADS.ID.in(ids)
+                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
+            )
+        ).stream().map(BulkDirectDownloadFileMapper::map).toList();
     }
 }

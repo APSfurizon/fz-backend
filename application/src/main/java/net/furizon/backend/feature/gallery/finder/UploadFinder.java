@@ -4,6 +4,7 @@ import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.GalleryUploadPreview;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDirectDownloadFile;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.generated.enums.UploadStatus;
@@ -80,4 +81,6 @@ public interface UploadFinder {
     int countPendingUploads();
 
     @NotNull List<BulkDownloadFile> getBulkDownloadableFiles(Set<Long> ids);
+
+    @NotNull List<BulkDirectDownloadFile> getBulkDirectDownloadableFiles(Set<Long> ids);
 }

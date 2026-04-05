@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDirectDownloadResponse;
 import net.furizon.backend.feature.gallery.dto.request.AdminSetSelectedUploadRequest;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
@@ -221,6 +222,34 @@ public class GalleryController {
                 new BulkGalleryDownloadUseCase.Input(
                         new HashSet<>(request.getIds()),
                         user
+                )
+        );
+    }
+
+    @Operation(summary = "Request a bulk DIRECT download of multiple uploads", description =
+        "This method works is similar to the bulk-download one, but instead of relying on an "
+        + "external service to download a single zip file containing all the photos already "
+        + "sorted in directories by event and photographer, it simply returns a direct download "
+        + "link for each single selected media together with some extra information:"
+        + "Inside every object we have the field"
+        + "`u` containing the direct download Url, "
+        + "`n` containing the original file name (keep in mind that files on server are saved with uuids, "
+        + "you have to manually fix the filename), "
+        + "`t` an upload timestamp, if needed for any reason, "
+        + "`s` the size of the file. "
+        + "This method is intended to be used on, for example, mobile platforms where it's better to download "
+        + "the direct medias instead of having a single huge zip file on disk. The link you get with this "
+        + "endpoint have NO expiration.")
+    @PostMapping("/bulk-direct-download")
+    public @NotNull BulkDirectDownloadResponse bulkDirectDownloadInit(
+            @NotNull @Valid @RequestBody final BulkDownloadRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+            BulkGalleryDirectDownloadUseCase.class,
+                new BulkGalleryDirectDownloadUseCase.Input(
+                    new HashSet<>(request.getIds()),
+                    user
                 )
         );
     }
