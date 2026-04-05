@@ -11,8 +11,10 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -22,7 +24,9 @@ public class GetUsersByOrderCodeUseCase implements UseCase<GetUsersByOrderCodeUs
 
     @Override
     public @NotNull SearchUsersResponse executor(@NotNull GetUsersByOrderCodeUseCase.Input input) {
-        final Set<String> parsedCodes = Set.of(input.orderCodes);
+        final Set<String> parsedCodes = Arrays.stream(input.orderCodes)
+                .map(String::toUpperCase)
+                .collect(Collectors.toUnmodifiableSet());
         final List<UserDisplayData> result = userFinder.getDisplayUserByOrderCode(parsedCodes, input.event);
         return new SearchUsersResponse(result.stream().map(data ->
                 new SearchUserResult(data.getUserId(), data.getFursonaName(), data.getPropic()))
