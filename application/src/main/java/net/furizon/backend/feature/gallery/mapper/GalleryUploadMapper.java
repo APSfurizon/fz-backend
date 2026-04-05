@@ -5,6 +5,7 @@ import net.furizon.backend.feature.pretix.objects.event.mapper.JooqEventMapper;
 import net.furizon.backend.feature.user.mapper.JooqUserDisplayMapper;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
+import net.furizon.jooq.generated.enums.UploadType;
 import org.jooq.Record;
 import org.jooq.Table;
 
@@ -22,6 +23,9 @@ public class GalleryUploadMapper {
         MediaResponse downloadMedia = MediaResponseMapper.map(r, media);
         MediaResponse displayMedia = MediaResponseMapper.mapOrNull(r, render);
         MediaResponse thumbnailMedia = MediaResponseMapper.mapOrNull(r, thumbnail);
+
+        UploadType type = r.get(UPLOADS.UPLOAD_TYPE);
+
         return GalleryUpload.builder()
                 .id(r.get(UPLOADS.ID))
                 .originalUploader(r.get(UPLOADS.ORIGINAL_UPLOADER_USER_ID))
@@ -33,9 +37,9 @@ public class GalleryUploadMapper {
                 .fileSize(r.get(UPLOADS.FILE_SIZE))
                 .width(r.get(UPLOADS.RESOLUTION_WIDTH))
                 .height(r.get(UPLOADS.RESOLUTION_HEIGTH))
-                .type(r.get(UPLOADS.UPLOAD_TYPE))
+                .type(type)
                 .downloadMedia(downloadMedia)
-                .displayMedia(displayMedia == null ? downloadMedia : displayMedia)
+                .displayMedia(displayMedia == null ? (type == UploadType.IMAGE ? downloadMedia : displayMedia) : displayMedia)
                 .thumbnailMedia(thumbnailMedia)
                 .isSelected(r.get(UPLOADS.IS_SELECTED))
                 .repostPermissions(r.get(UPLOADS.REPOST_PERMISSIONS))

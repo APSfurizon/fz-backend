@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.gallery.dto.request.AdminSetSelectedUploadRequest;
 import net.furizon.backend.feature.gallery.dto.GalleryEvent;
 import net.furizon.backend.feature.gallery.dto.GalleryPhotographer;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
@@ -17,16 +18,7 @@ import net.furizon.backend.feature.gallery.dto.response.AdminBatchApprovalRespon
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryEventsResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryPhotographersResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListUploadsResponse;
-import net.furizon.backend.feature.gallery.usecase.AdminBatchListUseCase;
-import net.furizon.backend.feature.gallery.usecase.AdminUpdateUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.BulkGalleryDownloadUseCase;
-import net.furizon.backend.feature.gallery.usecase.DeleteUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.FetchGalleryEventUseCase;
-import net.furizon.backend.feature.gallery.usecase.FetchGalleryPhotogapherUseCase;
-import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
-import net.furizon.backend.feature.gallery.usecase.ListGalleryEventsUseCase;
-import net.furizon.backend.feature.gallery.usecase.ListGalleryPhotographersUseCase;
-import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
+import net.furizon.backend.feature.gallery.usecase.*;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -302,6 +294,27 @@ public class GalleryController {
                         request.getNewStatus(),
                         request.getNewPhotographerUserId(),
                         request.getNewEventId(),
+                        user
+                )
+        );
+    }
+
+    @Operation(summary = "Updates the selection status of an upload", description =
+        "Keep in mind that only images can be set as selected. Only one selection "
+        + "is allowed per event, by selecting a photo all the others from the same "
+        + "event will be automatically deselected. The event is automatically inferred "
+        + "from the specified upload id")
+    @PermissionRequired(permissions = {Permission.UPLOADS_CAN_MANAGE_UPLOADS})
+    @PostMapping("/manage/set-selected")
+    public GalleryUpload setSelectedToUpload(
+            @NotNull @Valid @RequestBody final AdminSetSelectedUploadRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                AdminSetSelectedUploadUseCase.class,
+                new AdminSetSelectedUploadUseCase.Input(
+                        request.getUploadId(),
+                        request.getSelected(),
                         user
                 )
         );

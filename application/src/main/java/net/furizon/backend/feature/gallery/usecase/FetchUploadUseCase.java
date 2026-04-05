@@ -2,6 +2,7 @@ package net.furizon.backend.feature.gallery.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.gallery.GalleryChecks;
 import net.furizon.backend.feature.gallery.GalleryErrorCodes;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
@@ -22,23 +23,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FetchUploadUseCase implements UseCase<FetchUploadUseCase.Input, GalleryUpload> {
     @NotNull
-    private final UploadFinder uploadFinder;
-    @NotNull
     private final PermissionFinder permissionFinder;
     @NotNull
     private final TranslationService translationService;
+    @NotNull
+    private final GalleryChecks galleryChecks;
 
     @Override
     public @NotNull GalleryUpload executor(@NotNull FetchUploadUseCase.Input input) {
-        GalleryUpload upload = uploadFinder.getUploadById(input.uploadId);
-
-        if (upload == null) {
-            log.error("Unable to find upload {}", input.uploadId);
-            throw new ApiException(
-                translationService.error("gallery.not_found"),
-                GalleryErrorCodes.UPLOADS_NOT_FOUND
-            );
-        }
+        GalleryUpload upload = galleryChecks.getUploadAndAssertItExists(input.uploadId);
 
         if (upload.getStatus() != UploadStatus.APPROVED) {
             if (input.user == null) {

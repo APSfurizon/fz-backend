@@ -32,7 +32,7 @@ public class GalleryUpload {
     @NotNull private final UploadType type;
 
     @NotNull private final MediaResponse downloadMedia;
-    @NotNull private final MediaResponse displayMedia;
+    @Nullable private final MediaResponse displayMedia;
     @Nullable private final MediaResponse thumbnailMedia;
 
     private boolean isSelected;

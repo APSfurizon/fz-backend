@@ -2,6 +2,7 @@ package net.furizon.backend.feature.gallery;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.gallery.finder.UploadProgressFinder;
@@ -43,6 +44,13 @@ public class GalleryChecks {
                 translationService.error("gallery.not_found", GalleryErrorCodes.UPLOADS_NOT_FOUND)
             );
         }
+    }
+
+    @NotNull
+    public GalleryUpload getUploadAndAssertItExists(long uploadId) {
+        var res = uploadFinder.getUploadById(uploadId);
+        assertUploadFound(res);
+        return res;
     }
 
     @NotNull

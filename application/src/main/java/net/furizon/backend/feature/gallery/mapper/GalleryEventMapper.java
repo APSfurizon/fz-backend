@@ -22,6 +22,8 @@ public class GalleryEventMapper {
         MediaResponse downloadMedia = MediaResponseMapper.mapOrNull(r, media);
         MediaResponse displayMedia = MediaResponseMapper.mapOrNull(r, render);
         MediaResponse thumbnailMedia = MediaResponseMapper.mapOrNull(r, thumbnail);
+        //we assume that only photos can be selected
+        // This should be guaranteed by the select upload usecase
         return new GalleryEvent(
             JooqEventMapper.map(r),
             displayMedia != null ? displayMedia : downloadMedia,

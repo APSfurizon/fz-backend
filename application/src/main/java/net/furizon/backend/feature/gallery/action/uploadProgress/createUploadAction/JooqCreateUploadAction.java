@@ -102,7 +102,6 @@ public class JooqCreateUploadAction implements CreateUploadAction {
                 .height(0)
                 .type(UploadType.UNPROCESSED)
                 .downloadMedia(media)
-                .displayMedia(media)
                 .isSelected(false)
                 .repostPermissions(repostPermissions)
                 .event(event)
