@@ -14,7 +14,7 @@ public class VideoMetadataMapper {
                 .audioCodec(r.get(UPLOAD_VIDEO_DATA.AUDIO_CODEC))
                 .audioFrequency(r.get(UPLOAD_VIDEO_DATA.AUDIO_FREQUENCY))
                 .framerate(r.get(UPLOAD_VIDEO_DATA.FRAMERATE))
-                .duration(r.get(UPLOAD_VIDEO_DATA.DURATION))
+                .durationMs(r.get(UPLOAD_VIDEO_DATA.DURATION))
             .build();
     }
 }

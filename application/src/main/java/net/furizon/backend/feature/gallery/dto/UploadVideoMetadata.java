@@ -11,5 +11,5 @@ public class UploadVideoMetadata {
     @Nullable private String videoCodec;
     @Nullable private String audioCodec;
     @Nullable private String framerate;
-    private int duration; //TODO
+    private int durationMs;
 }

@@ -34,7 +34,7 @@ public class JooqUpsertVideoMetadata implements UpsertVideoMetadataAction {
                 videoMetadata.getVideoCodec(),
                 videoMetadata.getAudioCodec(),
                 videoMetadata.getAudioFrequency(),
-                videoMetadata.getDuration(),
+                videoMetadata.getDurationMs(),
                 videoMetadata.getFramerate()
             )
             .onConflict(UPLOAD_VIDEO_DATA.UPLOAD_ID)
@@ -42,7 +42,7 @@ public class JooqUpsertVideoMetadata implements UpsertVideoMetadataAction {
             .set(UPLOAD_VIDEO_DATA.VIDEO_CODEC, videoMetadata.getVideoCodec())
             .set(UPLOAD_VIDEO_DATA.AUDIO_CODEC, videoMetadata.getAudioCodec())
             .set(UPLOAD_VIDEO_DATA.AUDIO_FREQUENCY, videoMetadata.getAudioFrequency())
-            .set(UPLOAD_VIDEO_DATA.DURATION, videoMetadata.getDuration())
+            .set(UPLOAD_VIDEO_DATA.DURATION, videoMetadata.getDurationMs())
             .set(UPLOAD_VIDEO_DATA.FRAMERATE, videoMetadata.getFramerate())
         ) > 0;
     }
