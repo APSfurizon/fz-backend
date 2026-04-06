@@ -1,7 +1,6 @@
 package net.furizon.backend.feature.gallery.usecase;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadFile;
@@ -9,12 +8,10 @@ import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadPayload;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadResponse;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.infrastructure.configuration.GalleryConfig;
+import net.furizon.backend.infrastructure.generalUtils.hmacEncoder.HmacEncoder;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.apache.hc.client5.http.utils.Hex;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -37,7 +34,7 @@ public class BulkGalleryDownloadUseCase implements UseCase<BulkGalleryDownloadUs
     private final UploadFinder uploadFinder;
 
     @NotNull
-    private final ObjectMapper mapper;
+    private final HmacEncoder hmacEncoder;
 
     @NotNull
     private final GalleryConfig config;
@@ -97,18 +94,9 @@ public class BulkGalleryDownloadUseCase implements UseCase<BulkGalleryDownloadUs
         String b64Str;
         String hmacStr;
         try {
-            String data = mapper.writeValueAsString(payload);
-            byte[] dataBytes = data.getBytes();
-            b64Str = new String(Base64.encode(dataBytes));
-
-            //hmac
-            HMac hmac = new HMac(new SHA256Digest());
-            hmac.init(new KeyParameter(batchDownloadConfig.getHmacKey().getBytes()));
-            hmac.update(dataBytes, 0, dataBytes.length);
-            byte[] hmacOut = new byte[hmac.getMacSize()];
-            hmac.doFinal(hmacOut, 0);
-            hmacStr = Hex.encodeHexString(hmacOut);
-
+            var encoded = hmacEncoder.encode(payload, batchDownloadConfig.getHmacKey());
+            b64Str = new String(Base64.encode(encoded.data().getBytes()));
+            hmacStr = Hex.encodeHexString(encoded.hmacOut());
         } catch (JsonProcessingException e) {
             log.error("Error while processing payload");
             throw new RuntimeException(e);

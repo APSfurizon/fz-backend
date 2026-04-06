@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.generalUtils.Utils;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.action.AddMediaAction;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
@@ -13,7 +14,6 @@ import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
-import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
@@ -110,7 +110,7 @@ public class JooqCreateUploadAction implements CreateUploadAction {
 
     @NotNull
     public static UUID hashToUuid(@NotNull String md5) {
-        byte[] digest = Hex.decode(md5);
+        byte[] digest = Utils.fromHex(md5);
         long msb = 0L;
         long lsb = 0L;
         for (int i = 0; i < 8; i++) {

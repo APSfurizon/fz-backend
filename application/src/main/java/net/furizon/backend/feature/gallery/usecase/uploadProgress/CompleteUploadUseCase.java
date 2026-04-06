@@ -12,6 +12,7 @@ import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.CompleteUploadRequest;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.infrastructure.generalUtils.Utils;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
@@ -20,7 +21,6 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
-import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
@@ -64,8 +64,8 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
                 req.getEtags()
         );
 
-        byte[] s3Md5 =  Hex.decode(md5);
-        byte[] reqMd5 = Hex.decode(req.getMd5Hash());
+        byte[] s3Md5 =  Utils.fromHex(md5);
+        byte[] reqMd5 = Utils.fromHex(req.getMd5Hash());
         if (!Arrays.equals(s3Md5, reqMd5)) {
             log.error("Upload {} (uId {}): md5 hash mismatch! S3 returned {} while req contained {}. "
                     + "Deleting the newly made upload",
