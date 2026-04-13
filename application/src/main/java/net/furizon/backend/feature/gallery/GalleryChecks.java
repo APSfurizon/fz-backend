@@ -71,8 +71,8 @@ public class GalleryChecks {
         if (start != null) {
             OffsetDateTime now = OffsetDateTime.now();
             boolean canUpload = now.isAfter(start);
-            log.error("Cannot upload on event {} before {}",  event, start);
             if (!canUpload) {
+                log.error("Cannot upload on event {} before {}",  event, start);
                 throw new ApiException(
                         translationService.error("gallery.too_early_to_upload"),
                         GalleryErrorCodes.UPLOADS_TOO_EARLY_TO_UPLOAD
