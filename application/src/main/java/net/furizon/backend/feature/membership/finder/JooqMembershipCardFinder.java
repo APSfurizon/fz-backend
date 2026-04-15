@@ -236,6 +236,17 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
     }
 
     @Override
+    public @NotNull List<MembershipCard> getCardsOfUserForEvent(long userId, @NotNull Event event) {
+        return sqlQuery.fetch(
+            membershipSelect()
+            .where(
+                MEMBERSHIP_CARDS.USER_ID.eq(userId)
+                .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(event.getMembershipYear(membershipYearUtils)))
+            )
+        ).stream().map(MembershipCardMapper::map).toList();
+    }
+
+    @Override
     public boolean canDeleteCard(@NotNull MembershipCard card) {
         return !sqlQuery.fetchFirst(
                 PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)

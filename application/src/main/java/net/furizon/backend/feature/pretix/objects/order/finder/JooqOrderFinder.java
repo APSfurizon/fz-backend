@@ -89,6 +89,18 @@ public class JooqOrderFinder implements OrderFinder {
     }
 
     @Override
+    public @Nullable Order findOrderByCheckinSecretEvent(@NotNull String checkinSecret, @NotNull Event event, @NotNull PretixInformation pretixService) {
+        return query.fetchFirst(
+            selectFrom()
+            .where(
+                ORDERS.ORDER_CHECKIN_SECRET.eq(checkinSecret))
+                .and(ORDERS.EVENT_ID.eq(event.getId())
+            )
+            .limit(1)
+        ).mapOrNull(e -> orderMapper.map(e, pretixService));
+    }
+
+    @Override
     public @Nullable Order findOrderById(long orderId, @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
@@ -330,6 +342,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_REQUIRES_ATTENTION,
                         ORDERS.ORDER_CHECKIN_TEXT,
                         ORDERS.ORDER_INTERNAL_COMMENT,
+                        ORDERS.ORDER_CUSTOMER_NOTES,
                         ORDERS.USER_ID,
                         ORDERS.EVENT_ID,
                         ORDERS.ORDER_SERIAL_IN_EVENT

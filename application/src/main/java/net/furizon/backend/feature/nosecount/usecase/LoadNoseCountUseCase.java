@@ -23,6 +23,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -46,8 +47,11 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
     @Override
     public @NotNull NoseCountResponse executor(@NotNull LoadNoseCountUseCase.Input input) {
         if (input.event == null) {
-            throw new ApiException(translationService.error("common.event_not_found"),
-                GeneralResponseCodes.EVENT_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("common.event_not_found"),
+                    GeneralResponseCodes.EVENT_NOT_FOUND
+            );
         }
         long eventId = input.event.getId();
         PretixInformation pretix = input.pretixInformation;

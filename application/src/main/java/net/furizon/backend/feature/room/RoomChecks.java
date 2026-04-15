@@ -23,6 +23,7 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -168,13 +169,19 @@ public class RoomChecks {
                     roomId = idRes;
                     if (!roomFinder.isRoomConfirmed(roomId).isPresent()) {
                         log.error("Room with id {} doesn't exist!", roomId);
-                        throw new ApiException(translationService.error("room.not_found"),
-                                RoomErrorCodes.ROOM_NOT_FOUND);
+                        throw new ApiException(
+                                HttpStatus.NOT_FOUND,
+                                translationService.error("room.not_found"),
+                                RoomErrorCodes.ROOM_NOT_FOUND
+                        );
                     }
                 } else {
                     log.error("User is not an admin! It cannot operate on room {}", idRes);
-                    throw new ApiException(translationService.error("room.edit_denied"),
-                            GeneralResponseCodes.USER_IS_NOT_ADMIN);
+                    throw new ApiException(
+                            HttpStatus.NOT_FOUND,
+                            translationService.error("room.edit_denied"),
+                            GeneralResponseCodes.USER_IS_NOT_ADMIN
+                    );
                 }
             } else {
                 roomId = idRes;
@@ -246,8 +253,11 @@ public class RoomChecks {
         var r = roomFinder.getConfirmedRoomGuestFromUserEvent(userId, event);
         if (!r.isPresent()) {
             log.error("Could not find any roomGuest obj for user {} at event {}", userId, event);
-            throw new ApiException(translationService.error("room.guest.not_found"),
-                    RoomErrorCodes.GUEST_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.guest.not_found"),
+                    RoomErrorCodes.GUEST_NOT_FOUND
+            );
         }
         return r.get();
     }
@@ -255,8 +265,11 @@ public class RoomChecks {
         var r = roomFinder.getRoomGuestFromId(guestId);
         if (!r.isPresent()) {
             log.error("Unable to find roomGuest for id {}", guestId);
-            throw new ApiException(translationService.error("room.guest.not_found"),
-                    RoomErrorCodes.GUEST_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.guest.not_found"),
+                    RoomErrorCodes.GUEST_NOT_FOUND
+            );
         }
         return r.get();
     }
@@ -300,7 +313,11 @@ public class RoomChecks {
 
         if (!capacity.isPresent()) {
             log.error("Room {} not found while checking capacity", roomId);
-            throw new ApiException(translationService.error("room.not_found"), RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND
+            );
         }
 
         if (capacity.get() <= roomMates.size()) {
@@ -316,7 +333,11 @@ public class RoomChecks {
 
         if (p == null) {
             log.error("Unable to get biggest room capacity");
-            throw new ApiException(translationService.error("room.not_found"), RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND
+            );
         }
 
         if (p.capacity() <= roomMates.size()) {
@@ -325,13 +346,19 @@ public class RoomChecks {
         }
     }
 
+    @NotNull
     @Contract("null, _ -> fail")
-    public void assertExchangeExist(@Nullable ExchangeConfirmationStatus status, long exchangeId) {
+    public ExchangeConfirmationStatus assertExchangeExist(@Nullable ExchangeConfirmationStatus status,
+                                                          long exchangeId) {
         if (status == null) {
             log.error("No confirmed exchange status found for exchangeId {}", exchangeId);
-            throw new ApiException(translationService.error("room.exchange.not_found"),
-                    RoomErrorCodes.EXCHANGE_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.exchange.not_found"),
+                    RoomErrorCodes.EXCHANGE_NOT_FOUND
+            );
         }
+        return status;
     }
     public void assertBothUsersHasConfirmedExchange(long exchangeId) {
         var r = exchangeConfirmationFinder.getExchangeStatusFromId(exchangeId);
@@ -362,10 +389,15 @@ public class RoomChecks {
         }
     }
 
-    public void assertRoomFound(Optional<?> o, long roomId) {
+    public <V> @NotNull V assertRoomFound(Optional<V> o, long roomId) {
         if (!o.isPresent()) {
             log.error("Room {} was not found!", roomId);
-            throw new ApiException(translationService.error("room.not_found"), RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND
+            );
         }
+        return o.get();
     }
 }

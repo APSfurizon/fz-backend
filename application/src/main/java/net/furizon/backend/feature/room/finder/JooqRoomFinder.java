@@ -92,6 +92,22 @@ public class JooqRoomFinder implements RoomFinder {
     public boolean userOwnsAroom(long userId, long eventId) {
         return query.fetchFirst(selectRoomsOwnedBy(userId, eventId).limit(1)).isPresent();
     }
+
+    @Override
+    public boolean isRoomOwner(long userId, long eventId) {
+        return query.fetchFirst(
+            PostgresDSL.select(ORDERS.ID)
+            .from(ORDERS)
+            .innerJoin(ROOMS)
+            .on(ROOMS.ORDER_ID.eq(ORDERS.ID))
+            .where(
+                ORDERS.EVENT_ID.eq(eventId)
+                .and(ORDERS.USER_ID.eq(userId))
+            )
+            .limit(1)
+        ).isPresent();
+    }
+
     @Override
     public int countRoomsOwnedBy(long userId, long eventId) {
         return query.count(selectRoomsOwnedBy(userId, eventId));
@@ -546,7 +562,9 @@ public class JooqRoomFinder implements RoomFinder {
                 ORDERS.ORDER_CODE,
                 roomOwnerOrder.ORDER_CODE,
                 ORDERS.ORDER_REQUIRES_ATTENTION,
-                ORDERS.ORDER_INTERNAL_COMMENT
+                ORDERS.ORDER_INTERNAL_COMMENT,
+                ORDERS.ORDER_CUSTOMER_NOTES,
+                ORDERS.ORDER_CHECKIN_TEXT
             )
             .from(USERS)
             .innerJoin(MEMBERSHIP_INFO)
@@ -605,7 +623,9 @@ public class JooqRoomFinder implements RoomFinder {
                 USERS.USER_FURSONA_NAME,
                 ORDERS.ORDER_CODE,
                 ORDERS.ORDER_REQUIRES_ATTENTION,
-                ORDERS.ORDER_INTERNAL_COMMENT
+                ORDERS.ORDER_INTERNAL_COMMENT,
+                ORDERS.ORDER_CUSTOMER_NOTES,
+                ORDERS.ORDER_CHECKIN_TEXT
             )
             .from(USERS)
             .innerJoin(MEMBERSHIP_INFO)

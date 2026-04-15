@@ -29,6 +29,7 @@ public enum Permission {
     EARLY_BOOK(10000L),
     JUNIOR_STAFF(10001L),
     MAIN_STAFF(10002L),
+    SECURITY_STAFF(10003L),
 
     UNKNOWN_PERMISSION(Long.MAX_VALUE),
     ;

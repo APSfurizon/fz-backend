@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,8 +28,11 @@ public class GetSingleFursuitUseCase implements UseCase<GetSingleFursuitUseCase.
 
         FursuitData fursuit = fursuitFinder.getFursuit(input.fursuitId, event, userId, false);
         if (fursuit == null) {
-            throw new ApiException(translationService.error("badge.fursuit.not_found"),
-                FursuitErrorCodes.FURSUIT_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("badge.fursuit.not_found"),
+                    FursuitErrorCodes.FURSUIT_NOT_FOUND
+            );
         }
 
         //We assume that if someone is bringing his fursuit to an event, the info

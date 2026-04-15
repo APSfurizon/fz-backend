@@ -70,6 +70,7 @@ public class JooqOrderMapper {
                     .requireAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
                     .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
                     .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                    .userComment(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
                     .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                     .orderOwnerUserId(userId)
                     .eventId(record.get(ORDERS.EVENT_ID))

@@ -36,5 +36,7 @@ public class HotelExportRow {
     @NotNull private final String idIssuer;
 
     private boolean requiresAttention;
-    @Nullable private String comment;
+    @Nullable private String internalComment;
+    @Nullable private String customerNotes;
+    @Nullable private String checkinText;
 }

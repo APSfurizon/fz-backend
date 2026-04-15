@@ -35,17 +35,13 @@ public class GetFullInfoBadgeUseCase implements UseCase<GetFullInfoBadgeUseCase.
     @NotNull private final FursuitFinder fursuitFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final UserFinder userFinder;
-    @NotNull private final TranslationService translationService;
 
     @Override
     public @NotNull FullInfoBadgeResponse executor(@NotNull GetFullInfoBadgeUseCase.Input input) {
         Event event = input.pretixInformation.getCurrentEvent();
         long userId = input.userId;
 
-        UserDisplayData userData = userFinder.getDisplayUser(userId, event);
-        if (userData == null) {
-            throw new ApiException(translationService.error("user.not_found"), GeneralResponseCodes.USER_NOT_FOUND);
-        }
+        UserDisplayData userData = generalChecks.assertUserFound(userFinder.getDisplayUser(userId, event));
         OffsetDateTime editingDeadline = badgeConfig.getEditingDeadline();
 
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, input.pretixInformation);

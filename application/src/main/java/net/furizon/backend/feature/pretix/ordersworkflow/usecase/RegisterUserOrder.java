@@ -27,6 +27,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -74,8 +75,11 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                 if (!pretixOrder.isPresent()) {
                     log.error("[PRETIX] Registration of order {} failed: "
                             + "Order was not in the db and we were unable to fetch it from pretix", input.code);
-                    throw new ApiException(translationService.error("pretix.orders_flow.order_fetch_fail"),
-                        OrderWorkflowErrorCode.ORDER_NOT_FOUND);
+                    throw new ApiException(
+                            HttpStatus.NOT_FOUND,
+                            translationService.error("pretix.orders_flow.order_fetch_fail"),
+                            OrderWorkflowErrorCode.ORDER_NOT_FOUND
+                    );
                 }
 
                 var o = updateOrderInDb.execute(pretixOrder.get(), event, pretixService);
@@ -83,8 +87,11 @@ public class RegisterUserOrder implements UseCase<RegisterUserOrder.Input, Boole
                     log.error("[PRETIX] Registration of order {} failed: "
                             + "Order was not in the db and an error occurred in "
                             + "parsing or storing the newly fetched order", input.code);
-                    throw new ApiException(translationService.error("pretix.orders_flow.order_parse_fail"),
-                        OrderWorkflowErrorCode.ORDER_NOT_FOUND);
+                    throw new ApiException(
+                            HttpStatus.NOT_FOUND,
+                            translationService.error("pretix.orders_flow.order_parse_fail"),
+                            OrderWorkflowErrorCode.ORDER_NOT_FOUND
+                    );
                 }
                 order = o.get();
             }

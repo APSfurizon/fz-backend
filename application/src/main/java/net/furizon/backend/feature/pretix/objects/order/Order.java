@@ -114,6 +114,7 @@ public class Order {
 
     private final boolean requireAttention;
     @Nullable private final String internalComment;
+    @Nullable private final String userComment;
     @Nullable private final String checkinText;
 
     private final long orderSerialInEvent;

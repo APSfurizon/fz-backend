@@ -70,9 +70,9 @@ import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_AC
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_DUPLICATE_DATA;
 import static net.furizon.backend.infrastructure.pretix.PretixConst.QUESTIONS_USER_NOTES;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CachedPretixInformation implements PretixInformation {
     @NotNull
     private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
@@ -628,6 +628,7 @@ public class CachedPretixInformation implements PretixInformation {
 
             long questionUserId = specificCache.questionUserId.get();
             long questionDuplicateData = specificCache.questionDuplicateData.get();
+            long questionUserNotes = specificCache.questionUserNotes.get();
 
             boolean hasTicket = false; //If no ticket is found, we don't store the order at all
             boolean foundDuplicate = false;
@@ -641,6 +642,7 @@ public class CachedPretixInformation implements PretixInformation {
             String hotelInternalName = null;
             String roomInternalName = null;
             String checkinSecret = null;
+            String userNotes = null;
             Long pretixRoomItemId = null;
             long ticketPositionId = -1L;
             long ticketPosid = -1L;
@@ -694,6 +696,12 @@ public class CachedPretixInformation implements PretixInformation {
                                             + "Skipping it. Duplicate data: {}", s);
                                     foundDuplicate = true;
                                     break positionLoop;
+                                }
+
+                            } else if (questionId == questionUserNotes) {
+                                String s = answer.getAnswer();
+                                if (s != null && !s.isBlank()) {
+                                    userNotes = s;
                                 }
                             }
                         }
@@ -793,6 +801,7 @@ public class CachedPretixInformation implements PretixInformation {
                     .requireAttention(pretixOrder.isCheckinRequiresAttention())
                     .checkinText(pretixOrder.getCheckinText())
                     .internalComment(pretixOrder.getComment())
+                    .userComment(userNotes)
                     .build()
             );
         } finally {

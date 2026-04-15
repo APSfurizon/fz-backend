@@ -121,7 +121,7 @@ public class Event {
         return e.id == id;
     }
 
-    public short getMembershipYear(MembershipYearUtils membershipYearUtils) {
+    public short getMembershipYear(@NotNull MembershipYearUtils membershipYearUtils) {
         OffsetDateTime from = pretixDateFrom;
         if (from == null) {
             log.error("From date was unavailable for event {}. Falling back to Date.now()", slug);

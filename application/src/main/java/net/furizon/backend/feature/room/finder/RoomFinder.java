@@ -23,6 +23,7 @@ public interface RoomFinder {
     boolean isUserInAroom(long userId, long eventId, boolean ownRoomAllowed);
     boolean isUserInvitedInRoom(long userId, long roomId);
     boolean userOwnsAroom(long userId, long eventId);
+    boolean isRoomOwner(long userId, long eventId);
 
     int countRoomsOwnedBy(long userId, long eventId);
     int countRoomsWithUser(long userId, long eventId);
