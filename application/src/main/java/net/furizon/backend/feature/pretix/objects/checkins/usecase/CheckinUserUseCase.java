@@ -8,6 +8,8 @@ import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.pretix.objects.checkins.PortaBadgeLevel;
 import net.furizon.backend.feature.pretix.objects.checkins.action.redeemCheckin.PretixRedeemCheckinAction;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetManager;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetPermissionService;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemCheckinResponse;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.response.CheckinResponse;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -60,6 +62,9 @@ public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, Che
     @NotNull
     private final TranslationService translationService;
 
+    @NotNull
+    private final GadgetPermissionService gadgetPermissionService;
+
     @Override
     public @NotNull CheckinResponse executor(@NotNull CheckinUserUseCase.Input input) {
         log.info("User {} is checking in secret {}", input.user.getUserId(), input.secret);
@@ -80,6 +85,8 @@ public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, Che
         boolean isStaffer = permissions.contains(Permission.JUNIOR_STAFF)
                          || permissions.contains(Permission.SECURITY_STAFF)
                          || permissions.contains(Permission.MAIN_STAFF);
+        var gadgets = new GadgetManager(o.getGadgets());
+        permissions.forEach(p -> gadgets.addAll(gadgetPermissionService.getGadgetsForPermission(p)));
 
         String nonce = UUID.randomUUID().toString();
 
@@ -121,6 +128,7 @@ public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, Che
                 .lanyardType(lanyardType)
                 .portaBadgeType(portaBadgeType)
                 .roomInfo(roomInfo)
+                .gadgets(gadgets.getGadgets())
                 .firstName(pui.getFirstName())
                 .lastName(pui.getLastName())
                 .birthCity(pui.getBirthCity())

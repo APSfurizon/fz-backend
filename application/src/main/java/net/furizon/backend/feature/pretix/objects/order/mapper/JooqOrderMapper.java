@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.PretixAnswer;
@@ -25,6 +26,7 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @RequiredArgsConstructor
 public class JooqOrderMapper {
     private final TypeReference<List<PretixAnswer>> pretixAnswerRef = new TypeReference<>() {};
+    private final TypeReference<List<Gadget>> gadgetsRef = new TypeReference<>() {};
 
     private final ObjectMapper objectMapper;
 
@@ -71,6 +73,7 @@ public class JooqOrderMapper {
                     .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
                     .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
                     .userComment(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
+                    .gadgets(objectMapper.readValue(record.get(ORDERS.ORDER_INCLUDED_GADGETS).data(), gadgetsRef))
                     .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                     .orderOwnerUserId(userId)
                     .eventId(record.get(ORDERS.EVENT_ID))

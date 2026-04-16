@@ -343,6 +343,7 @@ public class JooqOrderFinder implements OrderFinder {
                         ORDERS.ORDER_CHECKIN_TEXT,
                         ORDERS.ORDER_INTERNAL_COMMENT,
                         ORDERS.ORDER_CUSTOMER_NOTES,
+                        ORDERS.ORDER_INCLUDED_GADGETS,
                         ORDERS.USER_ID,
                         ORDERS.EVENT_ID,
                         ORDERS.ORDER_SERIAL_IN_EVENT

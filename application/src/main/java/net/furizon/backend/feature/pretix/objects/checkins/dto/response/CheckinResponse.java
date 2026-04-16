@@ -7,6 +7,7 @@ import net.furizon.backend.feature.badge.dto.PrintedBadgeLevel;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.pretix.objects.checkins.PortaBadgeLevel;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemCheckinResponse;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
@@ -69,6 +70,9 @@ public class CheckinResponse {
 
     @Nullable
     private final RoomInfo roomInfo;
+
+    @NotNull
+    private final List<Gadget> gadgets;
 
     // Personal user information
 

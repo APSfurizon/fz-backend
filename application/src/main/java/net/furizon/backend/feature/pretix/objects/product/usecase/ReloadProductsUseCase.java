@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.product.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProduct;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +52,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                 names = names.isEmpty() ? product.getNames() : names;
                 result.itemIdToNames().put(productId, names);
                 result.isInternalItem().put(productId, product.isInternalItem());
+                List<Gadget> gadgets = product.getGadgets();
+                if (gadgets != null) {
+                    result.itemIdToGadgets().put(productId, gadgets);
+                }
 
                 product.getVariations().forEach(variation -> {
                     long variationId = variation.getId();
@@ -59,6 +65,10 @@ public class ReloadProductsUseCase implements UseCase<Event, PretixProductResult
                     variationNames = variationNames.isEmpty() ? variation.getNames() : variationNames;
                     result.variationIdToNames().put(variationId, variationNames);
                     result.isInternalVariation().put(variationId, variation.isInternalVariation());
+                    List<Gadget> variationGadgets = variation.getGadgets();
+                    if (variationGadgets != null) {
+                        result.variationIdToGadgets().put(variationId, variationGadgets);
+                    }
                 });
 
                 if (identifier.startsWith(PretixConst.METADATA_EXTRA_DAYS_TAG_PREFIX)) {

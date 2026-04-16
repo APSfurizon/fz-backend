@@ -26,6 +26,9 @@ public class PretixConfig implements HttpConfig {
     @NotNull
     private final String defaultEvent;
 
+    @Nullable
+    private final String gadgetPermissionFile;
+
     private final int connectionTimeout;
 
     private final boolean enableSync;

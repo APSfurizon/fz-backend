@@ -1,0 +1,62 @@
+[
+  {
+    "permission": 10001,
+    "gadgets": [
+      {
+        "gadgetId": "gid1",
+        "gadgetNames": {
+          "en": "english gadget 1",
+          "it": "Gadget italiano 1"
+        },
+        "stackable": true,
+        "shirt": false,
+        "quantity": 2
+      },
+      {
+        "gadgetId": "gid2",
+        "gadgetNames": {
+          "en": "english gadget 2",
+          "it": "Gadget italiano 2"
+        },
+        "stackable": false,
+        "shirt": true,
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "permission": 10002,
+    "gadgets": [
+      {
+        "gadgetId": "gid1",
+        "gadgetNames": {
+          "en": "english gadget 1",
+          "it": "Gadget italiano 1"
+        },
+        "stackable": true,
+        "shirt": true,
+        "quantity": 3
+      },
+      {
+        "gadgetId": "gid3",
+        "gadgetNames": {
+          "en": "english gadget 3",
+          "it": "Gadget italiano 3"
+        },
+        "stackable": true,
+        "shirt": true,
+        "quantity": 2
+      },
+      {
+        "gadgetId": "gid2",
+        "gadgetNames": {
+          "en": "english gadget 2",
+          "it": "Gadget italiano 2"
+        },
+        "stackable": false,
+        "shirt": true,
+        "quantity": 1
+      }
+    ]
+  }
+]

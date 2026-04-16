@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.healthcheck.finder.PretixHealthcheck;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetManager;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.event.usecase.ReloadEventsUseCase;
@@ -638,6 +639,7 @@ public class CachedPretixInformation implements PretixInformation {
             Sponsorship sponsorship = Sponsorship.NONE;
             ExtraDays extraDays = ExtraDays.NONE;
             Board board =  Board.NONE;
+            GadgetManager gadgets = new GadgetManager();
             List<PretixAnswer> answers = null;
             String hotelInternalName = null;
             String roomInternalName = null;
@@ -668,6 +670,9 @@ public class CachedPretixInformation implements PretixInformation {
                 }
 
                 long itemId = position.getItemId();
+
+                gadgets.addAll(mainCache.itemIdToGadgets.getIfPresent(itemId));
+                gadgets.addAll(mainCache.variationIdToGadgets.getIfPresent(position.getVariationId()));
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;
@@ -768,40 +773,41 @@ public class CachedPretixInformation implements PretixInformation {
 
             return Optional.of(
                 Order.builder()
-                    .code(pretixOrder.getCode())
-                    .orderStatus(status)
-                    .sponsorship(sponsorship)
-                    .extraDays(extraDays)
-                    .dailyDays(days)
-                    .board(board)
-                    .roomCapacity(roomCapacity)
-                    .pretixRoomItemId(pretixRoomItemId)
-                    .hotelInternalName(hotelInternalName)
-                    .roomInternalName(roomInternalName)
-                    .pretixOrderSecret(pretixOrder.getSecret())
-                    .checkinSecret(checkinSecret)
-                    .hasMembership(membership)
-                    .buyerEmail(pretixOrder.getEmail())
-                    .buyerPhone(pretixOrder.getPhone())
-                    .buyerUser(pretixOrder.getCustomer())
-                    .buyerLocale(pretixOrder.getLocale())
-                    .ticketPositionId(ticketPositionId)
-                    .ticketPositionPosid(ticketPosid)
-                    .roomPositionId(roomPositionId)
-                    .roomPositionPosid(roomPosid)
-                    .earlyPositionId(earlyPositionId)
-                    .boardPositionId(boardPositionId)
-                    .latePositionId(latePositionId)
-                    .eventId(event.getId())
-                    .orderOwnerUserId(userId)
-                    .answers(answers, this)
-                    .extraFursuits(extraFursuits)
-                    .userFinder(userFinder)
-                    .eventFinder(eventFinder)
-                    .requireAttention(pretixOrder.isCheckinRequiresAttention())
-                    .checkinText(pretixOrder.getCheckinText())
-                    .internalComment(pretixOrder.getComment())
-                    .userComment(userNotes)
+                        .code(pretixOrder.getCode())
+                        .orderStatus(status)
+                        .sponsorship(sponsorship)
+                        .extraDays(extraDays)
+                        .dailyDays(days)
+                        .board(board)
+                        .roomCapacity(roomCapacity)
+                        .pretixRoomItemId(pretixRoomItemId)
+                        .hotelInternalName(hotelInternalName)
+                        .roomInternalName(roomInternalName)
+                        .pretixOrderSecret(pretixOrder.getSecret())
+                        .checkinSecret(checkinSecret)
+                        .hasMembership(membership)
+                        .buyerEmail(pretixOrder.getEmail())
+                        .buyerPhone(pretixOrder.getPhone())
+                        .buyerUser(pretixOrder.getCustomer())
+                        .buyerLocale(pretixOrder.getLocale())
+                        .ticketPositionId(ticketPositionId)
+                        .ticketPositionPosid(ticketPosid)
+                        .roomPositionId(roomPositionId)
+                        .roomPositionPosid(roomPosid)
+                        .earlyPositionId(earlyPositionId)
+                        .boardPositionId(boardPositionId)
+                        .latePositionId(latePositionId)
+                        .eventId(event.getId())
+                        .orderOwnerUserId(userId)
+                        .answers(answers, this)
+                        .extraFursuits(extraFursuits)
+                        .userFinder(userFinder)
+                        .eventFinder(eventFinder)
+                        .requireAttention(pretixOrder.isCheckinRequiresAttention())
+                        .checkinText(pretixOrder.getCheckinText())
+                        .internalComment(pretixOrder.getComment())
+                        .userComment(userNotes)
+                        .gadgets(gadgets.getGadgets())
                     .build()
             );
         } finally {
@@ -1061,6 +1067,8 @@ public class CachedPretixInformation implements PretixInformation {
         mainCache.variationIdToBoard.putAll(products.boardVariationIdToType());
         mainCache.isInternalItem.putAll(products.isInternalItem());
         mainCache.isInternalVariation.putAll(products.isInternalVariation());
+        mainCache.itemIdToGadgets.putAll(products.itemIdToGadgets());
+        mainCache.variationIdToGadgets.putAll(products.variationIdToGadgets());
 
         eventSpecificCache.sponsorshipTypeToIds.putAll(products.sponsorshipTypeToIds());
         eventSpecificCache.roomIdToEarlyExtraDayItemId.putAll(products.earlyDaysItemId());
