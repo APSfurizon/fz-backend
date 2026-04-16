@@ -1,3 +1,16 @@
+@param String cardNo
+@param String fullname
+@param String fiscalCode
+@param String birthCity
+@param String birthDay
+@param String city
+@param String region
+@param String address
+@param String zipCode
+@param String email
+@param String phoneNumber
+@param String todayDate
+
 <!DOCTYPE html>
 <html lang="it">
 
@@ -107,11 +120,9 @@
         <!-- Intestazione con Logo SVG e Indirizzo -->
         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
             <div style="width: 35%; padding-top: 5px;">
-                <img src="https://furpanel.furizon.net/images/logo-light.png"
-                    style="max-height: 55px; max-width: 100%;">
+                <img src="https://furpanel.furizon.net/images/logo-light.png" style="max-height: 55px; max-width: 100%;">
             </div>
-            <div
-                style="width: 65%; padding-left: 20px; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: black;">
+            <div style="width: 65%; padding-left: 20px; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: black;">
                 <strong style="font-size: 10.5pt;">APS Furizon</strong><br><br>
                 Via G. Turri 12<br>
                 42121 Reggio nell'Emilia (RE)<br>
@@ -121,14 +132,12 @@
         </div>
 
         <!-- Barra Centrale Titolo -->
-        <div
-            style="position: relative; border-top: 2px solid black; border-bottom: 2px solid black; padding: 6px 0; margin: 15px 0;">
-            <div
-                style="font-size: 14.5pt; font-family: Arial, sans-serif; font-weight: bold; text-align: center; color: black; letter-spacing: 0.5px;">
-                RICHIESTA DI AMMISSIONE A SOCIO</div>
-            <div
-                style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 9pt; font-family: Arial, sans-serif; text-align: right; line-height: 1.25; color: black;">
-                <strong>Tess: {tessera}</strong>
+        <div style="position: relative; border-top: 2px solid black; border-bottom: 2px solid black; padding: 6px 0; margin: 15px 0;">
+            <div style="font-size: 14.5pt; font-family: Arial, sans-serif; font-weight: bold; text-align: center; color: black; letter-spacing: 0.5px;">
+                RICHIESTA DI AMMISSIONE A SOCIO
+            </div>
+            <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 9pt; font-family: Arial, sans-serif; text-align: right; line-height: 1.25; color: black;">
+                <strong>Tess: ${cardNo}</strong>
             </div>
         </div>
 
@@ -141,11 +150,11 @@
                     Il/La
                     <div style="position: absolute; top: 100%; left: 0;">sottoscritto/a</div>
                 </div>
-                <div class="value" style="flex-grow: 1;">{nome}</div>
+                <div class="value" style="flex-grow: 1;">${fullname}</div>
             </div>
             <div style="width: 35%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 35px;">C.F.</div>
-                <div class="value" style="flex-grow: 1;">{cf}</div>
+                <div class="value" style="flex-grow: 1;">${fiscalCode}</div>
             </div>
         </div>
 
@@ -153,15 +162,15 @@
         <div class="form-line" style="margin-top: 15px;">
             <div style="width: 45%; display: flex; align-items: flex-end;">
                 <div class="label" style="width: 90px;">nato/a a</div>
-                <div class="value" style="flex-grow: 1;">{nato_a}</div>
+                <div class="value" style="flex-grow: 1;">${birthCity}</div>
             </div>
             <div style="width: 25%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 15px; margin-right: 5px;">il</div>
-                <div class="value" style="flex-grow: 1; text-align: center;">{data_nascita}</div>
+                <div class="value" style="flex-grow: 1; text-align: center;">${birthDay}</div>
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="margin-right: 5px;">cittadinanza</div>
-                <div class="value" style="flex-grow: 1;">{cittadinanza}</div>
+                <div class="value" style="flex-grow: 1;"></div>
             </div>
         </div>
 
@@ -169,11 +178,11 @@
         <div class="form-line">
             <div style="width: 70%; display: flex; align-items: flex-end;">
                 <div class="label" style="width: 90px;">residente a</div>
-                <div class="value" style="flex-grow: 1;">{residente_a}</div>
+                <div class="value" style="flex-grow: 1;">${city}</div>
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 35px; margin-right: 5px;">prov.</div>
-                <div class="value" style="flex-grow: 1;">{prov}</div>
+                <div class="value" style="flex-grow: 1;">${region}</div>
             </div>
         </div>
 
@@ -181,11 +190,11 @@
         <div class="form-line">
             <div style="width: 70%; display: flex; align-items: flex-end;">
                 <div class="label" style="width: 90px;">in via/piazza</div>
-                <div class="value" style="flex-grow: 1;">{via}</div>
+                <div class="value" style="flex-grow: 1;">${address}</div>
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 35px; margin-right: 5px;">cap</div>
-                <div class="value" style="flex-grow: 1;">{cap}</div>
+                <div class="value" style="flex-grow: 1;">${zipCode}</div>
             </div>
         </div>
 
@@ -193,11 +202,11 @@
         <div class="form-line">
             <div style="width: 70%; display: flex; align-items: flex-end;">
                 <div class="label" style="width: 90px;">E-Mail</div>
-                <div class="value" style="flex-grow: 1;">{email}</div>
+                <div class="value" style="flex-grow: 1;">${email}</div>
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 35px; margin-right: 5px;">tel.</div>
-                <div class="value" style="flex-grow: 1;">{tel}</div>
+                <div class="value" style="flex-grow: 1;">${phoneNumber}</div>
             </div>
         </div>
 
@@ -215,7 +224,7 @@
             <div style="width: 40%; text-align: center; font-family: Arial, sans-serif; font-size: 11pt; color: black;">
                 Data
                 <div style="border-bottom: 1.5px solid black; margin-top: 5px; height: 25px; font-weight: bold; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2px;">
-                    {data}
+                    ${todayDate}
                 </div>
             </div>
             <div style="width: 40%; text-align: center; font-family: Arial, sans-serif; font-size: 11pt; color: black;">
@@ -229,35 +238,33 @@
         <div style="border-top: 2px solid black; margin: 30px 0 20px 0;"></div>
 
         <!-- Sezione: Consenso -->
-        <div class="section-title" style="font-weight: bold; margin-top: 10px;">CONSENSO AL TRATTAMENTO DEI DATI
-            PERSONALI</div>
+        <div class="section-title" style="font-weight: bold; margin-top: 10px;">CONSENSO AL TRATTAMENTO DEI DATI PERSONALI</div>
         <div class="legal-text">
-            Ricevuta l’informativa sull’utilizzazione dei miei dati personali ai sensi dell’art.13 del Decreto
-            Legislativo n.196/2003 e dell’articolo 13 del Regolamento UE n. 2016/679 consento al loro trattamento nella
-            misura necessaria per il perseguimento degli scopi statutari. Il Titolare del trattamento è l’Associazione
+            Ricevuta l'informativa sull'utilizzazione dei miei dati personali ai sensi dell'art.13 del Decreto
+            Legislativo n.196/2003 e dell'articolo 13 del Regolamento UE n. 2016/679 consento al loro trattamento nella
+            misura necessaria per il perseguimento degli scopi statutari. Il Titolare del trattamento è l'Associazione
             di Promozione Sociale "Furizon" nella persona del suo Presidente in carica con ufficio nella sede legale
             della stessa. Il trattamento dei dati sarà svolto in maniera sia manuale che automatizzata, nel rispetto di
             quanto indicato nella normativa di riferimento, ad opera di soggetti appositamente incaricati. Consento
-            anche che i dati riguardanti l’iscrizione siano comunicati agli enti con cui l’associazione collabora e da
-            questi trattati nella misura necessaria all’adempimento di obblighi previsti dalla legge e dalle norme
-            statutarie. Acconsento inoltre alla conservazione dei dati "sensibili" di cui all'art. 4 comma 1 lett. d),
+            anche che i dati riguardanti l'iscrizione siano comunicati agli enti con cui l'associazione collabora e da
+            questi trattati nella misura necessaria all'adempimento di obblighi previsti dalla legge e dalle norme
+            statutarie. Acconsento inoltre alla conservazione dei dati “sensibili” di cui all'art. 4 comma 1 lett. d),
             nonché art. 26 del D.lgs.196/2003 e degli articoli 9 e 10 del Regolamento UE n. 2016/679, vale a dire i dati
             "idonei a rivelare l'origine razziale ed etnica, le convinzioni religiose, filosofiche o di altro genere, le
             opinioni politiche, l'adesione a partiti, sindacati, associazioni od organizzazioni a carattere religioso,
             filosofico, politico o sindacale, nonché i dati personali idonei a rivelare lo stato di salute e la vita
             sessuale". I dati saranno conservati per il periodo necessario al conseguimento delle finalità per le quali
-            sono raccolti. Il conferimento dei dati è obbligatorio, pena l’impossibilità di proseguire il rapporto con
-            l’Associazione APS Furizon.
+            sono raccolti. Il conferimento dei dati è obbligatorio, pena l'impossibilità di proseguire il rapporto con
+            l'Associazione APS Furizon.
         </div>
 
         <!-- Sezione: Rilascio Immagini -->
-        <div class="section-title" style="font-weight: bold; margin-top: 25px;">AUTORIZZAZIONE ALL'UTILIZZO
-            DELL'IMMAGINE</div>
+        <div class="section-title" style="font-weight: bold; margin-top: 25px;">AUTORIZZAZIONE ALL'UTILIZZO DELL'IMMAGINE</div>
         <div class="legal-text">
-            Autorizzo la pubblicazione, anche ai sensi dell’art. 10 c.c., nonché degli artt. 96 e 97 legge 633/1941,
+            Autorizzo la pubblicazione, anche ai sensi dell'art. 10 c.c., nonché degli artt. 96 e 97 legge 633/1941,
             delle fotografie e riprese video che ritraggono la mia immagine effettuate dallo Staff di Furizon, senza
             limiti di tempo, nel mondo intero, con ogni mezzo e per qualsiasi finalità, purché non pregiudizievoli per
-            il decoro, l’onore, la reputazione, nonché la dignità della mia persona.
+            il decoro, l'onore, la reputazione, nonché la dignità della mia persona.
         </div>
 
         <!-- Blocco Firme Finale -->
@@ -265,7 +272,7 @@
             <div style="width: 40%; text-align: center; font-family: Arial, sans-serif; font-size: 11pt; color: black;">
                 Data
                 <div style="border-bottom: 1.5px solid black; margin-top: 5px; height: 25px; font-weight: bold; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2px;">
-                    {data}
+                    ${todayDate}
                 </div>
             </div>
             <div style="width: 40%; text-align: center; font-family: Arial, sans-serif; font-size: 11pt; color: black;">
