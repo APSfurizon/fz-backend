@@ -24,6 +24,7 @@ public enum Permission {
     CAN_MANAGE_USER_PUBLIC_INFO(104L),
     CAN_MANAGE_USER_LOGIN(106L),
     CAN_VIEW_USER(105L),
+    CAN_PERFORM_CHECKINS(107L),
 
     //Normal user permissions
     EARLY_BOOK(10000L),

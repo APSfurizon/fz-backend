@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -55,8 +54,8 @@ public class FetchCheckinLogsUseCase implements UseCase<FetchCheckinLogsUseCase.
         );
         return new CheckinHistoryResponse(
                 history.getCount(),
-                history.nextPage(),
-                history.previousPage(),
+                history.nextPage(false),
+                history.previousPage(false),
                 Optional.ofNullable(history.getResults()).orElse(Collections.emptyList()).stream().map(
                         c -> CheckinHistory.builder()
                                 .checkinId(c.getId())

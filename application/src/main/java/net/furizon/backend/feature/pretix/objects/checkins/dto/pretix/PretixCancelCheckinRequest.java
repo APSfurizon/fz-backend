@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Data
-public class CancelCheckinRequest {
+public class PretixCancelCheckinRequest {
     @NotNull
     private final String nonce;
 

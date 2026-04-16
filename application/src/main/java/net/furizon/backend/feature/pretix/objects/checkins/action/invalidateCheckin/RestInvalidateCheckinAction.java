@@ -2,7 +2,7 @@ package net.furizon.backend.feature.pretix.objects.checkins.action.invalidateChe
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CancelCheckinRequest;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixCancelCheckinRequest;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -36,7 +36,7 @@ public class RestInvalidateCheckinAction implements PretixInvalidateCheckinActio
                 .path("/api/v1/organizers/{organizer}/checkinrpc/annul/")
                 .uriVariable("organizer", organizer)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CancelCheckinRequest(nonce, checkinListIds, explanation))
+                .body(new PretixCancelCheckinRequest(nonce, checkinListIds, explanation))
                 .build();
 
         try {

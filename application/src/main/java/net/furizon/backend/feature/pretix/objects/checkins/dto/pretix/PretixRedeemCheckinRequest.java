@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Data
-public class RedeemCheckinRequest {
+public class PretixRedeemCheckinRequest {
     @NotNull
     private final String secret;
 

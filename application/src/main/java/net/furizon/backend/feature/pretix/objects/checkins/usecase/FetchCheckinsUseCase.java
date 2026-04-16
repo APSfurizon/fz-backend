@@ -57,8 +57,8 @@ public class FetchCheckinsUseCase implements UseCase<FetchCheckinsUseCase.Input,
 
         return new CheckinSearchResponse(
                 res.getCount(),
-                res.nextPage(),
-                res.previousPage(),
+                res.nextPage(false),
+                res.previousPage(false),
                 Optional.ofNullable(res.getResults()).orElse(Collections.emptyList()).stream().map(
                         r -> {
                             String orderCode = r.getOriginalOrderCode();
