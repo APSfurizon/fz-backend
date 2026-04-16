@@ -21,7 +21,7 @@ import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RestPretixCheckinListsFinder implements PretixCheckinListsFinder {
+class RestPretixCheckinListsFinder implements PretixCheckinListsFinder {
     private final ParameterizedTypeReference<PretixPaging<PretixCheckinList>> checkins =
             new ParameterizedTypeReference<>() {};
 

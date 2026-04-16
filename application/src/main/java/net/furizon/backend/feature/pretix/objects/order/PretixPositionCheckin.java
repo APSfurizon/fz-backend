@@ -2,6 +2,7 @@ package net.furizon.backend.feature.pretix.objects.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,7 @@ public class PretixPositionCheckin {
     private final OffsetDateTime checkinDatetime;
 
     @Nullable
-    private final String type;
+    private final CheckinType type;
 
     @Nullable
     private final Long gate;

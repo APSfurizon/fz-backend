@@ -37,7 +37,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, CheckinResponse> {
+public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input, CheckinResponse> {
     @NotNull
     private final GeneralChecks checks;
     @NotNull
@@ -66,7 +66,7 @@ public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, Che
     private final GadgetPermissionService gadgetPermissionService;
 
     @Override
-    public @NotNull CheckinResponse executor(@NotNull CheckinUserUseCase.Input input) {
+    public @NotNull CheckinResponse executor(@NotNull RedeemCheckinUseCase.Input input) {
         log.info("User {} is checking in secret {}", input.user.getUserId(), input.secret);
 
         Order o = checks.getOrderAndAssertItExists(input.secret, input.event, input.pretixService);
@@ -105,11 +105,9 @@ public class CheckinUserUseCase implements UseCase<CheckinUserUseCase.Input, Che
             );
         }
         var reason = checkinResponse.getReason();
-        String localizedErrorReason = null;
-        if (reason != null) {
-            var errorMessage = reason.getErrorMessage();
-            localizedErrorReason = translationService.error(errorMessage.getKey(), errorMessage.getParams());
-        }
+        String localizedErrorReason = reason == null
+                                    ? null
+                                    : reason.getErrorMessage().localizeError(translationService);
 
         return CheckinResponse.builder()
                 .checkinNonce(nonce)

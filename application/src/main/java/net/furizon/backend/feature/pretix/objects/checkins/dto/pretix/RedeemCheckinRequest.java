@@ -19,7 +19,7 @@ public class RedeemCheckinRequest {
     private final List<Long> lists;
 
     @NotNull
-    private final Type type = Type.ENTRY;
+    private final CheckinType type = CheckinType.ENTRY;
 
     private final boolean force = false;
 
@@ -33,11 +33,4 @@ public class RedeemCheckinRequest {
     private final String nonce;
 
     private final boolean useOrderLocale = false;
-
-    public enum Type {
-        @JsonProperty("entry")
-        ENTRY,
-        @JsonProperty("exit")
-        EXIT
-    }
 }
