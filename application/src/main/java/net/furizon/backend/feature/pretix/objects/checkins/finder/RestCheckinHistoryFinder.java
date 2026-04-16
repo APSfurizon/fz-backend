@@ -3,14 +3,16 @@ package net.furizon.backend.feature.pretix.objects.checkins.finder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
-import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PagedPretixCheckinHistory;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixCheckinHistory;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.request.CheckinHistoryOrder;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -23,12 +25,14 @@ import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RestCheckinHistoryFinder implements PretixCheckinHistoryFinder {
+class RestCheckinHistoryFinder implements PretixCheckinHistoryFinder {
+    private final ParameterizedTypeReference<PretixPaging<PretixCheckinHistory>> checkins =
+            new ParameterizedTypeReference<>() {};
     @Qualifier(PRETIX_HTTP_CLIENT)
     private final HttpClient pretixHttpClient;
 
     @Override
-    public @NotNull PagedPretixCheckinHistory getPagedCheckinLists(
+    public @NotNull PretixPaging<PretixCheckinHistory> getPagedCheckinLists(
             @NotNull String organizer,
             @NotNull String event,
 
@@ -43,12 +47,12 @@ public class RestCheckinHistoryFinder implements PretixCheckinHistoryFinder {
             @Nullable CheckinHistoryOrder order,
 
             @Nullable Integer page) {
-        final var request = HttpRequest.<PagedPretixCheckinHistory>create()
+        final var request = HttpRequest.<PretixPaging<PretixCheckinHistory>>create()
                 .method(HttpMethod.GET)
                 .path("/organizers/{organizer}/events/{event}/checkins/")
                 .uriVariable("organizer", organizer)
                 .uriVariable("event", event)
-                .responseType(PagedPretixCheckinHistory.class);
+                .responseParameterizedType(checkins);
 
         if (page != null) {
             request.queryParam("page", String.valueOf(page));

@@ -1,15 +1,16 @@
 package net.furizon.backend.feature.pretix.objects.checkins.finder;
 
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
-import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PagedPretixCheckinHistory;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixCheckinHistory;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.request.CheckinHistoryOrder;
+import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 
 public interface PretixCheckinHistoryFinder {
-    @NotNull PagedPretixCheckinHistory getPagedCheckinLists(
+    @NotNull PretixPaging<PretixCheckinHistory> getPagedCheckinLists(
             @NotNull String organizer,
             @NotNull String event,
 

@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.CheckinHistory;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
-import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PagedPretixCheckinHistory;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixCheckinHistory;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.request.CheckinHistoryOrder;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.response.CheckinHistoryResponse;
 import net.furizon.backend.feature.pretix.objects.checkins.finder.PretixCheckinHistoryFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.localization.TranslationService;
-import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
+import net.furizon.backend.infrastructure.pretix.dto.PretixPaging;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @Slf4j
@@ -36,7 +38,7 @@ public class FetchCheckinLogsUseCase implements UseCase<FetchCheckinLogsUseCase.
 
         var p = input.event.getOrganizerAndEventPair();
 
-        PagedPretixCheckinHistory history = historyFinder.getPagedCheckinLists(
+        PretixPaging<PretixCheckinHistory> history = historyFinder.getPagedCheckinLists(
                 p.getOrganizer(), p.getEvent(),
 
                 input.createdSince,
@@ -53,9 +55,9 @@ public class FetchCheckinLogsUseCase implements UseCase<FetchCheckinLogsUseCase.
         );
         return new CheckinHistoryResponse(
                 history.getCount(),
-                history.getNext(),
-                history.getPrevious(),
-                history.getResults().stream().map(
+                history.nextPage(),
+                history.previousPage(),
+                Optional.ofNullable(history.getResults()).orElse(Collections.emptyList()).stream().map(
                         c -> CheckinHistory.builder()
                                 .checkinId(c.getId())
                                 .successful(c.getSuccessful())
