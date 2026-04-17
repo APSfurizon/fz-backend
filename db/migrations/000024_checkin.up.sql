@@ -1,5 +1,8 @@
 BEGIN;
 
+ALTER TABLE IF EXISTS membership_cards ADD COLUMN IF NOT EXISTS signed_at timestamptz DEFAULT NULL NULL;
+ALTER TABLE IF EXISTS membership_cards ADD COLUMN IF NOT EXISTS sent_by_email bool DEFAULT false NOT NULL;
+
 ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS order_customer_notes text NULL;
 ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS order_included_gadgets json NULL;
 

@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.pretix.objects.checkins.dto.response;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.badge.dto.PrintedBadgeLevel;
@@ -58,6 +57,8 @@ public class CheckinResponse {
     private final boolean isDailyTicket;
 
     private final boolean isStaffer;
+
+    private final boolean shouldPrintApsJoinModule;
 
     @NotNull
     private final Sponsorship sponsorship;

@@ -19,6 +19,7 @@ import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
@@ -80,7 +81,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
         ).mapOrNull(MembershipCardMapper::map);
     }
 
-    private @NotNull SelectJoinStep<Record6<Long, Long, Integer, Short, Boolean, Long>> membershipSelect() {
+    private @NotNull SelectJoinStep<?> membershipSelect() {
         return PostgresDSL
                 .select(
                         MEMBERSHIP_CARDS.USER_ID,
@@ -88,7 +89,9 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                         MEMBERSHIP_CARDS.ID_IN_YEAR,
                         MEMBERSHIP_CARDS.ISSUE_YEAR,
                         MEMBERSHIP_CARDS.ALREADY_REGISTERED,
-                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER
+                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER,
+                        MEMBERSHIP_CARDS.SIGNED_AT,
+                        MEMBERSHIP_CARDS.SENT_BY_EMAIL
                 )
                 .from(MEMBERSHIP_CARDS);
     }
@@ -109,6 +112,8 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEMBERSHIP_CARDS.ISSUE_YEAR,
                 MEMBERSHIP_CARDS.ALREADY_REGISTERED,
                 MEMBERSHIP_CARDS.CREATED_FOR_ORDER,
+                MEMBERSHIP_CARDS.SIGNED_AT,
+                MEMBERSHIP_CARDS.SENT_BY_EMAIL,
                 MEMBERSHIP_INFO.ID,
                 MEMBERSHIP_INFO.INFO_FIRST_NAME,
                 MEMBERSHIP_INFO.INFO_LAST_NAME,

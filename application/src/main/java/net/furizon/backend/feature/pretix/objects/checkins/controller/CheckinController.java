@@ -174,7 +174,7 @@ public class CheckinController {
             @Valid @Nullable @RequestParam final Long checkinListId,
             @Valid @Nullable @RequestParam final CheckinType type,
             @Valid @Nullable @RequestParam final Boolean autoCheckedIn,
-            @Valid @Nullable @RequestParam final CheckinHistoryOrder order,
+            @Valid @Nullable @RequestParam final CheckinHistoryOrder orderBy,
             @Valid @Nullable @RequestParam final Integer page
     ) {
         return executor.execute(
@@ -188,7 +188,7 @@ public class CheckinController {
                         checkinListId,
                         type,
                         autoCheckedIn,
-                        order,
+                        orderBy,
                         page,
                         pretixService.getCurrentEvent(),
                         user

@@ -1,29 +1,29 @@
 package net.furizon.backend.feature.membership.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.admin.dto.GenerateBadgeRequest;
+import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
 import net.furizon.backend.feature.membership.dto.AddMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.DeleteMembershipCardRequest;
 import net.furizon.backend.feature.membership.dto.GetMembershipCardsResponse;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.membership.dto.SetMembershipCardRegistrationStatusRequest;
 import net.furizon.backend.feature.membership.dto.ShouldUpdateInfoResponse;
-import net.furizon.backend.feature.membership.usecase.CheckIfUserShouldUpdateInfoUseCase;
-import net.furizon.backend.feature.membership.usecase.CreateMembershipUseCase;
-import net.furizon.backend.feature.membership.usecase.DeleteMembershipCardUseCase;
-import net.furizon.backend.feature.membership.usecase.GetPersonalUserInformationUseCase;
-import net.furizon.backend.feature.membership.usecase.LoadAllMembershipInfosUseCase;
-import net.furizon.backend.feature.membership.usecase.MarkPersonalUserInformationAsUpdatedUseCase;
-import net.furizon.backend.feature.membership.usecase.SetCardRegisterStatusUseCase;
-import net.furizon.backend.feature.membership.usecase.UpdatePersonalUserInformationUseCase;
+import net.furizon.backend.feature.membership.usecase.*;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -224,6 +224,68 @@ public class MembershipController {
         return executor.execute(
                 SetCardRegisterStatusUseCase.class,
                 req
+        );
+    }
+
+    @Operation(summary = "Generates the precompiled module to join the APS", description =
+        "To formally join the APS and receive a membership card, an user needs to sign, "
+        + "at checkin time, a module containing some personal information. This endpoint "
+        + "generates the html of the module which later needs to be printed and signed, containing "
+        + "the precompiled personal information. Note that an user needs to sign only one module "
+        + "per fiscal year. This method does not check that an user has already signed a module, however "
+        + "marks all registred membership cards for the current year of the user as 'signed'. "
+        + "The check is done in other endpoints, like the redeem checkin one, or `/should-sign-aps-join-module`. "
+        + "This module by default works on the fiscal year of the current event, but an optional `eventId` "
+        + "parameter can be supplied for marking the cards of the specified event")
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+        Permission.CAN_PERFORM_CHECKINS,
+        Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
+    @GetMapping("/aps-join-module")
+    public ResponseEntity<String> generateApsJoinModule(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestParam final Long userId,
+            @Valid @Nullable @RequestParam final Long eventId
+    ) {
+        String html = executor.execute(
+                GenerateApsSignHtmlUseCase.class,
+                new GenerateApsSignHtmlUseCase.Input(
+                        userId,
+                        eventId,
+                        pretixInformation,
+                        user
+                )
+        );
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=generated.html")
+                .contentType(MediaType.TEXT_HTML)
+                .body(html);
+    }
+
+    @Operation(summary = "Checks if the user should sign the module to join the APS", description =
+        "Check `/aps-join-module` for a better explaination. This method returns a simple boolean "
+        + "which states if the user has already signed an APS join module for the fiscal year "
+        + "of the current event OR the specified event id.")
+    @PermissionRequired(permissions = {
+        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+        Permission.CAN_PERFORM_CHECKINS,
+        Permission.CAN_VIEW_USER
+    }, mode = PermissionRequiredMode.ANY)
+    @GetMapping("/should-sign-aps-join-module")
+    public boolean shouldSignApsJoinModule(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @Valid @NotNull @RequestParam final Long userId,
+            @Valid @Nullable @RequestParam final Long eventId
+    ) {
+        return executor.execute(
+                ShouldSignApsJoinModuleUseCase.class,
+                new ShouldSignApsJoinModuleUseCase.Input(
+                        userId,
+                        eventId,
+                        pretixInformation,
+                        user
+                )
         );
     }
 }

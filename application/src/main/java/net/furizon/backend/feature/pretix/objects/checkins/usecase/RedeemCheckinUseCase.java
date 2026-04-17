@@ -87,6 +87,11 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                          || permissions.contains(Permission.MAIN_STAFF);
         var gadgets = new GadgetManager(o.getGadgets());
         permissions.forEach(p -> gadgets.addAll(gadgetPermissionService.getGadgetsForPermission(p)));
+        boolean shouldPrintApsJoinModule = membershipCards.stream().reduce(
+                true,
+                (i, card) -> i && card.getSignedAt() == null,
+                Boolean::logicalAnd
+        );
 
         String nonce = UUID.randomUUID().toString();
 
@@ -122,6 +127,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .hasFursuitBadge(isFursuiter)
                 .isDailyTicket(isDailyTicket)
                 .isStaffer(isStaffer)
+                .shouldPrintApsJoinModule(shouldPrintApsJoinModule)
                 .sponsorship(o.getSponsorship())
                 .lanyardType(lanyardType)
                 .portaBadgeType(portaBadgeType)
