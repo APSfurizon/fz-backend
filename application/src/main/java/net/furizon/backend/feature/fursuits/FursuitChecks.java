@@ -14,8 +14,10 @@ import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -136,11 +138,16 @@ public class FursuitChecks {
         }
     }
 
-    private void assertFursuitObjExists(@Nullable Object object) {
+    @Contract("null -> fail")
+    public <V> @NotNull V assertFursuitObjExists(@Nullable V object) {
         if (object == null) {
             log.error("Fursuit not found!");
-            throw new ApiException(translationService.error("badge.fursuit.not_found"),
-                FursuitErrorCodes.FURSUIT_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("badge.fursuit.not_found"),
+                    FursuitErrorCodes.FURSUIT_NOT_FOUND
+            );
         }
+        return object;
     }
 }

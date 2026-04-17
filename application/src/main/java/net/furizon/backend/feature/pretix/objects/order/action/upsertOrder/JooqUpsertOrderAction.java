@@ -49,6 +49,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         String buyerUser = order.getBuyerUser();
         String buyerLocale = order.getBuyerLocale();
         String internalComment = order.getInternalComment();
+        String userComment = order.getUserComment();
         String checkinText = order.getCheckinText();
         boolean requiresAttention = order.isRequireAttention();
         boolean membership = order.hasMembership();
@@ -63,6 +64,7 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
         long eventId = order.getOrderEvent().getId();
         short extraFursuits = order.getExtraFursuits();
         var answers = jsonSerializer.serializeAsJson(order.getAllAnswers(pretixInformation));
+        var gadgets = jsonSerializer.serializeAsJson(order.getGadgets());
 
         if (userId != null) {
             var r = userFinder.getMailDataForUser(userId);
@@ -120,6 +122,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     ORDERS.ORDER_REQUIRES_ATTENTION,
                     ORDERS.ORDER_CHECKIN_TEXT,
                     ORDERS.ORDER_INTERNAL_COMMENT,
+                    ORDERS.ORDER_CUSTOMER_NOTES,
+                    ORDERS.ORDER_INCLUDED_GADGETS,
                     ORDERS.USER_ID,
                     ORDERS.EVENT_ID,
                     ORDERS.ORDER_ANSWERS_JSON,
@@ -155,6 +159,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                     requiresAttention,
                     checkinText,
                     internalComment,
+                    userComment,
+                    gadgets,
                     userId,
                     eventId,
                     answers,
@@ -189,6 +195,8 @@ public class JooqUpsertOrderAction implements UpsertOrderAction {
                 .set(ORDERS.ORDER_REQUIRES_ATTENTION, requiresAttention)
                 .set(ORDERS.ORDER_CHECKIN_TEXT, checkinText)
                 .set(ORDERS.ORDER_INTERNAL_COMMENT, internalComment)
+                .set(ORDERS.ORDER_CUSTOMER_NOTES, userComment)
+                .set(ORDERS.ORDER_INCLUDED_GADGETS, gadgets)
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, eventId)
                 .set(ORDERS.ORDER_ANSWERS_JSON, answers)

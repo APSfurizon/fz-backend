@@ -13,6 +13,7 @@ import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.configuration.FrontendConfig;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.email.model.MailRequest;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -53,6 +54,7 @@ public class RoomGeneralSanityCheck {
     @NotNull private final UserFinder userFinder;
     @NotNull private final RoomFinder roomFinder;
     @NotNull private final FrontendConfig frontendConfig;
+    @NotNull private final TranslationService translationService;
 
     private void sanityCheckLogAndStoreErrors(@Nullable List<String> logbook, String message, Object... args) {
         log.error(message, args);
@@ -81,14 +83,14 @@ public class RoomGeneralSanityCheck {
                         TEMPLATE_SANITY_CHECK_KICK_OWNER,
                         MailVarPair.of(OTHER_FURSONA_NAME, fursonaName),
                         MailVarPair.of(ROOM_NAME, roomName),
-                        MailVarPair.of(SANITY_CHECK_REASON, reason)
+                        MailVarPair.of(SANITY_CHECK_REASON, reason.localizeError(translationService))
                 ).subject("mail.sanity_check_kick_owner.title"),
                 new MailRequest(
                         userId,
                         userFinder,
                         TEMPLATE_SANITY_CHECK_KICK_USER,
                         MailVarPair.of(ROOM_NAME, roomName),
-                        MailVarPair.of(SANITY_CHECK_REASON, reason)
+                        MailVarPair.of(SANITY_CHECK_REASON, reason.localizeError(translationService))
                 ).subject("mail.sanity_check_kick_user.title")
         );
     }

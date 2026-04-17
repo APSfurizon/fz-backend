@@ -15,7 +15,9 @@ public class MembershipCardMapper {
                 record.get(MEMBERSHIP_CARDS.ISSUE_YEAR),
                 record.get(MEMBERSHIP_CARDS.USER_ID),
                 record.get(MEMBERSHIP_CARDS.CREATED_FOR_ORDER),
-                record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED)
+                record.get(MEMBERSHIP_CARDS.ALREADY_REGISTERED),
+                record.get(MEMBERSHIP_CARDS.SIGNED_AT),
+                record.get(MEMBERSHIP_CARDS.SENT_BY_EMAIL)
         );
     }
 }

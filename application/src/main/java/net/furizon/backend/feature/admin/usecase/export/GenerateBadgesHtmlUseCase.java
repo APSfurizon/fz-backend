@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -79,26 +80,11 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
             String fursuitSpecies = badge.getFursuitSpecies();
             fursuitSpecies = fursuitSpecies == null ? "" : fursuitSpecies;
 
-            PrintedBadgeLevel badgeLevel = PrintedBadgeLevel.NORMAL_BADGE;
-            //In your convention you may want to reimplement this
-            if (badge.getSponsorship() == Sponsorship.SPONSOR) {
-                badgeLevel = PrintedBadgeLevel.NORMAL_SPONSOR;
-            }
-            if (badge.getSponsorship() == Sponsorship.SUPER_SPONSOR) {
-                badgeLevel = PrintedBadgeLevel.SUPER_SPONSOR;
-            }
-            if (badge.getSponsorship() == Sponsorship.ULTRA_SPONSOR) {
-                badgeLevel = PrintedBadgeLevel.ULTRA_SPONSOR;
-            }
-            if (badge.isDaily()) {
-                badgeLevel = PrintedBadgeLevel.DAILY_BADGE;
-            }
-            if (badge.getPermissions().contains(Permission.JUNIOR_STAFF)) {
-                badgeLevel = PrintedBadgeLevel.JUNIOR_STAFF;
-            }
-            if (badge.getPermissions().contains(Permission.MAIN_STAFF)) {
-                badgeLevel = PrintedBadgeLevel.MAIN_STAFF;
-            }
+            PrintedBadgeLevel badgeLevel = getBadgeLevel(
+                    badge.getSponsorship(),
+                    badge.isDaily(),
+                    badge.getPermissions()
+            );
 
             String html = customTemplateService.renderTemplate(
                 input.isFursuit
@@ -130,6 +116,34 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
                 "pageHeight", exportConfig.getBadgeDimensionHeight()
             )
         );
+    }
+
+    public static @NotNull PrintedBadgeLevel getBadgeLevel(@NotNull Sponsorship sponsorship,
+                                                           boolean isDaily,
+                                                           @NotNull Collection<Permission> permissions) {
+
+        PrintedBadgeLevel badgeLevel = PrintedBadgeLevel.NORMAL_BADGE;
+        //In your convention you may want to reimplement this
+        if (sponsorship == Sponsorship.SPONSOR) {
+            badgeLevel = PrintedBadgeLevel.NORMAL_SPONSOR;
+        }
+        if (sponsorship == Sponsorship.SUPER_SPONSOR) {
+            badgeLevel = PrintedBadgeLevel.SUPER_SPONSOR;
+        }
+        if (sponsorship == Sponsorship.ULTRA_SPONSOR) {
+            badgeLevel = PrintedBadgeLevel.ULTRA_SPONSOR;
+        }
+        if (isDaily) {
+            badgeLevel = PrintedBadgeLevel.DAILY_BADGE;
+        }
+        if (permissions.contains(Permission.JUNIOR_STAFF)) {
+            badgeLevel = PrintedBadgeLevel.JUNIOR_STAFF;
+        }
+        if (permissions.contains(Permission.MAIN_STAFF)) {
+            badgeLevel = PrintedBadgeLevel.MAIN_STAFF;
+        }
+
+        return badgeLevel;
     }
 
 

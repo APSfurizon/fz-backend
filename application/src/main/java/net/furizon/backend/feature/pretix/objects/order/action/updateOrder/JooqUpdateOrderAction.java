@@ -71,6 +71,8 @@ public class JooqUpdateOrderAction implements UpdateOrderAction {
                 .set(ORDERS.ORDER_REQUIRES_ATTENTION, order.isRequireAttention())
                 .set(ORDERS.ORDER_CHECKIN_TEXT, order.getCheckinText())
                 .set(ORDERS.ORDER_INTERNAL_COMMENT, order.getInternalComment())
+                .set(ORDERS.ORDER_CUSTOMER_NOTES, order.getUserComment())
+                .set(ORDERS.ORDER_INCLUDED_GADGETS, serializer.serializeAsJson(order.getGadgets()))
                 .set(ORDERS.USER_ID, userId)
                 .set(ORDERS.EVENT_ID, order.getOrderEvent().getId())
                 .set(ORDERS.ORDER_ANSWERS_JSON, serializer.serializeAsJson(order.getAllAnswers(pretixInformation)))

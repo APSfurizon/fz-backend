@@ -360,6 +360,29 @@ def removeUserFromRole(userId: int, roleId: int) -> Response:
     }
     return doPost(f'{BASE_URL_API}roles/{roleId}/remove-user', json=json)
     
+def getCheckinLists() -> Response:
+    return doGet(f'{BASE_URL_API}checkin/lists')
+def redeemCheckin(secret: str, checkins: list) -> Response:
+    json = {
+        "checkinListIds": checkins,
+        "secret": secret
+    }
+    return doPost(f'{BASE_URL_API}checkin/redeem', json=json)
+def cancelCheckin(nonce: str, checkins: list, explanation: str) -> Response:
+    json = {
+        "checkinListIds": checkins,
+        "nonce": nonce,
+        "explanation": explanation
+    }
+    return doPost(f'{BASE_URL_API}checkin/cancel', json=json)
+def searchCheckin(checkin: int, query: str) -> Response:
+    return doGet(f'{BASE_URL_API}checkin/search?query={query}&checkinListId={checkin}&hasCheckedIn=false&orderBy=ORDER_CODE&page=1')
+def checkinlogs(checkin: int) -> Response:
+    return doGet(f'{BASE_URL_API}checkin/logs?checkinListId={checkin}&orderBy=CREATED_AT&page=1')
+def shouldSignApsJoin(userId: int) -> Response:
+    return doGet(f'{BASE_URL_API}membership/should-sign-aps-join-module?userId={userId}')
+def generateAspJoin(userId: int) -> Response:
+    return doGet(f'{BASE_URL_API}membership/aps-join-module?userId={userId}')
 
 #register()
 #confirmEmail()
@@ -382,7 +405,7 @@ login()
 #addFursuit()
 #updateBring()
 #exportHotel()
-exportShirts()
+#exportShirts()
 #listPermissions()
 #listRoles()
 #crerateRole("-_____")
@@ -431,3 +454,9 @@ exportShirts()
 #noseCount()
 
 #pretixWebhook("STOCAZZO", "polaris", "furizon")
+
+#getCheckinLists()
+#searchCheckin(35, "Luca")
+#redeemCheckin("", [35])
+#shouldSignApsJoin(1)
+generateAspJoin(1)

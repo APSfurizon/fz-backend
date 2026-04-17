@@ -25,6 +25,11 @@ public interface OrderFinder {
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
 
     @Nullable
+    Order findOrderByCheckinSecretEvent(@NotNull String secret,
+                                        @NotNull Event event,
+                                        @NotNull PretixInformation pretixService);
+
+    @Nullable
     Order findOrderById(long orderId, @NotNull PretixInformation pretixService);
 
     @Nullable

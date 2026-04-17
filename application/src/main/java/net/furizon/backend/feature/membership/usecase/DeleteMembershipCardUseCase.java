@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -26,8 +27,11 @@ public class DeleteMembershipCardUseCase implements UseCase<DeleteMembershipCard
         MembershipCard card = cardFinder.getMembershipCardByCardId(input.getCardId());
         if (card == null) {
             log.error("Trying deleting membership card {} but it wasn't found", input.getCardId());
-            throw new ApiException(translationService.error("membership.card.not_found"),
-                    AuthenticationCodes.MEMBERSHIP_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("membership.card.not_found"),
+                    AuthenticationCodes.MEMBERSHIP_NOT_FOUND
+            );
         }
 
         if (card.isRegistered()) {

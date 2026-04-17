@@ -18,11 +18,13 @@ public class PretixPaging<R> {
 
     private final int page;
 
+    private final int count;
+
     @Nullable
     private final String next;
 
     @Nullable
-    private final String prev;
+    private final String previous;
 
     // Can't find any info if is nullable
     @Nullable
@@ -32,12 +34,16 @@ public class PretixPaging<R> {
         return next != null;
     }
 
-    public int nextPage() {
-        if (next == null) {
-            throw new NoSuchElementException("No more pages");
+    @Nullable
+    private Integer extractPageNumber(@Nullable String s, boolean crashOnNoPage) {
+        if (s == null) {
+            if (crashOnNoPage) {
+                throw new NoSuchElementException("No more pages");
+            }
+            return null;
         }
 
-        Matcher matcher = pageNumberPatter.matcher(next);
+        Matcher matcher = pageNumberPatter.matcher(s);
         if (!matcher.find()) {
             throw new IllegalArgumentException("Couldn't find page from url");
         }
@@ -45,9 +51,23 @@ public class PretixPaging<R> {
         return Integer.parseInt(matcher.group(1));
     }
 
+    public @Nullable Integer nextPage(boolean crashOnNoPage) {
+        return extractPageNumber(next, crashOnNoPage);
+    }
+    public int nextPage() {
+        return extractPageNumber(next, true);
+    }
+    public @Nullable Integer previousPage(boolean crashOnNoPage) {
+        return extractPageNumber(previous, crashOnNoPage);
+    }
+    public int previousPage() {
+        return extractPageNumber(previous, true);
+    }
+
     public static <R> PretixPaging<R> empty() {
         return new PretixPaging<>(
             0,
+            1,
             null,
             null,
             null

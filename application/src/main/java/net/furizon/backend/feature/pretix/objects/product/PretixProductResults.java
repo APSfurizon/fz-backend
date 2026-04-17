@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.product;
 
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.infrastructure.pretix.model.Board;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
@@ -42,7 +43,9 @@ public record PretixProductResults(
     @NotNull Map<HotelCapacityPair, Long> fullBoardCapacityToVariationId,
     @NotNull Map<Long, Board> boardVariationIdToType,
     @NotNull Map<Long, Boolean> isInternalItem,
-    @NotNull Map<Long, Boolean> isInternalVariation
+    @NotNull Map<Long, Boolean> isInternalVariation,
+    @NotNull Map<Long, List<Gadget>> itemIdToGadgets,
+    @NotNull Map<Long, List<Gadget>> variationIdToGadgets
 ) {
     public PretixProductResults() {
         this(
@@ -73,6 +76,8 @@ public record PretixProductResults(
             new HashMap<>(),
             new HashMap<>(),
             new TreeMap<>(),
+            new HashMap<>(),
+            new HashMap<>(),
             new HashMap<>(),
             new HashMap<>()
         );

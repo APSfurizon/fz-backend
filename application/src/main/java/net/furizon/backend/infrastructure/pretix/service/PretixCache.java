@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.pretix.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.product.HotelCapacityPair;
 import net.furizon.backend.feature.pretix.objects.product.PretixProductBundle;
 import net.furizon.backend.feature.pretix.objects.question.PretixOption;
@@ -46,6 +47,10 @@ class PretixCache {
     final Cache<Long, Boolean> isInternalItem = Caffeine.newBuilder().build();
     @NotNull
     final Cache<Long, Boolean> isInternalVariation = Caffeine.newBuilder().build();
+    @NotNull
+    final Cache<Long, List<Gadget>> itemIdToGadgets = Caffeine.newBuilder().build();
+    @NotNull
+    final Cache<Long, List<Gadget>> variationIdToGadgets = Caffeine.newBuilder().build();
 
 
     //Questions

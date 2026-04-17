@@ -21,6 +21,7 @@ public interface MembershipCardFinder {
     @NotNull List<UserDisplayDataWithPersonalInfo> getUsersAtEventWithoutMembershipCard(@NotNull Event event);
 
     @NotNull List<MembershipCard> getCardsOfUser(long userId);
+    @NotNull List<MembershipCard> getCardsOfUserForEvent(long userId, @NotNull Event event);
 
     boolean canDeleteCard(@NotNull MembershipCard card);
 }

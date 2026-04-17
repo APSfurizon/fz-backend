@@ -13,6 +13,7 @@ import net.furizon.backend.infrastructure.security.permissions.finder.Permission
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,8 +32,11 @@ public class FetchRoleUseCase implements UseCase<Long, RoleResponse> {
         Role role = permissionFinder.getRoleFromId(input);
         if (role == null) {
             log.error("Role {} not found", input);
-            throw new ApiException(translationService.error("roles.role_not_found"),
-                    GeneralResponseCodes.ROLE_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("roles.role_not_found"),
+                    GeneralResponseCodes.ROLE_NOT_FOUND
+            );
         }
 
         Set<Permission> permissions = role.getPermissions(permissionFinder)

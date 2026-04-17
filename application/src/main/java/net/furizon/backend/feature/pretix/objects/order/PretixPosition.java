@@ -15,6 +15,10 @@ public class PretixPosition {
     @JsonProperty("item")
     private long itemId;
 
+    @NotNull
+    @JsonProperty("order")
+    private final String originalOrderCode;
+
     @JsonProperty("id")
     private final long positionId;
 
@@ -78,6 +82,10 @@ public class PretixPosition {
     private final String state;
 
     @Nullable
+    @JsonProperty("require_attention")
+    private final Boolean requireAttention;
+
+    @Nullable
     @JsonProperty("valid_from")
     private final OffsetDateTime validFrom;
 
@@ -85,7 +93,14 @@ public class PretixPosition {
     @JsonProperty("valid_until")
     private final OffsetDateTime validUntil;
 
+    @Nullable
+    private final List<PretixPositionCheckin> checkins;
+
     public long getLongPrice() {
         return PretixGenericUtils.fromStrPriceToLong(price);
+    }
+
+    public boolean isCheckedIn() {
+        return checkins != null && !checkins.isEmpty();
     }
 }

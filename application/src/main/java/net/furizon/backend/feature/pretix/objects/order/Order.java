@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.room.dto.RoomData;
@@ -114,9 +115,13 @@ public class Order {
 
     private final boolean requireAttention;
     @Nullable private final String internalComment;
+    @Nullable private final String userComment;
     @Nullable private final String checkinText;
 
     private final long orderSerialInEvent;
+
+    @NotNull
+    private final List<Gadget> gadgets;
 
     @Nullable
     @Builder.Default
