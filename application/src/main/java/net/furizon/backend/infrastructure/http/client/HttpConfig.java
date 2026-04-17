@@ -1,6 +1,8 @@
 package net.furizon.backend.infrastructure.http.client;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -16,5 +18,14 @@ public interface HttpConfig {
     @NotNull
     default String getBasePath() {
         return "";
+    }
+
+    @Nullable
+    default Pair<String, String> basicAuth() {
+        return null;
+    }
+
+    default int getConnectionTimeout() {
+        return 20;
     }
 }

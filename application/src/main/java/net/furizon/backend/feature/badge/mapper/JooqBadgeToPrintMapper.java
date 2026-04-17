@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.badge.mapper;
 
 import net.furizon.backend.feature.badge.dto.BadgeToPrint;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
@@ -31,7 +32,7 @@ public class JooqBadgeToPrintMapper {
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .locales(List.of(record.get(USERS.USER_LOCALE))) //TODO support more flags
-                .imageUrl(record.get(MEDIA.MEDIA_PATH))
+                .imageUrl(MediaData.getFullPath(record))
                 .imageMimeType(record.get(MEDIA.MEDIA_TYPE))
                 .serialNo(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                 .orderCode(record.get(ORDERS.ORDER_CODE))
