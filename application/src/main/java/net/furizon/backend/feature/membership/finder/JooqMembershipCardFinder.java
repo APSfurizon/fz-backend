@@ -14,12 +14,10 @@ import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Record6;
 import org.jooq.SelectJoinStep;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;

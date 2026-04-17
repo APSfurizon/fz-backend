@@ -89,7 +89,9 @@ public class JooqOrderFinder implements OrderFinder {
     }
 
     @Override
-    public @Nullable Order findOrderByCheckinSecretEvent(@NotNull String checkinSecret, @NotNull Event event, @NotNull PretixInformation pretixService) {
+    public @Nullable Order findOrderByCheckinSecretEvent(@NotNull String checkinSecret,
+                                                         @NotNull Event event,
+                                                         @NotNull PretixInformation pretixService) {
         return query.fetchFirst(
             selectFrom()
             .where(
