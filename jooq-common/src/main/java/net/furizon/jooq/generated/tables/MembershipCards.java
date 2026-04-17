@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -96,6 +97,16 @@ public class MembershipCards extends TableImpl<Record> {
      * The column <code>public.membership_cards.created_for_order</code>.
      */
     public final TableField<Record, Long> CREATED_FOR_ORDER = createField(DSL.name("created_for_order"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.membership_cards.signed_at</code>.
+     */
+    public final TableField<Record, OffsetDateTime> SIGNED_AT = createField(DSL.name("signed_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>public.membership_cards.sent_by_email</code>.
+     */
+    public final TableField<Record, Boolean> SENT_BY_EMAIL = createField(DSL.name("sent_by_email"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     private MembershipCards(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

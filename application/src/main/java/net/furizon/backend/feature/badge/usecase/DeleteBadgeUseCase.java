@@ -18,6 +18,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -68,7 +69,11 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
             if (media != null) {
                 return deleteMediaFromDiskAction.invoke(media, true);
             } else {
-                throw new ApiException(translationService.error("badge.not_found"), ImageCodes.BADGE_NOT_FOUND);
+                throw new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        translationService.error("badge.not_found"),
+                        ImageCodes.BADGE_NOT_FOUND
+                );
             }
         } catch (IOException e) {
             log.error("Exception while deleting a badge", e);

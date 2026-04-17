@@ -35,6 +35,7 @@ import net.furizon.backend.infrastructure.security.session.manager.SessionAuthen
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -73,8 +74,11 @@ public class GetUserAdminViewDataUseCase {
         Authentication auth = authenticationFinder.findAuthenticationByUserId(userId);
         User jooqUser = userFinder.findById(userId);
         if (privateInfo == null || auth == null || jooqUser == null) {
-            throw new ApiException(translationService.error("user.not_found"),
-                GeneralResponseCodes.USER_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("user.not_found"),
+                    GeneralResponseCodes.USER_NOT_FOUND
+            );
         }
         response.personalInfo(privateInfo)
                 .email(auth.getEmail())

@@ -13,8 +13,10 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -135,6 +137,12 @@ public class GeneralChecks {
     }
 
 
+    @NotNull public Order getOrderAndAssertItExists(@NotNull String checkinSecret, @NotNull Event event,
+                                                    @NotNull PretixInformation pretixInformation) {
+        Order order = orderFinder.findOrderByCheckinSecretEvent(checkinSecret, event, pretixInformation);
+        assertOrderFound(Optional.ofNullable(order), checkinSecret, event);
+        return order;
+    }
     @NotNull public Order getOrderAndAssertItExists(long userId, @NotNull Event event,
                                                     @NotNull PretixInformation pretixInformation) {
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, pretixInformation);
@@ -192,11 +200,39 @@ public class GeneralChecks {
         }
     }
 
-    public void assertOrderFound(Optional<?> r, long userId, @NotNull Event event) {
+    public <V> @NotNull V assertOrderFound(Optional<V> r, @NotNull String secret, @NotNull Event event) {
+        if (!r.isPresent()) {
+            log.error("No order found for secret {} on event {}", secret, event);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("order.not_found"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND
+            );
+        }
+        return r.get();
+    }
+    public <V> @NotNull V assertOrderFound(Optional<V> r, long userId, @NotNull Event event) {
         if (!r.isPresent()) {
             log.error("No order found for user {} on event {}", userId, event);
-            throw new ApiException(translationService.error("order.not_found"),
-                GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("order.not_found"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND
+            );
         }
+        return r.get();
+    }
+
+    @Contract("null -> fail")
+    public <V> @NotNull V assertUserFound(@Nullable V user) {
+        if (user == null) {
+            log.error("User not found!");
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("user.not_found"),
+                    GeneralResponseCodes.USER_NOT_FOUND
+            );
+        }
+        return user;
     }
 }

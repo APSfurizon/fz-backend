@@ -9,6 +9,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.OffsetDateTime;
+
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -30,6 +32,11 @@ public class MembershipCard {
     @Nullable
     private final Long createdForOrderId;
 
+    @Nullable
+    private final OffsetDateTime signedAt;
+
+    private boolean sentByEmail;
+
     @Getter(AccessLevel.NONE)
     private final boolean isRegistered;
     //If the membership card has been already registered in the external italian portal
@@ -38,13 +45,16 @@ public class MembershipCard {
     }
 
     public MembershipCard(long cardId, int idInYear, short issueYear,
-                          long userOwnerId, @Nullable Long createdForOrderId, boolean isRegistered) {
+                          long userOwnerId, @Nullable Long createdForOrderId, boolean isRegistered,
+                          @Nullable OffsetDateTime signedAt, boolean sentByEmail) {
         this.cardId = cardId;
         this.idInYear = idInYear;
         this.issueYear = issueYear;
         this.userOwnerId = userOwnerId;
         this.createdForOrderId = createdForOrderId;
         this.isRegistered = isRegistered;
+        this.sentByEmail = sentByEmail;
+        this.signedAt = signedAt;
         this.cardNo = toNumber(issueYear, idInYear);
     }
 

@@ -16,6 +16,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -47,8 +48,11 @@ public class ChangePasswordUseCase implements UseCase<ChangePasswordUseCase.Inpu
 
             userId = sessionAuthenticationManager.getUserIdFromPasswordResetReqId(resetPwId);
             if (userId == null) {
-                throw new ApiException(translationService.error("authentication.reset.reset_not_valid"),
-                        AuthenticationCodes.PW_RESET_NOT_FOUND);
+                throw new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        translationService.error("authentication.reset.reset_not_valid"),
+                        AuthenticationCodes.PW_RESET_NOT_FOUND
+                );
             }
         } else {
             userId = generalChecks.getUserIdAndAssertPermission(

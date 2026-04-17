@@ -9,11 +9,11 @@ import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.membership.validation.PersonalUserInformationValidator;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.dto.ApiError;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -26,14 +26,13 @@ public class MarkPersonalUserInformationAsUpdatedUseCase implements
     @NotNull private final MarkPersonalUserInformationAsUpdated markPersonalUserInformationAsUpdated;
     @NotNull private final PersonalUserInformationValidator validator;
     @NotNull private final TranslationService translationService;
+    @NotNull private final GeneralChecks generalChecks;
     @NotNull private final PersonalInfoFinder finder;
 
     @Override
     public @NotNull Boolean executor(@NotNull MarkPersonalUserInformationAsUpdatedUseCase.Input input) {
         PersonalUserInformation information = finder.findByUserId(input.userId);
-        if (information == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        information = generalChecks.assertUserFound(information);
         try {
             validator.validate(information);
         } catch (ApiException e) {

@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,8 +30,11 @@ public class GeneratePretixControlOrderLinkUseCase
                 input.pretixInformation
         );
         if (order == null) {
-            throw new ApiException(translationService.error("order.not_found"),
-                GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("order.not_found"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND
+            );
         }
         return new LinkResponse(pretixConfig.getShop().getOrderControlUrl(order));
     }

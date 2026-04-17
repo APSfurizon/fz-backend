@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.Condition;
 import org.jooq.util.postgres.PostgresDSL;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,8 +65,11 @@ public class DefaultRoomLogic implements RoomLogic {
         );
         if (!r.isPresent()) {
             log.error("Order not found while creating a room for user {} and event {}", userId, event);
-            throw new ApiException(translationService.error("room.create_fail_no_order"),
-                    GeneralResponseCodes.ORDER_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.create_fail_no_order"),
+                    GeneralResponseCodes.ORDER_NOT_FOUND
+            );
         }
         long orderId = r.get().get(ORDERS.ID);
         //Actual creation of the room
@@ -449,7 +453,11 @@ public class DefaultRoomLogic implements RoomLogic {
         sourceGuest = srcGuests.stream().filter(g -> g.getUserId() == sourceUsrId).findFirst().orElse(null);
         if (sourceGuest == null) {
             log.error("[ROOM_EXCHANGE] No guest found in room {} with userId {}", roomId, sourceUsrId);
-            throw new ApiException(translationService.error("room.guest.not_found"), RoomErrorCodes.GUEST_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.guest.not_found"),
+                    RoomErrorCodes.GUEST_NOT_FOUND
+            );
         }
 
         boolean res;
@@ -569,8 +577,11 @@ public class DefaultRoomLogic implements RoomLogic {
         var r = roomFinder.getRoomIdFromOwnerUserId(userId, event);
         if (!r.isPresent()) {
             log.error("No room found for user {} in event {} while refunding", userId, event);
-            throw new ApiException(translationService.error("room.exchange.room_not_found"),
-                    RoomErrorCodes.ROOM_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("room.exchange.room_not_found"),
+                    RoomErrorCodes.ROOM_NOT_FOUND
+            );
         }
         return this.deleteRoom(r.get());
     }

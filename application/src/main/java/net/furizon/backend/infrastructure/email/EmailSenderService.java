@@ -305,9 +305,7 @@ public class EmailSenderService implements EmailSender {
         Map<String, Object> params = message.getParams().entrySet().stream().map((entry) -> {
             final Object value;
             if (entry.getValue() instanceof TranslatableValue translatableValue) {
-                value = translationService.translateFallback(translatableValue.getKey(),
-                        translatableValue.getKey(),
-                        translatableValue.getParams());
+                value = translatableValue.translateFallback(translationService);
             } else {
                 value = entry.getValue();
             }

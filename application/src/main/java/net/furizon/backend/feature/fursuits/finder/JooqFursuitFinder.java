@@ -31,6 +31,21 @@ public class JooqFursuitFinder implements FursuitFinder {
     @NotNull private final SqlQuery sqlQuery;
 
     @Override
+    public @NotNull List<FursuitData> getFursuitsOfUserBroughtToEvent(long userId, @NotNull Event event) {
+        return sqlQuery.fetch(
+            selectDisplayFursuit(event, userId)
+            .innerJoin(FURSUITS_ORDERS)
+            .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
+            .innerJoin(ORDERS)
+            .on(ORDERS.ID.eq(FURSUITS_ORDERS.ORDER_ID))
+            .where(
+                FURSUITS.USER_ID.eq(userId)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+            .orderBy(FURSUITS.FURSUIT_ID)
+        ).stream().map(r -> JooqFursuitDataMapper.map(r, true, true)).toList();
+    }
+    @Override
     public @NotNull List<FursuitData> getFursuitsOfUser(long userId, @Nullable Event event) {
         return sqlQuery.fetch(
             selectDisplayFursuit(event, userId)

@@ -3,6 +3,9 @@ package net.furizon.backend.infrastructure.pretix;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,8 +14,10 @@ import java.text.StringCharacterIterator;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class PretixGenericUtils {
     public static String buildOrgEventSlug(@NotNull String eventSlug, @NotNull String organizerSlug) {
         return organizerSlug + "/" + eventSlug;
@@ -31,6 +36,7 @@ public class PretixGenericUtils {
     }
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private static final TypeReference<Map<String, String>> CUSTOM_NAMES_TYPE_REFERENCE = new TypeReference<>() {};
     public static @NotNull Map<String, String> convertCustomNames(@Nullable String customNames) {
         if (customNames == null || customNames.isBlank()) {
@@ -40,7 +46,23 @@ public class PretixGenericUtils {
         try {
             return OBJECT_MAPPER.readValue(customNames, CUSTOM_NAMES_TYPE_REFERENCE);
         } catch (JsonProcessingException e) {
+            log.error("JsonProcessingException while parsing custom names: {}", customNames, e);
             return Collections.emptyMap();
+        }
+    }
+
+    private static final TypeReference<List<Gadget>> GADGETS_TYPE_REFERENCE = new TypeReference<>() {};
+    public static @Nullable List<Gadget> convertGadgets(@Nullable String gadgets) {
+        if (gadgets == null || gadgets.isBlank()) {
+            return null;
+        }
+
+        try {
+            var g = OBJECT_MAPPER.readValue(gadgets, GADGETS_TYPE_REFERENCE);
+            return new GadgetManager(g).getGadgets(); //This will sanitize them
+        } catch (JsonProcessingException e) {
+            log.error("JsonProcessingException while parsing gadgets: {}", gadgets, e);
+            return null;
         }
     }
 

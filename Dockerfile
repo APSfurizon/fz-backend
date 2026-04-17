@@ -5,6 +5,7 @@ ENV APP_HOME=/app
 
 COPY application-*.jar $APP_HOME/application.jar
 COPY prodkeys/*-key-autocart.rsa $APP_HOME/
+COPY gadget-permissions.json $APP_HOME/
 COPY hotel-names.json $APP_HOME/
 COPY templates/ $APP_HOME/templates/
 COPY libs/ $APP_HOME/libs/

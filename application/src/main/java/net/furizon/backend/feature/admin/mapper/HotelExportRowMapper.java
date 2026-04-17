@@ -67,7 +67,9 @@ public class HotelExportRowMapper {
                 .extraDays(extraDays == null ? ExtraDays.NONE : extraDays)
                 .board(board == null ? Board.NONE : board)
                 .requiresAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
-                .comment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                .customerNotes(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
+                .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
             .build();
     }
 
@@ -108,7 +110,9 @@ public class HotelExportRowMapper {
                 .roomOwnerOrderCode("")
                 .extraDays(ExtraDays.NONE)
                 .requiresAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
-                .comment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
+                .customerNotes(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
+                .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
                 .build();
     }
 }

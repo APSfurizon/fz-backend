@@ -24,6 +24,15 @@ public class ApiException extends RuntimeException {
     }
 
     public ApiException(
+            @NotNull HttpStatus status,
+            @NotNull String message,
+            @NotNull Enum<?> code
+    ) {
+        this.status = status;
+        this.errors = List.of(new ApiError(message, code));
+    }
+
+    public ApiException(
             @NotNull String message,
             @NotNull Enum<?> code
     ) {

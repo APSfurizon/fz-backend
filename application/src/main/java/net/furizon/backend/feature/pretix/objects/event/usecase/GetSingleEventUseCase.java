@@ -8,6 +8,7 @@ import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,8 +21,11 @@ public class GetSingleEventUseCase implements UseCase<Long, Event> {
     public @NotNull Event executor(@NotNull Long eventId) {
         Event e = finder.findEventById(eventId);
         if (e == null || !e.canBeShownToPublic()) {
-            throw new ApiException(translationService.error("common.event_not_found"),
-                    GeneralResponseCodes.EVENT_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("common.event_not_found"),
+                    GeneralResponseCodes.EVENT_NOT_FOUND
+            );
         }
         e.setPublicUrl("");
         return e;
