@@ -19,6 +19,7 @@ import net.furizon.backend.infrastructure.security.permissions.finder.Permission
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -41,7 +42,9 @@ public class GalleryChecks {
         if (obj == null) {
             log.error("Upload not found");
             throw new ApiException(
-                translationService.error("gallery.not_found", GalleryErrorCodes.UPLOADS_NOT_FOUND)
+                HttpStatus.NOT_FOUND,
+                translationService.error("gallery.not_found"),
+                GalleryErrorCodes.UPLOADS_NOT_FOUND
             );
         }
     }

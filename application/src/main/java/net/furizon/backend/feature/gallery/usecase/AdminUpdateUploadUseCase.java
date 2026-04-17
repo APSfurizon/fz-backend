@@ -14,6 +14,7 @@ import net.furizon.backend.infrastructure.web.exception.ApiException;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class AdminUpdateUploadUseCase implements UseCase<AdminUpdateUploadUseCas
             if (user == null) {
                 log.error("Photographer {} not found", input.photographerId);
                 throw new ApiException(
+                    HttpStatus.NOT_FOUND,
                     translationService.error("user.not_found"),
                     GeneralResponseCodes.USER_NOT_FOUND
                 );

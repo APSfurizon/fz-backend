@@ -37,8 +37,11 @@ public class GeneralChecks {
         Event e = eventFinder.findEventById(eventId);
         if (e == null) {
             log.error("Event with id {} not found", eventId);
-            throw new ApiException(translationService.error("common.event_not_found"),
-                    GeneralResponseCodes.EVENT_NOT_FOUND);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("common.event_not_found"),
+                    GeneralResponseCodes.EVENT_NOT_FOUND
+            );
         }
         return e;
     }
