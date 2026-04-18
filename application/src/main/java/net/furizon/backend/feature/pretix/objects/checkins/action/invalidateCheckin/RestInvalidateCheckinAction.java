@@ -6,14 +6,18 @@ import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixCanc
 import net.furizon.backend.infrastructure.http.client.HttpClient;
 import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import static net.furizon.backend.infrastructure.pretix.PretixConst.PRETIX_HTTP_CLIENT;
@@ -33,15 +37,23 @@ public class RestInvalidateCheckinAction implements PretixInvalidateCheckinActio
         log.info("Canceling checkin for lists {} with nonce {}", checkinListIds, nonce);
         final var request = HttpRequest.<Void>create()
                 .method(HttpMethod.POST)
-                .path("/api/v1/organizers/{organizer}/checkinrpc/annul/")
+                .path("/organizers/{organizer}/checkinrpc/annul/")
                 .uriVariable("organizer", organizer)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new PretixCancelCheckinRequest(nonce, checkinListIds, explanation))
+                .responseType(Void.class)
                 .build();
 
         try {
-            return pretixHttpClient.send(PretixConfig.class, request).getStatusCode().is2xxSuccessful();
-        } catch (final HttpClientErrorException ex) {
+            var resp = pretixHttpClient.send(PretixConfig.class, request, ByteBuffer.class);
+            if (resp.isError()) {
+                throw new ApiException(
+                        HttpStatus.valueOf(resp.getErrorResponse().getStatusCode().value()),
+                        new String(resp.getErrorEntity().array())
+                );
+            }
+            return true;
+        } catch (final HttpClientErrorException | IOException ex) {
             log.error("Error canceling a checkin", ex);
             return false;
         }

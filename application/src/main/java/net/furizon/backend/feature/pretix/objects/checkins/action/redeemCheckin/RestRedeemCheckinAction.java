@@ -35,7 +35,7 @@ public class RestRedeemCheckinAction implements PretixRedeemCheckinAction {
         log.info("Checking in secret {} for lists {} with nonce {}", secret, checkinListIds, nonce);
         final var request = HttpRequest.<RedeemCheckinResponse>create()
                 .method(HttpMethod.POST)
-                .path("/api/v1/organizers/{organizer}/checkinrpc/redeem/")
+                .path("/organizers/{organizer}/checkinrpc/redeem/")
                 .uriVariable("organizer", organizer)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new PretixRedeemCheckinRequest(secret, checkinListIds, nonce))
@@ -43,8 +43,12 @@ public class RestRedeemCheckinAction implements PretixRedeemCheckinAction {
                 .build();
 
         try {
-            var resp = pretixHttpClient.send(PretixConfig.class, request);
-            return resp.getBody();
+            //Errors during checking (IE duplicate secret) returns the same object, but with non 2xx status code
+            var resp = pretixHttpClient.send(PretixConfig.class, request, RedeemCheckinResponse.class);
+            if (resp.isError()) {
+                return resp.getErrorEntity();
+            }
+            return resp.getResponseEntity().getBody();
         } catch (final HttpClientErrorException ex) {
             log.error("Error doing a checkin", ex);
             return null;

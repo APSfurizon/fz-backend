@@ -13,7 +13,7 @@ public class PretixRedeemCheckinRequest {
 
     @NotNull
     @JsonProperty("source_type")
-    private final String sourceType = "fz-backend";
+    private final String sourceType = "barcode";
 
     @NotNull
     private final List<Long> lists;

@@ -36,6 +36,7 @@ public class CustomTemplateService {
                 templatesPath.toString(),
                 this.adminConfig.getJteRuntimeJarLocation()
         ));
+        this.templateEngine.setHtmlCommentsPreserved(true);
     }
 
     public String renderTemplate(String templateName, Map<String, Object> params) {

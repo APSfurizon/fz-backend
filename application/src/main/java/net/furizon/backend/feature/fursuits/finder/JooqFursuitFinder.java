@@ -33,7 +33,7 @@ public class JooqFursuitFinder implements FursuitFinder {
     @Override
     public @NotNull List<FursuitData> getFursuitsOfUserBroughtToEvent(long userId, @NotNull Event event) {
         return sqlQuery.fetch(
-            selectDisplayFursuit(event, userId)
+            selectDisplayFursuit(event, null) //null on purpose, WE want to join fursuit orders manually
             .innerJoin(FURSUITS_ORDERS)
             .on(FURSUITS_ORDERS.FURSUIT_ID.eq(FURSUITS.FURSUIT_ID))
             .innerJoin(ORDERS)
