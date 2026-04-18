@@ -127,7 +127,7 @@
                 Via G. Turri 12<br>
                 42121 Reggio nell'Emilia (RE)<br>
                 - Codice Fiscale 91181650358<br>
-                Tel.3456679134 - e-mail. info@furizon.net - https://furizon.net
+                Tel.3456679134 - e-mail. <!--email_off-->info@furizon.net<!--/email_off--> - https://furizon.net
             </div>
         </div>
 
@@ -202,7 +202,7 @@
         <div class="form-line">
             <div style="width: 70%; display: flex; align-items: flex-end;">
                 <div class="label" style="width: 90px;">E-Mail</div>
-                <div class="value" style="flex-grow: 1;">${email}</div>
+                <div class="value" style="flex-grow: 1;"><!--email_off-->${email}<!--/email_off--></div>
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="width: 35px; margin-right: 5px;">tel.</div>
@@ -248,7 +248,7 @@
             quanto indicato nella normativa di riferimento, ad opera di soggetti appositamente incaricati. Consento
             anche che i dati riguardanti l'iscrizione siano comunicati agli enti con cui l'associazione collabora e da
             questi trattati nella misura necessaria all'adempimento di obblighi previsti dalla legge e dalle norme
-            statutarie. Acconsento inoltre alla conservazione dei dati “sensibili” di cui all'art. 4 comma 1 lett. d),
+            statutarie. Acconsento inoltre alla conservazione dei dati "sensibili" di cui all'art. 4 comma 1 lett. d),
             nonché art. 26 del D.lgs.196/2003 e degli articoli 9 e 10 del Regolamento UE n. 2016/679, vale a dire i dati
             "idonei a rivelare l'origine razziale ed etnica, le convinzioni religiose, filosofiche o di altro genere, le
             opinioni politiche, l'adesione a partiti, sindacati, associazioni od organizzazioni a carattere religioso,
@@ -283,7 +283,7 @@
         </div>
 
     </div>
-
+<script>window.print();</script>
 </body>
 
 </html>

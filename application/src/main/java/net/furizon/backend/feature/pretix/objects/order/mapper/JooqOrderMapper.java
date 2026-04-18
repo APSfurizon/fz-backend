@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.ORDERS;
@@ -42,6 +43,13 @@ public class JooqOrderMapper {
     @NotNull
     public Order map(@NotNull Record record, @NotNull PretixInformation pretixInformation, boolean loadAnswers) {
         try {
+            String gadgets = null;
+            try {
+                gadgets = record.get(ORDERS.ORDER_INCLUDED_GADGETS).data();
+            } catch (NullPointerException ignored) {
+                // Apparently there's no way to check if a jooq json object is null
+                // This is the only way to not load the value if it's null
+            }
             Long userId = record.get(ORDERS.USER_ID);
             var v = Order.builder()
                     .code(record.get(ORDERS.ORDER_CODE))
@@ -73,7 +81,7 @@ public class JooqOrderMapper {
                     .checkinText(record.get(ORDERS.ORDER_CHECKIN_TEXT))
                     .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
                     .userComment(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
-                    .gadgets(objectMapper.readValue(record.get(ORDERS.ORDER_INCLUDED_GADGETS).data(), gadgetsRef))
+                    .gadgets(gadgets == null ? Collections.emptyList() : objectMapper.readValue(gadgets, gadgetsRef))
                     .orderSerialInEvent(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                     .orderOwnerUserId(userId)
                     .eventId(record.get(ORDERS.EVENT_ID))

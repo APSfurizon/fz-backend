@@ -1,11 +1,11 @@
 package net.furizon.backend.infrastructure.rooms;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.infrastructure.configuration.JacksonConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -48,9 +48,8 @@ public class RoomConfig {
         this.hotelNamesPath = hotelNamesPath;
 
         String json = Files.readString(Paths.get(hotelNamesPath));
-        ObjectMapper mapper = new ObjectMapper();
         TypeReference<Map<String, Map<String, String>>> typeRef =
                 new TypeReference<Map<String, Map<String, String>>>() {};
-        this.hotelInternalNameToNames = mapper.readValue(json, typeRef);
+        this.hotelInternalNameToNames = JacksonConfiguration.OBJECT_MAPPER.readValue(json, typeRef);
     }
 }

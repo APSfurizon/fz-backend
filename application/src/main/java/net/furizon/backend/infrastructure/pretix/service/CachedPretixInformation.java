@@ -672,7 +672,9 @@ public class CachedPretixInformation implements PretixInformation {
                 long itemId = position.getItemId();
 
                 gadgets.addAll(mainCache.itemIdToGadgets.getIfPresent(itemId));
-                gadgets.addAll(mainCache.variationIdToGadgets.getIfPresent(position.getVariationId()));
+                if (position.getVariationId() != null) {
+                    gadgets.addAll(mainCache.variationIdToGadgets.getIfPresent(position.getVariationId()));
+                }
 
                 if (checkItemId.apply(CacheItemTypes.TICKETS, itemId)) {
                     hasTicket = true;

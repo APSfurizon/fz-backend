@@ -266,7 +266,7 @@ public class MembershipController {
         );
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=generated.html")
-                .contentType(MediaType.TEXT_HTML)
+                .contentType(MediaType.parseMediaType("text/html; charset=utf-8"))
                 .body(html);
     }
 
