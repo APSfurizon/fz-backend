@@ -2,10 +2,10 @@ package net.furizon.backend.infrastructure.pretix;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetManager;
+import net.furizon.backend.infrastructure.configuration.JacksonConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,8 +33,6 @@ public class PretixGenericUtils {
         return String.valueOf(price / 100L) + separator + String.valueOf(price % 100L);
     }
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private static final TypeReference<Map<String, String>> CUSTOM_NAMES_TYPE_REFERENCE = new TypeReference<>() {};
     public static @NotNull Map<String, String> convertCustomNames(@Nullable String customNames) {
         if (customNames == null || customNames.isBlank()) {
@@ -42,7 +40,7 @@ public class PretixGenericUtils {
         }
 
         try {
-            return OBJECT_MAPPER.readValue(customNames, CUSTOM_NAMES_TYPE_REFERENCE);
+            return JacksonConfiguration.OBJECT_MAPPER.readValue(customNames, CUSTOM_NAMES_TYPE_REFERENCE);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException while parsing custom names: {}", customNames, e);
             return Collections.emptyMap();
@@ -56,7 +54,7 @@ public class PretixGenericUtils {
         }
 
         try {
-            var g = OBJECT_MAPPER.readValue(gadgets, GADGETS_TYPE_REFERENCE);
+            var g = JacksonConfiguration.OBJECT_MAPPER.readValue(gadgets, GADGETS_TYPE_REFERENCE);
             return new GadgetManager(g).getGadgets(); //This will sanitize them
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException while parsing gadgets: {}", gadgets, e);

@@ -14,6 +14,9 @@ import java.util.TimeZone;
 
 @Configuration
 public class JacksonConfiguration {
+    public static ObjectMapper OBJECT_MAPPER;
+    public static CsvMapper CSV_MAPPER;
+
     @Bean
     @Primary
     ObjectMapper objectMapper() {
@@ -23,6 +26,7 @@ public class JacksonConfiguration {
         mapper.registerModule(new JavaTimeModule());
         mapper.findAndRegisterModules();
         mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
+        OBJECT_MAPPER = mapper;
         return mapper;
     }
 
@@ -37,6 +41,7 @@ public class JacksonConfiguration {
         csvMapper.registerModule(new JavaTimeModule());
         csvMapper.findAndRegisterModules();
         csvMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
+        CSV_MAPPER = csvMapper;
         return csvMapper;
     }
 }

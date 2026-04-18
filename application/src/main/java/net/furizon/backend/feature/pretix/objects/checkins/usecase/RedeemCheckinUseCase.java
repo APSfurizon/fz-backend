@@ -82,6 +82,11 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
         var lanyardType = GenerateBadgesHtmlUseCase.getBadgeLevel(o.getSponsorship(), isDailyTicket, permissions);
         var portaBadgeType = getPortaBadgeLevel(permissions, isFursuiter, isDailyTicket);
         var roomInfo = roomFinder.getRoomInfoForUser(orderOwner, input.event, input.pretixService, roomLogic);
+        if (roomInfo != null) {
+            roomInfo.setUserIsOwner(roomInfo.getRoomOwner().getUserId() == orderOwner);
+            var guests = roomFinder.getRoomGuestResponseFromRoomId(roomInfo.getRoomId(), input.event);
+            roomInfo.setGuests(guests.stream().filter(g -> g.getRoomGuest().isConfirmed()).toList());
+        }
         boolean isStaffer = permissions.contains(Permission.JUNIOR_STAFF)
                          || permissions.contains(Permission.SECURITY_STAFF)
                          || permissions.contains(Permission.MAIN_STAFF);

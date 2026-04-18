@@ -1,6 +1,6 @@
 package net.furizon.backend.infrastructure.http.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import net.furizon.backend.infrastructure.configuration.JacksonConfiguration;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +10,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -98,7 +99,11 @@ public class SimpleHttpClient implements HttpClient {
         if (!errorClass.equals(Void.class)) {
             v = v.onStatus(x -> !x.is2xxSuccessful(), (req, resp) -> {
                 InputStream body = resp.getBody();
-                errObj.setValue(new ObjectMapper().readValue(body, errorClass));
+                if (errorClass.equals(ByteBuffer.class)) {
+                    errObj.setValue((E) ByteBuffer.wrap(body.readAllBytes()));
+                } else {
+                    errObj.setValue(JacksonConfiguration.OBJECT_MAPPER.readValue(body, errorClass));
+                }
                 errorResponse.setValue(resp);
             });
         }
