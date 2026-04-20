@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -52,6 +53,19 @@ public class CommonControllerAdvice {
             .body(HttpErrorResponse.builder()
             .errors(List.of(new ApiError("oof :c", GeneralResponseCodes.GENERIC_ERROR)))
             .requestId((String) request.getAttribute(MDC_CORRELATION_ID)).build());
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<HttpErrorResponse> handleException(
+            @NotNull HttpMediaTypeNotSupportedException ex,
+            @NotNull HttpServletRequest request
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+            .body(HttpErrorResponse.builder()
+                    .errors(List.of(new ApiError(translationService.error("common.invalid_mismatch_media_type"),
+                            GeneralResponseCodes.GENERIC_ERROR)))
+                    .requestId((String) request.getAttribute(MDC_CORRELATION_ID)).build());
     }
 
     @ExceptionHandler(ApiException.class)
