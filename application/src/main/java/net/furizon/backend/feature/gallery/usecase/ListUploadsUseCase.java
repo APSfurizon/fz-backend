@@ -41,7 +41,7 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
             status,
             userId,
             isAdmin,
-            input.from == null ? 0L : input.from,
+            input.from == null ? Long.MAX_VALUE : input.from,
             galleryConfig.getListingBatchSize()
         );
         return new ListUploadsResponse(resp);

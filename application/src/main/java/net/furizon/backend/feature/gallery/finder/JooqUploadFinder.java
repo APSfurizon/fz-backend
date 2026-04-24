@@ -224,7 +224,7 @@ public class JooqUploadFinder implements UploadFinder {
             long fromId,
             long limit
     ) {
-        Condition condition = UPLOADS.ID.greaterThan(fromId);
+        Condition condition = UPLOADS.ID.lessThan(fromId);
 
         if (uploadStatus == null || !isReqUserAnAdmin) {
             if (reqUserId == null) {
