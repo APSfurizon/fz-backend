@@ -65,7 +65,7 @@ public class UserAdminViewData {
     private final List<SponsorNamesForEvent> sponsorNames;
 
     @Data
-    private static class SponsorNamesForEvent {
+    public static class SponsorNamesForEvent {
         private final long eventId;
         @NotNull
         private final SponsorshipNamesResponse sponsorNames;
