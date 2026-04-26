@@ -1,6 +1,5 @@
 package net.furizon.backend.feature.membership.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.usecase.SendMembershipCardEmails;
@@ -24,10 +23,5 @@ public class MembershipCardEmailCronjob {
         log.info("Running cronjob for sending membership card emails");
         int no = executor.execute(SendMembershipCardEmails.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} membership card emails", no);
-    }
-
-    @PostConstruct
-    public void init() {
-        run();
     }
 }
