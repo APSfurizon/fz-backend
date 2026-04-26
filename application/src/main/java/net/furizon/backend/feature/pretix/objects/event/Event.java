@@ -132,6 +132,17 @@ public class Event {
         return membershipYearUtils.getMembershipYear(date);
     }
 
+    public @NotNull LocalDate getMembershipResetDate(@NotNull MembershipYearUtils membershipYearUtils) {
+        OffsetDateTime from = pretixDateFrom;
+        if (from == null) {
+            log.error("From date was unavailable for event {}. Falling back to Date.now()", slug);
+            from = OffsetDateTime.now();
+        }
+
+        LocalDate date = from.toLocalDate();
+        return membershipYearUtils.getResetDate(date.getYear());
+    }
+
     public @NotNull Event setDateFrom(@Nullable OffsetDateTime dateFrom, boolean earlyIncluded) {
         if (dateFrom != null) {
             this.correctDateFrom = computeCorrectDateFrom(dateFrom, earlyIncluded);
