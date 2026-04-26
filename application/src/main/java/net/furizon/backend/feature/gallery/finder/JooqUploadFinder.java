@@ -24,13 +24,8 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Condition;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Record2;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.Table;
-import org.jooq.TableField;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -222,9 +217,16 @@ public class JooqUploadFinder implements UploadFinder {
             @Nullable Long reqUserId,
             boolean isReqUserAnAdmin,
             long fromId,
+            boolean after,
             long limit
     ) {
-        Condition condition = UPLOADS.ID.lessThan(fromId);
+        Condition condition = after
+            ? UPLOADS.ID.greaterThan(fromId)
+            : UPLOADS.ID.lessThan(fromId);
+
+        SortField<Long> sortingField = after
+                ? UPLOADS.ID.asc()
+                : UPLOADS.ID.desc();
 
         if (uploadStatus == null || !isReqUserAnAdmin) {
             if (reqUserId == null) {
@@ -251,7 +253,7 @@ public class JooqUploadFinder implements UploadFinder {
         return query.fetch(
             selectPreviewUploadObj()
             .where(condition)
-            .orderBy(UPLOADS.ID)
+            .orderBy(sortingField)
             .limit(limit)
         ).stream().map(GalleryPreviewMapper::map).toList();
     }

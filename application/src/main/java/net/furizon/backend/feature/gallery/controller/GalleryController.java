@@ -71,7 +71,7 @@ public class GalleryController {
         + "the `fileName` field. Finally, `thumbnailMedia` contains the small square thumbnail you should display as "
         + "preview. Keep in mind that post processing is done async, so immediately after an user has uploaded a "
         + "new media, this field will be null and you should display a temporary icon instead. If an user is an "
-        + "admin, he can mark a media as 'selected' for an event, making it the photo cover of the event. "
+        + "admin, they can mark a media as 'selected' for an event, making it the photo cover of the event. "
         + "`isSelected` tells you exactly if this is the selected photo for the event. `repostPermissions` is "
         + "a banner you should display on the page, telling the users if and how they're allowed by the original "
         + "photographer to repost their image around. `photoMetadata` and `videoMetadata` contains extra information "
@@ -102,7 +102,7 @@ public class GalleryController {
         + "their id. An user with the permission `UPLOADS_CAN_MANAGE_UPLOADS` can also filter "
         + "by the status of the upload. If the param is specified, but the user doesn't have "
         + "the correct permission, the parameter is simply ignored. However, if an user has "
-        + "that permission and no uploadStatus is defined, he will see all the results, in "
+        + "that permission and no uploadStatus is defined, they will see all the results, in "
         + "any possible status.")
     @GetMapping("/pub/list")
     public @NotNull ListUploadsResponse listUploads(
@@ -110,12 +110,14 @@ public class GalleryController {
             @RequestParam @Nullable @Valid @Positive final Long eventId,
             @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
+            @RequestParam @Nullable @Valid final Boolean after,
             @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
                 ListUploadsUseCase.class,
                 new ListUploadsUseCase.Input(
                         fromUploadId,
+                        after != null && after,
                         photographerUserId,
                         eventId,
                         uploadStatus,
@@ -200,6 +202,7 @@ public class GalleryController {
     public @NotNull ListUploadsResponse listMyUploads(
             @RequestParam @Nullable @Valid @Positive final Long eventId,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
+            @RequestParam @Nullable @Valid final Boolean after,
             @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
@@ -207,6 +210,7 @@ public class GalleryController {
                 ListUploadsUseCase.class,
                 new ListUploadsUseCase.Input(
                         fromUploadId,
+                        after != null && after,
                         user.getUserId(),
                         eventId,
                         uploadStatus,
