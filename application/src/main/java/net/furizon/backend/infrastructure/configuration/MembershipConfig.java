@@ -10,6 +10,8 @@ public class MembershipConfig {
     private final int cardEnumerationResetMonth;
     private final int cardEnumerationResetDay;
 
+    private final long sendCardEmailFromMinusDay;
+
     private final long minimumAgeAtEventDate;
 
     @NotNull private final String apsJoinModuleItJteFilename;

@@ -22,6 +22,7 @@ import net.furizon.backend.feature.admin.usecase.reminders.FursuitBadgeReminderU
 import net.furizon.backend.feature.admin.usecase.reminders.FursuitBringToCurrentEventReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.OrderLinkReminderUseCase;
 import net.furizon.backend.feature.admin.usecase.reminders.UserBadgeReminderUseCase;
+import net.furizon.backend.feature.membership.usecase.SendMembershipCardEmails;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -186,6 +187,18 @@ public class AdminController {
     ) {
         int sent = executor.execute(ExpiredIdReminderUseCase.class, pretixInformation.getCurrentEvent());
         log.info("Sent {} expired documents emails", sent);
+    }
+
+    @Operation(summary = "Sends membership cards by email", description =
+        "Sends to all person who have not received yet a membership card valid for the current event by "
+        + "email. The membership card has to be registered first")
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
+    @GetMapping("/mail-reminders/send-membership-card")
+    public void sendMembershipCard(
+            @AuthenticationPrincipal @NotNull final FurizonUser user
+    ) {
+        int sent = executor.execute(SendMembershipCardEmails.class, pretixInformation.getCurrentEvent());
+        log.info("Sent {} membership card emails", sent);
     }
 
 

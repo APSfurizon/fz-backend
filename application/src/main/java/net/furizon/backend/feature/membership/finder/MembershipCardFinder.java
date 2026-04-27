@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.finder;
 
+import net.furizon.backend.feature.membership.dto.ExportedMembershipCard;
 import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -24,4 +25,6 @@ public interface MembershipCardFinder {
     @NotNull List<MembershipCard> getCardsOfUserForEvent(long userId, @NotNull Event event);
 
     boolean canDeleteCard(@NotNull MembershipCard card);
+
+    @NotNull List<ExportedMembershipCard> getCardsNotSentByEmail(short year);
 }
