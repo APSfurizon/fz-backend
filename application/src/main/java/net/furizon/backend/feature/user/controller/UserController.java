@@ -3,10 +3,12 @@ package net.furizon.backend.feature.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
 import net.furizon.backend.feature.user.dto.SessionListResponse;
+import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
+import net.furizon.backend.feature.user.dto.UserAdminReducedViewData;
 import net.furizon.backend.feature.user.dto.UserAdminViewData;
 import net.furizon.backend.feature.user.dto.UsersByIdResponse;
 import net.furizon.backend.feature.user.objects.dto.UserDisplayDataResponse;
@@ -16,6 +18,7 @@ import net.furizon.backend.feature.user.usecase.GetUserDisplayDataUseCase;
 import net.furizon.backend.feature.user.usecase.GetUserSessionsUseCase;
 import net.furizon.backend.feature.user.usecase.SearchUsersByIdsUseCase;
 import net.furizon.backend.feature.user.usecase.UpdateShowInNosecountUseCase;
+import net.furizon.backend.infrastructure.membership.MembershipYearUtils;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
@@ -40,6 +43,9 @@ public class UserController {
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+
+    @org.jetbrains.annotations.NotNull
+    private final MembershipYearUtils membershipYearUtils;
 
     @org.jetbrains.annotations.NotNull
     private final GetUserAdminViewDataUseCase getUserAdminViewDataUseCase;
@@ -126,7 +132,7 @@ public class UserController {
     @GetMapping("/view/{id}")
     public @NotNull UserAdminViewData getUserAdminViewData(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
-            @PathVariable("id") Long userId
+            @PathVariable("id") @NotNull @Positive @Valid final Long userId
     ) {
         return getUserAdminViewDataUseCase.execute(
                 user,
@@ -135,6 +141,31 @@ public class UserController {
                 pretixInformation
         );
     }
+    @Operation(summary = "Reduced view on user", description =
+        "This operation can be performed only by an admin. It's an endpoint really similar to "
+        + "`/view/{id}`, however it returns less data. This endpoint is intended to be shown "
+        + "to security staff which should only get the really important user data, for both "
+        + "privacy concerns and for not getting bloaded with extra, useless, information.")
+    @PermissionRequired(permissions = {Permission.CAN_VIEW_USER})
+    @GetMapping("/security/view/{id}")
+    public @NotNull UserAdminReducedViewData getUserAdminReducedViewData(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @PathVariable("id") @NotNull @Positive @Valid final Long userId
+    ) {
+        UserAdminViewData data = getUserAdminViewDataUseCase.execute(
+                user,
+                userId,
+                pretixInformation.getCurrentEvent(),
+                pretixInformation
+        );
+
+        return new UserAdminReducedViewData(
+                data,
+                pretixInformation.getCurrentEvent(),
+                membershipYearUtils
+        );
+    }
+
 
     @Operation(summary = "Update showInNosecount user flag", description =
         "This operation can be performed only by an admin. User's show in nosecount flag is a hidden "

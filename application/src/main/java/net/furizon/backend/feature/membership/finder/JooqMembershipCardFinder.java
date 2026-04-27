@@ -2,8 +2,10 @@ package net.furizon.backend.feature.membership.finder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.membership.dto.ExportedMembershipCard;
 import net.furizon.backend.feature.membership.dto.FullInfoMembershipCard;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
+import net.furizon.backend.feature.membership.mapper.ExportedMembershipCardMapper;
 import net.furizon.backend.feature.membership.mapper.FullInfoMembershipMapper;
 import net.furizon.backend.feature.membership.mapper.MembershipCardMapper;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -263,5 +265,35 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 )
                 .limit(1)
         ).isPresent();
+    }
+
+    @Override
+    public @NotNull List<ExportedMembershipCard> getCardsNotSentByEmail(short year) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                MEMBERSHIP_CARDS.CARD_DB_ID,
+                MEMBERSHIP_CARDS.ID_IN_YEAR,
+                MEMBERSHIP_INFO.INFO_FISCAL_CODE,
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                AUTHENTICATIONS.AUTHENTICATION_EMAIL,
+                USERS.USER_ID,
+                USERS.USER_FURSONA_NAME,
+                USERS.USER_LANGUAGE
+            )
+            .from(MEMBERSHIP_CARDS)
+            .innerJoin(USERS)
+            .on(
+                MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
+                .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+                .and(MEMBERSHIP_CARDS.ALREADY_REGISTERED.isTrue())
+                .and(MEMBERSHIP_CARDS.SENT_BY_EMAIL.isFalse())
+            )
+            .innerJoin(MEMBERSHIP_INFO)
+            .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
+            .innerJoin(AUTHENTICATIONS)
+            .on(USERS.USER_ID.eq(AUTHENTICATIONS.USER_ID))
+        ).stream().map(ExportedMembershipCardMapper::map).toList();
     }
 }

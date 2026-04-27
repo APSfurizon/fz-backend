@@ -17,13 +17,17 @@ public class MembershipYearUtils {
         return getMembershipYear(LocalDate.now());
     }
 
-    public short getMembershipYear(LocalDate date) {
-        int year = date.getYear();
-        LocalDate reset = LocalDate.of(
+    public @NotNull LocalDate getResetDate(int year) {
+        return LocalDate.of(
                 year,
                 config.getCardEnumerationResetMonth(),
                 config.getCardEnumerationResetDay()
         );
+    }
+
+    public short getMembershipYear(LocalDate date) {
+        int year = date.getYear();
+        LocalDate reset = getResetDate(year);
 
         if (date.isBefore(reset)) {
             year--;

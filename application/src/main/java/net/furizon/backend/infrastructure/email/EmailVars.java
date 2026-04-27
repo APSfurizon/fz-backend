@@ -7,6 +7,11 @@ import lombok.RequiredArgsConstructor;
 public enum EmailVars {
     FURSUIT_NAME("fursuitName"),
     FURSONA_NAME("fursonaName"),
+    FULL_NAME("fullName"),
+    LAST_NAME("lastName"),
+    FISCAL_CODE("fiscalCode"),
+    FIRST_NAME("firstName"),
+    BIRTHDAY("birthday"),
     OTHER_FURSONA_NAME("otherfursonaName"),
     ROOM_OWNER_FURSONA_NAME("ownerFursonaName"),
     ROOM_NAME("roomName"),
