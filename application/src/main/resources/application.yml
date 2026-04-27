@@ -145,7 +145,7 @@ pretix:
 storage:
   base-path: data/
   base-public-path: ${storage.base-path}public/
-  media-path: static/
+  media-path: static/uploads/
   full-media-path: ${storage.base-public-path}${storage.media-path}
   delete-dangling-media-cronjob: ${STORAGE_DELETE_DANGLING_MEDIA_CRONJOB:0 30 4 * * *}
   s3:
