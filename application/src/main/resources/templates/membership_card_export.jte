@@ -8,7 +8,7 @@
 
 @template.layout(title = localize("mail.membership_card_export.title", cardIdInYear), content = @`
     <h2 class="title">${localize("mail.membership_card_export.title", cardIdInYear)}</h2>
-    <p class="main-content">${localize("mail.membership_card_export.description")}</p>
+    <p class="main-content">${localize("mail.membership_card_export.description", deadline)}</p>
     <div style="background-color: #ffffff; border: 0.25em solid #2479b9; margin: 1.25em 0; padding: 2em; box-sizing: border-box; font-family: sans-serif; color: #000000; border-radius: 10px">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 3.75em;">
             <tr>
