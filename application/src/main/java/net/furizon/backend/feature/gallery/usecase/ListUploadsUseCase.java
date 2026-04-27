@@ -30,7 +30,9 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
     public @NotNull ListUploadsResponse executor(@NotNull ListUploadsUseCase.Input input) {
 
         Long userId = input.user == null ? null : input.user.getUserId();
-        boolean isAdmin = userId != null && permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_MANAGE_UPLOADS);
+        boolean isAdmin = userId == null
+                        ? false
+                        : permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_MANAGE_UPLOADS);
         UploadStatus status = isAdmin ? input.uploadStatus : null;
 
         List<GalleryUploadPreview> resp = uploadFinder.listPreview(
@@ -40,11 +42,9 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
             userId,
             isAdmin,
             input.from != null
-                    ? input.from
-                    : input.after
-                        ? 0L
-                        : Long.MAX_VALUE,
-            input.after,
+                       ? input.from
+                       : (input.invertOrder ? 0L : Long.MAX_VALUE),
+            input.invertOrder,
             galleryConfig.getListingBatchSize()
         );
         return new ListUploadsResponse(resp);
@@ -52,7 +52,7 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
 
     public record Input(
             @Nullable Long from,
-            boolean after,
+            boolean invertOrder,
             @Nullable Long photographerId,
             @Nullable Long eventId,
             @Nullable UploadStatus uploadStatus,

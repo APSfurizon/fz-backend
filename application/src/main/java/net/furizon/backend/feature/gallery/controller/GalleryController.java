@@ -103,21 +103,23 @@ public class GalleryController {
         + "by the status of the upload. If the param is specified, but the user doesn't have "
         + "the correct permission, the parameter is simply ignored. However, if an user has "
         + "that permission and no uploadStatus is defined, they will see all the results, in "
-        + "any possible status.")
+        + "any possible status. Using optional boolean parameter `invertOrder` you can reverse "
+        + "the results; keep in mind that the `fromUploadId` param is also going to be inverted. "
+        + "By default it's set to false, so get the result in descending order")
     @GetMapping("/pub/list")
     public @NotNull ListUploadsResponse listUploads(
             @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
             @RequestParam @Nullable @Valid @Positive final Long eventId,
             @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
-            @RequestParam @Nullable @Valid final Boolean after,
+            @RequestParam @Nullable @Valid final Boolean invertOrder,
             @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
                 ListUploadsUseCase.class,
                 new ListUploadsUseCase.Input(
                         fromUploadId,
-                        after != null && after,
+                        invertOrder == null ? false : invertOrder,
                         photographerUserId,
                         eventId,
                         uploadStatus,
@@ -202,7 +204,7 @@ public class GalleryController {
     public @NotNull ListUploadsResponse listMyUploads(
             @RequestParam @Nullable @Valid @Positive final Long eventId,
             @RequestParam @Nullable @Valid @PositiveOrZero final Long fromUploadId,
-            @RequestParam @Nullable @Valid final Boolean after,
+            @RequestParam @Nullable @Valid final Boolean invertOrder,
             @RequestParam @Nullable @Valid final UploadStatus uploadStatus,
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
     ) {
@@ -210,7 +212,7 @@ public class GalleryController {
                 ListUploadsUseCase.class,
                 new ListUploadsUseCase.Input(
                         fromUploadId,
-                        after != null && after,
+                        invertOrder == null ? false : invertOrder,
                         user.getUserId(),
                         eventId,
                         uploadStatus,

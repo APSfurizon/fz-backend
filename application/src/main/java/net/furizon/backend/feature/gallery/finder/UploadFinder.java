@@ -56,7 +56,7 @@ public interface UploadFinder {
             @Nullable Long reqUserId,
             boolean isReqUserAnAdmin,
             long fromId,
-            boolean before,
+            boolean invertOrder,
             long limit
     );
 

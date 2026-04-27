@@ -217,14 +217,14 @@ public class JooqUploadFinder implements UploadFinder {
             @Nullable Long reqUserId,
             boolean isReqUserAnAdmin,
             long fromId,
-            boolean after,
+            boolean invertOrder,
             long limit
     ) {
-        Condition condition = after
+        Condition condition = invertOrder
             ? UPLOADS.ID.greaterThan(fromId)
             : UPLOADS.ID.lessThan(fromId);
 
-        SortField<Long> sortingField = after
+        SortField<Long> sortingField = invertOrder
                 ? UPLOADS.ID.asc()
                 : UPLOADS.ID.desc();
 
