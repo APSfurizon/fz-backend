@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.configuration.BadgeConfig;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class UpdateFursuitDataUseCase implements UseCase<UpdateFursuitDataUseCas
     public record Input(
             long fursuitId,
             @NotNull String name,
-            @NotNull String species,
+            @Nullable String species,
             boolean showInFursuitCount,
             boolean showOwner,
             @NotNull Event event,
