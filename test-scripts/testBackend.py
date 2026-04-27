@@ -161,6 +161,9 @@ def getSponsorshipNames() -> Response:
 def getAttendedEvents() -> Response:
     return doGet(f'{BASE_URL_API}events/attended')
 
+def getEvents() -> Response:
+    return doGet(f'{BASE_URL_API}events/')
+
 def getMeAuth() -> Response:
     return doGet(f'{BASE_URL_API}users/me')
 
