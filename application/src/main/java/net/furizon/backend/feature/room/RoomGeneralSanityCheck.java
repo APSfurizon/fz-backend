@@ -29,7 +29,22 @@ import static net.furizon.backend.infrastructure.email.EmailVars.LINK;
 import static net.furizon.backend.infrastructure.email.EmailVars.OTHER_FURSONA_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.ROOM_NAME;
 import static net.furizon.backend.infrastructure.email.EmailVars.SANITY_CHECK_REASON;
-import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.*;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_NO_OWNER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_DAILY_TICKET;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NOT_BOUGHT_ROOM;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_HAS_NO_ORDER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_IN_TOO_MANY_ROOMS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_NOT_IN_ROOM;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_ORDER_INVALID_STATUS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_ROOM_GUESTS_MISMATCH;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_TOO_MANY_MEMBERS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_DAILY_TICKET;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_NO_ORDER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_IN_TOO_MANY_ROOMS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_ORDER_INVALID_ORDER_STATUS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_DELETED;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_OWNER;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_SANITY_CHECK_KICK_USER;
 
 @Slf4j
 @Component
