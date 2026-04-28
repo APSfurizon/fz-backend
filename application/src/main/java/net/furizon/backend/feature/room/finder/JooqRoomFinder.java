@@ -269,7 +269,7 @@ public class JooqRoomFinder implements RoomFinder {
             .on(ORDERS.USER_ID.eq(USERS.USER_ID))
             .leftJoin(MEDIA)
             .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-            .where(ORDERS.EVENT_ID.eq(event.getId()))
+            .where(ORDERS.EVENT_ID.isNull().or(ORDERS.EVENT_ID.eq(event.getId())))
         ).stream().map(RoomGuestResponseMapper::map).toList();
     }
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.room.RoomChecks;
+import net.furizon.backend.feature.room.dto.RoomGuest;
 import net.furizon.backend.feature.room.dto.request.ExchangeRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
@@ -63,10 +64,18 @@ public class ExchangeFullOrderUseCase implements UseCase<ExchangeFullOrderUseCas
         Order sourceOrder = generalChecks.getOrderAndAssertItExists(sourceUserId, event, input.pretixInformation);
         generalChecks.assertUserHasNotAnOrder(destUserId, event);
 
-        long roomId = -1L;
-        var srcRoomId = roomFinder.getRoomIdFromOwnerUserId(sourceUserId, event);
-        if (srcRoomId.isPresent()) {
-            roomId = roomChecks.getRoomIdAndAssertPermissionsOnRoom(sourceUserId, event, null);
+        //Check if the user owns a room
+        long roomId = roomFinder.getRoomIdFromOwnerUserId(sourceUserId, event).orElse(-1L);
+        if (roomId < 0L) {
+            //If not, check if the user is in a room
+            // We prefer doing two different checks just to be sure in case there are bugs where the following
+            // doesn't return a roomId even if the user is the owner of a room
+            var roomGuest = roomFinder.getConfirmedRoomGuestFromUserEvent(sourceUserId, event);
+            if (roomGuest.isPresent()) {
+                roomId = roomGuest.get().getRoomId();
+            }
+        }
+        if (roomId >= 0L) {
             roomChecks.assertRoomNotConfirmed(roomId);
         }
 

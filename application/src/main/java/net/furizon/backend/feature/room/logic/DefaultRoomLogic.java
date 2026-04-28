@@ -179,17 +179,16 @@ public class DefaultRoomLogic implements RoomLogic {
         ).getFirst().get(ROOM_GUESTS.ROOM_GUEST_ID);
     }
 
-    @Override
-    @Transactional
-    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
-                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        log.info("Guest {} has accepted room invitation", guestId);
-        //Deletes pending invitation for user in event
-        command.execute(
+    private int clearPendingInvitation(long userId, @Nullable Long excludeGuestId, @NotNull Event event) {
+        Condition condition = ROOM_GUESTS.USER_ID.eq(userId);
+        if (excludeGuestId != null) {
+            condition = condition.and(ROOM_GUESTS.ROOM_GUEST_ID.notEqual(excludeGuestId));
+        }
+
+        return command.execute(
             PostgresDSL.deleteFrom(ROOM_GUESTS)
             .where(
-                ROOM_GUESTS.USER_ID.eq(invitedUserId)
-                .and(ROOM_GUESTS.ROOM_GUEST_ID.notEqual(guestId))
+                condition
                 .and(ROOM_GUESTS.ROOM_ID.in(
                     PostgresDSL.select(ROOMS.ROOM_ID)
                     .from(ROOMS)
@@ -201,6 +200,15 @@ public class DefaultRoomLogic implements RoomLogic {
                 ))
             )
         );
+    }
+
+    @Override
+    @Transactional
+    public boolean inviteAccept(long guestId, long invitedUserId, long roomId,
+                                @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+        log.info("Guest {} has accepted room invitation", guestId);
+        //Deletes pending invitation for user in event
+        clearPendingInvitation(invitedUserId, guestId, event);
 
         return command.execute(
             PostgresDSL.update(ROOM_GUESTS)
@@ -422,6 +430,9 @@ public class DefaultRoomLogic implements RoomLogic {
                 )
             ) > 0;
             logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
+            if (result) {
+                clearPendingInvitation(sourceUsrId, null, event);
+            }
             return result;
         };
         if (roomId < 0L) {

@@ -26,6 +26,8 @@ public class RoomEmailTexts {
             "mail.sanity_check.error.no_owner");
     public static final TranslatableValue SC_TOO_MANY_MEMBERS = TranslatableValue.ofEmail(
             "mail.sanity_check.error.too_many_members");
+    public static final TranslatableValue SC_ROOM_GUESTS_MISMATCH = TranslatableValue.ofEmail(
+            "mail.sanity_check.error.room_guests_mismatch");
     public static final TranslatableValue SC_OWNER_HAS_NO_ORDER = TranslatableValue.ofEmail(
             "mail.sanity_check.error.owner_has_no_order");
     public static final TranslatableValue SC_OWNER_HAS_NOT_BOUGHT_ROOM = TranslatableValue.ofEmail(
