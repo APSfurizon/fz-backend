@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.infrastructure.GeneralConsts;
 
 import static net.furizon.backend.feature.authentication.Const.EMAIL_REGEX;
 
@@ -27,7 +28,7 @@ public class RegisterUserRequest {
     private final String password;
 
     @NotNull
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
+    @Pattern(regexp = GeneralConsts.NAME_REGEX)
     private final String fursonaName;
 
     @NotNull

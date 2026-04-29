@@ -83,7 +83,7 @@ public class CreateFursuitUseCase implements UseCase<CreateFursuitUseCase.Input,
 
     public record Input(
             @NotNull String name,
-            @NotNull String species,
+            @Nullable String species,
             boolean bringToCurrentEvenet,
             boolean showInFursuitCount,
             @Nullable Long userId,

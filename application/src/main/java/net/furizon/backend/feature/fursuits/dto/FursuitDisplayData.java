@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public class FursuitDisplayData {
     private final long id;
     @NotNull private String name;
-    @NotNull private String species;
+    @Nullable private String species;
     @Nullable private MediaResponse propic;
     @Nullable private Long ownerId;
 

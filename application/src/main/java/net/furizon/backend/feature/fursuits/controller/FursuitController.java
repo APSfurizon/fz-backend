@@ -16,6 +16,7 @@ import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.GetSingleFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.UpdateFursuitDataUseCase;
+import net.furizon.backend.infrastructure.GeneralConsts;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -166,10 +167,10 @@ public class FursuitController {
     public @NotNull FursuitData updateFursuitWithImage(
             @AuthenticationPrincipal @NotNull final FurizonUser user,
             @PathVariable("fursuitId") @NotNull final Long fursuitId,
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
+            @Pattern(regexp = GeneralConsts.NAME_REGEX)
             @Valid @NotNull @RequestParam("name") final String name,
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
-            @Valid @NotNull @RequestParam("species") final String species,
+            @Pattern(regexp = GeneralConsts.NAME_REGEX)
+            @Valid @Nullable @RequestParam("species") final String species,
             @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
             @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
             @RequestParam("show-owner") @NotNull final Boolean showOwner,
@@ -277,10 +278,10 @@ public class FursuitController {
     @PostMapping("/add-with-image")
     public @NotNull FursuitData addFursuit(
         @AuthenticationPrincipal @NotNull final FurizonUser user,
-        @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
+        @Pattern(regexp = GeneralConsts.NAME_REGEX)
         @Valid @NotNull @RequestParam("name") final String name,
-        @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
-        @Valid @NotNull @RequestParam("species") final String species,
+        @Pattern(regexp = GeneralConsts.NAME_REGEX)
+        @Valid @Nullable @RequestParam("species") final String species,
         @RequestParam("bring-to-current-event") @NotNull final Boolean bringToCurrentEvent,
         @RequestParam("show-in-fursuit-count") @NotNull final Boolean showInFursuitCount,
         @Nullable @RequestParam(value = "user-id", required = false) final Long userId,

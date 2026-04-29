@@ -36,6 +36,7 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_H
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_IN_TOO_MANY_ROOMS;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_NOT_IN_ROOM;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_OWNER_ORDER_INVALID_STATUS;
+import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_ROOM_GUESTS_MISMATCH;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_TOO_MANY_MEMBERS;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_DAILY_TICKET;
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.SC_USER_HAS_NO_ORDER;
@@ -184,6 +185,18 @@ public class RoomGeneralSanityCheck {
                 sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
                         + "Room {} has too many members ({} > {}). Deleting the room", roomId, guestNo, capacity);
                 mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_TOO_MANY_MEMBERS));
+                roomLogic.deleteRoom(roomId);
+                return;
+            }
+
+            int confirmedGuestsNo = roomFinder.getRoomGuestsFromRoomId(roomId, true).size();
+            if (confirmedGuestsNo != guestNo) {
+                //delete room, number of confirmed guests object mismatch the getRoomGuestResponseFromRoomId size!
+                sanityCheckLogAndStoreErrors(detectedErrors, "[ROOM SANITY CHECKS] "
+                        + "Room {} number of confirmed guests objects ({}) mismatches "
+                        + "the getRoomGuestResponseFromRoomId's size ({}). Deleting the room",
+                        roomId, confirmedGuestsNo, guestNo);
+                mails.addAll(prepareSanityCheckMailRoomDeleted(roomId, roomName, SC_ROOM_GUESTS_MISMATCH));
                 roomLogic.deleteRoom(roomId);
                 return;
             }

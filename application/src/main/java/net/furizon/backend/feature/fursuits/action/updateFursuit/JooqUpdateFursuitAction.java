@@ -3,6 +3,7 @@ package net.furizon.backend.feature.fursuits.action.updateFursuit;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public class JooqUpdateFursuitAction implements UpdateFursuitAction {
     @Override
     public boolean invoke(long fursuitId,
                           @NotNull String name,
-                          @NotNull String species,
+                          @Nullable String species,
                           boolean showInFursuitCount,
                           boolean showOwner) {
         return command.execute(

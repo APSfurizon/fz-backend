@@ -8,7 +8,7 @@ public interface CreateFursuitAction {
     long invoke(
             long ownerId,
             @NotNull String name,
-            @NotNull String species,
+            @Nullable String species,
             boolean showInFursuitCount,
             boolean showOwner,
             @Nullable Order linkedOrder

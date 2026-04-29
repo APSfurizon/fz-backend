@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import net.furizon.backend.infrastructure.GeneralConsts;
 
 @Data
 public class ChangeNameToRoomRequest {
@@ -15,6 +16,6 @@ public class ChangeNameToRoomRequest {
     @NotNull
     @NotEmpty
     @Size(min = 2, max = 254)
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-/!\"'()\\[\\].,&\\\\? ]{2,63}$")
+    @Pattern(regexp = GeneralConsts.NAME_REGEX)
     private final String name;
 }
