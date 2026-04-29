@@ -13,20 +13,21 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
+import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
 @RequiredArgsConstructor
 public class JooqEventFinder implements EventFinder {
     private final SqlQuery query;
-
-    private final JooqEventMapper mapper;
+    @NotNull
+    private final JooqEventMapper eventMapper;
 
     @Override
     public @Nullable Event findEventBySlug(@NotNull String slug) {
         return query.fetchFirst(
             selectEvent()
             .where(EVENTS.EVENT_SLUG.eq(slug))
-        ).mapOrNull(mapper::map);
+        ).mapOrNull(eventMapper::mapInternal);
     }
 
     @Override
@@ -34,12 +35,24 @@ public class JooqEventFinder implements EventFinder {
         return query.fetchFirst(
             selectEvent()
             .where(EVENTS.ID.eq(id))
-        ).mapOrNull(mapper::map);
+        ).mapOrNull(eventMapper::mapInternal);
+    }
+
+    @Override
+    public @NotNull List<Event> getAttendedEvents(long userId) {
+        return query.fetch(
+            selectEvent()
+            .innerJoin(ORDERS)
+            .on(
+                ORDERS.EVENT_ID.eq(EVENTS.ID)
+                .and(ORDERS.USER_ID.eq(userId))
+            )
+        ).stream().map(eventMapper::mapInternal).toList();
     }
 
     @Override
     public @NotNull List<Event> getAllEvents() {
-        return query.fetch(selectEvent()).stream().map(mapper::map).toList();
+        return query.fetch(selectEvent()).stream().map(eventMapper::mapInternal).toList();
     }
 
     private @NotNull SelectJoinStep<?> selectEvent() {

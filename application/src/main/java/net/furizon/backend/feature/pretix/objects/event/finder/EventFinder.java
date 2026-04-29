@@ -11,5 +11,7 @@ public interface EventFinder {
 
     @Nullable Event findEventById(long id);
 
+    @NotNull List<Event> getAttendedEvents(long userId);
+
     @NotNull List<Event> getAllEvents();
 }

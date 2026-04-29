@@ -37,10 +37,10 @@ spring:
 
 gg:
   jte:
-    development-mode: ${JTE_DEV_MODE:true}
+    development-mode: ${JTE_DEV_MODE:false}
     templateLocation: templates/jte
     templateSuffix: .jte
-    usePrecompiledTemplates: ${JTE_PROD_MODE:false}
+    usePrecompiledTemplates: ${JTE_PROD_MODE:true}
 
 logbook:
   format:
@@ -89,6 +89,10 @@ frontend:
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
   user-page-url: ${FRONTEND_USER_PAGE_URL:}
   reservation-page-url: ${FRONTEND_RESERVATION_PAGE_URL:}
+  static-files:
+    local-disk-url: ${FRONTEND_STATIC_FILES_LOCAL_DISK_URL:}
+    s3-local-url: ${FRONTEND_STATIC_FILES_S3_LOCAL_URL:}
+    s3-remote-url: ${FRONTEND_STATIC_FILES_S3_REMOTE_URL:}
 
 room:
   logic: ${ROOM_LOGIC:roomLogic-default}
@@ -141,9 +145,18 @@ pretix:
 storage:
   base-path: data/
   base-public-path: ${storage.base-path}public/
-  media-path: static/
+  media-path: static/uploads/
   full-media-path: ${storage.base-public-path}${storage.media-path}
   delete-dangling-media-cronjob: ${STORAGE_DELETE_DANGLING_MEDIA_CRONJOB:0 30 4 * * *}
+  s3:
+    access-key: ${S3_ACCESS_KEY:changeme}
+    secret-key: ${S3_SECRET_KEY:changeme}
+    endpoint: ${S3_ENDPOINT:}
+    region: ${S3_REGION:changeme}
+    bucket: ${S3_BUCKET:changeme}
+    bucket-path-style: ${S3_BUCKET_PATH_STYLE:false}
+    multipart-size: ${S3_MULTIPART_PART_SIZE:6291456} #6 MB
+    presign-expiration-mins: ${S3_PRESIGN_EXPIRATION_MINS:15}
 
 
 image:
@@ -177,3 +190,22 @@ reminders:
 admin:
   custom-jte-templates-location: ${CUSTOM_JTE_TEMPLATE_PATH:templates/jte/custom}
   jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}
+
+gallery:
+  max-limited-uploads-per-event: ${GALLERY_MAX_USER_UPLOADS_PER_EVENT:100}
+  max-limited-upload-size: ${GALLERY_MAX_FILE_SIZE:33554432} #32 MB
+  max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB
+  delete-upload-progress-interval: ${GALLERY_DELETE_UPLOAD_PROGRESS_INTERVAL_MINS:15}
+  listing-batch-size: ${GALLERY_LISTING_BATCH_SIZE:300}
+  batch-download:
+    download-url: ${GALLERY_BATCH_DOWNLOAD_URL:http://127.0.0.1:8083/d?mac=}
+    expire-mins: ${GALLERY_BATCH_DOWNLOAD_EXPIRE_MINS:5}
+    hmac-key: ${GALLERY_BATCH_DOWNLOAD_HMAC_KEY:changeme}
+  admin-approval:
+    batch-size: ${GALLERY_ADMIN_APPROVAL_BATCH_SIZE:90}
+    reservation-batch-mins: ${GALLERY_ADMIN_APPROVAL_RESERVATION_MINS:20}
+  job-processor:
+    endpoint: ${GALLERY_JOB_PROCESSOR_ENDPOINT:http://127.0.0.1:8082/}
+    username: ${GALLERY_JOB_PROCESSOR_USERNAME:user}
+    password: ${GALLERY_JOB_PROCESSOR_PASSWORD:password}
+    poll-interval: ${GALLERY_JOB_PROCESSOR_POLL_INTERVAL:10}

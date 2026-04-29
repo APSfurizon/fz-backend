@@ -1,3 +1,6 @@
+import os
+import json
+import hashlib
 import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
@@ -46,10 +49,10 @@ def doPost(url, json=None, data=None, auth=None, files=None) -> Response:
     print(response.headers)
     print(response.text)
     return response
-def doGet(url, auth=None) -> Response:
+def doGet(url, auth=None, json=None, data=None) -> Response:
     global session
     global HEADERS
-    response = session.get(url, headers=HEADERS, allow_redirects=False, auth=auth)
+    response = session.get(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
     print(f"\n-------- GET {url} --------")
     print(response.status_code)
     print(response.cookies.items())
@@ -61,6 +64,17 @@ def doDelete(url) -> Response:
     global HEADERS
     response = session.delete(url, headers=HEADERS, allow_redirects=False)
     print(f"\n-------- DELETE {url} --------")
+    print(response.status_code)
+    print(response.cookies.items())
+    print(response.headers)
+    print(response.text)
+    return response
+def doPut(url, data=None, extraHeaders=None) -> Response:
+    global session
+    global HEADERS
+    extraHeaders = HEADERS if extraHeaders is None else {**HEADERS, **extraHeaders}
+    response = session.put(url, headers=extraHeaders, allow_redirects=False, data=data)
+    print(f"\n-------- PUT {url} --------")
     print(response.status_code)
     print(response.cookies.items())
     print(response.headers)
@@ -143,6 +157,12 @@ def markPersonalUserInformationAsUpdated() -> Response:
 
 def getSponsorshipNames() -> Response:
     return doGet(f'{BASE_URL_API}events/get-sponsorship-names/1')
+
+def getAttendedEvents() -> Response:
+    return doGet(f'{BASE_URL_API}events/attended')
+
+def getEvents() -> Response:
+    return doGet(f'{BASE_URL_API}events/')
 
 def getMeAuth() -> Response:
     return doGet(f'{BASE_URL_API}users/me')
@@ -383,6 +403,126 @@ def shouldSignApsJoin(userId: int) -> Response:
     return doGet(f'{BASE_URL_API}membership/should-sign-aps-join-module?userId={userId}')
 def generateAspJoin(userId: int) -> Response:
     return doGet(f'{BASE_URL_API}membership/aps-join-module?userId={userId}')
+    
+def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, eventId: int, etags: list, hash: str) -> Response:
+    json = {
+        "uploadReqId": reqId,
+        "fileName": fileName,
+        "fileSize": fileSize,
+        "eventId": eventId,
+        "uploadRepostPermissions": "CC_BY_NC_ND",
+        "etags": etags,
+        "md5Hash": hash
+    }
+    return doPost(f'{BASE_URL_API}gallery/upload/complete', json=json)
+def uploadFileToGallery_listParts(reqId: int) -> Response:
+    return doGet(f'{BASE_URL_API}gallery/upload/status/{reqId}')
+def uploadFileToGallery_abort(reqId: int) -> Response:
+    json = {
+        "uploadReqId": reqId
+    }
+    return doPost(f'{BASE_URL_API}gallery/upload/abort', json=json)
+def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
+    path = filePath + "/" + fileName
+    fileSize = os.path.getsize(path)
+    json = {
+        "fileName": fileName,
+        "fileSize": fileSize,
+        "eventId": eventId
+    }
+    ret = doPost(f'{BASE_URL_API}gallery/upload', json=json)
+    
+    ret = ret.json()
+    reqId = ret["uploadReqId"]
+    ret = ret["multipartCreationResponse"]
+    chunkSize = ret["chunkSize"]
+    presignedUrls = ret["presignedUrls"]
+    
+    md5 = [0] * len(presignedUrls)
+    etags = [0] * len(presignedUrls)
+    
+    with open(path, 'rb') as f:
+        for i, url in enumerate(presignedUrls):
+            chunk = f.read(chunkSize)
+            ret = doPut(url, data=chunk)
+            etags[i] = ret.headers["etag"]
+            md5[i] = hashlib.md5(chunk).digest()
+            
+    finalHash = hashlib.md5(b"".join(md5)).hexdigest()
+    
+    #uploadFileToGallery_listParts(reqId)
+    #uploadFileToGallery_abort(reqId)
+    uploadFileToGallery_complete(reqId, fileName, fileSize, eventId, etags, finalHash)
+def getUploadLimits() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/upload/limits')
+def galleryProcessorWebhook() -> Response:
+    data = {
+        'id': 7,
+        'file': '34a97c44-ecf3-41a8-965c-3d82989f31e2.MOV',
+        'status': 'DONE',
+        'type': 'VIDEO',
+        'result': {
+            'resolutionWidth': 1920,
+            'resolutionHeight': 1440,
+            'shotTimestamp': "2026-02-23T22:59:52Z",
+            'fileSize': 47154973,
+            'mimeType': 'video/quicktime',
+            'extraMediaMimeType': 'image/webp',
+            'thumbnailMediaName': 'thumb_34a97c44-ecf3-41a8-965c-3d82989f31e2.webp',
+            'renderedMediaName': 'rend_34a97c44-ecf3-41a8-965c-3d82989f31e2.webp',
+            'photoMetadata': None,
+            'videoMetadata': {
+                'audioFrequency': '48.000 kHz',
+                'videoCodec': 'hevc',
+                'audioCodec': 'pcm_s16le',
+                'framerate': '29,97 fps',
+                'duration': 20385
+            }
+        }
+    }
+    return doPost(f'{BASE_URL_API}gallery/job/completed', json=data)
+
+def getUpload(uploadId: int) -> Response:
+    return doGet(f'{BASE_URL_API}gallery/pub/{uploadId}')
+def myUploads() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/my-uploads')
+def listUploads(fromId: int = None, photographerId: int = None, eventId: int = None) -> Response:
+    url = f'{BASE_URL_API}gallery/pub/list?'
+    if fromId is not None:
+        url += f"fromUploadId={fromId}&"
+    if photographerId is not None:
+        url += f"photographerUserId={photographerId}&"
+    if eventId is not None:
+        url += f"eventId={eventId}&"
+    url += "a=0"
+    return doGet(url)
+def deleteUpload(uploadId: int) -> Response:
+    return doDelete(f'{BASE_URL_API}gallery/manage/{uploadId}')
+def getGalleryEvents() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/events')
+    return doGet(f'{BASE_URL_API}gallery/pub/events?photographerUserId=2')
+def getGalleryEvent() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/events/10')
+    return doGet(f'{BASE_URL_API}gallery/pub/events/10?photographerUserId=2')
+def getGalleryPhotographers() -> Response:
+    return doGet(f'{BASE_URL_API}gallery/pub/photographers')
+    #return doGet(f'{BASE_URL_API}gallery/pub/photographers?eventId=10')
+def getGalleryPhotographer() -> Response:
+    #return doGet(f'{BASE_URL_API}gallery/pub/photographers/1')
+    return doGet(f'{BASE_URL_API}gallery/pub/photographers/1?eventId=9')
+def adminUpdateUpload(uploadIds: list, status: str=None, photographerId: int=None, eventId: int=None) -> Response:
+    json = {
+        "uploadIds": uploadIds,
+        "newStatus": status,
+        "newPhotographerUserId": photographerId,
+        "newEventId": eventId
+    }
+    return doPost(f'{BASE_URL_API}gallery/manage/update', json=json)
+def bulkDownloadStart(uploadIds: list) -> Response:
+    json = {
+        "ids": uploadIds
+    }
+    return doPost(f'{BASE_URL_API}gallery/bulk-download', json=json)
 
 #register()
 #confirmEmail()
@@ -422,6 +562,31 @@ login()
 #searchByOrderCode("T07EZ")
 #addUserToRole(5, 1, True)
 #removeUserFromRole(5, 1)
+
+#testInternalAuthorize()
+#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
+#galleryProcessorWebhook()
+#getUpload(13)
+#listUploads(
+    #fromId = 0,
+    #photographerId = 1,
+    #eventId = 10
+#)
+#myUploads()
+#deleteUpload(16)
+#getGalleryEvents()
+#getGalleryEvent()
+#getGalleryPhotographers()
+#getGalleryPhotographer()
+#adminUpdateUpload(
+#    uploadIds=[13],
+#    #status="APPROVED",
+#    #photographerId=23,
+#    eventId=91
+#)
+#getAttendedEvents()
+#getUploadLimits()
+bulkDownloadStart([13, 14, 15, 16])
 
 #getOrderFullStatus()
 
