@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
+import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import net.furizon.jooq.generated.enums.UploadStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +53,10 @@ public class AdminUpdateUploadUseCase implements UseCase<AdminUpdateUploadUseCas
             }
         }
 
-        if (input.eventId == null && input.photographerId == null && input.status == null) {
+        if (input.eventId == null
+                && input.photographerId == null
+                && input.status == null
+                && input.repostPermissions == null) {
             log.debug("Empty update request, returning");
             return true;
         }
@@ -60,6 +64,7 @@ public class AdminUpdateUploadUseCase implements UseCase<AdminUpdateUploadUseCas
         return adminUpdateUploadAction.invoke(
                 input.uploadIds,
                 input.status,
+                input.repostPermissions,
                 input.photographerId,
                 input.eventId
         );
@@ -68,6 +73,7 @@ public class AdminUpdateUploadUseCase implements UseCase<AdminUpdateUploadUseCas
     public record Input(
             List<Long> uploadIds,
             @Nullable UploadStatus status,
+            @Nullable UploadRepostPermissions repostPermissions,
             @Nullable Long photographerId,
             @Nullable Long eventId,
             @NotNull FurizonUser user

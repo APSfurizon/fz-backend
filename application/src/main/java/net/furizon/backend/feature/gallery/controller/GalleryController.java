@@ -322,7 +322,10 @@ public class GalleryController {
     @Operation(summary = "Updates status, eventId, photographerId to a set of uploads", description =
         "This method is for admin use only, the user must have the `UPLOADS_CAN_MANAGE_UPLOADS` permission "
         + "to perform this operation. We don't permit on purpose users changing any information on an uploaded "
-        + "media (like the eventId), only an administrator can perform this. The operation of changing information "
+        + "media (like the eventId), only an administrator can perform this. Take, as example, "
+        + "changing the upload permissions: If an user can deliberately change them, it could first set them to "
+        + "allow commercial usage, then people will start using the photo commercially, and only after that "
+        + "the user set it back to prohibit; this would be a problem. The operation of changing information "
         + "on the various uploads can be done in bulk, just specify more ids in the list you want to change. "
         + "This endpoint actually verifies that new photographer and event exists. It also checks that you "
         + "specify at least one of the parameter you want to change (this implies that you must specify "
@@ -338,6 +341,7 @@ public class GalleryController {
                 new AdminUpdateUploadUseCase.Input(
                         request.getUploadIds(),
                         request.getNewStatus(),
+                        request.getNewRepostPermissions(),
                         request.getNewPhotographerUserId(),
                         request.getNewEventId(),
                         user
