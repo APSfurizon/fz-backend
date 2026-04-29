@@ -29,7 +29,7 @@ ACCOUNT_PWD = 'A1b2C3d5!'
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
     'Accept': '*/*',
-    'Accept-Language': 'it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3',
+    'Accept-Language': 'en-US,en;q=0.8,en-US;q=0.5,en;q=0.3',
     'Referer': 'http://localhost:3000/',
     #'content-type': 'application/json',
     'Origin': 'http://localhost:3000',
@@ -104,7 +104,13 @@ def register() -> Response:
             "prefixPhoneNumber": "+39",
             "phoneNumber": "3331234567",
             "sex":"M",
-            "gender":"CisMan"
+            "gender":"CisMan",
+            "idType": "id_card",
+            "idIssuer": "stocazzo",
+            "idExpiry": "2099-01-01",
+            "idNumber": "AA223344LA",
+            "telegramUsername": "@LucaStranck",
+            "shirtSize": "m"
         }
     }
     return doPost(f'{BASE_URL_API}authentication/register', json=json)
@@ -524,9 +530,10 @@ def bulkDownloadStart(uploadIds: list) -> Response:
     }
     return doPost(f'{BASE_URL_API}gallery/bulk-download', json=json)
 
-#register()
+register()
 #confirmEmail()
-login()
+#login()
+#login()
 #getMeAuth()
 #getMe()
 #updateUserInfo()
@@ -586,7 +593,7 @@ login()
 #)
 #getAttendedEvents()
 #getUploadLimits()
-bulkDownloadStart([13, 14, 15, 16])
+#bulkDownloadStart([13, 14, 15, 16])
 
 #getOrderFullStatus()
 
@@ -624,6 +631,6 @@ bulkDownloadStart([13, 14, 15, 16])
 #searchCheckin(35, "Luca")
 #redeemCheckin("", [35])
 #checkinlogs(35)
-cancelCheckin("", [35], "stocazoo")
+#cancelCheckin("", [35], "stocazoo")
 #shouldSignApsJoin(1)
 #generateAspJoin(1)
