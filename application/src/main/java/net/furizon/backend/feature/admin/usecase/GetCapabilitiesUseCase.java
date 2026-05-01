@@ -48,6 +48,7 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
                         || p.contains(Permission.CAN_VIEW_USER)
                 )
                 .canRemindRoomsNotFull(p.contains(Permission.CAN_MANAGE_ROOMS))
+                .isSecurity(p.contains(Permission.SECURITY_STAFF))
                 .build();
     }
 }

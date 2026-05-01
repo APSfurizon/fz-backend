@@ -19,4 +19,5 @@ public class CapabilitiesResponse {
     private final boolean canExportHotelList;
     private final boolean canExportShirtList;
     private final boolean canExportBadges;
+    private final boolean isSecurity;
 }

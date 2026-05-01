@@ -24,8 +24,14 @@ import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record2;
+import org.jooq.SelectOnConditionStep;
+import org.jooq.SortField;
+import org.jooq.Table;
+import org.jooq.TableField;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
