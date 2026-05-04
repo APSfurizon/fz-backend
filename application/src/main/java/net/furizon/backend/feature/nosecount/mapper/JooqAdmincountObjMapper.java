@@ -12,7 +12,7 @@ public class JooqAdmincountObjMapper {
                 .roleId(record.get(ROLES.ROLE_ID))
                 .roleInternalName(record.get(ROLES.INTERNAL_NAME))
                 .roleDisplayName(record.get(ROLES.DISPLAY_NAME))
-                .user(JooqUserDisplayMapper.map(record, false))
+                .user(JooqUserDisplayMapper.map(record, false, null))
             .build();
     }
 }

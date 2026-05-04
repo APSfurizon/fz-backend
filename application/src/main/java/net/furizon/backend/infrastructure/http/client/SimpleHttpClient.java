@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.http.client;
 
 import net.furizon.backend.infrastructure.configuration.JacksonConfiguration;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
@@ -24,18 +25,18 @@ public class SimpleHttpClient implements HttpClient {
     private final Map<Class<? extends HttpConfig>, HttpConfig> httpConfigsMap;
 
     public SimpleHttpClient(
-        @NotNull final RestClient restClient,
-        @NotNull final List<HttpConfig> httpConfigs
+            @NotNull final RestClient restClient,
+            @NotNull final List<HttpConfig> httpConfigs
     ) {
         this.restClient = restClient;
         httpConfigsMap = httpConfigs
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    HttpConfig::getClass,
-                    Function.identity()
-                )
-            );
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                HttpConfig::getClass,
+                                Function.identity()
+                        )
+                );
     }
 
     @NotNull
@@ -62,24 +63,29 @@ public class SimpleHttpClient implements HttpClient {
         String basePath = request.shouldOverridePath() ? request.overrideBasePath() : config.getBasePath();
 
         UriBuilder builder = new DefaultUriBuilderFactory(baseUrl)
-            .builder()
-            .path(basePath + request.getPath());
+                .builder()
+                .path(basePath + request.getPath());
 
         if (!request.getQueryParams().isEmpty()) {
             builder = builder.queryParams(request.getQueryParams());
         }
 
         RestClient.RequestBodySpec requestBodySpec = restClient
-            .method(request.getMethod())
-            .uri(builder.build(request.getUriVariables()))
-            .headers((headers) -> {
-                if (request.sendConfigHeaders()) {
-                    headers.addAll(config.headers());
-                }
-                if (!request.getHeaders().isEmpty()) {
-                    headers.addAll(request.getHeaders());
-                }
-            });
+                .method(request.getMethod())
+                .uri(builder.build(request.getUriVariables()))
+                .headers((headers) -> {
+                    if (request.sendConfigHeaders()) {
+                        headers.addAll(config.headers());
+                    }
+                    if (!request.getHeaders().isEmpty()) {
+                        headers.addAll(request.getHeaders());
+                    }
+                    Pair<String, String> basicAuth = request.isBasicAuthSet()
+                            ? request.getBasicAuth() : config.basicAuth();
+                    if (basicAuth != null) {
+                        headers.setBasicAuth(basicAuth.getLeft(), basicAuth.getRight());
+                    }
+                });
 
         if (request.getBody() != null) {
             requestBodySpec = requestBodySpec.body(request.getBody());

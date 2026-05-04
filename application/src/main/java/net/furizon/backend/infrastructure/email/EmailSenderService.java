@@ -280,13 +280,15 @@ public class EmailSenderService implements EmailSender {
         return request.getTo().stream()
             .map(to -> buildMimeMessage(
                     to.getMiddle(),
-                    translationService.email(request.getSubject().getKey(),
+                    translationService.email(
+                            request.getSubject().getKey(),
                             to.getLeft(),
-                            request.getSubject().getParams()),
+                            request.getSubject().getParams()
+                    ),
                     translatedBody.get(to.getLeft()),
+                    request.getReplyTo(),
                     isTemplateMessage
-                )
-            )
+            ))
             .toArray(MimeMessage[]::new);
     }
 
@@ -319,6 +321,7 @@ public class EmailSenderService implements EmailSender {
         @NotNull String to,
         @NotNull String subject,
         @NotNull String body,
+        @Nullable String replyTo,
         boolean isTemplateMessage
     ) {
         try {
@@ -331,6 +334,9 @@ public class EmailSenderService implements EmailSender {
             mimeMessageHelper.setTo(to); //TODO check if email leak is happening
             mimeMessageHelper.setSubject(subjectPrepend + subject);
             mimeMessageHelper.setText(body, isTemplateMessage);
+            if (replyTo != null) {
+                mimeMessageHelper.setReplyTo(replyTo);
+            }
 
             return mimeMessage;
         } catch (MessagingException exception) {

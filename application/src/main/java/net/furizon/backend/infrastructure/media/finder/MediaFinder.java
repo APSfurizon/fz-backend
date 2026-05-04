@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.media.finder;
 
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 
@@ -10,6 +11,8 @@ import java.util.Set;
 
 public interface MediaFinder {
     @NotNull List<MediaData> findByIds(Set<Long> ids);
+
+    @Nullable String getPathById(long id);
 
     @NotNull List<MediaData> findAll();
 
