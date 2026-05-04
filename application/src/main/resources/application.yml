@@ -156,6 +156,7 @@ storage:
     region: ${S3_REGION:changeme}
     bucket: ${S3_BUCKET:changeme}
     bucket-path-style: ${S3_BUCKET_PATH_STYLE:false}
+    chunk-encoding: ${S3_CHUNK_ENCODING:true}
     multipart-size: ${S3_MULTIPART_PART_SIZE:6291456} #6 MB
     presign-expiration-mins: ${S3_PRESIGN_EXPIRATION_MINS:15}
 
@@ -210,3 +211,4 @@ gallery:
     username: ${GALLERY_JOB_PROCESSOR_USERNAME:user}
     password: ${GALLERY_JOB_PROCESSOR_PASSWORD:password}
     poll-interval: ${GALLERY_JOB_PROCESSOR_POLL_INTERVAL:10}
+    connection-timeout-ms: ${GALLERY_JOB_PROCESSOR_HTTP_CLIENT_CONNECTION_TIMEOUT_MS:10000}

@@ -42,6 +42,7 @@ public class GalleryConfig implements HttpConfig {
         @NotNull private final String endpoint;
         @NotNull private final String username;
         @NotNull private final String password;
+        private final int connectionTimeoutMs;
     }
 
     @Override
@@ -52,5 +53,10 @@ public class GalleryConfig implements HttpConfig {
     @Override
     public @NotNull Pair<String, String> basicAuth() {
         return Pair.of(jobProcessor.username, jobProcessor.password);
+    }
+
+    @Override
+    public int getConnectionTimeout() {
+        return jobProcessor.connectionTimeoutMs;
     }
 }

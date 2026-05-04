@@ -26,6 +26,6 @@ public interface HttpConfig {
     }
 
     default int getConnectionTimeout() {
-        return 20;
+        return 20 * 1000; //It's in ms!
     }
 }

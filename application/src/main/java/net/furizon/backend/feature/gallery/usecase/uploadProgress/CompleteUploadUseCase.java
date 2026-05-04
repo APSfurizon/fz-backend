@@ -111,7 +111,7 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
         try {
             galleryProcessorSubmitJobAction.invoke(ret.getId(), upload.getS3Key());
         } catch (Exception e) {
-            log.warn("Upload {}: Unable to submit job to processor",  upload.getUploadReqId());
+            log.warn("Upload {}: Unable to submit job to processor",  upload.getUploadReqId(), e);
         }
 
         return ret;
