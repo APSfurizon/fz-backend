@@ -123,6 +123,7 @@ public class S3PresignedUploadImpl implements S3PresignedUpload {
                 .build();
 
         CompleteMultipartUploadResponse response = s3.completeMultipartUpload(completeRequest);
+        log.debug(response.toString());
         String etag = response.eTag();
         return response.eTag().substring(etag.charAt(0) == '"' ? 1 : 0, etag.indexOf('-'));
     }
