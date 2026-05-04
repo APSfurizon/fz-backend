@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "storage.s3")
 public class S3Config {
+    @Nullable private final String publicEndpoint;
     @Nullable private final String endpoint;
     @NotNull private final String accessKey;
     @NotNull private final String secretKey;

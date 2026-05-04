@@ -94,7 +94,7 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
 
         var res = StartUploadResponse.builder()
                 .uploadReqId(reqId)
-                .s3Endpoint(s3Config.getEndpoint())
+                .s3Endpoint(s3Config.getPublicEndpoint())
                 .s3Bucket(s3Config.getBucket())
                 .multipartCreationResponse(multipart)
             .build();

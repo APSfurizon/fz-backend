@@ -2,6 +2,7 @@ package net.furizon.backend.infrastructure.s3;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -31,14 +32,17 @@ public class S3ClientConfiguration {
     @Bean
     @NotNull
     public S3Client customS3Client() {
+        return generateClientWithEndpoint(s3Config.getEndpoint());
+    }
+
+    private final S3Client generateClientWithEndpoint(@Nullable String endpoint) {
         var b = S3Client.builder()
                 .region(Region.of(s3Config.getRegion()))
                 .forcePathStyle(s3Config.isBucketPathStyle())
                 .credentialsProvider(getCredentialsProvider());
 
-        String endpoint = s3Config.getEndpoint();
         if (endpoint != null && !endpoint.isEmpty()) {
-            b.endpointOverride(URI.create(s3Config.getEndpoint()));
+            b.endpointOverride(URI.create(endpoint));
         }
 
         return b.build();
@@ -57,9 +61,9 @@ public class S3ClientConfiguration {
                 .s3Client(s3Client)
                 .credentialsProvider(getCredentialsProvider());
 
-        String endpoint = s3Config.getEndpoint();
+        String endpoint = s3Config.getPublicEndpoint();
         if (endpoint != null && !endpoint.isEmpty()) {
-            b.endpointOverride(URI.create(s3Config.getEndpoint()));
+            b.endpointOverride(URI.create(endpoint));
         }
 
         return b.build();

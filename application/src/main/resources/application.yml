@@ -152,6 +152,7 @@ storage:
     access-key: ${S3_ACCESS_KEY:changeme}
     secret-key: ${S3_SECRET_KEY:changeme}
     endpoint: ${S3_ENDPOINT:}
+    public-endpoint: ${S3_PUBLIC_ENDPOINT:${storage.s3.endpoint}}
     region: ${S3_REGION:changeme}
     bucket: ${S3_BUCKET:changeme}
     bucket-path-style: ${S3_BUCKET_PATH_STYLE:false}
