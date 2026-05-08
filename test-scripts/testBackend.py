@@ -436,6 +436,7 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> Response:
         "fileSize": fileSize,
         "eventId": eventId
     }
+    ret = doPost(f'{BASE_URL_API}gallery/upload/', json=json)
     
     ret = ret.json()
     reqId = ret["uploadReqId"]
@@ -529,9 +530,9 @@ def bulkDownloadStart(uploadIds: list) -> Response:
     }
     return doPost(f'{BASE_URL_API}gallery/bulk-download', json=json)
 
-register()
+#register()
 #confirmEmail()
-#login()
+login()
 #login()
 #getMeAuth()
 #getMe()
@@ -544,7 +545,7 @@ register()
 #testInternalAuthorize()
 #uploadBadge()
 #deleteBadge()
-#runDeleteDanglingBadges()
+runDeleteDanglingBadges()
 #exception()
 #addFursuit()
 #addFursuit()
@@ -570,7 +571,7 @@ register()
 #removeUserFromRole(5, 1)
 
 #testInternalAuthorize()
-#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon", "RZR07368.ARW", 10)
+#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon/test", "file_example_AVI_1920_2_3MG.avi", 10)
 #galleryProcessorWebhook()
 #getUpload(13)
 #listUploads(
@@ -592,7 +593,7 @@ register()
 #)
 #getAttendedEvents()
 #getUploadLimits()
-#bulkDownloadStart([13, 14, 15, 16])
+#bulkDownloadStart([64, 65])
 
 #getOrderFullStatus()
 
