@@ -115,7 +115,7 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> int:
         "fileSize": fileSize,
         "eventId": eventId
     }
-    ret = doPost(f'{BASE_URL_API}gallery/upload', json=json)
+    ret = doPost(f'{BASE_URL_API}gallery/upload/', json=json)
     
     ret = ret.json()
     reqId = ret["uploadReqId"]
