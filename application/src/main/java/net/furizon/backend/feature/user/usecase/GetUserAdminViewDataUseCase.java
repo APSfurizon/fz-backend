@@ -2,6 +2,8 @@ package net.furizon.backend.feature.user.usecase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
+import net.furizon.backend.feature.admin.usecase.GetCapabilitiesUseCase;
 import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
 import net.furizon.backend.feature.badge.usecase.GetFullInfoBadgeUseCase;
@@ -175,8 +177,10 @@ public class GetUserAdminViewDataUseCase {
         // Fetch roles and permissions
         List<Role> roles = permissionFinder.getRolesFromUserId(userId);
         Set<Permission> permissions = permissionFinder.getUserPermissions(userId);
+        CapabilitiesResponse capabilities = GetCapabilitiesUseCase.getCapabilitiesObj(permissions);
         response.roles(roles)
-                .permissions(permissions);
+                .permissions(permissions)
+                .capabilities(capabilities);
 
         //Fetch sponsor names
         response.emptySponsorNames();

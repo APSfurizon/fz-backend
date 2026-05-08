@@ -3,6 +3,7 @@ package net.furizon.backend.feature.user.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import net.furizon.backend.feature.admin.dto.CapabilitiesResponse;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
@@ -59,6 +60,8 @@ public class UserAdminViewData {
     private final List<Role> roles;
     @NotNull
     private final Set<Permission> permissions;
+    @NotNull
+    private final CapabilitiesResponse capabilities;
 
     //Extra
     @NotNull

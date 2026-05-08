@@ -14,6 +14,9 @@ import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemChec
 import net.furizon.backend.feature.pretix.objects.checkins.dto.response.CheckinResponse;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
+import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
+import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.finder.UserFinder;
@@ -30,8 +33,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -51,6 +57,8 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
     @NotNull
     private final PermissionFinder permissionFinder;
     @NotNull
+    private final OrderFinder orderFinder;
+    @NotNull
     private final RoomFinder roomFinder;
 
     @NotNull
@@ -69,8 +77,15 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
     public @NotNull CheckinResponse executor(@NotNull RedeemCheckinUseCase.Input input) {
         log.info("User {} is checking in secret {}", input.user.getUserId(), input.secret);
 
+
         Order o = checks.getOrderAndAssertItExists(input.secret, input.event, input.pretixService);
         long orderOwner = checks.assertUserFound(o.getOrderOwnerUserId());
+        OrderDataResponse orderData = orderFinder.getOrderDataResponseFromUserEvent(
+                orderOwner,
+                input.event,
+                o,
+                input.pretixService
+        );
         var permissions = permissionFinder.getUserPermissions(orderOwner);
 
         var pui = checks.assertUserFound(personalInfoFinder.findByUserId(orderOwner));
@@ -79,6 +94,24 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
         var membershipCards = membershipCardFinder.getCardsOfUserForEvent(orderOwner, input.event);
         boolean isFursuiter = !fursuits.isEmpty();
         boolean isDailyTicket = o.isDaily();
+        Set<LocalDate> dailyDays = null;
+        if (isDailyTicket) {
+            dailyDays = orderData.getDailyDays();
+            LocalDate today = LocalDate.now();
+            if (dailyDays != null && !dailyDays.contains(today)) {
+                throw new ApiException(
+                    translationService.error(
+                        "order.checkin.invalid_daily",
+                            today.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                            String.join(
+                                ", ",
+                                dailyDays.stream().map(d -> d.format(DateTimeFormatter.ISO_LOCAL_DATE)).toList()
+                            )
+                    ),
+                    OrderWorkflowErrorCode.ORDER_NOT_FOUND
+                );
+            }
+        }
         var lanyardType = GenerateBadgesHtmlUseCase.getBadgeLevel(o.getSponsorship(), isDailyTicket, permissions);
         var portaBadgeType = getPortaBadgeLevel(permissions, isFursuiter, isDailyTicket);
         var roomInfo = roomFinder.getRoomInfoForUser(orderOwner, input.event, input.pretixService, roomLogic);
@@ -125,14 +158,17 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .localizedErrorReason(localizedErrorReason)
                 .optionalErrorMessage(checkinResponse.getMessage())
                 .user(user)
+                .orderStatus(o.getOrderStatus())
                 .orderCode(o.getCode())
                 .orderSerial(o.getOrderSerialInEvent())
                 .cardsForEvent(membershipCards)
                 .fursuits(fursuits)
                 .hasFursuitBadge(isFursuiter)
+                .dailyDays(dailyDays)
                 .isDailyTicket(isDailyTicket)
                 .isStaffer(isStaffer)
                 .shouldPrintApsJoinModule(shouldPrintApsJoinModule)
+                .sponsorNames(orderData.getSponsorNames())
                 .sponsorship(o.getSponsorship())
                 .lanyardType(lanyardType)
                 .portaBadgeType(portaBadgeType)

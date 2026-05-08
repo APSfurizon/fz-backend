@@ -10,6 +10,7 @@ import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.Gadget;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemCheckinResponse;
 import net.furizon.backend.feature.room.dto.RoomInfo;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
+import net.furizon.backend.infrastructure.pretix.model.OrderStatus;
 import net.furizon.backend.infrastructure.pretix.model.Sponsorship;
 import net.furizon.jooq.generated.enums.IdType;
 import net.furizon.jooq.generated.enums.ShirtSize;
@@ -18,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 @Builder
@@ -59,6 +62,15 @@ public class CheckinResponse {
     private final boolean isStaffer;
 
     private final boolean shouldPrintApsJoinModule;
+
+    @Nullable
+    private final Set<LocalDate> dailyDays;
+
+    @Nullable
+    private final Map<String, String> sponsorNames;
+
+    @NotNull
+    private final OrderStatus orderStatus;
 
     @NotNull
     private final Sponsorship sponsorship;
