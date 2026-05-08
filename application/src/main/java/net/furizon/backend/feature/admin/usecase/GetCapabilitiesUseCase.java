@@ -22,6 +22,10 @@ public class GetCapabilitiesUseCase implements UseCase<FurizonUser, Capabilities
     public @NotNull CapabilitiesResponse executor(@NotNull FurizonUser input) {
         log.info("User {} is checking his capabilities", input.getUserId());
         Set<Permission> p = permissionFinder.getUserPermissions(input.getUserId());
+        return getCapabilitiesObj(p);
+    }
+
+    public static @NotNull CapabilitiesResponse getCapabilitiesObj(@NotNull Set<Permission> p) {
         return CapabilitiesResponse.builder()
                 .canUpgradeUser(p.contains(Permission.CAN_UPGRADE_USERS))
                 .canBanUsers(p.contains(Permission.CAN_BAN_USERS))
