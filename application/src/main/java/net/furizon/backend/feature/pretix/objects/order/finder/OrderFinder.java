@@ -54,6 +54,10 @@ public interface OrderFinder {
     OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event,
                                                         @NotNull PretixInformation pretixService);
 
+    @NotNull OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event,
+                                                                 @NotNull Order order,
+                                                                 @NotNull PretixInformation pretixService);
+
     @Nullable
     Short getBoughtExtraFursuits(long userId, @NotNull Event event);
 

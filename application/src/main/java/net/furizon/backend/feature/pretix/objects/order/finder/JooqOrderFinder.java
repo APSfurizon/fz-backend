@@ -172,68 +172,69 @@ public class JooqOrderFinder implements OrderFinder {
     @Override
     public @Nullable OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event,
                                                                          @NotNull PretixInformation pretixService) {
-        OrderDataResponse orderDataResponse = null;
         Order order = findOrderByUserIdEvent(userId, event, pretixService);
-        if (order != null) {
-            OffsetDateTime from = event.getCorrectDateFrom();
-            OffsetDateTime to = event.getCorrectDateTo();
-            Sponsorship sponsorship = order.getSponsorship();
-            ExtraDays extraDays = order.getExtraDays();
-            boolean isDaily = order.isDaily();
-            boolean hasRoom = order.hasRoom();
-            boolean isInRoom = roomFinder.isUserInAroom(userId, event.getId(), false);
+        return order == null ? null : getOrderDataResponseFromUserEvent(userId, event, order, pretixService);
+    }
+    @Override
+    public @NotNull OrderDataResponse getOrderDataResponseFromUserEvent(long userId, @NotNull Event event,
+                                                                        @NotNull Order order,
+                                                                        @NotNull PretixInformation pretixService) {
+        OffsetDateTime from = event.getCorrectDateFrom();
+        OffsetDateTime to = event.getCorrectDateTo();
+        Sponsorship sponsorship = order.getSponsorship();
+        ExtraDays extraDays = order.getExtraDays();
+        boolean isDaily = order.isDaily();
+        boolean hasRoom = order.hasRoom();
+        boolean isInRoom = roomFinder.isUserInAroom(userId, event.getId(), false);
 
-            var orderDataBuilder = OrderDataResponse.builder()
-                    .code(order.getCode())
-                    .checkinSecret(order.getCheckinSecret())
-                    .orderStatus(order.getOrderStatus())
-                    .sponsorship(sponsorship)
-                    .extraDays(extraDays)
-                    .board(order.getBoard())
-                    .isDailyTicket(isDaily);
+        var orderDataBuilder = OrderDataResponse.builder()
+                .code(order.getCode())
+                .checkinSecret(order.getCheckinSecret())
+                .orderStatus(order.getOrderStatus())
+                .sponsorship(sponsorship)
+                .extraDays(extraDays)
+                .board(order.getBoard())
+                .isDailyTicket(isDaily);
 
-            var sponsorItemId = pretixService.getSponsorIds(sponsorship, event.getId()).stream().findFirst();
-            sponsorItemId.ifPresent(id -> orderDataBuilder.sponsorNames(pretixService.getVariationNames(id)));
+        var sponsorItemId = pretixService.getSponsorIds(sponsorship, event.getId()).stream().findFirst();
+        sponsorItemId.ifPresent(id -> orderDataBuilder.sponsorNames(pretixService.getVariationNames(id)));
 
-            if (isDaily && from != null) {
-                orderDataBuilder.dailyDays(order.getDailyDaysDates());
+        if (isDaily && from != null) {
+            orderDataBuilder.dailyDays(order.getDailyDaysDates());
+        }
+        if (hasRoom) {
+            short roomCapacity = order.getRoomCapacity();
+            long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
+            orderDataBuilder.room(
+                    new RoomData(
+                            roomCapacity,
+                            roomItemId,
+                            order.getRoomInternalName(),
+                            pretixService.getItemNames(roomItemId)
+                    )
+            );
+        }
+        if (!isDaily && !hasRoom && !isInRoom) {
+            //Normal ticket without room
+            if (from != null) {
+                orderDataBuilder.noRoomTicketFromDate(from.toLocalDate());
             }
-            if (hasRoom) {
-                short roomCapacity = order.getRoomCapacity();
-                long roomItemId = Objects.requireNonNull(order.getPretixRoomItemId());
-                orderDataBuilder.room(
-                        new RoomData(
-                                roomCapacity,
-                                roomItemId,
-                                order.getRoomInternalName(),
-                                pretixService.getItemNames(roomItemId)
-                        )
+            if (to != null) {
+                orderDataBuilder.noRoomTicketToDate(
+                    (pretixConfig.getEvent().isExcludeCheckoutForNoRoomTickets()
+                            ? to.minusDays(ExtraDays.CHECKOUT_DAYS_NO)
+                            : to
+                    ).toLocalDate()
                 );
             }
-            if (!isDaily && !hasRoom && !isInRoom) {
-                //Normal ticket without room
-                if (from != null) {
-                    orderDataBuilder.noRoomTicketFromDate(from.toLocalDate());
-                }
-                if (to != null) {
-                    orderDataBuilder.noRoomTicketToDate(
-                        (pretixConfig.getEvent().isExcludeCheckoutForNoRoomTickets()
-                                ? to.minusDays(ExtraDays.CHECKOUT_DAYS_NO)
-                                : to
-                        ).toLocalDate()
-                    );
-                }
-            }
-            if (isInRoom || hasRoom) {
-                orderDataBuilder.checkinDate(RoomInfo.computeCheckin(event, extraDays))
-                                .checkoutDate(RoomInfo.computeCheckout(event, extraDays));
-            }
-
-            orderDataBuilder.totalFursuits((short) (fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits()));
-
-            orderDataResponse = orderDataBuilder.build();
         }
-        return orderDataResponse;
+        if (isInRoom || hasRoom) {
+            orderDataBuilder.checkinDate(RoomInfo.computeCheckin(event, extraDays))
+                            .checkoutDate(RoomInfo.computeCheckout(event, extraDays));
+        }
+
+        orderDataBuilder.totalFursuits((short) (fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits()));
+        return orderDataBuilder.build();
     }
 
     @Override
