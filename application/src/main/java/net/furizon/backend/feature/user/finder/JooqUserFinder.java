@@ -86,11 +86,18 @@ public class JooqUserFinder implements UserFinder {
 
     @Nullable
     @Override
-    public UserDisplayData getDisplayUser(long userId, @NotNull Event event) {
-        return sqlQuery.fetchFirst(
-            selectJoinDisplayUser(event.getId())
-            .where(USERS.USER_ID.eq(userId))
-        ).mapOrNull(JooqUserDisplayMapper::map);
+    public UserDisplayData getDisplayUser(long userId, @Nullable Event event) {
+        if (event == null) {
+            return sqlQuery.fetchFirst(
+                selectJoinDisplayUser()
+                .where(USERS.USER_ID.eq(userId))
+            ).mapOrNull(r -> JooqUserDisplayMapper.map(r, false, null));
+        } else {
+            return sqlQuery.fetchFirst(
+                selectJoinDisplayUser(event.getId())
+                .where(USERS.USER_ID.eq(userId))
+            ).mapOrNull(JooqUserDisplayMapper::map);
+        }
     }
     @NotNull
     @Override
@@ -325,6 +332,7 @@ public class JooqUserFinder implements UserFinder {
             PostgresDSL.selectDistinct(
                 searchFursonaQuery.field(USERS.USER_ID),
                 searchFursonaQuery.field(USERS.USER_FURSONA_NAME),
+                MEDIA.MEDIA_STORE_METHOD,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID
@@ -421,6 +429,22 @@ public class JooqUserFinder implements UserFinder {
                 .and(ORDERS.EVENT_ID.eq(eventId))
             );
     }
+    @Override
+    public SelectJoinStep<?> selectJoinDisplayUser() {
+        return PostgresDSL.select(
+                    USERS.USER_ID,
+                    USERS.USER_FURSONA_NAME,
+                    USERS.USER_LOCALE,
+                    USERS.USER_LANGUAGE,
+                    MEDIA.MEDIA_STORE_METHOD,
+                    MEDIA.MEDIA_PATH,
+                    MEDIA.MEDIA_TYPE,
+                    MEDIA.MEDIA_ID
+            )
+            .from(USERS)
+            .leftJoin(MEDIA)
+            .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID));
+    }
 
     @Override
     public SelectJoinStep<?> selectDisplayUser() {
@@ -429,6 +453,7 @@ public class JooqUserFinder implements UserFinder {
                 USERS.USER_FURSONA_NAME,
                 USERS.USER_LOCALE,
                 USERS.USER_LANGUAGE,
+                MEDIA.MEDIA_STORE_METHOD,
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,

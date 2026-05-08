@@ -44,7 +44,8 @@ public class JooqCountFinder implements CountsFinder {
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_PATH,
-                MEDIA.MEDIA_TYPE
+                MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_STORE_METHOD
             )
             .from(FURSUITS)
             .innerJoin(USERS)
@@ -79,6 +80,7 @@ public class JooqCountFinder implements CountsFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
+                MEDIA.MEDIA_STORE_METHOD,
                 ORDERS.ORDER_SPONSORSHIP_TYPE
             )
             .from(USERS)
@@ -108,6 +110,7 @@ public class JooqCountFinder implements CountsFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
+                MEDIA.MEDIA_STORE_METHOD,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
 
                 ORDERS.ORDER_DAILY_DAYS,
@@ -162,6 +165,7 @@ public class JooqCountFinder implements CountsFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_TYPE,
                 MEDIA.MEDIA_ID,
+                MEDIA.MEDIA_STORE_METHOD,
                 ROLES.ROLE_ID,
                 ROLES.DISPLAY_NAME,
                 ROLES.INTERNAL_NAME

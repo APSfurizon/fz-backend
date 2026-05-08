@@ -25,6 +25,7 @@ public class MailRequest {
     private TranslatableValue subject;
     private String message;
     private TemplateMessage templateMessage;
+    @Nullable private String replyTo;
 
     public MailRequest to(@NotNull final List<Triple<@NotNull Locale, @NotNull String, @Nullable Long>> to) {
         this.to = to;
@@ -93,6 +94,11 @@ public class MailRequest {
         this.subject = subject;
         this.message = message;
         this.templateMessage = templateMessage;
+    }
+
+    public MailRequest replyTo(@Nullable String replyTo) {
+        this.replyTo = replyTo;
+        return this;
     }
 
     public MailRequest addParam(@NotNull String key, @NotNull Object value) {
