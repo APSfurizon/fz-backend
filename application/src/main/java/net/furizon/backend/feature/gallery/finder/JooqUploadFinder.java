@@ -322,6 +322,7 @@ public class JooqUploadFinder implements UploadFinder {
                         userPropic.field(MEDIA.MEDIA_PATH),
                         userPropic.field(MEDIA.MEDIA_TYPE),
                         userPropic.field(MEDIA.MEDIA_STORE_METHOD),
+                        PERMISSION.PERMISSION_VALUE,
                         EVENTS.ID,
                         EVENTS.EVENT_SLUG,
                         EVENTS.EVENT_DATE_TO,
@@ -367,6 +368,15 @@ public class JooqUploadFinder implements UploadFinder {
                 .on(UPLOADS.EVENT_ID.eq(EVENTS.ID))
                 .leftJoin(userPropic)
                 .on(USERS.MEDIA_ID_PROPIC.eq(userPropic.field(MEDIA.MEDIA_ID)))
+                .leftJoin(
+                    USER_HAS_ROLE
+                    .innerJoin(PERMISSION)
+                    .on(
+                        USER_HAS_ROLE.ROLE_ID.eq(PERMISSION.ROLE_ID)
+                        .and(PERMISSION.PERMISSION_VALUE.eq(Permission.UPLOADS_OFFICIAL_UPLOADER.getValue()))
+                    )
+                )
+                .on(USER_HAS_ROLE.USER_ID.eq(USERS.USER_ID))
                 .innerJoin(media)
                 .on(UPLOADS.MEDIA_ID.eq(media.field(MEDIA.MEDIA_ID)))
                 .leftJoin(thumbnail)

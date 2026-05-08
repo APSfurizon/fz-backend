@@ -41,6 +41,8 @@ public class GalleryUpload {
 
     @NotNull private final Event event;
 
+    private final boolean fromOfficialPhotographer;
+
     @Nullable private UploadImageMetadata photoMetadata;
     @Nullable private UploadVideoMetadata videoMetadata;
 }

@@ -9,6 +9,7 @@ import net.furizon.jooq.generated.enums.UploadType;
 import org.jooq.Record;
 import org.jooq.Table;
 
+import static net.furizon.jooq.generated.Tables.PERMISSION;
 import static net.furizon.jooq.generated.Tables.UPLOADS;
 
 public class GalleryUploadMapper {
@@ -47,6 +48,7 @@ public class GalleryUploadMapper {
                 .event(JooqEventMapper.map(r))
                 .photoMetadata(ImageMetadataMapper.map(r))
                 .videoMetadata(VideoMetadataMapper.map(r))
+                .fromOfficialPhotographer(r.get(PERMISSION.PERMISSION_VALUE) != null)
             .build();
     }
 }
