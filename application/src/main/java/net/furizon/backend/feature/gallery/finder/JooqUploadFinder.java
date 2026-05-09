@@ -397,8 +397,8 @@ public class JooqUploadFinder implements UploadFinder {
     }
 
     @Override
-    public @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId) {
-        var q = selectGalleryEventObj(photographerId);
+    public @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId, boolean isAdmin) {
+        var q = selectGalleryEventObj(photographerId, isAdmin);
         return query.fetchFirst(
                 q.query
                 .where(EVENTS.ID.eq(eventId))
@@ -406,8 +406,8 @@ public class JooqUploadFinder implements UploadFinder {
             .mapOrNull(r -> GalleryEventMapper.map(r, q.media, q.render, q.thumbnail, q.countField, q.countTable));
     }
     @Override
-    public @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId) {
-        var q = selectGalleryEventObj(photographerId);
+    public @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId, boolean isAdmin) {
+        var q = selectGalleryEventObj(photographerId, isAdmin);
         return query.fetch(
                 q.query
                 .orderBy(EVENTS.EVENT_DATE_FROM, EVENTS.EVENT_DATE_TO, EVENTS.ID)
@@ -427,10 +427,17 @@ public class JooqUploadFinder implements UploadFinder {
     ) {}
 
     @Override
-    public @NotNull GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId) {
+    public @NotNull GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId, boolean isAdmin) {
         Table<?> media = MEDIA.as("main_media");
         Table<?> render = MEDIA.as("render_media");
         Table<?> thumbnail = MEDIA.as("thumbnail_media");
+
+        var condition = photographerId == null
+                      ? PostgresDSL.trueCondition()
+                      : UPLOADS.PHOTOGRAPHER_USER_ID.eq(photographerId);
+        if (!isAdmin) {
+            condition = condition.and(UPLOADS.STATUS.eq(UploadStatus.APPROVED));
+        }
 
         var countField = PostgresDSL.field("countField", Integer.class);
         var countTable =
@@ -439,10 +446,7 @@ public class JooqUploadFinder implements UploadFinder {
                 PostgresDSL.countDistinct(UPLOADS.ID).as(countField)
             )
             .from(UPLOADS)
-            .where(
-                (photographerId == null ? PostgresDSL.trueCondition() : UPLOADS.PHOTOGRAPHER_USER_ID.eq(photographerId))
-                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
-            )
+            .where(condition)
             .groupBy(UPLOADS.EVENT_ID)
             .asTable("countTable");
 
@@ -501,8 +505,10 @@ public class JooqUploadFinder implements UploadFinder {
     }
 
     @Override
-    public @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId, @Nullable Long eventId) {
-        var q = selectGalleryPhotographerObj(eventId);
+    public @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId,
+                                                                @Nullable Long eventId,
+                                                                boolean isAdmin) {
+        var q = selectGalleryPhotographerObj(eventId, isAdmin);
         return query.fetchFirst(
                 q.query
                 .where(q.countTable.field(UPLOADS.PHOTOGRAPHER_USER_ID).eq(photographerId))
@@ -510,8 +516,8 @@ public class JooqUploadFinder implements UploadFinder {
         .mapOrNull(r -> GalleryPhotographerMapper.map(r, q.countField, q.countTable, q.officialPhotographer));
     }
     @Override
-    public @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId) {
-        var q = selectGalleryPhotographerObj(eventId);
+    public @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId, boolean isAdmin) {
+        var q = selectGalleryPhotographerObj(eventId, isAdmin);
         return query.fetch(
                 q.query
                 .orderBy(
@@ -535,19 +541,20 @@ public class JooqUploadFinder implements UploadFinder {
     ) {}
 
     @Override
-    public GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId) {
+    public GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId, boolean isAdmin) {
         var officialPhotographer = PostgresDSL.field("officialPhotographer", Boolean.class);
         var countField = PostgresDSL.field("countField", Integer.class);
+        var condition = eventId == null ? PostgresDSL.trueCondition() : UPLOADS.EVENT_ID.eq(eventId);
+        if (!isAdmin) {
+            condition = condition.and(UPLOADS.STATUS.eq(UploadStatus.APPROVED));
+        }
         var countTable =
             PostgresDSL.select(
                 UPLOADS.PHOTOGRAPHER_USER_ID,
                 PostgresDSL.countDistinct(UPLOADS.ID).as(countField)
             )
             .from(UPLOADS)
-            .where(
-                (eventId == null ? PostgresDSL.trueCondition() : UPLOADS.EVENT_ID.eq(eventId))
-                .and(UPLOADS.STATUS.eq(UploadStatus.APPROVED))
-            )
+            .where(condition)
             .groupBy(UPLOADS.PHOTOGRAPHER_USER_ID)
             .asTable("countTable");
         var q = PostgresDSL.select(

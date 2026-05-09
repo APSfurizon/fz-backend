@@ -65,17 +65,19 @@ public interface UploadFinder {
     @NotNull
     JooqUploadFinder.FullUploadObjSelected selectFullUploadObj();
 
-    @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId);
+    @Nullable GalleryEvent getGalleryEvent(long eventId, @Nullable Long photographerId, boolean isAdmin);
 
-    @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId);
+    @NotNull List<GalleryEvent> getGalleryEvents(@Nullable Long photographerId, boolean isAdmin);
 
-    @NotNull JooqUploadFinder.GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId);
+    @NotNull JooqUploadFinder.GalleryEventObjSelected selectGalleryEventObj(@Nullable Long photographerId,
+                                                                            boolean isAdmin);
 
-    @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId, @Nullable Long eventId);
+    @Nullable GalleryPhotographer getGalleryPhotographer(long photographerId, @Nullable Long eventId, boolean isAdmin);
 
-    @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId);
+    @NotNull List<GalleryPhotographer> getGalleryPhotographers(@Nullable Long eventId, boolean isAdmin);
 
-    JooqUploadFinder.GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId);
+    JooqUploadFinder.GalleryPhotographerObjSelected selectGalleryPhotographerObj(@Nullable Long eventId,
+                                                                                 boolean isAdmin);
 
     @Nullable Long getFirstPendingUpload(long startFrom);
 

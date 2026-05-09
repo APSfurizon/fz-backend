@@ -118,7 +118,7 @@ public class AdminBatchListUseCase implements UseCase<AdminBatchListUseCase.Inpu
             );
         }
 
-        GalleryEvent event = firstRes == null ? null : uploadFinder.getGalleryEvent(firstRes.getEventId(), null);
+        GalleryEvent event = firstRes == null ? null : uploadFinder.getGalleryEvent(firstRes.getEventId(), null, true);
         UserDisplayData user = firstRes == null ? null : userFinder.getDisplayUser(firstRes.getPhotographerUserId(),
                                                          event == null ? null : event.getEvent());
         return new AdminBatchApprovalResponse(res, user, event, uploadFinder.countPendingUploads());

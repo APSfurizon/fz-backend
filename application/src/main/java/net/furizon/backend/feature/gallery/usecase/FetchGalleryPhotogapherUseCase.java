@@ -7,7 +7,10 @@ import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.user.dto.UserDisplayData;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
+import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +24,8 @@ import org.springframework.stereotype.Component;
 public class FetchGalleryPhotogapherUseCase implements
         UseCase<FetchGalleryPhotogapherUseCase.Input, GalleryPhotographer> {
     @NotNull
+    private final PermissionFinder permissionFinder;
+    @NotNull
     private final UploadFinder uploadFinder;
     @NotNull
     private final UserFinder userFinder;
@@ -29,7 +34,11 @@ public class FetchGalleryPhotogapherUseCase implements
 
     @Override
     public @NotNull GalleryPhotographer executor(@NotNull FetchGalleryPhotogapherUseCase.Input input) {
-        var v = uploadFinder.getGalleryPhotographer(input.photographerId, input.eventId);
+        boolean isAdmin = input.user == null ? false : permissionFinder.userHasPermission(
+                input.user.getUserId(),
+                Permission.UPLOADS_CAN_MANAGE_UPLOADS
+        );
+        var v = uploadFinder.getGalleryPhotographer(input.photographerId, input.eventId, isAdmin);
         if (v == null) {
             UserDisplayData userData = userFinder.getDisplayUser(input.photographerId, null);
             if (userData == null) {
@@ -50,7 +59,8 @@ public class FetchGalleryPhotogapherUseCase implements
     }
 
     public record Input(
-        @Nullable Long eventId,
-        long photographerId
+            @Nullable Long eventId,
+            long photographerId,
+            @Nullable FurizonUser user
     ) {}
 }

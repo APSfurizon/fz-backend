@@ -139,11 +139,15 @@ public class GalleryController {
         + "on his photos.")
     @GetMapping("/pub/events")
     public @NotNull ListGalleryEventsResponse listEvents(
-        @RequestParam @Nullable @Valid @Positive final Long photographerUserId
+        @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
+        @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
             ListGalleryEventsUseCase.class,
-            photographerUserId == null ? -1L : photographerUserId
+            new ListGalleryEventsUseCase.Input(
+                    photographerUserId,
+                    user
+            )
         );
     }
 
@@ -155,11 +159,15 @@ public class GalleryController {
         + "accounts. Photographer list is already ordered")
     @GetMapping("/pub/photographers")
     public @NotNull ListGalleryPhotographersResponse listPhotographers(
-            @RequestParam @Nullable @Valid @Positive final Long eventId
+            @RequestParam @Nullable @Valid @Positive final Long eventId,
+            @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
                 ListGalleryPhotographersUseCase.class,
-                eventId == null ? -1L : eventId
+                new ListGalleryPhotographersUseCase.Input(
+                        eventId,
+                        user
+                )
         );
     }
 
@@ -169,13 +177,15 @@ public class GalleryController {
     @GetMapping("/pub/events/{eventId}")
     public @NotNull GalleryEvent fetchEvent(
             @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
-            @PathVariable @NotNull @Valid @Positive final Long eventId
+            @PathVariable @NotNull @Valid @Positive final Long eventId,
+            @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
                 FetchGalleryEventUseCase.class,
                 new FetchGalleryEventUseCase.Input(
                         photographerUserId,
-                        eventId
+                        eventId,
+                        user
                 )
         );
     }
@@ -185,13 +195,15 @@ public class GalleryController {
     @GetMapping("/pub/photographers/{photographerUserId}")
     public @NotNull GalleryPhotographer fetchPhotographer(
             @RequestParam @Nullable @Valid @Positive final Long eventId,
-            @PathVariable @NotNull @Valid @Positive final Long photographerUserId
+            @PathVariable @NotNull @Valid @Positive final Long photographerUserId,
+            @AuthenticationPrincipal @Valid @Nullable final FurizonUser user
     ) {
         return executor.execute(
                 FetchGalleryPhotogapherUseCase.class,
                 new FetchGalleryPhotogapherUseCase.Input(
                         eventId,
-                        photographerUserId
+                        photographerUserId,
+                        user
                 )
         );
     }
