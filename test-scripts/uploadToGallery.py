@@ -1,5 +1,6 @@
 import os
 import json
+import exifread
 import hashlib
 import requests
 from requests import Response
@@ -88,6 +89,9 @@ def login() -> Response:
 
 	return req
 
+def searchByUserId(id: int) -> Response:
+    return doGet(f'{BASE_URL_API}users/search/by-user-id?id={id}')
+
 
 def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, eventId: int, etags: list, hash: str) -> Response:
 	json = {
@@ -95,7 +99,7 @@ def uploadFileToGallery_complete(reqId: int, fileName: str, fileSize: int, event
 		"fileName": fileName,
 		"fileSize": fileSize,
 		"eventId": eventId,
-		"uploadRepostPermissions": "CC_BY_NC_ND",
+		"uploadRepostPermissions": "PHOTOGRAPHER_DISCRETION",
 		"etags": etags,
 		"md5Hash": hash
 	}
@@ -158,10 +162,48 @@ def adminUpdateUpload(uploadIds: list, status: str=None, photographerId: int=Non
 def getEvents() -> Response:
 	return doGet(f'{BASE_URL_API}events/')
 
-eventMap = {}
+def getDate(path, file):
+	#print(f"**[FINEST] Extracting EXIF data from path '{path}' file '{file}'...")
+	try:
+		with open(os.path.join(path, file), 'rb') as fh:
+			#import inspect
+			#print(inspect.getfullargspec(exifread.process_file))
+			tags = exifread.process_file(fh, stop_tag="EXIF DateTimeOriginal", extract_thumbnail=False, details=False)
+			#tags = exifread.process_file(fh, stop_tag="EXIF DateTimeOriginal", details=False)
+			dateTaken = tags["EXIF DateTimeOriginal"]
+			return dateTaken
+	except KeyError:
+		print(f"**[WARN] No EXIF DateTimeOriginal tag found for file '{file}' in path '{path}'.")
+	return None
+
+def approveUploads(uploadIds: dict, force: bool=False) -> Response:
+	for uploadKey, ids in uploadIds.items():
+		if len(ids) > 0 and (len(ids) > 50 or force):
+			try:
+				photographerId = uploadKey[0]
+				reject = uploadKey[1]
+				rejectStr = "REJECTED" if reject else "APPROVED"
+				print(f"**[INFO] Updating uploads with IDs {ids}: setting photographer to user {photographerId}, reject = {reject}")
+				adminUpdateUpload(ids, status=rejectStr, photographerId=photographerId)
+				uploadIds[uploadKey] = []
+			except Exception as e:
+				print(f"**[ERROR] Failed to update uploads with IDs {ids}: {e}")
+
+
+login()
+
+eventSlugToId = {}
+eventIdToSlug = {}
 events = getEvents().json()
-for event in events:
-	eventMap[event["slug"]] = event["id"]
+for event in events["events"]:
+	slug = event["slug"]
+	eventId = event["id"]
+	eventSlugToId[slug] = eventId
+	eventIdToSlug[eventId] = slug
+ 
+supportedFormats = getUploadLimits().json()["allowedFileExtensions"]
+supportedFormats = [x.lower() for x in supportedFormats]
+print(f"**[DEBUG] Supported file formats for upload: {supportedFormats}")
 
 
 uploadDirs = [
@@ -172,7 +214,7 @@ uploadDirs = [
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Ryuu/"},
 	{"event": "furizon/sideralis",		"user": 346,			"path": "Sideralis/Furizon 2k18/Sherly/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 346,			"path": "Sideralis/Furizon 2k18/Vesper/"},
-	{"event": "furizon/sideralis",		"user": 551,			"path": "Sideralis/Furizon 2k18/Winter Wolf/"},
+	{"event": "furizon/sideralis",		"user": 551,			"path": "Sideralis/Furizon 2k18/Winter Wolf/furizon/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 551,			"path": "Sideralis/Furizon 2k18/XxXVolpett0-OscuroXxX/"},
  
 	{"event": "furizon/sideralis",		"user": 4,				"path": "Sideralis/"}, #kyrill
@@ -188,7 +230,7 @@ uploadDirs = [
  
  
 	# NO ACCOUNT{"event": "furizon/river-side-2021",		"user": 76,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Aiden McLean/"},
-	{"event": "furizon/river-side-2021",		"user": 76,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Fuel/"},
+	{"event": "furizon/river-side-2021",		"user": 543,		"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Fuel/"},
 	{"event": "furizon/river-side-2021",		"user": 20,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Hypewolf/"},
 	{"event": "furizon/river-side-2021",		"user": 119,		"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Mark/"},
 	{"event": "furizon/river-side-2021",		"user": 45,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Nitro PunkDoggo/"},
@@ -316,7 +358,7 @@ uploadDirs = [
 	{"event": "furizon/beyond",		"user": 534,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Micole_Vulpix/"},
 	{"event": "furizon/beyond",		"user": 120,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Morkulfr/"},
 	{"event": "furizon/beyond",		"user": 200,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Paco folf/"},
-	{"event": "furizon/beyond",		"user": 693,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Pianostrong/"},
+	{"event": "furizon/beyond",		"user": 693,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Pianostrong/compressed/"},
 	{"event": "furizon/beyond",		"user": 152,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Roll Lee/"},
 	{"event": "furizon/beyond",		"user": 276,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Saika/"},
 	{"event": "furizon/beyond",		"user": 30,			"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Shado + others/"},
@@ -397,7 +439,7 @@ uploadDirs = [
  
 	{"event": "furizon/zenith",	"user": 100,			"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Akoro/"},
 	{"event": "furizon/zenith",	"user": 31,				"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/ArMeyk/"},
-	{"event": "furizon/zenith",	"user": 57,				"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Axl/"},
+	{"event": "furizon/zenith",	"user": 57,				"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Axl/Compressed/"},
 	{"event": "furizon/zenith",	"user": 254,			"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Baritz/"},
 	{"event": "furizon/zenith",	"user": 295,			"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Brusa/"},
 	{"event": "furizon/zenith",	"user": 219,			"path": "Furizon Zenith 2025/Furizon Zenith 2025 - User uploads/Buck The Owl/"},
@@ -456,28 +498,74 @@ uploadDirs = [
 
 
 # DONE add rejected uploads
-# TODO add dry run printing event name + id; user name obtained from backend + id; number of photos; path
-# TODO add method to verify if upload format is supported. Add print if unsupported
-# TODO load all photos first and then, for each event, order them by shot date and then filename
+# DONE add dry run printing event name + id; user name obtained from backend + id; number of photos; path
+# DONE add method to verify if upload format is supported. Add print if unsupported
+# DONE load all photos first and then, for each event, order them by shot date and then filename
+
+eventToUploads = {}
 
 for uploadDir in uploadDirs:
-	print(f"**[INFO] Uploading files from '{uploadDir['path']}' to event '{uploadDir['event']}' as user '{uploadDir['user']}'")
-	eventId = eventMap[uploadDir["event"]]
-	uploadIds = []
-	for fileName in os.listdir(uploadDir["path"]):
-		print(f"**[FINE] Uploading file '{fileName}'")
+	print(f"**[DEBUG] Processing upload directory: {uploadDir}")
+	eventName = uploadDir["event"]
+	eventId = eventSlugToId[eventName]
+	if (eventId not in eventToUploads):
+		eventToUploads[eventId] = []
+	event: list = eventToUploads[eventId]
+	path = uploadDir["path"]
+	photographerId = uploadDir["user"]
+	rejected = uploadDir.get("rejected", False)
+	filesFound = 0
+	for fileName in os.listdir(path):
+		if (not os.path.isfile(os.path.join(path, fileName))):
+			continue
+		if fileName == ".noempty":
+			continue
+		_, file_extension = os.path.splitext(fileName)
+		if file_extension.lower()[1:] not in supportedFormats:
+			print(f"**[DEBUG] Unsupported file format '{file_extension}' for file '{fileName}' in path '{path}'. Skipping.")
+			continue
+
+		dateTaken = getDate(path, fileName)
+		dateTaken = str(dateTaken) if dateTaken else f"---{photographerId}-{fileName}" 
+		event.append({
+			"fileName": fileName,
+			"path": path,
+			"photographerId": photographerId,
+			"rejected": rejected,
+			"dateTaken": dateTaken
+		})
+		filesFound += 1
+	photographerName: str = None
+	try:
+		photographerName = searchByUserId(photographerId).json()["users"][0]["description"]
+	except Exception as e:
+		pass
+	attentionStr = "!!!!!!!!!!!!" if filesFound < 5 else ""
+	print(f"**[DEBUG] Event ({eventId}) '{eventName}' - User ({("%03d" % photographerId)}) '{photographerName.ljust(40)}' - Found {("%04d" % filesFound)} photos - Rejected: {rejected} - Path: '{path}' {attentionStr}")
+
+for eventId, uploads in eventToUploads.items():
+	uploads.sort(key=lambda x: x["dateTaken"], reverse=False)
+	#print(uploads)
+
+print(json.dumps(eventToUploads))
+
+uploadIds = {}
+for eventId, uploads in eventToUploads.items():
+	for upload in uploads:
+		fileName = upload["fileName"]
 		try:
-			uploadId = uploadFileToGallery(uploadDir["path"], fileName, eventId)
-			print(f"**[FINE] Uploading file '{fileName}': Got upload ID = {uploadId}")
-			uploadIds.append(uploadId)
-			
-			if (len(uploadIds) > 50):
-				print(f"**[INFO] Pre-Approving uploads with IDs {uploadIds} and setting photographer to user {uploadDir['user']}")
-				adminUpdateUpload(uploadIds, status="APPROVED", photographerId=uploadDir["user"])
-				uploadIds = []
+			print(f"**[FINE] Uploading file '{fileName}'")
+			uploadId = uploadFileToGallery(upload["path"], fileName, eventId)
+			uploadKey = (upload["photographerId"], rejected)
+			print(f"**[FINE] Uploading file '{fileName}': Got upload ID = {uploadId}. Storing with key {uploadKey}")
+			if (uploadKey not in uploadIds):
+				uploadIds[uploadKey] = []
+			personalUploadIds: list = uploadIds[uploadKey]
+			personalUploadIds.append(uploadId)
+			approveUploads(uploadIds)
 		except Exception as e:
 			print(f"**[ERROR] Uploading file '{fileName}': {e}")
-	print(f"**[INFO] Approving uploads with IDs {uploadIds} and setting photographer to user {uploadDir['user']}")
-	adminUpdateUpload(uploadIds, status="APPROVED", photographerId=uploadDir["user"])
-	
+approveUploads(uploadIds, force=True)
+
 # python3 uploadToGallery.py 2>&1 | tee -a log.txt
+# grep -e "^\*\*" log.txt > log2.txt
