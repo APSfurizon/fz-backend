@@ -47,6 +47,8 @@ public class PretixConfig implements HttpConfig {
     @NotNull
     private final List<String> supportedLanguages;
 
+    private final boolean checkinAllowDailyOutsideOfDay;
+
     @NotNull
     @Override
     public String getBaseUrl() {
