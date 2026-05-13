@@ -213,7 +213,7 @@ uploadDirs = [
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Ren/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Ryuu/"},
 	{"event": "furizon/sideralis",		"user": 346,			"path": "Sideralis/Furizon 2k18/Sherly/"},
-	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 346,			"path": "Sideralis/Furizon 2k18/Vesper/"},
+	{"event": "furizon/sideralis",		"user": 876,			"path": "Sideralis/Furizon 2k18/Vesper/"},
 	{"event": "furizon/sideralis",		"user": 551,			"path": "Sideralis/Furizon 2k18/Winter Wolf/furizon/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 551,			"path": "Sideralis/Furizon 2k18/XxXVolpett0-OscuroXxX/"},
  
@@ -229,7 +229,7 @@ uploadDirs = [
 	{"event": "furizon/river-side-2020",		"user": 10,			"path": "Riverside/Razor AND soon/razor/"},
  
  
-	# NO ACCOUNT{"event": "furizon/river-side-2021",		"user": 76,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Aiden McLean/"},
+	{"event": "furizon/river-side-2021",		"user": 544,		"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Aiden McLean/"},
 	{"event": "furizon/river-side-2021",		"user": 543,		"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Fuel/"},
 	{"event": "furizon/river-side-2021",		"user": 20,			"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Hypewolf/"},
 	{"event": "furizon/river-side-2021",		"user": 119,		"path": "Furizon Riverside 2021/Furizon Riverside 2021 - Uploads/Mark/"},
@@ -249,13 +249,12 @@ uploadDirs = [
 
 
 	{"event": "furizon/riots",		"user": 76,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Aeritus/"},
-	# NO ACCOUNT{"event": "furizon/riots",		"user": 76,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Aiden/"},
+	{"event": "furizon/riots",		"user": 544,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Aiden/"},
 	# NO ACCOUNT{"event": "furizon/riots",		"user": 76,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Aless The Tiger/"},
 	{"event": "furizon/riots",		"user": 14,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Arven/"},
-	# NO ACCOUNT{"event": "furizon/riots",		"user": 14,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Blichard/"},
+	# NO ACCOUNT{"event": "furizon/riots",		"user": 14,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Blichard/"}, # just two photos, don't really care
 	{"event": "furizon/riots",		"user": 228,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Devon/"},
-	# NO ACCOUNT{"event": "furizon/riots",		"user": 228,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/dyed_rotterdam/"},
-	# NO ACCOUNT{"event": "furizon/riots",		"user": 228,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Foxo/"},
+	{"event": "furizon/riots",		"user": 879,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Foxo/"},
 	{"event": "furizon/riots",		"user": 68,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Hazard/"},
 	{"event": "furizon/riots",		"user": 584,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Indie AW/"},
 	{"event": "furizon/riots",		"user": 85,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Jabilo Bearly/"},
@@ -278,7 +277,7 @@ uploadDirs = [
 	{"event": "furizon/riots",		"user": 12,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/SnukTheKobold/"},
 	{"event": "furizon/riots",		"user": 669,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Soonyx/"},
 	{"event": "furizon/riots",		"user": 1,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Stranck/"},
-	# NO ACCOUNT{"event": "furizon/riots",		"user": 1,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Woolier/"},
+	# NO ACCOUNT{"event": "furizon/riots",		"user": 1,			"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Woolier/"}, # actually cool photos, try asking
 	{"event": "furizon/riots",		"user": 114,		"path": "Furizon Riots 2022␠/Furizon Riots 2022 - Uploads/Wyle/"},
  
 	{"event": "furizon/riots",		"user": 669,		"path": "Furizon Riots 2022␠/OFFICIAL/Furizon_ Riots 2022 - Offical Indoor Photographic Set/"},
@@ -343,15 +342,14 @@ uploadDirs = [
 	{"event": "furizon/beyond",		"user": 155,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Carty/"},
 	{"event": "furizon/beyond",		"user": 228,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Castore Krios/"},
 	{"event": "furizon/beyond",		"user": 259,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/cavallium/"},
-	# NO ACCOUNT{"event": "furizon/beyond",		"user": 259,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Ciroz/"},
+	# NO ACCOUNT{"event": "furizon/beyond",		"user": 259,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Ciroz/"}, # actually cool photos, try asking
 	{"event": "furizon/beyond",		"user": 6,			"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Drew/"},
 	{"event": "furizon/beyond",		"user": 728,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Fenrir Werewolfe/"},
 	{"event": "furizon/beyond",		"user": 164,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Fons/"},
 	{"event": "furizon/beyond",		"user": 345,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/GazelleIT/"},
-	# NO ACCOUNT{"event": "furizon/beyond",		"user": 164,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Glax/"},
 	{"event": "furizon/beyond",		"user": 355,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Igen/"},
 	# NO ACCOUNT{"event": "furizon/beyond",		"user": 164,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Lale OConner/"},
-	# NO ACCOUNT{"event": "furizon/beyond",		"user": 164,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/LeBerto6/"},
+	# NO ACCOUNT{"event": "furizon/beyond",		"user": 164,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/LeBerto6/"}, #Might be cool, but I cannot find how to contact him
 	{"event": "furizon/beyond",		"user": 221,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Luka/"},
 	{"event": "furizon/beyond",		"user": 119,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Mark/"},
 	{"event": "furizon/beyond",		"user": 872,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Maxetto/"},
@@ -368,7 +366,6 @@ uploadDirs = [
 	{"event": "furizon/beyond",		"user": 377,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/UndyBadger/"},
 	{"event": "furizon/beyond",		"user": 114,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Wyle/"},
 	{"event": "furizon/beyond",		"user": 71,			"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Zamy/"},
-	# NO ACCOUNT{"event": "furizon/beyond",		"user": 71,			"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/ZellDragon6/"},
 	{"event": "furizon/beyond",		"user": 453,		"path": "Furizon Beyond 2023/Furizon Beyond 2023 - User uploads/Zeus/"},
 
 	{"event": "furizon/beyond",		"user": 669,		"path": "Furizon Beyond 2023/OFFICIAL/INDOOR Photoshoot - Furizon BEYOND 2023/"}, #soonyx
@@ -383,7 +380,7 @@ uploadDirs = [
 	{"event": "furizon/river-side-2023",		"user": 120,		"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Mork/"},
 	{"event": "furizon/river-side-2023",		"user": 152,		"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Roll Lee/"},
 	{"event": "furizon/river-side-2023",		"user": 669,		"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Soonyx/"},
-	# NO ACCOUNT{"event": "furizon/river-side-2023",		"user": 669,		"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Starlight/"}, #starlight il protogen
+	{"event": "furizon/river-side-2023",		"user": 249,		"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Starlight/"}, #starlight il protogen
 	{"event": "furizon/river-side-2023",		"user": 1,			"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Stranck/"},
 	{"event": "furizon/river-side-2023",		"user": 2,			"path": "Furizon Riverside 2023/Furizon Riverside 2023 - Uploads/Sushi/"},
  
@@ -399,9 +396,8 @@ uploadDirs = [
 	{"event": "furizon/overlord",	"user": 873,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Caballino/"},
 	{"event": "furizon/overlord",	"user": 155,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Carty/"},
 	{"event": "furizon/overlord",	"user": 259,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Cavallium/"},
-	# NO ACCOUNT{"event": "furizon/overlord",	"user": 259,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Endiu Tealber/"},
+	# NO ACCOUNT{"event": "furizon/overlord",	"user": 259,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Endiu Tealber/"}, # actually cool photos, try asking
 	{"event": "furizon/overlord",	"user": 164,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Fons The Bun/"},
-	# NO ACCOUNT{"event": "furizon/overlord",	"user": 259,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Glax/"},
 	{"event": "furizon/overlord",	"user": 85,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Jabilo Bearly/"},
 	{"event": "furizon/overlord",	"user": 70,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Kinae/"},
 	{"event": "furizon/overlord",	"user": 872,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Maxetto/"},
@@ -415,7 +411,7 @@ uploadDirs = [
 	# NO ACCOUNT{"event": "furizon/overlord",	"user": 346,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/SithDragon18/"},
 	{"event": "furizon/overlord",	"user": 669,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Soonyx/"},
 	{"event": "furizon/overlord",	"user": 87,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Spectre/"},
-	# NO ACCOUNT{"event": "furizon/overlord",	"user": 87,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Stejf/"},
+	{"event": "furizon/overlord",	"user": 874,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Stejf/"}, # actually cool photos, try asking
 	{"event": "furizon/overlord",	"user": 465,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Stephen fang/"},
 	{"event": "furizon/overlord",	"user": 488,		"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Steve Wolf/"},
 	{"event": "furizon/overlord",	"user": 1,			"path": "Furizon Overlord 2024/Furizon Overlord 2024 - User uploads/Stranck/"},
