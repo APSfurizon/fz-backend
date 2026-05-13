@@ -23,7 +23,10 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -109,6 +112,28 @@ public class JooqOrderFinder implements OrderFinder {
             .where(ORDERS.ID.eq(orderId))
             .limit(1)
         ).mapOrNull(e -> orderMapper.map(e, pretixService));
+    }
+
+    @Override
+    public @NotNull Map<Long, Order> findOrdersByTicketPositionIds(@NotNull Collection<Long> ticketPositionIds,
+                                                                   @NotNull Event event,
+                                                                   @NotNull PretixInformation pretixService) {
+        if (ticketPositionIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return query.fetch(
+            selectFrom()
+            .where(
+                ORDERS.ORDER_TICKET_POSITION_ID.in(ticketPositionIds)
+                .and(ORDERS.EVENT_ID.eq(event.getId()))
+            )
+            .limit(ticketPositionIds.size())
+        ).stream().collect(
+                Collectors.toMap(
+                        e -> e.get(ORDERS.ORDER_TICKET_POSITION_ID),
+                        e -> orderMapper.map(e, pretixService)
+                )
+        );
     }
 
     @Override

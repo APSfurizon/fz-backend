@@ -45,7 +45,8 @@ public class PretixPaging<R> {
 
         Matcher matcher = pageNumberPatter.matcher(s);
         if (!matcher.find()) {
-            throw new IllegalArgumentException("Couldn't find page from url");
+            return 1;
+            //throw new IllegalArgumentException("Couldn't find page from url");
         }
 
         return Integer.parseInt(matcher.group(1));

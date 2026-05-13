@@ -8,6 +8,9 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 @Component
 @RequiredArgsConstructor
 public class GetSponsorshipNamesUseCase implements UseCase<GetSponsorshipNamesUseCase.Input, SponsorshipNamesResponse> {
@@ -18,13 +21,18 @@ public class GetSponsorshipNamesUseCase implements UseCase<GetSponsorshipNamesUs
         long eventId = input.eventId;
         SponsorshipNamesResponse response = new SponsorshipNamesResponse();
 
+        loadSponsorNames(pretix, eventId, response::sponsor);
+        return response;
+    }
+
+    public static void loadSponsorNames(@NotNull PretixInformation pretix, long eventId,
+                                        @NotNull BiConsumer<Sponsorship, Map<String, String>> consumer) {
         for (Sponsorship s : Sponsorship.values()) {
             if (s != Sponsorship.NONE) {
                 var variationId = pretix.getSponsorIds(s, eventId).stream().findFirst();
-                variationId.ifPresent(v -> response.sponsor(s, pretix.getVariationNames(v)));
+                variationId.ifPresent(v -> consumer.accept(s, pretix.getVariationNames(v)));
             }
         }
-        return response;
     }
 
     public record Input(

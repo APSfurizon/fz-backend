@@ -3,10 +3,10 @@ package net.furizon.backend.feature.user.dto;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Collection;
 
 @Data
 public class UsersByIdResponse {
     @NotNull
-    private final List<UserDisplayData> users;
+    private final Collection<UserDisplayData> users;
 }
