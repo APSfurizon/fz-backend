@@ -80,6 +80,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
         Order o = checks.getOrderAndAssertItExists(input.secret, input.event, input.pretixService);
         long orderOwner = checks.assertUserFound(o.getOrderOwnerUserId());
+        checks.assertOrderIsPaid(o, orderOwner, input.event);
         OrderDataResponse orderData = orderFinder.getOrderDataResponseFromUserEvent(
                 orderOwner,
                 input.event,
