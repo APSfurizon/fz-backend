@@ -31,7 +31,11 @@ public enum CheckinErrorCodes {
     @JsonProperty("unapproved")
     ORDER_NOT_APPROVED("checkin.redeem.errors.unapproved"),
     @JsonProperty("error")
-    INTERNAL_ERROR("checkin.redeem.errors.error");
+    INTERNAL_ERROR("checkin.redeem.errors.error"),
+    @JsonProperty("incomplete")
+    CHECKIN_INCOMPLETE("checkin.redeem.errors.incomplete"),
+    @JsonProperty("annulled")
+    CHECKIN_ANNULLED("checkin.redeem.errors.annulled");
 
     @NotNull
     private final TranslatableValue errorMessage;

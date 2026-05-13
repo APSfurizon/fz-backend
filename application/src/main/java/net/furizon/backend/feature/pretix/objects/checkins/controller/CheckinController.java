@@ -191,6 +191,7 @@ public class CheckinController {
                         orderBy,
                         page,
                         pretixService.getCurrentEvent(),
+                        pretixService,
                         user
                 )
         );

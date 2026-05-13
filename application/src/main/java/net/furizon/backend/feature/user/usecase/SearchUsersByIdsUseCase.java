@@ -22,7 +22,7 @@ public class SearchUsersByIdsUseCase implements UseCase<SearchUsersByIdsUseCase.
     @Override
     public @NotNull UsersByIdResponse executor(@NotNull SearchUsersByIdsUseCase.Input input) {
         final Set<Long> parsedIds = Arrays.stream(input.userIds).map(Long::parseLong).collect(Collectors.toSet());
-        return new UsersByIdResponse(userFinder.getDisplayUserByIds(parsedIds, input.event));
+        return new UsersByIdResponse(userFinder.getDisplayUserByIds(parsedIds, input.event).values());
     }
 
     public record Input(

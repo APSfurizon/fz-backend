@@ -10,7 +10,9 @@ import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,6 +33,11 @@ public interface OrderFinder {
 
     @Nullable
     Order findOrderById(long orderId, @NotNull PretixInformation pretixService);
+
+    @NotNull
+    Map<Long, Order> findOrdersByTicketPositionIds(@NotNull Collection<Long> ticketPositionIds,
+                                                   @NotNull Event event,
+                                                   @NotNull PretixInformation pretixService);
 
     @Nullable
     String getOrderCodeById(long orderId);
