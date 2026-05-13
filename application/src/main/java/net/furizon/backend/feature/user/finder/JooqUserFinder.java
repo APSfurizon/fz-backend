@@ -25,8 +25,11 @@ import org.jooq.Table;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.AUTHENTICATIONS;
 import static net.furizon.jooq.generated.Tables.FURSUITS;
@@ -94,11 +97,11 @@ public class JooqUserFinder implements UserFinder {
     }
     @NotNull
     @Override
-    public List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event) {
+    public Map<Long, UserDisplayData> getDisplayUserByIds(Collection<Long> ids, @NotNull Event event) {
         return sqlQuery.fetch(
             selectJoinDisplayUser(event.getId())
             .where(USERS.USER_ID.in(ids))
-        ).stream().map(JooqUserDisplayMapper::map).toList();
+        ).stream().collect(Collectors.toMap(r -> r.getValue(USERS.USER_ID), JooqUserDisplayMapper::map));
     }
 
     @Override

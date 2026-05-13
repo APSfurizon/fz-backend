@@ -12,6 +12,7 @@ import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,22 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @RequiredArgsConstructor
 public class JooqPersonalInfoFinder implements PersonalInfoFinder {
     private final SqlQuery sqlQuery;
+
+    @Override
+    public @NotNull Map<Long, Pair<String, String>> getFullNameByUserIds(@NotNull Collection<Long> userIds) {
+        return sqlQuery.fetch(
+            PostgresDSL.select(
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.USER_ID
+            )
+            .from(MEMBERSHIP_INFO)
+            .where(MEMBERSHIP_INFO.USER_ID.in(userIds))
+        ).stream().collect(Collectors.toMap(
+            r -> r.get(MEMBERSHIP_INFO.USER_ID),
+            r -> Pair.of(r.get(MEMBERSHIP_INFO.INFO_FIRST_NAME), r.get(MEMBERSHIP_INFO.INFO_LAST_NAME))
+        ));
+    }
 
     @Override
     public @Nullable PersonalUserInformation findByUserId(long userId) {

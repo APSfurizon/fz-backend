@@ -10,7 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectJoinStep;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface UserFinder {
@@ -45,7 +47,7 @@ public interface UserFinder {
     @NotNull
     List<UserDisplayData> getDisplayUserByOrderSerial(Set<Long> serials, @NotNull Event event);
     @NotNull
-    List<UserDisplayData> getDisplayUserByIds(Set<Long> ids, @NotNull Event event);
+    Map<Long, UserDisplayData> getDisplayUserByIds(Collection<Long> ids, @NotNull Event event);
     @NotNull
     List<UserDisplayData> getDisplayUserByMembershipDbId(Set<Long> ids, @NotNull Event event);
     @NotNull

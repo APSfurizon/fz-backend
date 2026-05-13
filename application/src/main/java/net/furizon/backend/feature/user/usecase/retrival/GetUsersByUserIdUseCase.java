@@ -11,7 +11,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class GetUsersByUserIdUseCase implements UseCase<GetUsersByUserIdUseCase.
     @Override
     public @NotNull SearchUsersResponse executor(@NotNull GetUsersByUserIdUseCase.Input input) {
         final Set<Long> parsedIds = Set.of(input.userIds);
-        final List<UserDisplayData> result = userFinder.getDisplayUserByIds(parsedIds, input.event);
+        final Collection<UserDisplayData> result = userFinder.getDisplayUserByIds(parsedIds, input.event).values();
         return new SearchUsersResponse(result.stream().map(data ->
                 new SearchUserResult(data.getUserId(), data.getFursonaName(), data.getPropic()))
                 .toList());
