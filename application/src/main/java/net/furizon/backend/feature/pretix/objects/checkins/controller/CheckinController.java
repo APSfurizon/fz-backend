@@ -93,6 +93,7 @@ public class CheckinController {
                 RedeemCheckinUseCase.class,
                 new RedeemCheckinUseCase.Input(
                         req.getCheckinListIds(),
+                        req.getCheckinType() == null ? CheckinType.ENTRY : req.getCheckinType(),
                         req.getSecret(),
                         pretixService.getCurrentEvent(),
                         user,

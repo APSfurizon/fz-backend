@@ -19,7 +19,7 @@ public class PretixRedeemCheckinRequest {
     private final List<Long> lists;
 
     @NotNull
-    private final CheckinType type = CheckinType.ENTRY;
+    private final CheckinType type;
 
     private final boolean force = false;
 
