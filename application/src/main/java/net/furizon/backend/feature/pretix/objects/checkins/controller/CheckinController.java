@@ -150,7 +150,7 @@ public class CheckinController {
                         query,
                         checkinListId,
                         hasCheckedIn,
-                        orderBy,
+                        orderBy == null ? CheckinSearchOrder.ORDER_CODE : orderBy,
                         page,
                         pretixService.getCurrentEvent(),
                         user,

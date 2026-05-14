@@ -23,8 +23,18 @@ public interface OrderFinder {
     @Nullable
     Order findOrderByCodeEvent(@NotNull String code, long eventId, @NotNull PretixInformation pretixService);
 
+    @NotNull
+    Map<String, Order> findOrderByCodesEvent(@NotNull Collection<String> codes,
+                                             long eventId,
+                                             @NotNull PretixInformation pretixService);
+
     @Nullable
     Order findOrderByUserIdEvent(long userId, @NotNull Event event, @NotNull PretixInformation pretixService);
+
+    @NotNull
+    Map<Long, Order> findOrderByUserIdsEvent(Collection<Long> userIds,
+                                             @NotNull Event event,
+                                             @NotNull PretixInformation pretixService);
 
     @Nullable
     Order findOrderByCheckinSecretEvent(@NotNull String secret,
