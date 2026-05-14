@@ -124,6 +124,7 @@ pretix:
     fzbackendutils-token: ${PRETIX_FZBACKENDUTILS_API_TOKEN:OwO}
   connection-timeout: ${PRETIX_HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
   cache-reload-cronjob: ${PRETIX_CACHE_RELOAD_CRONJOB:0 0 */8 * * *}
+  checkin-allow-daily-outside-of-day: ${PRETIX_CHECKIN_ALLOW_DAILY_OUTSIDE_OF_DAY:false}
   shop:
     host: ${PRETIX_SHOP_HOST:localhost}
     port: ${PRETIX_SHOP_PORT:8000}
