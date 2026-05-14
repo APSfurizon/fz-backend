@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.checkins.action.redeemCheckin
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.PretixRedeemCheckinRequest;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemCheckinResponse;
 import net.furizon.backend.infrastructure.http.client.HttpClient;
@@ -31,6 +32,7 @@ public class RestRedeemCheckinAction implements PretixRedeemCheckinAction {
     public @Nullable RedeemCheckinResponse invoke(@NotNull String secret,
                                                   @NotNull String organizer,
                                                   @NotNull String nonce,
+                                                  @NotNull CheckinType checkinType,
                                                   @NotNull List<Long> checkinListIds) {
         log.info("Checking in secret {} for lists {} with nonce {}", secret, checkinListIds, nonce);
         final var request = HttpRequest.<RedeemCheckinResponse>create()
@@ -38,7 +40,7 @@ public class RestRedeemCheckinAction implements PretixRedeemCheckinAction {
                 .path("/organizers/{organizer}/checkinrpc/redeem/")
                 .uriVariable("organizer", organizer)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new PretixRedeemCheckinRequest(secret, checkinListIds, nonce))
+                .body(new PretixRedeemCheckinRequest(secret, checkinListIds, checkinType, nonce))
                 .responseType(RedeemCheckinResponse.class)
                 .build();
 

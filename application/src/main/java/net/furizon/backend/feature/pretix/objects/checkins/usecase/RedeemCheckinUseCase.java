@@ -10,6 +10,7 @@ import net.furizon.backend.feature.pretix.objects.checkins.PortaBadgeLevel;
 import net.furizon.backend.feature.pretix.objects.checkins.action.redeemCheckin.PretixRedeemCheckinAction;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetManager;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.gadgets.GadgetPermissionService;
+import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.CheckinType;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemCheckinResponse;
 import net.furizon.backend.feature.pretix.objects.checkins.dto.response.CheckinResponse;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -21,6 +22,7 @@ import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -73,6 +75,9 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
     @NotNull
     private final GadgetPermissionService gadgetPermissionService;
 
+    @NotNull
+    private final PretixConfig pretixConfig;
+
     @Override
     public @NotNull CheckinResponse executor(@NotNull RedeemCheckinUseCase.Input input) {
         log.info("User {} is checking in secret {}", input.user.getUserId(), input.secret);
@@ -99,7 +104,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
         if (isDailyTicket) {
             dailyDays = orderData.getDailyDays();
             LocalDate today = LocalDate.now();
-            if (dailyDays != null && !dailyDays.contains(today)) {
+            if (dailyDays != null && !dailyDays.contains(today) && !pretixConfig.isCheckinAllowDailyOutsideOfDay()) {
                 throw new ApiException(
                     translationService.error(
                         "order.checkin.invalid_daily",
@@ -138,6 +143,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 input.secret,
                 input.event.getOrganizerAndEventPair().getOrganizer(),
                 nonce,
+                input.checkinType,
                 input.checkinListIds
         );
         if (checkinResponse == null) {
@@ -217,6 +223,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
     public record Input(
             @NotNull List<Long> checkinListIds,
+            @NotNull CheckinType checkinType,
             @NotNull String secret,
             @NotNull Event event,
             @NotNull FurizonUser user,

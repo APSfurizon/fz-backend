@@ -139,6 +139,9 @@ public class GenerateBadgesHtmlUseCase implements UseCase<GenerateBadgesHtmlUseC
         if (permissions.contains(Permission.JUNIOR_STAFF)) {
             badgeLevel = PrintedBadgeLevel.JUNIOR_STAFF;
         }
+        if (permissions.contains(Permission.SECURITY_STAFF)) {
+            badgeLevel = PrintedBadgeLevel.SECURITY_STAFF;
+        }
         if (permissions.contains(Permission.MAIN_STAFF)) {
             badgeLevel = PrintedBadgeLevel.MAIN_STAFF;
         }
