@@ -220,6 +220,16 @@ public class GalleryChecks {
         }
     }
 
+    public void assertFileNotEmpty(long userId, long fileSize) {
+        if (fileSize <= 0L) {
+            log.error("User {} is trying to upload an empty file ({})", userId, fileSize);
+            throw new ApiException(
+                    translationService.error("gallery.upload.empty"),
+                    ImageCodes.IMAGE_INVALID
+            );
+        }
+    }
+
     public long fullUploadChecksAndGetUserId(@NotNull FurizonUser user,
                                              @Nullable Long userIdFromReqBody,
                                              @NotNull Event event,
@@ -247,6 +257,8 @@ public class GalleryChecks {
         assertUserNotReachedUploadNumberLimitAdmin(user.getUserId(), userIdFromReqBody, event);
         //Check for file size
         assertUserCanUploadFileSize(user.getUserId(), fileSize);
+        //Check for empty file
+        assertFileNotEmpty(user.getUserId(), fileSize);
         return userId;
     }
 }
