@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface GalleryProcessorSubmitJobAction {
     @NotNull Optional<GalleryProcessorJob> invoke(long reqId, @NotNull String fileName);
+    void invokeAsync(long reqId, @NotNull String fileName, long uploadReqId);
 }

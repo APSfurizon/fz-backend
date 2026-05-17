@@ -10,6 +10,7 @@ import net.furizon.backend.infrastructure.http.client.HttpRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -41,6 +42,16 @@ public class GalleryProcessorSubmitJobImpl implements GalleryProcessorSubmitJobA
         } catch (final HttpClientErrorException ex) {
             log.error(ex.getResponseBodyAsString());
             throw ex;
+        }
+    }
+
+    @Async
+    @Override
+    public void invokeAsync(long reqId, @NotNull String fileName, long uploadReqId) {
+        try {
+            invoke(reqId, fileName);
+        } catch (Exception e) {
+            log.warn("Upload {}: Unable to submit job to processor",  uploadReqId, e);
         }
     }
 }

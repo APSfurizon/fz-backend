@@ -13,7 +13,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.SelectOnConditionStep;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface UploadFinder {
@@ -42,6 +44,7 @@ public interface UploadFinder {
     @NotNull List<Long> getUnprocessedUploadIds();
 
     @Nullable GalleryUpload getUploadById(long uploadId);
+    @NotNull Map<Long, GalleryUpload> getUploadByIds(Collection<Long> uploadIds);
 
     @NotNull List<GalleryUploadPreview> adminBatchApprovalRetrival(
             long fromId,

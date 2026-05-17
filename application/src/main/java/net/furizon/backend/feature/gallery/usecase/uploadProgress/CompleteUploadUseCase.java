@@ -108,11 +108,7 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
         deleteUploadProgress.invoke(upload.getUploadReqId());
 
         //Launch processor job
-        try {
-            galleryProcessorSubmitJobAction.invoke(ret.getId(), upload.getS3Key());
-        } catch (Exception e) {
-            log.warn("Upload {}: Unable to submit job to processor",  upload.getUploadReqId(), e);
-        }
+        galleryProcessorSubmitJobAction.invokeAsync(ret.getId(), upload.getS3Key(), upload.getUploadReqId());
 
         return ret;
     }

@@ -35,8 +35,11 @@ import org.jooq.TableField;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.furizon.jooq.generated.Tables.EVENTS;
 import static net.furizon.jooq.generated.Tables.MEDIA;
@@ -174,6 +177,23 @@ public class JooqUploadFinder implements UploadFinder {
                 q.render,
                 q.thumbnail,
                 q.userPropic
+        ));
+    }
+
+    @Override
+    public @NotNull Map<Long, GalleryUpload> getUploadByIds(Collection<Long> uploadIds) {
+        FullUploadObjSelected q = selectFullUploadObj();
+        return query.fetch(
+                q.query.where(UPLOADS.ID.in(uploadIds))
+        ).stream().collect(Collectors.toMap(
+            r -> r.get(UPLOADS.ID),
+            r -> GalleryUploadMapper.map(
+                r,
+                q.media,
+                q.render,
+                q.thumbnail,
+                q.userPropic
+            )
         ));
     }
 

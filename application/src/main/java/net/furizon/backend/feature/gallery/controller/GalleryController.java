@@ -15,6 +15,7 @@ import net.furizon.backend.feature.gallery.dto.GalleryUpload;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadRequest;
 import net.furizon.backend.feature.gallery.dto.bulkDownload.BulkDownloadResponse;
 import net.furizon.backend.feature.gallery.dto.request.AdminUpdateUploadRequest;
+import net.furizon.backend.feature.gallery.dto.request.ReprocessUploadsRequest;
 import net.furizon.backend.feature.gallery.dto.response.AdminBatchApprovalResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryEventsResponse;
 import net.furizon.backend.feature.gallery.dto.response.ListGalleryPhotographersResponse;
@@ -31,6 +32,7 @@ import net.furizon.backend.feature.gallery.usecase.FetchUploadUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListGalleryEventsUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListGalleryPhotographersUseCase;
 import net.furizon.backend.feature.gallery.usecase.ListUploadsUseCase;
+import net.furizon.backend.feature.gallery.usecase.ReprocessUploadUseCase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -279,6 +281,23 @@ public class GalleryController {
                 new BulkGalleryDirectDownloadUseCase.Input(
                     new HashSet<>(request.getIds()),
                     user
+                )
+        );
+    }
+
+    @Operation(summary = "Reloads metadata and reprocess upload", description =
+        "Triggers a reprocess of an a previously made upload. It doesn't immediately clear "
+        + "current metadata, but it's overwritten once the processing is done")
+    @PostMapping("/manage/reprocess-uploads")
+    public boolean reprocessUploads(
+            @NotNull @Valid @RequestBody final ReprocessUploadsRequest request,
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+    ) {
+        return executor.execute(
+                ReprocessUploadUseCase.class,
+                new ReprocessUploadUseCase.Input(
+                        user,
+                        request.getUploadIds()
                 )
         );
     }
