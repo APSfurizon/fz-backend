@@ -5,12 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.action.processor.handleJob.GalleryProcessorHandleJobAction;
 import net.furizon.backend.feature.gallery.action.processor.retryJob.GalleryProcessorRetryJobAction;
 import net.furizon.backend.feature.gallery.action.processor.submitJob.GalleryProcessorSubmitJobAction;
+import net.furizon.backend.feature.gallery.action.uploads.setUploadType.SetUploadTypeAction;
 import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorJob;
 import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.feature.gallery.finder.processor.GalleryProcessorJobFinder;
 import net.furizon.backend.infrastructure.usecase.UseCase;
+import net.furizon.jooq.generated.enums.UploadType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +29,29 @@ public class PollGalleryProcessorUseCase implements UseCase<Integer, Integer> {
     @NotNull private final GalleryProcessorJobFinder galleryProcessorJobFinder;
     @NotNull private final UploadFinder uploadFinder;
 
-    @Override
-    @NotNull
-    public Integer executor(@NotNull Integer input) {
-        int pollNo = 0;
+    @NotNull private final SetUploadTypeAction setUploadTypeAction;
 
+    @NotNull
+    @Override
+    @Transactional
+    public Integer executor(@NotNull Integer input) {
+        int i = 0;
+        i += fullRetryJob();
+        i += reprocessThumbnailJob();
+        return i;
+    }
+
+    public int reprocessThumbnailJob() {
+        List<Long> errorThumbnail = uploadFinder.getProcessedUploadIdsWithoutThumbnail();
+        setUploadTypeAction.invoke(errorThumbnail, UploadType.UNPROCESSED);
+        for (long uploadId : errorThumbnail) {
+            galleryProcessorRetryJobAction.invoke(uploadId);
+        }
+        return errorThumbnail.size();
+    }
+
+    public int fullRetryJob() {
+        int pollNo = 0;
 
         List<Long> unprocessed = uploadFinder.getUnprocessedUploadIds();
         List<Long> toSubmit = new ArrayList<>((unprocessed.size() / 2) + 1);

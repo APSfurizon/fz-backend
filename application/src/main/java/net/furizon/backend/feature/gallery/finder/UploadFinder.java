@@ -42,6 +42,7 @@ public interface UploadFinder {
     @Nullable Long getUploadIdByHashOnEvent(@NotNull String hash, long eventId);
 
     @NotNull List<Long> getUnprocessedUploadIds();
+    @NotNull List<Long> getProcessedUploadIdsWithoutThumbnail();
 
     @Nullable GalleryUpload getUploadById(long uploadId);
     @NotNull Map<Long, GalleryUpload> getUploadByIds(Collection<Long> uploadIds);

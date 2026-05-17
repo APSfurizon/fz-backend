@@ -167,6 +167,18 @@ public class JooqUploadFinder implements UploadFinder {
     }
 
     @Override
+    public @NotNull List<Long> getProcessedUploadIdsWithoutThumbnail() {
+        return query.fetch(
+            PostgresDSL.select(UPLOADS.ID)
+            .from(UPLOADS)
+            .where(
+                UPLOADS.UPLOAD_TYPE.notEqual(UploadType.UNPROCESSED)
+                .and(UPLOADS.THUMBNAIL_MEDIA_ID.isNull())
+            )
+        ).stream().map(r -> r.get(UPLOADS.ID)).toList();
+    }
+
+    @Override
     public @Nullable GalleryUpload getUploadById(long uploadId) {
         FullUploadObjSelected q = selectFullUploadObj();
         return query.fetchFirst(
