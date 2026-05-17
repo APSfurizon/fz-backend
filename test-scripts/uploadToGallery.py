@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import exifread
 import hashlib
 import requests
@@ -31,46 +32,51 @@ HEADERS = {
 
 session = requests.session()
 
+
+def tsPrint(msg: str):
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    print(f"[{timestamp}] {msg}")
+
 def doPost(url, json=None, data=None, auth=None, files=None) -> Response:
 	global session
 	global HEADERS
 	response = session.post(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth, files=files)
-	print(f"\n-------- POST {url} --------")
-	print(response.status_code)
-	print(response.cookies.items())
-	print(response.headers)
-	print(response.text)
+	tsPrint(f"\n-------- POST {url} --------")
+	tsPrint(response.status_code)
+	tsPrint(response.cookies.items())
+	tsPrint(response.headers)
+	tsPrint(response.text)
 	return response
 def doGet(url, auth=None, json=None, data=None) -> Response:
 	global session
 	global HEADERS
 	response = session.get(url, headers=HEADERS, json=json, data=data, allow_redirects=False, auth=auth)
-	print(f"\n-------- GET {url} --------")
-	print(response.status_code)
-	print(response.cookies.items())
-	print(response.headers)
-	print(response.text)
+	tsPrint(f"\n-------- GET {url} --------")
+	tsPrint(response.status_code)
+	tsPrint(response.cookies.items())
+	tsPrint(response.headers)
+	tsPrint(response.text)
 	return response
 def doDelete(url) -> Response:
 	global session
 	global HEADERS
 	response = session.delete(url, headers=HEADERS, allow_redirects=False)
-	print(f"\n-------- DELETE {url} --------")
-	print(response.status_code)
-	print(response.cookies.items())
-	print(response.headers)
-	print(response.text)
+	tsPrint(f"\n-------- DELETE {url} --------")
+	tsPrint(response.status_code)
+	tsPrint(response.cookies.items())
+	tsPrint(response.headers)
+	tsPrint(response.text)
 	return response
 def doPut(url, data=None, extraHeaders=None) -> Response:
 	global session
 	global HEADERS
 	extraHeaders = HEADERS if extraHeaders is None else {**HEADERS, **extraHeaders}
 	response = session.put(url, headers=extraHeaders, allow_redirects=False, data=data)
-	print(f"\n-------- PUT {url} --------")
-	print(response.status_code)
-	print(response.cookies.items())
-	print(response.headers)
-	print(response.text)
+	tsPrint(f"\n-------- PUT {url} --------")
+	tsPrint(response.status_code)
+	tsPrint(response.cookies.items())
+	tsPrint(response.headers)
+	tsPrint(response.text)
 	return response
 
 def login() -> Response:
@@ -85,7 +91,7 @@ def login() -> Response:
 		val = f"Bearer {token}"
 		HEADERS["Authorization"] = val
 		session.cookies.set("fz-token", val)
-		print(HEADERS)
+		tsPrint(HEADERS)
 
 	return req
 
@@ -141,7 +147,7 @@ def uploadFileToGallery(filePath: str, fileName: str, eventId: int) -> int:
 			try:
 				uploadChunk(i, url, chunk)
 			except Exception as e:
-				print(f"**[WARN] Failed to upload chunk {i} for file '{fileName}': {e}. Retrying...")
+				tsPrint(f"**[WARN] Failed to upload chunk {i} for file '{fileName}': {e}. Retrying...")
 				uploadChunk(i, url, chunk)
 			
 	finalHash = hashlib.md5(b"".join(md5)).hexdigest()
@@ -163,31 +169,32 @@ def getEvents() -> Response:
 	return doGet(f'{BASE_URL_API}events/')
 
 def getDate(path, file):
-	#print(f"**[FINEST] Extracting EXIF data from path '{path}' file '{file}'...")
+	#tsPrint(f"**[FINEST] Extracting EXIF data from path '{path}' file '{file}'...")
 	try:
 		with open(os.path.join(path, file), 'rb') as fh:
 			#import inspect
-			#print(inspect.getfullargspec(exifread.process_file))
+			#tsPrint(inspect.getfullargspec(exifread.process_file))
 			tags = exifread.process_file(fh, stop_tag="EXIF DateTimeOriginal", extract_thumbnail=False, details=False)
 			#tags = exifread.process_file(fh, stop_tag="EXIF DateTimeOriginal", details=False)
 			dateTaken = tags["EXIF DateTimeOriginal"]
 			return dateTaken
 	except KeyError:
-		print(f"**[WARN] No EXIF DateTimeOriginal tag found for file '{file}' in path '{path}'.")
+		tsPrint(f"**[WARN] No EXIF DateTimeOriginal tag found for file '{file}' in path '{path}'.")
 	return None
 
 def approveUploads(uploadIds: dict, force: bool=False) -> Response:
+	tsPrint(f"**[DEBUG] Approving uploads with IDs: {uploadIds}, force={force}")
 	for uploadKey, ids in uploadIds.items():
 		if len(ids) > 0 and (len(ids) > 50 or force):
 			try:
 				photographerId = uploadKey[0]
 				reject = uploadKey[1]
 				rejectStr = "REJECTED" if reject else "APPROVED"
-				print(f"**[INFO] Updating uploads with IDs {ids}: setting photographer to user {photographerId}, reject = {reject}")
+				tsPrint(f"**[INFO] Updating uploads with IDs {ids}: setting photographer to user {photographerId}, reject = {reject}")
 				adminUpdateUpload(ids, status=rejectStr, photographerId=photographerId)
 				uploadIds[uploadKey] = []
 			except Exception as e:
-				print(f"**[ERROR] Failed to update uploads with IDs {ids}: {e}")
+				tsPrint(f"**[ERROR] Failed to update uploads with IDs {ids}: {e}")
 
 
 login()
@@ -203,7 +210,7 @@ for event in events["events"]:
  
 supportedFormats = getUploadLimits().json()["allowedFileExtensions"]
 supportedFormats = [x.lower() for x in supportedFormats]
-print(f"**[DEBUG] Supported file formats for upload: {supportedFormats}")
+tsPrint(f"**[DEBUG] Supported file formats for upload: {supportedFormats}")
 
 
 uploadDirs = [
@@ -500,8 +507,11 @@ uploadDirs = [
 
 eventToUploads = {}
 
+totalPhotos = 0
+uploadedPhotos = 0
+
 for uploadDir in uploadDirs:
-	print(f"**[DEBUG] Processing upload directory: {uploadDir}")
+	tsPrint(f"**[DEBUG] Processing upload directory: {uploadDir}")
 	eventName = uploadDir["event"]
 	eventId = eventSlugToId[eventName]
 	if (eventId not in eventToUploads):
@@ -518,7 +528,7 @@ for uploadDir in uploadDirs:
 			continue
 		_, file_extension = os.path.splitext(fileName)
 		if file_extension.lower()[1:] not in supportedFormats:
-			print(f"**[DEBUG] Unsupported file format '{file_extension}' for file '{fileName}' in path '{path}'. Skipping.")
+			tsPrint(f"**[DEBUG] Unsupported file format '{file_extension}' for file '{fileName}' in path '{path}'. Skipping.")
 			continue
 
 		dateTaken = getDate(path, fileName)
@@ -531,37 +541,42 @@ for uploadDir in uploadDirs:
 			"dateTaken": dateTaken
 		})
 		filesFound += 1
+		totalPhotos += 1
 	photographerName: str = None
 	try:
 		photographerName = searchByUserId(photographerId).json()["users"][0]["description"]
 	except Exception as e:
 		pass
 	attentionStr = "!!!!!!!!!!!!" if filesFound < 5 else ""
-	print(f"**[DEBUG] Event ({eventId}) '{eventName}' - User ({("%03d" % photographerId)}) '{photographerName.ljust(40)}' - Found {("%04d" % filesFound)} photos - Rejected: {rejected} - Path: '{path}' {attentionStr}")
+	tsPrint(f"**[DEBUG] Event ({eventId}) '{eventName}' - User ({("%03d" % photographerId)}) '{photographerName.ljust(40)}' - Found {("%04d" % filesFound)} photos - Rejected: {rejected} - Path: '{path}' {attentionStr}")
 
 for eventId, uploads in eventToUploads.items():
 	uploads.sort(key=lambda x: x["dateTaken"], reverse=False)
-	#print(uploads)
+	#tsPrint(uploads)
 
-print(json.dumps(eventToUploads))
+tsPrint(json.dumps(eventToUploads))
+tsPrint(f"**[INFO] Total photos to upload: {totalPhotos}")
 
 uploadIds = {}
 for eventId, uploads in eventToUploads.items():
 	for upload in uploads:
 		fileName = upload["fileName"]
 		try:
-			print(f"**[FINE] Uploading file '{fileName}'")
+			tsPrint(f"**[FINE] Uploading file '{fileName}'")
 			uploadId = uploadFileToGallery(upload["path"], fileName, eventId)
 			uploadKey = (upload["photographerId"], rejected)
-			print(f"**[FINE] Uploading file '{fileName}': Got upload ID = {uploadId}. Storing with key {uploadKey}")
+			tsPrint(f"**[FINE] Uploading file '{fileName}': Got upload ID = {uploadId}. Storing with key {uploadKey}")
 			if (uploadKey not in uploadIds):
 				uploadIds[uploadKey] = []
 			personalUploadIds: list = uploadIds[uploadKey]
 			personalUploadIds.append(uploadId)
-			approveUploads(uploadIds)
+			uploadedPhotos += 1
+			approveUploads(uploadIds, force=(uploadedPhotos % 1000 == 0))
 		except Exception as e:
-			print(f"**[ERROR] Uploading file '{fileName}': {e}")
+			tsPrint(f"**[ERROR] Uploading file '{fileName}': {e}")
 approveUploads(uploadIds, force=True)
 
-# python3 uploadToGallery.py 2>&1 | tee -a log.txt
+tsPrint(f"**[INFO] Uploaded {uploadedPhotos} out of {totalPhotos} photos.")
+
+# python -X utf8 uploadToGallery.py 2>&1 | tee -a log.txt
 # grep -e "^\*\*" log.txt > log2.txt

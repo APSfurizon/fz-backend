@@ -187,30 +187,36 @@ public class GalleryChecks {
         long[] sizes = getUploadFileSizeMbArr();
         Permission[] permissions = getUploadFileSizePermissionsArr();
 
+        //Build list of possible permissions needed to upload this file
         List<Permission> permissionsList = new ArrayList<>(permissions.length);
         for (int i = 0; i < sizes.length; i++) {
             Permission p = permissions[i];
-            if (sizes[i] <= fileSize && p != null) {
+            if (fileSize <= sizes[i]) {
+                //If for uploading this file we don't need any particular permission,
+                // return immediately
+                if (p == null) {
+                    return;
+                }
                 permissionsList.add(p);
             }
         }
 
-        if (!permissionsList.isEmpty()) {
-            Set<Permission> userPermissions = permissionFinder.getUserPermissions(userId);
-            long biggest = getBiggestFileSize(userPermissions, sizes, permissions);
+        Set<Permission> userPermissions = permissionFinder.getUserPermissions(userId);
+        //This is just for message printing
+        long biggest = getBiggestFileSize(userPermissions, sizes, permissions);
 
-            //if at least one element is contained, it returns true
-            boolean userHasAnyPermission = userPermissions.removeAll(permissionsList);
-            if (!userHasAnyPermission) {
-                log.error("User {} has uploaded a file to big ({}). Limit: {}",  userId, fileSize, biggest);
-                throw new ApiException(
-                        translationService.error(
-                                "gallery.upload.too_big",
-                                PretixGenericUtils.humanReadableByteCountBin(biggest)
-                        ),
-                        ImageCodes.IMAGE_SIZE_TOO_BIG
-                );
-            }
+        //if at least one element is contained, this returns true
+        boolean userHasAnyPermission = userPermissions.removeAll(permissionsList);
+        // If the user has not any of the required permission, exit with an error
+        if (!userHasAnyPermission) {
+            log.error("User {} has uploaded a file too big ({}). Limit: {}",  userId, fileSize, biggest);
+            throw new ApiException(
+                    translationService.error(
+                            "gallery.upload.too_big",
+                            PretixGenericUtils.humanReadableByteCountBin(biggest)
+                    ),
+                    ImageCodes.IMAGE_SIZE_TOO_BIG
+            );
         }
     }
 
