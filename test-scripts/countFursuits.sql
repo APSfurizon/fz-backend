@@ -1,0 +1,1 @@
+SELECT COUNT(*) AS no, users.user_fursona_name FROM fursuits INNER JOIN fursuits_orders ON fursuits.fursuit_id = fursuits_orders.fursuit_id INNER JOIN orders ON orders.id = fursuits_orders.order_id INNER JOIN users ON fursuits.user_id = users.user_id WHERE orders.event_id = 8 GROUP BY users.user_id ORDER BY no DESC;
