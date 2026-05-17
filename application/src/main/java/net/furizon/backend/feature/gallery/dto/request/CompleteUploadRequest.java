@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import net.furizon.backend.feature.gallery.GalleryConstant;
 import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Data
 public class CompleteUploadRequest {
     @NotEmpty
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{M}_\\-'()\\[\\]. ]{2,63}$")
+    @Pattern(regexp = GalleryConstant.FILE_NAME_REGEX)
     private final String fileName;
 
     @NotNull private final Long uploadReqId;
