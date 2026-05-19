@@ -165,12 +165,10 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
                 //Delete unreferenced media db objects
                 if (!referencedMediaIds.contains(media.getId())) {
                     log.info("[DANGLING MEDIA] Deleting unreferenced db media: {}", media);
-                    switch (storeMethod) {
-                        case StoreMethod.DISK -> physicallyDeleteMediaAction.invoke(media, false);
-                        case StoreMethod.S3_REMOTE -> s3DeleteUpload.delete(media.getPath());
-                        default -> {
-                        }
-                    }
+                    //Media will be deleted in subsequent calls if it's really not referenced.
+                    //  This fixes a bug if two media object (one referenced) points to the same file:
+                    //  By deleting the file immediately we would kill also for the other media object
+                    //physicallyDeleteMediaAction.invoke(media, false);
                     dbDeleteIds.add(media.getId());
                     deleted++;
                     continue;
