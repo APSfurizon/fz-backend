@@ -14,6 +14,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class PhysicallyDeleteMediaActionImpl implements PhysicallyDeleteMediaAction {
     @NotNull private final DeleteMediaFromDiskAction deleteMediaFromDiskAction;
+    @NotNull private final DeleteMediaFromS3RemoteAction deleteMediaFromS3RemoteAction;
 
     @Override
     public boolean invoke(@NotNull MediaData media, boolean deleteFromDb) {
@@ -21,6 +22,7 @@ public class PhysicallyDeleteMediaActionImpl implements PhysicallyDeleteMediaAct
             boolean res = switch (media.getStoreMethod()) {
                 //It internally calls deleteIfExists
                 case StoreMethod.DISK -> deleteMediaFromDiskAction.invoke(media, deleteFromDb);
+                case StoreMethod.S3_REMOTE -> deleteMediaFromS3RemoteAction.invoke(media, deleteFromDb);
                 default -> throw new IllegalStateException("Unexpected value: " + media.getStoreMethod());
             };
             if (!res) {
@@ -28,7 +30,7 @@ public class PhysicallyDeleteMediaActionImpl implements PhysicallyDeleteMediaAct
             }
             return res;
         } catch (IOException e) {
-            log.error("Error deleting dangling media {}. store={} path={}",
+            log.error("Error deleting media {}. store={} path={}",
                     media.getId(), media.getStoreMethod(), media.getPath(), e);
             return false;
         }

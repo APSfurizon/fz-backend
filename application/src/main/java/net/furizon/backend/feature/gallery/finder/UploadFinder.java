@@ -90,4 +90,6 @@ public interface UploadFinder {
     @NotNull List<BulkDownloadFile> getBulkDownloadableFiles(Set<Long> ids);
 
     @NotNull List<BulkDirectDownloadFile> getBulkDirectDownloadableFiles(Set<Long> ids);
+
+    boolean areUploadStillProcessing();
 }

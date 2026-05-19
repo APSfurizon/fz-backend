@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.ImageConfig;
 import net.furizon.backend.infrastructure.media.StoreMethod;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -47,27 +48,31 @@ public class StoreMediaOnDiskActionImpl implements StoreMediaOnDiskAction {
     public @NotNull StoreMediaOnDiskAction.Results invoke(
             @NotNull ImmutableImage image,
             @NotNull FurizonUser user, @NotNull String basePath) throws IOException {
+        try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
+            log.info("Storing a media on disk for user {} on basePath {}", user.getUsername(), basePath);
 
-        log.info("Storing a media on disk for user {} on basePath {}", user.getUsername(), basePath);
+            String filename = UUID.randomUUID() + ".webp";
+            String userId = String.valueOf(user.getUserId());
 
-        String filename = UUID.randomUUID() + ".webp";
-        String userId = String.valueOf(user.getUserId());
+            Path relativePath = Paths.get(storageConfig.getMediaPath(), basePath, userId);
+            Path fullRelativePath = relativePath.resolve(filename);
+            Path baseStoragePath = Paths.get(storageConfig.getBasePublicPath());
+            Path absolutePath = baseStoragePath.resolve(relativePath);
+            Path fullAbsolutePath = baseStoragePath.resolve(fullRelativePath);
+            Files.createDirectories(absolutePath);
 
-        Path relativePath = Paths.get(storageConfig.getMediaPath(), basePath, userId);
-        Path fullRelativePath = relativePath.resolve(filename);
-        Path baseStoragePath = Paths.get(storageConfig.getBasePublicPath());
-        Path absolutePath = baseStoragePath.resolve(relativePath);
-        Path fullAbsolutePath = baseStoragePath.resolve(fullRelativePath);
-        Files.createDirectories(absolutePath);
+            //Important to normalize the path before!
+            String relativePathStr = fullRelativePath.normalize().toString();
+            long mediaId = addMediaAction.invoke(relativePathStr, mimeType, StoreMethod.DISK);
+            image.output(writer, fullAbsolutePath);
 
-        //Important to normalize the path before!
-        String relativePathStr = fullRelativePath.normalize().toString();
-        long mediaId = addMediaAction.invoke(relativePathStr, mimeType, StoreMethod.DISK);
-        image.output(writer, fullAbsolutePath);
+            log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), fullAbsolutePath);
 
-        log.info("Stored media on disk for user {}. Absolute path: {}", user.getUsername(), fullAbsolutePath);
-
-        return new Results(relativePathStr, mediaId);
+            return new Results(relativePathStr, mediaId);
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
+        }
     }
 
 

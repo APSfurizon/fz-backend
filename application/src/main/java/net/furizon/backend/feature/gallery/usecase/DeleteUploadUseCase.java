@@ -7,6 +7,7 @@ import net.furizon.backend.feature.gallery.finder.UploadFinder;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaAction;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -47,68 +48,73 @@ public class DeleteUploadUseCase implements UseCase<DeleteUploadUseCase.Input, B
     @Override
     @Transactional
     public @NotNull Boolean executor(@NotNull DeleteUploadUseCase.Input input) {
-        long userId = input.user.getUserId();
-        long uploadId = input.uploadId;
-        log.info("User {} is permanently deleting upload {}", userId, uploadId);
+        try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
+            long userId = input.user.getUserId();
+            long uploadId = input.uploadId;
+            log.info("User {} is permanently deleting upload {}", userId, uploadId);
 
-        Long photographer = uploadFinder.getPhotographerUserId(uploadId);
-        checks.assertUploadFound(photographer);
+            Long photographer = uploadFinder.getPhotographerUserId(uploadId);
+            checks.assertUploadFound(photographer);
 
-        if (photographer != userId) {
-            boolean b = permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_FULLY_DELETE_UPLOADS);
-            if (!b) {
-                log.error("User {} is trying to delete upload {}, "
-                        + "but he's not the owner nor he has the correct permissions!",
-                        userId, uploadId);
+            if (photographer != userId) {
+                boolean b = permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_FULLY_DELETE_UPLOADS);
+                if (!b) {
+                    log.error("User {} is trying to delete upload {}, "
+                                    + "but he's not the owner nor he has the correct permissions!",
+                            userId, uploadId);
+                    throw new ApiException(
+                            translationService.error("gallery.not_owner_of_upload"),
+                            GeneralResponseCodes.USER_IS_NOT_ADMIN
+                    );
+                }
+            }
+
+            long mainMediaId = uploadFinder.getMainMediaIdFromUploadId(uploadId);
+            Long thumbnailMediaId = uploadFinder.getThumbnailMediaIdFromUploadId(uploadId);
+            Long renderMediaId = uploadFinder.getRenderMediaIdFromUploadId(uploadId);
+
+            String mainMediaKey = mediaFinder.getPathById(mainMediaId);
+            String thumbnailMediaKey = thumbnailMediaId == null ? null : mediaFinder.getPathById(thumbnailMediaId);
+            String renderMediaKey = renderMediaId == null ? null : mediaFinder.getPathById(renderMediaId);
+
+
+            boolean res = true;
+
+            List<Long> ids = new ArrayList<>(3);
+            ids.add(mainMediaId);
+            if (thumbnailMediaId != null) {
+                ids.add(thumbnailMediaId);
+            }
+            if (renderMediaId != null) {
+                ids.add(renderMediaId);
+            }
+            res = res && deleteMediaAction.deleteFromDb(ids);
+            //Upload object is deleted with cascade
+
+            res = res && mainMediaKey != null;
+            if (res) {
+                s3DeleteUpload.delete(mainMediaKey);
+                if (thumbnailMediaKey != null) {
+                    s3DeleteUpload.delete(thumbnailMediaKey);
+                }
+                if (renderMediaKey != null) {
+                    s3DeleteUpload.delete(renderMediaKey);
+                }
+            }
+
+            if (!res) {
+                log.error("Deleting of upload {} failed! Res was false", uploadId);
                 throw new ApiException(
-                        translationService.error("gallery.not_owner_of_upload"),
-                        GeneralResponseCodes.USER_IS_NOT_ADMIN
+                        translationService.error("common.server_error"),
+                        GeneralResponseCodes.GENERIC_ERROR
                 );
             }
+
+            return res;
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
         }
-
-        long mainMediaId = uploadFinder.getMainMediaIdFromUploadId(uploadId);
-        Long thumbnailMediaId = uploadFinder.getThumbnailMediaIdFromUploadId(uploadId);
-        Long renderMediaId = uploadFinder.getRenderMediaIdFromUploadId(uploadId);
-
-        String mainMediaKey = mediaFinder.getPathById(mainMediaId);
-        String thumbnailMediaKey = thumbnailMediaId == null ? null : mediaFinder.getPathById(thumbnailMediaId);
-        String renderMediaKey = renderMediaId == null ? null : mediaFinder.getPathById(renderMediaId);
-
-
-        boolean res = true;
-
-        List<Long> ids = new ArrayList<>(3);
-        ids.add(mainMediaId);
-        if (thumbnailMediaId != null) {
-            ids.add(thumbnailMediaId);
-        }
-        if (renderMediaId != null) {
-            ids.add(renderMediaId);
-        }
-        res = res && deleteMediaAction.deleteFromDb(ids);
-        //Upload object is deleted with cascade
-
-        res = res && mainMediaKey != null;
-        if (res) {
-            s3DeleteUpload.delete(mainMediaKey);
-            if (thumbnailMediaKey != null) {
-                s3DeleteUpload.delete(thumbnailMediaKey);
-            }
-            if (renderMediaKey != null) {
-                s3DeleteUpload.delete(renderMediaKey);
-            }
-        }
-
-        if (!res) {
-            log.error("Deleting of upload {} failed! Res was false", uploadId);
-            throw new ApiException(
-                translationService.error("common.server_error"),
-                GeneralResponseCodes.GENERIC_ERROR
-            );
-        }
-
-        return res;
     }
 
     public record Input(

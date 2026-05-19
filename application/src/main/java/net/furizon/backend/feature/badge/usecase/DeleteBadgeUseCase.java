@@ -11,6 +11,7 @@ import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.action.DeleteMediaFromDiskAction;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.security.permissions.finder.PermissionFinder;
@@ -40,6 +41,7 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
     @Override
     public @NotNull Boolean executor(@NotNull Input input) {
         try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
             long userId = input.userId;
             boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
 
@@ -78,6 +80,8 @@ public class DeleteBadgeUseCase implements UseCase<DeleteBadgeUseCase.Input, Boo
         } catch (IOException e) {
             log.error("Exception while deleting a badge", e);
             return false;
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
         }
     }
 

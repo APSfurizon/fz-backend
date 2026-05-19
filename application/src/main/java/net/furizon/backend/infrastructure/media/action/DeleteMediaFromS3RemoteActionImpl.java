@@ -2,29 +2,26 @@ package net.furizon.backend.infrastructure.media.action;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.furizon.backend.infrastructure.media.dto.MediaData;
-import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.StoreMethod;
+import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
 import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
+import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction {
+public class DeleteMediaFromS3RemoteActionImpl implements DeleteMediaFromS3RemoteAction {
     @NotNull private final MediaFinder mediaFinder;
+    @NotNull private final S3DeleteUpload s3DeleteUpload;
     @NotNull private final DeleteMediaAction deleteMediaAction;
-    @NotNull private final StorageConfig storageConfig;
 
     @Override
     @Transactional
@@ -43,16 +40,14 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
     public boolean invoke(@NotNull List<MediaData> medias, boolean deleteFromDb) throws IOException {
         try {
             RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
-            Path basePath = Paths.get(storageConfig.getBasePublicPath());
 
             for (MediaData media : medias) {
-                if (media.getStoreMethod() != StoreMethod.DISK) {
-                    log.error("Unable to delete non-disk media {}", media);
+                if (media.getStoreMethod() != StoreMethod.S3_REMOTE) {
+                    log.error("Unable to delete non-s3_remote media {}", media);
                     continue;
                 }
                 log.info("Deleting media {}", media);
-                Path p = basePath.resolve(media.getPath());
-                Files.deleteIfExists(p);
+                s3DeleteUpload.delete(media.getPath());
             }
 
             return deleteFromDb ? deleteMediaAction.deleteFromDb(

@@ -15,6 +15,7 @@ import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.generalUtils.Utils;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.StoreMethod;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.s3.actions.deleteUpload.S3DeleteUpload;
 import net.furizon.backend.infrastructure.s3.actions.presignedUpload.S3PresignedUpload;
 import net.furizon.backend.infrastructure.security.FurizonUser;
@@ -44,73 +45,79 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
 
     @Override
     public @NotNull GalleryUpload executor(@NotNull Input input) {
-        CompleteUploadRequest req = input.req;
-        FurizonUser user = input.user;
+        try {
+            //plain lock, since the upload is already completed
+            RemoveDanglingMediaUseCase.mediaWriteMutexLock();
+            CompleteUploadRequest req = input.req;
+            FurizonUser user = input.user;
 
-        Event event = generalChecks.getEventAndAssertItExists(req.getEventId());
-        long userId = galleryChecks.fullUploadChecksAndGetUserId(
-                user,
-                req.getUserId(),
-                event,
-                req.getFileSize()
-        );
-
-        UploadProgress upload = galleryChecks.getUploadProgressAndAssertItExists(req.getUploadReqId(), userId);
-
-        log.info("Completing multipart upload {} with uploadId {}", req.getUploadReqId(), upload.getUploadId());
-        String md5 = s3PresignedUpload.completeMultipart(
-                upload.getUploadId(),
-                upload.getS3Key(),
-                req.getEtags()
-        );
-
-        byte[] s3Md5 =  Utils.fromHex(md5);
-        byte[] reqMd5 = Utils.fromHex(req.getMd5Hash());
-        if (!Arrays.equals(s3Md5, reqMd5)) {
-            log.error("Upload {} (uId {}): md5 hash mismatch! S3 returned {} while req contained {}. "
-                    + "Deleting the newly made upload",
-                    req.getUploadReqId(), upload.getUploadId(), md5, req.getMd5Hash());
-            s3DeleteUpload.delete(upload.getS3Key());
-            deleteUploadProgress.invoke(upload.getUploadReqId());
-            throw new ApiException(
-                translationService.error("gallery.upload.hash_mismatch"),
-                GalleryErrorCodes.UPLOADS_HASH_MISMATCH
+            Event event = generalChecks.getEventAndAssertItExists(req.getEventId());
+            long userId = galleryChecks.fullUploadChecksAndGetUserId(
+                    user,
+                    req.getUserId(),
+                    event,
+                    req.getFileSize()
             );
-        }
 
-        Long hashCollision = uploadFinder.getUploadIdByHashOnEvent(md5, event.getId());
-        if (hashCollision != null) {
-            log.error("Upload {} (uId {}): Duplicate upload detected for hash {}. "
-                    + "Deleting the newly made upload",
-                    req.getUploadReqId(), upload.getUploadId(), md5);
-            s3DeleteUpload.delete(upload.getS3Key());
-            deleteUploadProgress.invoke(upload.getUploadReqId());
-            throw new ApiException(
-                    translationService.error("gallery.upload.duplicated"),
-                    GalleryErrorCodes.UPLOADS_DUPLICATE
+            UploadProgress upload = galleryChecks.getUploadProgressAndAssertItExists(req.getUploadReqId(), userId);
+
+            log.info("Completing multipart upload {} with uploadId {}", req.getUploadReqId(), upload.getUploadId());
+            String md5 = s3PresignedUpload.completeMultipart(
+                    upload.getUploadId(),
+                    upload.getS3Key(),
+                    req.getEtags()
             );
+
+            byte[] s3Md5 = Utils.fromHex(md5);
+            byte[] reqMd5 = Utils.fromHex(req.getMd5Hash());
+            if (!Arrays.equals(s3Md5, reqMd5)) {
+                log.error("Upload {} (uId {}): md5 hash mismatch! S3 returned {} while req contained {}. "
+                                + "Deleting the newly made upload",
+                        req.getUploadReqId(), upload.getUploadId(), md5, req.getMd5Hash());
+                s3DeleteUpload.delete(upload.getS3Key());
+                deleteUploadProgress.invoke(upload.getUploadReqId());
+                throw new ApiException(
+                        translationService.error("gallery.upload.hash_mismatch"),
+                        GalleryErrorCodes.UPLOADS_HASH_MISMATCH
+                );
+            }
+
+            Long hashCollision = uploadFinder.getUploadIdByHashOnEvent(md5, event.getId());
+            if (hashCollision != null) {
+                log.error("Upload {} (uId {}): Duplicate upload detected for hash {}. "
+                                + "Deleting the newly made upload",
+                        req.getUploadReqId(), upload.getUploadId(), md5);
+                s3DeleteUpload.delete(upload.getS3Key());
+                deleteUploadProgress.invoke(upload.getUploadReqId());
+                throw new ApiException(
+                        translationService.error("gallery.upload.duplicated"),
+                        GalleryErrorCodes.UPLOADS_DUPLICATE
+                );
+            }
+
+            //Create media object in the db
+            GalleryUpload ret = createUploadAction.invoke(
+                    user.getUserId(),
+                    userId,
+                    req.getFileName(),
+                    req.getFileSize(),
+                    req.getUploadRepostPermissions(),
+                    event,
+                    upload.getS3Key(),
+                    MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
+                    StoreMethod.S3_REMOTE,
+                    md5
+            );
+
+            deleteUploadProgress.invoke(upload.getUploadReqId());
+
+            //Launch processor job
+            galleryProcessorSubmitJobAction.invokeAsync(ret.getId(), upload.getS3Key(), upload.getUploadReqId());
+
+            return ret;
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
         }
-
-        //Create media object in the db
-        GalleryUpload ret = createUploadAction.invoke(
-            user.getUserId(),
-            userId,
-            req.getFileName(),
-            req.getFileSize(),
-            req.getUploadRepostPermissions(),
-            event,
-            upload.getS3Key(),
-            MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE,
-            StoreMethod.S3_REMOTE,
-            md5
-        );
-
-        deleteUploadProgress.invoke(upload.getUploadReqId());
-
-        //Launch processor job
-        galleryProcessorSubmitJobAction.invokeAsync(ret.getId(), upload.getS3Key(), upload.getUploadReqId());
-
-        return ret;
     }
 
     public record Input(

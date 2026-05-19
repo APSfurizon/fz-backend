@@ -16,4 +16,6 @@ public interface UploadProgressFinder {
     @Nullable UploadProgress getUploadProgressByReqId(long reqId);
 
     @Nullable UploadProgress getUploadProgressByReqIdUser(long reqId, long userId);
+
+    boolean areUploadInProgress();
 }

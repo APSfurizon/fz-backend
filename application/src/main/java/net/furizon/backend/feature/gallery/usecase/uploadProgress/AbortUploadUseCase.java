@@ -6,6 +6,7 @@ import net.furizon.backend.feature.gallery.GalleryChecks;
 import net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadProgress.DeleteUploadProgressAction;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.dto.request.S3UploadRequest;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.s3.actions.presignedUpload.S3PresignedUpload;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
@@ -27,28 +28,33 @@ public class AbortUploadUseCase implements UseCase<AbortUploadUseCase.Input, Boo
     @Override
     @Transactional
     public @NotNull Boolean executor(@NotNull Input input) {
-        final S3UploadRequest req = input.req;
-        final FurizonUser user = input.user;
+        try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
+            final S3UploadRequest req = input.req;
+            final FurizonUser user = input.user;
 
-        long userId = generalChecks.getUserIdAndAssertPermission(
-                req.getUserId(),
-                user,
-                Permission.UPLOADS_CAN_MANAGE_UPLOADS
-        );
+            long userId = generalChecks.getUserIdAndAssertPermission(
+                    req.getUserId(),
+                    user,
+                    Permission.UPLOADS_CAN_MANAGE_UPLOADS
+            );
 
-        UploadProgress prevUpload = galleryChecks.getUploadProgressAndAssertItExists(
-                req.getUploadReqId(),
-                userId
-        );
+            UploadProgress prevUpload = galleryChecks.getUploadProgressAndAssertItExists(
+                    req.getUploadReqId(),
+                    userId
+            );
 
-        log.info("User {} is deleting prev multipart upload attempt {} (uploadId = {})",
-                userId, prevUpload.getUploadReqId(), prevUpload.getUploadId());
+            log.info("User {} is deleting prev multipart upload attempt {} (uploadId = {})",
+                    userId, prevUpload.getUploadReqId(), prevUpload.getUploadId());
 
-        deleteUploadProgressAction.invoke(req.getUploadReqId());
+            deleteUploadProgressAction.invoke(req.getUploadReqId());
 
-        s3PresignedUpload.abortUpload(prevUpload.getUploadId(), prevUpload.getS3Key());
+            s3PresignedUpload.abortUpload(prevUpload.getUploadId(), prevUpload.getS3Key());
 
-        return true;
+            return true;
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
+        }
     }
 
     public record Input(

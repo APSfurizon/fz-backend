@@ -74,6 +74,15 @@ public class JooqUploadProgressFinder implements UploadProgressFinder {
         ).mapOrNull(UploadProgressMapper::map);
     }
 
+    @Override
+    public boolean areUploadInProgress() {
+        return query.fetchFirst(
+            PostgresDSL.select(UPLOAD_PROGRESS_INFO.ID)
+            .from(UPLOAD_PROGRESS_INFO)
+            .limit(1)
+        ).isPresent();
+    }
+
 
     private @NotNull SelectSelectStep<Record6<Long, String, String, LocalDateTime, Long, Long>> selectUploadProgress() {
         return PostgresDSL.select(

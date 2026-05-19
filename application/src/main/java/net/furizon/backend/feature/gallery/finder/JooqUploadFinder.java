@@ -702,4 +702,14 @@ public class JooqUploadFinder implements UploadFinder {
             )
         ).stream().map(BulkDirectDownloadFileMapper::map).toList();
     }
+
+    @Override
+    public boolean areUploadStillProcessing() {
+        return query.fetchFirst(
+            PostgresDSL.select(UPLOADS.ID)
+            .from(UPLOADS)
+            .where(UPLOADS.UPLOAD_TYPE.eq(UploadType.UNPROCESSED))
+            .limit(1)
+        ).isPresent();
+    }
 }

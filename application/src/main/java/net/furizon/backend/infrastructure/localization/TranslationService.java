@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.localization;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
@@ -128,5 +129,14 @@ public class TranslationService {
 
     public interface InnerFunction<T> {
         T run();
+    }
+
+    private static TranslationService INSTANCE;
+    @PostConstruct
+    public void init() {
+        INSTANCE = this;
+    }
+    public static TranslationService getInstance() {
+        return INSTANCE;
     }
 }
