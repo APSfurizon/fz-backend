@@ -214,7 +214,6 @@ tsPrint(f"**[DEBUG] Supported file formats for upload: {supportedFormats}")
 
 
 uploadDirs = [
-	{"event": "furizon/sideralis",		"user": 96,			"path": "Sideralis/Furizon 2k18/Demon/"}, #2018
 	{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Gideon/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Lale/"},
 	# NO ACCOUNT{"event": "furizon/sideralis",		"user": 45,			"path": "Sideralis/Furizon 2k18/Ren/"},
