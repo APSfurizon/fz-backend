@@ -25,7 +25,7 @@
             font-weight: 700;
             letter-spacing: 2px;
         }
-        .text-fit { /*This must be put on the span containing the attendee name*/
+        .text-fit { /*This must be put on the span containing any variable length text, like attendee name. You should also remove left, width and font-size from the style*/
             word-wrap: break-word;
             max-width: var(--max-containable-text-width);
             font-size: max(min(calc(var(--max-containable-text-width) / (var(--chars) * 0.85)), 1.7em), 0.8em);
@@ -95,8 +95,14 @@
         .badge-level-staff-junior {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/juniorStaff.png');
         }
+        .badge-level-staff-security {
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/securityStaff.png');
+        }
         .badge-level-daily {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/daily.png');
+        }
+        .badge-level-sponsor-ultra {
+            background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsorUltra.png');
         }
         .badge-level-sponsor-super {
             background-image: url('https://furpanel.furizon.net/static/badge-gen/sponsorSuper.png');
