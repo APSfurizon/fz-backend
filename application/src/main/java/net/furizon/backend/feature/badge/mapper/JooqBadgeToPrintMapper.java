@@ -32,7 +32,7 @@ public class JooqBadgeToPrintMapper {
                 .userId(record.get(USERS.USER_ID))
                 .fursonaName(record.get(USERS.USER_FURSONA_NAME))
                 .locales(List.of(record.get(USERS.USER_LOCALE))) //TODO support more flags
-                .imageUrl(MediaData.getFullPath(record))
+                .imageUrl(MediaData.getFullPathOrNull(record))
                 .imageMimeType(record.get(MEDIA.MEDIA_TYPE))
                 .serialNo(record.get(ORDERS.ORDER_SERIAL_IN_EVENT))
                 .orderCode(record.get(ORDERS.ORDER_CODE))

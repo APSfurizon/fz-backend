@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.mapper.MediaResponseMapper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.Record;
 
 import java.util.Objects;
@@ -44,6 +45,16 @@ public class MediaData {
                 Objects.requireNonNull(StoreMethod.get(record.get(MEDIA.MEDIA_STORE_METHOD))),
                 record.get(MEDIA.MEDIA_PATH)
         );
+    }
+
+    @Nullable
+    public static String getFullPathOrNull(@NotNull Record record) {
+        Integer storeMethod = record.get(MEDIA.MEDIA_STORE_METHOD);
+        String mediaPath = record.get(MEDIA.MEDIA_PATH);
+        if (storeMethod == null || mediaPath == null) {
+            return null;
+        }
+        return getFullPath(Objects.requireNonNull(StoreMethod.get(storeMethod)), mediaPath);
     }
 
     @NotNull
