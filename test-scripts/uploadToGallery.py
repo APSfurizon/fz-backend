@@ -485,6 +485,7 @@ uploadDirs = [
  
 	#{"event": "furizon/zenith",	"user": 20,				"path": "Furizon Zenith 2025/OFFICIAL/hype/"},
 	#{"event": "furizon/zenith",	"user": 10,				"path": "Furizon Zenith 2025/OFFICIAL/razor/"},
+	{"event": "furizon/zenith",		"user": 10,				"path": "C:/Users/Stran/Desktop/Furizon/asd"}
 
 
 	#{"event": "furizon/river-side-2025",		"user": 221,		"path": "Furizon Riverside 2025/Furizon Riverside 2025 - User Uploads/montagutiluca/"},

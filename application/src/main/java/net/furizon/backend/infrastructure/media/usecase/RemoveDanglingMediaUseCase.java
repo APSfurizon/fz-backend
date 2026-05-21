@@ -75,6 +75,7 @@ public class RemoveDanglingMediaUseCase implements UseCase<Integer, Long> {
         long total = 0L;
         do {
             res = lockCheckAndExec();
+            log.debug("[DANGLING MEDIA] Run returned with {}", res);
             if (res < 0L) {
                 try {
                     if (retries > 200L) {
