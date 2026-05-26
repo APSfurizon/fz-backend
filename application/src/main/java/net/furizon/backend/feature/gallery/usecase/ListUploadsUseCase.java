@@ -35,6 +35,8 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
                         : permissionFinder.userHasPermission(userId, Permission.UPLOADS_CAN_MANAGE_UPLOADS);
         UploadStatus status = isAdmin ? input.uploadStatus : null;
 
+        long limit = galleryConfig.getListingBatchSize();
+
         List<GalleryUploadPreview> resp = uploadFinder.listPreview(
             input.photographerId,
             input.eventId,
@@ -45,9 +47,13 @@ public class ListUploadsUseCase implements UseCase<ListUploadsUseCase.Input, Lis
                        ? input.from
                        : (input.invertOrder ? 0L : Long.MAX_VALUE),
             input.invertOrder,
-            galleryConfig.getListingBatchSize()
+            limit + 1L
         );
-        return new ListUploadsResponse(resp);
+        boolean end = resp.size() <= limit;
+        if (!end) {
+            resp = resp.subList(0, (int) limit);
+        }
+        return new ListUploadsResponse(resp, end);
     }
 
     public record Input(

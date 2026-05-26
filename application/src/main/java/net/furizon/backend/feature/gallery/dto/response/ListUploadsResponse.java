@@ -8,4 +8,5 @@ import java.util.List;
 @Data
 public class ListUploadsResponse {
     private final List<GalleryUploadPreview> results;
+    private final boolean end;
 }

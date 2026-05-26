@@ -107,7 +107,9 @@ public class GalleryController {
         + "that permission and no uploadStatus is defined, they will see all the results, in "
         + "any possible status. Using optional boolean parameter `invertOrder` you can reverse "
         + "the results; keep in mind that the `fromUploadId` param is also going to be inverted. "
-        + "By default it's set to false, so get the result in descending order")
+        + "By default it's set to false, so get the result in descending order. We return an extra "
+        + "`end` field which is set to true if there aren't more photos to search (IE you're at "
+        + "the end of the list)")
     @GetMapping("/pub/list")
     public @NotNull ListUploadsResponse listUploads(
             @RequestParam @Nullable @Valid @Positive final Long photographerUserId,
