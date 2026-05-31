@@ -34,6 +34,8 @@ public interface UserFinder {
             @Nullable String filterWithoutRole
     );
 
+    List<Long> getUsersAttendingEvent(@NotNull Event event);
+
     @Nullable
     UserEmailData getMailDataForUser(long userId);
     @NotNull

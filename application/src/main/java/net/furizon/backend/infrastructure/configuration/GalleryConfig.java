@@ -15,6 +15,8 @@ public class GalleryConfig implements HttpConfig {
 
     private final long listingBatchSize;
 
+    private final long postEventGalleryReminderDays;
+
     @NotNull
     private final AdminApproval adminApproval;
 

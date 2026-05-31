@@ -89,6 +89,7 @@ frontend:
   room-page-url: ${FRONTEND_ROOM_PAGE_URL:}
   user-page-url: ${FRONTEND_USER_PAGE_URL:}
   reservation-page-url: ${FRONTEND_RESERVATION_PAGE_URL:}
+  gallery-page-url: ${FRONTEND_GALLERY_PAGE_URL:}
   static-files:
     local-disk-url: ${FRONTEND_STATIC_FILES_LOCAL_DISK_URL:}
     s3-local-url: ${FRONTEND_STATIC_FILES_S3_LOCAL_URL:}
@@ -195,11 +196,12 @@ admin:
   jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}
 
 gallery:
-  max-limited-uploads-per-event: ${GALLERY_MAX_USER_UPLOADS_PER_EVENT:100}
+  max-limited-uploads-per-event: ${GALLERY_MAX_USER_UPLOADS_PER_EVENT:350}
   max-limited-upload-size: ${GALLERY_MAX_FILE_SIZE:33554432} #32 MB
   max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB
   delete-upload-progress-interval: ${GALLERY_DELETE_UPLOAD_PROGRESS_INTERVAL_MINS:15}
   listing-batch-size: ${GALLERY_LISTING_BATCH_SIZE:300}
+  post-event-gallery-reminder-days: ${GALLERY_POST_EVENT_REMINDER_DAYS:1}
   batch-download:
     download-url: ${GALLERY_BATCH_DOWNLOAD_URL:http://127.0.0.1:8083/d?mac=}
     expire-mins: ${GALLERY_BATCH_DOWNLOAD_EXPIRE_MINS:5}

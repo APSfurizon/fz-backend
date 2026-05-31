@@ -385,6 +385,18 @@ public class JooqUserFinder implements UserFinder {
     }
 
     @Override
+    public List<Long> getUsersAttendingEvent(@NotNull Event event) {
+        return sqlQuery.fetch(
+            PostgresDSL.selectDistinct(ORDERS.USER_ID)
+            .from(ORDERS)
+            .where(
+                ORDERS.EVENT_ID.eq(event.getId())
+                .and(ORDERS.ORDER_STATUS.eq((short) OrderStatus.PAID.ordinal()))
+            )
+        ).stream().map(r -> r.getValue(ORDERS.USER_ID)).toList();
+    }
+
+    @Override
     public List<ShirtExportRow> exportShirts(long eventId) {
         return sqlQuery.fetch(
             PostgresDSL.select(
