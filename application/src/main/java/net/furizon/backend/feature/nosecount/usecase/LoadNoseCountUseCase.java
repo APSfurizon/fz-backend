@@ -57,7 +57,8 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
         PretixInformation pretix = input.pretixInformation;
         OffsetDateTime from = input.event.getCorrectDateFrom();
 
-        Long noRoomItemId = (Long) pretix.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM, eventId).toArray()[0];
+        var noRoomItems = pretix.getIdsForItemType(CacheItemTypes.NO_ROOM_ITEM, eventId).toArray();
+        Long noRoomItemId = noRoomItems.length > 0 ? (Long) noRoomItems[0] : null;
 
         Map<LocalDate, List<UserDisplayData>> dailys = new TreeMap<>();
         List<UserDisplayDataWithExtraDays> roomless = new ArrayList<>();
@@ -78,7 +79,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
             }
 
             //Roomless furs
-            if (obj.getRoomId() == null || noRoomItemId.equals(obj.getRoomPretixItemId())) {
+            if (noRoomItemId != null && (obj.getRoomId() == null || noRoomItemId.equals(obj.getRoomPretixItemId()))) {
                 roomless.add(new UserDisplayDataWithExtraDays(getUserDisplayData(obj), obj.getExtraDays()));
                 continue;
             }
