@@ -14,7 +14,7 @@
             <tr>
                 <td style="width: 100%; direction: rtl; text-align: left; vertical-align: top;">
                     <div style="width: 100%; max-width: 200px; text-align: right; vertical-align: top; display: inline-block; direction: ltr; margin-bottom: 1em">
-                        <img src="https://furpanel.furizon.net/images/logo-light.png" alt="Logo" style="max-width: 100%; height: auto; display: inline-block; border: 0; vertical-align: top; margin: 0;">
+                        <img src="https://furpanel.furizon.net/images/logo_light.svg" alt="Logo" style="max-width: 100%; height: auto; display: inline-block; border: 0; vertical-align: top; margin: 0;">
                     </div>
                     <div style="width: 100%; max-width: 250px; text-align: left; display: inline-block; vertical-align: top; direction: ltr;">
                         <div style="font-size: 1.75em; font-weight: bold; color: #000000;">${lastName}</div>
