@@ -6,6 +6,7 @@ import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Record;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import static net.furizon.jooq.generated.Tables.MEDIA;
 
+
 @Component
 @RequiredArgsConstructor
 public class JooqMediaFinder implements MediaFinder {
@@ -32,6 +34,15 @@ public class JooqMediaFinder implements MediaFinder {
             selectMedia()
             .where(MEDIA.MEDIA_ID.in(ids))
         ).stream().map(JooqMediaMapper::map).toList();
+    }
+
+    @Override
+    public @Nullable String getPathById(long id) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(MEDIA.MEDIA_PATH)
+            .from(MEDIA)
+            .where(MEDIA.MEDIA_ID.eq(id))
+        ).mapOrNull(r -> r.get(MEDIA.MEDIA_PATH));
     }
 
     @Override

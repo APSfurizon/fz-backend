@@ -19,6 +19,7 @@ import net.furizon.backend.infrastructure.media.ImageCodes;
 import net.furizon.backend.infrastructure.media.SimpleImageMetadata;
 import net.furizon.backend.infrastructure.media.action.StoreMediaOnDiskAction;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
@@ -60,6 +61,7 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
     @Transactional
     public @NotNull MediaResponse executor(@NotNull Input input) {
         try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
             long userId = input.user.getUserId();
             boolean isAdmin = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
             if (input.checkTimeframe) {
@@ -124,6 +126,8 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
         } catch (IOException e) {
             log.error("An error occurred while uploading a badge", e);
             throw new ApiException(translationService.error("badge.upload.fail"), ImageCodes.ERROR_WHILE_UPLOADING);
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
         }
     }
 

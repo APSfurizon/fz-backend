@@ -6,6 +6,7 @@ import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.configuration.StorageConfig;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.finder.MediaFinder;
+import net.furizon.backend.infrastructure.media.usecase.RemoveDanglingMediaUseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,19 +41,26 @@ public class DeleteMediaFromDiskActionImpl implements DeleteMediaFromDiskAction 
     @Override
     @Transactional
     public boolean invoke(@NotNull List<MediaData> medias, boolean deleteFromDb) throws IOException {
-        Path basePath = Paths.get(storageConfig.getBasePublicPath());
+        try {
+            RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
+            Path basePath = Paths.get(storageConfig.getBasePublicPath());
 
-        for (MediaData media : medias) {
-            if (media.getStoreMethod() != StoreMethod.DISK) {
-                log.error("Unable to delete non-disk media {}", media);
-                continue;
+            for (MediaData media : medias) {
+                if (media.getStoreMethod() != StoreMethod.DISK) {
+                    log.error("Unable to delete non-disk media {}", media);
+                    continue;
+                }
+                log.info("Deleting media {}", media);
+                Path p = basePath.resolve(media.getPath());
+                Files.deleteIfExists(p);
             }
-            log.info("Deleting media {}", media);
-            Path p = basePath.resolve(media.getPath());
-            Files.deleteIfExists(p);
-        }
 
-        return deleteFromDb ? deleteMediaAction.deleteFromDb(medias.stream().map(MediaData::getId).toList()) : false;
+            return deleteFromDb ? deleteMediaAction.deleteFromDb(
+                    medias.stream().map(MediaData::getId).toList()
+            ) : false;
+        } finally {
+            RemoveDanglingMediaUseCase.mediaWriteMutexUnlock();
+        }
     }
 
     @Override

@@ -148,6 +148,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_STORE_METHOD,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_CODE
             )
@@ -181,6 +182,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
                 MEDIA.MEDIA_PATH,
                 MEDIA.MEDIA_ID,
                 MEDIA.MEDIA_TYPE,
+                MEDIA.MEDIA_STORE_METHOD,
                 ORDERS.ORDER_SPONSORSHIP_TYPE,
                 ORDERS.ORDER_CODE,
                 MEMBERSHIP_INFO.ID,

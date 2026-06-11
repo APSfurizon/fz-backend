@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
+import net.furizon.backend.feature.pretix.objects.event.finder.EventFinder;
 import net.furizon.backend.feature.pretix.objects.order.Order;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.objects.order.finder.pretix.PretixBalanceForProviderFinder;
@@ -28,8 +29,22 @@ import java.util.Optional;
 public class GeneralChecks {
     @NotNull private final PretixBalanceForProviderFinder pretixBalanceForProviderFinder;
     @NotNull private final PermissionFinder permissionFinder;
+    @NotNull private final EventFinder eventFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final TranslationService translationService;
+
+    public @NotNull Event getEventAndAssertItExists(long eventId) {
+        Event e = eventFinder.findEventById(eventId);
+        if (e == null) {
+            log.error("Event with id {} not found", eventId);
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    translationService.error("common.event_not_found"),
+                    GeneralResponseCodes.EVENT_NOT_FOUND
+            );
+        }
+        return e;
+    }
 
     public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long userId,
                                                         @NotNull FurizonUser user,

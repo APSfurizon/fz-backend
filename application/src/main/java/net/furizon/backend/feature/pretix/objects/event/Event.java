@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 
 @Data
@@ -59,7 +61,10 @@ public class Event {
 
 
     public @NotNull String getLocalizedName(@NotNull TranslationService translationService) {
-        return translationService.getTranslationFromMap(eventNames);
+        return translationService.getTranslationFromMap(Objects.requireNonNull(eventNames));
+    }
+    public @NotNull String getLocalizedName(@NotNull TranslationService translationService, @NotNull Locale locale) {
+        return translationService.getTranslationFromMap(Objects.requireNonNull(eventNames), locale, false);
     }
 
     public static class EventBuilder {

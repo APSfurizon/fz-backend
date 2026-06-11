@@ -13,10 +13,11 @@ public class CapabilitiesResponse {
     private final boolean canRefreshPretixCache;
     private final boolean canRemindOrderLinking;
     private final boolean canRemindBadgeUploads;
+    private final boolean canRemindRoomsNotFull;
     private final boolean canRemindFursuitBringToEvent;
     private final boolean canViewUsers;
     private final boolean canExportHotelList;
     private final boolean canExportShirtList;
     private final boolean canExportBadges;
-    private final boolean canRemindRoomsNotFull;
+    private final boolean isSecurity;
 }

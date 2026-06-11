@@ -34,13 +34,15 @@ public interface UserFinder {
             @Nullable String filterWithoutRole
     );
 
+    List<Long> getUsersAttendingEvent(@NotNull Event event);
+
     @Nullable
     UserEmailData getMailDataForUser(long userId);
     @NotNull
     List<UserEmailData> getMailDataForUsers(@NotNull List<Long> userIds);
 
     @Nullable
-    UserDisplayData getDisplayUser(long userId, @NotNull Event event);
+    UserDisplayData getDisplayUser(long userId, @Nullable Event event);
 
     @NotNull
     List<UserDisplayData> getDisplayUserByOrderCode(Set<String> codes, @NotNull Event event);
@@ -58,6 +60,8 @@ public interface UserFinder {
     List<ShirtExportRow> exportShirts(long eventId);
 
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
+
+    SelectJoinStep<?> selectJoinDisplayUser();
 
     SelectJoinStep<?> selectDisplayUser();
 }
