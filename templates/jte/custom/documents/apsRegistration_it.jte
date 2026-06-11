@@ -120,7 +120,7 @@
         <!-- Intestazione con Logo SVG e Indirizzo -->
         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
             <div style="width: 35%; padding-top: 5px;">
-                <img src="https://furpanel.furizon.net/images/logo-light.png" style="max-height: 55px; max-width: 100%;">
+                <img src="https://furpanel.furizon.net/images/logo_light.svg" style="max-height: 55px; max-width: 100%;">
             </div>
             <div style="width: 65%; padding-left: 20px; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: black;">
                 <strong style="font-size: 10.5pt;">APS Furizon</strong><br><br>
@@ -283,7 +283,7 @@
         </div>
 
     </div>
-<script>window.print();</script>
+    <%-- script>window.print();</script --%>
 </body>
 
 </html>
