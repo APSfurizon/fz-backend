@@ -38,7 +38,9 @@ public class SendPostEventGalleryReminderCronjob {
 
         OffsetDateTime now = OffsetDateTime.now();
         LocalDate today = now.toLocalDate();
-        if (ChronoUnit.DAYS.between(today, endDay) == galleryConfig.getPostEventGalleryReminderDays()) {
+        long daysPassed = ChronoUnit.DAYS.between(endDay, today);
+        long reminderDays = galleryConfig.getPostEventGalleryReminderDays();
+        if (daysPassed == reminderDays) {
             DayOfWeek dayOfWeek = endDay.getDayOfWeek();
 
             boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
