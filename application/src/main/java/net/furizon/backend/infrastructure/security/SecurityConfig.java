@@ -21,6 +21,7 @@ public class SecurityConfig {
 
     @NotNull
     private final List<String> allowedOrigins;
+    private final Long corsCacheSecs;
 
     @NotNull
     private final Session session;

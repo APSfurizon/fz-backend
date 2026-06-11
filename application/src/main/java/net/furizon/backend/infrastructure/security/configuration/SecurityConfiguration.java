@@ -114,6 +114,7 @@ public class SecurityConfiguration {
             List.of("*")
         );
         corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setMaxAge(securityConfig.getCorsCacheSecs());
 
         final var urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
