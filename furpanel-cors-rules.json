@@ -1,0 +1,21 @@
+{
+    "CORSRules": [
+        {
+            "AllowedOrigins": [
+                "https://furpanel.furizon.net"
+            ],
+            "AllowedMethods": [
+                "PUT",
+                "GET",
+                "OPTIONS"
+            ],
+            "AllowedHeaders": [
+                "*"
+            ],
+            "ExposeHeaders": [
+                "ETag"
+            ],
+            "MaxAgeSeconds": 3600
+        }
+    ]
+}
