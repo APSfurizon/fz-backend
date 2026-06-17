@@ -4,6 +4,7 @@
 package net.furizon.jooq.generated.tables;
 
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -86,7 +87,7 @@ public class MembershipCards extends TableImpl<Record> {
     /**
      * The column <code>public.membership_cards.user_id</code>.
      */
-    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.membership_cards.already_registered</code>.
@@ -107,6 +108,26 @@ public class MembershipCards extends TableImpl<Record> {
      * The column <code>public.membership_cards.sent_by_email</code>.
      */
     public final TableField<Record, Boolean> SENT_BY_EMAIL = createField(DSL.name("sent_by_email"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.membership_cards.first_name</code>.
+     */
+    public final TableField<Record, String> FIRST_NAME = createField(DSL.name("first_name"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_cards.last_name</code>.
+     */
+    public final TableField<Record, String> LAST_NAME = createField(DSL.name("last_name"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_cards.birthday</code>.
+     */
+    public final TableField<Record, LocalDate> BIRTHDAY = createField(DSL.name("birthday"), SQLDataType.LOCALDATE.nullable(false), this, "");
+
+    /**
+     * The column <code>public.membership_cards.fiscal_code</code>.
+     */
+    public final TableField<Record, String> FISCAL_CODE = createField(DSL.name("fiscal_code"), SQLDataType.VARCHAR(16), this, "");
 
     private MembershipCards(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

@@ -10,11 +10,16 @@ import net.furizon.jooq.infrastructure.command.SqlCommand;
 import net.furizon.jooq.infrastructure.query.SqlQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
+import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Slf4j
 @Component
@@ -29,6 +34,29 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
         Long orderId = order == null ? null : order.getId();
         short year = event.getMembershipYear(membershipYearUtils);
 
+        var infoRes = sqlQuery.fetchFirst(
+            PostgresDSL.select(
+                MEMBERSHIP_INFO.INFO_FIRST_NAME,
+                MEMBERSHIP_INFO.INFO_LAST_NAME,
+                MEMBERSHIP_INFO.INFO_BIRTHDAY,
+                MEMBERSHIP_INFO.INFO_FISCAL_CODE
+            )
+            .from(MEMBERSHIP_INFO)
+            .where(MEMBERSHIP_INFO.USER_ID.eq(userId))
+            .limit(1)
+        );
+        String firstName = "";
+        String lastName = "";
+        LocalDate birthday = LocalDate.EPOCH;
+        String fiscalCode = null;
+        if (infoRes.isPresent()) {
+            Record record = Objects.requireNonNull(infoRes.get());
+            firstName = record.get(MEMBERSHIP_INFO.INFO_FIRST_NAME);
+            lastName = record.get(MEMBERSHIP_INFO.INFO_LAST_NAME);
+            birthday = record.get(MEMBERSHIP_INFO.INFO_BIRTHDAY);
+            fiscalCode = record.get(MEMBERSHIP_INFO.INFO_FISCAL_CODE);
+        }
+
         //We don't use sequence because we need to keep multiple active seqs at the same time
         //The choice has been between this couple of lines of code and multiple lines to
         //Obtain the correct seq object each time, checking if it existed, if not create a new one
@@ -42,7 +70,7 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
         );
         int id = 1;
         if (r.isPresent()) {
-            var res = r.get().get(0);
+            var res = Objects.requireNonNull(r.get()).get(0);
             id = res == null ? 1 : ((int) res) + 1;
         }
 
@@ -52,12 +80,22 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
                         MEMBERSHIP_CARDS.ISSUE_YEAR,
                         MEMBERSHIP_CARDS.USER_ID,
                         MEMBERSHIP_CARDS.ID_IN_YEAR,
-                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER
+                        MEMBERSHIP_CARDS.CREATED_FOR_ORDER,
+
+                        MEMBERSHIP_CARDS.FIRST_NAME,
+                        MEMBERSHIP_CARDS.LAST_NAME,
+                        MEMBERSHIP_CARDS.BIRTHDAY,
+                        MEMBERSHIP_CARDS.FISCAL_CODE
                 ).values(
                         year,
                         userId,
                         id,
-                        orderId
+                        orderId,
+
+                        firstName,
+                        lastName,
+                        birthday,
+                        fiscalCode
                 )
         );
     }
