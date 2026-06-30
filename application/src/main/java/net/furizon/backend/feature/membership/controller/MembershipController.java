@@ -184,7 +184,8 @@ public class MembershipController {
             + "will fetch it from pretix, so the deletions of these kinds of cards is NOT possible "
             + "and will return a `MEMBERSHIP_CARD_ORDER_STILL_LINKED` error. It's NOT possible "
             + "as well the deletion of already registered cards, in this instance the error "
-            + "will be `MEMBERSHIP_CARD_WAS_REGISTERED`")
+            + "will be `MEMBERSHIP_CARD_WAS_REGISTERED`. If the card has a cardNo assigned to it, "
+            + "the deletion is prohibited, and the error will be `MEMBERSHIP_CARD_NUMBER_ALREADY_ASSIGNED`")
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/delete-card")
     public boolean deleteMembershipCards(

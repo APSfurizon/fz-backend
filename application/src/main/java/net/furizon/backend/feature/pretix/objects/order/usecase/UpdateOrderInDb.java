@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.createMembershipCard.CreateMembershipCardAction;
 import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
-import net.furizon.backend.feature.membership.action.updateMembershipOwner.UpdateMembershipCardOwner;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -47,7 +46,6 @@ public class UpdateOrderInDb {
     @NotNull private final DeleteOrderAction deleteOrderAction;
     @NotNull private final DeleteMembershipCardAction deleteMembershipCardAction;
     @NotNull private final CreateMembershipCardAction createMembershipCardAction;
-    @NotNull private final UpdateMembershipCardOwner updateMembershipCardOwner;
     @NotNull private final ConvertTicketOnlyOrderAction convertTicketOnlyOrderAction;
     @NotNull private final MembershipCardFinder membershipCardFinder;
     @NotNull private final EmailSender emailSender;

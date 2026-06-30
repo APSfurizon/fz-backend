@@ -40,6 +40,12 @@ public class DeleteMembershipCardUseCase implements UseCase<DeleteMembershipCard
                     AuthenticationCodes.MEMBERSHIP_CARD_WAS_REGISTERED);
         }
 
+        if (card.getCardNo() != null) {
+            log.error("Trying deleting membership card {} but it has a card number assigned", input.getCardId());
+            throw new ApiException(translationService.error("membership.card.number_assigned"),
+                    AuthenticationCodes.MEMBERSHIP_CARD_NUMBER_ALREADY_ASSIGNED);
+        }
+
         if (card.getCreatedForOrderId() != null) {
             log.error("Trying deleting membership card {} but it is linked to an active order", input.getCardId());
             throw new ApiException(translationService.error("membership.card.delete_fail_linked"),

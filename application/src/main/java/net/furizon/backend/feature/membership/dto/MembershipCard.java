@@ -18,7 +18,8 @@ public class MembershipCard {
     @Min(0L)
     private final long cardId;
     @Min(1L)
-    private final int idInYear;
+    @Nullable
+    private final Integer idInYear;
 
     @Nullable
     //This respects Furizon's card numbering. You may want to change the constructor with your impl
@@ -44,7 +45,7 @@ public class MembershipCard {
         return isRegistered;
     }
 
-    public MembershipCard(long cardId, int idInYear, short issueYear,
+    public MembershipCard(long cardId, @Nullable Integer idInYear, short issueYear,
                           long userOwnerId, @Nullable Long createdForOrderId, boolean isRegistered,
                           @Nullable OffsetDateTime signedAt, boolean sentByEmail) {
         this.cardId = cardId;
@@ -55,7 +56,7 @@ public class MembershipCard {
         this.isRegistered = isRegistered;
         this.sentByEmail = sentByEmail;
         this.signedAt = signedAt;
-        this.cardNo = toNumber(issueYear, idInYear);
+        this.cardNo = idInYear == null ? null : toNumber(issueYear, idInYear);
     }
 
     @NotNull
