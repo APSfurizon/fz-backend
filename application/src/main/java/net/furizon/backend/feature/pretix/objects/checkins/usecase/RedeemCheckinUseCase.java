@@ -131,7 +131,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                          || permissions.contains(Permission.MAIN_STAFF);
         var gadgets = new GadgetManager(o.getGadgets());
         permissions.forEach(p -> gadgets.addAll(gadgetPermissionService.getGadgetsForPermission(p)));
-        boolean shouldPrintApsJoinModule = membershipCards.stream().reduce(
+        boolean shouldPrintApsJoinModule = membershipCards.stream().filter(m -> m.getCardNo() != null).reduce(
                 true,
                 (i, card) -> i && card.getSignedAt() == null,
                 Boolean::logicalAnd
@@ -168,7 +168,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .orderStatus(o.getOrderStatus())
                 .orderCode(o.getCode())
                 .orderSerial(o.getOrderSerialInEvent())
-                .cardsForEvent(membershipCards)
+                .cardsForEvent(membershipCards) //Intentionally showing duplicate cards as well
                 .fursuits(fursuits)
                 .hasFursuitBadge(isFursuiter)
                 .dailyDays(dailyDays)

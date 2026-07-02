@@ -250,7 +250,6 @@ public class UpdateOrderInDb {
                             + "No operation is going to be performed.",
                     order.getCode(), card.getCardId(), card.getIdInYear());
 
-            //TODO change email
             emailSender.prepareAndSendNotificationForPermission(
                     NotificationType.ADMIN_ORDER_CARD_REMOVED_BUT_CARD_REGISTERED,
                     generateCardRemovedFromOrderNotificationId(order, card.getCardId()),

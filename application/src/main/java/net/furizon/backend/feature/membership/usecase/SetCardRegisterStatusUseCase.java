@@ -16,7 +16,6 @@ public class SetCardRegisterStatusUseCase implements UseCase<SetMembershipCardRe
     @Override
     public @NotNull Boolean executor(@NotNull SetMembershipCardRegistrationStatusRequest input) {
         log.info("Setting card {} registration status to {}", input.getMembershipCardId(), input.getRegistered());
-        setMembershipCardRegistrationStatus.invoke(input.getMembershipCardId(), input.getRegistered());
-        return true;
+        return setMembershipCardRegistrationStatus.invoke(input.getMembershipCardId(), input.getRegistered());
     }
 }

@@ -13,7 +13,6 @@ import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.fzBackendUtils.FzBackendUtilsErrorCodes;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -37,19 +36,10 @@ public class RestTransferOrder implements TransferPretixOrderAction {
 
     @Override
     public boolean invoke(
-        @NotNull String orderCode,
-        long positionId,
-        long questionId,
-        long newUserId,
-
-        @Nullable String paymentComment,
-        @Nullable String refundComment,
-
+        @NotNull TransferOrderRequest toReq,
         @NotNull Event event
     ) {
-        log.info("Transferring order using pretix plugin. "
-               + "orderCode={}, positionId={}, questionId={}, newUserId={}",
-                orderCode, positionId, questionId, newUserId);
+        log.info("Transferring order using pretix plugin. Req={}", toReq);
         final var pair = event.getOrganizerAndEventPair();
         final var request = HttpRequest.<Void>create()
             .method(HttpMethod.POST)
@@ -58,17 +48,7 @@ public class RestTransferOrder implements TransferPretixOrderAction {
             .uriVariable("organizer", pair.getOrganizer())
             .uriVariable("event", pair.getEvent())
             .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                TransferOrderRequest.builder()
-                    .orderCode(orderCode)
-                    .positionId(positionId)
-                    .questionId(questionId)
-                    .newUserId(newUserId)
-
-                    .manualPaymentComment(paymentComment)
-                    .manualRefundComment(refundComment)
-                .build()
-            )
+            .body(toReq)
             .responseType(Void.class)
             .build();
         try {
