@@ -56,4 +56,7 @@ END $_$ LANGUAGE 'plpgsql';
 DROP TRIGGER IF EXISTS shift_other_membership_cards_on_deletion ON membership_cards;
 CREATE TRIGGER shift_other_membership_cards_on_deletion AFTER DELETE ON membership_cards FOR EACH ROW EXECUTE PROCEDURE shiftOtherMembershipCards();
 
+ALTER TABLE membership_cards DROP CONSTRAINT membership_cards_order_fk;
+ALTER TABLE membership_cards ADD CONSTRAINT membership_cards_order_fk FOREIGN KEY (created_for_order) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE;
+
 END;

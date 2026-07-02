@@ -37,7 +37,8 @@ BEGIN
 END $_$ LANGUAGE 'plpgsql';
 
 -- The condition is the same of the delation, IE id_in_year == null && is_registered == false
-CREATE TRIGGER prevent_update_id_in_year BEFORE UPDATE OF id_in_year ON membership_cards FOR EACH ROW EXECUTE PROCEDURE checkIfMembershipCardCanBeDeleted();
+-- Commented because in this way we're able to properly delete cards by hand in case of accidents or special needs (We first have to remove the card numer)
+-- CREATE TRIGGER prevent_update_id_in_year BEFORE UPDATE OF id_in_year ON membership_cards FOR EACH ROW EXECUTE PROCEDURE checkIfMembershipCardCanBeDeleted();
 
 
 
@@ -52,5 +53,9 @@ BEGIN
     RETURN NEW;
 END $_$ LANGUAGE 'plpgsql';
 CREATE TRIGGER membership_creation_trigger BEFORE INSERT ON membership_cards FOR EACH ROW EXECUTE FUNCTION membershipCreationTrigger();
+
+ALTER TABLE membership_cards DROP CONSTRAINT membership_cards_order_fk;
+ALTER TABLE membership_cards ADD CONSTRAINT membership_cards_order_fk FOREIGN KEY (created_for_order) REFERENCES orders (id) ON DELETE SET NULL ON UPDATE CASCADE;
+
 
 COMMIT;

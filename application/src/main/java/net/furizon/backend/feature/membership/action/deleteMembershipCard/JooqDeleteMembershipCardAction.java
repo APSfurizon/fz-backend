@@ -42,7 +42,7 @@ public class JooqDeleteMembershipCardAction implements DeleteMembershipCardActio
             orderCode = orderCode == null ? "-" : orderCode;
             emailSender.prepareAndSendForPermission(
                 Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                TranslatableValue.ofEmail("mail.membership_card_already_registered_or_with_number.title"),
+                TranslatableValue.ofEmail("mail.membership_card_deletion_already_registered_or_with_number.title"),
                 TEMPLATE_MEMBERSHIP_CARD_DELETED_BUT_REGISTERED_OR_WITH_NUMBER,
                 MailVarPair.of(ORDER_CODE, orderCode),
                 MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
