@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP INDEX IF EXISTS only_one_id_per_user_year;
+
 DROP TRIGGER IF EXISTS membership_creation_trigger ON membership_cards;
 DROP FUNCTION IF EXISTS membershipCreationTrigger;
 

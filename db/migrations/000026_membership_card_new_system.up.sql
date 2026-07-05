@@ -7,7 +7,7 @@ ALTER TABLE membership_cards ALTER id_in_year DROP NOT NULL;
 
 
 DROP FUNCTION IF EXISTS canDeleteMembershipCard; -- So it get's deleted even if it has different params
-CREATE OR REPLACE FUNCTION canDeleteMembershipCard(id_in_year int, already_registered bool) RETURNS bool AS $_$
+CREATE OR REPLACE FUNCTION canDeleteMembershipCard(id_in_year int4, already_registered bool) RETURNS bool AS $_$
 BEGIN
     RETURN(id_in_year IS NULL AND already_registered = false);
 END $_$ LANGUAGE 'plpgsql';
@@ -17,7 +17,7 @@ END $_$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION deleteMembershipAfterOrder() RETURNS TRIGGER AS $_$
 DECLARE
     cardId int8;
-    idInYear int8;
+    idInYear int4;
     registered bool;
 BEGIN
     SELECT INTO cardId, idInYear, registered membership_cards.card_db_id, membership_cards.id_in_year, membership_cards.already_registered FROM membership_cards WHERE created_for_order = OLD.id;
@@ -57,5 +57,8 @@ CREATE TRIGGER membership_creation_trigger BEFORE INSERT ON membership_cards FOR
 ALTER TABLE membership_cards DROP CONSTRAINT membership_cards_order_fk;
 ALTER TABLE membership_cards ADD CONSTRAINT membership_cards_order_fk FOREIGN KEY (created_for_order) REFERENCES orders (id) ON DELETE SET NULL ON UPDATE CASCADE;
 
+--ALTER TABLE membership_cards ADD CONSTRAINT only_one_id_per_user_year UNIQUE (user_id, issue_year) WHERE id_in_year IS NOT NULL;
+DROP INDEX IF EXISTS only_one_id_per_user_year;
+CREATE UNIQUE INDEX only_one_id_per_user_year ON membership_cards (user_id, issue_year) WHERE id_in_year IS NOT NULL AND issue_year > 2025; -- We don't want to delete membership cards from before 2026
 
 COMMIT;

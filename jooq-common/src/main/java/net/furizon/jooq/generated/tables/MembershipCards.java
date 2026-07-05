@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import net.furizon.jooq.generated.Indexes;
 import net.furizon.jooq.generated.Keys;
 import net.furizon.jooq.generated.Public;
 import net.furizon.jooq.generated.tables.Orders.OrdersPath;
@@ -22,6 +23,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -202,6 +204,11 @@ public class MembershipCards extends TableImpl<Record> {
     @Nullable
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.ONLY_ONE_ID_PER_USER_YEAR);
     }
 
     @Override

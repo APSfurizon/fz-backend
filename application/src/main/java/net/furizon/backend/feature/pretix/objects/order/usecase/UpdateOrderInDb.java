@@ -175,7 +175,7 @@ public class UpdateOrderInDb {
                             }
                         } else {
                             if (card != null) { //The order HAD a membership card, but now it does not anymore
-                                handleMembershipCardDeletion(card, order, pretixOrder);
+                                handleMembershipCardDeletion(card, event.getId(), pretixOrder.getCode(), pretixOrder);
                             }
                         }
                     }
@@ -189,10 +189,14 @@ public class UpdateOrderInDb {
             }
 
             if (shouldDelete) {
-                if (order != null) {
-                    MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(order.getId());
-                    handleMembershipCardDeletion(card, order, pretixOrder);
+                //Handle card
+                MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(
+                        Order.getId(pretixOrder.getCode(), event.getId())
+                );
+                if (card != null) {
+                    handleMembershipCardDeletion(card, event.getId(), pretixOrder.getCode(), pretixOrder);
                 }
+                //actually delete order
                 deleteOrderAction.invoke(pretixOrder.getCode(), event);
             }
 
@@ -227,36 +231,36 @@ public class UpdateOrderInDb {
 
     private void handleMembershipCardDeletion(
             @NotNull MembershipCard card,
-            @NotNull Order order,
+            long eventId,
+            @NotNull String orderCode,
             @NotNull PretixOrder pretixOrder
     ) {
         if (!card.isRegistered() && card.getIdInYear() == null) {
 
             log.info("[PRETIX] Order {} previously had a membership card, "
                             + "but now it doesn't. "
-                            + "Deleting the previous registered card {} and "
-                            + "shifting the enumeration of the others",
-                    order.getCode(), card.getCardId());
+                            + "Deleting the previous card {}",
+                    orderCode, card.getCardId());
             boolean del = deleteMembershipCardAction.invoke(card);
             if (!del) {
                 log.error("[PRETIX] Order {} previously had a membership card {},"
                                 + "but we failed deleting it",
-                        order.getCode(), card.getCardId());
+                        orderCode, card.getCardId());
             }
         } else {
             log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
                             + "However, the previous membership card ({}/{}) "
                             + "was already registered!! "
                             + "No operation is going to be performed.",
-                    order.getCode(), card.getCardId(), card.getIdInYear());
+                    orderCode, card.getCardId(), card.getIdInYear());
 
             emailSender.prepareAndSendNotificationForPermission(
                     NotificationType.ADMIN_ORDER_CARD_REMOVED_BUT_CARD_REGISTERED,
-                    generateCardRemovedFromOrderNotificationId(order, card.getCardId()),
+                    generateCardRemovedFromOrderNotificationId(eventId, orderCode, card.getCardId()),
                     Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
                     TranslatableValue.ofEmail("mail.membership_card_already_registered_or_with_number.title"),
                     TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED_OR_WITH_NUMBER,
-                    MailVarPair.of(ORDER_CODE, order.getCode()),
+                    MailVarPair.of(ORDER_CODE, orderCode),
                     MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
                     MailVarPair.of(
                             MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
@@ -274,10 +278,11 @@ public class UpdateOrderInDb {
     }
 
     private @NotNull String generateCardRemovedFromOrderNotificationId(
-            @NotNull Order order,
+            long eventId,
+            @NotNull String orderCode,
             long cardId
     ) {
-        return String.format("-%03d-%s-%07d-", order.getOrderEvent().getId(), order.getCode(), cardId);
+        return String.format("-%03d-%s-%07d-", eventId, orderCode, cardId);
     }
 
 }

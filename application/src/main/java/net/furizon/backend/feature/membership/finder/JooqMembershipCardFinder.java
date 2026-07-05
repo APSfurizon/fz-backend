@@ -259,7 +259,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
 
     @Override
     public boolean canDeleteCard(@NotNull MembershipCard card) {
-        return !sqlQuery.fetchFirst(
+        return sqlQuery.fetchFirst(
                 PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)
                 .from(MEMBERSHIP_CARDS)
                 .where(

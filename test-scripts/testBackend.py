@@ -345,8 +345,8 @@ def roomGetInfo() -> Response:
 def exchangeInit() -> Response:
     json = {
         "destUserId": 2,
-        "action": "room"
-        #"action": "order"
+        #"action": "room"
+        "action": "order"
     }
     return doPost(f'{BASE_URL_API}room/exchange/init', json=json)
 
@@ -571,7 +571,7 @@ login()
 #removeUserFromRole(5, 1)
 
 #testInternalAuthorize()
-uploadFileToGallery("C:/Users/Stran/Desktop/Furizon/test", "asd.png", 10)
+#uploadFileToGallery("C:/Users/Stran/Desktop/Furizon/test", "asd.png", 10)
 #galleryProcessorWebhook()
 #getUpload(13)
 #listUploads(
@@ -608,7 +608,7 @@ uploadFileToGallery("C:/Users/Stran/Desktop/Furizon/test", "asd.png", 10)
 #roomListing()
 #buyOrUpgradeRoom()
 #exchangeInit()
-#exchangeUpdate()
+exchangeUpdate()
 #getSponsorshipNames()
 #reminderFursuitBringToEvent()
 
