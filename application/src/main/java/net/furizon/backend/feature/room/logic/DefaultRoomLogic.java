@@ -421,19 +421,8 @@ public class DefaultRoomLogic implements RoomLogic {
                 + "targetUsrId={}; sourceUsrId={}; roomId={}; event = {}",
                 targetUsrId, sourceUsrId, roomId, event);
         BiFunction<RoomGuest, RoomGuest, Boolean> updateDb = (targetGuest, sourceGuest) -> {
-            boolean result = command.execute(
-                PostgresDSL.update(ORDERS)
-                .set(ORDERS.USER_ID, targetUsrId)
-                .where(
-                    ORDERS.USER_ID.eq(sourceUsrId)
-                    .and(ORDERS.EVENT_ID.eq(event.getId()))
-                )
-            ) > 0;
-            logExchangeError(result, 0, targetUsrId, sourceUsrId, event);
-            if (result) {
-                clearPendingInvitation(sourceUsrId, null, event);
-            }
-            return result;
+            clearPendingInvitation(sourceUsrId, null, event);
+            return true;
         };
         if (roomId < 0L) {
             return updateDb.apply(null, null);
