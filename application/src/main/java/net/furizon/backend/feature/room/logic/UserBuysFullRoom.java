@@ -43,8 +43,6 @@ import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,10 +58,8 @@ import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_U
 import static net.furizon.backend.infrastructure.rooms.RoomEmailTexts.TEMPLATE_UPGRADE_FAILED_PRICE;
 
 @Slf4j
-@Primary
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-full-room")
 public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final RoomChecks checks;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
@@ -388,7 +384,7 @@ public class UserBuysFullRoom implements RoomLogic {
             }
 
             //Changes on pretix
-            boolean pretixRes = transferOrderAction.invoke(
+            String newOrderCode = transferOrderAction.invoke(
                 TransferOrderRequest.builder()
                         .orderCode(orderCode)
 
@@ -414,8 +410,8 @@ public class UserBuysFullRoom implements RoomLogic {
                     .build(),
                 event
             );
-            if (!pretixRes) {
-                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Pretix update returned false!",
+            if (newOrderCode == null) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Pretix update returned null!",
                         sourceUsrId, targetUsrId, event);
                 //We're in a @Transactional. Throwing an exception makes it rollback database changes
                 throw new ApiException(translationService.error("common.server_error"),
@@ -424,14 +420,25 @@ public class UserBuysFullRoom implements RoomLogic {
 
             //Refetch pretix order and update it in db
             var pair = event.getOrganizerAndEventPair();
-            var order = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
-            if (!order.isPresent()) {
-                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to refetch order {} from pretix",
+            var oldOrder = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), orderCode);
+            if (!oldOrder.isPresent()) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to refetch old order {} from pretix",
                         sourceUsrId, targetUsrId, event, orderCode);
                 return false;
             }
-            boolean res = updateOrderInDb.execute(order.get(), event, pretixInformation).isPresent();
+            boolean res = updateOrderInDb.execute(oldOrder.get(), event, pretixInformation).isPresent();
             defaultRoomLogic.logExchangeError(res, 203, targetUsrId, sourceUsrId, event);
+            if (!res) {
+                return false;
+            }
+            var newOrder = pretixOrderFinder.fetchOrderByCode(pair.getOrganizer(), pair.getEvent(), newOrderCode);
+            if (!newOrder.isPresent()) {
+                log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to fetch new order {} from pretix",
+                        sourceUsrId, targetUsrId, event, orderCode);
+                return false;
+            }
+            res = updateOrderInDb.execute(newOrder.get(), event, pretixInformation).isPresent();
+            defaultRoomLogic.logExchangeError(res, 204, targetUsrId, sourceUsrId, event);
 
             return res;
         } finally {

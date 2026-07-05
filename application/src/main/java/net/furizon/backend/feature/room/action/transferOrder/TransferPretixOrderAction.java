@@ -5,7 +5,7 @@ import net.furizon.backend.feature.room.dto.request.TransferOrderRequest;
 import org.jetbrains.annotations.NotNull;
 
 public interface TransferPretixOrderAction {
-    boolean invoke(
+    @Nullable String invoke(
             @NotNull TransferOrderRequest toReq,
             @NotNull Event event
     );
