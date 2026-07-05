@@ -35,8 +35,9 @@ public class RestTransferOrder implements TransferPretixOrderAction {
     @NotNull
     private final TranslationService translationService;
 
+    @Nullable
     @Override
-    public boolean invoke(
+    public String invoke(
         @NotNull String orderCode,
         long positionId,
         long questionId,
@@ -51,7 +52,7 @@ public class RestTransferOrder implements TransferPretixOrderAction {
                + "orderCode={}, positionId={}, questionId={}, newUserId={}",
                 orderCode, positionId, questionId, newUserId);
         final var pair = event.getOrganizerAndEventPair();
-        final var request = HttpRequest.<Void>create()
+        final var request = HttpRequest.<TransferOrderResponse>create()
             .method(HttpMethod.POST)
             .overrideBasePath(pretixConfig.getShop().getBasePath())
             .path("/{organizer}/{event}/fzbackendutils/api/transfer-order/")
@@ -69,7 +70,7 @@ public class RestTransferOrder implements TransferPretixOrderAction {
                     .manualRefundComment(refundComment)
                 .build()
             )
-            .responseType(Void.class)
+            .responseType(TransferOrderResponse.class)
             .build();
         try {
             var response = pretixHttpClient.send(PretixConfig.class, request, GenericErrorResponse.class);
@@ -86,14 +87,15 @@ public class RestTransferOrder implements TransferPretixOrderAction {
                             translationService.error("pretix.orders_flow.refund_illegal_state", message),
                             OrderWorkflowErrorCode.REFUND_INVALID_STATE
                     );
-                    default -> false;
+                    default -> null;
                 };
             } else {
-                return response.getResponseEntity().getStatusCode().is2xxSuccessful();
+                var body = response.getResponseEntity().getBody();
+                return body == null ? null : body.getNewOrderCode();
             }
         } catch (final HttpClientErrorException | IOException ex) {
             log.error("Error updating bundle status", ex);
-            return false;
+            return null;
         }
     }
 }

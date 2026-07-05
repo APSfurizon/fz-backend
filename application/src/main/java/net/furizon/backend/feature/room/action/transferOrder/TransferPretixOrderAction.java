@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface TransferPretixOrderAction {
-    boolean invoke(
+    @Nullable String invoke(
         @NotNull String orderCode,
         long positionId,
         long questionId,

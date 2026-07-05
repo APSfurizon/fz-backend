@@ -26,23 +26,20 @@ import net.furizon.backend.infrastructure.security.GeneralChecks;
 import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Primary
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "room", name = "logic", havingValue = "roomLogic-user-buys-generic-spot")
 public class UserBuysGenericSpot implements RoomLogic {
     @NotNull private final RoomChecks checks;
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final UpdateOrderInDb updateOrderInDb;
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
+    @NotNull private final UserBuysFullRoom userBuysFullRoomLogic;
     @NotNull private final RoomGeneralSanityCheck sanityChecks;
     @NotNull private final PretixOrderFinder pretixOrderFinder;
     @NotNull private final OrderFinder orderFinder;
@@ -286,7 +283,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     }
     @Override
     public boolean isExchangeFullOrderSupported(@NotNull Event event) {
-        return false;
+        return true;
     }
     @Override
     public boolean exchangeRoom(long targetUsrId, long sourceUsrId,
@@ -300,9 +297,7 @@ public class UserBuysGenericSpot implements RoomLogic {
     @Override
     public boolean exchangeFullOrder(long targetUsrId, long sourceUsrId, long roomId,
                                      @NotNull Event event, @NotNull PretixInformation pretixInformation) {
-        //TODO implement when pretix is updated
-        log.warn("Exchange of full orders not supported with UserBuysGenericSpot");
-        return false;
+        return userBuysFullRoomLogic.exchangeFullOrder(targetUsrId, sourceUsrId, roomId, event, pretixInformation);
     }
 
     @Override
