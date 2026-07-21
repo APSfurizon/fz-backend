@@ -166,9 +166,10 @@ public class UpdateOrderInDb {
                                             TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED_OR_WITH_NUMBER,
                                             MailVarPair.of(ORDER_CODE, order.getCode()),
                                             MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear == null ? "-" : idInYear),
                                             MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
+                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId)),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR,
+                                                    idInYear == null ? "-" : idInYear)
                                         );
                                     }
                                 }

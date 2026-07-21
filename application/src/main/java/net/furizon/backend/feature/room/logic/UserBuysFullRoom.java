@@ -364,9 +364,9 @@ public class UserBuysFullRoom implements RoomLogic {
             final String comment =
                   " for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
                 + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now());
-            final String cancelComment = "Order was canceled" + comment;
-            final String paymentComment = "Payment was created" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
-            final String refundComment = "Refund was created" + comment;
+            String cancelComment = "Order was canceled" + comment;
+            String paymentComment = "Payment was created" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
+            String refundComment = "Refund was created" + comment;
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeFullOrder(
