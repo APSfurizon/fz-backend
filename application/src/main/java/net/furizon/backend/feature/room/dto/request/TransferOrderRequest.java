@@ -12,7 +12,7 @@ import java.util.Collection;
 public class TransferOrderRequest {
     @NotNull private final String orderCode;
 
-    @NotNull private final Collection<Long> ticketItemIds;
+    private final long membershipCardAddonToPositionId;
 
     @NotNull private final Collection<Long> membershipCardItemIds;
     private final boolean membershipCardNeededForNewUser;

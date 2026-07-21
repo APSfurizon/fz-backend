@@ -363,10 +363,16 @@ public class UserBuysFullRoom implements RoomLogic {
 
             final String comment =
                   " for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
-                + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now());
+                + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now())
+                + ". Old order code: " + orderCode;
             String cancelComment = "Order was canceled" + comment;
             String paymentComment = "Payment was created" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             String refundComment = "Refund was created" + comment;
+
+            Long mainPositionId = sourceOrder.getRoomPositionId();
+            if (mainPositionId == null) {
+                mainPositionId = sourceOrder.getTicketPositionId();
+            }
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeFullOrder(
@@ -388,7 +394,7 @@ public class UserBuysFullRoom implements RoomLogic {
                 TransferOrderRequest.builder()
                         .orderCode(orderCode)
 
-                        .ticketItemIds(pretixInformation.getIdsForItemType(CacheItemTypes.TICKETS))
+                        .membershipCardAddonToPositionId(mainPositionId)
 
                         .membershipCardItemIds(pretixInformation.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS))
                         .membershipCardNeededForNewUser(!hasCard)
