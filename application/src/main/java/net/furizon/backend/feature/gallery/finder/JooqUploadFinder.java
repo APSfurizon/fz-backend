@@ -599,22 +599,21 @@ public class JooqUploadFinder implements UploadFinder {
                     MEDIA.MEDIA_TYPE,
                     MEDIA.MEDIA_STORE_METHOD,
                     countTable.field(countField),
-                    USER_HAS_ROLE.ROLE_ID.isNotNull().as(officialPhotographer)
+                    PostgresDSL.exists(
+                        PostgresDSL.selectOne()
+                        .from(USER_HAS_ROLE)
+                        .innerJoin(PERMISSION)
+                        .on(PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID))
+                        .where(USER_HAS_ROLE.USER_ID.eq(USERS.USER_ID))
+                        .and(PERMISSION.PERMISSION_VALUE.eq(Permission.UPLOADS_OFFICIAL_UPLOADER.getValue()))
+                        .limit(1)
+                    ).as(officialPhotographer)
                 )
                 .from(USERS)
                 .innerJoin(countTable)
                 .on(USERS.USER_ID.eq(countTable.field(UPLOADS.PHOTOGRAPHER_USER_ID)))
                 .leftJoin(MEDIA)
-                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID))
-                .leftJoin(
-                    USER_HAS_ROLE
-                    .innerJoin(PERMISSION)
-                    .on(
-                        PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
-                        .and(PERMISSION.PERMISSION_VALUE.eq(Permission.UPLOADS_OFFICIAL_UPLOADER.getValue()))
-                    )
-                )
-                .on(USER_HAS_ROLE.USER_ID.eq(USERS.USER_ID));
+                .on(USERS.MEDIA_ID_PROPIC.eq(MEDIA.MEDIA_ID));
         return new GalleryPhotographerObjSelected(
                 q,
                 countField,
