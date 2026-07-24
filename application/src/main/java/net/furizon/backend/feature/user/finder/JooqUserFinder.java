@@ -420,6 +420,15 @@ public class JooqUserFinder implements UserFinder {
         ).stream().map(ShirtExportRowMapper::map).toList();
     }
 
+    @Override
+    public @Nullable String getEmailFromUserId(long userId) {
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(AUTHENTICATIONS.AUTHENTICATION_EMAIL)
+            .from(AUTHENTICATIONS)
+            .where(AUTHENTICATIONS.USER_ID.eq(userId))
+        ).mapOrNull(r -> r.getValue(AUTHENTICATIONS.AUTHENTICATION_EMAIL));
+    }
+
     private SelectJoinStep<?> selectUser() {
         return PostgresDSL
             .select(

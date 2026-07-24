@@ -21,9 +21,9 @@ public class JooqUpdateCardOwner implements UpdateMembershipCardOwner {
     public void invoke(@NotNull MembershipCard card, long newOwnerId) {
         log.info("Updating membership card {} owner to {}", card, newOwnerId);
         sqlCommand.execute(
-            PostgresDSL.update(MEMBERSHIP_CARDS)
-            .set(MEMBERSHIP_CARDS.USER_ID, newOwnerId)
-            .where(MEMBERSHIP_CARDS.CARD_DB_ID.eq(card.getCardId()))
+                PostgresDSL.update(MEMBERSHIP_CARDS)
+                        .set(MEMBERSHIP_CARDS.USER_ID, newOwnerId)
+                        .where(MEMBERSHIP_CARDS.CARD_DB_ID.eq(card.getCardId()))
         );
     }
 }

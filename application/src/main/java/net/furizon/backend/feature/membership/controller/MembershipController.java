@@ -184,7 +184,8 @@ public class MembershipController {
             + "will fetch it from pretix, so the deletions of these kinds of cards is NOT possible "
             + "and will return a `MEMBERSHIP_CARD_ORDER_STILL_LINKED` error. It's NOT possible "
             + "as well the deletion of already registered cards, in this instance the error "
-            + "will be `MEMBERSHIP_CARD_WAS_REGISTERED`")
+            + "will be `MEMBERSHIP_CARD_WAS_REGISTERED`. If the card has a cardNo assigned to it, "
+            + "the deletion is prohibited, and the error will be `MEMBERSHIP_CARD_NUMBER_ALREADY_ASSIGNED`")
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/delete-card")
     public boolean deleteMembershipCards(
@@ -221,7 +222,7 @@ public class MembershipController {
     @Operation(summary = "Sets the registration status of a membership card", description =
         "Membership cards have to be manually register to an external website for being legally valid."
         + "This endpoint should be used by ADMINS only and it's used to mark a membership card as registered "
-        + "in the external website or not")
+        + "in the external website or not. Note: Only cards with an assigned number can be set as registered.")
     @PermissionRequired(permissions = {Permission.CAN_MANAGE_MEMBERSHIP_CARDS})
     @PostMapping("/set-membership-card-registration-status")
     public boolean setMembershipCardRegistration(

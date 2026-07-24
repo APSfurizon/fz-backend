@@ -42,4 +42,7 @@ public class PretixOrder {
     @Nullable
     @JsonProperty("checkin_text")
     private final String checkinText;
+
+    @JsonProperty("testmode")
+    private final boolean testMode;
 }

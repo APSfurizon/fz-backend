@@ -59,6 +59,8 @@ public interface UserFinder {
 
     List<ShirtExportRow> exportShirts(long eventId);
 
+    @Nullable String getEmailFromUserId(long userId);
+
     SelectJoinStep<?> selectJoinDisplayUser(long eventId);
 
     SelectJoinStep<?> selectJoinDisplayUser();

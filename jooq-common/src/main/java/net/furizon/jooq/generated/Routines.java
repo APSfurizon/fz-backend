@@ -30,12 +30,12 @@ public class Routines {
      */
     public static Boolean candeletemembershipcard(
           Configuration configuration
-        , Integer startingfromid
-        , Short issueyear
+        , Integer idInYear
+        , Boolean alreadyRegistered
     ) {
         Candeletemembershipcard f = new Candeletemembershipcard();
-        f.setStartingfromid(startingfromid);
-        f.setIssueyear(issueyear);
+        f.setIdInYear(idInYear);
+        f.setAlreadyRegistered(alreadyRegistered);
 
         f.execute(configuration);
         return f.getReturnValue();
@@ -45,12 +45,12 @@ public class Routines {
      * Get <code>public.candeletemembershipcard</code> as a field.
      */
     public static Field<Boolean> candeletemembershipcard(
-          Integer startingfromid
-        , Short issueyear
+          Integer idInYear
+        , Boolean alreadyRegistered
     ) {
         Candeletemembershipcard f = new Candeletemembershipcard();
-        f.setStartingfromid(startingfromid);
-        f.setIssueyear(issueyear);
+        f.setIdInYear(idInYear);
+        f.setAlreadyRegistered(alreadyRegistered);
 
         return f.asField();
     }
@@ -59,12 +59,12 @@ public class Routines {
      * Get <code>public.candeletemembershipcard</code> as a field.
      */
     public static Field<Boolean> candeletemembershipcard(
-          Field<Integer> startingfromid
-        , Field<Short> issueyear
+          Field<Integer> idInYear
+        , Field<Boolean> alreadyRegistered
     ) {
         Candeletemembershipcard f = new Candeletemembershipcard();
-        f.setStartingfromid(startingfromid);
-        f.setIssueyear(issueyear);
+        f.setIdInYear(idInYear);
+        f.setAlreadyRegistered(alreadyRegistered);
 
         return f.asField();
     }

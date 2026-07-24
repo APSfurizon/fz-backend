@@ -83,6 +83,8 @@ public class GenerateApsSignHtmlUseCase implements UseCase<GenerateApsSignHtmlUs
         var pui = generalChecks.assertUserFound(personalInfoFinder.findByUserId(input.userId));
 
         var memberships = membershipCardFinder.getCardsOfUserForEvent(input.userId, event);
+        memberships = memberships.stream().filter(m -> m.getCardNo() != null).toList();
+
         if (memberships.isEmpty()) {
             log.error("User {} doesn't have any membership card", input.userId);
             throw new ApiException(

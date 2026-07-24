@@ -16,14 +16,17 @@ public class JooqSetCardRegistrationStatus implements SetMembershipCardRegistrat
     @NotNull private final SqlCommand sqlCommand;
 
     @Override
-    public void invoke(long membershipCardId, boolean status) {
+    public boolean invoke(long membershipCardId, boolean status) {
         try {
             OrderController.suspendWebhook();
-            sqlCommand.execute(
+            return sqlCommand.execute(
                 PostgresDSL.update(MEMBERSHIP_CARDS)
                 .set(MEMBERSHIP_CARDS.ALREADY_REGISTERED, status)
-                .where(MEMBERSHIP_CARDS.CARD_DB_ID.eq(membershipCardId))
-            );
+                .where(
+                    MEMBERSHIP_CARDS.CARD_DB_ID.eq(membershipCardId)
+                    .and(MEMBERSHIP_CARDS.ID_IN_YEAR.isNotNull())
+                )
+            ) == 1;
         } finally {
             OrderController.resumeWebhook();
         }

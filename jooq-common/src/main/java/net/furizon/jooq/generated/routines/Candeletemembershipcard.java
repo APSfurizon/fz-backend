@@ -36,14 +36,15 @@ public class Candeletemembershipcard extends AbstractRoutine<Boolean> {
     public static final Parameter<Boolean> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.BOOLEAN, false, false);
 
     /**
-     * The parameter <code>public.candeletemembershipcard.startingfromid</code>.
+     * The parameter <code>public.candeletemembershipcard.id_in_year</code>.
      */
-    public static final Parameter<Integer> STARTINGFROMID = Internal.createParameter("startingfromid", SQLDataType.INTEGER, false, false);
+    public static final Parameter<Integer> ID_IN_YEAR = Internal.createParameter("id_in_year", SQLDataType.INTEGER, false, false);
 
     /**
-     * The parameter <code>public.candeletemembershipcard.issueyear</code>.
+     * The parameter
+     * <code>public.candeletemembershipcard.already_registered</code>.
      */
-    public static final Parameter<Short> ISSUEYEAR = Internal.createParameter("issueyear", SQLDataType.SMALLINT, false, false);
+    public static final Parameter<Boolean> ALREADY_REGISTERED = Internal.createParameter("already_registered", SQLDataType.BOOLEAN, false, false);
 
     /**
      * Create a new routine call instance
@@ -52,37 +53,37 @@ public class Candeletemembershipcard extends AbstractRoutine<Boolean> {
         super("candeletemembershipcard", Public.PUBLIC, SQLDataType.BOOLEAN);
 
         setReturnParameter(RETURN_VALUE);
-        addInParameter(STARTINGFROMID);
-        addInParameter(ISSUEYEAR);
+        addInParameter(ID_IN_YEAR);
+        addInParameter(ALREADY_REGISTERED);
     }
 
     /**
-     * Set the <code>startingfromid</code> parameter IN value to the routine
+     * Set the <code>id_in_year</code> parameter IN value to the routine
      */
-    public void setStartingfromid(Integer value) {
-        setValue(STARTINGFROMID, value);
+    public void setIdInYear(Integer value) {
+        setValue(ID_IN_YEAR, value);
     }
 
     /**
-     * Set the <code>startingfromid</code> parameter to the function to be used
-     * with a {@link org.jooq.Select} statement
-     */
-    public void setStartingfromid(Field<Integer> field) {
-        setField(STARTINGFROMID, field);
-    }
-
-    /**
-     * Set the <code>issueyear</code> parameter IN value to the routine
-     */
-    public void setIssueyear(Short value) {
-        setValue(ISSUEYEAR, value);
-    }
-
-    /**
-     * Set the <code>issueyear</code> parameter to the function to be used with
+     * Set the <code>id_in_year</code> parameter to the function to be used with
      * a {@link org.jooq.Select} statement
      */
-    public void setIssueyear(Field<Short> field) {
-        setField(ISSUEYEAR, field);
+    public void setIdInYear(Field<Integer> field) {
+        setField(ID_IN_YEAR, field);
+    }
+
+    /**
+     * Set the <code>already_registered</code> parameter IN value to the routine
+     */
+    public void setAlreadyRegistered(Boolean value) {
+        setValue(ALREADY_REGISTERED, value);
+    }
+
+    /**
+     * Set the <code>already_registered</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
+     */
+    public void setAlreadyRegistered(Field<Boolean> field) {
+        setField(ALREADY_REGISTERED, field);
     }
 }

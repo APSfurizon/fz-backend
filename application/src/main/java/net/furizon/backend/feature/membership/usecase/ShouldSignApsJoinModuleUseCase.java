@@ -46,7 +46,7 @@ public class ShouldSignApsJoinModuleUseCase implements UseCase<ShouldSignApsJoin
         }
 
         var membershipCards = cardFinder.getCardsOfUserForEvent(input.userId, event);
-        return membershipCards.stream().reduce(
+        return membershipCards.stream().filter(m -> m.getCardNo() != null).reduce(
                 true,
                 (i, card) -> i && card.getSignedAt() == null,
                 Boolean::logicalAnd

@@ -174,6 +174,9 @@ public class Order {
 
 
     public long getId() {
+        return getId(code, eventId);
+    }
+    public static long getId(@NotNull String code, long eventId) {
         return Hashing.sha512().hashString(code + String.format("%016x", eventId), StandardCharsets.UTF_8).asLong();
     }
 

@@ -157,7 +157,11 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             .on(
                 MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
                 .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
-                .and(MEMBERSHIP_CARDS.ID_IN_YEAR.greaterThan(afterCardNo))
+                .and(
+                    //Not sure if this is correct
+                    MEMBERSHIP_CARDS.ID_IN_YEAR.greaterThan(afterCardNo)
+                    .or(MEMBERSHIP_CARDS.ID_IN_YEAR.isNull())
+                )
             )
             .innerJoin(MEMBERSHIP_INFO)
             .on(USERS.USER_ID.eq(MEMBERSHIP_INFO.USER_ID))
@@ -255,13 +259,13 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
 
     @Override
     public boolean canDeleteCard(@NotNull MembershipCard card) {
-        return !sqlQuery.fetchFirst(
+        return sqlQuery.fetchFirst(
                 PostgresDSL.select(MEMBERSHIP_CARDS.CARD_DB_ID)
                 .from(MEMBERSHIP_CARDS)
                 .where(
-                    MEMBERSHIP_CARDS.ISSUE_YEAR.eq(card.getIssueYear())
-                    .and(MEMBERSHIP_CARDS.ID_IN_YEAR.greaterOrEqual(card.getIdInYear()))
-                    .and(MEMBERSHIP_CARDS.ALREADY_REGISTERED.isTrue())
+                    MEMBERSHIP_CARDS.CARD_DB_ID.eq(card.getCardId())
+                    .and(MEMBERSHIP_CARDS.ALREADY_REGISTERED.isFalse())
+                    .and(MEMBERSHIP_CARDS.ID_IN_YEAR.isNull())
                 )
                 .limit(1)
         ).isPresent();
@@ -287,6 +291,7 @@ public class JooqMembershipCardFinder implements MembershipCardFinder {
             .on(
                 MEMBERSHIP_CARDS.USER_ID.eq(USERS.USER_ID)
                 .and(MEMBERSHIP_CARDS.ISSUE_YEAR.eq(year))
+                .and(MEMBERSHIP_CARDS.ID_IN_YEAR.isNotNull())
                 .and(MEMBERSHIP_CARDS.ALREADY_REGISTERED.isTrue())
                 .and(MEMBERSHIP_CARDS.SENT_BY_EMAIL.isFalse())
             )

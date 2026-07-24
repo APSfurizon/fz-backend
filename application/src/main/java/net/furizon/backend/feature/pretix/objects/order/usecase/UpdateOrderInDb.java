@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED;
-import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED_OR_WITH_NUMBER;
+import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED_OR_WITH_NUMBER;
 import static net.furizon.backend.feature.authentication.AuthenticationEmailTexts.TEMPLATE_ORDER_UNABLE_TO_CONVERT;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID;
 import static net.furizon.backend.infrastructure.email.EmailVars.MEMBERSHIP_CARD_ID_IN_YEAR;
@@ -95,7 +95,7 @@ public class UpdateOrderInDb {
 
                     // GENERATE MEMBERSHIP CARD LOGIC
                     Long orderOwnerId = order.getOrderOwnerUserId();
-                    if (orderOwnerId != null && os == OrderStatus.PAID) {
+                    if (orderOwnerId != null && os == OrderStatus.PAID && !pretixOrder.isTestMode()) {
 
                         MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(order.getId());
                         if (order.hasMembership()) {
@@ -114,9 +114,11 @@ public class UpdateOrderInDb {
                                 long cardOwnerId = card.getUserOwnerId();
 
                                 //Order owner has changed
+                                // THIS SHOULD NOT HAPPEN BTW
                                 if (!orderOwnerId.equals(cardOwnerId)) {
-                                    //If the card wasn't registered yet, we can change the owners
-                                    if (!card.isRegistered()) {
+                                    //If the card wasn't registered yet and has no code assigned,
+                                    // we can change the owners
+                                    if (!card.isRegistered() && card.getCardNo() == null) {
                                         if (userFinder.findById(orderOwnerId) != null) {
                                             log.warn("[PRETIX] Order {} has already generated "
                                                             + "the membeship card {}/{}. "
@@ -139,75 +141,42 @@ public class UpdateOrderInDb {
                                         //Check if the new owner has already a card. If yes, we're fine,
                                         // the previous card remains with the previous order.
                                         // Otherwise, send an error email to web admins
-                                        if (membershipCardFinder.userHasMembershipCardForEvent(orderOwnerId, event)) {
-                                            log.error("[PRETIX] Order {} has already generated "
-                                                            + "the membeship card {}/{}. "
-                                                            + "Order owner has changed ({} -> {}), "
-                                                            + "but membership card was already registered!!"
-                                                            + "Manual fix is needed!!! +++",
-                                                    order.getCode(),
-                                                    card.getCardId(), card.getIdInYear(),
-                                                    cardOwnerId, orderOwnerId
-                                            );
+                                        log.error("[PRETIX] Order {} has already generated "
+                                                        + "the membeship card {}/{}. "
+                                                        + "Order owner has changed ({} -> {}), "
+                                                        + "but membership card was already registered!!"
+                                                        + "Manual fix is needed!!! +++",
+                                                order.getCode(),
+                                                card.getCardId(), card.getIdInYear(),
+                                                cardOwnerId, orderOwnerId
+                                        );
 
-                                            String idInYear = String.valueOf(card.getIdInYear());
-                                            emailSender.prepareAndSendNotificationForPermission(
-                                                NotificationType.ADMIN_ORDER_OWNER_CHANGED_BUT_CARD_REGISTERED,
-                                                generateOrderOwnerChangedNotificationId(
-                                                        order.getOrderEvent(),
-                                                        card.getCardId(),
-                                                        cardOwnerId,
-                                                        orderOwnerId
-                                                ),
-                                                Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                                TranslatableValue.ofEmail(
-                                                        "mail.membership_card_owner_changed_but_registered.title"),
-                                                TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED,
-                                                MailVarPair.of(ORDER_CODE, order.getCode()),
-                                                MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                                MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR, idInYear),
-                                                MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
-                                                MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId))
-                                            );
-                                        }
+                                        String idInYear = String.valueOf(card.getIdInYear());
+                                        emailSender.prepareAndSendNotificationForPermission(
+                                            NotificationType.ADMIN_ORDER_OWNER_CHANGED_BUT_CARD_REGISTERED,
+                                            generateOrderOwnerChangedNotificationId(
+                                                    order.getOrderEvent(),
+                                                    card.getCardId(),
+                                                    cardOwnerId,
+                                                    orderOwnerId
+                                            ),
+                                            Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                                            TranslatableValue.ofEmail(
+                                                    "mail.membership_card_owner_changed_but_registered.title"),
+                                            TEMPLATE_MEMBERSHIP_CARD_OWNER_CHANGED_BUT_REGISTERED_OR_WITH_NUMBER,
+                                            MailVarPair.of(ORDER_CODE, order.getCode()),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                                            MailVarPair.of(ORDER_PREV_OWNER_ID, String.valueOf(cardOwnerId)),
+                                            MailVarPair.of(ORDER_OWNER_ID, String.valueOf(orderOwnerId)),
+                                            MailVarPair.of(MEMBERSHIP_CARD_ID_IN_YEAR,
+                                                    idInYear == null ? "-" : idInYear)
+                                        );
                                     }
                                 }
                             }
                         } else {
                             if (card != null) { //The order HAD a membership card, but now it does not anymore
-                                if (!card.isRegistered()) {
-                                    int cardIdInYear = card.getIdInYear();
-
-                                    log.info("[PRETIX] Order {} previously had a membership card, "
-                                            + "but now it doesn't. "
-                                            + "Deleting the previous registered card {}/{} and "
-                                            + "shifting the enumeration of the others",
-                                            order.getCode(), card.getCardId(), cardIdInYear);
-                                    boolean del = deleteMembershipCardAction.invoke(card);
-                                    if (!del) {
-                                        log.error("[PRETIX] Order {} previously had a membership card {}/{},"
-                                                + "but we failed deleting it",
-                                                order.getCode(), card.getCardId(), cardIdInYear);
-                                    }
-                                } else {
-                                    log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
-                                                    + "However, the previous membership card ({}/{}) "
-                                                    + "was already registered!! "
-                                                    + "No operation is going to be performed.",
-                                            order.getCode(), card.getCardId(), card.getIdInYear());
-
-                                    emailSender.prepareAndSendNotificationForPermission(
-                                        NotificationType.ADMIN_ORDER_CARD_REMOVED_BUT_CARD_REGISTERED,
-                                        generateCardRemovedFromOrderNotificationId(order, card.getCardId()),
-                                        Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
-                                        TranslatableValue.ofEmail("mail.membership_card_already_registered.title"),
-                                        TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED,
-                                        MailVarPair.of(ORDER_CODE, order.getCode()),
-                                        MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
-                                        MailVarPair.of(
-                                                MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
-                                    );
-                                }
+                                handleMembershipCardDeletion(card, event.getId(), pretixOrder.getCode(), pretixOrder);
                             }
                         }
                     }
@@ -221,6 +190,14 @@ public class UpdateOrderInDb {
             }
 
             if (shouldDelete) {
+                //Handle card
+                MembershipCard card = membershipCardFinder.getMembershipCardByOrderId(
+                        Order.getId(pretixOrder.getCode(), event.getId())
+                );
+                if (card != null) {
+                    handleMembershipCardDeletion(card, event.getId(), pretixOrder.getCode(), pretixOrder);
+                }
+                //actually delete order
                 deleteOrderAction.invoke(pretixOrder.getCode(), event);
             }
 
@@ -253,6 +230,45 @@ public class UpdateOrderInDb {
         }
     }
 
+    private void handleMembershipCardDeletion(
+            @NotNull MembershipCard card,
+            long eventId,
+            @NotNull String orderCode,
+            @NotNull PretixOrder pretixOrder
+    ) {
+        if (!card.isRegistered() && card.getIdInYear() == null) {
+
+            log.info("[PRETIX] Order {} previously had a membership card, "
+                            + "but now it doesn't. "
+                            + "Deleting the previous card {}",
+                    orderCode, card.getCardId());
+            boolean del = deleteMembershipCardAction.invoke(card);
+            if (!del) {
+                log.error("[PRETIX] Order {} previously had a membership card {},"
+                                + "but we failed deleting it",
+                        orderCode, card.getCardId());
+            }
+        } else {
+            log.error("[PRETIX] Order {} previously had a membership card, but now it doesn't. "
+                            + "However, the previous membership card ({}/{}) "
+                            + "was already registered!! "
+                            + "No operation is going to be performed.",
+                    orderCode, card.getCardId(), card.getIdInYear());
+
+            emailSender.prepareAndSendNotificationForPermission(
+                    NotificationType.ADMIN_ORDER_CARD_REMOVED_BUT_CARD_REGISTERED,
+                    generateCardRemovedFromOrderNotificationId(eventId, orderCode, card.getCardId()),
+                    Permission.CAN_MANAGE_MEMBERSHIP_CARDS,
+                    TranslatableValue.ofEmail("mail.membership_card_already_registered_or_with_number.title"),
+                    TEMPLATE_MEMBERSHIP_CARD_ALREADY_REGISTERED_OR_WITH_NUMBER,
+                    MailVarPair.of(ORDER_CODE, orderCode),
+                    MailVarPair.of(MEMBERSHIP_CARD_ID, String.valueOf(card.getCardId())),
+                    MailVarPair.of(
+                            MEMBERSHIP_CARD_ID_IN_YEAR, String.valueOf(card.getIdInYear()))
+            );
+        }
+    }
+
     private @NotNull String generateOrderOwnerChangedNotificationId(
         @NotNull Event event,
         long cardId,
@@ -263,10 +279,11 @@ public class UpdateOrderInDb {
     }
 
     private @NotNull String generateCardRemovedFromOrderNotificationId(
-            @NotNull Order order,
+            long eventId,
+            @NotNull String orderCode,
             long cardId
     ) {
-        return String.format("-%03d-%s-%07d-", order.getOrderEvent().getId(), order.getCode(), cardId);
+        return String.format("-%03d-%s-%07d-", eventId, orderCode, cardId);
     }
 
 }

@@ -2,6 +2,9 @@ package net.furizon.backend.feature.room.logic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
+import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
+import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
 import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -21,15 +24,18 @@ import net.furizon.backend.feature.room.action.transferOrder.TransferPretixOrder
 import net.furizon.backend.feature.room.dto.RoomData;
 import net.furizon.backend.feature.room.dto.RoomErrorCodes;
 import net.furizon.backend.feature.room.dto.request.ExchangeRoomRequest;
+import net.furizon.backend.feature.room.dto.request.TransferOrderRequest;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.RoomChecks;
 import net.furizon.backend.feature.user.dto.UserDisplayDataWithExtraDays;
+import net.furizon.backend.feature.user.finder.UserFinder;
 import net.furizon.backend.infrastructure.email.EmailSender;
 import net.furizon.backend.infrastructure.email.MailVarPair;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.localization.model.TranslatableValue;
 import net.furizon.backend.infrastructure.pretix.PretixConst;
 import net.furizon.backend.infrastructure.pretix.model.Board;
+import net.furizon.backend.infrastructure.pretix.model.CacheItemTypes;
 import net.furizon.backend.infrastructure.pretix.model.ExtraDays;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
@@ -60,8 +66,11 @@ public class UserBuysFullRoom implements RoomLogic {
     @NotNull private final DefaultRoomLogic defaultRoomLogic;
     @NotNull private final RoomGeneralSanityCheck sanityChecks;
     @NotNull private final PretixOrderFinder pretixOrderFinder;
+    @NotNull private final MembershipCardFinder membershipCardFinder;
+    @NotNull private final PersonalInfoFinder personalInfoFinder;
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;
+    @NotNull private final UserFinder userFinder;
     @NotNull private final EmailSender emailSender;
     @NotNull private final TranslationService translationService;
 
@@ -341,20 +350,29 @@ public class UserBuysFullRoom implements RoomLogic {
                 return false;
             }
             //Fetch extra data
+            boolean hasCard = membershipCardFinder.userHasMembershipCardForEvent(targetUsrId, event);
             String orderCode = sourceOrder.getCode();
-            long positionId = sourceOrder.getTicketPositionId();
-            var questionId = pretixInformation.getQuestionIdFromIdentifier(PretixConst.QUESTIONS_ACCOUNT_USERID);
-            if (questionId.isEmpty()) {
+            var userIdQuestionId = pretixInformation.getQuestionIdFromIdentifier(PretixConst.QUESTIONS_ACCOUNT_USERID);
+            if (userIdQuestionId.isEmpty()) {
                 log.error("[ORDER_TRANSFER] {} -> {} on event {}: Unable to find userId question",
                         sourceUsrId, targetUsrId, event);
                 return false;
             }
+            PersonalUserInformation targetPui = Objects.requireNonNull(personalInfoFinder.findByUserId(targetUsrId));
+            String targetEmail = Objects.requireNonNull(userFinder.getEmailFromUserId(targetUsrId));
 
             final String comment =
-                  " was created for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
-                + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now());
-            final String paymentComment = "Payment" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
-            final String refundComment = "Refund" + comment;
+                  " for an order exchange between users " + sourceUsrId + " -> " + targetUsrId
+                + " happened on " + PRETIX_DATETIME_FORMAT.format(ZonedDateTime.now())
+                + ". Old order code: " + orderCode;
+            String cancelComment = "Order was canceled" + comment;
+            String paymentComment = "Payment was created" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
+            String refundComment = "Refund was created" + comment;
+
+            Long mainPositionId = sourceOrder.getRoomPositionId();
+            if (mainPositionId == null) {
+                mainPositionId = sourceOrder.getTicketPositionId();
+            }
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeFullOrder(
@@ -373,14 +391,29 @@ public class UserBuysFullRoom implements RoomLogic {
 
             //Changes on pretix
             String newOrderCode = transferOrderAction.invoke(
-                orderCode,
-                positionId,
-                questionId.get(),
-                targetUsrId,
+                TransferOrderRequest.builder()
+                        .orderCode(orderCode)
 
-                paymentComment,
-                refundComment,
+                        .membershipCardAddonToPositionId(mainPositionId)
 
+                        .membershipCardItemIds(pretixInformation.getIdsForItemType(CacheItemTypes.MEMBERSHIP_CARDS))
+                        .membershipCardNeededForNewUser(!hasCard)
+
+                        .userIdQuestionId(userIdQuestionId.get())
+                        .newUserId(targetUsrId)
+
+                        .newEmail(targetEmail)
+                        .name(String.format("%s %s", targetPui.getFirstName(), targetPui.getLastName()))
+                        .street(targetPui.getResidenceAddress())
+                        .zipcode(targetPui.getResidenceZipCode())
+                        .city(targetPui.getResidenceCity())
+                        .state(targetPui.getResidenceRegion())
+                        .country(targetPui.getResidenceCountry())
+
+                        .cancellationComment(cancelComment)
+                        .manualPaymentComment(paymentComment)
+                        .manualRefundComment(refundComment)
+                    .build(),
                 event
             );
             if (newOrderCode == null) {

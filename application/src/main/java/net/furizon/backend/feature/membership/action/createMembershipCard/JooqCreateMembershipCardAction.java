@@ -74,6 +74,8 @@ public class JooqCreateMembershipCardAction implements CreateMembershipCardActio
             id = res == null ? 1 : ((int) res) + 1;
         }
 
+        //If the user has already a card for the given year, the new one SHOULD NOT get an id_in_year.
+        // This is handle automatically by a trigger, so we don't care here in code
         sqlCommand.execute(
                 PostgresDSL.insertInto(
                         MEMBERSHIP_CARDS,
