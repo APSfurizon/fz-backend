@@ -100,7 +100,8 @@ public class HotelExportRowMapper {
                 .phone(
                         record.get(MEMBERSHIP_INFO.INFO_PHONE_PREFIX) + " "
                                 + record.get(MEMBERSHIP_INFO.INFO_PHONE)
-                ).idType(record.get(MEMBERSHIP_INFO.INFO_ID_TYPE).getLiteral())
+                )
+                .idType(record.get(MEMBERSHIP_INFO.INFO_ID_TYPE).getLiteral())
                 .idNumber(record.get(MEMBERSHIP_INFO.INFO_ID_NUMBER))
                 .idIssuer(record.get(MEMBERSHIP_INFO.INFO_ID_ISSUER))
                 .idExpiry(record.get(MEMBERSHIP_INFO.INFO_ID_EXPIRY).atStartOfDay().atOffset(ZoneOffset.UTC))
@@ -109,6 +110,7 @@ public class HotelExportRowMapper {
                 .orderCode(record.get(ORDERS.ORDER_CODE))
                 .roomOwnerOrderCode("")
                 .extraDays(ExtraDays.NONE)
+                .board(Board.NONE)
                 .requiresAttention(record.get(ORDERS.ORDER_REQUIRES_ATTENTION))
                 .internalComment(record.get(ORDERS.ORDER_INTERNAL_COMMENT))
                 .customerNotes(record.get(ORDERS.ORDER_CUSTOMER_NOTES))
