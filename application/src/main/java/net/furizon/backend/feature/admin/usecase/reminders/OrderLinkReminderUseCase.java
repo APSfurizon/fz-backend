@@ -16,6 +16,7 @@ import net.furizon.backend.infrastructure.usecase.UseCase;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,7 +38,7 @@ public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Inte
                 pretixInformation.getCurrentEvent()
         );
 
-        MailRequest[] mails = new MailRequest[unlinkedOrders.size()];
+        List<MailRequest> mails = new ArrayList<>(unlinkedOrders.size());
         for (Order o : unlinkedOrders) {
             String buyerEmail = o.getBuyerEmail();
             if (buyerEmail == null || o.getOrderStatus() != OrderStatus.PAID) {
@@ -54,7 +55,7 @@ public class OrderLinkReminderUseCase implements UseCase<PretixInformation, Inte
                 MailVarPair.of(EmailVars.ORDER_CODE, o.getCode())
             );
 
-            mails[n] = mail;
+            mails.add(mail);
             n++;
         }
         //It's fine having some mails set to null

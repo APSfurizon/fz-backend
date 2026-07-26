@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -117,7 +119,12 @@ public class PretixConfig implements HttpConfig {
 
         @NotNull
         public String getOrderUrl(@NotNull Order order) {
-            return url + "order/" + order.getCode() + "/" + order.getPretixOrderSecret() + "/";
+            String s = url + "order/" + order.getCode() + "/" + order.getPretixOrderSecret() + "/";
+            try {
+                return new URI(s).toString();
+            } catch (URISyntaxException e) {
+                return s;
+            }
         }
 
         @NotNull
