@@ -4,14 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
-import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
-import net.furizon.backend.feature.fursuits.dto.FursuitData;
-import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
-import net.furizon.backend.feature.fursuits.dto.MultipleBringFursuitToEventRequest;
+import net.furizon.backend.feature.fursuits.dto.*;
 import net.furizon.backend.feature.fursuits.usecase.*;
 import net.furizon.backend.infrastructure.GeneralConsts;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
@@ -244,6 +242,27 @@ public class FursuitController {
             data.getFursuit().setPropic(media);
         }
         return data;
+    }
+
+    @Operation(summary = "Gets fursuit information for a user", description =
+        "The various information returned by this method is the full list of fursuits "
+        + "owned by an user, if the user can bring fursuit to an event and if he can "
+        + "actually change that, and how many fursuits he can currently bring with him. "
+        + "An admin can use the optional query parameter `userId` to specify the user he "
+        + "wants to get the fursuits of")
+    @GetMapping("/")
+    public @NotNull FursuitListResponse getAllFursuits(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestParam("user-id") @Nullable final Long userId
+    ) {
+        return executor.execute(
+                GetAllFursuitsUseCase.class,
+                new GetAllFursuitsUseCase.Input(
+                        user,
+                        userId,
+                        pretixInformation
+                )
+        );
     }
 
 
