@@ -11,11 +11,8 @@ import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
-import net.furizon.backend.feature.fursuits.usecase.BringFursuitToEventUseCase;
-import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.GetSingleFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.UpdateFursuitDataUseCase;
+import net.furizon.backend.feature.fursuits.dto.MultipleBringFursuitToEventRequest;
+import net.furizon.backend.feature.fursuits.usecase.*;
 import net.furizon.backend.infrastructure.GeneralConsts;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -86,7 +83,6 @@ public class FursuitController {
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. "
-        + "Using the field `userId` an admin must specify the owner of the fursuit."
         + "Editing this field is not permitted after the badge editing deadline. To understand if "
         + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/{fursuitId}/bringToEvent")
@@ -100,6 +96,26 @@ public class FursuitController {
                 new BringFursuitToEventUseCase.Input(
                         req,
                         fursuitId,
+                        user,
+                        pretixInformation
+                )
+        );
+    }
+
+    @Operation(summary = "Sets on multiple fursuits if the user is bringing them to the current event", description =
+        "Specify a map of fursuitId -> bringToCurrent event for updating the value on multiple fursuits atomically. "
+        + "Check the `/{fursuitId}/bringToEvent` for more information. If the operation is performed from an "
+        + "administrator, he must specify the userId of the owner of the fursuits. Only the fursuits of one "
+        + "owner per time can be updated together.")
+    @PostMapping("/bringToEvent")
+    public boolean multipleBringFursuitToEvent(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @RequestBody @Valid @NotNull final MultipleBringFursuitToEventRequest req
+    ) {
+        return executor.execute(
+                MultipleBringFursuitToEventUseCase.class,
+                new MultipleBringFursuitToEventUseCase.Input(
+                        req,
                         user,
                         pretixInformation
                 )
