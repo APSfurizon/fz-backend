@@ -9,6 +9,7 @@ import net.furizon.backend.infrastructure.security.permissions.dto.JooqUserHasRo
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +41,10 @@ public interface PermissionFinder {
     boolean userHasRole(long userId, @NotNull String roleInternalName);
 
     boolean userHasPermission(long userId, @NotNull Permission permission);
+    boolean userHasAnyPermission(long userId, @NotNull Collection<Permission> permissions);
+    boolean userHasAnyPermission(long userId, @NotNull Permission... permissions);
+    boolean userHasAllPermissions(long userId, @NotNull Collection<Permission> permissions);
+    boolean userHasAllPermissions(long userId, @NotNull Permission... permissions);
 
     @NotNull List<Role> searchRolesByName(@NotNull String name);
 

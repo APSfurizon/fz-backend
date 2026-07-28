@@ -22,9 +22,11 @@ import org.jooq.SelectJoinStep;
 import org.jooq.Table;
 import org.jooq.impl.SQLDataType;
 import org.jooq.util.postgres.PostgresDSL;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -226,7 +228,54 @@ public class JooqPermissionFinder implements PermissionFinder {
                 .and(USER_HAS_ROLE.USER_ID.eq(userId))
                 .and(PERMISSION.PERMISSION_VALUE.eq(permission.getValue()))
             )
+            .limit(1)
         ).isPresent();
+    }
+
+    @Override
+    public boolean userHasAnyPermission(long userId, @NotNull Collection<Permission> permissions) {
+        var permissionsSet = permissions.stream().map(Permission::getValue).collect(Collectors.toSet());
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(
+                USER_HAS_ROLE.USER_ID
+            )
+            .from(USER_HAS_ROLE)
+            .innerJoin(PERMISSION)
+            .on(
+                PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                .and(USER_HAS_ROLE.USER_ID.eq(userId))
+                .and(PERMISSION.PERMISSION_VALUE.in(permissionsSet))
+            )
+            .limit(1)
+        ).isPresent();
+    }
+
+    @Override
+    public boolean userHasAnyPermission(long userId, @NonNull @NotNull Permission... permissions) {
+        return userHasAnyPermission(userId, List.of(permissions));
+    }
+
+    @Override
+    public boolean userHasAllPermissions(long userId, @NotNull Collection<Permission> permissions) {
+        var permissionsSet = permissions.stream().map(Permission::getValue).collect(Collectors.toSet());
+        return sqlQuery.fetchFirst(
+            PostgresDSL.select(USER_HAS_ROLE.USER_ID)
+            .from(USER_HAS_ROLE)
+            .innerJoin(PERMISSION)
+            .on(
+                PERMISSION.ROLE_ID.eq(USER_HAS_ROLE.ROLE_ID)
+                .and(USER_HAS_ROLE.USER_ID.eq(userId))
+                .and(PERMISSION.PERMISSION_VALUE.in(permissionsSet))
+            )
+            .groupBy(USER_HAS_ROLE.USER_ID)
+            .having(PostgresDSL.countDistinct(PERMISSION.PERMISSION_VALUE).eq(permissionsSet.size()))
+            .limit(1)
+        ).isPresent();
+    }
+
+    @Override
+    public boolean userHasAllPermissions(long userId, @NonNull @NotNull Permission... permissions) {
+        return userHasAllPermissions(userId, List.of(permissions));
     }
 
     @Override

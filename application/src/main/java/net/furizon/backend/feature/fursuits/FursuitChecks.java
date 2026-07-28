@@ -33,9 +33,12 @@ public class FursuitChecks {
     @NotNull private final TranslationService translationService;
 
 
+    public static final Permission[] PERMISSIONS = {
+        Permission.CAN_MANAGE_USER_PUBLIC_INFO,
+        Permission.CAN_PERFORM_CHECKINS
+    };
     public boolean isAdmin(long userId) {
-        return permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
-
+        return permissionFinder.userHasAnyPermission(userId, PERMISSIONS);
     }
 
     public void assertPermissionAndTimeframe(long userId, long fursuitId,
@@ -74,12 +77,19 @@ public class FursuitChecks {
     }
 
     public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitData fursuit) {
-        if (userId != fursuit.getOwnerId()
-                && permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO)) {
-            log.error("User {} is trying to manage fursuit {} but it's not the owner!",
-                userId, fursuit.getFursuit().getId());
-            throw new ApiException(translationService.error("badge.fursuit.fail.not_owner"),
-                GeneralResponseCodes.USER_IS_NOT_ADMIN);
+        assertUserHasPermissionOnFursuit(userId, fursuit, null);
+    }
+    public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitData fursuit, @Nullable Boolean isAdminCached) {
+        if (userId != fursuit.getOwnerId()) {
+            if (isAdminCached == null) {
+                isAdminCached = isAdmin(userId);
+            }
+            if (!isAdminCached) {
+                log.error("User {} is trying to manage fursuit {} but it's not the owner!",
+                        userId, fursuit.getFursuit().getId());
+                throw new ApiException(translationService.error("badge.fursuit.fail.not_owner"),
+                        GeneralResponseCodes.USER_IS_NOT_ADMIN);
+            }
         }
     }
     public void assertUserHasPermissionOnFursuit(long userId, long fursuitId) {
@@ -89,7 +99,7 @@ public class FursuitChecks {
         Long fursuitOwnerId = fursuitFinder.getFursuitOwner(fursuitId);
         assertFursuitObjExists(fursuitOwnerId);
         if (isAdminCached == null) {
-            isAdminCached = permissionFinder.userHasPermission(userId, Permission.CAN_MANAGE_USER_PUBLIC_INFO);
+            isAdminCached = isAdmin(userId);
         }
         if (userId != fursuitOwnerId && !isAdminCached) {
             log.error("User {} is trying to manage fursuit {} but it's not the owner!", userId, fursuitId);
@@ -126,6 +136,13 @@ public class FursuitChecks {
             log.error("Fursuit {} is already brought to current event {}!", fursuitId, order.getEventId());
             throw new ApiException(translationService.error("badge.fursuit.fail.already_bringing_to_event"),
                 FursuitErrorCodes.FURSUIT_ALREADY_BROUGHT_TO_CURRENT_EVENT);
+        }
+    }
+    public void assertFursuitNotAlreadyBroughtToCurrentEvent(@NotNull FursuitData fursuit, @NotNull Order order) {
+        if (fursuit.isBringingToEvent()) {
+            log.error("Fursuit {} is already brought to current event {}!", fursuit.getFursuit().getId(), order.getEventId());
+            throw new ApiException(translationService.error("badge.fursuit.fail.already_bringing_to_event"),
+                    FursuitErrorCodes.FURSUIT_ALREADY_BROUGHT_TO_CURRENT_EVENT);
         }
     }
 

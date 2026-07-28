@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.checkins.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
@@ -21,6 +22,7 @@ import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataR
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -77,6 +79,8 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
     @NotNull
     private final PretixConfig pretixConfig;
+    @NotNull
+    private final FursuitConfig fursuitConfig;
 
     @Override
     public @NotNull CheckinResponse executor(@NotNull RedeemCheckinUseCase.Input input) {
@@ -96,9 +100,10 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
         var pui = checks.assertUserFound(personalInfoFinder.findByUserId(orderOwner));
         var user = checks.assertUserFound(userFinder.getDisplayUser(orderOwner, input.event));
-        var fursuits = fursuitFinder.getFursuitsOfUserBroughtToEvent(orderOwner, input.event);
+        var fursuits = fursuitFinder.getFursuitsOfUser(orderOwner, input.event);
         var membershipCards = membershipCardFinder.getCardsOfUserForEvent(orderOwner, input.event);
-        boolean isFursuiter = !fursuits.isEmpty();
+        int maxFursuits = fursuitConfig.getDefaultFursuitsNo() + o.getExtraFursuits();
+        boolean isFursuiter = fursuits.stream().anyMatch(FursuitData::isBringingToEvent);
         boolean isDailyTicket = o.isDaily();
         Set<LocalDate> dailyDays = null;
         if (isDailyTicket) {
@@ -170,6 +175,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .orderSerial(o.getOrderSerialInEvent())
                 .cardsForEvent(membershipCards) //Intentionally showing duplicate cards as well
                 .fursuits(fursuits)
+                .maxFursuits(maxFursuits)
                 .hasFursuitBadge(isFursuiter)
                 .dailyDays(dailyDays)
                 .isDailyTicket(isDailyTicket)

@@ -15,6 +15,7 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -39,14 +40,14 @@ public class PermissionRequiredManager implements AuthorizationManager<MethodInv
             throw new AccessDeniedException("User is not logged in");
         }
         final Permission[] requiredPermissions = annotation.permissions();
-        final Set<Permission> userPermissions = permissionFinder.getUserPermissions(user.getUserId());
+        final long userId = user.getUserId();
 
         String methodFullName = object.getMethod().getDeclaringClass().getName()
                 + "." + object.getMethod().getName() + "()";
 
         return switch (annotation.mode()) {
             case ALL -> {
-                if (!Arrays.stream(requiredPermissions).allMatch(userPermissions::contains)) {
+                if (!permissionFinder.userHasAllPermissions(userId, requiredPermissions)) {
                     String permissions = StringUtils.join(annotation.permissions(), ',');
                     log.error("User {} running {} doesn't have all required permissions: {}",
                             user.getUserId(), methodFullName, permissions);
@@ -56,7 +57,7 @@ public class PermissionRequiredManager implements AuthorizationManager<MethodInv
                 yield SUCCESS_AUTHORIZATION_DECISION;
             }
             case ANY -> {
-                if (Arrays.stream(requiredPermissions).noneMatch(userPermissions::contains)) {
+                if (!permissionFinder.userHasAnyPermission(userId, requiredPermissions)) {
                     String permissions = StringUtils.join(annotation.permissions(), ',');
                     log.error("User {} running {} doesn't have any required permissions: {}",
                             user.getUserId(), methodFullName, permissions);
