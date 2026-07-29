@@ -6,15 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
+import net.furizon.backend.feature.badge.dto.UpdateFursonaNameRequest;
 import net.furizon.backend.feature.badge.dto.UpdateUserBadgeRequest;
-import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
-import net.furizon.backend.feature.badge.usecase.GetFullInfoBadgeUseCase;
-import net.furizon.backend.feature.badge.usecase.UpdateUserBadgeInfoUseCase;
-import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
+import net.furizon.backend.feature.badge.usecase.*;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
 import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
 import org.springframework.http.MediaType;
@@ -68,7 +67,8 @@ public class BadgeController {
         + "If the ratio is not 1:1, the image will be cropped top left. If it has "
         + "an invalid size or dimensions, we will return with an error. We return "
         + "the media id and the relative path where the file is served")
-    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO})
+    @PermissionRequired(permissions = {Permission.CAN_MANAGE_USER_PUBLIC_INFO, Permission.CAN_PERFORM_CHECKINS},
+                        mode = PermissionRequiredMode.ANY)
     @PostMapping(value = "/user/upload/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public @NotNull MediaResponse userUpload(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
@@ -204,6 +204,25 @@ public class BadgeController {
         return useCaseExecutor.execute(
                 UpdateUserBadgeInfoUseCase.class,
                 new UpdateUserBadgeInfoUseCase.Input(
+                        user,
+                        req,
+                        pretixInformation.getCurrentEvent()
+                )
+        );
+    }
+
+    @Operation(summary = "Updates the fursona name of the user", description =
+        "Updates specifically the fursona name of the user. An administrator "
+        + "can update the information of another user by specifying the `userId` field."
+        + "For updating more badge info about the user altogether, check `/update-user-badge-info`")
+    @PostMapping("/update-fursona-name")
+    public boolean updateFursonaName(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @RequestBody @Valid @NotNull final UpdateFursonaNameRequest req
+    ) {
+        return useCaseExecutor.execute(
+                UpdateFursonaNameUseCase.class,
+                new UpdateFursonaNameUseCase.Input(
                         user,
                         req,
                         pretixInformation.getCurrentEvent()

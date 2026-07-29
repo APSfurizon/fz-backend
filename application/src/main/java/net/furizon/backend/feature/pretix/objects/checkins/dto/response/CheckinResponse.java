@@ -55,7 +55,7 @@ public class CheckinResponse {
     @NotNull
     private final List<FursuitData> fursuits;
 
-    private final int maxFursuits;
+    private final int maxFursuitsBroughtToEvent;
 
     private final boolean hasFursuitBadge;
 
