@@ -56,6 +56,7 @@ public class CheckinResponse {
     private final List<FursuitData> fursuits;
 
     private final int maxFursuitsBroughtToEvent;
+    private final int maxExtraFursuitBadges;
 
     private final boolean hasFursuitBadge;
 

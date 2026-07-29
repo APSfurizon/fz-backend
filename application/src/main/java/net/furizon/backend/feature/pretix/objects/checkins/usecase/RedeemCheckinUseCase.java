@@ -176,6 +176,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .cardsForEvent(membershipCards) //Intentionally showing duplicate cards as well
                 .fursuits(fursuits)
                 .maxFursuitsBroughtToEvent(maxFursuits)
+                .maxExtraFursuitBadges(fursuitConfig.getMaxExtraFursuits())
                 .hasFursuitBadge(isFursuiter)
                 .dailyDays(dailyDays)
                 .isDailyTicket(isDailyTicket)

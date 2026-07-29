@@ -34,6 +34,7 @@ public class FursuitChecks {
 
 
     public static final Permission[] PERMISSIONS = {
+        //If this changes, reminder to update the various @PermissionRequired in FursuitController
         Permission.CAN_MANAGE_USER_PUBLIC_INFO,
         Permission.CAN_PERFORM_CHECKINS
     };

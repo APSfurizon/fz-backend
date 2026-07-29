@@ -5,26 +5,23 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
-import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
-import net.furizon.backend.feature.fursuits.dto.FursuitData;
-import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
-import net.furizon.backend.feature.fursuits.dto.FursuitListResponse;
-import net.furizon.backend.feature.fursuits.dto.MultipleBringFursuitToEventRequest;
-import net.furizon.backend.feature.fursuits.usecase.BringFursuitToEventUseCase;
-import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.GetAllFursuitsUseCase;
-import net.furizon.backend.feature.fursuits.usecase.GetSingleFursuitUseCase;
-import net.furizon.backend.feature.fursuits.usecase.MultipleBringFursuitToEventUseCase;
-import net.furizon.backend.feature.fursuits.usecase.UpdateFursuitDataUseCase;
+import net.furizon.backend.feature.fursuits.dto.*;
+import net.furizon.backend.feature.fursuits.usecase.*;
 import net.furizon.backend.infrastructure.GeneralConsts;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/fursuits")
 @RequiredArgsConstructor
@@ -45,6 +43,7 @@ public class FursuitController {
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+    private final TranslationService translationService;
 
     @Operation(summary = "Fetch data for the specified fursuit", description =
         "If we're unable to retrieve the specified fursuit, we return a "
@@ -360,5 +359,39 @@ public class FursuitController {
             data.getFursuit().setPropic(media);
         }
         return data;
+    }
+
+    @Operation(summary = "Adds extra fursuit badges to the order of the specified user", description =
+        "This method, for admins with permission `CAN_PERFORM_CHECKINS` or `PRETIX_ADMIN`, is meant to "
+        + "easily add from the backend extra fursuit badges to the order of the specified user. "
+        + "Quantity is selectable. There's also the possibility to mark the newly added badges as paid "
+        + "directly in the pretix order, in cases where the payment happens via other channels. If, "
+        + "by adding the new badges to the order, `max-backend-fursuits-no` is reached, we return "
+        + "the error `TOO_MANY_EXTRA_FURSUIT_BADGES`. On success, we return the updated FursuitListResponse object")
+    @PermissionRequired(permissions = {
+        Permission.CAN_PERFORM_CHECKINS,
+        Permission.PRETIX_ADMIN
+    }, mode = PermissionRequiredMode.ANY)
+    @PostMapping("/add-fursuit-badges")
+    public @NotNull FursuitListResponse  addFursuitBadges(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @NotNull @Valid final AddFursuitBadgesRequest addFursuitBadgesRequest
+    ) {
+        boolean b = executor.execute(
+                AddFursuitBadgesUseCase.class,
+                new AddFursuitBadgesUseCase.Input(
+                        user,
+                        pretixInformation,
+                        addFursuitBadgesRequest
+                )
+        );
+        if (!b) {
+            log.error("AddFursuitBadgesUseCase returned false");
+            throw new ApiException(
+                    translationService.error("common.server_error"),
+                    GeneralResponseCodes.GENERIC_ERROR
+            );
+        }
+        return getAllFursuits(user, addFursuitBadgesRequest.getTargetUserId());
     }
 }

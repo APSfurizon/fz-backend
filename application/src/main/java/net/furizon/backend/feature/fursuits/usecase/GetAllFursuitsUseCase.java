@@ -64,6 +64,7 @@ public class GetAllFursuitsUseCase implements UseCase<GetAllFursuitsUseCase.Inpu
                 fursuits,
                 (short) bringingToEvent,
                 (short) maxFursuits,
+                fursuitConfig.getMaxExtraFursuits(),
                 canBringFursuitToEvent,
                 allowEditBringFursuitToEvent
         );
