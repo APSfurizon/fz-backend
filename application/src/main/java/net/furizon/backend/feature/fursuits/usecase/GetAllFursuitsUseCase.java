@@ -45,7 +45,9 @@ public class GetAllFursuitsUseCase implements UseCase<GetAllFursuitsUseCase.Inpu
         return invoke(userId, event, input.pretixInformation);
     }
 
-    public @NotNull FursuitListResponse invoke(long userId, @NotNull Event event, @NotNull PretixInformation pretixInformation) {
+    public @NotNull FursuitListResponse invoke(long userId,
+                                               @NotNull Event event,
+                                               @NotNull PretixInformation pretixInformation) {
         Order order = orderFinder.findOrderByUserIdEvent(userId, event, pretixInformation);
         int maxFursuits = order == null ? 0 : fursuitConfig.getDefaultFursuitsNo() + order.getExtraFursuits();
         List<FursuitData> fursuits = fursuitFinder.getFursuitsOfUser(userId, event);

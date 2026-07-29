@@ -48,16 +48,33 @@ public class MultipleBringFursuitToEventUseCase implements UseCase<MultipleBring
         Map<Long, Boolean> newSelection = input.req.getFursuitBroughtToEventMap();
 
         boolean isAdmin = fursuitChecks.isAdmin(input.user.getUserId());
-        long ownerUserId = generalChecks.getUserIdAndAssertPermission(input.req.getOwnerUserId(), input.user, null, isAdmin);
+        long ownerUserId = generalChecks.getUserIdAndAssertPermission(
+                input.req.getOwnerUserId(),
+                input.user,
+                null, isAdmin
+        );
 
-        generalChecks.assertTimeframeForEventNotPassedAllowAdmin(badgeConfig.getEditingDeadline(), event, ownerUserId, input.user.getUserId(), null, isAdmin);
+        generalChecks.assertTimeframeForEventNotPassedAllowAdmin(
+                badgeConfig.getEditingDeadline(),
+                event,
+                ownerUserId, input.user.getUserId(),
+                null, isAdmin
+        );
 
         log.info("User {} is updating multiple bringToCurrentEvent of user {}: {}",
                 input.user.getUserId(), ownerUserId, newSelection);
 
-        Map<Long, FursuitData> idToFursuit = fursuitFinder.getFursuitsOfUser(ownerUserId, event).stream().collect(Collectors.toMap(f -> f.getFursuit().getId(), f -> f));
+        Map<Long, FursuitData> idToFursuit = fursuitFinder.getFursuitsOfUser(ownerUserId, event)
+                                                          .stream()
+                                                          .collect(
+                                                              Collectors.toMap(
+                                                                  f -> f.getFursuit().getId(),
+                                                                  f -> f
+                                                              )
+                                                          );
         if (!idToFursuit.keySet().containsAll(newSelection.keySet())) {
-            log.error("Fursuit(s) not found: {}", new HashSet<Long>(newSelection.keySet()).removeAll(idToFursuit.keySet()));
+            log.error("Fursuit(s) not found: {}",
+                    new HashSet<Long>(newSelection.keySet()).removeAll(idToFursuit.keySet()));
             throw new ApiException(
                     HttpStatus.NOT_FOUND,
                     translationService.error("badge.fursuit.not_found"),
@@ -76,7 +93,8 @@ public class MultipleBringFursuitToEventUseCase implements UseCase<MultipleBring
             return f.isBringingToEvent();
         }).count();
         if ((int) fursuitsBrought > Math.min(maxFursuits, (int) fursuitConfig.getMaxExtraFursuits())) {
-            log.error("User {} has reached max fursuit badges. Max = {}, newSelection = {}", ownerUserId, maxFursuits, fursuitsBrought);
+            log.error("User {} has reached max fursuit badges. Max = {}, newSelection = {}",
+                    ownerUserId, maxFursuits, fursuitsBrought);
             throw new ApiException(translationService.error("badge.fursuit.fail.bring_to_event_limit_reached"),
                     FursuitErrorCodes.FURSUIT_BADGES_ENDED);
         }

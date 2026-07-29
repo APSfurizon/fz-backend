@@ -79,7 +79,9 @@ public class FursuitChecks {
     public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitData fursuit) {
         assertUserHasPermissionOnFursuit(userId, fursuit, null);
     }
-    public void assertUserHasPermissionOnFursuit(long userId, @NotNull FursuitData fursuit, @Nullable Boolean isAdminCached) {
+    public void assertUserHasPermissionOnFursuit(long userId,
+                                                 @NotNull FursuitData fursuit,
+                                                 @Nullable Boolean isAdminCached) {
         if (userId != fursuit.getOwnerId()) {
             if (isAdminCached == null) {
                 isAdminCached = isAdmin(userId);
@@ -140,7 +142,8 @@ public class FursuitChecks {
     }
     public void assertFursuitNotAlreadyBroughtToCurrentEvent(@NotNull FursuitData fursuit, @NotNull Order order) {
         if (fursuit.isBringingToEvent()) {
-            log.error("Fursuit {} is already brought to current event {}!", fursuit.getFursuit().getId(), order.getEventId());
+            log.error("Fursuit {} is already brought to current event {}!",
+                    fursuit.getFursuit().getId(), order.getEventId());
             throw new ApiException(translationService.error("badge.fursuit.fail.already_bringing_to_event"),
                     FursuitErrorCodes.FURSUIT_ALREADY_BROUGHT_TO_CURRENT_EVENT);
         }

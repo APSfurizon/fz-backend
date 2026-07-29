@@ -14,9 +14,6 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
 @Slf4j
