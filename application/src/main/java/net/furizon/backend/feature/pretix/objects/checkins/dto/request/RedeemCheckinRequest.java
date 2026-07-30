@@ -18,4 +18,7 @@ public class RedeemCheckinRequest {
 
     @NotNull
     private final String secret;
+
+    @Nullable
+    private final Boolean dryRun;
 }

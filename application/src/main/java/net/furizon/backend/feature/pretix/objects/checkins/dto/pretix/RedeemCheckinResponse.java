@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.pretix.objects.checkins.dto.pretix;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Data
+@Builder
 public class RedeemCheckinResponse {
     @NotNull
     private final Status status;
@@ -39,7 +41,8 @@ public class RedeemCheckinResponse {
         @JsonProperty("incomplete")
         INCOMPLETE,
         @JsonProperty("error")
-        ERROR
+        ERROR,
+        NONE //just for dry run checkins
     }
 
 

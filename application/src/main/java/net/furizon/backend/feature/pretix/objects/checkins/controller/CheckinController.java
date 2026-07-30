@@ -82,7 +82,10 @@ public class CheckinController {
         The boolean `shirt` means that the gadget is a shirt, so it must be displayed on screen
         together with the specified `shirtSize`. Checkin application should always display
         a button to print the normal badge, but the button for printing the fursuits badges
-        should be hidden if `hasFursuitBadge` is equal to false""")
+        should be hidden if `hasFursuitBadge` is equal to false. By specifying the optional
+        `dryRun` parameter (by default set to false) you can obtain the same information from
+        the checkin resonse without issueing a real checkin to the ticketing system. In that instance,
+        the `status` field will be equal to `NONE`""")
     @PostMapping("/redeem")
     @PermissionRequired(permissions = {Permission.CAN_PERFORM_CHECKINS})
     public CheckinResponse redeemCheckin(
@@ -97,7 +100,8 @@ public class CheckinController {
                         req.getSecret(),
                         pretixService.getCurrentEvent(),
                         user,
-                        pretixService
+                        pretixService,
+                        req.getDryRun() == null ? false : req.getDryRun()
                 )
         );
     }
