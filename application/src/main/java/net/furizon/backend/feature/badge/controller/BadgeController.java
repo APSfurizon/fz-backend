@@ -3,6 +3,7 @@ package net.furizon.backend.feature.badge.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.dto.FullInfoBadgeResponse;
@@ -185,12 +186,14 @@ public class BadgeController {
         + "actions on both badge information (EG fursona name, locale), badge propic and all fursuits interactions")
     @GetMapping("/")
     public @NotNull FullInfoBadgeResponse getBadge(
-            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @RequestParam(required = false) @Valid @Positive @jakarta.annotation.Nullable final Long userId
     ) {
         return useCaseExecutor.execute(
                 GetFullInfoBadgeUseCase.class,
                 new GetFullInfoBadgeUseCase.Input(
-                        user.getUserId(),
+                        user,
+                        userId,
                         pretixInformation
                 )
         );
