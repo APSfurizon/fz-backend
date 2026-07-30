@@ -56,6 +56,7 @@ class PretixAddPositionWithPaymentAction implements AddPositionWithPaymentAction
                     AddPositionWithPaymentRequest.builder()
                             .orderCode(order.getCode())
                             .item(itemId)
+                            .createPayment(createPayment)
                             .quantity(quantity)
                             .addonTo(addonToPositionId)
                             .variation(variationId)
