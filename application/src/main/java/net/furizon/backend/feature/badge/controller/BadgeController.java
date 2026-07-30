@@ -183,7 +183,9 @@ public class BadgeController {
         + "how many fursuits he has bought + default fursuit no; full list of fursuits the user has"
         + " + if the user has marked that fursuit to be brought to the current event. "
         + "If `allowedModifications` is set to false, the frontend should prevent the user from performing ANY "
-        + "actions on both badge information (EG fursona name, locale), badge propic and all fursuits interactions")
+        + "actions on both badge information (EG fursona name, locale), badge propic and all fursuits interactions. "
+        + "By specifying the optional `userId` query param, an admin with permission `CAN_MANAGE_USER_PUBLIC_INFO` "
+        + "or `CAN_PERFORM_CHECKINS` can get the information about another user")
     @GetMapping("/")
     public @NotNull FullInfoBadgeResponse getBadge(
             @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
