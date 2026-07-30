@@ -53,12 +53,13 @@ public class GetAllFursuitsUseCase implements UseCase<GetAllFursuitsUseCase.Inpu
         List<FursuitData> fursuits = fursuitFinder.getFursuitsOfUser(userId, event);
         long bringingToEvent = fursuits.stream().filter(FursuitData::isBringingToEvent).count();
 
-        boolean canBringFursuitToEvent = order != null
-                && order.getOrderStatus() == OrderStatus.PAID
-                && bringingToEvent < maxFursuits;
+        boolean baseCondition = order != null && order.getOrderStatus() == OrderStatus.PAID;
+        boolean canBringFursuitToEvent = baseCondition && bringingToEvent < maxFursuits;
 
-        boolean allowEditBringFursuitToEvent = generalChecks.isTimeframeForEventOk(
-                badgeConfig.getEditingDeadline(), null);
+        boolean allowEditBringFursuitToEvent = baseCondition && generalChecks.isTimeframeForEventOk(
+                badgeConfig.getEditingDeadline(),
+                null
+        );
 
         return new FursuitListResponse(
                 fursuits,
