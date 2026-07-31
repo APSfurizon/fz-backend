@@ -167,6 +167,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                             .answers(Collections.emptyList())
                             .price("-1.0")
                             .taxRate("0")
+                            .taxValue("0")
                             .canceled(false)
                         .build()
                     )
