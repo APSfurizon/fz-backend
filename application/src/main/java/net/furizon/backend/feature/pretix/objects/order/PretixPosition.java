@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.pretix.objects.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import net.furizon.backend.infrastructure.pretix.PretixGenericUtils;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Builder
 public class PretixPosition {
     @JsonProperty("item")
     private long itemId;

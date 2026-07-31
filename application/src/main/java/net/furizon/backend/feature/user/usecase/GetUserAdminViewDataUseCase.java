@@ -168,6 +168,7 @@ public class GetUserAdminViewDataUseCase {
         FullInfoBadgeResponse badgeData = executor.execute(
                 GetFullInfoBadgeUseCase.class,
                 new GetFullInfoBadgeUseCase.Input(
+                        user,
                         userId,
                         pretixInformation
                 )

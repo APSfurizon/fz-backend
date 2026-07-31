@@ -3,6 +3,7 @@ package net.furizon.backend.feature.pretix.objects.checkins.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.admin.usecase.export.GenerateBadgesHtmlUseCase;
+import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.finder.FursuitFinder;
 import net.furizon.backend.feature.membership.finder.MembershipCardFinder;
 import net.furizon.backend.feature.membership.finder.PersonalInfoFinder;
@@ -15,12 +16,14 @@ import net.furizon.backend.feature.pretix.objects.checkins.dto.pretix.RedeemChec
 import net.furizon.backend.feature.pretix.objects.checkins.dto.response.CheckinResponse;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
+import net.furizon.backend.feature.pretix.objects.order.PretixPosition;
 import net.furizon.backend.feature.pretix.objects.order.finder.OrderFinder;
 import net.furizon.backend.feature.pretix.ordersworkflow.OrderWorkflowErrorCode;
 import net.furizon.backend.feature.pretix.ordersworkflow.dto.response.OrderDataResponse;
 import net.furizon.backend.feature.room.finder.RoomFinder;
 import net.furizon.backend.feature.room.logic.RoomLogic;
 import net.furizon.backend.feature.user.finder.UserFinder;
+import net.furizon.backend.infrastructure.fursuits.FursuitConfig;
 import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.pretix.PretixConfig;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
@@ -38,6 +41,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -77,9 +81,15 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
     @NotNull
     private final PretixConfig pretixConfig;
+    @NotNull
+    private final FursuitConfig fursuitConfig;
 
     @Override
     public @NotNull CheckinResponse executor(@NotNull RedeemCheckinUseCase.Input input) {
+        // PAY ATTENTION WHILE MODIFYING THIS METHOD
+        // You SHOULD NOT perform any "write" action if input.dryRun == true
+
+
         log.info("User {} is checking in secret {}", input.user.getUserId(), input.secret);
 
 
@@ -96,9 +106,10 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
         var pui = checks.assertUserFound(personalInfoFinder.findByUserId(orderOwner));
         var user = checks.assertUserFound(userFinder.getDisplayUser(orderOwner, input.event));
-        var fursuits = fursuitFinder.getFursuitsOfUserBroughtToEvent(orderOwner, input.event);
+        var fursuits = fursuitFinder.getFursuitsOfUser(orderOwner, input.event);
         var membershipCards = membershipCardFinder.getCardsOfUserForEvent(orderOwner, input.event);
-        boolean isFursuiter = !fursuits.isEmpty();
+        int maxFursuits = fursuitConfig.getDefaultFursuitsNo() + o.getExtraFursuits();
+        boolean isFursuiter = fursuits.stream().anyMatch(FursuitData::isBringingToEvent);
         boolean isDailyTicket = o.isDaily();
         Set<LocalDate> dailyDays = null;
         if (isDailyTicket) {
@@ -139,20 +150,46 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
 
         String nonce = UUID.randomUUID().toString();
 
-        RedeemCheckinResponse checkinResponse = redeemCheckinAction.invoke(
-                input.secret,
-                input.event.getOrganizerAndEventPair().getOrganizer(),
-                nonce,
-                input.checkinType,
-                input.checkinListIds
-        );
-        if (checkinResponse == null) {
-            log.error("CheckinResponse is null!");
-            throw new ApiException(
-                    HttpStatus.NOT_FOUND,
-                    translationService.error("checkin.redeem.not-found"),
-                    GeneralResponseCodes.GENERIC_ERROR
+        RedeemCheckinResponse checkinResponse;
+        if (input.dryRun) {
+            checkinResponse = RedeemCheckinResponse.builder()
+                    .status(RedeemCheckinResponse.Status.NONE)
+                    .reason(null)
+                    .message("This is a dry run")
+                    .position(
+                        PretixPosition.builder()
+                            .itemId(-1L)
+                            .variationId(-1L)
+                            .originalOrderCode(o.getCode())
+                            .positionId(o.getMainPositionId())
+                            .positionPosid(o.getMainPositionPosId())
+                            .secret(input.secret)
+                            .answers(Collections.emptyList())
+                            .price("-1.0")
+                            .taxRate("0")
+                            .taxValue("0")
+                            .canceled(false)
+                        .build()
+                    )
+                    .requireAttention(false)
+                    .checkinTexts(Collections.emptyList())
+                .build();
+        } else {
+            checkinResponse = redeemCheckinAction.invoke(
+                    input.secret,
+                    input.event.getOrganizerAndEventPair().getOrganizer(),
+                    nonce,
+                    input.checkinType,
+                    input.checkinListIds
             );
+            if (checkinResponse == null) {
+                log.error("CheckinResponse is null!");
+                throw new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        translationService.error("checkin.redeem.not-found"),
+                        GeneralResponseCodes.GENERIC_ERROR
+                );
+            }
         }
         var reason = checkinResponse.getReason();
         String localizedErrorReason = reason == null
@@ -170,6 +207,8 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
                 .orderSerial(o.getOrderSerialInEvent())
                 .cardsForEvent(membershipCards) //Intentionally showing duplicate cards as well
                 .fursuits(fursuits)
+                .maxFursuitsBroughtToEvent(maxFursuits)
+                .maxExtraFursuitBadges(fursuitConfig.getMaxExtraFursuits())
                 .hasFursuitBadge(isFursuiter)
                 .dailyDays(dailyDays)
                 .isDailyTicket(isDailyTicket)
@@ -227,6 +266,7 @@ public class RedeemCheckinUseCase implements UseCase<RedeemCheckinUseCase.Input,
             @NotNull String secret,
             @NotNull Event event,
             @NotNull FurizonUser user,
-            @NotNull PretixInformation pretixService
+            @NotNull PretixInformation pretixService,
+            boolean dryRun
     ) {}
 }

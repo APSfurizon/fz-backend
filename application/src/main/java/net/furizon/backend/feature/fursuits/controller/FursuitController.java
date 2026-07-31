@@ -5,22 +5,35 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.badge.BadgeType;
 import net.furizon.backend.feature.badge.usecase.DeleteBadgeUseCase;
 import net.furizon.backend.feature.badge.usecase.UploadBadgeUsecase;
+import net.furizon.backend.feature.fursuits.dto.AddFursuitBadgesRequest;
 import net.furizon.backend.feature.fursuits.dto.BringFursuitToEventRequest;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.dto.FursuitDataRequest;
+import net.furizon.backend.feature.fursuits.dto.FursuitListResponse;
+import net.furizon.backend.feature.fursuits.dto.MultipleBringFursuitToEventRequest;
+import net.furizon.backend.feature.fursuits.usecase.AddFursuitBadgesUseCase;
 import net.furizon.backend.feature.fursuits.usecase.BringFursuitToEventUseCase;
 import net.furizon.backend.feature.fursuits.usecase.CreateFursuitUseCase;
 import net.furizon.backend.feature.fursuits.usecase.DeleteFursuitUseCase;
+import net.furizon.backend.feature.fursuits.usecase.GetAllFursuitsUseCase;
 import net.furizon.backend.feature.fursuits.usecase.GetSingleFursuitUseCase;
+import net.furizon.backend.feature.fursuits.usecase.MultipleBringFursuitToEventUseCase;
 import net.furizon.backend.feature.fursuits.usecase.UpdateFursuitDataUseCase;
 import net.furizon.backend.infrastructure.GeneralConsts;
+import net.furizon.backend.infrastructure.localization.TranslationService;
 import net.furizon.backend.infrastructure.media.dto.MediaResponse;
 import net.furizon.backend.infrastructure.pretix.service.PretixInformation;
 import net.furizon.backend.infrastructure.security.FurizonUser;
+import net.furizon.backend.infrastructure.security.GeneralResponseCodes;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequired;
+import net.furizon.backend.infrastructure.security.annotation.PermissionRequiredMode;
+import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.backend.infrastructure.usecase.UseCaseExecutor;
+import net.furizon.backend.infrastructure.web.exception.ApiException;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/fursuits")
 @RequiredArgsConstructor
@@ -41,6 +55,7 @@ public class FursuitController {
     private final PretixInformation pretixInformation;
     @org.jetbrains.annotations.NotNull
     private final UseCaseExecutor executor;
+    private final TranslationService translationService;
 
     @Operation(summary = "Fetch data for the specified fursuit", description =
         "If we're unable to retrieve the specified fursuit, we return a "
@@ -86,7 +101,6 @@ public class FursuitController {
         + "the `canBringFursuitsToEvent` field of the /badge endpoint"
         + "To bring a fursuit to an event the user needs to have an order in the "
         + "'paid' status, so expect also `ORDER_NOT_PAID` and `ORDER_NOT_FOUND` errors. "
-        + "Using the field `userId` an admin must specify the owner of the fursuit."
         + "Editing this field is not permitted after the badge editing deadline. To understand if "
         + "an user can update it, use the `allowEditBringFursuitToEvent` field of the GET /badge/ endpoint")
     @PostMapping("/{fursuitId}/bringToEvent")
@@ -100,6 +114,26 @@ public class FursuitController {
                 new BringFursuitToEventUseCase.Input(
                         req,
                         fursuitId,
+                        user,
+                        pretixInformation
+                )
+        );
+    }
+
+    @Operation(summary = "Sets on multiple fursuits if the user is bringing them to the current event", description =
+        "Specify a map of fursuitId -> bringToCurrent event for updating the value on multiple fursuits atomically. "
+        + "Check the `/{fursuitId}/bringToEvent` for more information. If the operation is performed from an "
+        + "administrator, he must specify the userId of the owner of the fursuits. Only the fursuits of one "
+        + "owner per time can be updated together.")
+    @PostMapping("/bringToEvent")
+    public boolean multipleBringFursuitToEvent(
+            @AuthenticationPrincipal @Valid @NotNull final FurizonUser user,
+            @RequestBody @Valid @NotNull final MultipleBringFursuitToEventRequest req
+    ) {
+        return executor.execute(
+                MultipleBringFursuitToEventUseCase.class,
+                new MultipleBringFursuitToEventUseCase.Input(
+                        req,
                         user,
                         pretixInformation
                 )
@@ -230,6 +264,27 @@ public class FursuitController {
         return data;
     }
 
+    @Operation(summary = "Gets fursuit information for a user", description =
+        "The various information returned by this method is the full list of fursuits "
+        + "owned by an user, if the user can bring fursuit to an event and if he can "
+        + "actually change that, and how many fursuits he can currently bring with him. "
+        + "An admin can use the optional query parameter `userId` to specify the user he "
+        + "wants to get the fursuits of")
+    @GetMapping("/")
+    public @NotNull FursuitListResponse getAllFursuits(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestParam("user-id") @Nullable final Long userId
+    ) {
+        return executor.execute(
+                GetAllFursuitsUseCase.class,
+                new GetAllFursuitsUseCase.Input(
+                        user,
+                        userId,
+                        pretixInformation
+                )
+        );
+    }
+
 
     @Operation(summary = "Creates a new fursuit without image", description =
         "This method doesn't support the immediate fursuit image upload, which can "
@@ -316,5 +371,39 @@ public class FursuitController {
             data.getFursuit().setPropic(media);
         }
         return data;
+    }
+
+    @Operation(summary = "Adds extra fursuit badges to the order of the specified user", description =
+        "This method, for admins with permission `CAN_PERFORM_CHECKINS` or `PRETIX_ADMIN`, is meant to "
+        + "easily add from the backend extra fursuit badges to the order of the specified user. "
+        + "Quantity is selectable. There's also the possibility to mark the newly added badges as paid "
+        + "directly in the pretix order, in cases where the payment happens via other channels. If, "
+        + "by adding the new badges to the order, `max-backend-fursuits-no` is reached, we return "
+        + "the error `TOO_MANY_EXTRA_FURSUIT_BADGES`. On success, we return the updated FursuitListResponse object")
+    @PermissionRequired(permissions = {
+        Permission.CAN_PERFORM_CHECKINS,
+        Permission.PRETIX_ADMIN
+    }, mode = PermissionRequiredMode.ANY)
+    @PostMapping("/add-fursuit-badges")
+    public @NotNull FursuitListResponse  addFursuitBadges(
+            @AuthenticationPrincipal @NotNull final FurizonUser user,
+            @RequestBody @NotNull @Valid final AddFursuitBadgesRequest addFursuitBadgesRequest
+    ) {
+        boolean b = executor.execute(
+                AddFursuitBadgesUseCase.class,
+                new AddFursuitBadgesUseCase.Input(
+                        user,
+                        pretixInformation,
+                        addFursuitBadgesRequest
+                )
+        );
+        if (!b) {
+            log.error("AddFursuitBadgesUseCase returned false");
+            throw new ApiException(
+                    translationService.error("common.server_error"),
+                    GeneralResponseCodes.GENERIC_ERROR
+            );
+        }
+        return getAllFursuits(user, addFursuitBadgesRequest.getTargetUserId());
     }
 }

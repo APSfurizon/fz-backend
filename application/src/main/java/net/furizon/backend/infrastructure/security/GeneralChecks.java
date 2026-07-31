@@ -57,7 +57,7 @@ public class GeneralChecks {
     }
     public long getUserIdAssertPermissionCheckTimeframe(@Nullable Long userId,
                                                         @NotNull FurizonUser user,
-                                                        @NotNull Permission permission,
+                                                        @Nullable Permission permission,
                                                         @Nullable OffsetDateTime date,
                                                         @Nullable Event event,
                                                         @Nullable Boolean isAdminCached) {

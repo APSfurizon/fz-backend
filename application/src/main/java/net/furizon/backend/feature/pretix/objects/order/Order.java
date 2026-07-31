@@ -206,6 +206,13 @@ public class Order {
         return dailyDays.stream().map(d -> from.plusDays(d).toLocalDate()).collect(Collectors.toSet());
     }
 
+    public long getMainPositionId() {
+        return roomPositionId == null ? ticketPositionId : roomPositionId;
+    }
+    public long getMainPositionPosId() {
+        return roomPositionPosid == null ? ticketPositionPosid : roomPositionPosid;
+    }
+
 
     //we can't use roomPositionId to validate, since it IS set even when we have a NO_ROOM item
     public boolean hasRoom() {

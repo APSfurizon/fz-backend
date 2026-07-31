@@ -9,6 +9,7 @@ import net.furizon.backend.feature.fursuits.FursuitChecks;
 import net.furizon.backend.feature.fursuits.action.setBadge.SetFursuitBadgeAction;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.localization.TranslationService;
+import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.feature.badge.finder.BadgeFinder;
 import net.furizon.backend.feature.badge.validator.UploadUserBadgeValidator;
@@ -122,7 +123,11 @@ public class UploadBadgeUsecase implements UseCase<UploadBadgeUsecase.Input, Med
                     throw new IllegalStateException("Unexpected value: " + input.type);
             }
 
-            return new MediaResponse(res.mediaDbId(), res.relativePath(), imageMetadata.getType());
+            return new MediaResponse(
+                    res.mediaDbId(),
+                    MediaData.getFullPath(Objects.requireNonNull(StoreMethod.DISK), res.relativePath()),
+                    imageMetadata.getType()
+            );
         } catch (IOException e) {
             log.error("An error occurred while uploading a badge", e);
             throw new ApiException(translationService.error("badge.upload.fail"), ImageCodes.ERROR_WHILE_UPLOADING);

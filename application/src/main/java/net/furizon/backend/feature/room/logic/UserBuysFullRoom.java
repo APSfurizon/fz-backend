@@ -369,10 +369,7 @@ public class UserBuysFullRoom implements RoomLogic {
             String paymentComment = "Payment was created" + comment + ". DO NOT REFUND ANY PAYMENT FROM THIS ORDER!";
             String refundComment = "Refund was created" + comment;
 
-            Long mainPositionId = sourceOrder.getRoomPositionId();
-            if (mainPositionId == null) {
-                mainPositionId = sourceOrder.getTicketPositionId();
-            }
+            long mainPositionId = sourceOrder.getMainPositionId();
 
             //Changes in DB
             boolean dbRes = defaultRoomLogic.exchangeFullOrder(
