@@ -11,6 +11,7 @@ public enum ApsRegistrationTemplateVars {
     FISCAL_CODE("fiscalCode"),
     BIRTH_CITY("birthCity"),
     BIRTH_DAY("birthDay"),
+    CITIZENSHIP("citizenship"),
     CITY("city"),
     REGION("region"),
     ADDRESS("address"),

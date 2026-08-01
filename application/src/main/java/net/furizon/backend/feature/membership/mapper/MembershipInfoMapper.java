@@ -20,6 +20,7 @@ public class MembershipInfoMapper {
                 .birthRegion(record.get(MEMBERSHIP_INFO.INFO_BIRTH_REGION))
                 .birthCountry(record.get(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY))
                 .birthday(record.get(MEMBERSHIP_INFO.INFO_BIRTHDAY))
+                .citizenship(record.get(MEMBERSHIP_INFO.INFO_CITIZENSHIP))
                 .residenceAddress(record.get(MEMBERSHIP_INFO.INFO_ADDRESS))
                 .residenceZipCode(record.get(MEMBERSHIP_INFO.INFO_ZIP))
                 .residenceCity(record.get(MEMBERSHIP_INFO.INFO_CITY))

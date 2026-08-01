@@ -64,6 +64,11 @@ public class PersonalUserInformation {
 
     @NotNull
     @NotEmpty
+    @Size(min = 2, max = 2)
+    private final String citizenship;
+
+    @NotNull
+    @NotEmpty
     @Size(min = 2)
     private final String residenceAddress;
 

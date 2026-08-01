@@ -3,6 +3,7 @@
 @param String fiscalCode
 @param String birthCity
 @param String birthDay
+@param String citizenship
 @param String city
 @param String region
 @param String address
@@ -170,7 +171,7 @@
             </div>
             <div style="width: 30%; display: flex; align-items: flex-end; padding-left: 15px;">
                 <div class="label" style="margin-right: 5px;">cittadinanza</div>
-                <div class="value" style="flex-grow: 1;"></div>
+                <div class="value" style="flex-grow: 1;">${citizenship}</div>
             </div>
         </div>
 
@@ -283,7 +284,6 @@
         </div>
 
     </div>
-    <%-- script>window.print();</script --%>
 </body>
 
 </html>

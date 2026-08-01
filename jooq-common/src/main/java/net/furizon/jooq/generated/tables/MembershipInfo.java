@@ -202,6 +202,11 @@ public class MembershipInfo extends TableImpl<Record> {
      */
     public final TableField<Record, LocalDate> INFO_ID_EXPIRY = createField(DSL.name("info_id_expiry"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
+    /**
+     * The column <code>public.membership_info.info_citizenship</code>.
+     */
+    public final TableField<Record, String> INFO_CITIZENSHIP = createField(DSL.name("info_citizenship"), SQLDataType.CLOB.nullable(false), this, "");
+
     private MembershipInfo(Name alias, Table<Record> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

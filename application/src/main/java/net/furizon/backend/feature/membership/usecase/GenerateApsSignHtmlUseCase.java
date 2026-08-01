@@ -130,6 +130,10 @@ public class GenerateApsSignHtmlUseCase implements UseCase<GenerateApsSignHtmlUs
                         pui.getBirthday().format(DateTimeFormatter.ISO_LOCAL_DATE)
                 ),
                 Map.entry(
+                        ApsRegistrationTemplateVars.CITIZENSHIP.getVarName(),
+                        pui.getCitizenship()
+                ),
+                Map.entry(
                         ApsRegistrationTemplateVars.CITY.getVarName(),
                         pui.getResidenceCity()
                 ),

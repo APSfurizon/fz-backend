@@ -29,6 +29,7 @@ public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoActio
                     .set(MEMBERSHIP_INFO.INFO_BIRTH_REGION, personalUserInformation.getBirthRegion())
                     .set(MEMBERSHIP_INFO.INFO_BIRTH_COUNTRY, personalUserInformation.getBirthCountry())
                     .set(MEMBERSHIP_INFO.INFO_BIRTHDAY, personalUserInformation.getBirthday())
+                    .set(MEMBERSHIP_INFO.INFO_CITIZENSHIP, personalUserInformation.getCitizenship())
                     .set(MEMBERSHIP_INFO.INFO_ADDRESS, personalUserInformation.getResidenceAddress())
                     .set(MEMBERSHIP_INFO.INFO_ZIP, personalUserInformation.getResidenceZipCode())
                     .set(MEMBERSHIP_INFO.INFO_CITY, personalUserInformation.getResidenceCity())
