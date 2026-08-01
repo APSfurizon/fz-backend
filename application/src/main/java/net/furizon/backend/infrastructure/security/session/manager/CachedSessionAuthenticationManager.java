@@ -60,6 +60,17 @@ public class CachedSessionAuthenticationManager implements SessionAuthentication
             .expireAfterAccess(SESSION_AUTHENTICATION_CACHE, TimeUnit.MINUTES)
             .build();
 
+
+    @Override
+    public int clearExpiredSessions() {
+        int expired = sqlCommand.execute(
+            PostgresDSL.deleteFrom(SESSIONS)
+            .where(SESSIONS.EXPIRES_AT.lessOrEqual(OffsetDateTime.now()))
+        );
+        sessionAuthenticationPairCache.invalidateAll();
+        return expired;
+    }
+
     @Override
     public boolean updateSession(@NotNull Session session, @NotNull String clientIp, long userId) {
         UUID sessionId = session.getId();

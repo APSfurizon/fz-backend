@@ -11,7 +11,10 @@ import java.util.Locale;
 import java.util.UUID;
 
 public interface SessionAuthenticationManager {
+
     //Write
+    int clearExpiredSessions();
+
     boolean updateSession(@NotNull Session session, @NotNull String clientIp, long userId);
     boolean deleteSession(@NotNull UUID sessionId);
     @NotNull UUID createSession(long userId, @NotNull String clientIp, @Nullable String userAgent);
