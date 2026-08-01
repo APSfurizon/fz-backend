@@ -72,6 +72,7 @@ public class SecurityConfiguration {
                     antMatcher(HttpMethod.GET, "/swagger-ui/**"),
                     antMatcher(HttpMethod.GET, "/api/v1/events/**"),
                     antMatcher(HttpMethod.GET, "/api/v1/counts/bopos"),
+                    antMatcher(HttpMethod.GET, "/api/v1/counts/admins"),
                     antMatcher(HttpMethod.GET, "/api/v1/counts/fursuit"),
                     antMatcher(HttpMethod.GET, "/api/v1/counts/sponsors"),
                     antMatcher(HttpMethod.POST, "/api/v1/authentication/login"),

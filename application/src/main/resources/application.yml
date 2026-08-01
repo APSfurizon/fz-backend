@@ -216,3 +216,7 @@ gallery:
     password: ${GALLERY_JOB_PROCESSOR_PASSWORD:password}
     poll-interval: ${GALLERY_JOB_PROCESSOR_POLL_INTERVAL:10}
     connection-timeout-ms: ${GALLERY_JOB_PROCESSOR_HTTP_CLIENT_CONNECTION_TIMEOUT_MS:10000}
+
+nosecounts:
+  permanent:
+    json_path: ${NOSECOUNT_PERMANENT_JSON_PATH:}
