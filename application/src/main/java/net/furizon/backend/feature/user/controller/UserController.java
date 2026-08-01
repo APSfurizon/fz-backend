@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import net.furizon.backend.feature.authentication.Authentication;
 import net.furizon.backend.feature.user.dto.SessionListResponse;
 import net.furizon.backend.feature.user.dto.UpdateShowInNosecountRequest;
 import net.furizon.backend.feature.user.dto.UserAdminReducedViewData;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -54,7 +56,23 @@ public class UserController {
     public @NotNull FurizonUser getMe(
         @AuthenticationPrincipal @NotNull final FurizonUser user
     ) {
-        return user;
+        Authentication authentication = user.getAuthentication();
+        return FurizonUser.builder()
+                .userId(user.getUserId())
+                .sessionId(new UUID(0L, 0L))
+                .authentication(
+                    Authentication.builder()
+                            .id(authentication.getId())
+                            .email(authentication.getEmail())
+                            .isDisabled(authentication.isDisabled())
+                            .hashedPassword("")
+                            .failedAttempts(authentication.getFailedAttempts())
+                            .authToken(null)
+                            .userId(authentication.getUserId())
+                        .build()
+                )
+                .language(user.getLanguage())
+            .build();
     }
 
     @GetMapping("/display/me")
