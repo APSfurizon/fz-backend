@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.media.action;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.media.StoreMethod;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -11,6 +12,7 @@ import static net.furizon.jooq.generated.Tables.MEDIA;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqAddMediaAction implements AddMediaAction {
     private final SqlCommand sqlCommand;
 

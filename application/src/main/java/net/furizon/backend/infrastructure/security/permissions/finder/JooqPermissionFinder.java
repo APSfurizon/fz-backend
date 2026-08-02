@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.security.permissions.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.roles.dto.responses.ListedRoleResponse;
 import net.furizon.backend.feature.roles.dto.responses.UserHasRoleResponse;
@@ -39,6 +40,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqPermissionFinder implements PermissionFinder {
     @NotNull
     private final SqlQuery sqlQuery;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.updateUploadMetadata;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.processor.GalleryProcessorJob;
@@ -15,6 +16,7 @@ import static net.furizon.jooq.generated.tables.Uploads.UPLOADS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateUploadMetadata implements UpdateUploadMetadataAction {
     @NotNull
     private final SqlCommand command;

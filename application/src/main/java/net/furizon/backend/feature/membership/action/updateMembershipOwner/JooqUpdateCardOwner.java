@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.updateMembershipOwner;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.dto.MembershipCard;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateCardOwner implements UpdateMembershipCardOwner {
     @NotNull
     private final SqlCommand sqlCommand;

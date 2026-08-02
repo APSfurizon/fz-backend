@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.upsertImageMetadata;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.UploadImageMetadata;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.UPLOAD_EXIF;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpsertImageMetadata implements UpsertImageMetadataAction {
     @NotNull
     private final SqlCommand command;

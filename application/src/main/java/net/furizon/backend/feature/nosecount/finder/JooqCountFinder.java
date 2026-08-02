@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.nosecount.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitDisplayData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDisplayMapper;
@@ -29,6 +30,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqCountFinder implements CountsFinder {
     @NotNull private final SqlQuery sqlQuery;
 

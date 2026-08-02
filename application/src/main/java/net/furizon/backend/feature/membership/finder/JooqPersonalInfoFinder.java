@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.membership.mapper.MembershipInfoMapper;
@@ -20,6 +21,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqPersonalInfoFinder implements PersonalInfoFinder {
     private final SqlQuery sqlQuery;
 

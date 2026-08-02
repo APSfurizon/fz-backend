@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.markInfoAsUpdated;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -11,6 +12,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqMarkInfoAsUpdated implements MarkPersonalUserInformationAsUpdated {
     @NotNull private final SqlCommand sqlCommand;
 

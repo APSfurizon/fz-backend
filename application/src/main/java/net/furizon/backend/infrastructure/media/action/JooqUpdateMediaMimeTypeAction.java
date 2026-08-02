@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.media.action;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import static net.furizon.jooq.generated.Tables.MEDIA;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateMediaMimeTypeAction implements UpdateMediaMimeTypeAction {
     @NotNull
     private final SqlCommand sqlCommand;

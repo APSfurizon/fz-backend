@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.roles.action.updateRoleInfo;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import static net.furizon.jooq.generated.Tables.ROLES;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateRoleInfoAction implements UpdateRoleInformationAction {
     @NotNull private final SqlCommand command;
 

@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.email.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.infrastructure.email.NotificationType;
@@ -17,6 +18,7 @@ import static net.furizon.jooq.generated.Tables.ONE_TIME_NOTIFICATIONS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqEmailNotificationFinder implements EmailNotificationFinder {
     @NotNull private final SqlQuery sqlQuery;
 

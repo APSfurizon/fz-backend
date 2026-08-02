@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.gallery.dto.UploadProgress;
 import net.furizon.backend.feature.gallery.mapper.UploadProgressMapper;
@@ -18,6 +19,7 @@ import static net.furizon.jooq.generated.Tables.UPLOAD_PROGRESS_INFO;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUploadProgressFinder implements UploadProgressFinder {
     @NotNull
     private final SqlQuery query;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.updateSelectedUpload;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import static net.furizon.jooq.generated.Tables.UPLOADS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateSelectedUpload implements UpdateSelectedUploadAction {
     @NotNull
     private final SqlCommand command;

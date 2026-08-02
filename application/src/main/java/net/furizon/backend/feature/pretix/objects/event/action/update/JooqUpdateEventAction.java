@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.event.action.update;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.infrastructure.jackson.JsonSerializer;
@@ -14,6 +15,7 @@ import static net.furizon.jooq.generated.Tables.EVENTS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateEventAction implements UpdateEventAction {
     private final SqlCommand command;
 

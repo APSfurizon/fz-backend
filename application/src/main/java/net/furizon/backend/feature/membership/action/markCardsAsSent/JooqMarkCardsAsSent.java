@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.markCardsAsSent;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -14,6 +15,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 class JooqMarkCardsAsSent implements MarkCardsAsSentAction {
     @NotNull
     private final SqlCommand sqlCommand;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.action.createUser;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.user.User;
 import net.furizon.backend.feature.user.mapper.JooqUserMapper;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqCreateUserAction implements CreateUserAction {
     @NotNull private final SqlCommand sqlCommand;
 

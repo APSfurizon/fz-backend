@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploadProgress.deleteUploadProgress;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -12,6 +13,7 @@ import static net.furizon.jooq.generated.Tables.UPLOAD_PROGRESS_INFO;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqDeleteUploadProgress implements DeleteUploadProgressAction {
     @NotNull
     private final SqlCommand command;

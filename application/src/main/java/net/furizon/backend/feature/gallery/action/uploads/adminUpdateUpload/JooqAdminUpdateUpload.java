@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.adminUpdateUpload;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.generated.enums.UploadRepostPermissions;
 import net.furizon.jooq.generated.enums.UploadStatus;
@@ -17,6 +18,7 @@ import static net.furizon.jooq.generated.Tables.UPLOADS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqAdminUpdateUpload implements AdminUpdateUploadAction {
     @NotNull
     private final SqlCommand command;

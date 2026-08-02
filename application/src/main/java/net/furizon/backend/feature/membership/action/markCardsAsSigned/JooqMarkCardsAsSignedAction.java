@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.markCardsAsSigned;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqMarkCardsAsSignedAction implements MarkCardsAsSignedAction {
     @NotNull
     private final SqlCommand sqlCommand;

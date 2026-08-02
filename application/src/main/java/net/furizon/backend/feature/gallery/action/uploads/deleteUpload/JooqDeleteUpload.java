@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.deleteUpload;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -12,6 +13,7 @@ import static net.furizon.jooq.generated.Tables.UPLOADS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqDeleteUpload implements DeleteUploadAction {
     @NotNull
     private final SqlCommand command;

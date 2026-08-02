@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.dto.ExportedMembershipCard;
@@ -32,6 +33,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqMembershipCardFinder implements MembershipCardFinder {
     @NotNull private final MembershipYearUtils membershipYearUtils;
     @NotNull private final SqlQuery sqlQuery;

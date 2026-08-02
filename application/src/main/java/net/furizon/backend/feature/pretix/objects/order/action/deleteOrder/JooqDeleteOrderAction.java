@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.order.action.deleteOrder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.membership.action.deleteMembershipCard.DeleteMembershipCardAction;
@@ -20,6 +21,7 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqDeleteOrderAction implements DeleteOrderAction {
     @NotNull private final DeleteMembershipCardAction deleteMembershipCardAction;
     @NotNull private final MembershipCardFinder cardFinder;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.fursuits.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.fursuits.dto.FursuitData;
 import net.furizon.backend.feature.fursuits.mapper.JooqFursuitDataMapper;
@@ -27,6 +28,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqFursuitFinder implements FursuitFinder {
     @NotNull private final SqlQuery sqlQuery;
 

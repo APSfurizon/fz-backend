@@ -3,6 +3,7 @@ package net.furizon.backend.infrastructure.security.session.manager;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.f4b6a3.uuid.UuidCreator;
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.authentication.Authentication;
@@ -42,6 +43,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@LogCall
 public class CachedSessionAuthenticationManager implements SessionAuthenticationManager {
     private static final long SESSION_AUTHENTICATION_CACHE = 30L;
     private static final long SESSION_UPDATE_TIMEOUT = 30L;

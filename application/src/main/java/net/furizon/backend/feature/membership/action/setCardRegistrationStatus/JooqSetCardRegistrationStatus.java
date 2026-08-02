@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.membership.action.setCardRegistrationStatus;
 
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.order.controller.OrderController;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -12,6 +13,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_CARDS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqSetCardRegistrationStatus implements SetMembershipCardRegistrationStatus {
     @NotNull private final SqlCommand sqlCommand;
 

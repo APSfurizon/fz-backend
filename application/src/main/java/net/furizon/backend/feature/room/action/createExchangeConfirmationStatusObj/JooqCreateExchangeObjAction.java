@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.action.createExchangeConfirmationStatusObj;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.room.dto.ExchangeAction;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.EXCHANGE_CONFIRMATION_STATUS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqCreateExchangeObjAction implements CreateExchangeObjAction {
     @NotNull private final SqlCommand sqlCommand;
 

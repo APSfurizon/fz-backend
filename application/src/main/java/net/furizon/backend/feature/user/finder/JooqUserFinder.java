@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.admin.dto.ShirtExportRow;
 import net.furizon.backend.feature.admin.mapper.ShirtExportRowMapper;
@@ -45,6 +46,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUserFinder implements UserFinder {
     @NotNull private final SqlQuery sqlQuery;
 

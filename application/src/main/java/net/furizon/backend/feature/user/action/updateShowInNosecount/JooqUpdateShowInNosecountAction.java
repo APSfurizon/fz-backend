@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.action.updateShowInNosecount;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateShowInNosecountAction implements UpdateShowInNosecountAction {
     @NotNull
     private final SqlCommand sqlCommand;

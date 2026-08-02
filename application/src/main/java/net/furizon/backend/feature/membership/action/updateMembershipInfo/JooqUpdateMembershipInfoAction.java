@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.updateMembershipInfo;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.membership.dto.PersonalUserInformation;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -12,6 +13,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateMembershipInfoAction implements UpdateMembershipInfoAction {
     @NotNull private final SqlCommand sqlCommand;
 

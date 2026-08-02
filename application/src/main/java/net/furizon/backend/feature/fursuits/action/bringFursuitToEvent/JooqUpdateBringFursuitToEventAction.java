@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.fursuits.action.bringFursuitToEvent;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.FURSUITS_ORDERS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqUpdateBringFursuitToEventAction implements UpdateBringFursuitToEventAction {
     @NotNull private final SqlCommand command;
 

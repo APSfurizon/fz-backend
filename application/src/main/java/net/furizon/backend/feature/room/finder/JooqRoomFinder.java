@@ -1,6 +1,7 @@
 package net.furizon.backend.feature.room.finder;
 
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.admin.dto.HotelExportRow;
 import net.furizon.backend.feature.admin.dto.JooqRoomNotFullRow;
@@ -51,6 +52,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqRoomFinder implements RoomFinder {
     @NotNull private final SqlQuery query;
 

@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.media.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.media.dto.MediaData;
 import net.furizon.backend.infrastructure.media.mapper.JooqMediaMapper;
@@ -25,6 +26,7 @@ import static net.furizon.jooq.generated.Tables.MEDIA;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqMediaFinder implements MediaFinder {
     @NotNull
     private final SqlQuery sqlQuery;

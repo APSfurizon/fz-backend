@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.user.action.setBadge;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.USERS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqSetUserBadgeAction implements SetUserBadgeAction {
     @NotNull private final SqlCommand sqlCommand;
 

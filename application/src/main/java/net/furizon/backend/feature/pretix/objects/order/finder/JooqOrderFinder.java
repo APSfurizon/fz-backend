@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.order.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.order.Order;
@@ -36,6 +37,7 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqOrderFinder implements OrderFinder {
     @NotNull private final SqlQuery query;
 

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.roles.action.addUsers;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.roles.dto.requests.UpdateRoleToUserRequest;
@@ -14,6 +15,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqAddUsersToRoleAction implements AddUserToRoleAction {
     @NotNull
     private final SqlCommand command;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.badge.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.badge.dto.BadgeToPrint;
 import net.furizon.backend.feature.badge.mapper.JooqBadgeToPrintMapper;
@@ -35,6 +36,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqBadgeFinder implements BadgeFinder {
     @NotNull private final MediaFinder mediaFinder;
     @NotNull private final SqlQuery sqlQuery;

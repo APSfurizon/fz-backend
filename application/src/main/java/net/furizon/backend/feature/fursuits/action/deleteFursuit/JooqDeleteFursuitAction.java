@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.fursuits.action.deleteFursuit;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import static net.furizon.jooq.generated.Tables.FURSUITS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqDeleteFursuitAction implements DeleteFursuitAction {
     @NotNull private final SqlCommand command;
 

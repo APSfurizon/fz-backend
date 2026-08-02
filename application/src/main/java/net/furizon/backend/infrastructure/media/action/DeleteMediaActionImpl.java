@@ -1,5 +1,6 @@
 package net.furizon.backend.infrastructure.media.action;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -13,6 +14,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class DeleteMediaActionImpl implements DeleteMediaAction {
     @NotNull private final SqlCommand sqlCommand;
 

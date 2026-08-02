@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.pretix.objects.event.finder;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.feature.pretix.objects.event.Event;
 import net.furizon.backend.feature.pretix.objects.event.mapper.JooqEventMapper;
@@ -17,6 +18,7 @@ import static net.furizon.jooq.generated.Tables.ORDERS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqEventFinder implements EventFinder {
     private final SqlQuery query;
     @NotNull

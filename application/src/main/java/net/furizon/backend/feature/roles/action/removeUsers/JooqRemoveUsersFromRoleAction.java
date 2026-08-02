@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.roles.action.removeUsers;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import static net.furizon.jooq.generated.Tables.USER_HAS_ROLE;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqRemoveUsersFromRoleAction implements RemoveUserFromRoleAction {
     @NotNull
     private final SqlCommand command;

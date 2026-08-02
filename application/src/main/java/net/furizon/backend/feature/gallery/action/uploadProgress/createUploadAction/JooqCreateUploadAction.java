@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploadProgress.createUploadAction;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.gallery.dto.GalleryUpload;
@@ -28,6 +29,7 @@ import static net.furizon.jooq.generated.tables.Uploads.UPLOADS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqCreateUploadAction implements CreateUploadAction {
     @NotNull
     private final SqlCommand command;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.gallery.action.uploads.setUploadType;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.jooq.generated.enums.UploadType;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.UPLOADS;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqSetUploadType implements SetUploadTypeAction {
     @NotNull
     private final SqlCommand command;

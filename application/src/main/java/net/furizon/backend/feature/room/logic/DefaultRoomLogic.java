@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.room.logic;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.nosecount.dto.NosecountRoom;
@@ -37,6 +38,7 @@ import static net.furizon.jooq.generated.Tables.ROOM_GUESTS;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class DefaultRoomLogic implements RoomLogic {
     @NotNull private final OrderFinder orderFinder;
     @NotNull private final RoomFinder roomFinder;

@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.roles.action.addPermissoins;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import net.furizon.backend.infrastructure.security.permissions.Permission;
 import net.furizon.jooq.infrastructure.command.SqlCommand;
@@ -13,6 +14,7 @@ import static net.furizon.jooq.generated.Tables.PERMISSION;
 
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqAddPermissionAction implements AddPermissionsAction {
     @NotNull
     private final SqlCommand command;

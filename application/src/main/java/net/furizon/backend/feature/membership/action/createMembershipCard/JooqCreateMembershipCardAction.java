@@ -1,5 +1,6 @@
 package net.furizon.backend.feature.membership.action.createMembershipCard;
 
+import net.furizon.backend.infrastructure.logging.LogCall;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.furizon.backend.feature.pretix.objects.event.Event;
@@ -24,6 +25,7 @@ import static net.furizon.jooq.generated.Tables.MEMBERSHIP_INFO;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@LogCall
 public class JooqCreateMembershipCardAction implements CreateMembershipCardAction {
     private final MembershipYearUtils membershipYearUtils;
     private final SqlCommand sqlCommand;
