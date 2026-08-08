@@ -57,6 +57,14 @@ public class JooqEventFinder implements EventFinder {
         return query.fetch(selectEvent()).stream().map(eventMapper::mapInternal).toList();
     }
 
+    @Override
+    public @NotNull List<Event> getEventsWithAttendees() {
+        return query.fetch(
+            selectEvent()
+            .where(EVENTS.ID.in(PostgresDSL.selectDistinct(ORDERS.EVENT_ID)))
+        ).stream().map(eventMapper::mapInternal).toList();
+    }
+
     private @NotNull SelectJoinStep<?> selectEvent() {
         return PostgresDSL.select(
                 EVENTS.ID,

@@ -79,7 +79,7 @@ public class LoadNoseCountUseCase implements UseCase<LoadNoseCountUseCase.Input,
             }
 
             //Roomless furs
-            if (noRoomItemId != null && (obj.getRoomId() == null || noRoomItemId.equals(obj.getRoomPretixItemId()))) {
+            if (obj.getRoomId() == null || (noRoomItemId != null && noRoomItemId.equals(obj.getRoomPretixItemId()))) {
                 roomless.add(new UserDisplayDataWithExtraDays(getUserDisplayData(obj), obj.getExtraDays()));
                 continue;
             }

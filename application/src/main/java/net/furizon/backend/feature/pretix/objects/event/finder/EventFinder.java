@@ -14,4 +14,6 @@ public interface EventFinder {
     @NotNull List<Event> getAttendedEvents(long userId);
 
     @NotNull List<Event> getAllEvents();
+
+    @NotNull List<Event> getEventsWithAttendees();
 }

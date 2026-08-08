@@ -148,6 +148,23 @@ public class Event {
         return membershipYearUtils.getResetDate(date.getYear());
     }
 
+    public int compareOrderByDate(@NotNull Event other) {
+        Event e1 = this;
+        Event e2 = other;
+        OffsetDateTime s1 = e1.getCorrectDateFrom();
+        if (s1 == null) {
+            s1 = e1.getCorrectDateTo();
+        }
+        OffsetDateTime s2 = e2.getCorrectDateFrom();
+        if (s2 == null) {
+            s2 = e2.getCorrectDateTo();
+        }
+        if (s1 == null || s2 == null) {
+            return Long.compare(e1.getId(), e2.getId());
+        }
+        return s1.compareTo(s2);
+    }
+
     public @NotNull Event setDateFrom(@Nullable OffsetDateTime dateFrom, boolean earlyIncluded) {
         if (dateFrom != null) {
             this.correctDateFrom = computeCorrectDateFrom(dateFrom, earlyIncluded);

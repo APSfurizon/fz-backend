@@ -40,9 +40,13 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -69,7 +73,9 @@ public class GetUserAdminViewDataUseCase {
     ) {
         var response = UserAdminViewData.builder();
         //Fetch event list
-        List<Event> events = eventFinder.getAllEvents();
+        List<Event> events = new ArrayList<>(eventFinder.getAllEvents());
+        events.sort(Event::compareOrderByDate);
+        Map<Long, Event> eventIdToEvent = events.stream().collect(Collectors.toMap(Event::getId, Function.identity()));
 
         // Fetch userData
         PersonalUserInformation privateInfo = personalInfoFinder.findByUserId(userId);
@@ -92,7 +98,12 @@ public class GetUserAdminViewDataUseCase {
         response.membershipCards(cards);
 
         // Fetch past orders
-        List<Order> orders = orderFinder.findAllOrdersOfUser(userId, pretixInformation);
+        List<Order> orders = new ArrayList<>(orderFinder.findAllOrdersOfUser(userId, pretixInformation));
+        orders.sort((o1, o2) -> {
+            Event e1 = Objects.requireNonNull(eventIdToEvent.get(o1.getEventId()));
+            Event e2 = Objects.requireNonNull(eventIdToEvent.get(o2.getEventId()));
+            return e1.compareOrderByDate(e2);
+        });
         response.orders(orders);
 
         // Fetch current room data

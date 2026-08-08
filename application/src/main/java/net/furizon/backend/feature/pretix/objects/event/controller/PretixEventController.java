@@ -36,7 +36,18 @@ public class PretixEventController {
 
     @GetMapping("/")
     public GetEventsResponse getEvents() {
-        return executor.execute(GetAllEventsUseCase.class, 0);
+        return executor.execute(
+                GetAllEventsUseCase.class,
+                new GetAllEventsUseCase.Input(false, null)
+        );
+    }
+
+    @GetMapping("/events-with-attendees")
+    public GetEventsResponse getEventsWithAttendees() {
+        return executor.execute(
+                GetAllEventsUseCase.class,
+                new GetAllEventsUseCase.Input(true, pretixInformation.getCurrentEvent())
+        );
     }
 
     @GetMapping("/current")
