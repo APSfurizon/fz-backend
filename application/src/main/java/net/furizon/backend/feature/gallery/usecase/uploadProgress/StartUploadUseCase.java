@@ -41,6 +41,7 @@ public class StartUploadUseCase implements UseCase<StartUploadUseCase.Input, Sta
     @Override
     @Transactional
     public @NotNull StartUploadResponse executor(@NotNull StartUploadUseCase.Input input) {
+        galleryChecks.assertUploadsEnabled();
         try {
             RemoveDanglingMediaUseCase.mediaWriteMutexLockException();
             StartUploadRequest req = input.req;

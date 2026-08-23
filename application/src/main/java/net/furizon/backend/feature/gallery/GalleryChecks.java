@@ -38,6 +38,17 @@ public class GalleryChecks {
     @NotNull private final GeneralChecks generalChecks;
     @NotNull private final TranslationService translationService;
 
+    public void assertUploadsEnabled() {
+        if (!galleryConfig.isUploadsEnabled()) {
+            log.error("Uploads are disabled");
+            throw new ApiException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                translationService.error("gallery.uploads_disabled"),
+                GalleryErrorCodes.UPLOADS_NOT_ENABLED
+            );
+        }
+    }
+
     public void assertUploadFound(@Nullable Object obj) {
         if (obj == null) {
             log.error("Upload not found");

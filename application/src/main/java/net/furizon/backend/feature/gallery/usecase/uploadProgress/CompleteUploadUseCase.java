@@ -45,6 +45,7 @@ public class CompleteUploadUseCase implements UseCase<CompleteUploadUseCase.Inpu
 
     @Override
     public @NotNull GalleryUpload executor(@NotNull Input input) {
+        galleryChecks.assertUploadsEnabled();
         try {
             //plain lock, since the upload is already completed
             RemoveDanglingMediaUseCase.mediaWriteMutexLock();

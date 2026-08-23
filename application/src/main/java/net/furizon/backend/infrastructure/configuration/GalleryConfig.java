@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("gallery")
 public class GalleryConfig implements HttpConfig {
+    private final boolean uploadsEnabled;
+
     private final int maxLimitedUploadsPerEvent;
     private final long maxLimitedUploadSize;
     private final long maxLimitedBigUploadSize;
