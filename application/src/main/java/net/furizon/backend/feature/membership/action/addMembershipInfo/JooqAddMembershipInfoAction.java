@@ -60,6 +60,7 @@ public class JooqAddMembershipInfoAction implements AddMembershipInfoAction {
                     personalUserInformation.getBirthRegion(),
                     personalUserInformation.getBirthCountry(),
                     personalUserInformation.getBirthday(),
+                    personalUserInformation.getCitizenship(),
                     personalUserInformation.getResidenceAddress(),
                     personalUserInformation.getResidenceZipCode(),
                     personalUserInformation.getResidenceCity(),
