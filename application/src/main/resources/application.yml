@@ -198,7 +198,7 @@ admin:
   jte-runtime-jar-location: ${JTE_RUNTIME_JAR_LOCATION:}
 
 gallery:
-    uploads-enabled: ${GALLERY_UPLOADS_ENABLED:true}
+  uploads-enabled: ${GALLERY_UPLOADS_ENABLED:true}
   max-limited-uploads-per-event: ${GALLERY_MAX_USER_UPLOADS_PER_EVENT:350}
   max-limited-upload-size: ${GALLERY_MAX_FILE_SIZE:33554432} #32 MB
   max-limited-big-upload-size: ${GALLERY_MAX_FILE_SIZE:268435456} #256 MB
