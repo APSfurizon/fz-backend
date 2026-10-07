@@ -90,7 +90,8 @@ public class JooqPersonalInfoFinder implements PersonalInfoFinder {
         return sqlQuery.fetch(
             PostgresDSL
                 .select(
-                    MEMBERSHIP_INFO.USER_ID
+                    MEMBERSHIP_INFO.USER_ID,
+                    MEMBERSHIP_INFO.INFO_ID_EXPIRY
                 ).from(MEMBERSHIP_INFO)
                 .where(MEMBERSHIP_INFO.INFO_ID_EXPIRY.lessThan(LocalDate.now()))
         ).stream()
