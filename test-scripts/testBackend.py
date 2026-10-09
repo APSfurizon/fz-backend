@@ -5,8 +5,8 @@ import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
-BASE_URL = "http://localhost:8081/"
-#BASE_URL = "https://be.furizon.net/"
+#BASE_URL = "http://localhost:8081/"
+BASE_URL = "https://fzbe.furizon.net/"
 BASE_URL_API = f"{BASE_URL}api/v1/"
 
 import random
@@ -31,11 +31,11 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
     'Accept': '*/*',
     'Accept-Language': 'en-US,en;q=0.8,en-US;q=0.5,en;q=0.3',
-    #'Referer': 'https://furpanel.furizon.net/',
-    'Referer': 'http://localhost:3000/',
+    'Referer': 'https://furpanel.furizon.net/',
+    #'Referer': 'http://localhost:3000/',
     #'content-type': 'application/json',
-    #'Origin': 'https://furpanel.furizon.net',
-    'Origin': 'http://localhost:3000',
+    'Origin': 'https://furpanel.furizon.net',
+    #'Origin': 'http://localhost:3000',
     'Connection': 'keep-alive',
     #"x-forwarded-for": "123456789abcdefghijklmnopqrstuvwxyz, 192.168.1.1"
 }
@@ -327,8 +327,9 @@ def roomDelete() -> Response:
     json = {}
     return doPost(f'{BASE_URL_API}room/delete')
 
-def roomConfirm() -> Response:
-    return doPost(f'{BASE_URL_API}room/confirm')
+def roomConfirm(roomId: None) -> Response:
+    data = None if roomId is None else {"roomId": roomId}
+    return doPost(f'{BASE_URL_API}room/confirm', json=data)
 
 def roomUnconfirm() -> Response:
     return doPost(f'{BASE_URL_API}room/unconfirm')
